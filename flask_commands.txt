@@ -1,0 +1,8 @@
+set FLASK_APP=flaskr.app
+set FLASK_ENV=development
+set DATABSE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+set SECRET_KEY="THISNEEDSTOBECHANGED"
+py manage.py db init
+py manage.py db migrate
+py manage.py db upgrade
+flask run
