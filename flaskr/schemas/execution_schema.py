@@ -17,3 +17,6 @@ class ConfigSchema(Schema):
     maxNodes = fields.Integer(required=True)
     threads = fields.Integer(required=True)
     logPath = fields.Str(required=True)
+
+class LogSchema(Schema):
+    log = fields.Str(required=False)

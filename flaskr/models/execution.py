@@ -2,6 +2,7 @@ import datetime
 import hashlib
 
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import TEXT
 
 from . import db
 from flaskr.schemas.execution_schema import *
@@ -19,6 +20,8 @@ class ExecutionModel(db.Model):
     instance_id = db.Column(db.Integer, db.ForeignKey('instances.id'), nullable=False)
     config = db.Column(JSON, nullable = False)
     reference_id = db.Column(db.String(256), nullable=False, unique=True)
+    log_text = db.Column(TEXT, nullable=True)
+    log_json = db.Column(JSON, nullable=True)
     created_at = db.Column(db.DateTime)
     modified_at = db.Column(db.DateTime)
 
@@ -62,5 +65,7 @@ class ExecutionSchema(Schema):
     instance = fields.Str(required=True)
     config = fields.Nested(ConfigSchema, required=True)
     reference_id = fields.Str(dump_only=True)
+    log_text = fields.Str(dump_only=True)
+    log_json = fields.Nested(LogSchema, dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     modified_at = fields.DateTime(dump_only=True)
