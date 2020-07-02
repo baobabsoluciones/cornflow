@@ -30,4 +30,7 @@ Go into container commadn lines:
 
 Configurate shared directory (does not seem to work)
 `docker run -d -p 8080:8080 -v shared/directory/path:/usr/local/airflow/dags puckel/docker-airflow webserver`
+`docker run -d -p 8080:8080 -v C:\Users\bob_hugo\Desktop\airflow-dag:/usr/local/airflow/dags puckel/docker-airflow webserver`
+
+
 
