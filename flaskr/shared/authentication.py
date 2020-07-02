@@ -25,7 +25,7 @@ class Auth():
             }
 
             # TODO change secret
-            return jwt.encode(payload, 'THISNEEDSTOBECHANGED', 'HS256').decode('utf8'), None
+            return jwt.encode(payload,  'THISNEEDSTOBECHANGED', 'HS256').decode('utf8'), None
 
         except Exception as e:
             return '', {'error': 'error in generating user token (' + str(e) + ' )'}
@@ -75,7 +75,7 @@ class Auth():
             user_id = data['data']['user_id']
             check_user = UserModel.get_one_user(user_id)
             if not check_user:
-                return Response(mimetype="applciation/json",
+                return Response(mimetype="application/json",
                                 response=json.dumps({'error': 'User does not exist, invalid token'}))
 
             g.user = {'id': user_id}

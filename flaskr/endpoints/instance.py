@@ -13,7 +13,6 @@ class InstanceEndpoint(Resource):
         user_id = Auth.return_user(request)
         instances = InstanceModel.get_all_instances(user_id)
         ser_instances = instance_schema.dump(instances, many=True)
-        print(ser_instances)
 
         return ser_instances, 200
 
