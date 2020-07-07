@@ -1,5 +1,7 @@
 from marshmallow import fields, Schema
 
+# TODO: options must be a list
+
 class OptionsSchema(Schema):
     option1 = fields.Int(required=False)
 
