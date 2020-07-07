@@ -1,5 +1,12 @@
-import requests
+"""
 
+file to be copied in airflow/dags
+
+"""
+
+
+import requests
+from pulp import *
 
 def sign_up(email, pwd, name):
     return requests.post(
@@ -39,3 +46,29 @@ def get_data(token, execution_id):
         json={"execution_id": execution_id})
     
     return response.json()
+
+
+def solve_model(data, config):
+    print("Solving the model")
+    var, model = LpProblem.from_dict(data)
+    print(config)
+    solver = get_solver_from_dict(config)
+    model.solve(solver)
+    solution = model.to_dict()
+    print("Model solved")
+    
+    return solution
+
+
+def write_solution(solution):
+    print("Writing the solution in database")
+    return True
+
+
+def solve_execution(token, execution_id):
+    execution_data = get_data(token, execution_id)
+    solution = solve_model(execution_data["data"], execution_data["config"])
+    write_solution(solution)
+    
+    return solution
+
