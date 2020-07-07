@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
 from . import db
+from flaskr.models.instance import InstanceModel
 from flaskr.schemas.execution_schema import *
 from flaskr.schemas.model_schema import *
 
@@ -52,23 +53,24 @@ class ExecutionModel(db.Model):
     @staticmethod
     def get_all_executions_user(user):
         return ExecutionModel.query.filter_by(user_id=user)
-
+    
+    @staticmethod
+    def get_one_execution(id):
+        return ExecutionModel.query.get(id)
+    
+    @staticmethod
+    def get_execution_id(reference_id):
+        return ExecutionModel.query.filter_by(reference_id=reference_id).first().id
+    
+    @staticmethod
+    def get_execution_data(reference_id):
+        id = ExecutionModel.get_execution_id(reference_id)
+        execution = ExecutionModel.get_one_execution(id)
+        instance_data = InstanceModel.get_one_instance(execution.instance_id).data
+        config = execution.config
+        return {"data":instance_data, "config":config}
+        
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
-class ExecutionSchema(Schema):
-    """
-
-    """
-    id = fields.Int(dump_only=True, load_only=True)
-    user_id = fields.Int(required=False, load_only=True)
-    instance_id = fields.Int(required=False, dump_only=True, load_only=True)
-    instance = fields.Str(required=True)
-    config = fields.Nested(ConfigSchema, required=True)
-    reference_id = fields.Str(dump_only=True)
-    execution_results = fields.Nested(DataSchema, dump_only=True)
-    log_text = fields.Str(dump_only=True)
-    log_json = fields.Nested(LogSchema, dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
