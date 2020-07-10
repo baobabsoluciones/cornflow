@@ -41,7 +41,7 @@ def create_execution(token, instance_id, config):
 
 def get_data(token, execution_id):
     response = requests.get(
-        "http://127.0.0.1:5000/execution/",
+        "http://127.0.0.1:5000/execution_data/",
         headers={'Authorization': 'access_token ' + token},
         json={"execution_id": execution_id})
     
@@ -55,20 +55,33 @@ def solve_model(data, config):
     solver = get_solver_from_dict(config)
     model.solve(solver)
     solution = model.to_dict()
+    
+    log_path = config["logPath"]
+    f = open(log_path, "r")
+    log = f.read()
+    
     print("Model solved")
     
-    return solution
+    return solution, log
 
 
-def write_solution(solution):
+def write_solution(token, execution_id, solution, log_text=None, log_json=None):
     print("Writing the solution in database")
-    return True
+    response = requests.post(
+        "http://127.0.0.1:5000/execution_data/",
+        headers={'Authorization': 'access_token ' + token},
+        json={"execution_id": execution_id, "execution_results": solution, "log_text": log_text, "log_json": log_json})
+    
+    return response
 
 
 def solve_execution(token, execution_id):
     execution_data = get_data(token, execution_id)
-    solution = solve_model(execution_data["data"], execution_data["config"])
-    write_solution(solution)
+    solution, log = solve_model(execution_data["data"], execution_data["config"])
+    write_solution(token, execution_id, solution, log)
     
     return solution
+
+
+
 

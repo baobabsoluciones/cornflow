@@ -1,7 +1,8 @@
 from flask import request
 from flask_restful import Resource
 
-from flaskr.models.instance import InstanceModel, InstanceSchema
+from flaskr.models.instance import InstanceModel
+from flaskr.schemas.instance_schema import InstanceSchema
 from flaskr.shared.authentication import Auth
 
 instance_schema = InstanceSchema()
