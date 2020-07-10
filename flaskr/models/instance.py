@@ -2,11 +2,7 @@ import datetime
 import hashlib
 
 from sqlalchemy.dialects.postgresql import JSON
-from flaskr.schemas.execution_schema import *
-from flaskr.schemas.model_schema import *
-#from flaskr.models.execution import ExecutionSchema
 from . import db
-from flaskr.schemas.model_schema import *
 
 
 class InstanceModel(db.Model):
@@ -61,34 +57,4 @@ class InstanceModel(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
-
-class ExecutionSchema(Schema):
-    """
-
-    """
-    id = fields.Int(dump_only=True, load_only=True)
-    user_id = fields.Int(required=False, load_only=True)
-    instance_id = fields.Int(required=False, dump_only=True, load_only=True)
-    instance = fields.Str(required=True)
-    config = fields.Nested(ConfigSchema, required=True)
-    reference_id = fields.Str(dump_only=True)
-    execution_results = fields.Nested(DataSchema, dump_only=True)
-    log_text = fields.Str(dump_only=True)
-    log_json = fields.Nested(LogSchema, dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
-
-
-class InstanceSchema(Schema):
-    """
-
-    """
-    id = fields.Int(dump_only=True, load_only=True)
-    user_id = fields.Int(required=False, load_only=True)
-    data = fields.Nested(DataSchema, required=True, load_only=True)
-    name = fields.Str(dump_only=True)
-    reference_id = fields.Str(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
-    executions = fields.Nested(ExecutionSchema, many=True)
 

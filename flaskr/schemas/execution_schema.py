@@ -1,24 +1,39 @@
 from marshmallow import fields, Schema
-
-# TODO: options must be a list
+from flaskr.schemas.model_schema import *
 
 class OptionsSchema(Schema):
-    option1 = fields.Int(required=False)
+    option1 = fields.Str(required=True, many=True)
 
 class ConfigSchema(Schema):
     solver = fields.Str(default="PULP_CBC_CMD")
-    mip = fields.Boolean(required=True)
-    msg = fields.Boolean(required=True)
-    warmStart = fields.Boolean(required=True)
-    timeLimit = fields.Integer(required=True)
-    options = fields.Nested(OptionsSchema, required=True)
-    keepFiles = fields.Boolean(required=True)
-    gapRel = fields.Float(required=True)
-    gapAbs = fields.Float(required=True)
-    maxMemory = fields.Integer(required=True)
-    maxNodes = fields.Integer(required=True)
-    threads = fields.Integer(required=True)
-    logPath = fields.Str(required=True)
+    mip = fields.Boolean(required=False)
+    msg = fields.Boolean(required=False)
+    warmStart = fields.Boolean(required=False)
+    timeLimit = fields.Integer(required=False)
+    options = fields.List(fields.Str, required=False, many=True)
+    keepFiles = fields.Boolean(required=False)
+    gapRel = fields.Float(required=False)
+    gapAbs = fields.Float(required=False)
+    maxMemory = fields.Integer(required=False)
+    maxNodes = fields.Integer(required=False)
+    threads = fields.Integer(required=False)
+    logPath = fields.Str(required=False)
 
 class LogSchema(Schema):
     log = fields.Str(required=False)
+    
+class ExecutionSchema(Schema):
+    """
+
+    """
+    id = fields.Int(dump_only=True, load_only=True)
+    user_id = fields.Int(required=False, load_only=True)
+    instance_id = fields.Int(required=False, dump_only=True, load_only=True)
+    instance = fields.Str(required=True)
+    config = fields.Nested(ConfigSchema, required=True)
+    reference_id = fields.Str(dump_only=True)
+    execution_results = fields.Nested(DataSchema, dump_only=True)
+    log_text = fields.Str(dump_only=True)
+    log_json = fields.Nested(LogSchema, dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    modified_at = fields.DateTime(dump_only=True)
