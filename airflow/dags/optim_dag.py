@@ -7,8 +7,8 @@ DAG file to be copied in airflow/dags
 from airflow import DAG
 from airflow.operators import BashOperator, PythonOperator
 from datetime import datetime, timedelta
-from time import sleep
-from api_functions import *
+from corn.api_functions import login, get_data, write_solution
+import pulp as pl
 
 # Following are defaults which can be overridden later on
 default_args = {
@@ -35,13 +35,38 @@ def get_arg(arg, context):
     return context["dag_run"].conf[arg]
 
 
+def solve_model(data, config):
+    print("Solving the model")
+    var, model = pl.LpProblem.from_dict(data)
+    print(config)
+    solver = pl.get_solver_from_dict(config)
+    model.solve(solver)
+    solution = model.to_dict()
+
+    log_path = config["logPath"]
+    f = open(log_path, "r")
+    log = f.read()
+
+    print("Model solved")
+
+    return solution, log
+
+
+def solve_execution(token, execution_id):
+    execution_data = get_data(token, execution_id)
+    solution, log = solve_model(execution_data["data"], execution_data["config"])
+    write_solution(token, execution_id, solution, log)
+
+    return solution
+
+
 def run_solve(**kwargs):
     token = login(email="airflow@noemail.com", pwd="airflow")
     exec_id = get_arg("exec_id", kwargs)
     print("starting to solve the model with execution %s" % exec_id)
     data = get_data(token, exec_id)
     solution = solve_execution(token, exec_id)
-    
+
     if solution:
         return "Solution saved"
     else:
