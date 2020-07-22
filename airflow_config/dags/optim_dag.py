@@ -1,13 +1,7 @@
-"""
-
-DAG file to be copied in airflow/dags
-
-"""
-
 from airflow import DAG
 from airflow.operators import BashOperator, PythonOperator
 from datetime import datetime, timedelta
-from corn.api_functions import login, get_data, write_solution
+from api_functions import login, get_data, write_solution
 import pulp as pl
 
 # Following are defaults which can be overridden later on
