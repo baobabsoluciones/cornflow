@@ -10,7 +10,7 @@ class LoginEndpoint(Resource):
     def post(self):
         req_data = request.get_json()
 
-        data = user_schema.load(req_data, partial=True)
+        data = user_schema.load(req_data, partial=True).data
 
         if not data.get('email') or not data.get('password'):
             return {'error': 'you need email and password to sign in'}, 400
@@ -23,8 +23,8 @@ class LoginEndpoint(Resource):
         if not user.check_hash(data.get('password')):
             return {'error': 'invalid credentials'}, 400
 
-        ser_data = user_schema.dump(user)
-        print(ser_data)
+        ser_data = user_schema.dump(user).data
+        # print(ser_data)
 
         token, error = Auth.generate_token(ser_data.get('id'))
 

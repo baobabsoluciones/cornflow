@@ -20,13 +20,13 @@ class InstanceEndpoint(Resource):
     @Auth.auth_required
     def post(self):
         req_data = request.get_json()
-        data = instance_schema.load(req_data, partial=True)
+        data = instance_schema.load(req_data, partial=True).data
 
         data['user_id'] = Auth.return_user(request)
 
         instance = InstanceModel(data)
         instance.save()
 
-        ser_data = instance_schema.dump(instance)
+        ser_data = instance_schema.dump(instance).data
 
         return {'instance_id': ser_data.get('reference_id')}, 201
