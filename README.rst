@@ -14,12 +14,14 @@ Install cornflow
 ~~~~~~~~~~~~~~~~~~
 
 do::
-    
-    python -m venv venv
+
+    git clone git@github.com:ggsdc/corn.git
+    cd corn
+    python3 -m venv venv
     source venv/bin/activate
     pip3 install -r requirements.txt
 
-You now need to create a user and password in postgresql. And also you need to create a database (we will be using one with the name `cornflow`).
+You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
 
 
 Setup cornflow database
@@ -27,19 +29,10 @@ Setup cornflow database
 
 Every time cornflow is used, PostgreSQL and airflow needs to be configured::
 
-    set FLASK_APP=flaskr.app
-    set FLASK_ENV=development
-    set DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    set SECRET_KEY=THISNEEDSTOBECHANGED
-    set AIRFLOW_HOME=PATH/TO/corn/airflow
-
-In Ubuntu:
-
     export FLASK_APP=flaskr.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
-
 
 In order to create the database, execute the following::
 
@@ -55,21 +48,24 @@ Each time you run the flask server, execute the following::
     flask run
 
 
-Install airflow
+Configure airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+airflow gets installed with cornFlow since it's listed as a dependency in the `requirements.py` file.
 
 **On Linux**
 
-Install from pypi using pip::
+    export AIRFLOW_HOME=PATH/TO/corn/airflow_config
+    export AIRFLOW_HOME=/home/pchtsp/Documents/projects/corn/airflow_config
+    airflow -h
 
-    pip3 install apache-airflow
-    export export AIRFLOW_HOME=/PATH/TO/corn/airflow
-    airflow ?
+If you want to use postgresql with airflow too you need to edit the existing values in airflow config (corn/airflow/airflow.cfg)::
 
-Edit the existing values in airflow config (corn/airflow/airflow.cfg)::
+    sql_alchemy_conn = postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
 
-    `sql_alchemy_conn = postgres://postgres:postgresadmin@127.0.0.1:5432/airflow`
-    `load_examples = False`
+In the same file, if you do not want the examples::
+
+    load_examples = False
 
 Create the `airflow` database in postgresql::
 
@@ -99,10 +95,11 @@ Open two differents command prompts and execute the following commands:
 
 start the web server, default port is 8080::
 
-    airflow webserver -p 8080
+    airflow webserver -p 8080 &
 
 start the scheduler::
-    airflow scheduler
+
+    airflow scheduler &
 
 airflow gui will be at::
 
@@ -121,6 +118,10 @@ Kill it::
 
     kill -9 CODE
 
+If you're filling lucky::
+    
+    kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
+
 Using cornflow
 ~~~~~~~~~~~~~~~~~~
 
@@ -128,7 +129,7 @@ Launch airflow and the flask server
 
 In order to use cornflow api, import api functions::
 
-    from api_functions import *
+    from airflow_config.dags.api_functions import *
 
 Create a user::
 
@@ -144,29 +145,42 @@ create and log in as airflow user ( necessary until airflow is made a superuser)
     token = login(email="airflow@noemail.com", pwd="airflow")
 
 create an instance::
+    
+    import pulp
+    prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)
+    x = pulp.LpVariable("x", 0, 4)
+    y = pulp.LpVariable("y", -1, 1)
+    z = pulp.LpVariable("z", 0, None, pulp.LpInteger)
+    prob += x + 4 * y + 9 * z, "obj"
+    prob += x + y <= 5, "c1"
+    prob += x + z >= 10, "c2"
+    prob += -y + z == 7.5, "c3"
+    data = prob.to_dict()
 
     instance_id = create_instance(token, data)
 
 Solve an instance::
+
+    config = dict(
+        solver = "PULP_CBC_CMD",
+        mip = True,
+        msg = True,
+        warmStart = True,
+        timeLimit = 10,
+        options = ["donotexist", "thisdoesnotexist"],
+        keepFiles = 0,
+        gapRel = 0.1,
+        gapAbs = 1,
+        maxMemory = 1000,
+        maxNodes = 1,
+        threads = 1,
+        logPath = "test_export_solver_json.log"
+    )
     execution_id = create_execution(token, instance_id, config)
 
-config format::
+Retrieve a solution::
 
-    config = {
-    "solver": "PULP_CBC_CMD",
-    "mip": True,
-    "msg": True,
-    "warmStart": True,
-    "timeLimit": 10,
-    "options": ["donotexist", "thisdoesnotexist"],
-    "keepFiles": 0,
-    "gapRel": 0.1,
-    "gapAbs": 1,
-    "maxMemory": 1000,
-    "maxNodes": 1,
-    "threads": 1,
-    "logPath": "test_export_solver_json.log"
-}
+    data = get_data(token, execution_id)
 
 
 Run an execution in airflow api (not needed)

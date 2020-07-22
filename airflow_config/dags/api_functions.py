@@ -1,10 +1,3 @@
-"""
-
-file to be copied in airflow/dags
-
-"""
-
-
 import requests
 
 def sign_up(email, pwd, name):
