@@ -10,7 +10,7 @@ af.sign_up(**config)
 token = af.login(email, pwd)
 
 af.sign_up(email="airflow@noemail.com", pwd="airflow", name="airflow")
-token = af.login(email="airflow@noemail.com", pwd="airflow")
+tokenaf = af.login(email="airflow@noemail.com", pwd="airflow")
 
 import pulp
 prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)

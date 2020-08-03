@@ -13,19 +13,35 @@ Requirements
 Install cornflow
 ~~~~~~~~~~~~~~~~~~
 
+cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in two python virtual environments in the same machine.
+
 do::
 
     git clone git@github.com:ggsdc/corn.git
     cd corn
-    python3 -m venv venv
-    source venv/bin/activate
-    pip3 install -r requirements.txt
-
-You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
+    python3 -m venv cfvenv
+    cfvenv/bin/pip3 install -r requirements.txt
 
 
 Setup cornflow database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
+
+Create a new user::
+
+    sudo -u postgres psql
+
+In the shell you put the following::
+
+    ALTER USER postgres PASSWORD 'postgresadmin';
+    \q
+
+Create a new database::
+
+    sudo su - postgres
+    psql -c "create database cornflow"
+    exit
 
 Every time cornflow is used, PostgreSQL and airflow needs to be configured::
 
@@ -36,6 +52,7 @@ Every time cornflow is used, PostgreSQL and airflow needs to be configured::
 
 In order to create the database, execute the following::
 
+    source cfvenv/bin/activate
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
@@ -45,21 +62,26 @@ Starting flask server
 
 Each time you run the flask server, execute the following::
 
+    source cfvenv/bin/activate
     flask run
 
 
-Configure airflow
+Install and configure airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-airflow gets installed with cornFlow since it's listed as a dependency in the `requirements.py` file.
+You need your own virtual environment for airflow to work.
 
 **On Linux**
 
-    export AIRFLOW_HOME=PATH/TO/corn/airflow_config
-    export AIRFLOW_HOME=/home/pchtsp/Documents/projects/corn/airflow_config
+Install it::
+
+    cd corn
+    python3 -m venv afvenv
+    afvenv/bin/pip3 install -r requirements_af.txt
+    export AIRFLOW_HOME="$PWD/airflow_config"
     airflow -h
 
-If you want to use postgresql with airflow too you need to edit the existing values in airflow config (corn/airflow/airflow.cfg)::
+If you want to use postgresql with airflow too you need to edit the existing values in airflow config (corn/airflow_config/airflow.cfg)::
 
     sql_alchemy_conn = postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
 
@@ -69,7 +91,10 @@ In the same file, if you do not want the examples::
 
 Create the `airflow` database in postgresql::
 
-    MISSING (I did it using pgadmin3)
+    sudo su - postgres
+    psql -c "create database airflow"
+    exit
+
 
 initialize the database::
 
@@ -91,10 +116,10 @@ If necessary, give execution rights to your user in the airflow folder (I did no
 Launch airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Open two differents command prompts and execute the following commands:
-
 start the web server, default port is 8080::
 
+    cd corn
+    python3 -m venv afvenv
     airflow webserver -p 8080 &
 
 start the scheduler::
@@ -125,7 +150,7 @@ If you're filling lucky::
 Using cornflow
 ~~~~~~~~~~~~~~~~~~
 
-Launch airflow and the flask server
+Launch airflow and the flask server from two different terminals (using their respective virtual environments).
 
 In order to use cornflow api, import api functions::
 
@@ -193,3 +218,18 @@ The execution id has to be passed like this:
 response = requests.post(
         "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
         json={"conf":conf})</code>
+
+
+Deploying to heroku
+~~~~~~~~~~~~~~~~~~~~~~~
+
+create app::
+    
+    heroku git:remote -a 'cornflow'
+    heroku buildpacks:add heroku/python --app 'cornflow'
+    heroku addons:create heroku-postgresql:hobby-dev --app 'cornflow'
+    heroku config:set SECRET_KEY='some-secret-string' --app 'cornflow'
+    git push heroku master
+    heroku run python manage.py migrate
+
+
