@@ -11,7 +11,7 @@ class SingUpEndpoint(BaseResource):
 
     def post(self):
         req_data = request.get_json()
-        data = user_schema.load(req_data).data
+        data = user_schema.load(req_data)
 
         user_in_db = UserModel.get_one_user_by_email(data.get('email'))
         if user_in_db:
@@ -21,7 +21,7 @@ class SingUpEndpoint(BaseResource):
         user = UserModel(data)
         user.save()
 
-        ser_data = user_schema.dump(user).data
+        ser_data = user_schema.dump(user)
 
         token, error = Auth.generate_token(ser_data.get('id'))
 
