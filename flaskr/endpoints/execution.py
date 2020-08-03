@@ -15,7 +15,7 @@ class ExecutionEndpoint(Resource):
     @Auth.auth_required
     def post(self):
         req_data = request.get_json()
-        data = execution_schema.load(req_data, partial=True).data
+        data = execution_schema.load(req_data, partial=True)
 
         data['user_id'] = Auth.return_user(request)
         data['instance_id'] = InstanceModel.get_instance_id(data['instance'])
@@ -23,7 +23,7 @@ class ExecutionEndpoint(Resource):
         execution = ExecutionModel(data)
         execution.save()
 
-        ser_data = execution_schema.dump(execution).data
+        ser_data = execution_schema.dump(execution)
         execution_id = ser_data.get('reference_id')
         
         # solve
