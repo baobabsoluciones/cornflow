@@ -1,14 +1,20 @@
 import requests
+from urllib.parse import urljoin
+
+# TODO: API_URL should me modifiable
+#  maybe have an object that handles all this
+API_URL = "http://127.0.0.1:5000"
 
 def sign_up(email, pwd, name):
+
     return requests.post(
-        "http://127.0.0.1:5000/singup/",
+        urljoin(API_URL, 'signup'),
         json={"email": email, "password": pwd, "name": name})
 
 
 def login(email, pwd):
     response = requests.post(
-        "http://127.0.0.1:5000/login/",
+        urljoin(API_URL, 'login'),
         json={"email": email, "password": pwd})
     
     return response.json()["token"]
@@ -16,7 +22,7 @@ def login(email, pwd):
 
 def create_instance(token, data):
     response = requests.post(
-        "http://127.0.0.1:5000/instance/",
+        urljoin(API_URL, 'instance'),
         headers={'Authorization': 'access_token ' + token},
         json={"data": data})
     
@@ -25,7 +31,7 @@ def create_instance(token, data):
 
 def create_execution(token, instance_id, config):
     response = requests.post(
-        "http://127.0.0.1:5000/execution/",
+        urljoin(API_URL, 'execution'),
         headers={'Authorization': 'access_token ' + token},
         json={"config": config, "instance": instance_id})
     return response.json()["execution_id"]
@@ -33,7 +39,7 @@ def create_execution(token, instance_id, config):
 
 def get_data(token, execution_id):
     response = requests.get(
-        "http://127.0.0.1:5000/execution_data/",
+        urljoin(API_URL, 'execution_data'),
         headers={'Authorization': 'access_token ' + token},
         json={"execution_id": execution_id})
     
@@ -41,9 +47,8 @@ def get_data(token, execution_id):
 
 
 def write_solution(token, execution_id, solution, log_text=None, log_json=None):
-    print("Writing the solution in database")
     response = requests.post(
-        "http://127.0.0.1:5000/execution_data/",
+        urljoin(API_URL, 'execution_data'),
         headers={'Authorization': 'access_token ' + token},
         json={"execution_id": execution_id, "execution_results": solution, "log_text": log_text, "log_json": log_json})
     
