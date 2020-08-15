@@ -104,7 +104,8 @@ Reset the database (if necessary, I did not need this)::
 
     airflow resetdb
 
-If necessary, give execution rights to your user in the airflow folder (I did not need this) ::
+If necessary, give execution rights to your user in the airflow folder (I did not need this)::
+
     sudo chmod -R  a+rwx airflow
 
 **On windows**
@@ -209,15 +210,15 @@ Retrieve a solution::
 
 
 Run an execution in airflow api (not needed)
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The execution id has to be passed like this:
+The execution id has to be passed like this::
 
-<code>conf = "{\"exec_id\":\"%s\"}" % execution_id
+    conf = "{\"exec_id\":\"%s\"}" % execution_id
 
-response = requests.post(
+    response = requests.post(
         "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
-        json={"conf":conf})</code>
+        json={"conf":conf})
 
 
 Deploying to heroku
