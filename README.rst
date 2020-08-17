@@ -63,6 +63,10 @@ Starting flask server
 Each time you run the flask server, execute the following::
 
     source cfvenv/bin/activate
+    export FLASK_APP=flaskr.app
+    export FLASK_ENV=development
+    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    export SECRET_KEY=THISNEEDSTOBECHANGED
     flask run
 
 
@@ -120,7 +124,8 @@ Launch airflow
 start the web server, default port is 8080::
 
     cd corn
-    python3 -m venv afvenv
+    source afvenv/bin/activate
+    export AIRFLOW_HOME="$PWD/airflow_config"
     airflow webserver -p 8080 &
 
 start the scheduler::

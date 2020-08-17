@@ -8,6 +8,10 @@ from flaskr.models.instance import InstanceModel
 from flaskr.schemas.execution_schema import  ExecutionSchema
 from flaskr.shared.authentication import Auth
 
+from urllib.parse import urljoin
+
+# TODO: AIRFLOW_URL should be modifiable
+AIRFLOW_URL = "http://localhost:8080"
 execution_schema = ExecutionSchema()
 
 class ExecutionEndpoint(Resource):
@@ -30,7 +34,7 @@ class ExecutionEndpoint(Resource):
         conf = "{\"exec_id\":\"%s\"}" % execution_id
 
         response = requests.post(
-            "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
+            urljoin(AIRFLOW_URL, 'api/experimental/dags/solve_model_dag/dag_runs'),
             json={"conf": conf})
 
         return {'execution_id': execution_id}, 201

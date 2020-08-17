@@ -43,7 +43,4 @@ config = dict(
 execution_id = af.create_execution(token, instance_id, config)
 data = af.get_data(token, execution_id)
 
-data['data']['sos1'] = {}
-data['data']['sos2'] = {}
 _vars, prob = pulp.LpProblem.from_dict(data['data'])
-

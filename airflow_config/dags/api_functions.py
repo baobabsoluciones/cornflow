@@ -1,20 +1,20 @@
 import requests
 from urllib.parse import urljoin
 
-# TODO: API_URL should me modifiable
-#  maybe have an object that handles all this
-API_URL = "http://127.0.0.1:5000"
+# TODO: CORNFLOW_URL should be modifiable
+#  maybe have an object that handles the session
+CORNFLOW_URL = "http://127.0.0.1:5000"
 
 def sign_up(email, pwd, name):
 
     return requests.post(
-        urljoin(API_URL, 'signup'),
+        urljoin(CORNFLOW_URL, 'signup/'),
         json={"email": email, "password": pwd, "name": name})
 
 
 def login(email, pwd):
     response = requests.post(
-        urljoin(API_URL, 'login'),
+        urljoin(CORNFLOW_URL, 'login/'),
         json={"email": email, "password": pwd})
     
     return response.json()["token"]
@@ -22,7 +22,7 @@ def login(email, pwd):
 
 def create_instance(token, data):
     response = requests.post(
-        urljoin(API_URL, 'instance'),
+        urljoin(CORNFLOW_URL, 'instance/'),
         headers={'Authorization': 'access_token ' + token},
         json={"data": data})
     
@@ -31,7 +31,7 @@ def create_instance(token, data):
 
 def create_execution(token, instance_id, config):
     response = requests.post(
-        urljoin(API_URL, 'execution'),
+        urljoin(CORNFLOW_URL, 'execution/'),
         headers={'Authorization': 'access_token ' + token},
         json={"config": config, "instance": instance_id})
     return response.json()["execution_id"]
@@ -39,7 +39,7 @@ def create_execution(token, instance_id, config):
 
 def get_data(token, execution_id):
     response = requests.get(
-        urljoin(API_URL, 'execution_data'),
+        urljoin(CORNFLOW_URL, 'execution_data/'),
         headers={'Authorization': 'access_token ' + token},
         json={"execution_id": execution_id})
     
@@ -48,7 +48,7 @@ def get_data(token, execution_id):
 
 def write_solution(token, execution_id, solution, log_text=None, log_json=None):
     response = requests.post(
-        urljoin(API_URL, 'execution_data'),
+        urljoin(CORNFLOW_URL, 'execution_data/'),
         headers={'Authorization': 'access_token ' + token},
         json={"execution_id": execution_id, "execution_results": solution, "log_text": log_text, "log_json": log_json})
     
