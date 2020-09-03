@@ -3,10 +3,10 @@ import requests
 from flask import request
 from flask_restful import Resource
 
-from flaskr.models.execution import ExecutionModel
-from flaskr.models.instance import InstanceModel
-from flaskr.schemas.execution_schema import  ExecutionSchema
-from flaskr.shared.authentication import Auth
+from ..models.execution import ExecutionModel
+from ..models.instance import InstanceModel
+from ..schemas.execution_schema import  ExecutionSchema
+from ..shared.authentication import Auth
 
 from urllib.parse import urljoin
 

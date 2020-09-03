@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema
-from flaskr.schemas.model_schema import *
+from ..schemas.model_schema import *
 
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)

@@ -4,7 +4,7 @@ from marshmallow import fields, Schema
 
 from . import bcrypt
 from . import db
-from flaskr.schemas.instance_schema import InstanceSchema
+from ..schemas.instance_schema import InstanceSchema
 
 
 class UserModel(db.Model):

@@ -5,9 +5,9 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
 from . import db
-from flaskr.models.instance import InstanceModel
-from flaskr.schemas.execution_schema import *
-from flaskr.schemas.model_schema import *
+from ..models.instance import InstanceModel
+from ..schemas.execution_schema import *
+from ..schemas.model_schema import *
 
 
 class ExecutionModel(db.Model):

@@ -1,5 +1,5 @@
-from flaskr.schemas.execution_schema import *
-from flaskr.schemas.model_schema import *
+from ..schemas.execution_schema import *
+from ..schemas.model_schema import *
 
 class InstanceSchema(Schema):
     """

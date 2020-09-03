@@ -50,6 +50,8 @@ Every time cornflow is used, PostgreSQL and airflow needs to be configured::
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
 
+In windows use ``set`` instead of ``export``.
+
 In order to create the database, execute the following::
 
     source cfvenv/bin/activate

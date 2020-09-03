@@ -5,7 +5,7 @@ from functools import wraps
 import jwt
 from flask import Response, request, json, g
 
-from flaskr.models.user import UserModel
+from ..models.user import UserModel
 
 
 class Auth():
