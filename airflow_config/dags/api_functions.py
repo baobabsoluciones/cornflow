@@ -39,18 +39,18 @@ def create_execution(token, instance_id, config):
 
 def get_data(token, execution_id):
     response = requests.get(
-        urljoin(CORNFLOW_URL, 'execution_data/'),
+        urljoin(urljoin(CORNFLOW_URL, 'execution_data/'), str(execution_id) + '/'),
         headers={'Authorization': 'access_token ' + token},
-        json={"execution_id": execution_id})
+        json={})
     
     return response.json()
 
 
 def write_solution(token, execution_id, solution, log_text=None, log_json=None):
     response = requests.post(
-        urljoin(CORNFLOW_URL, 'execution_data/'),
+        urljoin(urljoin(CORNFLOW_URL, 'execution_data/'), str(execution_id) + '/'),
         headers={'Authorization': 'access_token ' + token},
-        json={"execution_id": execution_id, "execution_results": solution, "log_text": log_text, "log_json": log_json})
+        json={"execution_results": solution, "log_text": log_text, "log_json": log_json})
     
     return response
 

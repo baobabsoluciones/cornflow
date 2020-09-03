@@ -84,7 +84,8 @@ class Auth():
         return decorated_auth
 
     @staticmethod
-    def return_user(request):
+    def return_user_info(request):
         token = request.headers.get('Authorization').split(" ")[1]
         user_id = Auth.decode_token(token)['data']['user_id']
-        return user_id
+        admin, super_admin = UserModel.get_user_info(user_id)
+        return user_id, admin, super_admin

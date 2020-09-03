@@ -60,8 +60,8 @@ def run_solve(**kwargs):
     print("starting to solve the model with execution %s" % exec_id)
     data = get_data(token, exec_id)
     solution = solve_execution(token, exec_id)
-
     if solution:
+
         return "Solution saved"
     else:
         return "Error in writing"

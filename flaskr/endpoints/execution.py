@@ -21,8 +21,12 @@ class ExecutionEndpoint(Resource):
         req_data = request.get_json()
         data = execution_schema.load(req_data, partial=True)
 
-        data['user_id'] = Auth.return_user(request)
+        data['user_id'], admin, super_admin = Auth.return_user_info(request)
         data['instance_id'] = InstanceModel.get_instance_id(data['instance'])
+        instance_owner = InstanceModel.get_instance_owner(data['instance'])
+
+        if instance_owner != data['user_id']:
+            return {'error': 'You do not have permissions for the instance'}, 400
 
         execution = ExecutionModel(data)
         execution.save()
@@ -41,7 +45,7 @@ class ExecutionEndpoint(Resource):
 
     @Auth.auth_required
     def get(self):
-        user_id = Auth.return_user(request)
+        user_id, admin, super_admin = Auth.return_user_info(request)
         executions = ExecutionModel.get_all_executions_user(user_id)
         ser_executions = execution_schema.dump(executions, many=True)
 

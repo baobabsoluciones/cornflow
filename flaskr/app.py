@@ -25,7 +25,7 @@ def create_app(env_name):
     api = Api(app)
     api.add_resource(InstanceEndpoint, '/instance/')
     api.add_resource(ExecutionEndpoint, '/execution/')
-    api.add_resource(ExecutionDataEndpoint, '/execution_data/')
+    api.add_resource(ExecutionDataEndpoint, '/execution_data/<string:id>/')
     api.add_resource(UserEndpoint, '/user/')
     api.add_resource(LoginEndpoint, '/login/')
     api.add_resource(SingUpEndpoint, '/singup/')
