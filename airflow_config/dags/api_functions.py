@@ -1,12 +1,15 @@
 import requests
 from urllib.parse import urljoin
 
-# TODO: CORNFLOW_URL should be modifiable
+# TODO: CORNFLOW_URL should be modifiable and should be stored as a environment variable
 #  maybe have an object that handles the session
 CORNFLOW_URL = "http://127.0.0.1:5000"
 
-def sign_up(email, pwd, name):
 
+# TODO: have airflow user created at startup so this method is not needed
+# airflow should sing_up itself on start up on its own endpoint (maybe) and get its password from an
+# environment variable on deployment
+def sign_up(email, pwd, name):
     return requests.post(
         urljoin(CORNFLOW_URL, 'signup/'),
         json={"email": email, "password": pwd, "name": name})
@@ -16,7 +19,7 @@ def login(email, pwd):
     response = requests.post(
         urljoin(CORNFLOW_URL, 'login/'),
         json={"email": email, "password": pwd})
-    
+
     return response.json()["token"]
 
 
@@ -25,7 +28,7 @@ def create_instance(token, data):
         urljoin(CORNFLOW_URL, 'instance/'),
         headers={'Authorization': 'access_token ' + token},
         json={"data": data})
-    
+
     return response.json()["instance_id"]
 
 
@@ -39,24 +42,17 @@ def create_execution(token, instance_id, config):
 
 def get_data(token, execution_id):
     response = requests.get(
-        urljoin(urljoin(CORNFLOW_URL, 'execution_data/'), str(execution_id) + '/'),
+        urljoin(urljoin(CORNFLOW_URL, 'dag/'), str(execution_id) + '/'),
         headers={'Authorization': 'access_token ' + token},
         json={})
-    
+
     return response.json()
 
 
 def write_solution(token, execution_id, solution, log_text=None, log_json=None):
     response = requests.post(
-        urljoin(urljoin(CORNFLOW_URL, 'execution_data/'), str(execution_id) + '/'),
+        urljoin(urljoin(CORNFLOW_URL, 'dag/'), str(execution_id) + '/'),
         headers={'Authorization': 'access_token ' + token},
         json={"execution_results": solution, "log_text": log_text, "log_json": log_json})
-    
+
     return response
-
-
-
-
-
-
-

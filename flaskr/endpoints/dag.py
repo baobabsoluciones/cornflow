@@ -1,6 +1,7 @@
 """
 
 Internal endpoint for getting and posting execution data
+This are the endpoints used by airflow in its communication with cornflow
 
 """
 
@@ -17,26 +18,18 @@ from ..shared.authentication import Auth
 execution_schema = ExecutionSchema()
 
 
-class ExecutionDataEndpoint(Resource):
+class DAGEndpoint(Resource):
     
-    @Auth.auth_required
+    @Auth.super_admin_required
     def post(self, reference_id):
-        print("posting results")
         req_data = request.get_json()
-        print(req_data)
-        # reference_id = req_data["execution_id"]
-        print(reference_id)
-        # id = ExecutionModel.get_execution_id(reference_id)
-        # print(id)
-        # execution = ExecutionModel.get_one_execution(id)
         execution = ExecutionModel.get_execution_with_reference(reference_id)
-        print(execution)
         execution.update(req_data)
         execution.finished = True
         execution.save()
         return {}, 201
     
-    @Auth.auth_required
+    @Auth.super_admin_required
     def get(self, reference_id):
         execution_data = ExecutionModel.get_execution_data(reference_id)
         return execution_data, 200

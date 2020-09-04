@@ -20,6 +20,7 @@ class ConfigSchema(Schema):
     logPath = fields.Str(required=False)
 
 class LogSchema(Schema):
+    # TODO: convert to structure-less json
     log = fields.Str(required=False)
     
 class ExecutionSchema(Schema):
