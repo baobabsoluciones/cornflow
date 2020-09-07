@@ -30,7 +30,7 @@ def create_app(env_name):
     api.add_resource(DAGEndpoint, '/dag/<string:reference_id>/')
     api.add_resource(UserEndpoint, '/user/')
     api.add_resource(LoginEndpoint, '/login/')
-    api.add_resource(SingUpEndpoint, '/singup/')
+    api.add_resource(SingUpEndpoint, '/signup/')
 
     return app
 

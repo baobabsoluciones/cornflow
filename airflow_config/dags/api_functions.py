@@ -45,7 +45,6 @@ def get_data(token, execution_id):
         urljoin(urljoin(CORNFLOW_URL, 'dag/'), str(execution_id) + '/'),
         headers={'Authorization': 'access_token ' + token},
         json={})
-
     return response.json()
 
 

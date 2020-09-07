@@ -58,7 +58,6 @@ def run_solve(**kwargs):
     token = login(email="airflow@noemail.com", pwd="airflow")
     exec_id = get_arg("exec_id", kwargs)
     print("starting to solve the model with execution %s" % exec_id)
-    data = get_data(token, exec_id)
     solution = solve_execution(token, exec_id)
     if solution:
 

@@ -48,5 +48,5 @@ class DataSchema(Schema):
     constraints = fields.Nested(ConstraintSchema, many=True, required=True)
     variables = fields.Nested(VariableSchema, many=True, required=True)
     parameters = fields.Nested(ParametersSchema, required=True)
-    sos1 = fields.Nested(Sos1Constraints, many=True, required=False)
-    sos2 = fields.Nested(Sos2Constraints, many=True, required=False)
+    sos1 = fields.Nested(Sos1Constraints, many=False, required=False)
+    sos2 = fields.Nested(Sos2Constraints, many=False, required=False)
