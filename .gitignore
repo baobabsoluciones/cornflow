@@ -148,3 +148,6 @@ build/
 
 .idea/*
 migrations/*
+
+# vagrant machine folder
+.vagrant

@@ -242,3 +242,61 @@ create app::
     heroku run python manage.py migrate
 
 
+Deploying with docker-compose
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The docker-compose.yml file write in version '3' of the syntaxis describes the build of four docker containers::
+
+	app python3 cornflow service
+	airflow service based on puckel/docker-airflow image
+	cornflow postgres database service
+	airflow postgres database service
+
+create containers::
+
+	docker-compose up --build -d
+	
+list containers::
+
+	docker-compose ps
+
+inspect container::
+
+	docker exec -it containerid bash
+
+stop containers::
+
+	docker-compose down
+	
+destroy all container and images (be carefull! this destroy all docker images of non running container)::
+
+	docker system prune -af
+
+
+Deploying with Vagrantfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Install Vagrant by Hashicorp "https://www.vagrantup.com/intro"
+Install Oracle VM VirtualBox "https://www.virtualbox.org/"
+
+The Vagrantfile in root folder describes a Ubuntu bionic x64 dummy box with 2Gb of RAM and IP = 192.168.33.10. Please, change to your favourite features or docker-compose supported machine.
+Vagrantfile will provision a Linux machine with docker and docker-compose
+
+Once previously steps has done, deploy a virtual machine in your computer with these command from root corn folder::
+
+	vagrant up
+	
+If you have already deploy the machine you can access it with ::
+
+	vagrant ssh
+	
+Destroy the machine with::
+
+	vagrant destroy -f
+
+Suspend the machine with::
+
+	vagrant halt
+
+
+
