@@ -16,5 +16,9 @@ RUN pip install -r requirements.txt --ignore-installed
 # copy project
 COPY . /usr/src/app/
 
+# install dos2unix for initapp.sh
+RUN apt update && apt install dos2unix -y
+RUN dos2unix initapp.sh
+
 # execute script initapp.sh
 CMD ["./initapp.sh"]

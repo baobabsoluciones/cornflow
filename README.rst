@@ -272,6 +272,8 @@ destroy all container and images (be carefull! this destroy all docker images of
 
 	docker system prune -af
 
+cornflow app  "http://localhost:5000"
+airflow GUI  "http://localhost:8080"
 
 Deploying with Vagrantfile
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -290,13 +292,14 @@ if you have already deploy the machine you can access it with ::
 
 	vagrant ssh
 	
+suspend the machine with::
+
+	vagrant halt
+	
 destroy the machine with::
 
 	vagrant destroy -f
 
-suspend the machine with::
-
-	vagrant halt
-
-
+cornflow app  "http://vagrantfileIP:5000"
+airflow GUI  "http://vagrantfileIP:8080"
 
