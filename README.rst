@@ -277,24 +277,24 @@ Deploying with Vagrantfile
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install Vagrant by Hashicorp "https://www.vagrantup.com/intro"
+
 Install Oracle VM VirtualBox "https://www.virtualbox.org/"
 
-The Vagrantfile in root folder describes a Ubuntu bionic x64 dummy box with 2Gb of RAM and IP = 192.168.33.10. Please, change to your favourite features or docker-compose supported machine.
-Vagrantfile will provision a Linux machine with docker and docker-compose
+The Vagrantfile in root folder describes a Ubuntu bionic x64 dummy box with 2Gb of RAM and IP = '192.168.33.10' Please, change to your favourite features or docker-compose supported machine.
 
 Once previously steps has done, deploy a virtual machine in your computer with these command from root corn folder::
 
 	vagrant up
 	
-If you have already deploy the machine you can access it with ::
+if you have already deploy the machine you can access it with ::
 
 	vagrant ssh
 	
-Destroy the machine with::
+destroy the machine with::
 
 	vagrant destroy -f
 
-Suspend the machine with::
+suspend the machine with::
 
 	vagrant halt
 
