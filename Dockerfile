@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED 1
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
-RUN pip install -r requirements.txt --ignore-installed
+RUN pip install -r requirements.txt --force-reinstall
 
 # copy project
 COPY . /usr/src/app/
