@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators import BashOperator, PythonOperator
 from datetime import datetime, timedelta
-from .cornflow_api import CornFlow
+from cornflow_api import CornFlow
 import pulp as pl
 import orloge as ol
 import os
