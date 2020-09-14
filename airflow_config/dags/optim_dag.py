@@ -1,8 +1,10 @@
 from airflow import DAG
 from airflow.operators import BashOperator, PythonOperator
 from datetime import datetime, timedelta
-from api_functions import login, get_data, write_solution
+from .cornflow_api import CornFlow
 import pulp as pl
+import orloge as ol
+import os
 
 # Following are defaults which can be overridden later on
 default_args = {
@@ -30,37 +32,62 @@ def get_arg(arg, context):
 
 
 def solve_model(data, config):
+    """
+    :param data: pulp json for the model
+    :param config: pulp config for solver
+    :return:
+    """
     print("Solving the model")
     var, model = pl.LpProblem.from_dict(data)
     print(config)
+
+    # we overwrite the logPath argument before solving.
+    log_path = config['logPath'] = 'temp.log'
     solver = pl.get_solver_from_dict(config)
     model.solve(solver)
     solution = model.to_dict()
 
-    log_path = config["logPath"]
-    f = open(log_path, "r")
-    log = f.read()
-
     print("Model solved")
 
-    return solution, log
+    with open(log_path, "r") as f:
+        log = f.read()
 
+    # we convert the log into orloge json
+    equivs = \
+        dict(
+            CPLEX_CMD='CPLEX', CPLEX_PY='CPLEX', CPLEX_DLL='CPLEX',
+            GUROBI='GUROBI', GUROBI_CMD='GUROBI',
+            PULP_CBC_CMD='CBC', COIN_CMD='CBC'
+        )
+    solver_name = equivs.get(solver.name)
+    log_dict = None
+    if solver_name:
+        log_dict = ol.get_info_solver(path=log, solver=solver_name, get_progress=True, content=True)
 
-def solve_execution(token, execution_id):
-    execution_data = get_data(token, execution_id)
-    solution, log = solve_model(execution_data["data"], execution_data["config"])
-    write_solution(token, execution_id, solution, log)
+    print("Log read")
 
-    return solution
+    try:
+        os.remove(log_path)
+    except:
+        pass
 
+    return solution, log, log_dict
 
 def run_solve(**kwargs):
-    token = login(email="airflow@noemail.com", pwd="airflow")
     exec_id = get_arg("exec_id", kwargs)
-    print("starting to solve the model with execution %s" % exec_id)
-    solution = solve_execution(token, exec_id)
-    if solution:
+    cornflow_url = get_arg("cornflow_url", kwargs)
+    airflow_user = CornFlow(url=cornflow_url)
 
+    # login
+    airflow_user.login(email="airflow@noemail.com", pwd="airflow")
+    print("starting to solve the model with execution %s" % exec_id)
+    # get data
+    execution_data = airflow_user.get_data(exec_id)
+    # solve model
+    solution, log, log_dict = solve_model(execution_data["data"], execution_data["config"])
+    # write solution
+    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
+    if solution:
         return "Solution saved"
     else:
         return "Error in writing"

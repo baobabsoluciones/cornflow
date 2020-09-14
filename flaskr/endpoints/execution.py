@@ -5,7 +5,7 @@ from flask_restful import Resource
 
 from ..models.execution import ExecutionModel
 from ..models.instance import InstanceModel
-from ..schemas.execution_schema import  ExecutionSchema
+from ..schemas.execution_schema import ExecutionSchema
 from ..shared.authentication import Auth
 
 from urllib.parse import urljoin
@@ -37,9 +37,11 @@ class ExecutionEndpoint(Resource):
 
         # TODO: process response to check what happened on the airflow side
         # TODO: move airflow calls to its own class
+
+        # TODO: replace cornflow_url with the address of this server (using reverse?)
         response = requests.post(
             urljoin(current_app.config['AIRFLOW_URL'], 'api/experimental/dags/solve_model_dag/dag_runs'),
-            json={"conf": conf})
+            json={"conf": conf, "cornflow_url": "http://127.0.0.1:5000"})
 
         return {'execution_id': execution_id}, 201
 

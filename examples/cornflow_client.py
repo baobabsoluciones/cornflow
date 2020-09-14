@@ -1,5 +1,4 @@
-
-import airflow_config.dags.api_functions as af
+from airflow_config.dags.cornflow_api import CornFlow
 
 email = 'some_email@gmail.com'
 pwd = 'some_password'
@@ -7,11 +6,13 @@ name = 'some_name'
 
 config = dict(email=email, pwd=pwd, name=name)
 
-af.sign_up(**config)
-token = af.login(email, pwd)
+client = CornFlow(url="http://127.0.0.1:5000")
+client.sign_up(**config)
+client.login(email, pwd)
 
-af.sign_up(email="airflow@noemail.com", pwd="airflow", name="airflow")
-tokenaf = af.login(email="airflow@noemail.com", pwd="airflow")
+airflow_client = CornFlow(url="http://127.0.0.1:5000")
+airflow_client.sign_up(email="airflow@noemail.com", pwd="airflow", name="airflow")
+airflow_client.login(email="airflow@noemail.com", pwd="airflow")
 
 import pulp
 prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)
@@ -24,7 +25,7 @@ prob += x + z >= 10, "c2"
 prob += -y + z == 7.5, "c3"
 data = prob.to_dict()
 
-instance_id = af.create_instance(token, data)
+instance_id = client.create_instance(data)
 
 config = dict(
     solver="PULP_CBC_CMD",
@@ -41,7 +42,7 @@ config = dict(
     threads=1,
     logPath="test_export_solver_json.log"
 )
-execution_id = af.create_execution(token, instance_id, config)
-data = af.get_data(token, execution_id)
+execution_id = client.create_execution(instance_id, config)
+data = client.get_data(execution_id)
 
 _vars, prob = pulp.LpProblem.from_dict(data['data'])

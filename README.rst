@@ -304,3 +304,11 @@ destroy the machine with::
 cornflow app  "http://vagrantfileIP:5000"
 airflow GUI  "http://vagrantfileIP:8080"
 
+Deploying in Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Open the VagrantFile and copy the instructions at the beginning in the console. Except the last line "cd /vagrant" and instead do::
+
+    sudo docker-compose up -d --build
+
+Then follow the instructions in "Deploying with docker-compose".
