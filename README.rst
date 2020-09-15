@@ -73,6 +73,7 @@ Each time you run the flask server, execute the following::
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
+    export CORNFLOW_URL=http://localhost:5000
     flask run
 
 
@@ -98,6 +99,16 @@ If you want to use postgresql with airflow too you need to edit the existing val
 In the same file, if you do not want the examples::
 
     load_examples = False
+
+Finally, and only for development, the API needs to be publicly available::
+
+    [api]
+    auth_backend = airflow.api.auth.backend.default
+
+https://airflow.apache.org/docs/stable/security.html
+
+
+See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
 
 Create the `airflow` database in postgresql::
 
@@ -230,6 +241,10 @@ The execution id has to be passed like this::
     response = requests.post(
         "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
         json={"conf":conf})
+
+or via the web by pasting this in the text box in DAGs/Trigger DAG::
+
+    {"exec_id":"1b06da8e5c670ba715fbe7f04f8538a687b900bb", "cornflow_url": "http://localhost:5000"}
 
 
 Deploying to heroku

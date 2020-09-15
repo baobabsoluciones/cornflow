@@ -10,10 +10,6 @@ client = CornFlow(url="http://127.0.0.1:5000")
 client.sign_up(**config)
 client.login(email, pwd)
 
-airflow_client = CornFlow(url="http://127.0.0.1:5000")
-airflow_client.sign_up(email="airflow@noemail.com", pwd="airflow", name="airflow")
-airflow_client.login(email="airflow@noemail.com", pwd="airflow")
-
 import pulp
 prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)
 x = pulp.LpVariable("x", 0, 4)
@@ -37,12 +33,21 @@ config = dict(
     keepFiles=0,
     gapRel=0.1,
     gapAbs=1,
-    maxMemory=1000,
-    maxNodes=1,
     threads=1,
     logPath="test_export_solver_json.log"
 )
+execution_id = '1b06da8e5c670ba715fbe7f04f8538a687b900bb'
 execution_id = client.create_execution(instance_id, config)
 status = client.get_status(execution_id)
 results = client.get_results(execution_id)
+results.keys()
 _vars, prob = pulp.LpProblem.from_dict(results['execution_results'])
+
+# get the values for the variables:
+{k: v.value() for k, v in _vars.items()}
+
+# get the log in text format
+results['log_text']
+
+# get the log in json format
+results['log_json']

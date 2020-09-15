@@ -1,5 +1,3 @@
-import requests
-import json
 
 from flask import request, current_app
 from flask_restful import Resource
@@ -8,8 +6,9 @@ from ..models.execution import ExecutionModel
 from ..models.instance import InstanceModel
 from ..schemas.execution_schema import ExecutionSchema
 from ..shared.authentication import Auth
+from ..shared.errors import AirflowError
 
-from urllib.parse import urljoin
+from ..shared.airflow_api import Airflow
 
 execution_schema = ExecutionSchema()
 
@@ -34,17 +33,11 @@ class ExecutionEndpoint(Resource):
         execution_id = ser_data.get('reference_id')
         
         # solve
-        conf = json.dumps(
-            dict(exec_id=execution_id,
-                 cornflow_url=current_app.config['CORNFLOW_URL'])
-        )
-
-        # TODO: process response to check what happened on the airflow side
-        # TODO: move airflow calls to its own class
-
-        response = requests.post(
-            urljoin(current_app.config['AIRFLOW_URL'], '/api/experimental/dags/solve_model_dag/dag_runs'),
-            json={"conf": conf})
+        airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
+        response = airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
+        if response.status_code != 200:
+            raise AirflowError('Airflow responded with a status: {}:\n{}'.
+                               format(response.status_code, response.text))
 
         return {'execution_id': execution_id}, 201
 

@@ -5,6 +5,7 @@ from cornflow_api import CornFlow
 import pulp as pl
 import orloge as ol
 import os
+import json
 
 # Following are defaults which can be overridden later on
 default_args = {
@@ -27,7 +28,6 @@ Functions
 
 
 def get_arg(arg, context):
-    print(context)
     return context["dag_run"].conf[arg]
 
 
@@ -62,8 +62,8 @@ def solve_model(data, config):
     solver_name = equivs.get(solver.name)
     log_dict = None
     if solver_name:
-        log_dict = ol.get_info_solver(path=log, solver=solver_name, get_progress=True, content=True)
-
+        log_dict = ol.get_info_solver(path=log, solver=solver_name, get_progress=False, content=True)
+        log_dict['progress'] = None
     print("Log read")
 
     try:
@@ -86,7 +86,7 @@ def run_solve(**kwargs):
     # solve model
     solution, log, log_dict = solve_model(execution_data["data"], execution_data["config"])
     # write solution
-    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
+    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=json.dumps(log_dict))
     if solution:
         return "Solution saved"
     else:

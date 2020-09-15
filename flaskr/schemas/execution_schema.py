@@ -1,5 +1,7 @@
 from marshmallow import fields, Schema
-from ..schemas.model_schema import *
+from ..schemas.model_schema import DataSchema
+
+options = dict(required=True, allow_none=True)
 
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
@@ -19,10 +21,39 @@ class ConfigSchema(Schema):
     threads = fields.Integer(required=False)
     logPath = fields.Str(required=False)
 
+class MatrixSchema(Schema):
+    constraints = fields.Int(required=False)
+    variables = fields.Int(required=False)
+    nonzeros = fields.Int(required=False)
+
+class PresolveSchema(Schema):
+    cols = fields.Int(required=True)
+    rows = fields.Int(required=True)
+    time = fields.Float(required=True)
+
 class LogSchema(Schema):
-    # TODO: convert to structure-less json
-    log = fields.Str(required=False)
-    
+    version = fields.Str(**options)
+    solver = fields.Str(**options)
+    status = fields.Str(**options)
+    best_bound = fields.Float(**options)
+    best_solution = fields.Float(**options)
+    gap = fields.Float(**options)
+    time = fields.Float(**options)
+    matrix = fields.Nested(MatrixSchema, **options, many=False)
+    matrix_post = fields.Nested(MatrixSchema, **options, many=False)
+    rootTime = fields.Float(**options)
+    presolve = fields.Nested(PresolveSchema, **options, many=False)
+    first_relaxed = fields.Float(**options)
+    first_solution = fields.Float(**options)
+    status_code = fields.Int(**options)
+    sol_code = fields.Int(**options)
+    nodes = fields.Int(**options)
+
+    # TODO: these two are incorrect:
+    cut_info = fields.Int(**options)
+    progress = fields.Int(**options)
+
+
 class ExecutionSchema(Schema):
     """
 
