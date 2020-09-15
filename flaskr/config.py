@@ -10,6 +10,7 @@ class Development(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
+    CORNFLOW_URL = os.getenv('CORNFLOW_URL')
 
 class Production(object):
     """
@@ -20,7 +21,7 @@ class Production(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
-
+    CORNFLOW_URL = os.getenv('CORNFLOW_URL')
 
 app_config = {
     'development': Development,

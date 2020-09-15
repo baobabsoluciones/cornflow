@@ -1,26 +1,29 @@
 version: '3'
 
 services:
-  app:
+  cornflow:
     build: .
     ports:
       - 5000:5000
     environment:
       - FLASK_APP=flaskr.app
       - FLASK_ENV=development
-      - DATABASE_URL=postgres://postgres:postgresadmin@app_db:5432/cornflow
+      - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
       - SECRET_KEY=THISNEEDSTOBECHANGED
+      - AIRFLOW_URL=http://airflow:8080
+      - CORNFLOW_URL=http://cornflow:5000
     depends_on:
-      - app_db
+      - cornflow_db
+      - airflow
 
-  app_db:
+  cornflow_db:
     image: postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgresadmin
       - POSTGRES_DB=cornflow
     volumes:
-      - postgres_app_data:/var/lib/postgresql/data/
+      - postgres_cf_data:/var/lib/postgresql/data/
 
   airflow:
     image: puckel/docker-airflow
@@ -46,6 +49,6 @@ services:
       - postgres_af_data:/var/lib/postgresql/data/
 
 volumes:
-  postgres_app_data:
+  postgres_cf_data:
   postgres_af_data:
 

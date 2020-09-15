@@ -50,6 +50,7 @@ Every time cornflow is used, PostgreSQL and airflow needs to be configured::
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
+    export CORNFLOW_URL=http://localhost:5000
 
 In windows use ``set`` instead of ``export``.
 

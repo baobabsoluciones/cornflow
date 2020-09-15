@@ -43,6 +43,6 @@ config = dict(
     logPath="test_export_solver_json.log"
 )
 execution_id = client.create_execution(instance_id, config)
-data = client.get_data(execution_id)
-
-_vars, prob = pulp.LpProblem.from_dict(data['data'])
+status = client.get_status(execution_id)
+results = client.get_results(execution_id)
+_vars, prob = pulp.LpProblem.from_dict(results['execution_results'])
