@@ -59,6 +59,7 @@ In order to create the database, execute the following::
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
+    python manage.py create_super_user
 
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~
