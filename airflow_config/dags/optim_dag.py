@@ -79,7 +79,7 @@ def run_solve(**kwargs):
     airflow_user = CornFlow(url=cornflow_url)
 
     # login
-    airflow_user.login(email="airflow@noemail.com", pwd="airflow")
+    airflow_user.login(email="airflow@baobabsoluciones.es", pwd="THISNEEDSTOBECHANGED")
     print("starting to solve the model with execution %s" % exec_id)
     # get data
     execution_data = airflow_user.get_data(exec_id)
