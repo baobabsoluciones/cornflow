@@ -55,7 +55,7 @@ def solve_execution(token, execution_id):
 
 
 def run_solve(**kwargs):
-    token = login(email="airflow@noemail.com", pwd="airflow")
+    token = login(email="airflow@baobabsoluciones.es", pwd="THISNEEDSTOBECHANGED")
     exec_id = get_arg("exec_id", kwargs)
     print("starting to solve the model with execution %s" % exec_id)
     solution = solve_execution(token, exec_id)
