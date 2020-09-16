@@ -4,7 +4,8 @@ from marshmallow import fields, Schema
 
 from . import bcrypt
 from . import db
-from flaskr.schemas.instance_schema import InstanceSchema
+from sqlalchemy.sql import expression
+from ..schemas.instance_schema import InstanceSchema
 
 
 class UserModel(db.Model):
@@ -14,6 +15,8 @@ class UserModel(db.Model):
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
+    admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
+    super_admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
     created_at = db.Column(db.DateTime)
     modified_at = db.Column(db.DateTime)
     instances = db.relationship('InstanceModel', backref='users', lazy=True)
@@ -27,6 +30,8 @@ class UserModel(db.Model):
         self.name = data.get('name')
         self.email = data.get('email')
         self.password = self.__generate_hash(data.get('password'))
+        self.admin = False
+        self.super_admin = False
         self.created_at = datetime.datetime.utcnow()
         self.modified_at = datetime.datetime.utcnow()
 
@@ -38,6 +43,8 @@ class UserModel(db.Model):
         for key, item in data.items():
             if key == 'password':
                 self.password = self.__generate_hash(item)
+            elif key == 'admin' or key == 'super_admin':
+                continue
             setattr(self, key, item)
 
         self.modified_at = datetime.datetime.utcnow()
@@ -65,6 +72,11 @@ class UserModel(db.Model):
     def get_one_user_by_email(em):
         return UserModel.query.filter_by(email=em).first()
 
+    @staticmethod
+    def get_user_info(id):
+        user = UserModel.query.get(id)
+        return user.admin, user.super_admin
+
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
@@ -76,7 +88,9 @@ class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
     email = fields.Email(required=True)
-    password = fields.Str(required=True)
+    password = fields.Str(required=True, load_only=True)
+    admin = fields.Boolean(required=False, load_only=True)
+    super_admin = fields.Boolean(required=False, load_only=True)
     created_at = fields.DateTime(dump_only=True)
     modified_at = fields.DateTime(dump_only=True)
     instances = fields.Nested(InstanceSchema, many=True)

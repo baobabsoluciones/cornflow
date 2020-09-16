@@ -1,9 +1,9 @@
 from flask import request
 from flask_restful import Resource
 
-from flaskr.models.instance import InstanceModel
-from flaskr.schemas.instance_schema import InstanceSchema
-from flaskr.shared.authentication import Auth
+from ..models.instance import InstanceModel
+from ..schemas.instance_schema import InstanceSchema
+from ..shared.authentication import Auth
 
 instance_schema = InstanceSchema()
 
@@ -11,7 +11,7 @@ class InstanceEndpoint(Resource):
 
     @Auth.auth_required
     def get(self):
-        user_id = Auth.return_user(request)
+        user_id, admin, super_admin = Auth.return_user_info(request)
         instances = InstanceModel.get_all_instances(user_id)
         ser_instances = instance_schema.dump(instances, many=True)
 
@@ -22,7 +22,7 @@ class InstanceEndpoint(Resource):
         req_data = request.get_json()
         data = instance_schema.load(req_data, partial=True)
 
-        data['user_id'] = Auth.return_user(request)
+        data['user_id'], admin, super_admin = Auth.return_user_info(request)
 
         instance = InstanceModel(data)
         instance.save()

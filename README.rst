@@ -49,6 +49,10 @@ Every time cornflow is used, PostgreSQL and airflow needs to be configured::
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
+    export AIRFLOW_URL=http://localhost:8080
+    export CORNFLOW_URL=http://localhost:5000
+
+In windows use ``set`` instead of ``export``.
 
 In order to create the database, execute the following::
 
@@ -56,6 +60,7 @@ In order to create the database, execute the following::
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
+    python manage.py create_super_user
 
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +72,8 @@ Each time you run the flask server, execute the following::
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
+    export AIRFLOW_URL=http://localhost:8080
+    export CORNFLOW_URL=http://localhost:5000
     flask run
 
 
@@ -82,16 +89,6 @@ Install it::
     cd corn
     python3 -m venv afvenv
     afvenv/bin/pip3 install -r requirements_af.txt
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    airflow -h
-
-If you want to use postgresql with airflow too you need to edit the existing values in airflow config (corn/airflow_config/airflow.cfg)::
-
-    sql_alchemy_conn = postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
-
-In the same file, if you do not want the examples::
-
-    load_examples = False
 
 Create the `airflow` database in postgresql::
 
@@ -121,11 +118,19 @@ If necessary, give execution rights to your user in the airflow folder (I did no
 Launch airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-start the web server, default port is 8080::
+We start the web server, default port is 8080.
+We're setting some environment variables that are suited for development. Specially taking out the deactivation of the security of the api.
+
+See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
+
+To set the config and start everything::
 
     cd corn
     source afvenv/bin/activate
     export AIRFLOW_HOME="$PWD/airflow_config"
+    export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
+    export AIRFLOW__CORE__LOAD_EXAMPLES=0
+    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
     airflow webserver -p 8080 &
 
 start the scheduler::
@@ -225,6 +230,10 @@ The execution id has to be passed like this::
         "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
         json={"conf":conf})
 
+or via the web by pasting this in the text box in DAGs/Trigger DAG::
+
+    {"exec_id":"1b06da8e5c670ba715fbe7f04f8538a687b900bb", "cornflow_url": "http://localhost:5000"}
+
 
 Deploying to heroku
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -239,3 +248,72 @@ create app::
     heroku run python manage.py migrate
 
 
+Deploying with docker-compose
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The docker-compose.yml file write in version '3' of the syntaxis describes the build of four docker containers::
+
+	app python3 cornflow service
+	airflow service based on puckel/docker-airflow image
+	cornflow postgres database service
+	airflow postgres database service
+
+create containers::
+
+	docker-compose up --build -d
+	
+list containers::
+
+	docker-compose ps
+
+inspect container::
+
+	docker exec -it containerid bash
+
+stop containers::
+
+	docker-compose down
+	
+destroy all container and images (be carefull! this destroy all docker images of non running container)::
+
+	docker system prune -af
+
+cornflow app  "http://localhost:5000"
+airflow GUI  "http://localhost:8080"
+
+Deploying with Vagrantfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Install Vagrant by Hashicorp "https://www.vagrantup.com/intro"
+
+Install Oracle VM VirtualBox "https://www.virtualbox.org/"
+
+The Vagrantfile in root folder describes a Ubuntu bionic x64 dummy box with 2Gb of RAM and IP = '192.168.33.10' Please, change to your favourite features or docker-compose supported machine.
+
+Once previously steps has done, deploy a virtual machine in your computer with these command from root corn folder::
+
+	vagrant up
+	
+if you have already deploy the machine you can access it with ::
+
+	vagrant ssh
+	
+suspend the machine with::
+
+	vagrant halt
+	
+destroy the machine with::
+
+	vagrant destroy -f
+
+cornflow app  "http://vagrantfileIP:5000"
+airflow GUI  "http://vagrantfileIP:8080"
+
+Deploying in Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Open the VagrantFile and copy the instructions at the beginning in the console. Except the last line "cd /vagrant" and instead do::
+
+    sudo docker-compose up -d --build
+
+Then follow the instructions in "Deploying with docker-compose".

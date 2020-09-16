@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  cornflow:
+    build: .
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_APP=flaskr.app
+      - FLASK_ENV=development
+      - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
+      - SECRET_KEY=THISNEEDSTOBECHANGED
+      - AIRFLOW_URL=http://airflow:8080
+      - CORNFLOW_URL=http://cornflow:5000
+    depends_on:
+      - cornflow_db
+      - airflow
+
+  cornflow_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_DB=cornflow
+    volumes:
+      - postgres_cf_data:/var/lib/postgresql/data/
+
+  airflow:
+    image: puckel/docker-airflow
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - AIRFLOW__CORE__LOAD_EXAMPLES=0
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+    ports:
+      - 8080:8080
+    depends_on:
+      - airflow_db
+
+  airflow_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres_af_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_cf_data:
+  postgres_af_data:
+

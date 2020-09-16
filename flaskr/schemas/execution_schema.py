@@ -1,5 +1,7 @@
 from marshmallow import fields, Schema
-from flaskr.schemas.model_schema import *
+from ..schemas.model_schema import DataSchema
+
+options = dict(required=True, allow_none=True)
 
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
@@ -19,9 +21,39 @@ class ConfigSchema(Schema):
     threads = fields.Integer(required=False)
     logPath = fields.Str(required=False)
 
+class MatrixSchema(Schema):
+    constraints = fields.Int(required=False)
+    variables = fields.Int(required=False)
+    nonzeros = fields.Int(required=False)
+
+class PresolveSchema(Schema):
+    cols = fields.Int(required=True)
+    rows = fields.Int(required=True)
+    time = fields.Float(required=True)
+
 class LogSchema(Schema):
-    log = fields.Str(required=False)
-    
+    version = fields.Str(**options)
+    solver = fields.Str(**options)
+    status = fields.Str(**options)
+    best_bound = fields.Float(**options)
+    best_solution = fields.Float(**options)
+    gap = fields.Float(**options)
+    time = fields.Float(**options)
+    matrix = fields.Nested(MatrixSchema, **options, many=False)
+    matrix_post = fields.Nested(MatrixSchema, **options, many=False)
+    rootTime = fields.Float(**options)
+    presolve = fields.Nested(PresolveSchema, **options, many=False)
+    first_relaxed = fields.Float(**options)
+    first_solution = fields.Float(**options)
+    status_code = fields.Int(**options)
+    sol_code = fields.Int(**options)
+    nodes = fields.Int(**options)
+
+    # TODO: these two are incorrect:
+    cut_info = fields.Int(**options)
+    progress = fields.Int(**options)
+
+
 class ExecutionSchema(Schema):
     """
 
@@ -35,5 +67,6 @@ class ExecutionSchema(Schema):
     execution_results = fields.Nested(DataSchema, dump_only=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
+    finished = fields.Boolean(required=False)
     created_at = fields.DateTime(dump_only=True)
     modified_at = fields.DateTime(dump_only=True)

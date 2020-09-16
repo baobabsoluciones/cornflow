@@ -1,6 +1,6 @@
-from flaskr.models.user import UserModel, UserSchema
-from flaskr.shared.authentication import Auth
-from flaskr.shared.resource import BaseResource
+from ..models.user import UserModel, UserSchema
+from ..shared.authentication import Auth
+from ..shared.resource import BaseResource
 
 user_schema = UserSchema()
 
