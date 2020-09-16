@@ -34,6 +34,9 @@ services:
       - POSTGRES_HOST=airflow_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgresadmin
+      - AIRFLOW__CORE__LOAD_EXAMPLES=0
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
     ports:
       - 8080:8080
     depends_on:

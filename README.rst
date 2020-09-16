@@ -89,26 +89,6 @@ Install it::
     cd corn
     python3 -m venv afvenv
     afvenv/bin/pip3 install -r requirements_af.txt
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    airflow -h
-
-If you want to use postgresql with airflow too you need to edit the existing values in airflow config (corn/airflow_config/airflow.cfg)::
-
-    sql_alchemy_conn = postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
-
-In the same file, if you do not want the examples::
-
-    load_examples = False
-
-Finally, and only for development, the API needs to be publicly available::
-
-    [api]
-    auth_backend = airflow.api.auth.backend.default
-
-https://airflow.apache.org/docs/stable/security.html
-
-
-See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
 
 Create the `airflow` database in postgresql::
 
@@ -138,11 +118,19 @@ If necessary, give execution rights to your user in the airflow folder (I did no
 Launch airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-start the web server, default port is 8080::
+We start the web server, default port is 8080.
+We're setting some environment variables that are suited for development. Specially taking out the deactivation of the security of the api.
+
+See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
+
+To set the config and start everything::
 
     cd corn
     source afvenv/bin/activate
     export AIRFLOW_HOME="$PWD/airflow_config"
+    export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
+    export AIRFLOW__CORE__LOAD_EXAMPLES=0
+    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
     airflow webserver -p 8080 &
 
 start the scheduler::
