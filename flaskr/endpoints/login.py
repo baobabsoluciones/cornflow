@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
-from flaskr.models.user import UserSchema, UserModel
-from flaskr.shared.authentication import Auth
+from ..models.user import UserSchema, UserModel
+from ..shared.authentication import Auth
 
 user_schema = UserSchema()
 
@@ -24,7 +24,6 @@ class LoginEndpoint(Resource):
             return {'error': 'invalid credentials'}, 400
 
         ser_data = user_schema.dump(user)
-        print(ser_data)
 
         token, error = Auth.generate_token(ser_data.get('id'))
 

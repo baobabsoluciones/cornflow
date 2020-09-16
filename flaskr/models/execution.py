@@ -3,11 +3,12 @@ import hashlib
 
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
+from sqlalchemy.sql import expression
 
 from . import db
-from flaskr.models.instance import InstanceModel
-from flaskr.schemas.execution_schema import *
-from flaskr.schemas.model_schema import *
+from ..models.instance import InstanceModel
+from ..schemas.execution_schema import *
+from ..schemas.model_schema import *
 
 
 class ExecutionModel(db.Model):
@@ -25,12 +26,14 @@ class ExecutionModel(db.Model):
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
+    finished = db.Column(db.Boolean, server_default=expression.false(), default=False, nullable=False)
     created_at = db.Column(db.DateTime)
     modified_at = db.Column(db.DateTime)
 
     def __init__(self, data):
         self.user_id = data.get('user_id')
         self.instance_id = data.get('instance_id')
+        self.finished = False
         self.config = data.get('config')
         self.created_at = datetime.datetime.utcnow()
         self.modified_at = datetime.datetime.utcnow()
@@ -57,7 +60,15 @@ class ExecutionModel(db.Model):
     @staticmethod
     def get_one_execution(id):
         return ExecutionModel.query.get(id)
-    
+
+    @staticmethod
+    def get_execution_with_id(id):
+        return ExecutionModel.query.get(id)
+
+    @staticmethod
+    def get_execution_with_reference(reference_id):
+        return ExecutionModel.query.filter_by(reference_id=reference_id).first()
+
     @staticmethod
     def get_execution_id(reference_id):
         return ExecutionModel.query.filter_by(reference_id=reference_id).first().id
@@ -65,8 +76,11 @@ class ExecutionModel(db.Model):
     @staticmethod
     def get_execution_data(reference_id):
         id = ExecutionModel.get_execution_id(reference_id)
+        print("id", id)
         execution = ExecutionModel.get_one_execution(id)
+        print("execution", execution)
         instance_data = InstanceModel.get_one_instance(execution.instance_id).data
+        print(instance_data)
         config = execution.config
         return {"data":instance_data, "config":config}
         
