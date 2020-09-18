@@ -33,6 +33,8 @@ class ExecutionEndpoint(Resource):
         execution_id = ser_data.get('reference_id')
         
         # solve
+        # To send the absolute url:
+        # url_for(endpoint_name, _external=True)
         airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
         response = airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
         if response.status_code != 200:
