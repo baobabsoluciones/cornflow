@@ -1,2 +1,2 @@
-pulp
-orloge
+PuLP==2.3
+orloge==0.13
