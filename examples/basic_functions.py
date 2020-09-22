@@ -7,6 +7,7 @@ name = 'some_name'
 config = dict(email=email, pwd=pwd, name=name)
 
 client = CornFlow(url="http://127.0.0.1:5000")
+client = CornFlow(url="http://34.78.205.34:5000/")
 client.sign_up(**config)
 client.login(email, pwd)
 

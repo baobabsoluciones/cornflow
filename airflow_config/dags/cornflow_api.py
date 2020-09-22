@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urljoin
-
+import re
 
 class CornFlow(object):
 
@@ -69,3 +69,68 @@ class CornFlow(object):
         self.require_token()
         response = self.get_api_from_execution('execution/status/', execution_id)
         return response.json()
+
+
+class CornFlowApiError(Exception):
+    """
+    CornFlow returns an error
+    """
+    pass
+
+
+def arg_to_value(some_string, replace_underscores_with_spaces=False, force_number=False):
+    if replace_underscores_with_spaces:
+        some_string = re.sub(pattern=r'_', repl=r' ', string=some_string)
+    if some_string[0] == "'" and some_string[-1] == "'":
+        # this means its a string, no need to continue
+        return some_string[1:-1]
+    if not force_number:
+        return some_string
+    if some_string.isdigit():
+        return int(some_string)
+    # TODO: probably other edge cases, such as boolean.
+    try:
+        return float(some_string)
+    except ValueError:
+        return some_string
+
+
+def get_tuple_from_root(rest: str, **kwargs):
+    if not rest:
+        # it matches exactly, no index.
+        raise CornFlowApiError("There is not rest: there is just one variable")
+
+    if rest[0] == '(':
+        # key is a tuple.
+        args = re.split(',_?', rest[1:-1])
+        kwargs = {**kwargs, 'force_number':True}
+        new_args = [arg_to_value(arg, **kwargs) for arg in args if arg != '']
+        return tuple(new_args)
+    # key is a single value
+    return arg_to_value(rest, **kwargs)
+
+
+def group_variables_by_name(_vars, names_list, **kwargs):
+    # this is an experimental function that assumes the following:
+    # 1. keys do not have special characters: -+[] ->/
+    # 2. key can be a tuple or a single string.
+    # 3. if a tuple, they can be an integer or a string.
+    #
+    # it dos not permit the nested dictionary format of variables
+    # we copy it because we will be taking out already seen variables
+    _vars = dict(_vars)
+    __vars = {k: {} for k in names_list}
+    for root in names_list:
+        # 1. match root name to variables
+        candidates = {name: obj for name, obj in _vars.items() if
+                      name.startswith(root)}
+        # 2 extract and store said variables
+        try:
+            __vars[root] = {get_tuple_from_root(name[len(root)+1:], **kwargs): obj
+                            for name, obj in candidates.items()}
+        except CornFlowApiError:
+            __vars[root] = list(candidates.values())[0]
+        # 3. take out from list
+        for name in candidates:
+            _vars.pop(name)
+    return __vars
