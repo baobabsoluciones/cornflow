@@ -105,19 +105,26 @@ def check_db(**kwargs):
         raise Exception("Execution id does not exist")
 
 
-check_db_task = PythonOperator(
-    task_id='task_0',
+preprocess_task = PythonOperator(
+    task_id='pre_process_task',
     provide_context=True,
     python_callable=check_db,
     dag=dag,
 )
 
 solve_task = PythonOperator(
-    task_id='task_1',
+    task_id='solve_task',
     provide_context=True,
     python_callable=run_solve,
     dag=dag,
 )
 
-solve_task.set_upstream(check_db_task)
+post_process_task = PythonOperator(
+    task_id='post_process_task',
+    provide_context=True,
+    python_callable=check_db,
+    dag=dag,
+)
 
+solve_task.set_upstream(preprocess_task)
+post_process_task.set_upstream(solve_task)
