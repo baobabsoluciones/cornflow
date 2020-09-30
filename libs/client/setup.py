@@ -20,5 +20,5 @@ setuptools.setup(
         "Development Status :: 2 - Pre-Alpha"
     ],
     python_requires='>=3.6',
-    install_requires=['requests', 'urllib']
+    install_requires=['requests', 'urllib3']
 )
