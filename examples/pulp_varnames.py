@@ -1,4 +1,4 @@
-from airflow_config.dags.cornflow_api import CornFlow, group_variables_by_name
+from cornflow_client import CornFlow, group_variables_by_name
 import pulp
 
 email = 'some_email@gmail.com'

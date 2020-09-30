@@ -1,4 +1,4 @@
-from airflow_config.dags.cornflow_api import CornFlow
+from cornflow_client import CornFlow
 
 email = 'some_email@gmail.com'
 pwd = 'some_password'
