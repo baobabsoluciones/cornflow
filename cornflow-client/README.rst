@@ -20,7 +20,7 @@ Use cornflow-client
 
 To use, first you have to import the package::
 
-    from cornflow-client import CornFlow
+    from cornflow_client import CornFlow
 
 Then you have to start up the client and login or sing up::
 
