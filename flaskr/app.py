@@ -5,7 +5,7 @@ from .endpoints.user import UserEndpoint
 from .endpoints.login import LoginEndpoint
 from .endpoints.execution import ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint
 from .endpoints.dag import DAGEndpoint
-from .endpoints.singup import SingUpEndpoint
+from .endpoints.signup import SingUpEndpoint
 from .config import app_config
 from .models import db, bcrypt
 
@@ -24,13 +24,13 @@ def create_app(env_name):
     db.init_app(app)
     api = Api(app)
     api.add_resource(InstanceEndpoint, '/instance/', endpoint="instance")
-    api.add_resource(ExecutionEndpoint, '/execution/', endpoints="execution")
+    api.add_resource(ExecutionEndpoint, '/execution/', endpoint="execution")
     api.add_resource(ExecutionDetailsEndpoint, '/execution/<string:reference_id>/', endpoint="execution-detail")
     api.add_resource(ExecutionStatusEndpoint, '/execution/status/<string:reference_id>/', endpoint="execution-status")
     api.add_resource(DAGEndpoint, '/dag/<string:reference_id>/', endpoint="dag")
     api.add_resource(UserEndpoint, '/user/', endpoint="user")
     api.add_resource(LoginEndpoint, '/login/', endpoint="login")
-    api.add_resource(SingUpEndpoint, '/signup/', endpoint="singup")
+    api.add_resource(SingUpEndpoint, '/signup/', endpoint="signup")
 
     return app
 

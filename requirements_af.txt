@@ -91,3 +91,4 @@ zipp==3.1.0
 zope.deprecation==4.4.0
 orloge
 psycopg2
+cornflow_client

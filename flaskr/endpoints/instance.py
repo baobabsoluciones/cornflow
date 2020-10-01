@@ -20,6 +20,7 @@ class InstanceEndpoint(Resource):
     @Auth.auth_required
     def post(self):
         req_data = request.get_json()
+        # TODO: catch possible validation error and process it to give back a more meaningful error message
         data = instance_schema.load(req_data, partial=True)
 
         data['user_id'], admin, super_admin = Auth.return_user_info(request)
