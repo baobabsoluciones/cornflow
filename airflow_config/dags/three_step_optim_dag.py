@@ -20,7 +20,7 @@ default_args = {
     'schedule_interval': None
 }
 
-dag = DAG('solve_model_dag', default_args=default_args, schedule_interval=None)
+dag = DAG('solve_model_dag_three', default_args=default_args, schedule_interval=None)
 
 """
 Functions
@@ -105,6 +105,12 @@ def check_db(**kwargs):
         raise Exception("Execution id does not exist")
 
 
+preprocess_task = PythonOperator(
+    task_id='pre_process_task',
+    provide_context=True,
+    python_callable=check_db,
+    dag=dag,
+)
 
 solve_task = PythonOperator(
     task_id='solve_task',
@@ -113,3 +119,12 @@ solve_task = PythonOperator(
     dag=dag,
 )
 
+post_process_task = PythonOperator(
+    task_id='post_process_task',
+    provide_context=True,
+    python_callable=check_db,
+    dag=dag,
+)
+
+solve_task.set_upstream(preprocess_task)
+post_process_task.set_upstream(solve_task)

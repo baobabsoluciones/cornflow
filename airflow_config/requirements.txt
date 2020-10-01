@@ -1,2 +1,3 @@
-PuLP==2.3
-orloge==0.13
+cornflow-client>=0.0.5
+orloge>=0.13
+PuLP>=2.3

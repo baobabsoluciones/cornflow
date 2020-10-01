@@ -6,9 +6,7 @@ from ..models.execution import ExecutionModel
 from ..models.instance import InstanceModel
 from ..schemas.execution_schema import ExecutionSchema
 from ..shared.authentication import Auth
-from ..shared.errors import AirflowError
-
-from ..shared.airflow_api import Airflow
+from ..shared.airflow_api import Airflow, AirflowApiError
 
 execution_schema = ExecutionSchema()
 
@@ -38,8 +36,8 @@ class ExecutionEndpoint(Resource):
         airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
         response = airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
         if response.status_code != 200:
-            raise AirflowError('Airflow responded with a status: {}:\n{}'.
-                               format(response.status_code, response.text))
+            raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
+                                  format(response.status_code, response.text))
 
         return {'execution_id': execution_id}, 201
 

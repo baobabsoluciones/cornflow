@@ -17,3 +17,11 @@ class Airflow(object):
         return requests.post(
             urljoin(self.url, '/api/experimental/dags/solve_model_dag/dag_runs'),
             json={"conf": json.dumps(conf)})
+
+
+
+class AirflowApiError(Exception):
+    """
+    Airflow returns an error
+    """
+    pass
