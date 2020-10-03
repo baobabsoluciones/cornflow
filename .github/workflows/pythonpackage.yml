@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
@@ -21,6 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
         pip install .
     - name: Test
       run: |
