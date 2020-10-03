@@ -19,7 +19,6 @@ class CornFlow(object):
             json={})
 
     def sign_up(self, email, pwd, name):
-        # TODO: do a login and return a token ?
         return requests.post(
             urljoin(self.url, 'signup/'),
             json={"email": email, "password": pwd, "name": name})
@@ -68,6 +67,13 @@ class CornFlow(object):
     def get_status(self, execution_id):
         self.require_token()
         response = self.get_api_from_execution('execution/status/', execution_id)
+        return response.json()
+
+    def get_all_instances(self):
+        self.require_token()
+        response = requests.get(urljoin(self.url, 'instance/'),
+                                headers={'Authorization': 'access_token ' + self.token},
+                                json={})
         return response.json()
 
 
