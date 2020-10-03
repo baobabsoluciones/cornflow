@@ -7,6 +7,8 @@ from ..shared.authentication import Auth
 
 instance_schema = InstanceSchema()
 
+# TODO: delete an instance (with its executions)
+
 class InstanceEndpoint(Resource):
 
     @Auth.auth_required

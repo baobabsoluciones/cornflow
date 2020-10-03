@@ -7,7 +7,7 @@ class CoefficientsSchema(Schema):
 
 
 class ObjectiveSchema(Schema):
-    name = fields.Str(required=True)
+    name = fields.Str(required=False, allow_none=True)
     coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
 
 
@@ -15,7 +15,7 @@ class ConstraintSchema(Schema):
     sense = fields.Int(required=True)
     pi = fields.Float(required=False, allow_none=True)
     constant = fields.Float(required=True)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False, allow_none=True)
     coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
 
 
