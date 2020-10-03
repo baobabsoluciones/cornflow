@@ -10,6 +10,8 @@ from ..shared.airflow_api import Airflow, AirflowApiError
 
 execution_schema = ExecutionSchema()
 
+# TODO: delete an execution
+
 class ExecutionEndpoint(Resource):
 
     @Auth.auth_required
