@@ -86,7 +86,7 @@ def run_solve(**kwargs):
     # solve model
     solution, log, log_dict = solve_model(execution_data["data"], execution_data["config"])
     # write solution
-    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=json.dumps(log_dict))
+    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
     if solution:
         return "Solution saved"
     else:
