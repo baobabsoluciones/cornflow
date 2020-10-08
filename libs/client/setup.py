@@ -3,9 +3,13 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+required = []
+with open("requirements.txt", "r") as fh:
+    required.append(fh.read().splitlines())
+
 setuptools.setup(
     name="cornflow-client",
-    version="0.0.5",
+    version="0.0.6",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="Client to connect to a cornflow server",
@@ -20,5 +24,5 @@ setuptools.setup(
         "Development Status :: 2 - Pre-Alpha"
     ],
     python_requires='>=3.6',
-    install_requires=['requests', 'urllib3']
+    install_requires=required
 )
