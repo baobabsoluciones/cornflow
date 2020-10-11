@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema
-from ..schemas.model_schema import DataSchema
+from ..schemas.model_schema_json import DataSchema
 
 options = dict(required=True, allow_none=True)
 
