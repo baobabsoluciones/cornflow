@@ -7,8 +7,6 @@ from sqlalchemy.sql import expression
 
 from . import db
 from ..models.instance import InstanceModel
-from ..schemas.execution_schema import *
-from ..schemas.model_schema import *
 
 
 class ExecutionModel(db.Model):
