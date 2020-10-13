@@ -1,4 +1,4 @@
-from ..schemas.meta_schema import gen_schema, ParameterSchema
+from ..schemas.meta_schema import gen_schema, ParameterSchema, sort_dict
 
 
 dict_params = \
@@ -47,8 +47,11 @@ dict_params = \
          )
 
 result_dict = {}
-for key, params in dict_params.items():
+ordered = sort_dict(dict_params)
+tuplist = sorted(dict_params.items(), key=lambda v: ordered[v[0]])
+for key, params in tuplist:
     schema = ParameterSchema()
+    # this line validates the list of parameters:
     params1 = schema.load(params, many=True)
     result_dict[key] = gen_schema(key, params1, result_dict)
 

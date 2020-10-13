@@ -1,5 +1,5 @@
 import unittest
-from ..flaskr.schemas.meta_schema import gen_schema, ParameterSchema
+from flaskr.schemas.meta_schema import gen_schema, ParameterSchema, sort_dict
 from marshmallow import ValidationError, Schema, fields
 
 class MyTestCase(unittest.TestCase):
@@ -55,13 +55,13 @@ class MyTestCase(unittest.TestCase):
         self.assertRaises(ValidationError, func_error2)
 
     def test_two_classes(self):
-        class CoefficientsSchema(Schema):
-            name = fields.Str(required=True)
-            value = fields.Float(required=True)
-
-        class ObjectiveSchema(Schema):
-            name = fields.Str(required=False, allow_none=True)
-            coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
+        # class CoefficientsSchema(Schema):
+        #     name = fields.Str(required=True)
+        #     value = fields.Float(required=True)
+        #
+        # class ObjectiveSchema(Schema):
+        #     name = fields.Str(required=False, allow_none=True)
+        #     coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
 
         dict_params = \
             dict(CoefficientsSchema=
@@ -87,8 +87,33 @@ class MyTestCase(unittest.TestCase):
         self.assertRaises(ValidationError, func_error1)
         self.assertRaises(ValidationError, func_error2)
 
+    def test_two_unordered_classes(self):
 
+        dict_params = \
+            dict(ObjectiveSchema=
+             [dict(name='name', type='String', required=False, allow_none=True),
+              dict(name='coefficients', type='CoefficientsSchema', many=True, required=True)],
+                CoefficientsSchema=
+             [dict(name='name', type='String', required=True),
+              dict(name='value', type='Float', required=True)]
+             )
+        result_dict = {}
+        ordered = sort_dict(dict_params)
+        tuplist = sorted(dict_params.items(), key=lambda v: ordered[v[0]])
+        for key, params in tuplist:
+            schema = ParameterSchema()
+            params1 = schema.load(params, many=True)
+            result_dict[key] = gen_schema(key, params1, result_dict)
 
+        good = dict(name='objective', coefficients=[dict(name='a', value=1), dict(name='b', value=5)])
+        bad = dict(name=1)
+        bad2 = dict(coefficients=[dict(name=1, value='')])
+        oschema = result_dict['ObjectiveSchema']()
+        oschema.load(good)
+        func_error1 = lambda: oschema.load(bad)
+        func_error2 = lambda: oschema.load(bad2)
+        self.assertRaises(ValidationError, func_error1)
+        self.assertRaises(ValidationError, func_error2)
 
 
 if __name__ == '__main__':
