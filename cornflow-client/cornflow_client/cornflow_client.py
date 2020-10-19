@@ -1,6 +1,8 @@
 import requests
 from urllib.parse import urljoin
 import re
+import logging as log
+
 
 class CornFlow(object):
 
@@ -8,9 +10,21 @@ class CornFlow(object):
         self.url = url
         self.token = token
 
-    def require_token(self):
-        if not self.token:
-            raise ValueError("Need to login first!")
+    def ask_token(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.token:
+                raise CornFlowApiError("Need to login first!")
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    def log_call(func):
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            log.debug(result)
+            return result
+
+        return wrapper
 
     def get_api_from_execution(self, api, execution_id):
         return requests.get(
@@ -18,6 +32,7 @@ class CornFlow(object):
             headers={'Authorization': 'access_token ' + self.token},
             json={})
 
+    @log_call
     def sign_up(self, email, pwd, name):
         return requests.post(
             urljoin(self.url, 'signup/'),
@@ -30,47 +45,54 @@ class CornFlow(object):
         self.token = response.json()["token"]
         return self.token
 
+    @ask_token
+    @log_call
     def create_instance(self, data):
-        self.require_token()
         response = requests.post(
             urljoin(self.url, 'instance/'),
             headers={'Authorization': 'access_token ' + self.token},
             json={"data": data})
+        # TODO: check response for status
         return response.json()["instance_id"]
 
+    @log_call
+    @ask_token
     def create_execution(self, instance_id, config):
-        self.require_token()
         response = requests.post(
             urljoin(self.url, 'execution/'),
             headers={'Authorization': 'access_token ' + self.token},
             json={"config": config, "instance": instance_id})
+        # TODO: check response for status
         return response.json()["execution_id"]
 
+    @ask_token
     def get_data(self, execution_id):
-        self.require_token()
         response = self.get_api_from_execution('dag/', execution_id)
         return response.json()
 
+    @ask_token
     def write_solution(self, execution_id, solution, log_text=None, log_json=None):
-        self.require_token()
         response = requests.post(
             urljoin(urljoin(self.url, 'dag/'), str(execution_id) + '/'),
             headers={'Authorization': 'access_token ' + self.token},
             json={"execution_results": solution, "log_text": log_text, "log_json": log_json})
         return response
 
+    @log_call
+    @ask_token
     def get_results(self, execution_id):
-        self.require_token()
         response = self.get_api_from_execution('execution/', execution_id)
         return response.json()
 
+    @log_call
+    @ask_token
     def get_status(self, execution_id):
-        self.require_token()
         response = self.get_api_from_execution('execution/status/', execution_id)
         return response.json()
 
+    @log_call
+    @ask_token
     def get_all_instances(self):
-        self.require_token()
         response = requests.get(urljoin(self.url, 'instance/'),
                                 headers={'Authorization': 'access_token ' + self.token},
                                 json={})
