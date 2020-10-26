@@ -1,0 +1,109 @@
+version: '3'
+
+services:
+  webserver:
+    image: puckel/docker-airflow
+    restart: always
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - AIRFLOW__CORE__LOAD_EXAMPLES=0
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - EXECUTOR=Celery
+    ports:
+      - 8080:8080
+    depends_on:
+      - airflow_db
+      - redis
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  scheduler:
+    image: puckel/docker-airflow
+    restart: always
+    depends_on:
+        - webserver
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - AIRFLOW__CORE__LOAD_EXAMPLES=0
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - EXECUTOR=Celery
+    command: scheduler
+
+  flower:
+    image: puckel/docker-airflow
+    restart: always
+    depends_on:
+        - redis
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - EXECUTOR=Celery
+    ports:
+        - "5555:5555"
+    command: flower
+
+  airflow_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres_af_data:/var/lib/postgresql/data/
+  
+  redis:
+    image: redis:5.0.5
+
+  worker1:
+    image: puckel/docker-airflow
+    restart: always
+    depends_on:
+      - scheduler
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - EXECUTOR=Celery
+    command: worker
+
+  worker2:
+    image: puckel/docker-airflow
+    restart: always
+    depends_on:
+      - scheduler
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - POSTGRES_HOST=airflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresadmin
+      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - EXECUTOR=Celery
+    command: worker
+
+volumes:
+  postgres_af_data:
