@@ -281,7 +281,7 @@ destroy all container and images (be carefull! this destroy all docker images of
 cornflow app  "http://localhost:5000"
 airflow GUI  "http://localhost:8080"
 
-Append in this repository are three more docker-compose files for different kind of deployment.
+Appended in this repository are three more docker-compose files for different kind of deployment::
 	
 	Use "docker-compose -f docker-compose-celery-2w.yml up -d" for deploy cornflow with airflow celery executor and two workers.
 
