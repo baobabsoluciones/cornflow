@@ -1,3 +1,7 @@
+"""
+File with the different defined commands
+"""
+
 from flask_script import Command
 from flaskr.models.user import UserModel
 
@@ -9,6 +13,6 @@ class CreateSuperAdmin(Command):
     def run(self):
         data = {'name': 'airflow', 'email': 'airflow@baobabsoluciones.es', 'password': 'THISNEEDSTOBECHANGED'}
         user = UserModel(data=data)
-        user.super_admin=True
+        user.super_admin = True
         user.save()
-        print('Airflow super user created succesfully')
+        print('Airflow super user created successfully')

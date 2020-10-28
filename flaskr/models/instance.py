@@ -2,10 +2,11 @@ import datetime
 import hashlib
 
 from sqlalchemy.dialects.postgresql import JSON
-from . import db
+from ..shared.utils import db
+from .base_attributes import BaseAttributes
 
 
-class InstanceModel(db.Model):
+class InstanceModel(BaseAttributes):
     """
 
     """
@@ -13,15 +14,13 @@ class InstanceModel(db.Model):
     __tablename__ = 'instances'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     data = db.Column(JSON, nullable=False)
     name = db.Column(db.String(256), nullable=False)
     reference_id = db.Column(db.String(256), nullable=False, unique=True)
-    created_at = db.Column(db.DateTime)
-    modified_at = db.Column(db.DateTime)
     executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
 
     def __init__(self, data):
+        super().__init__()
         self.user_id = data.get('user_id')
         self.data = data.get('data')
         self.created_at = datetime.datetime.utcnow()
@@ -36,7 +35,7 @@ class InstanceModel(db.Model):
     def update(self, data):
         for key, item in data.items():
             setattr(self, key, item)
-        self.modified_at = datetime.datetime.utcnow()
+        super().__init__()
 
     def delete(self):
         db.session.delete(self)

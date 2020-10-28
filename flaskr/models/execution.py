@@ -5,11 +5,12 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.sql import expression
 
-from . import db
+from ..shared.utils import db
 from ..models.instance import InstanceModel
+from .base_attributes import BaseAttributes
 
 
-class ExecutionModel(db.Model):
+class ExecutionModel(BaseAttributes):
     """
 
     """
@@ -17,7 +18,6 @@ class ExecutionModel(db.Model):
     __tablename__ = 'executions'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     instance_id = db.Column(db.Integer, db.ForeignKey('instances.id'), nullable=False)
     config = db.Column(JSON, nullable = False)
     reference_id = db.Column(db.String(256), nullable=False, unique=True)
@@ -25,10 +25,9 @@ class ExecutionModel(db.Model):
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
     finished = db.Column(db.Boolean, server_default=expression.false(), default=False, nullable=False)
-    created_at = db.Column(db.DateTime)
-    modified_at = db.Column(db.DateTime)
 
     def __init__(self, data):
+        super().__init__()
         self.user_id = data.get('user_id')
         self.instance_id = data.get('instance_id')
         self.finished = False
@@ -45,7 +44,7 @@ class ExecutionModel(db.Model):
     def update(self, data):
         for key, item in data.items():
             setattr(self, key, item)
-        self.modified_at = datetime.datetime.utcnow()
+        super().__init__()
 
     def delete(self):
         db.session.delete(self)

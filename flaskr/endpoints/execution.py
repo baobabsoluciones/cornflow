@@ -1,19 +1,22 @@
+"""
 
+"""
 from flask import request, current_app
 from flask_restful import Resource
 
-from ..models.execution import ExecutionModel
-from ..models.instance import InstanceModel
+from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution_schema import ExecutionSchema
-from ..shared.authentication import Auth
 from ..shared.airflow_api import Airflow, AirflowApiError
+from ..shared.authentication import Auth
 
 execution_schema = ExecutionSchema()
 
+
 # TODO: delete an execution
-
 class ExecutionEndpoint(Resource):
+    """
 
+    """
     @Auth.auth_required
     def post(self):
         req_data = request.get_json()
@@ -53,7 +56,9 @@ class ExecutionEndpoint(Resource):
 
 
 class ExecutionDetailsEndpoint(Resource):
+    """
 
+    """
     @Auth.auth_required
     def get(self, reference_id):
         execution = ExecutionModel.get_execution_with_reference(reference_id)
@@ -63,7 +68,9 @@ class ExecutionDetailsEndpoint(Resource):
 
 
 class ExecutionStatusEndpoint(Resource):
+    """
 
+    """
     # TODO: call airflow to check status
     @Auth.auth_required
     def get(self, reference_id):
@@ -74,4 +81,3 @@ class ExecutionStatusEndpoint(Resource):
             pass
 
         return {'finished': status}, 200
-

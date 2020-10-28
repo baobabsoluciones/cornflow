@@ -1,16 +1,21 @@
+"""
+
+"""
 from flask import request
 from flask_restful import Resource
 
-from ..models.instance import InstanceModel
+from ..models import InstanceModel
 from ..schemas.instance_schema import InstanceSchema
 from ..shared.authentication import Auth
 
 instance_schema = InstanceSchema()
 
+
 # TODO: delete an instance (with its executions)
-
 class InstanceEndpoint(Resource):
+    """
 
+    """
     @Auth.auth_required
     def get(self):
         user_id, admin, super_admin = Auth.return_user_info(request)

@@ -1,13 +1,10 @@
 from flask import Flask
 from flask_restful import Api
-from .endpoints.instance import InstanceEndpoint
-from .endpoints.user import UserEndpoint
-from .endpoints.login import LoginEndpoint
-from .endpoints.execution import ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint
-from .endpoints.dag import DAGEndpoint
-from .endpoints.signup import SingUpEndpoint
+
 from .config import app_config
-from .models import db, bcrypt
+from .endpoints import InstanceEndpoint, UserEndpoint, LoginEndpoint, ExecutionEndpoint, ExecutionDetailsEndpoint, \
+    ExecutionStatusEndpoint, DAGEndpoint, SingUpEndpoint
+from .shared.utils import db, bcrypt
 
 
 def create_app(env_name):

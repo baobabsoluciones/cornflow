@@ -1,14 +1,15 @@
 import datetime
 
 from marshmallow import fields, Schema
-
-from . import bcrypt
-from . import db
 from sqlalchemy.sql import expression
+
 from ..schemas.instance_schema import InstanceSchema
+from ..shared.utils import bcrypt, db
+
+from .base_attributes import TraceAttributes
 
 
-class UserModel(db.Model):
+class UserModel(TraceAttributes):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -17,8 +18,6 @@ class UserModel(db.Model):
     password = db.Column(db.String(128), nullable=True)
     admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
     super_admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
-    created_at = db.Column(db.DateTime)
-    modified_at = db.Column(db.DateTime)
     instances = db.relationship('InstanceModel', backref='users', lazy=True)
 
     def __init__(self, data):
@@ -26,14 +25,12 @@ class UserModel(db.Model):
 
         :param data:
         """
-
+        super().__init__()
         self.name = data.get('name')
         self.email = data.get('email')
         self.password = self.__generate_hash(data.get('password'))
         self.admin = False
         self.super_admin = False
-        self.created_at = datetime.datetime.utcnow()
-        self.modified_at = datetime.datetime.utcnow()
 
     def save(self):
         db.session.add(self)
@@ -47,7 +44,7 @@ class UserModel(db.Model):
                 continue
             setattr(self, key, item)
 
-        self.modified_at = datetime.datetime.utcnow()
+        super().__init__()
         db.session.commit()
 
     def delete(self):

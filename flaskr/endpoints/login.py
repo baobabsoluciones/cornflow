@@ -1,12 +1,20 @@
-from flask_restful import Resource
+"""
+
+"""
+
 from flask import request
-from ..models.user import UserSchema, UserModel
+from flask_restful import Resource
+
+from ..models import UserSchema, UserModel
 from ..shared.authentication import Auth
 
 user_schema = UserSchema()
 
-class LoginEndpoint(Resource):
 
+class LoginEndpoint(Resource):
+    """
+
+    """
     def post(self):
         req_data = request.get_json()
 
