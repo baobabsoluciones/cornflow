@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conrflow-deployment
+spec:
+  selector:
+    matchLabels:
+      name: cornflow
+  template:
+    metadata:
+      labels:
+        name: cornflow
+    spec:
+      containers:
+        - name: cornflow
+          image: cornflow:1.0
+          env:
+            - name: FLASK_APP
+              value: flaskr.app
+            - name: FLASK_ENV
+              value: development
+            - name: DATABASE_URL
+              value: postgres://postgres:postgresadmin@cornflowdb:5432/cornflow
+            - name: SECRET_KEY
+              value: THISNEEDSTOBECHANGED
+            - name: AIRFLOW_URL
+              value: http://airflow-webserver-svc:8080
+            - name: CORNFLOW_URL
+              value: http://cornflow-svc:5000
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
