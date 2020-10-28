@@ -6,7 +6,7 @@ from flask import request
 from flask_restful import Resource
 
 from ..models import UserSchema, UserModel
-from ..shared.authentication import Auth
+from ..shared import Auth
 
 user_schema = UserSchema()
 
@@ -16,6 +16,9 @@ class LoginEndpoint(Resource):
 
     """
     def post(self):
+        """
+
+        """
         req_data = request.get_json()
 
         data = user_schema.load(req_data, partial=True)

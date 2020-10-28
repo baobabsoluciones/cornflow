@@ -5,9 +5,8 @@ from flask import request, current_app
 from flask_restful import Resource
 
 from ..models import InstanceModel, ExecutionModel
-from ..schemas.execution_schema import ExecutionSchema
-from ..shared.airflow_api import Airflow, AirflowApiError
-from ..shared.authentication import Auth
+from ..schemas import ExecutionSchema
+from ..shared import Auth, Airflow, AirflowApiError
 
 execution_schema = ExecutionSchema()
 
@@ -19,6 +18,9 @@ class ExecutionEndpoint(Resource):
     """
     @Auth.auth_required
     def post(self):
+        """
+
+        """
         req_data = request.get_json()
         data = execution_schema.load(req_data, partial=True)
 
@@ -48,6 +50,9 @@ class ExecutionEndpoint(Resource):
 
     @Auth.auth_required
     def get(self):
+        """
+
+        """
         user_id, admin, super_admin = Auth.return_user_info(request)
         executions = ExecutionModel.get_all_executions_user(user_id)
         ser_executions = execution_schema.dump(executions, many=True)
@@ -61,6 +66,9 @@ class ExecutionDetailsEndpoint(Resource):
     """
     @Auth.auth_required
     def get(self, reference_id):
+        """
+
+        """
         execution = ExecutionModel.get_execution_with_reference(reference_id)
         ser_execution = execution_schema.dump(execution, many=False)
 
@@ -74,6 +82,9 @@ class ExecutionStatusEndpoint(Resource):
     # TODO: call airflow to check status
     @Auth.auth_required
     def get(self, reference_id):
+        """
+
+        """
         status = ExecutionModel.get_execution_with_reference(reference_id).finished
 
         if not status:

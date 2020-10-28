@@ -4,8 +4,7 @@
 from flask import request
 
 from ..models import UserModel, UserSchema
-from ..shared.authentication import Auth
-from ..shared.resource import BaseResource
+from ..shared import Auth, BaseResource
 
 user_schema = UserSchema()
 
@@ -15,6 +14,9 @@ class SingUpEndpoint(BaseResource):
 
     """
     def post(self):
+        """
+
+        """
         req_data = request.get_json()
         data = user_schema.load(req_data)
 

@@ -7,7 +7,10 @@ from flaskr.models.user import UserModel
 
 
 class CreateSuperAdmin(Command):
-    """Creates the initial super user"""
+    """
+    Creates the initial super user that is used by airflow to write the results of the execution back
+    This command should only be used on deployment
+    """
 
     # TODO: read email and password from environment variables
     def run(self):

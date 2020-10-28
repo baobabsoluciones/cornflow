@@ -1,5 +1,6 @@
 """
 Initialization file for the endpoints module
+All references to endpoints should be imported from here
 """
 
 from .dag import DAGEndpoint
