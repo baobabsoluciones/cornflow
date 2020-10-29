@@ -14,6 +14,10 @@ class CreateSuperAdmin(Command):
 
     # TODO: read email and password from environment variables
     def run(self):
+        """
+        Method to run the command and create the superuser
+        It does not return anything
+        """
         data = {'name': 'airflow', 'email': 'airflow@baobabsoluciones.es', 'password': 'THISNEEDSTOBECHANGED'}
         user = UserModel(data=data)
         user.super_admin = True

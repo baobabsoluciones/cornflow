@@ -26,6 +26,8 @@ class InstanceModel(BaseAttributes):
         self.created_at = datetime.datetime.utcnow()
         self.modified_at = datetime.datetime.utcnow()
         self.name = data.get('data')['parameters']['name']
+        # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
+        #  that identifies it as an instance
         self.reference_id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
 
     def save(self):

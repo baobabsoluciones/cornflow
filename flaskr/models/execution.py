@@ -34,6 +34,8 @@ class ExecutionModel(BaseAttributes):
         self.config = data.get('config')
         self.created_at = datetime.datetime.utcnow()
         self.modified_at = datetime.datetime.utcnow()
+        # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
+        #  that identifies it as an execution
         self.reference_id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
 

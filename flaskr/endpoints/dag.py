@@ -22,8 +22,13 @@ class DAGEndpoint(Resource):
     @Auth.super_admin_required
     def post(self, reference_id):
         """
-        API method to post the results of the execution
-        :param reference_id: ID of the execution
+        API method to write the results of the execution
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by the superuser created for the airflow webserver
+
+        :param str reference_id: ID of the execution
+        :return: A dictionary with a message (body) and a HTTP status code
+        :rtype: Tuple(dict, integer)
         """
         # TODO: control errors and give back error message and error status,
         #  for example if there is a problem with the data validation
@@ -32,13 +37,19 @@ class DAGEndpoint(Resource):
         execution.update(req_data)
         execution.finished = True
         execution.save()
-        return {}, 201
+        return {'message': 'saved results'}, 201
     
     @Auth.super_admin_required
     def get(self, reference_id):
         """
         API method to get the data of the instance that is going to be executed
-        :param reference_id: ID of the execution
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by the superuser created for the airflow webserver
+
+        :param str reference_id: ID of the execution
+        :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
+        and :class:`DataSchema` and an integer for HTTP status code
+        :rtype: Tuple(dict, integer)
         """
         # TODO: control errors and give back error message and error status,
         #  for example if there is no data.
