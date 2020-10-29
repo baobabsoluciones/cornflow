@@ -8,6 +8,7 @@ from flask import request
 from flask_restful import Resource
 
 # Import from internal modules
+from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas import InstanceSchema
 from ..shared import Auth
@@ -16,11 +17,16 @@ from ..shared import Auth
 instance_schema = InstanceSchema()
 
 
-class InstanceEndpoint(Resource):
+class InstanceEndpoint(MetaResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
     """
-    @Auth.auth_required
+    def __init__(self):
+        super().__init__()
+        self.model = InstanceModel
+        self.query = 'get_all_instances'
+        self.schema = InstanceSchema()
+
     def get(self):
         """
         API method to get all the instances created by the user and its related info
@@ -33,11 +39,7 @@ class InstanceEndpoint(Resource):
         """
         # TODO: if super_admin or admin should it be able to get any execution?
         # TODO: return 204 if no instances have been created by the user
-        user_id, admin, super_admin = Auth.return_user_info(request)
-        instances = InstanceModel.get_all_instances(user_id)
-        ser_instances = instance_schema.dump(instances, many=True)
-
-        return ser_instances, 200
+        return self.get_list(request)
 
     @Auth.auth_required
     def post(self):
