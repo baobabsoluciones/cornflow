@@ -1,13 +1,15 @@
 """
 Endpoints for the user profiles
 """
+from flask_restful import Resource
+
 from ..models import UserModel, UserSchema
-from ..shared import Auth, BaseResource
+from ..shared import Auth
 
 user_schema = UserSchema()
 
 
-class UserEndpoint(BaseResource):
+class UserEndpoint(Resource):
     """
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions

@@ -6,7 +6,7 @@ from sqlalchemy.sql import expression
 from ..schemas.instance_schema import InstanceSchema
 from ..shared.utils import bcrypt, db
 
-from .base_attributes import TraceAttributes
+from .meta_model import TraceAttributes
 
 
 class UserModel(TraceAttributes):

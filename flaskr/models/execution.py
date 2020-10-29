@@ -7,7 +7,7 @@ from sqlalchemy.sql import expression
 
 from ..shared.utils import db
 from ..models.instance import InstanceModel
-from .base_attributes import BaseAttributes
+from .meta_model import BaseAttributes
 
 
 class ExecutionModel(BaseAttributes):

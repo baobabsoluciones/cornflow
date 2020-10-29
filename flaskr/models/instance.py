@@ -3,7 +3,7 @@ import hashlib
 
 from sqlalchemy.dialects.postgresql import JSON
 from ..shared.utils import db
-from .base_attributes import BaseAttributes
+from .meta_model import BaseAttributes
 
 
 class InstanceModel(BaseAttributes):
@@ -20,7 +20,7 @@ class InstanceModel(BaseAttributes):
     executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
 
     def __init__(self, data):
-        super().__init__()
+        super().__init__(data)
         self.user_id = data.get('user_id')
         self.data = data.get('data')
         self.created_at = datetime.datetime.utcnow()
@@ -45,6 +45,7 @@ class InstanceModel(BaseAttributes):
 
     @staticmethod
     def get_all_instances(user):
+        print(user)
         return InstanceModel.query.filter_by(user_id=user)
 
     @staticmethod

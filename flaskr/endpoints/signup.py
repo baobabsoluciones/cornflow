@@ -2,14 +2,15 @@
 
 """
 from flask import request
+from flask_restful import Resource
 
 from ..models import UserModel, UserSchema
-from ..shared import Auth, BaseResource
+from ..shared import Auth
 
 user_schema = UserSchema()
 
 
-class SingUpEndpoint(BaseResource):
+class SingUpEndpoint(Resource):
     """
 
     """
