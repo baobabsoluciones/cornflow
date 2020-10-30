@@ -45,12 +45,15 @@ class InstanceModel(BaseAttributes):
 
     @staticmethod
     def get_all_instances(user):
-        print(user)
         return InstanceModel.query.filter_by(user_id=user)
 
     @staticmethod
     def get_one_instance(id):
         return InstanceModel.query.get(id)
+
+    @staticmethod
+    def get_one_instance_with_reference(reference_id):
+        return InstanceModel.query.filter_by(reference_id=reference_id).first()
 
     @staticmethod
     def get_instance_id(reference):

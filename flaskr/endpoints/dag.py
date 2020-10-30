@@ -27,7 +27,7 @@ class DAGEndpoint(Resource):
         an existing session (login) made by the superuser created for the airflow webserver
 
         :param str reference_id: ID of the execution
-        :return: A dictionary with a message (body) and a HTTP status code
+        :return: A dictionary with a message (body) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         # TODO: control errors and give back error message and error status,

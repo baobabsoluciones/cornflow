@@ -3,7 +3,7 @@ from flask_restful import Api
 
 from .config import app_config
 from .endpoints import InstanceEndpoint, InstanceDetailsEndpoint, UserEndpoint, LoginEndpoint, ExecutionEndpoint, ExecutionDetailsEndpoint, \
-    ExecutionStatusEndpoint, DAGEndpoint, SingUpEndpoint
+    ExecutionStatusEndpoint, DAGEndpoint, SignUpEndpoint
 from .shared.utils import db, bcrypt
 
 
@@ -29,7 +29,7 @@ def create_app(environment):
     api.add_resource(DAGEndpoint, '/dag/<string:reference_id>/', endpoint="dag")
     api.add_resource(UserEndpoint, '/user/', endpoint="user")
     api.add_resource(LoginEndpoint, '/login/', endpoint="login")
-    api.add_resource(SingUpEndpoint, '/signup/', endpoint="signup")
+    api.add_resource(SignUpEndpoint, '/signup/', endpoint="signup")
 
     return app
 

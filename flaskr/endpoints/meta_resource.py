@@ -1,4 +1,11 @@
+"""
+Meta resource used in the endpoints to generalize the methods and how they work in order to make all endpoints the same.
+It should allow all CRUD (create, read, update, delete) operations
+"""
+# Import from libraries
 from flask_restful import Resource
+
+# Import from internal modules
 from ..shared import Auth
 
 

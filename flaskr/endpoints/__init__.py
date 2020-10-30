@@ -7,5 +7,5 @@ from .dag import DAGEndpoint
 from .execution import ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint
 from .instance import InstanceEndpoint, InstanceDetailsEndpoint
 from .login import LoginEndpoint
-from .signup import SingUpEndpoint
+from .signup import SignUpEndpoint
 from .user import UserEndpoint
