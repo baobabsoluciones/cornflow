@@ -12,18 +12,18 @@ class TraceAttributes(db.Model):
     """
     __abstract__ = True
     created_at = db.Column(db.DateTime)
-    modified_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
     deleted_at = db.Column(db.DateTime)
 
-    def __init__(self):
+    def __init__(self, data):
         self.created_at = datetime.datetime.utcnow()
-        self.modified_at = datetime.datetime.utcnow()
+        self.updated_at = datetime.datetime.utcnow()
         self.deleted_at = None
 
-    def update(self):
-        self.modified_at = datetime.datetime.utcnow()
+    def update(self, data):
+        self.updated_at = datetime.datetime.utcnow()
 
-    def delete(self):
+    def disable(self):
         self.deleted_at = datetime.datetime.utcnow()
 
 

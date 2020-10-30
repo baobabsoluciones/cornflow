@@ -23,3 +23,17 @@ class CreateSuperAdmin(Command):
         user.super_admin = True
         user.save()
         print('Airflow super user created successfully')
+
+
+class CleanHistoricData(Command):
+    """
+
+    """
+    # TODO: implement command to delete data than is older than X years (this time could be read from a settings file)
+    def run(self):
+        """
+
+        :return:
+        :rtype:
+        """
+        pass

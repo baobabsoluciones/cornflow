@@ -23,8 +23,6 @@ class InstanceModel(BaseAttributes):
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.data = data.get('data')
-        self.created_at = datetime.datetime.utcnow()
-        self.modified_at = datetime.datetime.utcnow()
         self.name = data.get('data')['parameters']['name']
         # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
         #  that identifies it as an instance

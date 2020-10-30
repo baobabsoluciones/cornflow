@@ -40,7 +40,7 @@ def get_type(param_type, possible_dict=None):
 
 def gen_schema(cls_name, params, possible_dict=None):
     """
-    returns a marshmellow schema as if it were generates with a python object
+    returns a marshmallow schema as if it were generates with a python object
 
     :param cls_name: string with the class name
     :param params: list of dictionaries

@@ -3,8 +3,10 @@ from ..schemas.model_schema_json import DataSchema
 
 options = dict(required=True, allow_none=True)
 
+
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
+
 
 class ConfigSchema(Schema):
     solver = fields.Str(default="PULP_CBC_CMD")
@@ -21,15 +23,18 @@ class ConfigSchema(Schema):
     threads = fields.Integer(required=False)
     logPath = fields.Str(required=False)
 
+
 class MatrixSchema(Schema):
     constraints = fields.Int(required=False)
     variables = fields.Int(required=False)
     nonzeros = fields.Int(required=False)
 
+
 class PresolveSchema(Schema):
     cols = fields.Int(required=True)
     rows = fields.Int(required=True)
     time = fields.Float(required=True)
+
 
 class LogSchema(Schema):
     version = fields.Str(**options)
