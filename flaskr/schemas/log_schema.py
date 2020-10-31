@@ -15,13 +15,35 @@ class PresolveSchema(Schema):
     time = fields.Float(required=True)
 
 
-class ProgressDataSchema(Schema):
-    row = fields.Str(many=True, required=True)
-
-
 class ProgressSchema(Schema):
-    columns = fields.Str(many=True)
-    data = fields.Nested(ProgressDataSchema, many=True)
+    Node = fields.Str(many=True)
+    NodesLeft = fields.Str(many=True)
+    Objective = fields.Str(many=True)
+    IInf = fields.Str(many=True)
+    BestInteger = fields.Str(many=True)
+    CutsBestBound = fields.Str(many=True)
+    ItpNode = fields.Str(many=True)
+    Gap = fields.Str(many=True)
+    Time = fields.Str(many=True)
+
+
+class Cuts(Schema):
+    # TODO: this
+    pass
+
+
+class CutInfo(Schema):
+    time = fields.Float()
+    best_bound = fields.Float(**options)
+    best_solution = fields.Float(**options)
+    cuts = fields.Nested(Cuts, required=False)
+
+
+class FirstSolution(Schema):
+    Node = fields.Int(**options)
+    NodesLeft = fields.Int(**options)
+    BestInteger = fields.Float(**options)
+    CutsBestBound = fields.Float(**options)
 
 
 class LogSchema(Schema):
@@ -32,16 +54,14 @@ class LogSchema(Schema):
     best_solution = fields.Float(**options)
     gap = fields.Float(**options)
     time = fields.Float(**options)
-    matrix = fields.Nested(MatrixSchema, **options, many=False)
-    matrix_post = fields.Nested(MatrixSchema, **options, many=False)
+    matrix = fields.Nested(MatrixSchema, **options)
+    matrix_post = fields.Nested(MatrixSchema, **options)
     rootTime = fields.Float(**options)
-    presolve = fields.Nested(PresolveSchema, **options, many=False)
+    presolve = fields.Nested(PresolveSchema, **options)
     first_relaxed = fields.Float(**options)
-    first_solution = fields.Float(**options)
+    first_solution = fields.Nested(FirstSolution, **options)
     status_code = fields.Int(**options)
     sol_code = fields.Int(**options)
     nodes = fields.Int(**options)
     progress = fields.Nested(ProgressSchema, required=True)
-
-    # TODO: these two are incorrect:
-    cut_info = fields.Int(**options)
+    cut_info = fields.Nested(CutInfo, **options)
