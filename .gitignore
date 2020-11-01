@@ -151,3 +151,11 @@ migrations/*
 
 # vagrant machine folder
 .vagrant
+
+# terraform folder and files
+.terraform
+*.tf
+
+# ssh keys
+cornssh
+cornssh.pub
