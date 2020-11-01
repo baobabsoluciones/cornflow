@@ -1,11 +1,7 @@
 import datetime
-
-from marshmallow import fields, Schema
-
 from . import bcrypt
 from . import db
 from sqlalchemy.sql import expression
-from ..schemas.instance_schema import InstanceSchema
 
 
 class UserModel(db.Model):
@@ -79,18 +75,3 @@ class UserModel(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
-
-
-class UserSchema(Schema):
-    """
-
-    """
-    id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
-    admin = fields.Boolean(required=False, load_only=True)
-    super_admin = fields.Boolean(required=False, load_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
-    instances = fields.Nested(InstanceSchema, many=True)

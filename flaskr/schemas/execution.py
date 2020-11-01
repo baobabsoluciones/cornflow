@@ -1,6 +1,6 @@
 from marshmallow import fields, Schema
-from ..schemas.model_schema_json import DataSchema
-from ..schemas.log_schema import LogSchema
+from ..schemas.model_json import DataSchema
+from ..schemas.solution_log import LogSchema
 
 
 class OptionsSchema(Schema):

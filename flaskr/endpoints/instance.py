@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 
 from ..models.instance import InstanceModel
-from ..schemas.instance_schema import InstanceSchema
+from ..schemas.instance import InstanceSchema
 from ..shared.authentication import Auth
 
 instance_schema = InstanceSchema()
