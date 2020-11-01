@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from flask import request
-from ..models.user import UserSchema, UserModel
+from ..models.user import UserModel
+from ..schemas.user import UserSchema
 from ..shared.authentication import Auth
 
 user_schema = UserSchema()

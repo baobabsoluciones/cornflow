@@ -1,7 +1,7 @@
 Cornflow
 =========
 
-The aim of this repository is to create an open source optimization server.
+An open source multi-solver optimization server with a REST API.
 
 Requirements
 ~~~~~~~~~~~~~~~~~~
@@ -13,7 +13,7 @@ Requirements
 Install cornflow
 ~~~~~~~~~~~~~~~~~~
 
-cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in two python virtual environments in the same machine.
+Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in two python virtual environments in the same machine.
 
 do::
 
@@ -161,6 +161,8 @@ If you're filling lucky::
 Using cornflow
 ~~~~~~~~~~~~~~~~~~
 
+.. TODO: update this.
+
 Launch airflow and the flask server from two different terminals (using their respective virtual environments).
 
 In order to use cornflow api, import api functions::
@@ -235,59 +237,56 @@ or via the web by pasting this in the text box in DAGs/Trigger DAG::
     {"exec_id":"1b06da8e5c670ba715fbe7f04f8538a687b900bb", "cornflow_url": "http://localhost:5000"}
 
 
-Deploying to heroku
-~~~~~~~~~~~~~~~~~~~~~~~
-
-create app::
-    
-    heroku git:remote -a 'cornflow'
-    heroku buildpacks:add heroku/python --app 'cornflow'
-    heroku addons:create heroku-postgresql:hobby-dev --app 'cornflow'
-    heroku config:set SECRET_KEY='some-secret-string' --app 'cornflow'
-    git push heroku master
-    heroku run python manage.py migrate
-
-
 Deploying with docker-compose
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The docker-compose.yml file write in version '3' of the syntaxis describes the build of four docker containers::
+The docker-compose.yml file write in version '3' of the syntax describes the build of four docker containers::
 
 	app python3 cornflow service
 	airflow service based on puckel/docker-airflow image
 	cornflow postgres database service
 	airflow postgres database service
 
-create containers::
+Create containers::
 
 	docker-compose up --build -d
 	
-list containers::
+List containers::
 
 	docker-compose ps
 
-inspect container::
+Inspect container::
 
 	docker exec -it containerid bash
 
-stop containers::
+See the logs for a particular service (e.g., SERVICE=cornflow)::
 
-	docker-compose down
+    docker-compose logs SERVICE
+
+Stop the containers::
+    
+    docker-compose down
 	
-destroy all container and images (be carefull! this destroy all docker images of non running container)::
+destroy all container and images (be careful! this destroys all docker images of non running container)::
 
 	docker system prune -af
 
 cornflow app  "http://localhost:5000"
 airflow GUI  "http://localhost:8080"
 
-Appended in this repository are three more docker-compose files for different kind of deployment::
-	
-	Use "docker-compose -f docker-compose-celery-2w.yml up -d" for deploy cornflow with airflow celery executor and two workers.
+Appended in this repository are three more docker-compose files for different kind of deployment. An important note is that, when using these deployments, all previous functions need to be run with the `-f DOCKERFILENAME.yml` prefix.
 
-	Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
+To deploy cornflow with airflow celery executor and two workers::
 
-	Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
+    docker-compose -f docker-compose-celery-2w.yml up -d
+
+To deploy cornflow and postgres without the airflow platform. Replace "airflowurl" string inside with your airflow address::
+
+	docker-compose -f docker-compose-cornflow-separate.yml up -d
+
+To deploy just the airflow celery executor and two workers::
+
+    docker-compose -f docker-compose-airflow-celery-separate.yml up -d
 
 
 Deploying with Vagrantfile
@@ -317,12 +316,3 @@ destroy the machine with::
 
 cornflow app  "http://vagrantfileIP:5000"
 airflow GUI  "http://vagrantfileIP:8080"
-
-Deploying in Ubuntu
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Open the VagrantFile and copy the instructions at the beginning in the console. Except the last line "cd /vagrant" and instead do::
-
-    sudo docker-compose up -d --build
-
-Then follow the instructions in "Deploying with docker-compose".
