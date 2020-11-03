@@ -1,4 +1,5 @@
-from ..models.user import UserModel, UserSchema
+from ..models.user import UserModel
+from ..schemas.user import UserSchema
 from ..shared.authentication import Auth
 from ..shared.resource import BaseResource
 

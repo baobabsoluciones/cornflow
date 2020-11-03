@@ -24,6 +24,7 @@ def create_app(env_name):
     db.init_app(app)
     api = Api(app)
     api.add_resource(InstanceEndpoint, '/instance/', endpoint="instance")
+    api.add_resource(InstanceEndpoint, '/instance/<string:reference_id>/', endpoint="instances")
     api.add_resource(ExecutionEndpoint, '/execution/', endpoint="execution")
     api.add_resource(ExecutionDetailsEndpoint, '/execution/<string:reference_id>/', endpoint="execution-detail")
     api.add_resource(ExecutionStatusEndpoint, '/execution/status/<string:reference_id>/', endpoint="execution-status")
