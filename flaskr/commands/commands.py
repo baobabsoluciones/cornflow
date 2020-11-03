@@ -1,9 +1,11 @@
 """
 File with the different defined commands
 """
-
+# Import from libraries
 from flask_script import Command
-from flaskr.models.user import UserModel
+
+# Import from internal modules
+from flaskr.models import UserModel
 
 
 class CreateSuperAdmin(Command):

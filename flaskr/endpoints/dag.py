@@ -2,10 +2,11 @@
 Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
-
+# Import from libraries
 from flask import request
 from flask_restful import Resource
 
+# Import from internal modules
 from ..models import ExecutionModel
 from ..schemas import ExecutionSchema
 from ..shared import Auth
