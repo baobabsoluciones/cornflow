@@ -51,12 +51,20 @@ class InstanceModel(db.Model):
         return InstanceModel.query.get(id)
 
     @staticmethod
+    def get_instance(reference):
+        return InstanceModel.query.filter_by(reference_id=reference).first()
+
+    @staticmethod
+    def get_instance_from_user(user, reference):
+        return InstanceModel.get_all_instances(user=user).filter_by(reference_id=reference).first()
+
+    @staticmethod
     def get_instance_id(reference):
-        return InstanceModel.query.filter_by(reference_id=reference).first().id
+        return InstanceModel.get_instance(reference).id
 
     @staticmethod
     def get_instance_owner(reference):
-        return InstanceModel.query.filter_by(reference_id=reference).first().user_id
+        return InstanceModel.get_instance(reference).user_id
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
