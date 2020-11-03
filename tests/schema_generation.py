@@ -1,5 +1,5 @@
 import unittest
-from flaskr.schemas.meta_schema import gen_schema, ParameterSchema, sort_dict
+from flaskr.schemas.json_factory import gen_schema, ParameterSchema, sort_dict
 from marshmallow import ValidationError, Schema, fields
 
 class MyTestCase(unittest.TestCase):

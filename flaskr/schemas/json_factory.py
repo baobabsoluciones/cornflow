@@ -7,6 +7,7 @@ INTEGER_TYPE = 'Integer'
 FLOAT_TYPE = 'Float'
 BASIC_TYPES = [STRING_TYPE, BOOLEAN_TYPE, INTEGER_TYPE, FLOAT_TYPE]
 
+
 class ParameterSchema(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)

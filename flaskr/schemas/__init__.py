@@ -2,5 +2,6 @@
 Initialization file for the schemas module
 """
 
-from .execution_schema import ExecutionSchema
-from .instance_schema import InstanceSchema
+from .execution import ExecutionSchema
+from .instance import InstanceSchema
+from .user import UserSchema

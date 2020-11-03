@@ -130,7 +130,7 @@ class ExecutionModel(BaseAttributes):
         :return: the executions of the user.
         :rtype:
         """
-        return ExecutionModel.query.filter_by(user_id=user)
+        return ExecutionModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
     def get_execution_with_id(execution_id):
@@ -141,7 +141,7 @@ class ExecutionModel(BaseAttributes):
         :return: The execution
         :rtype:
         """
-        return ExecutionModel.query.get(execution_id)
+        return ExecutionModel.query.get(execution_id, deleted_at=None)
 
     @staticmethod
     def get_execution_with_reference(reference_id):
@@ -152,7 +152,7 @@ class ExecutionModel(BaseAttributes):
         :return: The execution
         :rtype:
         """
-        return ExecutionModel.query.filter_by(reference_id=reference_id).first()
+        return ExecutionModel.query.filter_by(reference_id=reference_id, deleted_at=None).first()
 
     @staticmethod
     def get_execution_id(reference_id):
@@ -163,7 +163,7 @@ class ExecutionModel(BaseAttributes):
         :return: the id of the execution
         :rtype: int
         """
-        return ExecutionModel.query.filter_by(reference_id=reference_id).first().id
+        return ExecutionModel.query.filter_by(reference_id=reference_id, deleted_at=None).first().id
     
     @staticmethod
     def get_execution_data(reference_id):
@@ -177,7 +177,7 @@ class ExecutionModel(BaseAttributes):
         :rtype: dict
         """
         execution = ExecutionModel.get_execution_with_reference(reference_id)
-        instance_data = InstanceModel.get_one_instance(execution.instance_id).data
+        instance_data = InstanceModel.get_one_instance_from_id(execution.instance_id).data
         config = execution.config
         return {"data": instance_data, "config": config}
         

@@ -21,7 +21,7 @@ class InstanceEndpoint(Resource):
     Endpoint used to create a new instance or get all the instances and their related information
     """
     @Auth.auth_required
-    def get(self):
+    def get(self, reference_id=None):
         """
         API (GET) method to get all the instances created by the user and its related info
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -34,8 +34,13 @@ class InstanceEndpoint(Resource):
         # TODO: if super_admin or admin should it be able to get any execution?
         # TODO: return 204 if no instances have been created by the user
         user_id, admin, super_admin = Auth.return_user_info(request)
-        instances = InstanceModel.get_all_instances(user_id)
-        ser_instances = instance_schema.dump(instances, many=True)
+        if reference_id is not None:
+            instance = InstanceModel.get_one_instance_from_user(user_id, reference_id)
+            many = False
+        else:
+            instance = InstanceModel.get_all_instances(user_id)
+            many = True
+        ser_instances = instance_schema.dump(instance, many=many)
 
         return ser_instances, 200
 
@@ -64,55 +69,14 @@ class InstanceEndpoint(Resource):
 
         return {'instance_id': ser_data.get('reference_id')}, 201
 
-
-# TODO: implement this new endpoint and its methods: get one instance and its related data,
-#  modify one instance (data or owner?), delete one instance and its related info
-class InstanceDetailsEndpoint(Resource):
-    """
-    Endpoint used to get the information of a certain instance
-    """
-    @Auth.auth_required
-    def get(self, reference_id):
-        """
-        API (GET) method to get an instance created by the user and its related info.
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user.
-
-
-        :param str reference_id: ID of the instance
-        :return: A dictionary with a message (error if authentication failed, or the instance does not exist or
-        the data of the instance) and an integer with the HTTP status code.
-        :rtype: Tuple(dict, integer)
-        """
-        instance = InstanceModel.get_one_instance_with_reference(reference_id)
-        ser_instance = instance_schema.dump(instance, many=False)
-
-        return ser_instance, 200
-
-    @Auth.auth_required
-    def put(self, reference_id):
-        """
-        NOT IMPLEMENTED
-        API (PUT) method to update an instance and its related info
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user.
-
-        :param str reference_id: ID of the instance
-        :return:
-        :rtype:
-        """
-        return {'error': 'Method not allowed'}, 403
-
     @Auth.auth_required
     def delete(self, reference_id):
-        """
-        NOT IMPLEMENTED
-        API (DELETE) method to delete an instance and its related info
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user.
+        user_id, admin, super_admin = Auth.return_user_info(request)
+        instance = InstanceModel.get_one_instance_from_user(user_id, reference_id)
 
-        :param str reference_id: ID of the instance
-        :return:
-        :rtype:
-        """
-        return {'error': 'Method not allowed'}, 403
+        # TODO: for now they get disable instead of getting permanently deleted
+        for execution in instance.executions:
+            execution.disable()
+        if instance:
+            instance.disable()
+        return {}, 204

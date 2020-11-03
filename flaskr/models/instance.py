@@ -10,7 +10,6 @@ class InstanceModel(BaseAttributes):
     """
 
     """
-
     __tablename__ = 'instances'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -20,6 +19,10 @@ class InstanceModel(BaseAttributes):
     executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
 
     def __init__(self, data):
+        """
+
+        :param dict data:
+        """
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.data = data.get('data')
@@ -29,39 +32,110 @@ class InstanceModel(BaseAttributes):
         self.reference_id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
 
     def save(self):
+        """
+
+        :return:
+        :rtype:
+        """
         db.session.add(self)
         db.session.commit()
 
     def update(self, data):
+        """
+
+        :param dict data:
+        :return:
+        :rtype:
+        """
         for key, item in data.items():
             setattr(self, key, item)
         super().__init__()
 
+    def disable(self):
+        """
+        Updates the deleted_at field of an execution to mark an execution as "deleted"
+
+        :return:
+        :rtype:
+        """
+        super().disable()
+
     def delete(self):
+        """
+
+        :return:
+        :rtype:
+        """
         db.session.delete(self)
         db.session.commit()
 
     @staticmethod
     def get_all_instances(user):
-        return InstanceModel.query.filter_by(user_id=user)
+        """
+
+        :param int user:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
-    def get_one_instance(id):
-        return InstanceModel.query.get(id)
+    def get_one_instance_from_id(internal_id):
+        """
+
+        :param int internal_id:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.query.get(internal_id, deleted_at=None)
 
     @staticmethod
-    def get_one_instance_with_reference(reference_id):
-        return InstanceModel.query.filter_by(reference_id=reference_id).first()
+    def get_one_instance_from_reference(reference):
+        """
+
+        :param str reference:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.query.filter_by(reference_id=reference, deleted_at=None).first()
+
+    @staticmethod
+    def get_one_instance_from_user(user, reference):
+        """
+
+        :param int user:
+        :param str reference:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.get_all_instances(user=user).filter_by(reference_id=reference).first()
 
     @staticmethod
     def get_instance_id(reference):
-        return InstanceModel.query.filter_by(reference_id=reference).first().id
+        """
+
+        :param str reference:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.get_one_instance_from_reference(reference).id
 
     @staticmethod
     def get_instance_owner(reference):
-        return InstanceModel.query.filter_by(reference_id=reference).first().user_id
+        """
+
+        :param str reference:
+        :return:
+        :rtype:
+        """
+        return InstanceModel.get_one_instance_from_reference(reference).user_id
 
     def __repr__(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return '<id {}>'.format(self.id)
 
 

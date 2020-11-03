@@ -5,7 +5,8 @@ Endpoints for the user profiles
 from flask_restful import Resource
 
 # Import from internal modules
-from ..models import UserModel, UserSchema
+from ..models import UserModel
+from ..schemas import UserSchema
 from ..shared import Auth
 
 # Initialize the schema that the endpoint uses

@@ -1,4 +1,4 @@
-from ..schemas.meta_schema import gen_schema, ParameterSchema, sort_dict
+from ..schemas.json_factory import gen_schema, ParameterSchema, sort_dict
 
 
 dict_params = \

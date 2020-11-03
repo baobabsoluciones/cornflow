@@ -1,5 +1,5 @@
-from ..schemas.execution_schema import *
-from ..schemas.model_schema_json import DataSchema
+from ..schemas.execution import *
+from ..schemas.model_json import DataSchema
 
 
 class InstanceSchema(Schema):
