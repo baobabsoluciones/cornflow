@@ -1,17 +1,49 @@
-import datetime
+"""Model for the instances"""
+
+# Import from libraries
 import hashlib
 
+# Import from sqlalchemy
 from sqlalchemy.dialects.postgresql import JSON
-from ..shared.utils import db
+
+# Imported from internal models
 from .meta_model import BaseAttributes
+from ..shared.utils import db
 
 
 class InstanceModel(BaseAttributes):
     """
+    Model class for the Instances
+    It inherits from :class:`BaseAttributes` to have the trace fields and user field
 
+    The :class:`InstanceModel` has the following fields:
+
+    - **id**: int, the primary key for the executions, it is also referred as the internal ID.
+    - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
+    - **name**: str, the name given to the instance by the user.
+    - **reference_id**: str, a hash generated upon creation of the instance and the id given back to the user.
+      The hash is generated from the creation time and the user id.
+      This field is unique for each instance.
+    - **executions**: relationship, not a field in the model but the relationship between the _class:`InstanceModel`
+      and its dependent :class:`ExecutionModel`.
+    - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the execution to its owner.
+    - **created_at**: datetime, the datetime when the execution was created (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **updated_at**: datetime, the datetime when the execution was last updated (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **deleted_at**: datetime, the datetime when the execution was deleted (in UTC). Even though it is deleted,
+      actually, it is not deleted from the database, in order to have a command that cleans up deleted data
+      after a certain time of its deletion.
+      This datetime is generated automatically, the user does not need to provide it.
+
+    :param dict data: the aprsed json got from an endpoint that contains all the required information to create
+      a new instance
     """
+
+    # Table name in the database
     __tablename__ = 'instances'
 
+    # Model fields
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(JSON, nullable=False)
     name = db.Column(db.String(256), nullable=False)
@@ -19,10 +51,6 @@ class InstanceModel(BaseAttributes):
     executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
 
     def __init__(self, data):
-        """
-
-        :param dict data:
-        """
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.data = data.get('data')
@@ -33,6 +61,7 @@ class InstanceModel(BaseAttributes):
 
     def save(self):
         """
+        Saves the instance to the data base
 
         :return:
         :rtype:
@@ -42,8 +71,9 @@ class InstanceModel(BaseAttributes):
 
     def update(self, data):
         """
+        Updates the execution in the data base and automatically updates the updated_at field
 
-        :param dict data:
+        :param dict data: A dictionary containing the updated data for the instance
         :return:
         :rtype:
         """
@@ -62,6 +92,7 @@ class InstanceModel(BaseAttributes):
 
     def delete(self):
         """
+        Deletes an instance permanently from the data base
 
         :return:
         :rtype:

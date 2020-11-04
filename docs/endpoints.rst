@@ -8,6 +8,7 @@ DAG endpoint
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 Execution endpoints
 '''''''''''''''''''
@@ -16,6 +17,7 @@ Execution endpoints
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 Instance endpoints
 ''''''''''''''''''''
@@ -24,6 +26,7 @@ Instance endpoints
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 Login endpoint
 ''''''''''''''''''''
@@ -32,6 +35,7 @@ Login endpoint
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 Signup endpoint
 ''''''''''''''''''''
@@ -40,6 +44,7 @@ Signup endpoint
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 User endpoint
 ''''''''''''''''''''
@@ -48,3 +53,4 @@ User endpoint
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource

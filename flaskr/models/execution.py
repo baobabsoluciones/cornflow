@@ -47,7 +47,7 @@ class ExecutionModel(BaseAttributes):
       This datetime is generated automatically, the user does not need to provide it.
 
     :param dict data: the parsed json got from an endpoint that contains all the required information to
-    create a new execution
+      create a new execution
     """
 
     # Table name in the database
@@ -64,11 +64,6 @@ class ExecutionModel(BaseAttributes):
     finished = db.Column(db.Boolean, server_default=expression.false(), default=False, nullable=False)
 
     def __init__(self, data):
-        """
-        Constructor method
-
-        :param dict data: A dictionary containing the data for the execution
-        """
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.instance_id = data.get('instance_id')
@@ -92,9 +87,9 @@ class ExecutionModel(BaseAttributes):
 
     def update(self, data):
         """
-        Updates the execution in the data base and automatically updates the modified_at field
+        Updates the execution in the data base and automatically updates the updated_at field
 
-        :param dict data:  A dictionary containing the data for the execution
+        :param dict data:  A dictionary containing the updated data for the execution
         :return:
         :rtype:
         """
@@ -113,7 +108,7 @@ class ExecutionModel(BaseAttributes):
 
     def delete(self):
         """
-        Deletes an execution permanently from the database
+        Deletes an execution permanently from the data base
 
         :return:
         :rtype:
@@ -173,7 +168,7 @@ class ExecutionModel(BaseAttributes):
 
         :param str reference_id: The reference ID of the execution.
         :return: a dict with the data from the parent instance (:class:`InstanceModel`)
-        and the configuration from the execution
+          and the configuration from the execution
         :rtype: dict
         """
         execution = ExecutionModel.get_execution_with_reference(reference_id)
