@@ -12,7 +12,7 @@ from flask_restful import Resource
 
 from ..models.execution import ExecutionModel
 from ..models.instance import InstanceModel
-from ..schemas.execution_schema import ExecutionSchema
+from ..schemas.execution import ExecutionSchema
 from ..shared.authentication import Auth
 
 execution_schema = ExecutionSchema()

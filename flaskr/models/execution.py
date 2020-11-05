@@ -74,11 +74,8 @@ class ExecutionModel(db.Model):
     @staticmethod
     def get_execution_data(reference_id):
         id = ExecutionModel.get_execution_id(reference_id)
-        print("id", id)
         execution = ExecutionModel.get_one_execution(id)
-        print("execution", execution)
         instance_data = InstanceModel.get_one_instance(execution.instance_id).data
-        print(instance_data)
         config = execution.config
         return {"data":instance_data, "config":config}
         

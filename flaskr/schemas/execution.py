@@ -1,10 +1,11 @@
 from marshmallow import fields, Schema
-from ..schemas.model_schema_json import DataSchema
+from ..schemas.model_json import DataSchema
+from ..schemas.solution_log import LogSchema
 
-options = dict(required=True, allow_none=True)
 
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
+
 
 class ConfigSchema(Schema):
     solver = fields.Str(default="PULP_CBC_CMD")
@@ -21,43 +22,8 @@ class ConfigSchema(Schema):
     threads = fields.Integer(required=False)
     logPath = fields.Str(required=False)
 
-class MatrixSchema(Schema):
-    constraints = fields.Int(required=False)
-    variables = fields.Int(required=False)
-    nonzeros = fields.Int(required=False)
-
-class PresolveSchema(Schema):
-    cols = fields.Int(required=True)
-    rows = fields.Int(required=True)
-    time = fields.Float(required=True)
-
-class LogSchema(Schema):
-    version = fields.Str(**options)
-    solver = fields.Str(**options)
-    status = fields.Str(**options)
-    best_bound = fields.Float(**options)
-    best_solution = fields.Float(**options)
-    gap = fields.Float(**options)
-    time = fields.Float(**options)
-    matrix = fields.Nested(MatrixSchema, **options, many=False)
-    matrix_post = fields.Nested(MatrixSchema, **options, many=False)
-    rootTime = fields.Float(**options)
-    presolve = fields.Nested(PresolveSchema, **options, many=False)
-    first_relaxed = fields.Float(**options)
-    first_solution = fields.Float(**options)
-    status_code = fields.Int(**options)
-    sol_code = fields.Int(**options)
-    nodes = fields.Int(**options)
-
-    # TODO: these two are incorrect:
-    cut_info = fields.Int(**options)
-    progress = fields.Int(**options)
-
 
 class ExecutionSchema(Schema):
-    """
-
-    """
     id = fields.Int(dump_only=True, load_only=True)
     user_id = fields.Int(required=False, load_only=True)
     instance_id = fields.Int(required=False, dump_only=True, load_only=True)

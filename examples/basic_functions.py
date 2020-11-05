@@ -23,6 +23,8 @@ def run_example():
     data = prob.to_dict()
 
     instance_id = client.create_instance(data)
+    info = client.get_one_instance(instance_id)
+    # info = client.get_all_instances()
 
     config = dict(
         solver="PULP_CBC_CMD",
