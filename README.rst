@@ -277,7 +277,7 @@ airflow GUI  "http://localhost:8080"
 <<<<<<< HEAD
 Appended in this repository are three more docker-compose files for different kind of deployment::
 	
-	Use "docker-compose -f docker-compose-celery-2w.yml up -d" for deploy cornflow with airflow celery executor and two workers.
+	Use "docker-compose -f docker-compose-cornflow-celery.yml up -d" for deploy cornflow with airflow celery executor and one worker. If a larger number of workers are required, use --scale parameter of docker-compose.
 
 	Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
 
