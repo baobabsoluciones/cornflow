@@ -34,7 +34,7 @@ sleep 1
 # expose to all created services
 #kubectl port-forward podid --address 0.0.0.0 5000:5000 &
 
-# destroy all resources and stop minikube cluster
+# for destroying all resources and stop minikube cluster paste uncommented next lines
 #kubectl delete -f cornflowdb-configmap.yaml
 #kubectl delete -f cornflowdb-service.yaml
 #kubectl delete -f cornflowdb-deployment.yaml
