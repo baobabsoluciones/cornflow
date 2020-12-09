@@ -316,3 +316,18 @@ destroy the machine with::
 
 cornflow app  "http://vagrantfileIP:5000"
 airflow GUI  "http://vagrantfileIP:8080"
+
+Test conrflow
+~~~~~~~~~~~~~~~~~~
+
+To test conrflow you have to run the following command from the main directory::
+
+    coverage run  --source=./flaskr/ -m unittest discover -s=./flaskr/tests/
+
+After if you want to check the coverage report you need to run::
+
+    coverage report -m
+
+or to get the html reports::
+
+    coverage html

@@ -1,4 +1,5 @@
 from flask import request
+from marshmallow.exceptions import ValidationError
 
 from ..models.user import UserModel
 from ..schemas.user import UserSchema
@@ -12,7 +13,11 @@ class SingUpEndpoint(BaseResource):
 
     def post(self):
         req_data = request.get_json()
-        data = user_schema.load(req_data)
+
+        try:
+            data = user_schema.load(req_data)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
 
         user_in_db = UserModel.get_one_user_by_email(data.get('email'))
         if user_in_db:
