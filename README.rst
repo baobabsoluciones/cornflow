@@ -320,7 +320,13 @@ airflow GUI  "http://vagrantfileIP:8080"
 Test conrflow
 ~~~~~~~~~~~~~~~~~~
 
-To test conrflow you have to run the following command from the main directory::
+To test conrflow first you will have to create a new database::
+
+    sudo su - postgres
+    psql -c "create database cornflow_test"
+    exit
+
+Then you have to run the following command from the main directory::
 
     coverage run  --source=./flaskr/ -m unittest discover -s=./flaskr/tests/
 
