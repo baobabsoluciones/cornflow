@@ -6,7 +6,7 @@ services:
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=flaskr.app
+      - FLASK_APP=conrflow.app
       - FLASK_ENV=development
       - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
       - SECRET_KEY=THISNEEDSTOBECHANGED

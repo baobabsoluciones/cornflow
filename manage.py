@@ -1,8 +1,8 @@
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from flaskr.commands import CreateSuperAdmin, CleanHistoricData
+from conrflow.commands import CreateSuperAdmin, CleanHistoricData
 
-from flaskr.app import create_app, db
+from conrflow.app import create_app, db
 
 env_name = 'development'
 app = create_app(env_name)

@@ -5,7 +5,7 @@ File with the different defined commands
 from flask_script import Command
 
 # Import from internal modules
-from flaskr.models import UserModel
+from conrflow.models import UserModel
 
 
 class CreateSuperAdmin(Command):

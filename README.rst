@@ -45,7 +45,7 @@ Create a new database::
 
 Every time cornflow is used, PostgreSQL and airflow needs to be configured::
 
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
@@ -68,7 +68,7 @@ Starting flask server
 Each time you run the flask server, execute the following::
 
     source cfvenv/bin/activate
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
