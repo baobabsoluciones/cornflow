@@ -4,7 +4,7 @@ Models
 Execution model
 ''''''''''''''''''''''''''''
 
-.. automodule:: flaskr.models.execution
+.. automodule:: cornflow.models.execution
    :members:
    :show-inheritance:
    :member-order: bysource
@@ -12,7 +12,7 @@ Execution model
 Instance model
 ''''''''''''''''''''''''''''
 
-.. automodule:: flaskr.models.instance
+.. automodule:: cornflow.models.instance
    :members:
    :show-inheritance:
    :member-order: bysource

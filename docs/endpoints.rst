@@ -4,7 +4,7 @@ Endpoints
 DAG endpoint
 ''''''''''''''
 
-.. automodule:: flaskr.endpoints.dag
+.. automodule:: cornflow.endpoints.dag
    :members:
    :undoc-members:
    :show-inheritance:
@@ -13,7 +13,7 @@ DAG endpoint
 Execution endpoints
 '''''''''''''''''''
 
-.. automodule:: flaskr.endpoints.execution
+.. automodule:: cornflow.endpoints.execution
    :members:
    :undoc-members:
    :show-inheritance:
@@ -22,7 +22,7 @@ Execution endpoints
 Instance endpoints
 ''''''''''''''''''''
 
-.. automodule:: flaskr.endpoints.instance
+.. automodule:: cornflow.endpoints.instance
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ Instance endpoints
 Login endpoint
 ''''''''''''''''''''
 
-.. automodule:: flaskr.endpoints.login
+.. automodule:: cornflow.endpoints.login
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,7 +40,7 @@ Login endpoint
 Signup endpoint
 ''''''''''''''''''''
 
-.. automodule:: flaskr.endpoints.signup
+.. automodule:: cornflow.endpoints.signup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -49,7 +49,7 @@ Signup endpoint
 User endpoint
 ''''''''''''''''''''
 
-.. automodule:: flaskr.endpoints.user
+.. automodule:: cornflow.endpoints.user
    :members:
    :undoc-members:
    :show-inheritance:
