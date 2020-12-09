@@ -32,3 +32,23 @@ class MetaResource(Resource):
         self.serialized_data = self.schema.dump(self.data, many=True)
 
         return self.serialized_data, 200
+
+    @Auth.auth_required
+    def get_detail(self, request, id):
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        self.data = getattr(self.model, self.query)(id)
+        self.serialized_data = self.schema.dump(self.data, many=False)
+
+        return self.serialized_data, 200
+
+    @Auth.auth_required
+    def post_list(self):
+        return {}, 501
+
+    @Auth.auth_required
+    def put_detail(self):
+        return {}, 501
+
+    @Auth.auth_required
+    def delete_detail(self):
+        return {}, 501

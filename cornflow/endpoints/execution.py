@@ -115,7 +115,7 @@ class ExecutionDetailsEndpoint(Resource):
         :return:
         :rtype:
         """
-        pass
+        return {}, 501
 
 
 class ExecutionStatusEndpoint(Resource):

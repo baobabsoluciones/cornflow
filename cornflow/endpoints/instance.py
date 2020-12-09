@@ -6,6 +6,8 @@ These endpoints have different access url, but manage the smae data entities
 # Import from libraries
 from flask import request
 from flask_restful import Resource
+from marshmallow.exceptions import ValidationError
+
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -54,7 +56,10 @@ class InstanceEndpoint(MetaResource):
         """
         req_data = request.get_json()
         # TODO: catch possible validation error and process it to give back a more meaningful error message
-        data = instance_schema.load(req_data, partial=True)
+        try:
+            data = instance_schema.load(req_data, partial=True)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
 
         data['user_id'], admin, super_admin = Auth.return_user_info(request)
         print(data)
@@ -66,12 +71,27 @@ class InstanceEndpoint(MetaResource):
 
         return {'instance_id': ser_data.get('reference_id')}, 201
 
+
+class InstanceDetailsEndpoint(MetaResource):
+    def __init__(self):
+        super().__init__()
+        self.model = InstanceModel
+        # TODO: should this query use user as well?
+        self.query = 'get_one_instance_from_reference'
+        self.schema = InstanceSchema()
+
+    def get(self, reference_id):
+        return self.get_detail(request, reference_id)
+
+    def put(self, reference_id):
+        return self.put_detail()
+
     @Auth.auth_required
     def delete(self, reference_id):
         user_id, admin, super_admin = Auth.return_user_info(request)
         instance = InstanceModel.get_one_instance_from_user(user_id, reference_id)
 
-        # TODO: for now they get disable instead of getting permanently deleted
+        # TODO: for now they get disabled instead of getting permanently deleted
         for execution in instance.executions:
             execution.disable()
         if instance:
