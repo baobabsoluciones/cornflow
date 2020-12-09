@@ -1,6 +1,6 @@
 import unittest
 from airflow_config.dags.model_functions import solve_model
-from conrflow.schemas.solution_log import LogSchema
+from cornflow.schemas.solution_log import LogSchema
 import json
 
 class MyTestCase(unittest.TestCase):

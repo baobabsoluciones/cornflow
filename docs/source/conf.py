@@ -50,7 +50,7 @@ copyright = '2020-, cornflow documentation team.'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-import conrflow
+import cornflow
 
 # release = pulp.VERSION
 release = '0.4'
