@@ -5,9 +5,6 @@ These endpoints have different access url, but manage the smae data entities
 """
 # Import from libraries
 from flask import request
-from flask_restful import Resource
-from marshmallow.exceptions import ValidationError
-
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -28,8 +25,10 @@ class InstanceEndpoint(MetaResource):
         self.model = InstanceModel
         self.query = 'get_all_instances'
         self.schema = InstanceSchema()
+        self.external_primary_key = 'reference_id'
+        self.output_name = 'instance_id'
 
-    def get(self, reference_id=None):
+    def get(self):
         """
         API (GET) method to get all the instances created by the user and its related info
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -39,7 +38,7 @@ class InstanceEndpoint(MetaResource):
         object with the data from the instances otherwise) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: if super_admin or admin should it be able to get any execution?
+        # TODO: if super_admin or admin should it be able to get any instance?
         # TODO: return 204 if no instances have been created by the user
         return self.get_list(request)
 
@@ -54,22 +53,7 @@ class InstanceEndpoint(MetaResource):
         or the reference_id of the instance created if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        req_data = request.get_json()
-        # TODO: catch possible validation error and process it to give back a more meaningful error message
-        try:
-            data = instance_schema.load(req_data, partial=True)
-        except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
-
-        data['user_id'], admin, super_admin = Auth.return_user_info(request)
-        print(data)
-
-        instance = InstanceModel(data)
-        instance.save()
-
-        ser_data = instance_schema.dump(instance)
-
-        return {'instance_id': ser_data.get('reference_id')}, 201
+        return self.post_list(request)
 
 
 class InstanceDetailsEndpoint(MetaResource):
@@ -84,7 +68,7 @@ class InstanceDetailsEndpoint(MetaResource):
         return self.get_detail(request, reference_id)
 
     def put(self, reference_id):
-        return self.put_detail()
+        return self.put_detail(request, reference_id)
 
     @Auth.auth_required
     def delete(self, reference_id):

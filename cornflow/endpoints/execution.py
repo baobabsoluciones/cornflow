@@ -10,6 +10,7 @@ These endpoints hve different access url, but manage the same data entities
 # Import from libraries
 from flask import request, current_app
 from flask_restful import Resource
+from marshmallow.exceptions import ValidationError
 
 # Import from internal modules
 from ..models import InstanceModel, ExecutionModel
@@ -55,7 +56,10 @@ class ExecutionEndpoint(Resource):
         :rtype: Tuple(dict, integer)
         """
         req_data = request.get_json()
-        data = execution_schema.load(req_data, partial=True)
+        try:
+            data = execution_schema.load(req_data, partial=True)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
 
         data['user_id'], admin, super_admin = Auth.return_user_info(request)
         # TODO: what happens if the instance_id given is not right?
