@@ -39,7 +39,7 @@ def create_app(env_name='development'):
     return app
 
 if __name__ == '__main__':
-    environment_name = os.getenv('FLASK_ENV')
+    environment_name = os.getenv('FLASK_ENV', 'development')
     # env_name = 'development'
     app = create_app(environment_name)
     app.run()
