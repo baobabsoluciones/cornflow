@@ -326,7 +326,12 @@ To test conrflow first you will have to create a new database::
     psql -c "create database cornflow_test"
     exit
 
-Then you have to run the following command from the main directory::
+Then you have to run the following commands::
+
+    export FLASK_APP=flaskr.app
+    export FLASK_ENV=testing
+
+Finally you can run the tests with the following command::
 
     coverage run  --source=./flaskr/ -m unittest discover -s=./flaskr/tests/
 
