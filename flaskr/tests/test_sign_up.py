@@ -5,7 +5,7 @@ from flask_testing import TestCase
 import json
 
 
-class TestSingUp(TestCase):
+class TestSignUp(TestCase):
 
     def create_app(self):
         app = create_app('testing')
@@ -24,7 +24,7 @@ class TestSingUp(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_successful_login(self):
+    def test_successful_signup(self):
         payload = self.data
 
         response = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
@@ -32,6 +32,18 @@ class TestSingUp(TestCase):
 
         self.assertEqual(201, response.status_code)
         self.assertEqual(str, type(response.json['token']))
+
+    # Test that registering again with the same name give an error
+    def test_existing_name_signup(self):
+        payload = self.data
+        
+        response = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+                                    headers={"Content-Type": "application/json"})
+        
+        response2 = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+                                    headers={"Content-Type": "application/json"})
+        
+        self.assertEqual(400, response2.status_code)
 
     def test_validation_error(self):
         payload = self.data
