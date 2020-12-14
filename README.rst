@@ -22,6 +22,25 @@ do::
     python3 -m venv cfvenv
     cfvenv/bin/pip3 install -r requirements.txt
 
+activate the virtual environment::
+
+    cd cfvenv/bin
+    . activate
+    cd ../..
+
+**Possible error with psycopg2:**
+
+The installation of the psycopg2 may generate an error because it does not find the pg_config file.
+
+One way to solve this problem is to previously install libpq-dev which install pg_config::
+
+    sudo apt install libpq-dev
+
+Install dev requirements
+------------------------
+Install the dev libraries with::
+
+    cfvenv/bin/pip3 install -r requirements-dev.txt
 
 Setup cornflow database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -317,7 +336,7 @@ destroy the machine with::
 cornflow app  "http://vagrantfileIP:5000"
 airflow GUI  "http://vagrantfileIP:8080"
 
-Test conrflow
+Test cornflow
 ~~~~~~~~~~~~~~~~~~
 
 To test conrflow first you will have to create a new database::
@@ -342,3 +361,4 @@ After if you want to check the coverage report you need to run::
 or to get the html reports::
 
     coverage html
+
