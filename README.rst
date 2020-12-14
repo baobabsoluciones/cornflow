@@ -17,7 +17,7 @@ Cornflow consists of two projects: cornflow (itself) and airflow (from apache). 
 
 do::
 
-    git clone git@github.com:ggsdc/corn.git
+    git clone git@github.com:baobabsoluciones/corn.git
     cd corn
     python3 -m venv cfvenv
     cfvenv/bin/pip3 install -r requirements.txt
