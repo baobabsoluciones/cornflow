@@ -10,7 +10,7 @@ from flask import request
 from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas import InstanceSchema
-from ..shared import Auth
+from ..shared.authentication import Auth
 
 # Initialize the schema that all endpoints are going to use
 instance_schema = InstanceSchema()
@@ -25,9 +25,9 @@ class InstanceEndpoint(MetaResource):
         self.model = InstanceModel
         self.query = 'get_all_instances'
         self.schema = InstanceSchema()
-        self.external_primary_key = 'reference_id'
-        self.output_name = 'instance_id'
+        self.primary_key = 'id'
 
+    @Auth.auth_required
     def get(self):
         """
         API (GET) method to get all the instances created by the user and its related info
@@ -40,7 +40,8 @@ class InstanceEndpoint(MetaResource):
         """
         # TODO: if super_admin or admin should it be able to get any instance?
         # TODO: return 204 if no instances have been created by the user
-        return self.get_list(request)
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.get_list(self.user_id)
 
     @Auth.auth_required
     def post(self):
@@ -53,6 +54,7 @@ class InstanceEndpoint(MetaResource):
         or the reference_id of the instance created if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.post_list(request)
 
 
@@ -61,23 +63,21 @@ class InstanceDetailsEndpoint(MetaResource):
         super().__init__()
         self.model = InstanceModel
         # TODO: should this query use user as well?
-        self.query = 'get_one_instance_from_reference'
+        self.query = 'get_one_instance_from_user'
         self.schema = InstanceSchema()
-
-    def get(self, reference_id):
-        return self.get_detail(request, reference_id)
-
-    def put(self, reference_id):
-        return self.put_detail(request, reference_id)
+        self.dependents = 'executions'
 
     @Auth.auth_required
-    def delete(self, reference_id):
-        user_id, admin, super_admin = Auth.return_user_info(request)
-        instance = InstanceModel.get_one_instance_from_user(user_id, reference_id)
+    def get(self, idx):
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.get_detail(self.user_id, idx)
 
-        # TODO: for now they get disabled instead of getting permanently deleted
-        for execution in instance.executions:
-            execution.disable()
-        if instance:
-            instance.disable()
-        return {}, 204
+    @Auth.auth_required
+    def put(self, idx):
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.put_detail(request, self.user_id, idx)
+
+    @Auth.auth_required
+    def delete(self, idx):
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.delete_detail(self.user_id, idx)

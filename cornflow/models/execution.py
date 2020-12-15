@@ -54,10 +54,11 @@ class ExecutionModel(BaseAttributes):
     __tablename__ = 'executions'
 
     # Model fields
-    id = db.Column(db.Integer, primary_key=True)
-    instance_id = db.Column(db.Integer, db.ForeignKey('instances.id'), nullable=False)
+    id = db.Column(db.String(256), nullable=False, primary_key=True)
+    instance_id = db.Column(db.String(256), db.ForeignKey('instances.id'), nullable=False)
+    name = db.Column(db.String(256), nullable=False)
+    description = db.Column(TEXT, nullable=True)
     config = db.Column(JSON, nullable=False)
-    reference_id = db.Column(db.String(256), nullable=False, unique=True)
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
@@ -67,12 +68,14 @@ class ExecutionModel(BaseAttributes):
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.instance_id = data.get('instance_id')
-        self.finished = False
-        self.config = data.get('config')
         # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
         #  that identifies it as an execution
-        self.reference_id = hashlib.sha1(
+        self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
+        self.name = data.get('name')
+        self.description = data.get('description')
+        self.finished = False
+        self.config = data.get('config')
 
     def save(self):
         """

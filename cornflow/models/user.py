@@ -1,8 +1,8 @@
-import datetime
+
 from sqlalchemy.sql import expression
-from ..shared.utils import bcrypt, db
 
 from .meta_model import TraceAttributes
+from ..shared.utils import bcrypt, db
 
 
 class UserModel(TraceAttributes):

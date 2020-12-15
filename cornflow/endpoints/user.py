@@ -7,7 +7,7 @@ from flask_restful import Resource
 # Import from internal modules
 from ..models import UserModel
 from ..schemas import UserSchema
-from ..shared import Auth
+from ..shared.authentication import Auth
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()

@@ -9,7 +9,7 @@ from flask_restful import Resource
 # Import from internal modules
 from ..models import ExecutionModel
 from ..schemas import ExecutionSchema
-from ..shared import Auth
+from ..shared.authentication import Auth
 
 execution_schema = ExecutionSchema()
 

@@ -1,6 +1,6 @@
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from cornflow.commands import CreateSuperAdmin, CleanHistoricData
+from cornflow.commands import *
 
 from cornflow.app import create_app, db
 
