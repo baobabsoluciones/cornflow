@@ -41,7 +41,7 @@ class DAGEndpoint(Resource):
         return {'message': 'saved results'}, 201
     
     @Auth.super_admin_required
-    def get(self, reference_id):
+    def get(self, idx):
         """
         API method to get the data of the instance that is going to be executed
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -54,5 +54,5 @@ class DAGEndpoint(Resource):
         """
         # TODO: control errors and give back error message and error status,
         #  for example if there is no data.
-        execution_data = ExecutionModel.get_execution_data(reference_id)
+        execution_data = ExecutionModel.get_execution_data(idx)
         return execution_data, 200

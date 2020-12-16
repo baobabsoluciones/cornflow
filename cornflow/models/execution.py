@@ -154,7 +154,7 @@ class ExecutionModel(BaseAttributes):
         return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
     
     @staticmethod
-    def get_execution_data(reference_id):
+    def get_execution_data(idx):
         """
         Gets the configuration of the execution and the data for the execution from its parent instance
         from a given reference_id
@@ -164,7 +164,7 @@ class ExecutionModel(BaseAttributes):
           and the configuration from the execution
         :rtype: dict
         """
-        execution = ExecutionModel.get_execution_with_reference(reference_id)
+        execution = ExecutionModel.get_execution_with_reference(idx)
         instance_data = InstanceModel.get_one_instance_from_id(execution.instance_id).data
         config = execution.config
         return {"data": instance_data, "config": config}
