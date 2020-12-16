@@ -1,9 +1,10 @@
-from flaskr.app import create_app
-from flaskr.models import db
-from flask_testing import TestCase
-from flaskr.models.user import UserModel
-
 import json
+
+from flask_testing import TestCase
+
+from cornflow.app import create_app
+from cornflow.models import UserModel
+from cornflow.shared.utils import db
 
 
 class TestLogIn(TestCase):
@@ -14,15 +15,14 @@ class TestLogIn(TestCase):
 
     def setUp(self):
         db.create_all()
-        data = {'name': 'testname', 'email': 'test@test.com', 'password': 'testpassword'}
-        user = UserModel(data=data)
-        user.save()
-        db.session.commit()
         self.data = {
             'name': 'testname',
             'email': 'test@test.com',
             'password': 'testpassword'
         }
+        user = UserModel(data=self.data)
+        user.save()
+        db.session.commit()
 
     def tearDown(self):
         db.session.remove()

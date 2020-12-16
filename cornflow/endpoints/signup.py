@@ -4,6 +4,7 @@ External endpoint for the user to signup
 # Import from libraries
 from flask import request
 from flask_restful import Resource
+from marshmallow.exceptions import ValidationError
 
 # Import from internal modules
 from ..models import UserModel
@@ -27,7 +28,10 @@ class SignUpEndpoint(Resource):
         :rtype: Tuple(dict, integer)
         """
         req_data = request.get_json()
-        data = user_schema.load(req_data)
+        try:
+            data = user_schema.load(req_data)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
 
         user_in_db = UserModel.get_one_user_by_email(data.get('email'))
         if user_in_db:

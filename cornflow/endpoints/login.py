@@ -4,6 +4,7 @@ External endpoint for the user to login to the cornflow webserver
 # Import from libraries
 from flask import request
 from flask_restful import Resource
+from marshmallow.exceptions import ValidationError
 
 # Import from internal modules
 from ..models import UserModel
@@ -27,22 +28,26 @@ class LoginEndpoint(Resource):
         :rtype: Tuple(dict, integer)
         """
         req_data = request.get_json()
-
-        data = user_schema.load(req_data, partial=True)
+        try:
+            data = user_schema.load(req_data, partial=True)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
 
         if not data.get('email') or not data.get('password'):
-            return {'error': 'you need email and password to sign in'}, 400
+            return {'error': 'You need email and password to sign in.'}, 400
 
         user = UserModel.get_one_user_by_email(data.get('email'))
 
         if not user:
-            return {'error': 'email not recognized, please check'}, 400
+            return {'error': 'Invalid credentials.'}, 400
 
         if not user.check_hash(data.get('password')):
-            return {'error': 'password invalid'}, 400
+            return {'error': 'Invalid credentials.'}, 400
 
         ser_data = user_schema.dump(user)
 
         token, error = Auth.generate_token(ser_data.get('id'))
+        if error:
+            return error, 400
 
         return {'token': token}, 200
