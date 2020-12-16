@@ -9,7 +9,6 @@ These endpoints hve different access url, but manage the same data entities
 
 # Import from libraries
 from flask import request, current_app
-from flask_restful import Resource
 
 from .meta_resource import MetaResource
 # Import from internal modules
@@ -29,7 +28,7 @@ class ExecutionEndpoint(MetaResource):
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
-        self.query = 'get_all_executions_user'
+        self.query = 'get_all_executions'
         self.schema = ExecutionSchema()
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
@@ -72,14 +71,22 @@ class ExecutionEndpoint(MetaResource):
             raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
                                   format(response.status_code, response.text))
 
-        return response
+        return result
 
 
 # TODO: delete an execution and its related data
-class ExecutionDetailsEndpoint(Resource):
+class ExecutionDetailsEndpoint(MetaResource):
     """
     Endpoint used to get the information of a certain execution
     """
+    def __init__(self):
+        super().__init__()
+        self.model = ExecutionModel
+        self.query = 'get_one_execution_from_user'
+        self.schema = ExecutionSchema()
+        self.primary_key = 'id'
+        self.foreign_data = {'instance_id': InstanceModel}
+
     @Auth.auth_required
     def get(self, idx):
         """
@@ -87,24 +94,22 @@ class ExecutionDetailsEndpoint(Resource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
-        :param str reference_id: ID of the execution.
+        :param str idx: ID of the execution.
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
         the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         # TODO: what if the reference id is wrong and it does not exist
         # TODO: if super_admin or admin should it be able to get any execution?
-        execution = ExecutionModel.get_execution_with_reference(idx)
-        ser_execution = execution_schema.dump(execution, many=False)
-
-        return ser_execution, 200
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
     def put(self, idx):
         """
+        Not implemented
 
-        :param idx:
-        :type idx:
+        :param string idx:
         :return:
         :rtype:
         """
@@ -118,10 +123,11 @@ class ExecutionDetailsEndpoint(Resource):
         :return:
         :rtype:
         """
-        return {}, 501
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.delete_detail(self.user_id, idx)
 
 
-class ExecutionStatusEndpoint(Resource):
+class ExecutionStatusEndpoint(MetaResource):
     """
     Endpoint used to get the status of a certain execution that is running in the airflow webserver
     """
@@ -132,12 +138,13 @@ class ExecutionStatusEndpoint(Resource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
-        :param str reference_id:  ID of the execution
+        :param str idx:  ID of the execution
         :return: A dictionary with a message (error if the execution does not exist or status of the execution)
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        status = ExecutionModel.get_execution_with_reference(idx).finished
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        status = ExecutionModel.get_one_execution_from_user(self.user_id, idx).finished
         # TODO: call airflow to check status
         if not status:
             # Here we should call airflow to check solving status

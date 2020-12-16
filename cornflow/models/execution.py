@@ -120,7 +120,7 @@ class ExecutionModel(BaseAttributes):
         db.session.commit()
 
     @staticmethod
-    def get_all_executions_user(user):
+    def get_all_executions(user):
         """
         Gets all executions from one user
 
@@ -131,37 +131,27 @@ class ExecutionModel(BaseAttributes):
         return ExecutionModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
-    def get_execution_with_id(execution_id):
+    def get_one_execution_from_id(idx):
         """
-        Gets one execution with the given id (internal ID)
+        Gets one execution with the given id
 
-        :param int execution_id: Execution internal ID
+        :param str idx: Execution internal ID
         :return: The execution
         :rtype:
         """
-        return ExecutionModel.query.get(execution_id, deleted_at=None)
+        return ExecutionModel.query.get(id=idx, deleted_at=None).first()
 
     @staticmethod
-    def get_execution_with_reference(reference_id):
+    def get_one_execution_from_user(user, idx):
         """
-        Gets one execution with the given reference_id (external ID)
+        Gets one execution with the given id
 
-        :param str reference_id: Execution reference id.
+        :param int user: User performing the query
+        :param str idx: Execution ID
         :return: The execution
         :rtype:
         """
-        return ExecutionModel.query.filter_by(reference_id=reference_id, deleted_at=None).first()
-
-    @staticmethod
-    def get_execution_id(reference_id):
-        """
-        Gets the id (internal) of the execution from its reference_id (external)
-
-        :param str reference_id:
-        :return: the id of the execution
-        :rtype: int
-        """
-        return ExecutionModel.query.filter_by(reference_id=reference_id, deleted_at=None).first().id
+        return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
     
     @staticmethod
     def get_execution_data(reference_id):

@@ -44,9 +44,9 @@ class BaseAttributes(TraceAttributes):
         return db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __init__(self, data):
-        self.user_id = data.get('user_id')
+        self.user_id = data.get
         super().__init__()
 
     def update(self, data):
-        self.user_id = data.get('user_id')
+        self.user_id = data.get
         super().update(data)
