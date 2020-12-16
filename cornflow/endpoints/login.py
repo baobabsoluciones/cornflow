@@ -23,7 +23,7 @@ class LoginEndpoint(Resource):
         API (POST) method to log in in to the web server.
 
         :return: A dictionary with a message (either an error during login or the generated token for the user session)
-        and an integer with the HTTP status code
+          and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         req_data = request.get_json()

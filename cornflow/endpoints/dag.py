@@ -49,7 +49,7 @@ class DAGEndpoint(Resource):
 
         :param str reference_id: ID of the execution
         :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
-        and :class:`DataSchema` and an integer for HTTP status code
+          and :class:`DataSchema` and an integer for HTTP status code
         :rtype: Tuple(dict, integer)
         """
         # TODO: control errors and give back error message and error status,

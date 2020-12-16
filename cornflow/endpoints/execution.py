@@ -41,7 +41,7 @@ class ExecutionEndpoint(MetaResource):
         an existing session (login) made by a user
 
         :return: A dictionary with a message (error if authentication failed or a list with all the executions
-        created by the authenticated user) and a integer with the HTTP status code
+          created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         # TODO: if super_admin or admin should it be able to get any execution?
@@ -57,7 +57,7 @@ class ExecutionEndpoint(MetaResource):
         an existing session (login) made by a user
 
         :return: A dictionary with a message (error if authentication failed, error if data is not validated or
-        the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
+          the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
@@ -96,7 +96,7 @@ class ExecutionDetailsEndpoint(MetaResource):
 
         :param str idx: ID of the execution.
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
-        the data of the execution) and an integer with the HTTP status code.
+          the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         # TODO: what if the reference id is wrong and it does not exist
@@ -107,21 +107,26 @@ class ExecutionDetailsEndpoint(MetaResource):
     @Auth.auth_required
     def put(self, idx):
         """
-        Not implemented
+        Not implemented yet
 
-        :param string idx:
-        :return:
-        :rtype:
+        :param string idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
         """
         return {}, 501
 
     @Auth.auth_required
     def delete(self, idx):
         """
+        API method to delete an execution created by the user and its related info.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
 
-        :param string idx:
-        :return:
-        :rtype:
+        :param string idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)

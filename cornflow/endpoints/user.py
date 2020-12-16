@@ -18,14 +18,14 @@ class UserEndpoint(Resource):
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions
     """
-    @Auth.auth_required
+    @Auth.super_admin_required
     def get(self):
         """
         API (GET) method to get all the info from all the users
-
         It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user
-        :return:
+        an existing session (login) made by the superuser
+
+        :return: A dictionary with the user data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         # TODO: maybe this method should be change in two ways:
@@ -40,7 +40,7 @@ class UserEndpoint(Resource):
 # TODO: implement new endpoint to give back a user all its related info? Maybe this does not have sense as
 #  for now the only info they have is the instances and executions that they can get from the instances endpoint
 # TODO: the PUT method here could be used to change the password of the user.
-# These endpoints could be used mainly by the cornflow webserver UI.
+#   These endpoints could be used mainly by the cornflow webserver UI.
 class UserDetailEndpoint(Resource):
     """
     Endpoint use to get the information of one single user
@@ -48,9 +48,10 @@ class UserDetailEndpoint(Resource):
     @Auth.auth_required
     def get(self, user_id):
         """
+        Not implemented
 
         :param str user_id: User ID.
         :return:
         :rtype:
         """
-        pass
+        return {}, 501

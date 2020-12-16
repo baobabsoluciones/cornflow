@@ -19,12 +19,11 @@ class InstanceModel(BaseAttributes):
 
     The :class:`InstanceModel` has the following fields:
 
-    - **id**: int, the primary key for the executions, it is also referred as the internal ID.
+    - **id**: int, the primary key for the executions, a hash generated upon creation of the instance 
+      and the id given back to the user.The hash is generated from the creation time and the user id.
     - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
     - **name**: str, the name given to the instance by the user.
-    - **reference_id**: str, a hash generated upon creation of the instance and the id given back to the user.
-      The hash is generated from the creation time and the user id.
-      This field is unique for each instance.
+    - **description**: str, the description given to the instance by the user. It is optional.
     - **executions**: relationship, not a field in the model but the relationship between the _class:`InstanceModel`
       and its dependent :class:`ExecutionModel`.
     - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the execution to its owner.
@@ -37,7 +36,7 @@ class InstanceModel(BaseAttributes):
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.
 
-    :param dict data: the aprsed json got from an endpoint that contains all the required information to create
+    :param dict data: the parsed json got from an endpoint that contains all the required information to create
       a new instance
     """
 
@@ -63,9 +62,6 @@ class InstanceModel(BaseAttributes):
     def save(self):
         """
         Saves the instance to the data base
-
-        :return:
-        :rtype:
         """
         db.session.add(self)
         db.session.commit()
@@ -75,8 +71,6 @@ class InstanceModel(BaseAttributes):
         Updates the execution in the data base and automatically updates the updated_at field
 
         :param dict data: A dictionary containing the updated data for the instance
-        :return:
-        :rtype:
         """
         for key, item in data.items():
             setattr(self, key, item)
@@ -85,18 +79,12 @@ class InstanceModel(BaseAttributes):
     def disable(self):
         """
         Updates the deleted_at field of an execution to mark an execution as "deleted"
-
-        :return:
-        :rtype:
         """
         super().disable()
 
     def delete(self):
         """
         Deletes an instance permanently from the data base
-
-        :return:
-        :rtype:
         """
         db.session.delete(self)
         db.session.commit()
@@ -104,49 +92,54 @@ class InstanceModel(BaseAttributes):
     @staticmethod
     def get_all_instances(user):
         """
+        Query to get all instances from a user
 
-        :param int user:
-        :return:
-        :rtype:
+        :param int user: ID from the user performing the query
+        :return: The instances
+        :rtype: list(:class:`InstanceModel`)
         """
         return InstanceModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
     def get_one_instance_from_id(idx):
         """
+        Query to get one instance from its ID
 
-        :param str idx:
-        :return:
-        :rtype:
+        :param str idx: ID from the instance
+        :return: The instance
+        :rtype: :class:`InstanceModel`
         """
         return InstanceModel.query.get(idx, deleted_at=None)
 
     @staticmethod
     def get_one_instance_from_user(user, idx):
         """
+        Query to get one instance from the user and the id.
 
-        :param int user:
-        :param str idx:
-        :return:
-        :rtype:
+        :param int user: ID from the user performing the query
+        :param str idx: ID from the instance
+        :return: The instance
+        :rtype: :class:`InstanceModel`
         """
         return InstanceModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_instance_owner(idx):
         """
+        Query to get the owner of an instance
 
-        :param str idx:
-        :return:
-        :rtype:
+        :param str idx: ID from the instance
+        :return: The user code from the owner
+        :rtype: int
         """
         return InstanceModel.query.get(idx).user_id
 
     def __repr__(self):
         """
+        Method to represent the class :class:`InstanceModel`
 
-        :return:
-        :rtype:
+        :return: The representation of the :class:`InstanceModel`
+        :rtype: str
         """
         return '<id {}>'.format(self.id)
 

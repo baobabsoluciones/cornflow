@@ -23,7 +23,7 @@ class SignUpEndpoint(Resource):
         API (POST) method tyo sign up to the cornflow webserver
 
         :return: A dictionary with a message (either an error during signup or the generated token for the user session)
-        and an integer with the HTTP status code
+          and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         req_data = request.get_json()

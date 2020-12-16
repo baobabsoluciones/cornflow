@@ -35,7 +35,7 @@ class InstanceEndpoint(MetaResource):
         an existing session (login) made by a user
 
         :return: a dictionary with a message or an object (message if it an error is encountered,
-        object with the data from the instances otherwise) and an integer with the HTTP status code
+          object with the data from the instances otherwise) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         # TODO: if super_admin or admin should it be able to get any instance?
@@ -51,7 +51,7 @@ class InstanceEndpoint(MetaResource):
         an existing session (login) made by a user
 
         :return: a dictionary with a message(either an error encountered during creation
-        or the reference_id of the instance created if successful) and an integer with the HTTP status code
+          or the reference_id of the instance created if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
@@ -59,6 +59,9 @@ class InstanceEndpoint(MetaResource):
 
 
 class InstanceDetailsEndpoint(MetaResource):
+    """
+    Endpoint used to get the information ofa single instance, edit it or delete it
+    """
     def __init__(self):
         super().__init__()
         self.model = InstanceModel
@@ -69,15 +72,45 @@ class InstanceDetailsEndpoint(MetaResource):
 
     @Auth.auth_required
     def get(self, idx):
+        """
+        API method to get an instance created by the user and its related info.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param str idx: ID of the instance
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          the data of the instance) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
     def put(self, idx):
+        """
+        API method to edit an existing instance.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param str idx: ID of the instance
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.put_detail(request, self.user_id, idx)
 
     @Auth.auth_required
     def delete(self, idx):
+        """
+        API method to delete an existing instance.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param str idx: ID of the instance
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)

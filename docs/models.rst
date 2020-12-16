@@ -16,3 +16,11 @@ Instance model
    :members:
    :show-inheritance:
    :member-order: bysource
+
+User model
+''''''''''''''''''''''''''''
+
+.. automodule:: cornflow.models.user
+   :members:
+   :show-inheritance:
+   :member-order: bysource
