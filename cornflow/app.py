@@ -1,13 +1,15 @@
+import os
+
 from flask import Flask
 from flask_restful import Api
 
-from .config import app_config
+from .endpoints.user import UserEndpoint
 from .endpoints import InstanceEndpoint, InstanceDetailsEndpoint, UserEndpoint, UserDetailEndpoint, LoginEndpoint, \
     ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint, DAGEndpoint, SignUpEndpoint
 from .shared.utils import db, bcrypt
 
 
-def create_app(environment):
+def create_app(env_name='development'):
     """
 
     :param str environment:
@@ -16,7 +18,7 @@ def create_app(environment):
     """
 
     app = Flask(__name__)
-    app.config.from_object(app_config['development'])
+    app.config.from_object(app_config[env_name])
 
     bcrypt.init_app(app)
     db.init_app(app)
@@ -36,7 +38,7 @@ def create_app(environment):
 
 
 if __name__ == '__main__':
-    # env_name = os.getenv('FLASK_ENV')
-    env_name = 'development'
-    app = create_app(env_name)
+    environment_name = os.getenv('FLASK_ENV', 'development')
+    # env_name = 'development'
+    app = create_app(environment_name)
     app.run()
