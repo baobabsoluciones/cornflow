@@ -4,6 +4,8 @@ from functools import wraps
 import jwt
 from flask import Response, request, json, g, current_app
 
+import os
+
 from ..models.user import UserModel
 
 
@@ -36,8 +38,9 @@ class Auth:
         :return:
         """
         re = {'data': {}, 'error': {}}
+        secret_key = os.getenv('SECRET_KEY')
         try:
-            payload = jwt.decode(token, 'THISNEEDSTOBECHANGED', 'HS256')
+            payload = jwt.decode(token, secret_key, 'HS256')
             re['data'] = {'user_id': payload['sub']}
             return re
         except jwt.ExpiredSignatureError:
