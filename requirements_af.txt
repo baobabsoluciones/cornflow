@@ -1,6 +1,6 @@
 alembic==1.4.2
 amply==0.1.2
-apache-airflow==1.10.11
+apache-airflow==1.10.14
 apispec==1.3.3
 argcomplete==1.12.0
 attrs==19.3.0
