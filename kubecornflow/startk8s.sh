@@ -8,9 +8,6 @@ sleep 1
 eval $(minikube docker-env)
 # take short time
 sleep 1
-# build cornflow image
-docker build -t cornflow:1.0 ../.
-# build airflow custom image
 # create all configmap
 kubectl apply -f cornflowdb-configmap.yaml
 # create all services

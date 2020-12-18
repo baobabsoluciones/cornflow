@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: cornflow
-          image: cornflow:1.0
+          image: baobabsoluciones/cornflow:latest
           env:
             - name: FLASK_APP
               value: flaskr.app
