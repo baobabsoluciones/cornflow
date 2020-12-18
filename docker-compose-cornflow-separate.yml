@@ -2,7 +2,7 @@ version: '3'
 
 services:
   cornflow:
-    build: .
+    image: baobabsoluciones/cornflow:latest
     restart: always
     ports:
       - 5000:5000
@@ -11,7 +11,7 @@ services:
       - FLASK_ENV=development
       - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
       - SECRET_KEY=THISNEEDSTOBECHANGED
-      - AIRFLOW_URL=http://airflowurl:8080
+      - AIRFLOW_URL=http://changethistoairflowurl:8080
       - CORNFLOW_URL=http://cornflow:5000
     depends_on:
       - cornflow_db
