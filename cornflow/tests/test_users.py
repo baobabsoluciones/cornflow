@@ -10,6 +10,7 @@ class TestUserEndpoint(TestCase):
 
     def create_app(self):
         app = create_app('testing')
+        return app
 
     def setUp(self):
         db.create_all()

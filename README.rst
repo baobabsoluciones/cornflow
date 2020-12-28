@@ -347,12 +347,12 @@ To test conrflow first you will have to create a new database::
 
 Then you have to run the following commands::
 
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=testing
 
 Finally you can run the tests with the following command::
 
-    coverage run  --source=./flaskr/ -m unittest discover -s=./flaskr/tests/
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
 
 After if you want to check the coverage report you need to run::
 
