@@ -1,5 +1,3 @@
-import json
-
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -10,8 +8,13 @@ class TestInstances(CustomTestCase):
         super().setUp()
         self.url = '/instance/'
         self.model = InstanceModel
-        with open('./cornflow/tests/data/new_instance.json') as f:
-            self.payload = json.load(f)
 
     def test_new_instance(self):
-        self.create_new_row()
+        self.create_new_row('./cornflow/tests/data/new_instance.json')
+
+    def test_get_instances(self):
+        files = ['./cornflow/tests/data/new_instance.json', './cornflow/tests/data/new_instance_2.json']
+        self.get_rows(files)
+
+    def test_get_no_instances(self):
+        self.get_no_rows()

@@ -30,19 +30,17 @@ class MetaResource(Resource):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=True)
         if len(self.serialized_data) == 0:
-            status_code = 204
+            return {}, 204
         else:
-            status_code = 200
-
-        return self.serialized_data, status_code
+            return self.serialized_data, 200
 
     def get_detail(self, *args):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=False)
-        if len(self.serialized_data) > 0:
-            return self.serialized_data, 200
-        else:
+        if len(self.serialized_data) == 0:
             return {}, 204
+        else:
+            return self.serialized_data, 200
 
     def post_list(self, request):
         request_data = request.get_json()

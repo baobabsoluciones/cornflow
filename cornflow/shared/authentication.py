@@ -127,3 +127,8 @@ class Auth:
         user_id = Auth.decode_token(token)['data']['user_id']
         admin, super_admin = UserModel.get_user_info(user_id)
         return user_id, admin, super_admin
+
+    @staticmethod
+    def return_user_from_token(token):
+        user_id = Auth.decode_token(token)['data']['user_id']
+        return user_id
