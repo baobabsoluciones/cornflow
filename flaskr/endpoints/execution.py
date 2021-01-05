@@ -1,6 +1,7 @@
 
 from flask import request, current_app
 from flask_restful import Resource
+from marshmallow import ValidationError
 
 from ..models.execution import ExecutionModel
 from ..models.instance import InstanceModel
@@ -10,23 +11,28 @@ from ..shared.airflow_api import Airflow, AirflowApiError
 
 execution_schema = ExecutionSchema()
 
-# TODO: delete an execution
 
 class ExecutionEndpoint(Resource):
 
     @Auth.auth_required
     def post(self):
         req_data = request.get_json()
-        data = execution_schema.load(req_data, partial=True)
+        try:
+            data = execution_schema.load(req_data, partial=True)
+        except ValidationError as err:
+            return {'error': 'Wrong JSON format.'}, 400
 
-        data['user_id'], admin, super_admin = Auth.return_user_info(request)
-        data['instance_id'] = InstanceModel.get_instance_id(data['instance'])
-        instance_owner = InstanceModel.get_instance_owner(data['instance'])
+        try:
+            user_id, admin, super_admin = Auth.return_user_info(request)
+            instance_obj = InstanceModel.get_instance_from_user(user_id, data['instance'])
+            if not instance_obj:
+                return {'error': 'No instance corresponds to that reference'}, 404
+            data['user_id'] = user_id
+            data['instance_id'] = instance_obj.id
+            execution = ExecutionModel(data)
+        except KeyError as err:
+            return {'error': "Missing information: {}".format(err)}, 400
 
-        if instance_owner != data['user_id'] and not super_admin:
-            return {'error': 'You do not have permissions for the instance'}, 400
-
-        execution = ExecutionModel(data)
         execution.save()
 
         ser_data = execution_schema.dump(execution)
@@ -36,10 +42,12 @@ class ExecutionEndpoint(Resource):
         # To send the absolute url:
         # url_for(endpoint_name, _external=True)
         airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
-        response = airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
-        if response.status_code != 200:
-            raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
-                                  format(response.status_code, response.text))
+        if not airflow_client.is_alive():
+            return {'error': "Airflow is not accesible"}, 400
+        try:
+            airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
+        except AirflowApiError:
+            return {'error': "Airflow responded with an error"}, 400
 
         return {'execution_id': execution_id}, 201
 
@@ -56,10 +64,21 @@ class ExecutionDetailsEndpoint(Resource):
 
     @Auth.auth_required
     def get(self, reference_id):
-        execution = ExecutionModel.get_execution_with_reference(reference_id)
+        user_id, admin, super_admin = Auth.return_user_info(request)
+        execution = ExecutionModel.get_execution_from_user(user_id, reference_id)
+        if not execution:
+            return {}, 404
         ser_execution = execution_schema.dump(execution, many=False)
-
         return ser_execution, 200
+
+    @Auth.auth_required
+    def delete(self, reference_id):
+        user_id, admin, super_admin = Auth.return_user_info(request)
+        execution = ExecutionModel.get_execution_from_user(user_id, reference_id)
+        if not execution:
+            return {}, 404
+        execution.delete()
+        return {}, 204
 
 
 class ExecutionStatusEndpoint(Resource):
@@ -67,7 +86,7 @@ class ExecutionStatusEndpoint(Resource):
     # TODO: call airflow to check status
     @Auth.auth_required
     def get(self, reference_id):
-        status = ExecutionModel.get_execution_with_reference(reference_id).finished
+        status = ExecutionModel.get_execution_from_user(reference_id).finished
 
         if not status:
             # Here we should call airflow to check solving status

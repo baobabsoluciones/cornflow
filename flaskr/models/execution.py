@@ -56,25 +56,21 @@ class ExecutionModel(db.Model):
         return ExecutionModel.query.filter_by(user_id=user)
     
     @staticmethod
-    def get_one_execution(id):
+    def get_one_execution_admin(id):
         return ExecutionModel.query.get(id)
 
     @staticmethod
-    def get_execution_with_id(id):
-        return ExecutionModel.query.get(id)
+    def get_execution_from_user(user, reference):
+        return ExecutionModel.get_all_executions_user(user=user).filter_by(reference_id=reference).first()
 
     @staticmethod
-    def get_execution_with_reference(reference_id):
+    def get_execution_with_reference_admin(reference_id):
         return ExecutionModel.query.filter_by(reference_id=reference_id).first()
 
     @staticmethod
-    def get_execution_id(reference_id):
-        return ExecutionModel.query.filter_by(reference_id=reference_id).first().id
-    
-    @staticmethod
-    def get_execution_data(reference_id):
-        id = ExecutionModel.get_execution_id(reference_id)
-        execution = ExecutionModel.get_one_execution(id)
+    def get_execution_data_admin(reference_id):
+        id = ExecutionModel.get_execution_with_reference_admin(reference_id).id
+        execution = ExecutionModel.get_one_execution_admin(id)
         instance_data = InstanceModel.get_one_instance(execution.instance_id).data
         config = execution.config
         return {"data":instance_data, "config":config}

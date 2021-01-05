@@ -68,6 +68,7 @@ class UserModel(db.Model):
     def get_one_user_by_email(em):
         return UserModel.query.filter_by(email=em).first()
 
+    # TODO: instead we should define functions with is_admin(user) and is_super_admin(user)
     @staticmethod
     def get_user_info(id):
         user = UserModel.query.get(id)

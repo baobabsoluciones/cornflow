@@ -42,8 +42,10 @@ class InstanceModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    # TODO: by default we should not return all the executions for each instance.
+    #  Maybe the number and the last one
     @staticmethod
-    def get_all_instances(user):
+    def get_all_instances_from_user(user):
         return InstanceModel.query.filter_by(user_id=user)
 
     @staticmethod
@@ -51,20 +53,12 @@ class InstanceModel(db.Model):
         return InstanceModel.query.get(id)
 
     @staticmethod
-    def get_instance(reference):
+    def get_instance_admin(reference):
         return InstanceModel.query.filter_by(reference_id=reference).first()
 
     @staticmethod
     def get_instance_from_user(user, reference):
-        return InstanceModel.get_all_instances(user=user).filter_by(reference_id=reference).first()
-
-    @staticmethod
-    def get_instance_id(reference):
-        return InstanceModel.get_instance(reference).id
-
-    @staticmethod
-    def get_instance_owner(reference):
-        return InstanceModel.get_instance(reference).user_id
+        return InstanceModel.get_all_instances_from_user(user=user).filter_by(reference_id=reference).first()
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
