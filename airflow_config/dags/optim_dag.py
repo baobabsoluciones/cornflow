@@ -8,7 +8,7 @@ import model_functions as mf
 # Following are defaults which can be overridden later on
 # TODO: clean this
 default_args = {
-    'owner': 'hugo',
+    'owner': 'baobab',
     'depends_on_past': False,
     'start_date': datetime(2020, 2, 1),
     'email': [''],
