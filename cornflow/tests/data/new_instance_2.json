@@ -1,0 +1,125 @@
+{"data": {
+    "objective": {
+        "name": "obj",
+        "coefficients": [
+            {
+                "name": "x",
+                "value": 1
+            },
+            {
+                "name": "y",
+                "value": 4
+            },
+            {
+                "name": "z",
+                "value": 9
+            }
+        ]
+    },
+    "constraints": [
+        {
+            "sense": -1,
+            "pi": null,
+            "constant": -5,
+            "name": "c1",
+            "coefficients": [
+                {
+                    "name": "x",
+                    "value": 1
+                },
+                {
+                    "name": "y",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "sense": 1,
+            "pi": null,
+            "constant": -10,
+            "name": "c2",
+            "coefficients": [
+                {
+                    "name": "x",
+                    "value": 1
+                },
+                {
+                    "name": "z",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "sense": 0,
+            "pi": null,
+            "constant": -7,
+            "name": "c3",
+            "coefficients": [
+                {
+                    "name": "y",
+                    "value": -1
+                },
+                {
+                    "name": "z",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "sense": 1,
+            "pi": null,
+            "constant": 0,
+            "name": "c4",
+            "coefficients": [
+                {
+                    "name": "w",
+                    "value": 1
+                }
+            ]
+        }
+    ],
+    "variables": [
+        {
+            "lowBound": 0,
+            "upBound": null,
+            "cat": "Continuous",
+            "varValue": null,
+            "dj": null,
+            "name": "w"
+        },
+        {
+            "lowBound": 0,
+            "upBound": 4,
+            "cat": "Continuous",
+            "varValue": null,
+            "dj": null,
+            "name": "x"
+        },
+        {
+            "lowBound": -1,
+            "upBound": 1,
+            "cat": "Continuous",
+            "varValue": null,
+            "dj": null,
+            "name": "y"
+        },
+        {
+            "lowBound": 0,
+            "upBound": null,
+            "cat": "Continuous",
+            "varValue": null,
+            "dj": null,
+            "name": "z"
+        }
+    ],
+    "parameters": {
+        "name": "test_export_json_LP",
+        "sense": 1,
+        "status": 0,
+        "sol_status": 0
+    },
+    "sos1": [],
+    "sos2": []
+},
+"name":"instance_2",
+"description":"This is a test instance to check if name and description get saved succesfully"}
