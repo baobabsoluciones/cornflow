@@ -17,11 +17,30 @@ Cornflow consists of two projects: cornflow (itself) and airflow (from apache). 
 
 do::
 
-    git clone git@github.com:ggsdc/corn.git
+    git clone git@github.com:baobabsoluciones/corn.git
     cd corn
     python3 -m venv cfvenv
     cfvenv/bin/pip3 install -r requirements.txt
 
+activate the virtual environment::
+
+    cd cfvenv/bin
+    . activate
+    cd ../..
+
+**Possible error with psycopg2:**
+
+The installation of the psycopg2 may generate an error because it does not find the pg_config file.
+
+One way to solve this problem is to previously install libpq-dev which install pg_config::
+
+    sudo apt install libpq-dev
+
+Install dev requirements
+------------------------
+Install the dev libraries with::
+
+    cfvenv/bin/pip3 install -r requirements-dev.txt
 
 Setup cornflow database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +64,7 @@ Create a new database::
 
 Every time cornflow is used, PostgreSQL and airflow needs to be configured::
 
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
@@ -68,7 +87,7 @@ Starting flask server
 Each time you run the flask server, execute the following::
 
     source cfvenv/bin/activate
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
@@ -326,3 +345,30 @@ destroy the machine with::
 
 cornflow app  "http://vagrantfileIP:5000"
 airflow GUI  "http://vagrantfileIP:8080"
+
+Test cornflow
+~~~~~~~~~~~~~~~~~~
+
+To test conrflow first you will have to create a new database::
+
+    sudo su - postgres
+    psql -c "create database cornflow_test"
+    exit
+
+Then you have to run the following commands::
+
+    export FLASK_APP=cornflow.app
+    export FLASK_ENV=testing
+
+Finally you can run the tests with the following command::
+
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
+
+After if you want to check the coverage report you need to run::
+
+    coverage report -m
+
+or to get the html reports::
+
+    coverage html
+
