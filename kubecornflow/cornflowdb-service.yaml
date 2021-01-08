@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cornflowdb
+  labels:
+    name: cornflowdb
+spec:
+  type: NodePort
+  ports:
+   - port: 5432
+  selector:
+   name: cornflowdb
