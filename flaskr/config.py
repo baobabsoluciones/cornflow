@@ -11,6 +11,9 @@ class Development(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
     CORNFLOW_URL = os.getenv('CORNFLOW_URL')
+    AIRFLOW_USER = os.getenv('AIRFLOW_USER')
+    AIRFLOW_PWD = os.getenv('AIRFLOW_PWD')
+
 
 class Testing(object):
     DEBUG = True
@@ -32,6 +35,9 @@ class Production(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
     CORNFLOW_URL = os.getenv('CORNFLOW_URL')
+    AIRFLOW_USER = os.getenv('AIRFLOW_USER')
+    AIRFLOW_PWD = os.getenv('AIRFLOW_PWD')
+
 
 app_config = {
     'development': Development,

@@ -62,17 +62,6 @@ Create a new database::
     psql -c "create database cornflow"
     exit
 
-Every time cornflow is used, PostgreSQL and airflow needs to be configured::
-
-    export FLASK_APP=flaskr.app
-    export FLASK_ENV=development
-    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    export SECRET_KEY=THISNEEDSTOBECHANGED
-    export AIRFLOW_URL=http://localhost:8080
-    export CORNFLOW_URL=http://localhost:5000
-
-In windows use ``set`` instead of ``export``.
-
 In order to create the database, execute the following::
 
     source cfvenv/bin/activate
@@ -93,8 +82,11 @@ Each time you run the flask server, execute the following::
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
     export CORNFLOW_URL=http://localhost:5000
+    export AIRFLOW_USER=admin
+    export AIRFLOW_PWD=admin
     flask run
 
+In windows use ``set`` instead of ``export``.
 
 Install and configure airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,7 +99,11 @@ Install it::
 
     cd corn
     python3 -m venv afvenv
-    afvenv/bin/pip3 install -r requirements_af.txt
+    AIRFLOW_VERSION=2.0.0
+    PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+    CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+    pip install "apache-airflow[postgres]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+    pip install orloge psycopg2 cornflow_client pulp
 
 Create the `airflow` database in postgresql::
 
@@ -118,11 +114,18 @@ Create the `airflow` database in postgresql::
 
 initialize the database::
 
-    airflow initdb
+    airflow db init
+    airflow users create \
+          --username admin \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --password admin \
+          --email admin@example.org
 
 Reset the database (if necessary, I did not need this)::
 
-    airflow resetdb
+    airflow db reset
 
 If necessary, give execution rights to your user in the airflow folder (I did not need this)::
 
@@ -149,7 +152,8 @@ To set the config and start everything::
     export AIRFLOW_HOME="$PWD/airflow_config"
     export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
     export AIRFLOW__CORE__LOAD_EXAMPLES=0
-    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+    export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
     airflow webserver -p 8080 &
 
 start the scheduler::
@@ -160,7 +164,6 @@ airflow gui will be at::
 
     localhost:8080
 
-Select the DAG in the web and click on ON.
 
 Killing airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

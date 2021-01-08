@@ -20,7 +20,7 @@ class ExecutionEndpoint(Resource):
         try:
             data = execution_schema.load(req_data, partial=True)
         except ValidationError as err:
-            return {'error': 'Wrong JSON format.'}, 400
+            return {'error': 'Wrong JSON format: {}'.format(err)}, 400
 
         try:
             user_id, admin, super_admin = Auth.return_user_info(request)
@@ -41,7 +41,9 @@ class ExecutionEndpoint(Resource):
         # solve
         # To send the absolute url:
         # url_for(endpoint_name, _external=True)
-        airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
+        airflow_client = Airflow(current_app.config['AIRFLOW_URL'],
+                                 current_app.config['AIRFLOW_USER'],
+                                 current_app.config['AIRFLOW_PWD'])
         if not airflow_client.is_alive():
             return {'error': "Airflow is not accesible"}, 400
         try:
@@ -66,9 +68,14 @@ class ExecutionDetailsEndpoint(Resource):
     def get(self, reference_id):
         user_id, admin, super_admin = Auth.return_user_info(request)
         execution = ExecutionModel.get_execution_from_user(user_id, reference_id)
+        # TODO: here, the execution log progress is read correctly.
+        #  but later, during the schema matching, the arrays in the progress are converted
+        #  into strings
+        # print(execution.log_json['progress'][1])
         if not execution:
             return {}, 404
         ser_execution = execution_schema.dump(execution, many=False)
+        # print(ser_execution['log_json']['progress'])
         return ser_execution, 200
 
     @Auth.auth_required
