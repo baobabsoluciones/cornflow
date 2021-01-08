@@ -38,6 +38,7 @@ class Auth:
         :return:
         """
         re = {'data': {}, 'error': {}}
+        secret_key = os.getenv('SECRET_KEY')
         try:
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms='HS256')
             re['data'] = {'user_id': payload['sub']}
