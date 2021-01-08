@@ -1,8 +1,9 @@
-from flaskr.app import create_app
-from flaskr.models import db
+import json
+
 from flask_testing import TestCase
 
-import json
+from cornflow.app import create_app
+from cornflow.shared.utils import db
 
 
 class TestSignUp(TestCase):

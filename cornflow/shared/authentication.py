@@ -38,9 +38,8 @@ class Auth:
         :return:
         """
         re = {'data': {}, 'error': {}}
-        secret_key = os.getenv('SECRET_KEY')
         try:
-            payload = jwt.decode(token, secret_key, 'HS256')
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms='HS256')
             re['data'] = {'user_id': payload['sub']}
             return re
         except jwt.ExpiredSignatureError:
@@ -128,3 +127,8 @@ class Auth:
         user_id = Auth.decode_token(token)['data']['user_id']
         admin, super_admin = UserModel.get_user_info(user_id)
         return user_id, admin, super_admin
+
+    @staticmethod
+    def return_user_from_token(token):
+        user_id = Auth.decode_token(token)['data']['user_id']
+        return user_id

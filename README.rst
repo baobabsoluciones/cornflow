@@ -76,7 +76,7 @@ Starting flask server
 Each time you run the flask server, execute the following::
 
     source cfvenv/bin/activate
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
@@ -296,19 +296,13 @@ destroy all container and images (be careful! this destroys all docker images of
 cornflow app  "http://localhost:5000"
 airflow GUI  "http://localhost:8080"
 
-Appended in this repository are three more docker-compose files for different kind of deployment. An important note is that, when using these deployments, all previous functions need to be run with the `-f DOCKERFILENAME.yml` prefix.
+Appended in this repository are three more docker-compose files for different kind of deployment::
+	
+	Use "docker-compose -f docker-compose-cornflow-celery.yml up -d" for deploy cornflow with airflow celery executor and one worker. If a larger number of workers are required, use --scale parameter of docker-compose.
 
-To deploy cornflow with airflow celery executor and two workers::
+	Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
 
-    docker-compose -f docker-compose-celery-2w.yml up -d
-
-To deploy cornflow and postgres without the airflow platform. Replace "airflowurl" string inside with your airflow address::
-
-	docker-compose -f docker-compose-cornflow-separate.yml up -d
-
-To deploy just the airflow celery executor and two workers::
-
-    docker-compose -f docker-compose-airflow-celery-separate.yml up -d
+	Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
 
 
 Deploying with Vagrantfile
@@ -350,12 +344,12 @@ To test conrflow first you will have to create a new database::
 
 Then you have to run the following commands::
 
-    export FLASK_APP=flaskr.app
+    export FLASK_APP=cornflow.app
     export FLASK_ENV=testing
 
 Finally you can run the tests with the following command::
 
-    coverage run  --source=./flaskr/ -m unittest discover -s=./flaskr/tests/
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
 
 After if you want to check the coverage report you need to run::
 

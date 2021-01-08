@@ -3,6 +3,7 @@ from ..schemas.model_json import DataSchema
 from ..schemas.solution_log import LogSchema
 
 
+
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
 
@@ -24,15 +25,16 @@ class ConfigSchema(Schema):
 
 
 class ExecutionSchema(Schema):
-    id = fields.Int(dump_only=True, load_only=True)
+    id = fields.Str(dump_only=True)
     user_id = fields.Int(required=False, load_only=True)
-    instance_id = fields.Int(required=False, dump_only=True, load_only=True)
-    instance = fields.Str(required=True)
+    instance_id = fields.Str(required=True)
+    name = fields.Str()
+    description = fields.Str()
     config = fields.Nested(ConfigSchema, required=True)
-    reference_id = fields.Str(dump_only=True)
     execution_results = fields.Nested(DataSchema, dump_only=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
     created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+    deleted_at = fields.DateTime(dump_only=True)

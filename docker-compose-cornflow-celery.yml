@@ -2,12 +2,12 @@ version: '3'
 
 services:
   cornflow:
-    build: .
+    image: baobabsoluciones/cornflow:latest
     restart: always
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=flaskr.app
+      - FLASK_APP=cornflow.app
       - FLASK_ENV=development
       - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
       - SECRET_KEY=THISNEEDSTOBECHANGED
@@ -98,23 +98,7 @@ services:
   redis:
     image: redis:5.0.5
 
-  worker1:
-    image: puckel/docker-airflow
-    restart: always
-    depends_on:
-      - scheduler
-    volumes:
-      - ./airflow_config/dags:/usr/local/airflow/dags
-      - ./airflow_config/requirements.txt:/requirements.txt
-    environment:
-      - POSTGRES_HOST=airflow_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgresadmin
-      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
-      - EXECUTOR=Celery
-    command: worker
-
-  worker2:
+  worker:
     image: puckel/docker-airflow
     restart: always
     depends_on:

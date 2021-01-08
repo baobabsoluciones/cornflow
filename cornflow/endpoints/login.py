@@ -1,19 +1,33 @@
+"""
+External endpoint for the user to login to the cornflow webserver
+"""
+# Import from libraries
 from flask import request
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 
-from ..models.user import UserModel
-from ..schemas.user import UserSchema
+# Import from internal modules
+from ..models import UserModel
+from ..schemas import UserSchema
 from ..shared.authentication import Auth
 
+# Initialize the schema that the endpoint uses
 user_schema = UserSchema()
 
 
 class LoginEndpoint(Resource):
-
+    """
+    Endpoint used to do the login to the cornflow webserver
+    """
     def post(self):
-        req_data = request.get_json()
+        """
+        API (POST) method to log in in to the web server.
 
+        :return: A dictionary with a message (either an error during login or the generated token for the user session)
+          and an integer with the HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        req_data = request.get_json()
         try:
             data = user_schema.load(req_data, partial=True)
         except ValidationError as val_err:
@@ -33,5 +47,7 @@ class LoginEndpoint(Resource):
         ser_data = user_schema.dump(user)
 
         token, error = Auth.generate_token(ser_data.get('id'))
+        if error:
+            return error, 400
 
         return {'token': token}, 200
