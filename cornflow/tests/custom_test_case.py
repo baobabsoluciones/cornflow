@@ -31,6 +31,7 @@ class CustomTestCase(TestCase):
         self.url = None
         self.model = None
         self.payload = None
+        self.id = None
 
     def tearDown(self):
         db.session.remove()
@@ -50,6 +51,7 @@ class CustomTestCase(TestCase):
         self.assertEqual(row.id, response.json['id'])
         for key in self.payload:
             self.assertEqual(getattr(row, key), self.payload[key])
+        return row.id
 
     def get_rows(self, files):
         self.payload = []
@@ -73,14 +75,24 @@ class CustomTestCase(TestCase):
             for key in self.payload[i]:
                 self.assertEqual(rows.json[i][key], self.payload[i][key])
 
-    def get_one_row(self):
-        pass
+    def get_one_row(self, file):
+        self.payload = None
+        with open(file) as f:
+            self.payload = json.load(f)
+
+        row = self.client.get(self.url, follow_redirects=True,
+                              headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+
+        self.assertEqual(200, row.status_code)
+        self.assertEqual(row.json['id'], self.id)
+        for key in self.payload:
+            self.assertEqual(row.json[key], self.payload[key])
 
     def get_no_rows(self):
-        response = self.client.get(self.url, follow_redirects=True,
-                                   headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+        rows = self.client.get(self.url, follow_redirects=True,
+                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
 
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(204, rows.status_code)
 
     def update_row(self):
         pass
