@@ -26,7 +26,7 @@ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s http
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin/kubectl
 kubectl version --client
-docker-compose -f /vagrant/docker-compose-cornflow-celery.yml up --scale workers=2 -d 
+docker-compose -f /vagrant/docker-compose-cornflow-celery.yml up --scale worker=2 -d 
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
