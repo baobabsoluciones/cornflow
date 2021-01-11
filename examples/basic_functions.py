@@ -5,10 +5,12 @@ pwd = 'some_password'
 name = 'some_name'
 
 def run_example():
+    server = 'http://34.77.164.250:5000'
+    server = "http://127.0.0.1:5000"
+    client = CornFlow(url=server)
 
-    client = CornFlow(url="http://127.0.0.1:5000")
-    # config = dict(email=email, pwd=pwd, name=name)
-    # client.sign_up(**config)
+    config = dict(email=email, pwd=pwd, name=name)
+    client.sign_up(**config)
     client.login(email, pwd)
 
     import pulp
@@ -23,7 +25,7 @@ def run_example():
     data = prob.to_dict()
 
     instance_id = client.create_instance(data)
-    info = client.get_one_instance_from_id(instance_id)
+    info = client.get_one_instance(instance_id['id'])
     # info = client.get_all_instances()
 
     config = dict(
@@ -39,7 +41,7 @@ def run_example():
         threads=1,
         logPath="test_export_solver_json.log"
     )
-    execution_id = client.create_execution(instance_id, config)
+    execution_id = client.create_execution(instance_id['id'], config, name='test123')
     status = client.get_status(execution_id)
     results = client.get_results(execution_id)
     results.keys()
