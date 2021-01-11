@@ -49,32 +49,39 @@ class CornFlow(object):
             urljoin(self.url, 'login/'),
             json={"email": email, "password": pwd})
         if response.status_code == 200:
-            self.token = response.json()["token"]
-            return self.token
+            result = response.json()
+            self.token = result['token']
+            return result
         else:
-            raise CornFlowApiError("Login failed with status code: {}".format(response.status_code))
+            raise CornFlowApiError("Login failed with status code: {}. {}".format(response.status_code, response))
 
     @ask_token
     @log_call
-    def create_instance(self, data):
+    def create_instance(self, data, name=None, description=''):
+        if name is None:
+            try:
+                name = data['parameters']['name']
+            except IndexError:
+                raise CornFlowApiError('The `name` argument needs to be filled')
         response = requests.post(
             urljoin(self.url, 'instance/'),
             headers={'Authorization': 'access_token ' + self.token},
-            json={"data": data})
+            json=dict(data=data, name=name, description=description))
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead".format(response.status_code))
-        return response.json()["instance_id"]
+        return response.json()
 
     @log_call
     @ask_token
-    def create_execution(self, instance_id, config):
+    def create_execution(self, instance_id, config, name='test1', description=''):
         response = requests.post(
             urljoin(self.url, 'execution/'),
             headers={'Authorization': 'access_token ' + self.token},
-            json={"config": config, "instance": instance_id})
+            json=dict(config=config, instance_id=instance_id, name=name, description=description))
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead".format(response.status_code))
-        return response.json()["execution_id"]
+            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
+                                   format(response.status_code, response.json()))
+        return response.json()
 
     @ask_token
     def get_data(self, execution_id):
@@ -86,7 +93,7 @@ class CornFlow(object):
         response = requests.post(
             urljoin(urljoin(self.url, 'dag/'), str(execution_id) + '/'),
             headers={'Authorization': 'access_token ' + self.token},
-            json={"execution_results": solution, "log_text": log_text, "log_json": log_json})
+            json=dict(execution_results=solution, log_text=log_text, log_json=log_json))
         return response
 
     @log_call
