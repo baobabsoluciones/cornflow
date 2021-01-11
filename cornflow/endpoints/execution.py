@@ -63,13 +63,20 @@ class ExecutionEndpoint(MetaResource):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         result = self.post_list(request)
 
+        # TODO: check result[1] before continuing! if not 20X, return.
+
         # To send the absolute url:
         # url_for(endpoint_name, _external=True)
-        airflow_client = Airflow(current_app.config['AIRFLOW_URL'])
-        response = airflow_client.run_dag(result[0][self.primary_key], current_app.config['CORNFLOW_URL'])
-        if response.status_code != 200:
-            raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
-                                  format(response.status_code, response.text))
+        airflow_client = Airflow(current_app.config['AIRFLOW_URL'],
+                                 current_app.config['AIRFLOW_USER'],
+                                 current_app.config['AIRFLOW_PWD'])
+        if not airflow_client.is_alive():
+            return {'error': "Airflow is not accessible"}, 400
+        execution_id = result[0][self.primary_key]
+        try:
+            airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
+        except AirflowApiError as err:
+            return {'error': "Airflow responded with an error: {}".format(err)}, 400
 
         return result
 
@@ -102,6 +109,8 @@ class ExecutionDetailsEndpoint(MetaResource):
         # TODO: what if the reference id is wrong and it does not exist
         # TODO: if super_admin or admin should it be able to get any execution?
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        # TODO: here, the execution log progress is read correctly but parsed incorrectly by
+        #  marshmallow: the arrays in the progress are converted into strings
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required

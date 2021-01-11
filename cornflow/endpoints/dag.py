@@ -38,7 +38,7 @@ class DAGEndpoint(Resource):
         execution.update(req_data)
         execution.finished = True
         execution.save()
-        return {'message': 'saved results'}, 201
+        return {'message': 'results successfully saved'}, 201
     
     @Auth.super_admin_required
     def get(self, idx):

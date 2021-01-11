@@ -99,6 +99,7 @@ class ExecutionModel(BaseAttributes):
         """
         Updates the deleted_at field of an execution to mark an execution as "deleted"
         """
+        # TODO: if the method is the same as the parent: no need of adding it
         super().disable()
 
     def delete(self):
@@ -138,7 +139,11 @@ class ExecutionModel(BaseAttributes):
         :return: The execution.
         """
         return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
-    
+
+    @staticmethod
+    def get_execution_with_reference(reference_id):
+        return ExecutionModel.query.filter_by(reference_id=reference_id).first()
+
     @staticmethod
     def get_execution_data(idx):
         """
