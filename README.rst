@@ -114,6 +114,9 @@ Create the `airflow` database in postgresql::
 
 initialize the database::
 
+    source afvenv/bin/activate
+    export AIRFLOW_HOME="$PWD/airflow_config"
+    export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
     airflow db init
     airflow users create \
           --username admin \
@@ -241,22 +244,6 @@ Solve an instance::
 Retrieve a solution::
 
     data = get_data(token, execution_id)
-
-
-Run an execution in airflow api (not needed)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The execution id has to be passed like this::
-
-    conf = "{\"exec_id\":\"%s\"}" % execution_id
-
-    response = requests.post(
-        "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
-        json={"conf":conf})
-
-or via the web by pasting this in the text box in DAGs/Trigger DAG::
-
-    {"exec_id":"1b06da8e5c670ba715fbe7f04f8538a687b900bb", "cornflow_url": "http://localhost:5000"}
 
 
 Deploying with docker-compose
