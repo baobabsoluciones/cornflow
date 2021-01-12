@@ -3,6 +3,7 @@ Endpoints for the user profiles
 """
 # Import from libraries
 from flask_restful import Resource
+from flask import request
 
 # Import from internal modules
 from ..models import UserModel
@@ -37,21 +38,23 @@ class UserEndpoint(Resource):
         return ser_users, 200
 
 
-# TODO: implement new endpoint to give back a user all its related info? Maybe this does not have sense as
-#  for now the only info they have is the instances and executions that they can get from the instances endpoint
 # TODO: the PUT method here could be used to change the password of the user.
 #   These endpoints could be used mainly by the cornflow webserver UI.
-class UserDetailEndpoint(Resource):
+class UserDetailsEndpoint(Resource):
     """
     Endpoint use to get the information of one single user
     """
     @Auth.auth_required
     def get(self, user_id):
         """
-        Not implemented
 
         :param str user_id: User ID.
         :return:
-        :rtype:
+        :rtype: Tuple(dict, integer)
         """
-        return {}, 501
+        ath_user_id, admin, super_admin = Auth.return_user_info(request)
+        if ath_user_id != user_id and not (admin or super_admin):
+            return {}, 400
+        user = UserModel.get_one_user(user_id)
+        ser_users = user_schema.dump(user, many=False)
+        return ser_users, 200

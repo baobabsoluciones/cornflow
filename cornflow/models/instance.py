@@ -109,7 +109,7 @@ class InstanceModel(BaseAttributes):
         :return: The instance
         :rtype: :class:`InstanceModel`
         """
-        return InstanceModel.query.get(idx, deleted_at=None)
+        return InstanceModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_one_instance_from_user(user, idx):
