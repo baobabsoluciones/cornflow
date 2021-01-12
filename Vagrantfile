@@ -30,7 +30,7 @@ docker-compose -f /vagrant/docker-compose-cornflow-celery.yml up --scale worker=
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-config.vm.box = "ubuntu/bionic64"
+config.vm.box = "bento/ubuntu-20.04"
 config.vm.network "private_network", ip: "192.168.33.10"
 config.vm.provider "virtualbox" do |vb|
 config.vm.network "forwarded_port", guest: 5000, host: 5000

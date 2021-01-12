@@ -2,7 +2,7 @@ version: '3'
 
 services:
   webserver:
-    image: puckel/docker-airflow
+    image: baobabsoluciones/docker-airflow
     restart: always
     volumes:
       - ./airflow_config/dags:/usr/local/airflow/dags
@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD=postgresadmin
       - AIRFLOW__CORE__LOAD_EXAMPLES=0
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
       - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
     ports:
@@ -29,7 +29,7 @@ services:
       retries: 3
 
   scheduler:
-    image: puckel/docker-airflow
+    image: baobabsoluciones/docker-airflow
     restart: always
     depends_on:
         - webserver
@@ -42,13 +42,13 @@ services:
       - POSTGRES_PASSWORD=postgresadmin
       - AIRFLOW__CORE__LOAD_EXAMPLES=0
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
       - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
     command: scheduler
 
   flower:
-    image: puckel/docker-airflow
+    image: baobabsoluciones/docker-airflow
     restart: always
     depends_on:
         - redis
@@ -74,7 +74,7 @@ services:
     image: redis:5.0.5
 
   worker:
-    image: puckel/docker-airflow
+    image: baobabsoluciones/docker-airflow
     restart: always
     depends_on:
       - scheduler

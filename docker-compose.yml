@@ -2,7 +2,7 @@ version: '3'
 
 services:
   cornflow:
-    image: baobabsoluciones/cornflow:latest
+    image: baobabsoluciones/cornflow
     ports:
       - 5000:5000
     environment:
@@ -26,7 +26,7 @@ services:
       - postgres_cf_data:/var/lib/postgresql/data/
 
   airflow:
-    image: puckel/docker-airflow
+    image: baobabsoluciones/docker-airflow
     volumes:
       - ./airflow_config/dags:/usr/local/airflow/dags
       - ./airflow_config/requirements.txt:/requirements.txt
@@ -36,7 +36,7 @@ services:
       - POSTGRES_PASSWORD=postgresadmin
       - AIRFLOW__CORE__LOAD_EXAMPLES=0
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     ports:
       - 8080:8080
     depends_on:
