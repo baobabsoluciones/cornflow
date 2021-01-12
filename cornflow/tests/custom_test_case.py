@@ -94,8 +94,44 @@ class CustomTestCase(TestCase):
 
         self.assertEqual(204, rows.status_code)
 
-    def update_row(self):
-        pass
+    def update_row(self, file, key, new_value):
+        self.payload = None
+        with open(file) as f:
+            self.payload = json.load(f)
+
+        self.payload[key] = new_value
+
+        response = self.client.put(self.url, data=json.dumps(self.payload), follow_redirects=True,
+                                   headers={"Content-Type": "application/json",
+                                            "Authorization": 'Bearer ' + self.token})
+
+        self.assertEqual(200, response.status_code)
+
+        row = self.client.get(self.url, follow_redirects=True,
+                              headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+
+        self.assertEqual(200, row.status_code)
+        self.assertEqual(row.json['id'], self.id)
+        for key in self.payload:
+            self.assertEqual(row.json[key], self.payload[key])
 
     def delete_row(self):
-        pass
+
+        response = self.client.delete(self.url, follow_redirects=True,
+                                      headers={"Content-Type": "application/json",
+                                               "Authorization": 'Bearer ' + self.token})
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(self.url, follow_redirects=True,
+                                   headers={"Content-Type": "application/json",
+                                            "Authorization": 'Bearer ' + self.token})
+
+        self.assertEqual(204, response.status_code)
+
+    def repr_method(self, representation):
+        row = self.model.query.get(self.id)
+        self.assertEqual(repr(row), representation)
+
+    def str_method(self, string: str):
+        row = self.model.query.get(self.id)
+        self.assertEqual(str(row), string)

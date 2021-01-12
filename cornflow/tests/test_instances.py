@@ -33,3 +33,24 @@ class TestInstancesDetail(CustomTestCase):
 
     def test_one_instance(self):
         self.get_one_row(INSTANCE_PATH)
+
+    def test_update_one_instance(self):
+        self.update_row(INSTANCE_PATH, 'name', 'new_name')
+
+    def test_delete_one_instance(self):
+        self.delete_row()
+
+
+class TestInstanceModelMethods(CustomTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.url = '/instance/'
+        self.model = InstanceModel
+        self.id = self.create_new_row(INSTANCE_PATH)
+
+    def test_repr_method(self):
+        self.repr_method('<id {}>'.format(self.id))
+
+    def test_str_method(self):
+        self.str_method('<id {}>'.format(self.id))

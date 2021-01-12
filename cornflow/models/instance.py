@@ -109,7 +109,7 @@ class InstanceModel(BaseAttributes):
         :return: The instance
         :rtype: :class:`InstanceModel`
         """
-        return InstanceModel.query.get(idx, deleted_at=None)
+        return InstanceModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_one_instance_from_user(user, idx):
@@ -123,17 +123,6 @@ class InstanceModel(BaseAttributes):
         """
         return InstanceModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
 
-    @staticmethod
-    def get_instance_owner(idx):
-        """
-        Query to get the owner of an instance
-
-        :param str idx: ID from the instance
-        :return: The user code from the owner
-        :rtype: int
-        """
-        return InstanceModel.query.get(idx).user_id
-
     def __repr__(self):
         """
         Method to represent the class :class:`InstanceModel`
@@ -143,4 +132,11 @@ class InstanceModel(BaseAttributes):
         """
         return '<id {}>'.format(self.id)
 
+    def __str__(self):
+        """
+        Method to print a string representation of the :class:`InstanceModel`
 
+        :return: The string for the :class:`InstanceModel`
+        :rtype: str
+        """
+        return '<id {}>'.format(self.id)
