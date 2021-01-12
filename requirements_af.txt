@@ -1,5 +1,0 @@
-airflow==1.10.14
-orloge
-psycopg2
-cornflow_client
-pulp

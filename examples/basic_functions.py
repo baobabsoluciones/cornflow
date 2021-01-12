@@ -24,9 +24,11 @@ def run_example():
     prob += -y + z == 7.5, "c3"
     data = prob.to_dict()
 
-    instance_id = client.create_instance(data)
+    instance_id = client.create_instance(data,
+                                         name='test_export_dict_MIP',
+                                         description='very small example')
     info = client.get_one_instance(instance_id['id'])
-    # info = client.get_all_instances()
+    info_all = client.get_all_instances()
 
     config = dict(
         solver="PULP_CBC_CMD",
@@ -41,9 +43,11 @@ def run_example():
         threads=1,
         logPath="test_export_solver_json.log"
     )
-    execution_id = client.create_execution(instance_id['id'], config, name='test123')
-    status = client.get_status(execution_id)
-    results = client.get_results(execution_id)
+    execution_id = client.create_execution(instance_id['id'], config,
+                                           name='execution1',
+                                           description='execution of a very small instance')
+    status = client.get_status(execution_id['id'])
+    results = client.get_results(execution_id['id'])
     results.keys()
     _vars, prob = pulp.LpProblem.from_dict(results['execution_results'])
 

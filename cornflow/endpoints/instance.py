@@ -114,3 +114,19 @@ class InstanceDetailsEndpoint(MetaResource):
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)
+
+
+class InstanceFileEndpoint(MetaResource):
+    """
+    Endpoint to accept mps files to upload
+    """
+
+    def post(self, file):
+        """
+        Not implemented!
+
+        :param file:
+        :return:
+        :rtype: Tuple(dict, integer)
+        """
+        return {}, 501
