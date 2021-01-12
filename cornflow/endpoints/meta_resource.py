@@ -76,6 +76,7 @@ class MetaResource(Resource):
 
         item = getattr(self.model, self.query)(*args)
         if item is None:
+            # TODO: why is sometimes 'message' and sometimes 'error' when it's 400
             return {'message': 'The object to update does not exist.'}, 400
         item.update(self.data)
 
@@ -88,6 +89,8 @@ class MetaResource(Resource):
         if item is None:
             return {'message': 'The object to delete does not exist.'}, 400
 
+        # TODO: I think there's a model configuration in django to do this automatically.
+        #  In this case, what happens when there are more than one "dependents"?
         if self.dependents is not None:
             for element in getattr(item, self.dependents):
                 element.disable()
