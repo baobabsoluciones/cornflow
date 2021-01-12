@@ -65,6 +65,7 @@ Create a new database::
 In order to create the database, execute the following::
 
     source cfvenv/bin/activate
+    export FLASK_APP=cornflow.app
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
@@ -93,12 +94,13 @@ Install and configure airflow
 
 You need your own virtual environment for airflow to work.
 
-**On Linux**
+**On Ubuntu**
 
 Install it::
 
     cd corn
     python3 -m venv afvenv
+    source afvenv/bin/activate
     AIRFLOW_VERSION=2.0.0
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
@@ -110,7 +112,6 @@ Create the `airflow` database in postgresql::
     sudo su - postgres
     psql -c "create database airflow"
     exit
-
 
 initialize the database::
 
@@ -126,27 +127,17 @@ initialize the database::
           --password admin \
           --email admin@example.org
 
-Reset the database (if necessary, I did not need this)::
-
-    airflow db reset
-
-If necessary, give execution rights to your user in the airflow folder (I did not need this)::
-
-    sudo chmod -R  a+rwx airflow
 
 **On windows**
 
-- Install Linux subsystems for linux: https://docs.microsoft.com/es-es/windows/wsl/install-win10
-- Install Ubuntu from windows store
+- Install Linux subsystems for linux (https://docs.microsoft.com/es-es/windows/wsl/install-win10).
+- Install Ubuntu 20.04 from windows store.
 - Install python in Ubuntu and follow Linux installations instructions above.
 
 Launch airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We start the web server, default port is 8080.
-We're setting some environment variables that are suited for development. Specially taking out the deactivation of the security of the api.
-
-See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
 
 To set the config and start everything::
 

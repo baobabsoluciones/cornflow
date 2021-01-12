@@ -29,7 +29,7 @@ class Airflow(object):
             headers={'Content-type': 'application/json',
                      'Accept': 'application/json'},
             auth=self.auth,
-            json={"conf": json.dumps(conf)})
+            json={"conf": conf})
         if response.status_code != 200:
             raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
                                   format(response.status_code, response.text))

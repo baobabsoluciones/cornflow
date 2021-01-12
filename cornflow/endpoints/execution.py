@@ -64,7 +64,8 @@ class ExecutionEndpoint(MetaResource):
         result = self.post_list(request)
 
         # TODO: check result[1] before continuing! if not 20X, return.
-
+        if result[1] >= 300:
+            return result
         # To send the absolute url:
         # url_for(endpoint_name, _external=True)
         airflow_client = Airflow(current_app.config['AIRFLOW_URL'],

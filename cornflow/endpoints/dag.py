@@ -35,6 +35,8 @@ class DAGEndpoint(Resource):
         #  for example if there is a problem with the data validation
         req_data = request.get_json()
         execution = ExecutionModel.get_one_execution_from_id(idx)
+        # because we do not want to store airflow's user:
+        req_data['user_id'] = execution.user_id
         execution.update(req_data)
         execution.finished = True
         execution.save()

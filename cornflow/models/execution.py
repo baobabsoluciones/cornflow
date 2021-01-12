@@ -127,7 +127,7 @@ class ExecutionModel(BaseAttributes):
         :param str idx: Execution ID
         :return: The execution.
         """
-        return ExecutionModel.query.get(id=idx, deleted_at=None).first()
+        return ExecutionModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_one_execution_from_user(user, idx):
@@ -142,7 +142,7 @@ class ExecutionModel(BaseAttributes):
 
     @staticmethod
     def get_execution_with_reference(reference_id):
-        return ExecutionModel.query.filter_by(reference_id=reference_id).first()
+        return ExecutionModel.query.filter_by(id=reference_id).first()
 
     @staticmethod
     def get_execution_data(idx):
