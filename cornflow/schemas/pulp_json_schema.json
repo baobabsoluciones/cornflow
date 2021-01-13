@@ -2,17 +2,13 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
 
   "definitions": {
-    "coefficients": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
+    "coefficient": {
+      "type": "object",
+      "properties": {
         "name": {"type": "string"},
         "value": {"type": "number"}
-        },
-        "required": ["name", "value"]
       },
-      "default": []
+      "required": ["name", "value"]
     }
   },
 
@@ -24,7 +20,10 @@
       "properties": {
         "name": {"type": "string"},
         "coefficients": {
-          "$ref": "#/definitions/coefficients"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/coefficient"
+          }
         }
       },
       "required": [
@@ -53,7 +52,10 @@
             "type": "number"
           },
           "coefficients": {
-            "$ref": "#/definitions/coefficients"
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/coefficient"
+            }
           }
         },
         "required": [
@@ -83,6 +85,8 @@
 	"parameters": {
 	  "type": "object",
 	  "properties": {
+        "name": {"type": "string"},
+        "sense": {"type": "integer"},
 		"status": {"type": "integer"},
 		"sol_status": {"type": "integer"}
 	  },
