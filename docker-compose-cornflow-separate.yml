@@ -11,8 +11,8 @@ services:
       - FLASK_ENV=development
       - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
       - SECRET_KEY=THISNEEDSTOBECHANGED
-      - AIRFLOW_URL=http://changethistoairflowurl:8080
-      - CORNFLOW_URL=http://cornflow:5000
+      - AIRFLOW_URL=http://airflowurl:8080
+      - CORNFLOW_URL=http://cornflowurl:5000
     depends_on:
       - cornflow_db
 
