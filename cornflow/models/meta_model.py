@@ -13,9 +13,9 @@ class TraceAttributes(db.Model):
 
     """
     __abstract__ = True
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
-    deleted_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self):
         self.created_at = datetime.datetime.utcnow()

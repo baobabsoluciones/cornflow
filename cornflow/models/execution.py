@@ -59,6 +59,7 @@ class ExecutionModel(BaseAttributes):
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     config = db.Column(JSON, nullable=False)
+    dag_run_id = db.Column(db.String(256), nullable=True)
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
@@ -73,7 +74,8 @@ class ExecutionModel(BaseAttributes):
         self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
         self.name = data.get('name')
-        self.description = data.get('description')
+        self.description = data.get('description', None)
+        self.dag_run_id = data.get('dag_run_id', None)
         self.finished = False
         self.config = data.get('config')
 
