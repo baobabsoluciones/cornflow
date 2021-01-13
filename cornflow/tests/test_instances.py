@@ -5,7 +5,7 @@ INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
 INSTANCES_LIST = [INSTANCE_PATH, './cornflow/tests/data/new_instance_2.json']
 
 
-class TestInstances(CustomTestCase):
+class TestInstancesListEndpoint(CustomTestCase):
 
     def setUp(self):
         super().setUp()
@@ -22,7 +22,7 @@ class TestInstances(CustomTestCase):
         self.get_no_rows()
 
 
-class TestInstancesDetail(CustomTestCase):
+class TestInstancesDetailEndpoint(CustomTestCase):
 
     def setUp(self):
         super().setUp()
@@ -31,7 +31,7 @@ class TestInstancesDetail(CustomTestCase):
         self.id = self.create_new_row(INSTANCE_PATH)
         self.url = self.url + self.id + '/'
 
-    def test_one_instance(self):
+    def test_get_one_instance(self):
         self.get_one_row(INSTANCE_PATH)
 
     def test_update_one_instance(self):
@@ -48,6 +48,29 @@ class TestInstanceModelMethods(CustomTestCase):
         self.url = '/instance/'
         self.model = InstanceModel
         self.id = self.create_new_row(INSTANCE_PATH)
+
+    # TODO: should these test be implemented? The funtions that these test should cover are already covered
+    #  by other test cases, mainly the endpoint functions that use this functions
+    def test_save(self):
+        pass
+
+    def test_update(self):
+        pass
+
+    def test_disable(self):
+        pass
+
+    def test_delete(self):
+        pass
+
+    def test_get_all_instances(self):
+        pass
+
+    def test_get_one_instance_from_id(self):
+        pass
+
+    def test_get_one_instance_from_user(self):
+        pass
 
     def test_repr_method(self):
         self.repr_method('<id {}>'.format(self.id))

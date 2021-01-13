@@ -32,6 +32,7 @@ class CustomTestCase(TestCase):
         self.model = None
         self.payload = None
         self.id = None
+        self.foreign_keys = None
 
     def tearDown(self):
         db.session.remove()
@@ -41,10 +42,18 @@ class CustomTestCase(TestCase):
         with open(file) as f:
             self.payload = json.load(f)
 
+        if self.foreign_keys is not None:
+            for key, value in self.foreign_keys.items():
+                self.payload[key] = value
+
         response = self.client.post(self.url, data=json.dumps(self.payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json",
                                              "Authorization": 'Bearer ' + self.token})
 
+        if response.status_code == 400:
+            print(response.json, self.url)
+            print(self.payload)
+            print(self.token)
         self.assertEqual(201, response.status_code)
 
         row = self.model.query.get(response.json['id'])
@@ -54,26 +63,29 @@ class CustomTestCase(TestCase):
         return row.id
 
     def get_rows(self, files):
-        self.payload = []
+        data = []
         codes = []
+
         for file in files:
             with open(file) as f:
-                self.payload.append(json.load(f))
+                temp = json.load(f)
 
-            response = self.client.post(self.url, data=json.dumps(self.payload[-1]), follow_redirects=True,
-                                        headers={"Content-Type": "application/json",
-                                                 "Authorization": 'Bearer ' + self.token})
-            codes.append(response.json['id'])
+                if self.foreign_keys is not None:
+                    for key, value in self.foreign_keys.items():
+                        temp[key] = value
 
-            self.assertEqual(201, response.status_code)
+                data.append(temp)
+                codes.append(self.create_new_row(file))
 
         rows = self.client.get(self.url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
 
-        for i in range(len(self.payload)):
+        self.assertEqual(len(rows.json), len(files))
+
+        for i in range(len(data)):
             self.assertEqual(rows.json[i]['id'], codes[i])
-            for key in self.payload[i]:
-                self.assertEqual(rows.json[i][key], self.payload[i][key])
+            for key in data[i]:
+                self.assertEqual(rows.json[i][key], data[i][key])
 
     def get_one_row(self, file):
         self.payload = None
