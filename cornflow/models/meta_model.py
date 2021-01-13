@@ -38,7 +38,6 @@ class BaseAttributes(TraceAttributes):
 
     """
     __abstract__ = True
-    # user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     @declared_attr
     def user_id(cls):
         return db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

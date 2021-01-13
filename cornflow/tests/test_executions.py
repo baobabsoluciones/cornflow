@@ -16,7 +16,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
         fk_id = self.create_new_row(INSTANCE_PATH)
         self.foreign_keys = {'instance_id': fk_id}
 
-        self.url = '/execution/?run=no'
+        self.url = '/execution/'
         self.model = ExecutionModel
 
     def test_new_execution(self):
