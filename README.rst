@@ -62,20 +62,10 @@ Create a new database::
     psql -c "create database cornflow"
     exit
 
-Every time cornflow is used, PostgreSQL and airflow needs to be configured::
-
-    export FLASK_APP=cornflow.app
-    export FLASK_ENV=development
-    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    export SECRET_KEY=THISNEEDSTOBECHANGED
-    export AIRFLOW_URL=http://localhost:8080
-    export CORNFLOW_URL=http://localhost:5000
-
-In windows use ``set`` instead of ``export``.
-
 In order to create the database, execute the following::
 
     source cfvenv/bin/activate
+    export FLASK_APP=cornflow.app
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
@@ -93,21 +83,29 @@ Each time you run the flask server, execute the following::
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
     export CORNFLOW_URL=http://localhost:5000
+    export AIRFLOW_USER=admin
+    export AIRFLOW_PWD=admin
     flask run
 
+In windows use ``set`` instead of ``export``.
 
 Install and configure airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You need your own virtual environment for airflow to work.
 
-**On Linux**
+**On Ubuntu**
 
 Install it::
 
     cd corn
     python3 -m venv afvenv
-    afvenv/bin/pip3 install -r requirements_af.txt
+    source afvenv/bin/activate
+    AIRFLOW_VERSION=2.0.0
+    PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+    CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+    pip install "apache-airflow[postgres]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+    pip install orloge psycopg2 cornflow_client pulp
 
 Create the `airflow` database in postgresql::
 
@@ -115,32 +113,31 @@ Create the `airflow` database in postgresql::
     psql -c "create database airflow"
     exit
 
-
 initialize the database::
 
-    airflow initdb
+    source afvenv/bin/activate
+    export AIRFLOW_HOME="$PWD/airflow_config"
+    export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
+    airflow db init
+    airflow users create \
+          --username admin \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --password admin \
+          --email admin@example.org
 
-Reset the database (if necessary, I did not need this)::
-
-    airflow resetdb
-
-If necessary, give execution rights to your user in the airflow folder (I did not need this)::
-
-    sudo chmod -R  a+rwx airflow
 
 **On windows**
 
-- Install Linux subsystems for linux: https://docs.microsoft.com/es-es/windows/wsl/install-win10
-- Install Ubuntu from windows store
+- Install Linux subsystems for linux (https://docs.microsoft.com/es-es/windows/wsl/install-win10).
+- Install Ubuntu 20.04 from windows store.
 - Install python in Ubuntu and follow Linux installations instructions above.
 
 Launch airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We start the web server, default port is 8080.
-We're setting some environment variables that are suited for development. Specially taking out the deactivation of the security of the api.
-
-See more about authenticating the API here: https://airflow.apache.org/docs/stable/security.html
 
 To set the config and start everything::
 
@@ -149,7 +146,8 @@ To set the config and start everything::
     export AIRFLOW_HOME="$PWD/airflow_config"
     export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgres://postgres:postgresadmin@127.0.0.1:5432/airflow
     export AIRFLOW__CORE__LOAD_EXAMPLES=0
-    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+    export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
     airflow webserver -p 8080 &
 
 start the scheduler::
@@ -160,7 +158,6 @@ airflow gui will be at::
 
     localhost:8080
 
-Select the DAG in the web and click on ON.
 
 Killing airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -238,22 +235,6 @@ Solve an instance::
 Retrieve a solution::
 
     data = get_data(token, execution_id)
-
-
-Run an execution in airflow api (not needed)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The execution id has to be passed like this::
-
-    conf = "{\"exec_id\":\"%s\"}" % execution_id
-
-    response = requests.post(
-        "http://localhost:8080/api/experimental/dags/solve_model_dag/dag_runs",
-        json={"conf":conf})
-
-or via the web by pasting this in the text box in DAGs/Trigger DAG::
-
-    {"exec_id":"1b06da8e5c670ba715fbe7f04f8538a687b900bb", "cornflow_url": "http://localhost:5000"}
 
 
 Deploying with docker-compose
