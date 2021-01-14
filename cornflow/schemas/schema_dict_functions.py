@@ -1,11 +1,6 @@
 from marshmallow import Schema, fields
 from functools import partial
-
-STRING_TYPE = 'String'
-BOOLEAN_TYPE = 'Boolean'
-INTEGER_TYPE = 'Integer'
-FLOAT_TYPE = 'Float'
-BASIC_TYPES = [STRING_TYPE, BOOLEAN_TYPE, INTEGER_TYPE, FLOAT_TYPE]
+from .constants import BOOLEAN_TYPE, STRING_TYPE, INTEGER_TYPE, FLOAT_TYPE, BASIC_TYPES
 
 
 class ParameterSchema(Schema):
