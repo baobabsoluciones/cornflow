@@ -7,6 +7,7 @@ class InstanceSchema(Schema):
 
     """
     id = fields.Str(dump_only=True)
+    # TODO: required=True for user_id?
     user_id = fields.Int(required=False, load_only=True)
     data = fields.Nested(DataSchema, required=True)
     name = fields.Str()

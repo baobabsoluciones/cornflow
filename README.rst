@@ -132,8 +132,13 @@ Download and install WSL:
 
 - Install Linux subsystems for linux (https://docs.microsoft.com/es-es/windows/wsl/install-win10).
 - Install Ubuntu 20.04 from windows store.
+- Open the Ubuntu 20.04 terminal.
 
-Then, the Ubuntu steps are slightly modified.
+Then, we will list the changes to the Ubuntu installing sequence.
+
+Update and install some basic tools that help building python packages::
+
+    sudo apt install -y build-essential libssl-dev libffi-dev python3-dev
 
 Creation of airflow directory::
 

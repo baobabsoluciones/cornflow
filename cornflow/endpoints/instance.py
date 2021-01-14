@@ -64,6 +64,7 @@ class InstanceDetailsEndpoint(MetaResource):
     """
     def __init__(self):
         super().__init__()
+        # TODO: we can make it subclass of InstanceEndpoint and avoid the self.model and the self.schema?
         self.model = InstanceModel
         # TODO: should this query use user as well?
         self.query = 'get_one_instance_from_user'
