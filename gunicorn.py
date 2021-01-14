@@ -6,8 +6,8 @@ from os import environ
 def max_workers():    
     return cpu_count()
 
-chdir = '/usr/src/app/cornflow'
-bind = '0.0.0.0:8000'
+chdir = '/usr/src/app'
+bind = '0.0.0.0:5000'
 max_requests = 1000
 worker_class = 'gevent'
 workers = 3

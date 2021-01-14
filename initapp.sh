@@ -9,7 +9,6 @@
 : "${FLASK_APP:="cornflow.app"}"
 : "${FLASK_ENV:="development"}"
 #: "${SECRET_KEY=${FERNET_KEY:=$(python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)")}}"
-: "${DATABASE_URL=${CORNFLOW_DB_CONN}}"
 
 export \
   AIRFLOW_USER \
@@ -20,12 +19,6 @@ export \
   FLASK_ENV \
 
 # check database param from docker env
-if [ -z "$CORNFLOW_DB_CONN" ]; then
-
-   DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}${POSTGRES_EXTRAS}"
-   export DATABASE_URL
-
-fi
 if [ -z "$DATABASE_URL" ];  then
 
      >&2 printf '%s\n' "FATAL: you need to provide a postgres database for Cornflow"
@@ -42,4 +35,4 @@ python manage.py create_super_user
 # Cambiar flask por Gunicorn
 #flask run -h 0.0.0.0
 
-/usr/local/bin/gunicorn -c gunicorn.py wsgi:app
+/usr/local/bin/gunicorn -c gunicorn.py "cornflow:create_app('$FLASK_ENV')" --log-level info
