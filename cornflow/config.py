@@ -21,7 +21,7 @@ class Testing(object):
     DEBUG = True
     TESTING = True
     SECRET_KEY = 'TESTINGSECRETKEY'
-    SQLALCHEMY_DATABASE_URI = 'postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow_test'
+    SQLALCHEMY_DATABASE_URI = "sqlite:///cornflow_test.db"
     AIRFLOW_URL = 'http://localhost:8080'
     CORNFLOW_URL = 'http://localhost:5000'
     PRESERVE_CONTEXT_ON_EXCEPTION = False

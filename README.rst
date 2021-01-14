@@ -332,12 +332,6 @@ Appended in this repository are three more docker-compose files for different ki
 Test cornflow
 ~~~~~~~~~~~~~~~~~~
 
-Create a new test database::
-
-    sudo su - postgres
-    psql -c "create database cornflow_test"
-    exit
-
 Then you have to run the following commands::
 
     export FLASK_APP=cornflow.app

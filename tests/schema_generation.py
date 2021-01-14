@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
              "type": "Boolean",
              },
             {"name": "NotRequiredBool",
-             "description": "Another bool thats not required",
+             "description": "Another bool that's not required",
              "required": False,
              "type": "Boolean"
              }
