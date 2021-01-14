@@ -16,6 +16,9 @@ class Development(object):
 
 
 class Testing(object):
+    """
+
+    """
     DEBUG = True
     TESTING = True
     SECRET_KEY = 'TESTINGSECRETKEY'
@@ -23,6 +26,8 @@ class Testing(object):
     AIRFLOW_URL = 'http://localhost:8080'
     CORNFLOW_URL = 'http://localhost:5000'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    AIRFLOW_USER = 'admin'
+    AIRFLOW_PWD = 'admin'
 
 
 class Production(object):

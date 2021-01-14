@@ -338,9 +338,17 @@ Then you have to run the following commands::
     export FLASK_APP=cornflow.app
     export FLASK_ENV=testing
 
-Finally you can run the tests with the following command::
+Finally you can run all the tests with the following command::
 
     coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
+
+If you want to only run the unit tests (without a local airflow webserver)::
+
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/unit/
+
+If you want to only run the integration test with a local airflow webserver::
+
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/integration/
 
 After if you want to check the coverage report you need to run::
 
