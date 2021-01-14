@@ -16,14 +16,18 @@ class MetaResource(Resource):
         self.user_id = None
         self.admin = None
         self.super_admin = None
+        # TODO: these properties (data, serialized_data) is always passed as an argument
+        #  so there's no need to store it
         self.data = None
+        self.serialized_data = None
         self.model = None
         self.query = None
-        self.serialized_data = None
         self.schema = None
         self.primary_key = None
         self.dependents = None
         self.foreign_data = None
+        # TODO: this property can be passed as an argument
+        #  so there's no need to store it (foreign_owner)
         self.foreign_owner = None
 
     def get_list(self, *args):
@@ -45,6 +49,7 @@ class MetaResource(Resource):
     def post_list(self, request):
         request_data = request.get_json()
         try:
+            # TODO: take out the partial and make it work
             self.data = self.schema.load(request_data, partial=True)
         except ValidationError as val_err:
             return {'error': val_err.normalized_messages()}, 400
