@@ -24,6 +24,8 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         krb5-user \
         ldap-utils \
         libffi6 \
+        libffi-dev \
+		libpq-dev \
         libsasl2-2 \
         libsasl2-modules \
         libssl1.1 \

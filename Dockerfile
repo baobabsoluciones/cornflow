@@ -16,6 +16,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		dos2unix \
 		gcc \
 		python3-dev \
+		libffi-dev \
 		libpq-dev
 		
 # set work directory
