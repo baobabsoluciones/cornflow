@@ -5,6 +5,7 @@ class Development(object):
     """
 
     """
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
     TESTING = True
     SECRET_KEY = os.getenv('SECRET_KEY')
@@ -19,6 +20,7 @@ class Testing(object):
     """
 
     """
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
     SECRET_KEY = 'TESTINGSECRETKEY'
@@ -34,6 +36,7 @@ class Production(object):
     """
 
     """
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
     SECRET_KEY = os.getenv('SECRET_KEY')
