@@ -63,7 +63,7 @@ class ExecutionEndpoint(MetaResource):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         result = self.post_list(request)
 
-        not_run = request.args.get('run', 'no') == 'no'
+        not_run = request.args.get('run', '1') == '0'
 
         if result[1] >= 300 or not_run:
             return result

@@ -16,7 +16,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
         fk_id = self.create_new_row(INSTANCE_PATH)
         self.foreign_keys = {'instance_id': fk_id}
 
-        self.url = '/execution/'
+        self.url = '/execution/?run=0'
         self.model = ExecutionModel
 
     def test_new_execution(self):
@@ -40,11 +40,11 @@ class TestExecutionsDetailEndpoint(CustomTestCase):
 
         self.foreign_keys = {'instance_id': fk_id}
 
-        self.url = '/execution/'
+        self.url = '/execution/?run=0'
         self.model = ExecutionModel
 
         self.id = self.create_new_row(EXECUTION_PATH)
-        self.url = self.url + self.id + '/'
+        self.url = '/execution/' + self.id + '/'
 
     def test_get_one_execution(self):
         self.get_one_row(EXECUTION_PATH)

@@ -15,24 +15,36 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.data = {
+        data = {
             'name': 'testname',
             'email': 'test@test.com',
             'password': 'testpassword'
         }
-        user = UserModel(data=self.data)
+        user = UserModel(data=data)
         user.save()
         db.session.commit()
 
-        self.token = self.client.post('/login/', data=json.dumps(self.data), follow_redirects=True,
+        self.token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
 
         self.user = Auth.return_user_from_token(self.token)
         self.url = None
         self.model = None
-        self.payload = None
         self.id = None
         self.foreign_keys = None
+
+    @staticmethod
+    def airflow_user():
+        data = {
+            'name': 'airflow',
+            'email': 'airflow@baobabsoluciones.es',
+            'password': 'THISNEEDSTOBECHANGED'
+        }
+
+        user = UserModel(data=data)
+        user.super_admin = True
+        user.save()
+        db.session.commit()
 
     def tearDown(self):
         db.session.remove()
@@ -40,26 +52,22 @@ class CustomTestCase(TestCase):
 
     def create_new_row(self, file):
         with open(file) as f:
-            self.payload = json.load(f)
+            payload = json.load(f)
 
         if self.foreign_keys is not None:
             for key, value in self.foreign_keys.items():
-                self.payload[key] = value
+                payload[key] = value
 
-        response = self.client.post(self.url, data=json.dumps(self.payload), follow_redirects=True,
+        response = self.client.post(self.url, data=json.dumps(payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json",
                                              "Authorization": 'Bearer ' + self.token})
 
-        if response.status_code == 400:
-            print(response.json, self.url)
-            print(self.payload)
-            print(self.token)
         self.assertEqual(201, response.status_code)
 
         row = self.model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
-        for key in self.payload:
-            self.assertEqual(getattr(row, key), self.payload[key])
+        for key in payload:
+            self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
     def get_rows(self, files):
@@ -88,17 +96,16 @@ class CustomTestCase(TestCase):
                 self.assertEqual(rows.json[i][key], data[i][key])
 
     def get_one_row(self, file):
-        self.payload = None
         with open(file) as f:
-            self.payload = json.load(f)
+            payload = json.load(f)
 
         row = self.client.get(self.url, follow_redirects=True,
                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json['id'], self.id)
-        for key in self.payload:
-            self.assertEqual(row.json[key], self.payload[key])
+        for key in payload:
+            self.assertEqual(row.json[key], payload[key])
 
     def get_no_rows(self):
         rows = self.client.get(self.url, follow_redirects=True,
@@ -107,13 +114,12 @@ class CustomTestCase(TestCase):
         self.assertEqual(204, rows.status_code)
 
     def update_row(self, file, key, new_value):
-        self.payload = None
         with open(file) as f:
-            self.payload = json.load(f)
+            payload = json.load(f)
 
-        self.payload[key] = new_value
+        payload[key] = new_value
 
-        response = self.client.put(self.url, data=json.dumps(self.payload), follow_redirects=True,
+        response = self.client.put(self.url, data=json.dumps(payload), follow_redirects=True,
                                    headers={"Content-Type": "application/json",
                                             "Authorization": 'Bearer ' + self.token})
 
@@ -124,8 +130,8 @@ class CustomTestCase(TestCase):
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json['id'], self.id)
-        for key in self.payload:
-            self.assertEqual(row.json[key], self.payload[key])
+        for key in payload:
+            self.assertEqual(row.json[key], payload[key])
 
     def delete_row(self):
 
