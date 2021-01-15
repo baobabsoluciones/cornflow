@@ -53,7 +53,8 @@ class CornFlow(object):
             self.token = result['token']
             return result
         else:
-            raise CornFlowApiError("Login failed with status code: {}. {}".format(response.status_code, response))
+            raise CornFlowApiError("Login failed with status code: {}: {}".
+                                   format(response.status_code, response.text))
 
     @ask_token
     @log_call
@@ -68,7 +69,23 @@ class CornFlow(object):
             headers={'Authorization': 'access_token ' + self.token},
             json=dict(data=data, name=name, description=description))
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead".format(response.status_code))
+            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
+                                   format(response.status_code, response.text))
+        return response.json()
+
+    @ask_token
+    @log_call
+    def create_instance_file(self, filename, name, description=''):
+        files = {'file': open(filename, 'rb')}
+        response = requests.post(
+            urljoin(self.url, 'instancefile/'),
+            headers={'Authorization': 'access_token ' + self.token},
+            files=files,
+            data=dict(name=name, description=description))
+
+        if response.status_code != 201:
+            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
+                                   format(response.status_code, response.text))
         return response.json()
 
     @log_call
@@ -80,7 +97,7 @@ class CornFlow(object):
             json=dict(config=config, instance_id=instance_id, name=name, description=description))
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.json()))
+                                   format(response.status_code, response.text))
         return response.json()
 
     @ask_token
