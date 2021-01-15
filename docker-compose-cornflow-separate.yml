@@ -7,10 +7,13 @@ services:
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=cornflow.app
-      - FLASK_ENV=development
-      - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
-      - SECRET_KEY=THISNEEDSTOBECHANGED
+      - AIRFLOW_USER=admin
+      - AIRFLOW_PWD=admin
+      - CORNFLOW_DB_HOST=cornflow_db
+      - CORNFLOW_DB_PORT=5432
+      - CORNFLOW_DB_USER=cornflow
+      - CORNFLOW_DB_PASSWORD=cornflow
+      - CORNFLOW_DB=cornflow
       - AIRFLOW_URL=http://airflowurl:8080
       - CORNFLOW_URL=http://cornflowurl:5000
     depends_on:
@@ -19,8 +22,8 @@ services:
   cornflow_db:
     image: postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_USER=cornflow
+      - POSTGRES_PASSWORD=cornflow
       - POSTGRES_DB=cornflow
     volumes:
       - postgres_cf_data:/var/lib/postgresql/data/

@@ -14,3 +14,4 @@ workers = 3
 timeout = 300
 keepalive = 300
 graceful_timeout = 300
+log_level = 'info'
