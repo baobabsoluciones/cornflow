@@ -17,6 +17,9 @@ class Development(object):
 
 
 class Testing(object):
+    """
+
+    """
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
@@ -25,6 +28,8 @@ class Testing(object):
     AIRFLOW_URL = 'http://localhost:8080'
     CORNFLOW_URL = 'http://localhost:5000'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    AIRFLOW_USER = 'admin'
+    AIRFLOW_PWD = 'admin'
 
 
 class Production(object):

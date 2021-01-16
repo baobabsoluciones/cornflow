@@ -37,8 +37,8 @@ class DAGEndpoint(Resource):
         execution = ExecutionModel.get_one_execution_from_id(idx)
         # because we do not want to store airflow's user:
         req_data['user_id'] = execution.user_id
+        req_data['finished'] = True
         execution.update(req_data)
-        execution.finished = True
         execution.save()
         return {'message': 'results successfully saved'}, 201
     
@@ -49,7 +49,7 @@ class DAGEndpoint(Resource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by the superuser created for the airflow webserver
 
-        :param str reference_id: ID of the execution
+        :param str idx: ID of the execution
         :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
           and :class:`DataSchema` and an integer for HTTP status code
         :rtype: Tuple(dict, integer)
