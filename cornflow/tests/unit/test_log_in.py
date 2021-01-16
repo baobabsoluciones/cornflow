@@ -23,6 +23,7 @@ class TestLogIn(TestCase):
         user = UserModel(data=self.data)
         user.save()
         db.session.commit()
+        self.id = UserModel.query.filter_by(name='testname').first().id
 
     def tearDown(self):
         db.session.remove()
@@ -93,3 +94,25 @@ class TestLogIn(TestCase):
     def test_token(self):
         # TODO: implement to check correct token creation
         pass
+
+    def test_old_token(self):
+        token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ' \
+                '.QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc '
+
+        response = self.client.get('/user/' + str(self.id) + '/', follow_redirects=True,
+                                   headers={"Content-Type": "application/json",
+                                            "Authorization": 'Bearer ' + token})
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual('Token expired, please login again.', response.json['message'])
+
+    def test_invalid_token(self):
+        token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ' \
+                '.g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo'
+
+        response = self.client.get('/user/' + str(self.id) + '/', follow_redirects=True,
+                                   headers={"Content-Type": "application/json",
+                                            "Authorization": 'Bearer ' + token})
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual('Invalid token, please try again with a new token.', response.json['message'])

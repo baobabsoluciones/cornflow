@@ -43,10 +43,10 @@ class Auth:
             re['data'] = {'user_id': payload['sub']}
             return re
         except jwt.ExpiredSignatureError:
-            re['error'] = {'message': 'token expired, please login again'}
+            re['error'] = {'message': 'Token expired, please login again.'}
             return re
         except jwt.InvalidTokenError:
-            re['error'] = {'message': 'Invalid token, please try again with a new token'}
+            re['error'] = {'message': 'Invalid token, please try again with a new token.'}
             return re
 
     # user decorator

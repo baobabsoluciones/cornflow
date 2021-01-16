@@ -1,0 +1,18 @@
+{"config": {
+    "solver": "PULP_CBC_CMD",
+    "mip": true,
+    "msg": true,
+    "warmStart": true,
+    "timeLimit": 10,
+    "options": [""],
+    "keepFiles": 0,
+    "gapRel": 0.1,
+    "gapAbs": 1,
+    "maxMemory": 1000,
+    "maxNodes": 1,
+    "threads": 1,
+    "logPath": "test_export_solver_json.log"
+},
+"name": "execution_1",
+"description": "This is a test for the executions"
+}
