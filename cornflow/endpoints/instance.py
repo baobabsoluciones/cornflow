@@ -64,6 +64,7 @@ class InstanceDetailsEndpoint(MetaResource):
     """
     def __init__(self):
         super().__init__()
+        # TODO: we can make it subclass of InstanceEndpoint and avoid the self.model and the self.schema?
         self.model = InstanceModel
         # TODO: should this query use user as well?
         self.query = 'get_one_instance_from_user'
@@ -114,3 +115,19 @@ class InstanceDetailsEndpoint(MetaResource):
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)
+
+
+class InstanceFileEndpoint(MetaResource):
+    """
+    Endpoint to accept mps files to upload
+    """
+
+    def post(self, file):
+        """
+        Not implemented!
+
+        :param file:
+        :return:
+        :rtype: Tuple(dict, integer)
+        """
+        return {}, 501

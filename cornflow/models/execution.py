@@ -59,6 +59,7 @@ class ExecutionModel(BaseAttributes):
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     config = db.Column(JSON, nullable=False)
+    dag_run_id = db.Column(db.String(256), nullable=True)
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
@@ -73,7 +74,8 @@ class ExecutionModel(BaseAttributes):
         self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
         self.name = data.get('name')
-        self.description = data.get('description')
+        self.description = data.get('description', None)
+        self.dag_run_id = data.get('dag_run_id', None)
         self.finished = False
         self.config = data.get('config')
 
@@ -99,6 +101,7 @@ class ExecutionModel(BaseAttributes):
         """
         Updates the deleted_at field of an execution to mark an execution as "deleted"
         """
+        # TODO: if the method is the same as the parent: no need of adding it
         super().disable()
 
     def delete(self):
@@ -126,7 +129,7 @@ class ExecutionModel(BaseAttributes):
         :param str idx: Execution ID
         :return: The execution.
         """
-        return ExecutionModel.query.get(id=idx, deleted_at=None).first()
+        return ExecutionModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_one_execution_from_user(user, idx):
@@ -138,7 +141,11 @@ class ExecutionModel(BaseAttributes):
         :return: The execution.
         """
         return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
-    
+
+    @staticmethod
+    def get_execution_with_reference(reference_id):
+        return ExecutionModel.query.filter_by(id=reference_id).first()
+
     @staticmethod
     def get_execution_data(idx):
         """
