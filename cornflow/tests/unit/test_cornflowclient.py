@@ -5,6 +5,10 @@ import pulp
 
 class TestInstances(CustomTestCaseLive):
 
+    # TODO:
+    #  delete instance, new / delete execution, user management
+    #  get status?
+
     def create_new_instance_file(self, file):
         name = 'test_instance1'
         description = 'description123'
@@ -21,3 +25,4 @@ class TestInstances(CustomTestCaseLive):
 
     def test_new_instance(self):
         self.create_new_instance_file('./cornflow/tests/data/test_mps.mps')
+

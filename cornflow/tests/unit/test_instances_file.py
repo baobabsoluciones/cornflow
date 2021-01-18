@@ -1,6 +1,5 @@
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
-import json
 import pulp
 
 

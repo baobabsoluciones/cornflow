@@ -62,7 +62,7 @@ class CustomTestCase(TestCase):
                                     headers={"Content-Type": "application/json",
                                              "Authorization": 'Bearer ' + self.token})
 
-            self.assertEqual(201, response.status_code)
+        self.assertEqual(201, response.status_code)
 
         row = self.model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
