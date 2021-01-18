@@ -1,5 +1,5 @@
 import requests
-import json
+from requests.exceptions import ConnectionError, HTTPError
 from urllib.parse import urljoin
 from requests.auth import HTTPBasicAuth
 
@@ -14,10 +14,13 @@ class Airflow(object):
         self.auth = HTTPBasicAuth(user, pwd)
 
     def is_alive(self):
-        response = requests.get(self.url + '/health')
+        try:
+            response = requests.get(self.url + '/health')
+        except (ConnectionError, HTTPError):
+            return False
         data = response.json()
-        return data['metadatabase']['status']=='healthy' and \
-               data['scheduler']['status']=='healthy'
+        return data['metadatabase']['status'] == 'healthy' and \
+               data['scheduler']['status'] == 'healthy'
 
     def consume_dag_run(self, dag_name, payload, dag_run_id=None, method='POST'):
         url = urljoin(self.url, '/api/v1/dags/{}/dagRuns'.format(dag_name))

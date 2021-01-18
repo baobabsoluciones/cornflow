@@ -63,8 +63,6 @@ Initialize the database::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    python manage.py db init
-    python manage.py db migrate
     python manage.py db upgrade
     python manage.py create_super_user
 

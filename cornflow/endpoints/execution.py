@@ -67,10 +67,11 @@ class ExecutionEndpoint(MetaResource):
 
         not_run = request.args.get('run', '1') == '0'
 
+        # if we failed to save the execution, we do not continue
         if result[1] >= 300 or not_run:
             return result
-        # To send the absolute url:
-        # url_for(endpoint_name, _external=True)
+
+        # We now try to launch the task in airflow
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
             return {'error': "Airflow is not accessible"}, 400
@@ -79,9 +80,12 @@ class ExecutionEndpoint(MetaResource):
             response = af_client.run_dag(execution_id, config['CORNFLOW_URL'], dag_name='solve_model_dag')
         except AirflowApiError as err:
             return {'error': "Airflow responded with an error: {}".format(err)}, 400
-        # TODO: register dag_run_id to execution table
+
+        # if we succeed, we register the dag_run_id in the execution table:
         data = response.json()
-        print(data['dag_run_id'])
+        execution = ExecutionModel.get_one_execution_from_user(self.user_id, execution_id)
+        execution.dag_run_id = data['dag_run_id']
+        execution.save()
         return result
 
 
@@ -170,9 +174,6 @@ class ExecutionStatusEndpoint(MetaResource):
         status = execution.finished
         if status:
             return {'status': 'finished'}, 200
-        # Here we should call airflow to check solving status
-        # TODO: delete the following line when active
-        return {'status': 'not finished'}, 200
         dag_run_id = execution.dag_run_id
         if not dag_run_id:
             return {'error': 'The execution has no dag_run associated'}, 400
