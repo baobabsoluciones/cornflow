@@ -3,7 +3,6 @@ from ..schemas.model_json import DataSchema
 from ..schemas.solution_log import LogSchema
 
 
-
 class OptionsSchema(Schema):
     option1 = fields.Str(required=True, many=True)
 
@@ -30,6 +29,7 @@ class ExecutionSchema(Schema):
     instance_id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
+    dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     execution_results = fields.Nested(DataSchema, dump_only=True)
     log_text = fields.Str(dump_only=True)

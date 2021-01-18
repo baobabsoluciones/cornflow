@@ -65,8 +65,9 @@ class ExecutionEndpoint(MetaResource):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         result = self.post_list(request)
 
-        # TODO: check result[1] before continuing! if not 20X, return.
-        if result[1] >= 300:
+        not_run = request.args.get('run', '1') == '0'
+
+        if result[1] >= 300 or not_run:
             return result
         # To send the absolute url:
         # url_for(endpoint_name, _external=True)
