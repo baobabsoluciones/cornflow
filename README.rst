@@ -63,8 +63,6 @@ Initialize the database::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    python manage.py db init
-    python manage.py db migrate
     python manage.py db upgrade
     python manage.py create_super_user
 
@@ -331,12 +329,6 @@ Appended in this repository are three more docker-compose files for different ki
 
 Test cornflow
 ~~~~~~~~~~~~~~~~~~
-
-Create a new test database::
-
-    sudo su - postgres
-    psql -c "create database cornflow_test"
-    exit
 
 Then you have to run the following commands::
 
