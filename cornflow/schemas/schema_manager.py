@@ -5,7 +5,7 @@ Class to help create and manage data schema and to validate json files.
 
 import json
 import re
-from jsonschema import validate
+from jsonschema import validate, Draft7Validator
 from copy import deepcopy
 from genson import SchemaBuilder
 from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
@@ -21,6 +21,7 @@ class SchemaManager:
         
         :param schema: a json schema
         """
+        self.default_validator = Draft7Validator
         self.jsonschema = schema if schema is not None else {}
         self.types = JSON_TYPES
         self.schema_dict = {"DataSchema": []}
@@ -53,24 +54,29 @@ class SchemaManager:
             raise Warning("No jsonschema has been loaded in the SchemaManager class")
         return loaded
     
-    def validate_data(self, data):
+    def validate_data(self, data, validator=None):
         """
         Validate json data according to the loaded jsonschema.
 
         :param data The path to the json file containing the data.
 
-        :return: True if the data is valid and False if it is not.
+        :return: A list of validation errors.
+        For more details about the error format, see:
+        https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError
         """
+        # TODO: is it ok to return [] when the validation is fine?
         self.is_schema_loaded()
         
-        try:
-            validate(data, self.get_jsonschema())
-            return True
-        except Exception as e:
-            # TODO: return the errors in a good format
-            print("json file not valid: ", e)
-            return False
-    
+        if validator is None:
+            validator = self.default_validator
+        v = validator(self.get_jsonschema())
+        
+        if not v.is_valid(data):
+            error_list = [e for e in v.iter_errors(data)]
+            return error_list
+        else:
+            return []
+        
     def validate_file(self, path):
         """
         Validate a json file according to the loaded jsonschema.
@@ -172,7 +178,7 @@ class SchemaManager:
         
         draft_schema = builder.to_json()
         if save_path is not None:
-            self.save_json(self.draft_schema, save_path)
+            self.save_json(draft_schema, save_path)
         return draft_schema
     
     """

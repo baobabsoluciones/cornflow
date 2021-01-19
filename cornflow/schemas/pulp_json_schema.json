@@ -18,7 +18,7 @@
     "objective": {
       "type": "object",
       "properties": {
-        "name": {"type": "string"},
+        "name": {"type": ["string", "null"]},
         "coefficients": {
           "type": "array",
           "items": {
@@ -27,7 +27,6 @@
         }
       },
       "required": [
-        "name",
         "coefficients"
       ]
     },
@@ -49,7 +48,10 @@
             ]
           },
           "constant": {
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "coefficients": {
             "type": "array",
@@ -62,7 +64,6 @@
           "name",
           "sense",
           "pi",
-          "constant",
           "coefficients"
         ]
       }
