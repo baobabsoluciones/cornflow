@@ -14,19 +14,29 @@ from .constants import JSON_TYPES
 
 class SchemaManager:
     
-    def __init__(self, schema_path=None):
+    def __init__(self, schema=None):
         """
         Class to help create and manage data schema.
         Once a schema is loaded, allow the validation of data.
+        
+        :param schema: a json schema
         """
-    
-        self.jsonschema = {}
+        self.jsonschema = schema if schema is not None else {}
         self.types = JSON_TYPES
-        self.schema_dict = {"DataSchema": {}}
-        self.flask_schemas = {}
-        self.draft_schema = {}
-        if schema_path is not None:
-            self.load_schema(schema_path)
+        self.schema_dict = {"DataSchema": []}
+    
+    @classmethod
+    def from_filepath(cls, path):
+        """
+        Load a json schema from a json file.
+        
+        :param path the file path
+        
+        return The SchemaManager instance
+        """
+
+        schema = cls.load_json(path)
+        return cls(schema)
     
     def get_jsonschema(self):
         """
@@ -43,23 +53,35 @@ class SchemaManager:
             raise Warning("No jsonschema has been loaded in the SchemaManager class")
         return loaded
     
-    def validate_data(self, data_path):
+    def validate_data(self, data):
         """
-        Validate a json file according to the loaded jsonschema.
+        Validate json data according to the loaded jsonschema.
 
-        :param data_path The path to the json file containing the data.
+        :param data The path to the json file containing the data.
 
         :return: True if the data is valid and False if it is not.
         """
         self.is_schema_loaded()
         
-        data = self.load_json(data_path)
         try:
             validate(data, self.get_jsonschema())
             return True
         except Exception as e:
+            # TODO: return the errors in a good format
             print("json file not valid: ", e)
             return False
+    
+    def validate_file(self, path):
+        """
+        Validate a json file according to the loaded jsonschema.
+        
+        :param path the file path
+        
+        :return: True if the data is valid and False if it is not.
+        """
+    
+        data = self.load_json(path)
+        return self.validate_data(data)
     
     def jsonschema_to_dict(self):
         """
@@ -70,7 +92,8 @@ class SchemaManager:
         jsonschema = self.get_jsonschema()
         
         if not self.is_schema_loaded():
-            return {"DataSchema": {}}
+            return self.schema_dict
+        
         self.schema_dict = {"DataSchema": []}
 
         for item in jsonschema["definitions"].items():
@@ -97,9 +120,8 @@ class SchemaManager:
             # this line validates the list of parameters:
             params1 = schema.load(params, many=True)
             result_dict[key] = gen_schema(key, params1, result_dict)
-    
-        self.flask_schemas = result_dict['DataSchema']
-        return self.flask_schemas
+        
+        return result_dict['DataSchema']
     
     def jsonschema_to_flask(self):
         """
@@ -108,8 +130,7 @@ class SchemaManager:
         :return: a dict containing the flask marshmallow schemas
         """
         self.jsonschema_to_dict()
-        self.dict_to_flask()
-        return self.flask_schemas
+        return self.dict_to_flask()
         
     def load_schema(self, path):
         """
@@ -120,9 +141,10 @@ class SchemaManager:
         return the jsonschema
         """
         self.jsonschema = self.load_json(path)
+        self.schema_dict = {"DataSchema": []}
         return self.jsonschema
 
-    def print_schema_dict(self, path):
+    def export_schema_dict(self, path):
         """
         Print the schema_dict in a json file.
 
@@ -148,10 +170,10 @@ class SchemaManager:
         builder.add_schema({"type": "object", "properties": {}})
         builder.add_object(file)
         
-        self.draft_schema = builder.to_json()
+        draft_schema = builder.to_json()
         if save_path is not None:
             self.save_json(self.draft_schema, save_path)
-        return self.draft_schema
+        return draft_schema
     
     """
     Functions used to translate jsonschema to schema_dict
@@ -169,10 +191,10 @@ class SchemaManager:
         content = item[1]
     
         schema = [dict(name=name,
-                      type=self._get_schema_name(name),
-                      many=("type" in content and content["type"] == "array"),
-                      required=True)]
-        self.schema_dict["DataSchema"] +=schema
+                       type=self._get_schema_name(name),
+                       many=("type" in content and content["type"] == "array"),
+                       required=True)]
+        self.schema_dict["DataSchema"] += schema
     
         return schema
     
@@ -190,6 +212,7 @@ class SchemaManager:
         
         name = item[0]
         content = item[1]
+        # TODO: what should we do when no type is given?
         if "type" not in content:
             if "$ref" in content:
                 return {
@@ -226,7 +249,7 @@ class SchemaManager:
         {"schema_name": [{"name":"field1", "type": "field1_type", "many": False, "required":(True or False)}, ...]
         
         :param item: The jsonschema item (key, value)
-        The forma tof the item is: ("object_name", {"type":"object", "properties":{"a": {...}, "b": {...}})
+        The format of the item is: ("object_name", {"type":"object", "properties":{"a": {...}, "b": {...}})
         
         :return: The schema name
         """
@@ -312,11 +335,10 @@ class SchemaManager:
         :return: the type in schema_dict.
         """
         if type(json_type) is list:
-            if "null" in json_type:
-                json_type = [i for i in json_type if i != "null"]
-            if len(json_type) > 1:
+            not_null_type = [i for i in json_type if i != "null"]
+            if len(not_null_type) > 1:
                 raise Warning("Warning: more than one type given")
-            return self.types[json_type[0]]
+            return self.types[not_null_type[0]]
         else:
             return self.types[json_type]
     
@@ -341,11 +363,8 @@ class SchemaManager:
         :return: The required list or empty list.
         
         """
-        if "required" in content:
-            return content["required"]
-        else:
-            return []
-       
+        return content.get("required", [])
+    
     """
     Helper methods
     """

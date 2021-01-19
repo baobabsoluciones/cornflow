@@ -2,7 +2,7 @@ from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_di
 from .schema_manager import SchemaManager
 
 
-manager = SchemaManager("./cornflow/schemas/pulp_json_schema.json")
+manager = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
 DataSchema = manager.jsonschema_to_flask()
 
 """
