@@ -54,28 +54,47 @@ class SchemaManager:
             raise Warning("No jsonschema has been loaded in the SchemaManager class")
         return loaded
     
-    def validate_data(self, data, validator=None):
+    def get_validation_errors(self, data, validator=None):
         """
-        Validate json data according to the loaded jsonschema.
+        Validate json data according to the loaded jsonschema and return a list of errors.
+        Return an empty list if data is valid.
 
         :param data The path to the json file containing the data.
+        :param validator A jsonschema IValidator class. If None, will use self.default_validator.
 
         :return: A list of validation errors.
         For more details about the error format, see:
         https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError
         """
-        # TODO: is it ok to return [] when the validation is fine?
         self.is_schema_loaded()
-        
+    
         if validator is None:
             validator = self.default_validator
         v = validator(self.get_jsonschema())
-        
+    
         if not v.is_valid(data):
             error_list = [e for e in v.iter_errors(data)]
             return error_list
         else:
             return []
+    
+    def validate_data(self, data, validator=None, print_errors=False):
+        """
+        Validate json data according to the loaded jsonschema.
+
+        :param data The path to the json file containing the data.
+        :param validator A jsonschema IValidator class. If None, will use self.default_validator.
+        :param print_errors: If true, will print the errors.
+
+        :return: True if data format is valid, else False.
+        """
+        errors_list = self.get_validation_errors(data, validator=validator)
+        
+        if print_errors:
+            for e in errors_list:
+                print(e)
+        
+        return len(errors_list) == 0
         
     def validate_file(self, path):
         """

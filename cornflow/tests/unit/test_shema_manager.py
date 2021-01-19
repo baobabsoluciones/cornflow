@@ -28,14 +28,16 @@ class TestSchemaManager(TestCase):
     def test_schema_validation(self):
         sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
         val = sm.validate_file("./cornflow/tests/data/pulp_example_data.json")
-        self.assertEqual(len(val), 0)
+        self.assertTrue(val)
     
     def test_validation_errors(self):
         sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
         data1 = {"objective": [], "constraints": [], "variables": []}
         data2 = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
-        val1 = sm.validate_data(data1)
-        val2 = sm.validate_data(data2)
+        bool1 = sm.validate_data(data1)
+        val1 = sm.get_validation_errors(data1)
+        val2 = sm.get_validation_errors(data2)
+        self.assertFalse(bool1)
         self.assertEqual(len(val1), 1)
         self.assertEqual(val1[0].message, "[] is not of type 'object'")
         self.assertEqual(len(val2), 3)
