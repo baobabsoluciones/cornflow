@@ -171,8 +171,7 @@ class ExecutionStatusEndpoint(MetaResource):
 
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, idx)
-        status = execution.finished
-        if status:
+        if execution.finished:
             return {'status': 'finished'}, 200
         dag_run_id = execution.dag_run_id
         if not dag_run_id:

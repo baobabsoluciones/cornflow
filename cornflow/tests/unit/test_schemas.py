@@ -4,6 +4,8 @@ import json
 from cornflow.schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
 from cornflow.schemas.solution_log import LogSchema
 from airflow_config.dags.model_functions import solve_model
+from cornflow.schemas.solution_log import LogSchema
+from airflow_config.dags.model_functions import solve_model
 from marshmallow import ValidationError, Schema, fields
 
 
