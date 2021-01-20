@@ -5,16 +5,21 @@ These endpoints have different access url, but manage the smae data entities
 """
 # Import from libraries
 from flask import request
+from werkzeug.utils import secure_filename
+import os
+import pulp
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas import InstanceSchema
 from ..shared.authentication import Auth
+from marshmallow.exceptions import ValidationError
 
 # Initialize the schema that all endpoints are going to use
+# TODO: instance_schema is not used.
 instance_schema = InstanceSchema()
-
+ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
 class InstanceEndpoint(MetaResource):
     """
@@ -117,17 +122,55 @@ class InstanceDetailsEndpoint(MetaResource):
         return self.delete_detail(self.user_id, idx)
 
 
-class InstanceFileEndpoint(MetaResource):
+class InstanceFileEndpoint(InstanceEndpoint):
     """
     Endpoint to accept mps files to upload
     """
 
-    def post(self, file):
+    @Auth.auth_required
+    def post(self):
         """
-        Not implemented!
 
         :param file:
         :return:
         :rtype: Tuple(dict, integer)
         """
-        return {}, 501
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        name = request.form.get('name', '')
+        description = request.form.get('description', '')
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        if not (file and allowed_file(filename)):
+            return {'error': "Could not open file to upload. Check the extension matches {}.".
+                format(ALLOWED_EXTENSIONS)}, 400
+        file.save(filename)
+        try:
+            _vars, problem = pulp.LpProblem.fromMPS(filename)
+        except:
+            return {'error': "There was an error reading the file."}, 400
+        try:
+            os.remove(filename)
+        except:
+            pass
+
+        pb_data = dict(
+            data=problem.toDict()
+            ,name=name
+            ,description=description
+            ,user_id=self.user_id
+        )
+
+        try:
+            self.data = self.schema.load(pb_data)
+        except ValidationError as val_err:
+            return {'error': val_err.normalized_messages()}, 400
+
+        item = self.model(self.data)
+        item.save()
+
+        return {self.primary_key: getattr(item, self.primary_key)}, 201
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

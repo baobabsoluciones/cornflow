@@ -5,11 +5,12 @@ pwd = 'some_password'
 name = 'some_name'
 
 def run_example():
+    server = "http://127.0.0.1:5000"
+    client = CornFlow(url=server)
 
-    client = CornFlow(url="http://127.0.0.1:5000")
-    # config = dict(email=email, pwd=pwd, name=name)
-    # client.sign_up(**config)
-    client.login(email, pwd)
+    config = dict(email=email, pwd=pwd, name=name)
+    a = client.sign_up(**config)
+    a = client.login(email, pwd)
 
     import pulp
     prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)
@@ -20,11 +21,17 @@ def run_example():
     prob += x + y <= 5, "c1"
     prob += x + z >= 10, "c2"
     prob += -y + z == 7.5, "c3"
-    data = prob.to_dict()
+    data = prob.toDict()
+    filename = 'test_mps.mps'
+    insName = 'test_export_dict_MIP'
+    description = 'very small example'
+    prob.writeMPS(filename=filename)
 
     instance_id = client.create_instance(data,
-                                         name='test_export_dict_MIP',
-                                         description='very small example')
+                                         name=insName,
+                                         description=description)
+    instance_id = client.create_instance_file(filename=filename, name=insName, description=description)
+    
     info = client.get_one_instance(instance_id['id'])
     info_all = client.get_all_instances()
 

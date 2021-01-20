@@ -20,7 +20,6 @@ from ..shared.authentication import Auth
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
 
-
 class ExecutionEndpoint(MetaResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -60,26 +59,33 @@ class ExecutionEndpoint(MetaResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        config = current_app.config
+        airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
+
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         result = self.post_list(request)
 
         not_run = request.args.get('run', '1') == '0'
 
+        # if we failed to save the execution, we do not continue
         if result[1] >= 300 or not_run:
             return result
-        # To send the absolute url:
-        # url_for(endpoint_name, _external=True)
-        airflow_client = Airflow(current_app.config['AIRFLOW_URL'],
-                                 current_app.config['AIRFLOW_USER'],
-                                 current_app.config['AIRFLOW_PWD'])
-        if not airflow_client.is_alive():
+
+        # We now try to launch the task in airflow
+        af_client = Airflow(**airflow_conf)
+        if not af_client.is_alive():
             return {'error': "Airflow is not accessible"}, 400
         execution_id = result[0][self.primary_key]
         try:
-            airflow_client.run_dag(execution_id, current_app.config['CORNFLOW_URL'])
+            response = af_client.run_dag(execution_id, config['CORNFLOW_URL'], dag_name='solve_model_dag')
         except AirflowApiError as err:
             return {'error': "Airflow responded with an error: {}".format(err)}, 400
 
+        # if we succeed, we register the dag_run_id in the execution table:
+        data = response.json()
+        execution = ExecutionModel.get_one_execution_from_user(self.user_id, execution_id)
+        execution.dag_run_id = data['dag_run_id']
+        execution.save()
         return result
 
 
@@ -159,11 +165,23 @@ class ExecutionStatusEndpoint(MetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        status = ExecutionModel.get_one_execution_from_user(self.user_id, idx).finished
-        # TODO: call airflow to check status
-        if not status:
-            # Here we should call airflow to check solving status
-            pass
+        airflow_conf = dict(url=current_app.config['AIRFLOW_URL'],
+                            user=current_app.config['AIRFLOW_USER'],
+                            pwd=current_app.config['AIRFLOW_PWD'])
 
-        return {'finished': status}, 200
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        execution = ExecutionModel.get_one_execution_from_user(self.user_id, idx)
+        if execution.finished:
+            return {'status': 'finished'}, 200
+        dag_run_id = execution.dag_run_id
+        if not dag_run_id:
+            return {'error': 'The execution has no dag_run associated'}, 400
+        af_client = Airflow(**airflow_conf)
+        if not af_client.is_alive():
+            return {'error': "Airflow is not accessible"}, 400
+        try:
+            response = af_client.get_dag_run_status(dag_name='solve_model_dag', dag_run_id=dag_run_id)
+        except AirflowApiError as err:
+            return {'error': "Airflow responded with an error: {}".format(err)}, 400
+        data = response.json()
+        return {'status': data['state']}, 200
