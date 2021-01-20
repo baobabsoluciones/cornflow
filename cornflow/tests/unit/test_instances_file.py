@@ -13,14 +13,14 @@ class TestInstances(CustomTestCase):
 
     def create_new_row(self, file, name='test1', description=''):
         data = dict(name=name, description=description)
-        data['file'] = (open(file, 'rb'), 'test.mps')
-
-        response = self.client.post(self.url,
-                                    data=data,
-                                    follow_redirects=True,
-                                    headers={"Content-Type": "multipart/form-data",
-                                             "Authorization": 'Bearer ' + self.token}
-                                    )
+        with open(file, 'rb') as file_obj:
+            data['file'] = (file_obj, 'test.mps')
+            response = self.client.post(self.url,
+                                        data=data,
+                                        follow_redirects=True,
+                                        headers={"Content-Type": "multipart/form-data",
+                                                 "Authorization": 'Bearer ' + self.token}
+                                        )
         self.assertEqual(201, response.status_code)
         row = self.model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
