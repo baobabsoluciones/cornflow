@@ -9,7 +9,7 @@ from jsonschema import validate, Draft7Validator
 from copy import deepcopy
 from genson import SchemaBuilder
 from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
-from .constants import JSON_TYPES
+from .constants import JSON_TYPES, DATASCHEMA
 
 
 class SchemaManager:
@@ -24,7 +24,13 @@ class SchemaManager:
         self.default_validator = Draft7Validator
         self.jsonschema = schema if schema is not None else {}
         self.types = JSON_TYPES
-        self.schema_dict = {"DataSchema": []}
+        self.schema_dict = self.get_empty_schema()
+    
+    def get_empty_schema(self):
+        """
+        Create un empty schema dict
+        """
+        return {DATASCHEMA: []}
     
     @classmethod
     def from_filepath(cls, path):
@@ -119,7 +125,7 @@ class SchemaManager:
         if not self.is_schema_loaded():
             return self.schema_dict
         
-        self.schema_dict = {"DataSchema": []}
+        self.schema_dict = self.get_empty_schema()
 
         for item in jsonschema["definitions"].items():
             self._get_element_dict(item)
@@ -166,7 +172,7 @@ class SchemaManager:
         return the jsonschema
         """
         self.jsonschema = self.load_json(path)
-        self.schema_dict = {"DataSchema": []}
+        self.schema_dict = self.get_empty_schema()
         return self.jsonschema
 
     def export_schema_dict(self, path):
@@ -219,7 +225,7 @@ class SchemaManager:
                        type=self._get_schema_name(name),
                        many=("type" in content and content["type"] == "array"),
                        required=True)]
-        self.schema_dict["DataSchema"] += schema
+        self.schema_dict[DATASCHEMA] += schema
     
         return schema
     
