@@ -61,7 +61,7 @@ class TestExecutionsModel(CustomTestCase):
     def setUp(self):
         super().setUp()
 
-    # TODO: should these test be implemented? The funtions that these test should cover are already covered
+    # TODO: should these tests be implemented? The functions that these tests should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
     def test_save(self):
         pass

@@ -63,8 +63,6 @@ Initialize the database::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    python manage.py db init
-    python manage.py db migrate
     python manage.py db upgrade
     python manage.py create_super_user
 
@@ -332,31 +330,25 @@ Appended in this repository are three more docker-compose files for different ki
 Test cornflow
 ~~~~~~~~~~~~~~~~~~
 
-Create a new test database::
-
-    sudo su - postgres
-    psql -c "create database cornflow_test"
-    exit
-
 Then you have to run the following commands::
 
-    export FLASK_APP=cornflow.app
     export FLASK_ENV=testing
 
 Finally you can run all the tests with the following command::
 
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
+    python -m unittest discover -s cornflow.tests
 
 If you want to only run the unit tests (without a local airflow webserver)::
 
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/unit/
+    python -m unittest discover -s cornflow.tests.unit
 
 If you want to only run the integration test with a local airflow webserver::
 
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/integration/
+    python -m unittest discover -s cornflow.tests.integration
 
 After if you want to check the coverage report you need to run::
 
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
     coverage report -m
 
 or to get the html reports::
