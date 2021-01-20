@@ -194,7 +194,6 @@ class SchemaManager:
         
         :return: the generated schema.
         """
-        
         file = self.load_json(path)
         
         builder = SchemaBuilder()
@@ -217,7 +216,6 @@ class SchemaManager:
 
         return the schema dict.
         """
-    
         name = item[0]
         content = item[1]
     
@@ -243,7 +241,6 @@ class SchemaManager:
         
         name = item[0]
         content = item[1]
-        # TODO: what should we do when no type is given?
         if "type" not in content:
             if "$ref" in content:
                 return {
@@ -252,6 +249,8 @@ class SchemaManager:
                     "many": False,
                     "required": (name in required_list)
                 }
+            else:
+                raise TypeError("Type missing for item %s" % name)
         if content["type"] == "object":
             return {
                 "name": name,
