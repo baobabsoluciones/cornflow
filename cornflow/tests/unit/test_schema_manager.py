@@ -30,6 +30,14 @@ class TestSchemaManager(TestCase):
         sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
         val = sm.validate_file("./cornflow/tests/data/pulp_example_data.json")
         self.assertTrue(val)
+
+    def test_schema_validation_2(self):
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        val = sm.validate_file("./cornflow/tests/data/data_input.json")
+        
+        # Test that it can be transformed into a dict
+        dict_schema = sm.jsonschema_to_dict()
+        self.assertTrue(val)
     
     def test_validation_errors(self):
         sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")

@@ -11,4 +11,4 @@ BASIC_TYPES = [STRING_TYPE, BOOLEAN_TYPE, INTEGER_TYPE, FLOAT_TYPE]
 JSON_TYPES = {"string": STRING_TYPE, "number": FLOAT_TYPE, "integer": INTEGER_TYPE, "null": None,
               "boolean": BOOLEAN_TYPE}
 
-DATASCHEMA = "DataSchema1"
+DATASCHEMA = "DataSchema"

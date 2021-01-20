@@ -126,13 +126,15 @@ class SchemaManager:
             return self.schema_dict
         
         self.schema_dict = self.get_empty_schema()
-
-        for item in jsonschema["definitions"].items():
-            self._get_element_dict(item)
         
-        for item in jsonschema["properties"].items():
-            self._get_element_dict(item)
-            self._create_data_schema(item)
+        if "definitions" in jsonschema:
+            for item in jsonschema["definitions"].items():
+                self._get_element_dict(item)
+
+        if "properties" in jsonschema:
+            for item in jsonschema["properties"].items():
+                self._get_element_dict(item)
+                self._create_data_schema(item)
 
         return self.schema_dict
 
@@ -202,7 +204,8 @@ class SchemaManager:
         
         draft_schema = builder.to_json()
         if save_path is not None:
-            self.save_json(draft_schema, save_path)
+            with open(save_path, 'w') as outfile:
+                outfile.write(draft_schema)
         return draft_schema
     
     """
@@ -238,7 +241,7 @@ class SchemaManager:
         """
         if required_list is None:
             required_list = []
-        
+            
         name = item[0]
         content = item[1]
         if "type" not in content:
@@ -250,7 +253,9 @@ class SchemaManager:
                     "required": (name in required_list)
                 }
             else:
-                raise TypeError("Type missing for item %s" % name)
+                print("\nType missing for item: {}".format(name))
+                raise TypeError("Type missing")
+            
         if content["type"] == "object":
             return {
                 "name": name,
@@ -317,6 +322,8 @@ class SchemaManager:
             )
         elif "$ref" in content:
             schema_name = self._get_ref((None, content))
+        elif "type" in content and content["type"] != "array":
+            return content["type"]
         else:
             self.schema_dict.update(
                 {schema_name: [self._get_element_dict(i, self._get_required(content)) for i in content.items()]})
