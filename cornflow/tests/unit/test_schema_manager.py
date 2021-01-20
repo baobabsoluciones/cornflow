@@ -60,6 +60,11 @@ class TestSchemaManager(TestCase):
         val = sm.get_file_errors("./cornflow/tests/data/data_input_bad.json")
         self.assertFalse(bool)
         self.assertEqual(len(val), 2)
-        
+     
+    def test_schema_names(self):
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/name_problem_schema.json")
+        dict_schema = sm.jsonschema_to_dict()
+        self.assertEqual(len(dict_schema["CoefficientsSchema"]), 2)
+        self.assertEqual(len(dict_schema["Coefficients1Schema"]), 1)
         
         

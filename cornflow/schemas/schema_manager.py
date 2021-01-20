@@ -305,7 +305,7 @@ class SchemaManager:
         """
         name = item[0]
         content = item[1]
-        schema_name = self._get_schema_name(name)
+        schema_name = self._get_new_schema_name(name)
         self.schema_dict.update(
             {schema_name: [self._get_element_dict(i, self._get_required(content))
                            for i in content["properties"].items()]}
@@ -329,7 +329,7 @@ class SchemaManager:
         """
         name = item[0]
         content = item[1]["items"]
-        schema_name = self._get_schema_name(name)
+        schema_name = self._get_new_schema_name(name)
         if "type" in content and content["type"] == "object":
             self.schema_dict.update(
                 {schema_name: [self._get_element_dict(i, self._get_required(content))
@@ -393,9 +393,9 @@ class SchemaManager:
             return self.types[not_null_type[0]]
         else:
             return self.types[json_type]
-    
+
     @staticmethod
-    def _get_schema_name(name):
+    def _get_schema_name(name, n=0):
         """
         Transform an element name into a schema name in order to create a schema corrsponing to an object or array.
         
@@ -403,7 +403,18 @@ class SchemaManager:
         
         :return: the corresponign schema name.
         """
-        return name.capitalize() + "Schema"
+        if n == 0:
+            return name.capitalize() + "Schema"
+        else:
+            return name.capitalize() + str(n) + "Schema"
+    
+    def _get_new_schema_name(self, name, n=0):
+        try_name = self._get_schema_name(name, n)
+        
+        if try_name in self.schema_dict:
+            return self._get_new_schema_name(name, n+1)
+        else:
+            return try_name
     
     @staticmethod
     def _get_required(content):
