@@ -1,6 +1,7 @@
 from cornflow.schemas.schema_manager import SchemaManager
 from unittest import TestCase
 from cornflow.tests.data.dict_schema_example import dict_example
+from cornflow.schemas.constants import DATASCHEMA
 
 
 class TestSchemaManager(TestCase):
@@ -19,7 +20,7 @@ class TestSchemaManager(TestCase):
         self.assertCountEqual(dict_schema["ParametersSchema"], dict_example["ParametersSchema"])
         self.assertCountEqual(dict_schema["Sos1Schema"], dict_example["Sos1Schema"])
         self.assertCountEqual(dict_schema["Sos2Schema"], dict_example["Sos2Schema"])
-        self.assertCountEqual(dict_schema["DataSchema"], dict_example["DataSchema"])
+        self.assertCountEqual(dict_schema[DATASCHEMA], dict_example[DATASCHEMA])
 
     def test_flask_schema(self):
         # TODO: I am not sure how to test that

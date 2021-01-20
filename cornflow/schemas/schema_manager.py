@@ -152,7 +152,7 @@ class SchemaManager:
             params1 = schema.load(params, many=True)
             result_dict[key] = gen_schema(key, params1, result_dict)
         
-        return result_dict['DataSchema']
+        return result_dict[DATASCHEMA]
     
     def jsonschema_to_flask(self):
         """
