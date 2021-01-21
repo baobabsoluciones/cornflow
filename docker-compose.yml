@@ -2,51 +2,61 @@ version: '3'
 
 services:
   cornflow:
-    image: baobabsoluciones/cornflow:latest
+    image: baobabsoluciones/cornflow
+    restart: always
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=cornflow.app
-      - FLASK_ENV=development
-      - DATABASE_URL=postgres://postgres:postgresadmin@cornflow_db:5432/cornflow
-      - SECRET_KEY=THISNEEDSTOBECHANGED
-      - AIRFLOW_URL=http://airflow:8080
-      - CORNFLOW_URL=http://cornflow:5000
+      - AIRFLOW_USER=admin
+      - AIRFLOW_PWD=admin
+      - CORNFLOW_DB_HOST=cornflow_db
+      - CORNFLOW_DB_PORT=5432
+      - CORNFLOW_DB_USER=cornflow
+      - CORNFLOW_DB_PASSWORD=cornflow
+      - CORNFLOW_DB=cornflow
     depends_on:
       - cornflow_db
-      - airflow
+      - webserver
 
   cornflow_db:
     image: postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_USER=cornflow
+      - POSTGRES_PASSWORD=cornflow
       - POSTGRES_DB=cornflow
     volumes:
       - postgres_cf_data:/var/lib/postgresql/data/
 
-  airflow:
-    image: puckel/docker-airflow
+  webserver:
+    image: baobabsoluciones/docker-airflow
+    restart: always
     volumes:
       - ./airflow_config/dags:/usr/local/airflow/dags
       - ./airflow_config/requirements.txt:/requirements.txt
     environment:
-      - POSTGRES_HOST=airflow_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgresadmin
-      - AIRFLOW__CORE__LOAD_EXAMPLES=0
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.default
+      - AIRFLOW_USER=admin
+      - AIRFLOW_PWD=admin
+      - AIRFLOW_DB_HOST=airflow_db
+      - AIRFLOW_DB_PORT=5432
+      - AIRFLOW_DB_USER=airflow
+      - AIRFLOW_DB_PASSWORD=airflow
+      - AIRFLOW_DB=airflow
     ports:
       - 8080:8080
     depends_on:
       - airflow_db
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
 
   airflow_db:
     image: postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgresadmin
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     volumes:
       - postgres_af_data:/var/lib/postgresql/data/
