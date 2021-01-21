@@ -21,7 +21,7 @@ def create_app(env_name='development'):
 
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
-    if env_name == 'development':
+    if env_name == 'development' or env_name == 'testing':
         # TODO: not sure if we should keep this line and if so, here.
         CORS(app)
     bcrypt.init_app(app)

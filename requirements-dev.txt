@@ -2,14 +2,14 @@
 alabaster==0.7.12
 Babel==2.8.0
 colorama==0.4.4
-cornflow-client>=0.0.5
+cornflow-client
 coverage==5.3
 docutils==0.16
 Flask-Testing==0.8.0
 imagesize==1.2.0
 orloge
 packaging==20.4
-PuLP>=2.3
+PuLP
 Pygments==2.7.2
 pyparsing==2.4.7
 snowballstemmer==2.0.0

@@ -1,6 +1,11 @@
-from ..schemas.json_factory import gen_schema, ParameterSchema, sort_dict
+from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
+from .schema_manager import SchemaManager
 
 
+manager = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+DataSchema = manager.jsonschema_to_flask()
+
+"""
 dict_params = \
     dict(
         CoefficientsSchema=[
@@ -56,3 +61,4 @@ for key, params in tuplist:
     result_dict[key] = gen_schema(key, params1, result_dict)
 
 DataSchema = result_dict['DataSchema']
+"""

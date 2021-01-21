@@ -1,8 +1,15 @@
 import unittest
-from cornflow.schemas.json_factory import gen_schema, ParameterSchema, sort_dict
+import json
+
+from cornflow.schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
+from cornflow.schemas.solution_log import LogSchema
+from airflow_config.dags.model_functions import solve_model
+from cornflow.schemas.solution_log import LogSchema
+from airflow_config.dags.model_functions import solve_model
 from marshmallow import ValidationError, Schema, fields
 
-class MyTestCase(unittest.TestCase):
+
+class SchemaGenerator(unittest.TestCase):
     data1 = [
             {"name": "filename",
              "description": "Should be a filename",
@@ -16,7 +23,7 @@ class MyTestCase(unittest.TestCase):
              "type": "Boolean",
              },
             {"name": "NotRequiredBool",
-             "description": "Another bool thats not required",
+             "description": "Another bool that's not required",
              "required": False,
              "type": "Boolean"
              }
@@ -114,6 +121,18 @@ class MyTestCase(unittest.TestCase):
         func_error2 = lambda: oschema.load(bad2)
         self.assertRaises(ValidationError, func_error1)
         self.assertRaises(ValidationError, func_error2)
+
+
+class PuLPLogSchema(unittest.TestCase):
+    with open('./cornflow/tests/data/gc_20_7.json', 'r') as f:
+        data = json.load(f)
+
+    config = dict(solver="PULP_CBC_CMD", timeLimit=10)
+
+    def test_progress(self):
+        solution, log, log_dict = solve_model(self.data, self.config)
+        LS = LogSchema()
+        LS.dump(log_dict)
 
 
 if __name__ == '__main__':

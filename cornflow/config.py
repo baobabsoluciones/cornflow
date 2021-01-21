@@ -5,6 +5,7 @@ class Development(object):
     """
 
     """
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
     TESTING = True
     SECRET_KEY = os.getenv('SECRET_KEY')
@@ -16,19 +17,26 @@ class Development(object):
 
 
 class Testing(object):
+    """
+
+    """
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
     SECRET_KEY = 'TESTINGSECRETKEY'
-    SQLALCHEMY_DATABASE_URI = 'postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow_test'
+    SQLALCHEMY_DATABASE_URI = "sqlite:///cornflow_test.db"
     AIRFLOW_URL = 'http://localhost:8080'
     CORNFLOW_URL = 'http://localhost:5000'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    AIRFLOW_USER = 'admin'
+    AIRFLOW_PWD = 'admin'
 
 
 class Production(object):
     """
 
     """
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
     SECRET_KEY = os.getenv('SECRET_KEY')
