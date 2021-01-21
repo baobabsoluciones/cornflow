@@ -43,10 +43,10 @@ class Auth:
             re['data'] = {'user_id': payload['sub']}
             return re
         except jwt.ExpiredSignatureError:
-            re['error'] = {'message': 'Token expired, please login again.'}
+            re['error'] = {'error': 'Token expired, please login again.'}
             return re
         except jwt.InvalidTokenError:
-            re['error'] = {'message': 'Invalid token, please try again with a new token.'}
+            re['error'] = {'error': 'Invalid token, please try again with a new token.'}
             return re
 
     # user decorator
@@ -65,6 +65,7 @@ class Auth:
                                 response=json.dumps({'error': 'Auth token is not available'}), status=400)
             auth_header = request.headers.get('Authorization')
             if auth_header:
+                # TODO: we need a try-catch here in case incorrect format of token is provided
                 token = auth_header.split(" ")[1]
             else:
                 token = ''

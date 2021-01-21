@@ -127,6 +127,7 @@ class UserModel(TraceAttributes):
         :return: The user
         :rtype: :class:`UserModel`
         """
+        # TODO: only provide the user information, not the instances or executions
         return UserModel.query.get(idx)
 
     @staticmethod
