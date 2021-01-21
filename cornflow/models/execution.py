@@ -6,6 +6,7 @@ Model for the executions
 import hashlib
 
 # Imports from sqlalchemy
+from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.sql import expression
@@ -63,7 +64,11 @@ class ExecutionModel(BaseAttributes):
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
-    finished = db.Column(db.Boolean, server_default=expression.false(), default=False, nullable=False)
+    state = db.Column(db.SmallInteger, default=0, nullable=False) # IntegerRangeField
+    state_message = db.Column(TEXT, nullable=True)
+
+    __table_args__ = (CheckConstraint('state <= 1', name='check_status_less_than'),
+                      CheckConstraint('state >= -1', name='check_status_greater_than'))
 
     def __init__(self, data):
         super().__init__(data)
@@ -76,7 +81,7 @@ class ExecutionModel(BaseAttributes):
         self.name = data.get('name')
         self.description = data.get('description', None)
         self.dag_run_id = data.get('dag_run_id', None)
-        self.finished = False
+        self.state = 0
         self.config = data.get('config')
 
     def save(self):

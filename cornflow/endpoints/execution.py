@@ -20,6 +20,7 @@ from ..shared.authentication import Auth
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
 
+
 class ExecutionEndpoint(MetaResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -171,17 +172,28 @@ class ExecutionStatusEndpoint(MetaResource):
 
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, idx)
-        if execution.finished:
+        if execution.state == 1:
             return {'status': 'finished'}, 200
         dag_run_id = execution.dag_run_id
         if not dag_run_id:
+            execution.state = -1
+            execution.state_message = 'The execution has no dag_run associated'
+            execution.save()
             return {'error': 'The execution has no dag_run associated'}, 400
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
+            execution.state = -1
+            execution.state_message = 'Airflow is not accessible'
+            execution.save()
             return {'error': "Airflow is not accessible"}, 400
         try:
             response = af_client.get_dag_run_status(dag_name='solve_model_dag', dag_run_id=dag_run_id)
         except AirflowApiError as err:
+            execution.state = -1
+            execution.state_message = "Airflow responded with an error: {}".format(err)
             return {'error': "Airflow responded with an error: {}".format(err)}, 400
         data = response.json()
+        execution.state = 0
+        execution.state_message = data['state']
+        execution.save()
         return {'status': data['state']}, 200

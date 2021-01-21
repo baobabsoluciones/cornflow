@@ -38,6 +38,9 @@ class DAGEndpoint(Resource):
         # because we do not want to store airflow's user:
         req_data['user_id'] = execution.user_id
         req_data['finished'] = True
+        # TODO: here I guess that the run is performed without problems so state should be 1
+        req_data['state'] = 1
+        req_data['state_message'] = ''
         execution.update(req_data)
         execution.save()
         return {'message': 'results successfully saved'}, 201
