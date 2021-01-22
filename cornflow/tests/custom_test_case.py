@@ -111,7 +111,7 @@ class CustomTestCase(TestCase):
         rows = self.client.get(self.url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
 
-        self.assertEqual(204, rows.status_code)
+        self.assertEqual(200, rows.status_code)
 
     def update_row(self, file, key, new_value):
         with open(file) as f:

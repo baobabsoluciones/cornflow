@@ -97,4 +97,27 @@ class UserDetailsEndpoint(Resource):
         data = self.schema.load(request_data, partial=True)
         user_obj.update(data)
         user_obj.save()
-        return {user_obj.id: user_obj}, 201
+        return user_obj, 201
+
+class ToggleUserAdmin(Resource):
+
+    @Auth.super_admin_required
+    def put(self, user_email, make_admin):
+        """
+        API method to make admin or take out privileges.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user. Only superadmin can change this.
+
+        :param str user_email: email of the user
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        user_obj = UserModel.get_one_user_by_email(user_email)
+        if make_admin:
+            user_obj.admin = 1
+        else:
+            user_obj.admin = 0
+        user_obj.save()
+        return_keys = ['name', 'email', 'admin']
+        return {k: getattr(user_obj, k) for k in return_keys}, 201

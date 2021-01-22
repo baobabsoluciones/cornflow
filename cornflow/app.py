@@ -5,7 +5,8 @@ from flask_restful import Api
 
 from .config import app_config
 from .endpoints import InstanceEndpoint, InstanceDetailsEndpoint, UserEndpoint, UserDetailsEndpoint, LoginEndpoint, \
-    ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint, DAGEndpoint, SignUpEndpoint, InstanceDetailsEndpoint, InstanceFileEndpoint
+    ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint, DAGEndpoint, SignUpEndpoint, ToggleUserAdmin, \
+    InstanceFileEndpoint
 from .shared.utils import db, bcrypt
 from flask_cors import CORS
 
@@ -35,6 +36,7 @@ def create_app(env_name='development'):
     api.add_resource(DAGEndpoint, '/dag/<string:idx>/', endpoint="dag")
     api.add_resource(UserEndpoint, '/user/', endpoint="user")
     api.add_resource(UserDetailsEndpoint, '/user/<string:user_email>/', endpoint="user-detail")
+    api.add_resource(ToggleUserAdmin, '/user/<string:user_email>/<int:make_admin>/', endpoint="user-admin")
     api.add_resource(LoginEndpoint, '/login/', endpoint="login")
     api.add_resource(SignUpEndpoint, '/signup/', endpoint="signup")
 

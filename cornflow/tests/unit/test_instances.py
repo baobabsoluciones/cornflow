@@ -49,7 +49,7 @@ class TestInstanceModelMethods(CustomTestCase):
         self.model = InstanceModel
         self.id = self.create_new_row(INSTANCE_PATH)
 
-    # TODO: should these test be implemented? The funtions that these test should cover are already covered
+    # TODO: should these test be implemented? The functions that these test should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
     def test_save(self):
         pass
