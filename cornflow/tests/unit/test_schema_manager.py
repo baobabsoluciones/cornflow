@@ -66,5 +66,4 @@ class TestSchemaManager(TestCase):
         dict_schema = sm.jsonschema_to_dict()
         self.assertEqual(len(dict_schema["CoefficientsSchema"]), 2)
         self.assertEqual(len(dict_schema["Coefficients1Schema"]), 1)
-        
-        
+      

@@ -397,11 +397,14 @@ class SchemaManager:
     @staticmethod
     def _get_schema_name(name, n=0):
         """
-        Transform an element name into a schema name in order to create a schema corrsponing to an object or array.
+        Transform an element name into a schema name in order to create a schema corresponing to an object or array.
+        The schema name use the following format:
+        [name][n]Schema (for example if name is "values" and n is 3: Values3Schema)
         
         :param name: The name of the object or array.
+        :param n: if n is different from 0, it is added to the schema name.
         
-        :return: the corresponign schema name.
+        :return: the corresponding schema name.
         """
         if n == 0:
             return name.capitalize() + "Schema"
