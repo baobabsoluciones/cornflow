@@ -41,14 +41,29 @@ class TestSchemaManager(TestCase):
     
     def test_validation_errors(self):
         sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
-        data1 = {"objective": [], "constraints": [], "variables": []}
-        data2 = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
-        bool1 = sm.validate_data(data1)
-        val1 = sm.get_validation_errors(data1)
-        val2 = sm.get_validation_errors(data2)
-        self.assertFalse(bool1)
-        self.assertEqual(len(val1), 1)
-        self.assertEqual(val1[0].message, "[] is not of type 'object'")
-        self.assertEqual(len(val2), 3)
+        data = {"objective": [], "constraints": [], "variables": []}
+        bool = sm.validate_data(data)
+        val = sm.get_validation_errors(data)
+        self.assertFalse(bool)
+        self.assertEqual(len(val), 1)
+        self.assertEqual(val[0].message, "[] is not of type 'object'")
     
-    
+    def test_validation_errors2(self):
+        sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+        data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
+        val = sm.get_validation_errors(data)
+        self.assertEqual(len(val), 3)
+
+    def test_validation_errors3(self):
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        bool = sm.validate_file("./cornflow/tests/data/data_input_bad.json")
+        val = sm.get_file_errors("./cornflow/tests/data/data_input_bad.json")
+        self.assertFalse(bool)
+        self.assertEqual(len(val), 2)
+     
+    def test_schema_names(self):
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/name_problem_schema.json")
+        dict_schema = sm.jsonschema_to_dict()
+        self.assertEqual(len(dict_schema["CoefficientsSchema"]), 2)
+        self.assertEqual(len(dict_schema["Coefficients1Schema"]), 1)
+      
