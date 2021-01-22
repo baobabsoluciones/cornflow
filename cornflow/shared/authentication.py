@@ -111,11 +111,13 @@ class Auth:
             check_user = UserModel.get_one_user(user_id)
             if not check_user:
                 return Response(mimetype="application/json",
-                                response=json.dumps({'error': 'User does not exist, invalid token'}))
+                                response=json.dumps({'error': 'User does not exist, invalid token'}),
+                                status=400)
 
             if not check_user.super_admin:
                 return Response(mimetype='application/json',
-                                response=json.dumps({'error': 'You do not have permission to access this endpoint'}))
+                                response=json.dumps({'error': 'You do not have permission to access this endpoint'}),
+                                status=400)
 
             g.user = {'id': user_id}
             return func(*args, **kwargs)

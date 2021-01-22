@@ -45,6 +45,7 @@ class InstanceEndpoint(MetaResource):
         """
         # TODO: if super_admin or admin should it be able to get any instance?
         # TODO: return 204 if no instances have been created by the user
+        # TODO: do not return the contents; only the id, and stats.
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.get_list(self.user_id)
 

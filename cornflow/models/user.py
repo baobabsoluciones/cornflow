@@ -127,7 +127,7 @@ class UserModel(TraceAttributes):
         :return: The user
         :rtype: :class:`UserModel`
         """
-        # TODO: only provide the user information, not the instances or executions
+        # TODO: only provide: name, email and created_at
         return UserModel.query.get(idx)
 
     @staticmethod
@@ -139,6 +139,7 @@ class UserModel(TraceAttributes):
         :return: The user
         :rtype: :class:`UserModel`
         """
+        # TODO: only provide: name, email and created_at
         return UserModel.query.filter_by(email=em).first()
 
     @staticmethod
