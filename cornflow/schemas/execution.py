@@ -1,6 +1,7 @@
 from marshmallow import fields, Schema, validate
 from ..schemas.model_json import DataSchema
 from ..schemas.solution_log import LogSchema
+from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 
 
 class OptionsSchema(Schema):
@@ -35,7 +36,8 @@ class ExecutionSchema(Schema):
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
-    state = fields.Int(validate=validate.Range(min=-1, max=1), required=False)
+    state = fields.Int(validate=validate.Range(min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE),
+                       required=False)
     state_message = fields.Str(required=False)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
