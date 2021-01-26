@@ -33,10 +33,7 @@ class MetaResource(Resource):
     def get_list(self, *args):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=True)
-        if len(self.serialized_data) == 0:
-            return {}, 204
-        else:
-            return self.serialized_data, 200
+        return self.serialized_data, 200
 
     def get_detail(self, *args):
         self.data = getattr(self.model, self.query)(*args)

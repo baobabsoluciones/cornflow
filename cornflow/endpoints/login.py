@@ -31,7 +31,7 @@ class LoginEndpoint(Resource):
         try:
             data = user_schema.load(req_data, partial=True)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            return {'error': str(val_err.normalized_messages())}, 400
 
         if not data.get('email') or not data.get('password'):
             return {'error': 'You need email and password to sign in.'}, 400

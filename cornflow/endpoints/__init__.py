@@ -8,4 +8,4 @@ from .execution import ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionSta
 from .instance import InstanceEndpoint, InstanceDetailsEndpoint, InstanceFileEndpoint
 from .login import LoginEndpoint
 from .signup import SignUpEndpoint
-from .user import UserEndpoint, UserDetailsEndpoint
+from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
