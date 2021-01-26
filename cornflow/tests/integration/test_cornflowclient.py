@@ -1,6 +1,7 @@
-from cornflow.models import InstanceModel
+from cornflow.models import InstanceModel, ExecutionModel
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 import pulp
+import time
 
 
 class TestInstances(CustomTestCaseLive):
@@ -48,10 +49,13 @@ class TestInstances(CustomTestCaseLive):
                                      description=description,
                                      name=name)
         self.assertTrue('id' in response)
-        row = InstanceModel.query.get(response['id'])
+        row = ExecutionModel.query.get(response['id'])
         self.assertEqual(row.id, response['id'])
         self.assertEqual(row.name, name)
         self.assertEqual(row.description, description)
+        time.sleep(5)
+        response = self.client.get_status(response['id'])
+        self.assertTrue('status' in response)
         return row
 
     def test_new_instance_file(self):
@@ -60,6 +64,6 @@ class TestInstances(CustomTestCaseLive):
     def test_new_instance(self):
         self.create_new_instance('./cornflow/tests/data/test_mps.mps')
 
-    # def test_new_execution(self):
-    #     one_instance = self.create_new_instance('./cornflow/tests/data/test_mps.mps')
-    #     self.create_new_execution(one_instance.id, config=dict(solver='PULP_CBC_CMD', timeLimit=10))
+    def test_new_execution(self):
+        one_instance = self.create_new_instance('./cornflow/tests/data/test_mps.mps')
+        self.create_new_execution(one_instance.id, config=dict(solver='PULP_CBC_CMD', timeLimit=10))

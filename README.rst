@@ -34,7 +34,7 @@ or, in windows::
 
 The installation of the psycopg2 may generate an error because it does not find the pg_config file.
 
-One way to solve this problem is to previously install libpq-dev which install pg_config::
+One way to solve this problem is to previously install libpq-dev which installs pg_config::
 
     sudo apt install libpq-dev
 
@@ -63,8 +63,13 @@ Initialize the database::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    export SADMIN_USER=airflow_test@admin.com
+    export SADMIN_PWD=airflow_test_password
     python manage.py db upgrade
-    python manage.py create_super_user
+    python manage.py create_super_user \\
+        --user=airflow_test@admin.com \\
+        --password=airflow_test_password
+
 
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,6 +147,7 @@ Creation of airflow directory::
 
     cd
     mkdir airflow
+    cd airflow
     python3 -m venv afvenv
     source afvenv/bin/activate
 
@@ -172,6 +178,8 @@ To set the base config and start the web server::
     export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
     export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+    export AIRFLOW_CONN_CF_URI=cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
+
     airflow webserver -p 8080 &
 
 Also, start the scheduler::

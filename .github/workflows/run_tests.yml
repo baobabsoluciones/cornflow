@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.8]
         os: [ubuntu-latest]
 
     steps:
@@ -23,6 +23,37 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
     - name: set environment
-      run: echo "FLASK_ENV=testing" >> $GITHUB_ENV
-    - name: Run tests
-      run: python -m unittest discover -s cornflow.tests
+      run: |
+        echo "FLASK_ENV=testing" >> $GITHUB_ENV
+        echo "SQLALCHEMY_DATABASE_URI=sqlite:///cornflow_test.db" >> $GITHUB_ENV
+        python manage.py create_super_user --user=airflow_test@admin.com --password=airflow_test_password
+    - name: Run unit tests
+      run: python -m unittest discover -s cornflow.tests.unit
+    - name: Install airflow
+      run: |
+        python -m venv afvenv
+        source afvenv/bin/activate
+        AIRFLOW_VERSION=2.0.0
+        PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+        CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+        pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+        pip install orloge cornflow_client pulp
+        export AIRFLOW_HOME="$PWD/airflow_config"
+        airflow db init
+        airflow users create \
+              --username admin \
+              --firstname admin \
+              --lastname admin \
+              --role Admin \
+              --password admin \
+              --email admin@example.org
+        echo "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0" >> $GITHUB_ENV
+        echo "AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth" >> $GITHUB_ENV
+        echo "AIRFLOW_CONN_CF_URI=cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000" >> $GITHUB_ENV
+    - name: start airflow
+      run: |
+        airflow webserver -p 8080 &
+        airflow scheduler &
+        deactivate
+    - name: test integration tests
+      run: python -m unittest discover -s cornflow.tests.integration
