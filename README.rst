@@ -70,7 +70,6 @@ Initialize the database::
         --user=airflow_test@admin.com \\
         --password=airflow_test_password
 
-
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~
 
