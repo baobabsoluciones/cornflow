@@ -32,6 +32,8 @@ class CustomTestCase(TestCase):
         self.model = None
         self.id = None
         self.foreign_keys = None
+        self.response_items = set()
+        self.items_to_check = []
 
     @staticmethod
     def airflow_user():
@@ -66,24 +68,26 @@ class CustomTestCase(TestCase):
 
         row = self.model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
-        for key in payload:
+
+        for key in self.get_keys_to_check(payload):
             self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
     def get_rows(self, files):
-        data = []
-        codes = []
 
-        for file in files:
+        def _get_data(file):
             with open(file) as f:
                 temp = json.load(f)
 
-                if self.foreign_keys is not None:
-                    for key, value in self.foreign_keys.items():
-                        temp[key] = value
+            if self.foreign_keys is not None:
+                for key, value in self.foreign_keys.items():
+                    temp[key] = value
+            return temp
 
-                data.append(temp)
-                codes.append(self.create_new_row(file))
+        # data = {f: _get_data(f) for f in files}
+        data = [_get_data(f) for f in files]
+        # codes = {f: self.create_new_row(f) for f in files}
+        codes = [self.create_new_row(f) for f in files]
 
         rows = self.client.get(self.url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
@@ -92,8 +96,13 @@ class CustomTestCase(TestCase):
 
         for i in range(len(data)):
             self.assertEqual(rows.json[i]['id'], codes[i])
-            for key in data[i]:
+            for key in self.get_keys_to_check(data[i]):
                 self.assertEqual(rows.json[i][key], data[i][key])
+
+    def get_keys_to_check(self, payload):
+        if len(self.items_to_check):
+            return self.items_to_check
+        return payload.keys()
 
     def get_one_row(self, file):
         with open(file) as f:
@@ -104,14 +113,16 @@ class CustomTestCase(TestCase):
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json['id'], self.id)
-        for key in payload:
+        for key in self.get_keys_to_check(payload):
             self.assertEqual(row.json[key], payload[key])
+        return row.json
 
     def get_no_rows(self):
         rows = self.client.get(self.url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
 
         self.assertEqual(200, rows.status_code)
+        return rows.json
 
     def update_row(self, file, key, new_value):
         with open(file) as f:
@@ -130,8 +141,9 @@ class CustomTestCase(TestCase):
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json['id'], self.id)
-        for key in payload:
+        for key in self.get_keys_to_check(payload):
             self.assertEqual(row.json[key], payload[key])
+        return row.json
 
     def delete_row(self):
 
@@ -145,6 +157,8 @@ class CustomTestCase(TestCase):
                                             "Authorization": 'Bearer ' + self.token})
 
         self.assertEqual(204, response.status_code)
+        # TODO: why can't I get a response.json?
+        return response
 
     def repr_method(self, representation):
         row = self.model.query.get(self.id)
