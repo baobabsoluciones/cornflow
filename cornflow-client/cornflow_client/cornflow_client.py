@@ -26,9 +26,9 @@ class CornFlow(object):
 
         return wrapper
 
-    def get_api_for_id(self, api, id):
+    def get_api_for_id(self, api, id, post_url=''):
         return requests.get(
-            urljoin(urljoin(self.url, api) + '/', str(id) + '/'),
+            urljoin(urljoin(self.url, api) + '/', str(id) + '/' + post_url),
             headers={'Authorization': 'access_token ' + self.token},
             json={})
 
@@ -76,12 +76,12 @@ class CornFlow(object):
     @ask_token
     @log_call
     def create_instance_file(self, filename, name, description=''):
-        files = {'file': open(filename, 'rb')}
-        response = requests.post(
-            urljoin(self.url, 'instancefile/'),
-            headers={'Authorization': 'access_token ' + self.token},
-            files=files,
-            data=dict(name=name, description=description))
+        with open(filename, 'rb') as file:
+            response = requests.post(
+                urljoin(self.url, 'instancefile/'),
+                headers={'Authorization': 'access_token ' + self.token},
+                files=dict(file=file),
+                data=dict(name=name, description=description))
 
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
@@ -122,7 +122,19 @@ class CornFlow(object):
     @log_call
     @ask_token
     def get_status(self, execution_id):
-        response = self.get_api_for_id('execution/status/', execution_id)
+        response = self.get_api_for_id('execution/', execution_id, 'status')
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_log(self, execution_id):
+        response = self.get_api_for_id('execution/', execution_id, 'log')
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_solution(self, execution_id):
+        response = self.get_api_for_id('execution/', execution_id, 'data')
         return response.json()
 
     @log_call
@@ -132,6 +144,18 @@ class CornFlow(object):
                                 headers={'Authorization': 'access_token ' + self.token},
                                 json={})
         return response.json()
+
+    @log_call
+    @ask_token
+    def get_all_users(self):
+        return requests.get(urljoin(self.url, 'user/'),
+                            headers={'Authorization': 'access_token ' + self.token},
+                            json={})
+
+    @log_call
+    @ask_token
+    def get_one_user(self, user_id):
+        return self.get_api_for_id('user', user_id)
 
     @log_call
     @ask_token
