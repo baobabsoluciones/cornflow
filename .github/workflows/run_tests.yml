@@ -51,4 +51,5 @@ jobs:
         airflow webserver -p 8080 &
         airflow scheduler &
         deactivate
+        sleep 10s
         python -m unittest discover -s cornflow.tests.integration
