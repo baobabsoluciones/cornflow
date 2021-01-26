@@ -41,7 +41,7 @@ class TestUserEndpoint(TestCase):
         token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
         return self.client.get(url, follow_redirects=True,
-                              headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
+                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
 
     def make_admin(self, user_asks, user_asked, make_admin=1):
         data = {k: user_asks[k] for k in self.login_keys}

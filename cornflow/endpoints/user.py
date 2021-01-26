@@ -2,7 +2,7 @@
 Endpoints for the user profiles
 """
 # Import from libraries
-from flask_restful import Resource
+from flask_restful import Resource, fields, marshal_with, marshal
 from flask import request
 
 # Import from internal modules
@@ -19,7 +19,17 @@ class UserEndpoint(Resource):
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions
     """
+    resource_fields = dict(
+        id=fields.Integer,
+        admin=fields.Boolean,
+        super_admin=fields.Boolean,
+        name=fields.String,
+        email=fields.String,
+        created_at=fields.String
+    )
+
     @Auth.super_admin_required
+    @marshal_with(resource_fields)
     def get(self):
         """
         API (GET) method to get all the info from all the users
@@ -44,6 +54,11 @@ class UserDetailsEndpoint(Resource):
     """
     Endpoint use to get the information of one single user
     """
+    resource_fields = dict(
+        name=fields.String,
+        email=fields.String
+    )
+
     @Auth.auth_required
     def get(self, user_email):
         """
@@ -58,7 +73,7 @@ class UserDetailsEndpoint(Resource):
             return {'error': 'You have no permission to access given user'}, 400
         user_obj = UserModel.get_one_user_by_email(user_email)
         ser_users = user_schema.dump(user_obj, many=False)
-        return ser_users, 200
+        return marshal(ser_users, self.resource_fields), 200
 
     @Auth.auth_required
     def delete(self, user_email):
@@ -97,9 +112,15 @@ class UserDetailsEndpoint(Resource):
         data = self.schema.load(request_data, partial=True)
         user_obj.update(data)
         user_obj.save()
-        return user_obj, 201
+        return marshal(user_obj, self.resource_fields), 201
 
 class ToggleUserAdmin(Resource):
+
+    resource_fields = dict(
+        name=fields.String,
+        email=fields.String,
+        admin=fields.Boolean
+    )
 
     @Auth.super_admin_required
     def put(self, user_email, make_admin):
@@ -119,5 +140,5 @@ class ToggleUserAdmin(Resource):
         else:
             user_obj.admin = 0
         user_obj.save()
-        return_keys = ['name', 'email', 'admin']
-        return {k: getattr(user_obj, k) for k in return_keys}, 201
+        return marshal(user_obj, self.resource_fields), 201
+
