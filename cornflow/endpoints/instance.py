@@ -45,6 +45,7 @@ class InstanceEndpoint(MetaResource):
         """
         # TODO: if super_admin or admin should it be able to get any instance?
         # TODO: return 204 if no instances have been created by the user
+        # TODO: do not return the contents; only the id, and stats.
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.get_list(self.user_id)
 
@@ -89,6 +90,7 @@ class InstanceDetailsEndpoint(MetaResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        # TODO: filter only the execution (ids, created_at, name, description) fields and not the rest of details of the execution.
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
@@ -138,6 +140,8 @@ class InstanceFileEndpoint(InstanceEndpoint):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         name = request.form.get('name', '')
         description = request.form.get('description', '')
+        if 'file' not in request.files:
+            return dict(error="No file was provided"), 400
         file = request.files['file']
         filename = secure_filename(file.filename)
         if not (file and allowed_file(filename)):

@@ -1,13 +1,10 @@
 import requests
 from requests.exceptions import ConnectionError, HTTPError
+from json import JSONDecodeError
 from urllib.parse import urljoin
 from requests.auth import HTTPBasicAuth
 
 class Airflow(object):
-
-    # TODO: get_status for an instance
-    # TODO we need an endpoint to check if airflow is alive or not
-    # https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html
 
     def __init__(self, url, user, pwd):
         self.url = url
@@ -18,7 +15,10 @@ class Airflow(object):
             response = requests.get(self.url + '/health')
         except (ConnectionError, HTTPError):
             return False
-        data = response.json()
+        try:
+            data = response.json()
+        except JSONDecodeError:
+            return False
         return data['metadatabase']['status'] == 'healthy' and \
                data['scheduler']['status'] == 'healthy'
 

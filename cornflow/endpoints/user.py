@@ -45,16 +45,79 @@ class UserDetailsEndpoint(Resource):
     Endpoint use to get the information of one single user
     """
     @Auth.auth_required
-    def get(self, user_id):
+    def get(self, user_email):
         """
 
-        :param str user_id: User ID.
+        :param str user_email: User email.
         :return:
         :rtype: Tuple(dict, integer)
         """
         ath_user_id, admin, super_admin = Auth.return_user_info(request)
-        if ath_user_id != user_id and not (admin or super_admin):
-            return {}, 400
-        user = UserModel.get_one_user(user_id)
-        ser_users = user_schema.dump(user, many=False)
+        ath_user_obj = UserModel.get_one_user(ath_user_id)
+        if ath_user_obj.email != user_email and not (admin or super_admin):
+            return {'error': 'You have no permission to access given user'}, 400
+        user_obj = UserModel.get_one_user_by_email(user_email)
+        ser_users = user_schema.dump(user_obj, many=False)
         return ser_users, 200
+
+    @Auth.auth_required
+    def delete(self, user_email):
+        """
+
+        :param str user_email: User email.
+        :return:
+        :rtype: Tuple(dict, integer)
+        """
+        ath_user_id, admin, super_admin = Auth.return_user_info(request)
+        ath_user_obj = UserModel.get_one_user(ath_user_id)
+        if ath_user_obj.email != user_email and not (admin or super_admin):
+            return {'error': 'You have no permission to access given user'}, 400
+        user_obj = UserModel.get_one_user_by_email(user_email)
+        user_obj.delete()
+        return {'message': 'The object has been deleted'}, 200
+
+    @Auth.auth_required
+    def put(self, user_email):
+        """
+        API method to edit an existing user.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user. Only admin and superadmin can edit other users.
+
+        :param str user_email: email of the user
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        ath_user_id, admin, super_admin = Auth.return_user_info(request)
+        ath_user_obj = UserModel.get_one_user(ath_user_id)
+        if ath_user_obj.email != user_email and not (admin or super_admin):
+            return {'error': 'You have no permission to access given user'}, 400
+        user_obj = UserModel.get_one_user_by_email(user_email)
+        request_data = request.get_json()
+        data = self.schema.load(request_data, partial=True)
+        user_obj.update(data)
+        user_obj.save()
+        return user_obj, 201
+
+class ToggleUserAdmin(Resource):
+
+    @Auth.super_admin_required
+    def put(self, user_email, make_admin):
+        """
+        API method to make admin or take out privileges.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user. Only superadmin can change this.
+
+        :param str user_email: email of the user
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        user_obj = UserModel.get_one_user_by_email(user_email)
+        if make_admin:
+            user_obj.admin = 1
+        else:
+            user_obj.admin = 0
+        user_obj.save()
+        return_keys = ['name', 'email', 'admin']
+        return {k: getattr(user_obj, k) for k in return_keys}, 201
