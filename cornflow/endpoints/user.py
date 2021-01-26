@@ -135,4 +135,5 @@ class ToggleUserAdmin(Resource):
             user_obj.admin = 0
         user_obj.save()
         return_keys = ['name', 'email', 'admin']
+        # TODO: add format
         return {k: getattr(user_obj, k) for k in return_keys}, 201
