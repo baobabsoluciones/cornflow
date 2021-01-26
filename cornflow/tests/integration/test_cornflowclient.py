@@ -53,7 +53,6 @@ class TestInstances(CustomTestCaseLive):
         self.assertEqual(row.id, response['id'])
         self.assertEqual(row.name, name)
         self.assertEqual(row.description, description)
-        time.sleep(5)
         response = self.client.get_status(response['id'])
         self.assertTrue('status' in response)
         return row

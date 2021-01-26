@@ -37,7 +37,6 @@ def run_solve(**kwargs):
     print(uri)
     conn = urlparse(uri)
 
-    # conn = urlparse('cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000')
     # TODO: what if https??
     airflow_user = CornFlow(url="http://{}:{}".format(conn.hostname, conn.port))
 
