@@ -48,10 +48,7 @@ jobs:
         echo "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0" >> $GITHUB_ENV
         echo "AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth" >> $GITHUB_ENV
         echo "AIRFLOW_CONN_CF_URI=cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000" >> $GITHUB_ENV
-    - name: start airflow
-      run: |
         airflow webserver -p 8080 &
         airflow scheduler &
         deactivate
-    - name: test integration tests
-      run: python -m unittest discover -s cornflow.tests.integration
+        python -m unittest discover -s cornflow.tests.integration
