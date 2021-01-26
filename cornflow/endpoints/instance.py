@@ -54,8 +54,6 @@ class InstanceEndpoint(MetaResource):
         :rtype: Tuple(dict, integer)
         """
         # TODO: if super_admin or admin should it be able to get any instance?
-        # TODO: return 204 if no instances have been created by the user
-        # TODO: do not return the contents; only the id, and stats.
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.get_list(self.user_id)
 
@@ -84,7 +82,13 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         name=fields.String,
         description=fields.String,
         created_at=fields.String,
-        executions= fields.List(fields.Nested(dict(id=fields.String)))
+        executions= fields.List(fields.Nested(
+            dict(id=fields.String,
+                 config=fields.Raw,
+                 name=fields.String,
+                 created_at=fields.String,
+                 finished=fields.String)
+        ))
     )
     def __init__(self):
         super().__init__()
