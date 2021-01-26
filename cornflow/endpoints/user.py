@@ -112,9 +112,15 @@ class UserDetailsEndpoint(Resource):
         data = self.schema.load(request_data, partial=True)
         user_obj.update(data)
         user_obj.save()
-        return user_obj, 201
+        return marshal(user_obj, self.resource_fields), 201
 
 class ToggleUserAdmin(Resource):
+
+    resource_fields = dict(
+        name=fields.String,
+        email=fields.String,
+        admin=fields.Boolean
+    )
 
     @Auth.super_admin_required
     def put(self, user_email, make_admin):
@@ -134,6 +140,5 @@ class ToggleUserAdmin(Resource):
         else:
             user_obj.admin = 0
         user_obj.save()
-        return_keys = ['name', 'email', 'admin']
-        # TODO: add format
-        return {k: getattr(user_obj, k) for k in return_keys}, 201
+        return marshal(user_obj, self.resource_fields), 201
+
