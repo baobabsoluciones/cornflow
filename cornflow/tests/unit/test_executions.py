@@ -1,5 +1,7 @@
 from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
+import json
+
 
 INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
 EXECUTION_PATH = './cornflow/tests/data/new_execution.json'
@@ -13,6 +15,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
 
         self.url = '/instance/'
         self.model = InstanceModel
+        # TODO: instead of this, we should create an instance with the models
         fk_id = self.create_new_row(INSTANCE_PATH)
         self.foreign_keys = {'instance_id': fk_id}
 
@@ -21,6 +24,19 @@ class TestExecutionsListEndpoint(CustomTestCase):
 
     def test_new_execution(self):
         self.create_new_row(EXECUTION_PATH)
+
+    def test_new_execution_no_instance(self):
+        with open(EXECUTION_PATH) as f:
+            payload = json.load(f)
+
+        payload['instance_id'] = 'bad_id'
+
+        response = self.client.post(self.url, data=json.dumps(payload), follow_redirects=True,
+                                    headers={"Content-Type": "application/json",
+                                             "Authorization": 'Bearer ' + self.token})
+
+        self.assertEqual(400, response.status_code)
+        self.assertTrue('error' in response.json)
 
     def test_get_executions(self):
         self.get_rows(EXECUTIONS_LIST)
@@ -45,6 +61,9 @@ class TestExecutionsDetailEndpoint(CustomTestCase):
 
         self.id = self.create_new_row(EXECUTION_PATH)
         self.url = '/execution/' + self.id + '/'
+        self.response_items = {'id', 'name', 'description', 'created_at', 'instance_id', 'finished'}
+        # we only the following because this endpoint does not return data
+        self.items_to_check = ['name', 'description']
 
     def test_get_one_execution(self):
         self.get_one_row(EXECUTION_PATH)
@@ -54,6 +73,41 @@ class TestExecutionsDetailEndpoint(CustomTestCase):
 
     def test_delete_one_execution(self):
         self.delete_row()
+
+
+class TestExecutionsDataEndpoint(TestExecutionsDetailEndpoint):
+
+    def setUp(self):
+        super().setUp()
+        self.url = '/execution/' + self.id + '/data/'
+        self.response_items = {'id', 'name', 'data'}
+        self.items_to_check = ['name']
+
+    def test_get_one_execution(self):
+        self.get_one_row(EXECUTION_PATH)
+
+    def test_update_one_execution(self):
+        pass
+
+    def test_delete_one_execution(self):
+        pass
+
+class TestExecutionsLogEndpoint(TestExecutionsDetailEndpoint):
+
+    def setUp(self):
+        super().setUp()
+        self.url = '/execution/' + self.id + '/log/'
+        self.response_items = {'id', 'name', 'log'}
+        self.items_to_check = ['name']
+
+    def test_get_one_execution(self):
+        self.get_one_row(EXECUTION_PATH)
+
+    def test_update_one_execution(self):
+        pass
+
+    def test_delete_one_execution(self):
+        pass
 
 
 class TestExecutionsModel(CustomTestCase):
