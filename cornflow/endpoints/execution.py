@@ -75,7 +75,7 @@ class ExecutionEndpoint(MetaResource):
             return {'error': "Airflow is not accessible"}, 400
         execution_id = result[0][self.primary_key]
         try:
-            response = af_client.run_dag(execution_id, config['CORNFLOW_URL'], dag_name='solve_model_dag')
+            response = af_client.run_dag(execution_id, dag_name='solve_model_dag')
         except AirflowApiError as err:
             return {'error': "Airflow responded with an error: {}".format(err)}, 400
 
