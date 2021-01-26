@@ -1,6 +1,7 @@
-from cornflow.models import InstanceModel
+from cornflow.models import InstanceModel, ExecutionModel
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 import pulp
+import time
 
 
 class TestInstances(CustomTestCaseLive):
@@ -48,10 +49,12 @@ class TestInstances(CustomTestCaseLive):
                                      description=description,
                                      name=name)
         self.assertTrue('id' in response)
-        row = InstanceModel.query.get(response['id'])
+        row = ExecutionModel.query.get(response['id'])
         self.assertEqual(row.id, response['id'])
         self.assertEqual(row.name, name)
         self.assertEqual(row.description, description)
+        response = self.client.get_status(response['id'])
+        self.assertTrue('status' in response)
         return row
 
     def test_new_instance_file(self):

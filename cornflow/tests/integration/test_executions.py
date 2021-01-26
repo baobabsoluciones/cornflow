@@ -1,5 +1,3 @@
-from cornflow.tests.custom_test_case import CustomTestCase
-from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
