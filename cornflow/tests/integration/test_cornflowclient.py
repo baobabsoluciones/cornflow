@@ -63,6 +63,6 @@ class TestInstances(CustomTestCaseLive):
     def test_new_instance(self):
         self.create_new_instance('./cornflow/tests/data/test_mps.mps')
 
-    def test_new_execution(self):
-        one_instance = self.create_new_instance('./cornflow/tests/data/test_mps.mps')
-        self.create_new_execution(one_instance.id, config=dict(solver='PULP_CBC_CMD', timeLimit=10))
+    # def test_new_execution(self):
+    #     one_instance = self.create_new_instance('./cornflow/tests/data/test_mps.mps')
+    #     self.create_new_execution(one_instance.id, config=dict(solver='PULP_CBC_CMD', timeLimit=10))
