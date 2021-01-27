@@ -37,6 +37,8 @@ class TestLogIn(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(str, type(response.json['token']))
+        self.assertEqual(self.id, response.json['id'])
+
 
     def test_validation_error(self):
         payload = self.data

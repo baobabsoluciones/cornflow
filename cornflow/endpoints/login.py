@@ -45,9 +45,9 @@ class LoginEndpoint(Resource):
             return {'error': 'Invalid credentials.'}, 400
 
         ser_data = user_schema.dump(user)
-
-        token, error = Auth.generate_token(ser_data.get('id'))
+        user_id = ser_data.get('id')
+        token, error = Auth.generate_token(user_id)
         if error:
             return error, 400
 
-        return {'token': token}, 200
+        return {'token': token, 'id': user_id}, 200

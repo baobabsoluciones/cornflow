@@ -18,8 +18,6 @@ from ..schemas import InstanceSchema
 from ..shared.authentication import Auth
 
 # Initialize the schema that all endpoints are going to use
-# TODO: instance_schema is not used.
-instance_schema = InstanceSchema()
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
 class InstanceEndpoint(MetaResource):
@@ -31,7 +29,8 @@ class InstanceEndpoint(MetaResource):
             id=fields.String,
             name=fields.String,
             description=fields.String,
-            created_at=fields.String
+            created_at=fields.String,
+            user_id=fields.Integer,
         )
 
     def __init__(self):
@@ -53,8 +52,9 @@ class InstanceEndpoint(MetaResource):
           object with the data from the instances otherwise) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: if super_admin or admin should it be able to get any instance?
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        if (self.admin or self.super_admin):
+            return InstanceModel.get_all_instances_admin()
         return self.get_list(self.user_id)
 
     @Auth.auth_required
@@ -92,7 +92,6 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
     )
     def __init__(self):
         super().__init__()
-        # TODO: should this query use user as well?
         self.query = 'get_one_instance_from_user'
         self.dependents = 'executions'
 
@@ -110,7 +109,6 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        # TODO: filter only the execution (ids, created_at, name, description) fields and not the rest of details of the execution.
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
@@ -148,9 +146,9 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
-    # TODO: now sure if we should give the data schema here.
+    # TODO: not sure if we should give the data schema here.
     #  it doesn't appear to accept Marshmallow schemas
-    #  fields.Raw does not validation
+    #  fields.Raw does no validation.
     resource_fields = dict(
         id=fields.String,
         name=fields.String,
@@ -174,7 +172,6 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        # TODO: filter only the execution (ids, created_at, name, description) fields and not the rest of details of the execution.
         return self.get_detail(self.user_id, idx)
 
 

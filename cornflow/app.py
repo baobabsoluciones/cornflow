@@ -41,8 +41,8 @@ def create_app(env_name='development'):
     api.add_resource(ExecutionEndpoint, '/execution/', endpoint="execution")
     api.add_resource(DAGEndpoint, '/dag/<string:idx>/', endpoint="dag")
     api.add_resource(UserEndpoint, '/user/', endpoint="user")
-    api.add_resource(UserDetailsEndpoint, '/user/<string:user_email>/', endpoint="user-detail")
-    api.add_resource(ToggleUserAdmin, '/user/<string:user_email>/<int:make_admin>/', endpoint="user-admin")
+    api.add_resource(UserDetailsEndpoint, '/user/<int:user_id>/', endpoint="user-detail")
+    api.add_resource(ToggleUserAdmin, '/user/<int:user_id>/<int:make_admin>/', endpoint="user-admin")
     api.add_resource(LoginEndpoint, '/login/', endpoint="login")
     api.add_resource(SignUpEndpoint, '/signup/', endpoint="signup")
 
