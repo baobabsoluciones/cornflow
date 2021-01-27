@@ -32,7 +32,12 @@ COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt --force-reinstall
 
 # copy project
-COPY . /usr/src/app/
+COPY cornflow /usr/src/app/cornflow
+COPY docs /usr/src/app/docs
+COPY migrations /usr/src/app/migrations
+COPY examples /usr/src/app/examples
+COPY initapp.sh /usr/src/app/
+COPY *.py /usr/src/app/
 
 # dos2unix for initapp.sh
 RUN dos2unix initapp.sh
