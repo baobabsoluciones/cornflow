@@ -36,7 +36,11 @@ class CustomTestCase(TestCase):
         self.items_to_check = []
 
     @staticmethod
-    def airflow_user():
+    def get_header_with_auth(token):
+        return {"Content-Type": "application/json",
+                                             "Authorization": 'Bearer ' + token}
+
+    def create_super_admin(self):
         data = {
             'name': 'airflow',
             'email': 'airflow@baobabsoluciones.es',
@@ -47,6 +51,8 @@ class CustomTestCase(TestCase):
         user.super_admin = True
         user.save()
         db.session.commit()
+        return self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+                                      headers={"Content-Type": "application/json"}).json['token']
 
     def tearDown(self):
         db.session.remove()
@@ -61,8 +67,7 @@ class CustomTestCase(TestCase):
                 payload[key] = value
 
         response = self.client.post(self.url, data=json.dumps(payload), follow_redirects=True,
-                                    headers={"Content-Type": "application/json",
-                                             "Authorization": 'Bearer ' + self.token})
+                                    headers=self.get_header_with_auth(self.token))
 
         self.assertEqual(201, response.status_code)
 
@@ -84,13 +89,11 @@ class CustomTestCase(TestCase):
                     temp[key] = value
             return temp
 
-        # data = {f: _get_data(f) for f in files}
         data = [_get_data(f) for f in files]
-        # codes = {f: self.create_new_row(f) for f in files}
         codes = [self.create_new_row(f) for f in files]
 
         rows = self.client.get(self.url, follow_redirects=True,
-                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+                               headers=self.get_header_with_auth(self.token))
 
         self.assertEqual(len(rows.json), len(files))
 

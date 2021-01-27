@@ -29,6 +29,15 @@ class TestInstancesListEndpoint(CustomTestCase):
     def test_get_instances(self):
         self.get_rows(INSTANCES_LIST)
 
+    def test_get_instances_superadmin(self):
+        self.get_rows(INSTANCES_LIST)
+        token = self.create_super_admin()
+        rows = self.client.get(self.url, follow_redirects=True,
+                               headers=self.get_header_with_auth(token))
+        # TODO: here we get 5 >= 2. But this depends on the order of the tests...
+        #  we should do something to really check the correct number
+        self.assertGreaterEqual(len(rows.json), len(INSTANCES_LIST))
+
     def test_get_no_instances(self):
         self.get_no_rows()
 
