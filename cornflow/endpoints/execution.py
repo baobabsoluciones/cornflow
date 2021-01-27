@@ -130,14 +130,15 @@ class ExecutionDetailsEndpoint(MetaResource):
     @Auth.auth_required
     def put(self, idx):
         """
-        Not implemented yet
+        Edit an existing execution
 
         :param string idx: ID of the execution.
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return {}, 501
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.put_detail(request, self.user_id, idx)
 
     @Auth.auth_required
     def delete(self, idx):

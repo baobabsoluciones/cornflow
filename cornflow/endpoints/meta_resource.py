@@ -36,8 +36,7 @@ class MetaResource(Resource):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=False)
         if len(self.serialized_data) == 0:
-            # TODO: shouldn't this be a 404?
-            return {}, 204
+            return {}, 404
         else:
             return self.serialized_data, 200
 
@@ -79,7 +78,7 @@ class MetaResource(Resource):
         item = getattr(self.model, self.query)(*args)
         if item is None:
             # TODO: why is sometimes 'message' and sometimes 'error' when it's 400
-            return {'message': 'The object to update does not exist.'}, 400
+            return {'error': 'The object to update does not exist.'}, 400
         item.update(self.data)
 
         return {'message': 'Updated correctly.'}, 200
@@ -89,7 +88,7 @@ class MetaResource(Resource):
         item = getattr(self.model, self.query)(*args)
 
         if item is None:
-            return {'message': 'The object to delete does not exist.'}, 400
+            return {'error': 'The object to delete does not exist.'}, 400
 
         # TODO: I think there's a model configuration in django to do this automatically.
         #  In this case, what happens when there are more than one "dependents"?
