@@ -15,8 +15,16 @@ class TestInstancesListEndpoint(CustomTestCase):
         self.response_items = {'id', 'name', 'description', 'created_at'}
         self.items_to_check = ['name', 'description']
 
+        def load_file(_file):
+            with open(_file) as f:
+                temp = json.load(f)
+            return temp
+
+        self.payload = load_file(INSTANCE_PATH)
+        self.payloads = [load_file(f) for f in INSTANCES_LIST]
+
     def test_new_instance(self):
-        self.create_new_row(INSTANCE_PATH)
+        self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_instance_bad_format(self):
         payload = dict(data1= 1, data2=dict(a=1))
@@ -27,10 +35,10 @@ class TestInstancesListEndpoint(CustomTestCase):
         self.assertTrue('error' in response.json)
 
     def test_get_instances(self):
-        self.get_rows(INSTANCES_LIST)
+        self.get_rows(self.url, self.payloads)
 
     def test_get_instances_superadmin(self):
-        self.get_rows(INSTANCES_LIST)
+        self.get_rows(self.url, self.payloads)
         token = self.create_super_admin()
         rows = self.client.get(self.url, follow_redirects=True,
                                headers=self.get_header_with_auth(token))
@@ -39,7 +47,7 @@ class TestInstancesListEndpoint(CustomTestCase):
         self.assertGreaterEqual(len(rows.json), len(INSTANCES_LIST))
 
     def test_get_no_instances(self):
-        self.get_no_rows()
+        self.get_no_rows(self.url)
 
 
 class TestInstancesDetailEndpoint(CustomTestCase):
@@ -50,35 +58,40 @@ class TestInstancesDetailEndpoint(CustomTestCase):
         # to create the instance and *then* update the url
         self.url = '/instance/'
         self.model = InstanceModel
-        # TODO: instead of this, we should create an instance with the models
-        self.id = self.create_new_row(INSTANCE_PATH)
-        self.url = self.url + self.id + '/'
+        with open(INSTANCE_PATH) as f:
+            self.payload = json.load(f)
         self.response_items = {'id', 'name', 'description', 'created_at', 'executions'}
         # we only check name and description because this endpoint does not return data
         self.items_to_check = ['name', 'description']
 
     def test_get_one_instance(self):
-        result = self.get_one_row(INSTANCE_PATH)
+        id = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=id)}
+        result = self.get_one_row(self.url + id + '/', payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
     def test_update_one_instance(self):
-        self.update_row(INSTANCE_PATH, 'name', 'new_name')
+        id = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=id, name='new_name')}
+        self.update_row(self.url + id + '/', dict(name='new_name'), payload)
 
     def test_delete_one_instance(self):
-        self.delete_row()
+        id = self.create_new_row(self.url, self.model, self.payload)
+        self.delete_row(self.url + id + '/', self.model)
 
 
 class TestInstancesDataEndpoint(TestInstancesDetailEndpoint):
 
     def setUp(self):
         super().setUp()
-        self.url = '/instance/' + self.id + '/data/'
         self.response_items = {'id', 'name', 'data'}
         self.items_to_check = ['name', 'data']
 
     def test_get_one_instance(self):
-        result = self.get_one_row(INSTANCE_PATH)
+        id = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=id)}
+        result = self.get_one_row('/instance/' + id + '/data/', payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -95,7 +108,9 @@ class TestInstanceModelMethods(CustomTestCase):
         super().setUp()
         self.url = '/instance/'
         self.model = InstanceModel
-        self.id = self.create_new_row(INSTANCE_PATH)
+        with open(INSTANCE_PATH) as f:
+            self.payload = json.load(f)
+        self.id = self.create_new_row(self.url, self.model, self.payload)
 
     # TODO: should these test be implemented? The functions that these test should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
