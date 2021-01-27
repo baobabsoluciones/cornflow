@@ -17,8 +17,8 @@
 : "${AIRFLOW_LASTNAME:="admin"}"
 : "${AIRFLOW_ROLE:="Admin"}"
 : "${AIRFLOW_PWD:="admin"}"
-: "${AIRFLOW_USER_EMAIL:="admin@example"}"
-	  
+: "${AIRFLOW_USER_EMAIL:="admin@example.com"}"
+
 export \
 	AIRFLOW_HOME \
 	AIRFLOW__CORE__EXECUTOR \
@@ -38,6 +38,7 @@ if [ -e "/requirements.txt" ]; then
     $(command -v pip) install --user -r /requirements.txt
 fi
 
+# Make SQL connention
   if [ -z "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" ]; then
     # Default values corresponding to the default compose files
     : "${AIRFLOW_DB_HOST:="airflow_db"}"
@@ -95,6 +96,18 @@ if [ "$AIRFLOW__CORE__EXECUTOR" = "CeleryExecutor" ]; then
   fi
 fi
 
+# Make cornflow connection for response from workers
+  if [ -z "$AIRFLOW_CONN_CF_CONN" ]; then
+    # Default values corresponding to the default compose files
+    : "${CORNFLOW_HOST:="cornflow"}"
+    : "${CORNFLOW_PORT:="5000"}"
+    : "${CORNFLOW_ADMIN_USER:="user@cornflow.com"}"
+    : "${CORNFLOW_ADMIN_PWD:="cornflow1234"}"
+
+    AIRFLOW_CONN_CF_CONN="cornflow://${CORNFLOW_ADMIN_USER}:${CORNFLOW_ADMIN_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
+    export AIRFLOW_CONN_CF_CONN
+  fi
+
 case "$1" in
   webserver)
     airflow db init
@@ -105,7 +118,7 @@ case "$1" in
       --role "$AIRFLOW_ROLE" \
       --password "$AIRFLOW_PWD" \
       --email "$AIRFLOW_USER_EMAIL"
-	  
+
     if [ "$AIRFLOW__CORE__EXECUTOR" = "LocalExecutor" ] || [ "$AIRFLOW__CORE__EXECUTOR" = "SequentialExecutor" ]; then
       # With the "Local" and "Sequential" executors it should all run in one container.
       airflow scheduler &
