@@ -1,14 +1,16 @@
 from airflow import DAG, AirflowException
 from airflow.operators.python_operator import PythonOperator
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 from cornflow_client import CornFlow
 from datetime import datetime, timedelta
 import model_functions as mf
+from urllib.parse import urlparse
 
 
 # Following are defaults which can be overridden later on
 # TODO: clean this
 default_args = {
-    'owner': 'hugo',
+    'owner': 'baobab',
     'depends_on_past': False,
     'start_date': datetime(2020, 2, 1),
     'email': [''],
@@ -28,11 +30,17 @@ def get_arg(arg, context):
 
 def run_solve(**kwargs):
     exec_id = get_arg("exec_id", kwargs)
-    cornflow_url = get_arg("cornflow_url", kwargs)
-    airflow_user = CornFlow(url=cornflow_url)
+
+    # This secret comes from airflow configuration
+    print("Getting connection information from ENV VAR=CF_URI")
+    secrets = EnvironmentVariablesBackend()
+    uri = secrets.get_conn_uri('CF_URI')
+    conn = urlparse(uri)
+    # TODO: what if https??
+    airflow_user = CornFlow(url="http://{}:{}".format(conn.hostname, conn.port))
 
     # login
-    airflow_user.login(email="airflow@baobabsoluciones.es", pwd="THISNEEDSTOBECHANGED")
+    airflow_user.login(email=conn.username, pwd=conn.password)
     print("starting to solve the model with execution %s" % exec_id)
     # get data
     execution_data = airflow_user.get_data(exec_id)
