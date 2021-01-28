@@ -31,7 +31,7 @@ class LoginEndpoint(Resource):
         try:
             data = user_schema.load(req_data, partial=True)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            return {'error': str(val_err.normalized_messages())}, 400
 
         if not data.get('email') or not data.get('password'):
             return {'error': 'You need email and password to sign in.'}, 400
@@ -45,9 +45,9 @@ class LoginEndpoint(Resource):
             return {'error': 'Invalid credentials.'}, 400
 
         ser_data = user_schema.dump(user)
-
-        token, error = Auth.generate_token(ser_data.get('id'))
+        user_id = ser_data.get('id')
+        token, error = Auth.generate_token(user_id)
         if error:
             return error, 400
 
-        return {'token': token}, 200
+        return {'token': token, 'id': user_id}, 200

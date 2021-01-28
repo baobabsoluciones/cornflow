@@ -48,7 +48,10 @@ class InstanceModel(BaseAttributes):
     data = db.Column(JSON, nullable=False)
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
-    executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
+    executions = db.relationship('ExecutionModel', backref='instances', lazy=True,
+                                 primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
+                                             "ExecutionModel.deleted_at==None)"
+                                 )
 
     def __init__(self, data):
         super().__init__(data)
@@ -88,6 +91,17 @@ class InstanceModel(BaseAttributes):
         """
         db.session.delete(self)
         db.session.commit()
+
+    @staticmethod
+    def get_all_instances_admin():
+        """
+        Query to get all instances.
+        BEWARE: only the admin should do this.
+
+        :return: The instances
+        :rtype: list(:class:`InstanceModel`)
+        """
+        return InstanceModel.query.filter_by(deleted_at=None)
 
     @staticmethod
     def get_all_instances(user):

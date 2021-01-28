@@ -24,7 +24,6 @@ def upgrade():
                                           server_default=sa.text(str(DEFAULT_EXECUTION_CODE))))
 
     op.add_column('executions', sa.Column('state_message', sa.TEXT(),
-                                          server_default=sa.text(EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE]),
                                           nullable=True))
 
     op.drop_column('executions', 'finished')

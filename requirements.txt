@@ -12,6 +12,9 @@ Flask-Migrate==2.5.3
 Flask-RESTful==0.3.8
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.1
+gevent==1.4.0
+greenlet==0.4.15
+gunicorn==20.0.4
 idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
@@ -31,3 +34,5 @@ urllib3==1.25.10
 Werkzeug==1.0.1
 flask-cors
 pulp
+jsonschema
+genson

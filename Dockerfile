@@ -1,6 +1,24 @@
-# pull official base image
-FROM python
+# VERSION 2.0.0
+# AUTHOR: sistemas@baobabsoluciones.es
+# DESCRIPTION: Cornflow docker container build on docker-hub "docker pull baobabsoluciones/cornflow:latest"
 
+FROM python:3.8-slim-buster
+LABEL maintainer="sistemas@baobabsoluciones"
+
+# Never prompt the user for choices on installation/configuration of packages
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM linux
+
+# Cornflow vars
+
+# install dos2unix for initapp.sh
+RUN apt update -y && apt-get install -y --no-install-recommends \
+		dos2unix \
+		gcc \
+		python3-dev \
+		libffi-dev \
+		libpq-dev
+		
 # set work directory
 WORKDIR /usr/src/app
 
@@ -14,12 +32,18 @@ COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt --force-reinstall
 
 # copy project
-COPY . /usr/src/app/
+COPY cornflow /usr/src/app/cornflow
+COPY docs /usr/src/app/docs
+COPY migrations /usr/src/app/migrations
+COPY examples /usr/src/app/examples
+COPY initapp.sh /usr/src/app/
+COPY *.py /usr/src/app/
 
-# install dos2unix for initapp.sh
-RUN apt update && apt install dos2unix -y
+# dos2unix for initapp.sh
 RUN dos2unix initapp.sh
 RUN chmod +x initapp.sh
 
+EXPOSE 5000
+
 # execute script initapp.sh
-CMD ["./initapp.sh"]
+ENTRYPOINT ["./initapp.sh"]

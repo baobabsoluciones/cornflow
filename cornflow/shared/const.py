@@ -1,7 +1,3 @@
-MIN_EXECUTION_STATUS_CODE = -5
-MAX_EXECUTION_STATUS_CODE = 1
-DEFAULT_EXECUTION_CODE = 0
-
 EXEC_STATE_CORRECT = 1
 EXEC_STATE_RUNNING = 0
 EXEC_STATE_ERROR = -1
@@ -16,4 +12,9 @@ EXECUTION_STATE_MESSAGE_DICT = {EXEC_STATE_CORRECT: "The execution has been solv
                                 EXEC_STATE_STOPPED: "The execution has stopped running.",
                                 EXEC_STATE_ERROR_START: "The execution couldn't start running.",
                                 EXEC_STATE_NOT_RUN: "The execution wasn't run by user choice.",
-                                EXEC_STATE_UNKNOWN: "The execution has an unknown error"}
+                                EXEC_STATE_UNKNOWN: "The execution has an unknown error."}
+
+# derived constants
+MIN_EXECUTION_STATUS_CODE = min(EXECUTION_STATE_MESSAGE_DICT.keys())
+MAX_EXECUTION_STATUS_CODE = max(EXECUTION_STATE_MESSAGE_DICT.keys())
+DEFAULT_EXECUTION_CODE = EXEC_STATE_RUNNING

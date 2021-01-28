@@ -4,14 +4,12 @@ or check the status of an ongoing one
 These endpoints hve different access url, but manage the same data entities
 """
 
-# TODO: should we have and endpoint that gets the executions from one instance, not all of them,
-#  but not just one without getting the info from the instance?
-
 # Import from libraries
 from flask import request, current_app
+from flask_restful import fields, marshal_with
 
-from .meta_resource import MetaResource
 # Import from internal modules
+from .meta_resource import MetaResource
 from ..models import InstanceModel, ExecutionModel
 from ..schemas import ExecutionSchema
 from ..shared.airflow_api import Airflow, AirflowApiError
@@ -88,7 +86,7 @@ class ExecutionEndpoint(MetaResource):
                     'error': "Airflow is not accessible."}, 400
 
         try:
-            response = af_client.run_dag(execution.id, config['CORNFLOW_URL'], dag_name='solve_model_dag')
+            response = af_client.run_dag(execution.id, dag_name='solve_model_dag')
         except AirflowApiError as err:
             execution.update_state(EXEC_STATE_ERROR)
             return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
@@ -103,8 +101,18 @@ class ExecutionEndpoint(MetaResource):
 
 class ExecutionDetailsEndpoint(MetaResource):
     """
-    Endpoint used to get the information of a certain execution
+    Endpoint used to get the information of a certain execution. But not the data!
     """
+    resource_fields = dict(
+        id=fields.String,
+        name=fields.String,
+        description=fields.String,
+        created_at=fields.String,
+        instance_id=fields.String,
+        # TODO: this will change:
+        finished=fields.Boolean,
+    )
+
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
@@ -113,6 +121,7 @@ class ExecutionDetailsEndpoint(MetaResource):
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
 
+    @marshal_with(resource_fields)
     @Auth.auth_required
     def get(self, idx):
         """
@@ -125,24 +134,23 @@ class ExecutionDetailsEndpoint(MetaResource):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        # TODO: what if the reference id is wrong and it does not exist
-        # TODO: if super_admin or admin should it be able to get any execution?
+        # TODO: what if the reference id is wrong and it does not exist => 404
+        # TODO: if super_admin or admin should it be able to get any execution? => yes
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        # TODO: here, the execution log progress is read correctly but parsed incorrectly by
-        #  marshmallow: the arrays in the progress are converted into strings
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
     def put(self, idx):
         """
-        Not implemented yet
+        Edit an existing execution
 
         :param string idx: ID of the execution.
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return {}, 501
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.put_detail(request, self.user_id, idx)
 
     @Auth.auth_required
     def delete(self, idx):
@@ -207,3 +215,65 @@ class ExecutionStatusEndpoint(MetaResource):
         data = response.json()
         execution.update_state(EXEC_STATE_RUNNING)
         return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_RUNNING], 'status': data['state']}, 200
+
+
+class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
+    """
+    Endpoint used to get the solution of a certain execution.
+    """
+    resource_fields = dict(
+        id=fields.String,
+        name=fields.String,
+        data=fields.Raw(attribute='execution_results'),
+    )
+
+    @Auth.auth_required
+    @marshal_with(resource_fields)
+    def get(self, idx):
+        """
+
+        :param str idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          the data of the execution) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        return self.get_detail(self.user_id, idx)
+
+    def delete(self, idx):
+        return {}, 501
+
+    def put(self, idx):
+        return {}, 501
+
+
+class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
+    """
+    Endpoint used to get the log of a certain execution.
+    """
+    resource_fields = dict(
+        id=fields.String,
+        name=fields.String,
+        log=fields.Raw(attribute='log_json'),
+    )
+
+    @Auth.auth_required
+    @marshal_with(resource_fields)
+    def get(self, idx):
+        """
+
+        :param str idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          the data of the execution) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        # TODO: here, the execution log progress is read correctly but parsed incorrectly by
+        #  marshmallow: the arrays in the progress are converted into strings
+        return self.get_detail(self.user_id, idx)
+
+    def delete(self, idx):
+        return {}, 501
+
+    def put(self, idx):
+        return {}, 501

@@ -1,13 +1,11 @@
 import requests
 from requests.exceptions import ConnectionError, HTTPError
+from json import JSONDecodeError
 from urllib.parse import urljoin
 from requests.auth import HTTPBasicAuth
 
-class Airflow(object):
 
-    # TODO: get_status for an instance
-    # TODO we need an endpoint to check if airflow is alive or not
-    # https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html
+class Airflow(object):
 
     def __init__(self, url, user, pwd):
         self.url = url
@@ -18,7 +16,10 @@ class Airflow(object):
             response = requests.get(self.url + '/health')
         except (ConnectionError, HTTPError):
             return False
-        data = response.json()
+        try:
+            data = response.json()
+        except JSONDecodeError:
+            return False
         return data['metadatabase']['status'] == 'healthy' and \
                data['scheduler']['status'] == 'healthy'
 
@@ -38,8 +39,8 @@ class Airflow(object):
                                   format(response.status_code, response.text))
         return response
 
-    def run_dag(self, execution_id, cornflow_url, dag_name='solve_model_dag'):
-        conf = dict(exec_id=execution_id, cornflow_url=cornflow_url)
+    def run_dag(self, execution_id, dag_name='solve_model_dag'):
+        conf = dict(exec_id=execution_id)
         payload = dict(conf=conf)
         return self.consume_dag_run(dag_name, payload=payload, method='POST')
 
@@ -48,6 +49,19 @@ class Airflow(object):
 
     def get_all_dag_runs(self, dag_name):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method='GET')
+
+    def get_dag_info(self, dag_name, method='GET'):
+        url = urljoin(self.url, '/api/v1/dags/{}'.format(dag_name))
+        response = requests.request(
+            method=method,
+            url=url,
+            headers={'Content-type': 'application/json',
+                     'Accept': 'application/json'},
+            auth=self.auth)
+        if response.status_code != 200:
+            raise AirflowApiError('Airflow responded with a status: {}:\n{}'.
+                                  format(response.status_code, response.text))
+        return response
 
 
 class AirflowApiError(Exception):

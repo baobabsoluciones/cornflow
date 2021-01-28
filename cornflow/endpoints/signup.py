@@ -31,7 +31,9 @@ class SignUpEndpoint(Resource):
         try:
             data = user_schema.load(req_data)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            # TODO: I'm making a text of all errors to be consistent.
+            #  but I'm not sure if we can do better than just wrapping everything in str
+            return {'error': str(val_err.normalized_messages())}, 400
 
         user_in_db = UserModel.get_one_user_by_email(data.get('email'))
         if user_in_db:

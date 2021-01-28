@@ -37,6 +37,8 @@ class TestLogIn(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(str, type(response.json['token']))
+        self.assertEqual(self.id, response.json['id'])
+
 
     def test_validation_error(self):
         payload = self.data
@@ -46,8 +48,8 @@ class TestLogIn(TestCase):
                                     headers={"Content-Type": "application/json"})
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(dict, type(response.json['error']))
-        self.assertEqual('Not a valid email address.', response.json['error']['email'][0])
+        self.assertEqual(str, type(response.json['error']))
+        # self.assertEqual('Not a valid email address.', response.json['error']['email'][0])
 
     def test_missing_email(self):
         payload = self.data
@@ -104,7 +106,7 @@ class TestLogIn(TestCase):
                                             "Authorization": 'Bearer ' + token})
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual('Token expired, please login again.', response.json['message'])
+        self.assertEqual('Token expired, please login again.', response.json['error'])
 
     def test_invalid_token(self):
         token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ' \
@@ -115,4 +117,4 @@ class TestLogIn(TestCase):
                                             "Authorization": 'Bearer ' + token})
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual('Invalid token, please try again with a new token.', response.json['message'])
+        self.assertEqual('Invalid token, please try again with a new token.', response.json['error'])

@@ -32,9 +32,14 @@ class CustomTestCase(TestCase):
         self.model = None
         self.id = None
         self.foreign_keys = None
+        self.response_items = set()
+        self.items_to_check = []
 
     @staticmethod
-    def airflow_user():
+    def get_header_with_auth(token):
+        return {"Content-Type": "application/json", "Authorization": 'Bearer ' + token}
+
+    def create_super_admin(self):
         data = {
             'name': 'airflow',
             'email': 'airflow@baobabsoluciones.es',
@@ -45,111 +50,95 @@ class CustomTestCase(TestCase):
         user.super_admin = True
         user.save()
         db.session.commit()
+        return self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+                                      headers={"Content-Type": "application/json"}).json['token']
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
 
-    def create_new_row(self, file):
-        with open(file) as f:
-            payload = json.load(f)
+    def create_new_row(self, url, model, payload):
 
-        if self.foreign_keys is not None:
-            for key, value in self.foreign_keys.items():
-                payload[key] = value
-
-        response = self.client.post(self.url, data=json.dumps(payload), follow_redirects=True,
-                                    headers={"Content-Type": "application/json",
-                                             "Authorization": 'Bearer ' + self.token})
+        response = self.client.post(url, data=json.dumps(payload), follow_redirects=True,
+                                    headers=self.get_header_with_auth(self.token))
 
         self.assertEqual(201, response.status_code)
 
-        row = self.model.query.get(response.json['id'])
+        row = model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
-        for key in payload:
+
+        for key in self.get_keys_to_check(payload):
             self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, files):
-        data = []
-        codes = []
+    def get_rows(self, url, data):
 
-        for file in files:
-            with open(file) as f:
-                temp = json.load(f)
+        codes = [self.create_new_row(url=url, model=self.model, payload=d) for d in data]
 
-                if self.foreign_keys is not None:
-                    for key, value in self.foreign_keys.items():
-                        temp[key] = value
+        rows = self.client.get(url, follow_redirects=True,
+                               headers=self.get_header_with_auth(self.token))
 
-                data.append(temp)
-                codes.append(self.create_new_row(file))
-
-        rows = self.client.get(self.url, follow_redirects=True,
-                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
-
-        self.assertEqual(len(rows.json), len(files))
+        self.assertEqual(len(rows.json), len(data))
 
         for i in range(len(data)):
             self.assertEqual(rows.json[i]['id'], codes[i])
-            for key in data[i]:
+            for key in self.get_keys_to_check(data[i]):
                 self.assertEqual(rows.json[i][key], data[i][key])
 
-    def get_one_row(self, file):
-        with open(file) as f:
-            payload = json.load(f)
+    def get_keys_to_check(self, payload):
+        if len(self.items_to_check):
+            return self.items_to_check
+        return payload.keys()
 
-        row = self.client.get(self.url, follow_redirects=True,
-                              headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+    def get_one_row(self, url, payload, expected_status=200, check_payload=True):
 
-        self.assertEqual(200, row.status_code)
-        self.assertEqual(row.json['id'], self.id)
-        for key in payload:
+        row = self.client.get(url, follow_redirects=True,
+                              headers=self.get_header_with_auth(self.token))
+
+        self.assertEqual(expected_status, row.status_code)
+        if not check_payload:
+            return row.json
+        self.assertEqual(row.json['id'], payload['id'])
+        for key in self.get_keys_to_check(payload):
             self.assertEqual(row.json[key], payload[key])
+        return row.json
 
-    def get_no_rows(self):
-        rows = self.client.get(self.url, follow_redirects=True,
-                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+    def get_no_rows(self, url):
+        rows = self.client.get(url, follow_redirects=True,
+                               headers=self.get_header_with_auth(self.token))
+        self.assertEqual(200, rows.status_code)
+        return rows.json
 
-        self.assertEqual(204, rows.status_code)
-
-    def update_row(self, file, key, new_value):
-        with open(file) as f:
-            payload = json.load(f)
-
-        payload[key] = new_value
-
-        response = self.client.put(self.url, data=json.dumps(payload), follow_redirects=True,
-                                   headers={"Content-Type": "application/json",
-                                            "Authorization": 'Bearer ' + self.token})
-
+    def update_row(self, url, change, payload_to_check):
+        response = self.client.put(url, data=json.dumps(change), follow_redirects=True,
+                                   headers=self.get_header_with_auth(self.token))
         self.assertEqual(200, response.status_code)
 
-        row = self.client.get(self.url, follow_redirects=True,
-                              headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + self.token})
+        row = self.client.get(url, follow_redirects=True,
+                              headers=self.get_header_with_auth(self.token))
 
         self.assertEqual(200, row.status_code)
-        self.assertEqual(row.json['id'], self.id)
-        for key in payload:
-            self.assertEqual(row.json[key], payload[key])
+        self.assertEqual(row.json['id'], payload_to_check['id'])
+        for key in self.get_keys_to_check(payload_to_check):
+            self.assertEqual(row.json[key], payload_to_check[key])
+        return row.json
 
-    def delete_row(self):
+    def delete_row(self, url, model):
 
-        response = self.client.delete(self.url, follow_redirects=True,
-                                      headers={"Content-Type": "application/json",
-                                               "Authorization": 'Bearer ' + self.token})
+        response = self.client.delete(url, follow_redirects=True,
+                                      headers=self.get_header_with_auth(self.token))
         self.assertEqual(200, response.status_code)
 
-        response = self.client.get(self.url, follow_redirects=True,
-                                   headers={"Content-Type": "application/json",
-                                            "Authorization": 'Bearer ' + self.token})
+        response = self.client.get(url, follow_redirects=True,
+                                   headers=self.get_header_with_auth(self.token))
 
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(404, response.status_code)
+        return response
 
-    def repr_method(self, representation):
-        row = self.model.query.get(self.id)
+    def repr_method(self, id, representation):
+        row = self.model.query.get(id)
         self.assertEqual(repr(row), representation)
 
-    def str_method(self, string: str):
-        row = self.model.query.get(self.id)
+    def str_method(self, id, string: str):
+        row = self.model.query.get(id)
         self.assertEqual(str(row), string)
