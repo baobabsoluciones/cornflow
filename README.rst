@@ -306,9 +306,9 @@ List containers::
 
     docker-compose ps
 
-Inspect container::
+Interact with container::
 
-    docker exec -it containerid bash
+    docker exec -it CONTAINER_ID bash
 
 See the logs for a particular service (e.g., SERVICE=cornflow)::
 
@@ -330,6 +330,29 @@ Appended in this repository are three more docker-compose files for different ki
 
     Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
 
+Running airflow with reverse proxy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
+Eg.::
+
+	[Nginx]
+	server {
+    listen 80;
+    server_name localhost;
+    location / {
+      proxy_pass http://localhost:5000;
+	}
+
+If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP Cloud Balancer, just make changes on airflow.cfg through environment variables.
+	
+	[webserver]
+	AIRFLOW__WEBSERVER__BASE_URL=http://my_host/myorg/airflow
+    AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX=True
+	[flower]
+	AIRFLOW__CELERY__FLOWER_URL_PREFIX=/myorg/flower
+
+More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
 
 Test cornflow
 ~~~~~~~~~~~~~~~~~~

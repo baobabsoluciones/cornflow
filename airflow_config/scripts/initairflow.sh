@@ -97,15 +97,15 @@ if [ "$AIRFLOW__CORE__EXECUTOR" = "CeleryExecutor" ]; then
 fi
 
 # Make cornflow connection for response from workers
-  if [ -z "$AIRFLOW_CONN_CF_CONN" ]; then
+  if [ -z "$AIRFLOW_CONN_CF_URI" ]; then
     # Default values corresponding to the default compose files
     : "${CORNFLOW_HOST:="cornflow"}"
     : "${CORNFLOW_PORT:="5000"}"
     : "${CORNFLOW_ADMIN_USER:="user@cornflow.com"}"
     : "${CORNFLOW_ADMIN_PWD:="cornflow1234"}"
 
-    AIRFLOW_CONN_CF_CONN="cornflow://${CORNFLOW_ADMIN_USER}:${CORNFLOW_ADMIN_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
-    export AIRFLOW_CONN_CF_CONN
+    AIRFLOW_CONN_CF_URI="cornflow://${CORNFLOW_ADMIN_USER}:${CORNFLOW_ADMIN_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
+    export AIRFLOW_CONN_CF_URI
   fi
 
 case "$1" in
