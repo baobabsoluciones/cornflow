@@ -73,6 +73,7 @@ class ExecutionEndpoint(MetaResource):
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
             return {'error': "Airflow is not accessible"}, 400
+        # TODO: add log when fails
         execution_id = result[0][self.primary_key]
         try:
             response = af_client.run_dag(execution_id, dag_name='solve_model_dag')
