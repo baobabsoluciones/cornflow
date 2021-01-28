@@ -90,6 +90,17 @@ class InstanceModel(BaseAttributes):
         db.session.commit()
 
     @staticmethod
+    def get_all_instances_admin():
+        """
+        Query to get all instances.
+        BEWARE: only the admin should do this.
+
+        :return: The instances
+        :rtype: list(:class:`InstanceModel`)
+        """
+        return InstanceModel.query.filter_by(deleted_at=None)
+
+    @staticmethod
     def get_all_instances(user):
         """
         Query to get all instances from a user

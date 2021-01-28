@@ -26,23 +26,17 @@ class MetaResource(Resource):
         self.primary_key = None
         self.dependents = None
         self.foreign_data = None
-        # TODO: this property can be passed as an argument
-        #  so there's no need to store it (foreign_owner)
-        self.foreign_owner = None
 
     def get_list(self, *args):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=True)
-        if len(self.serialized_data) == 0:
-            return {}, 204
-        else:
-            return self.serialized_data, 200
+        return self.serialized_data, 200
 
     def get_detail(self, *args):
         self.data = getattr(self.model, self.query)(*args)
         self.serialized_data = self.schema.dump(self.data, many=False)
         if len(self.serialized_data) == 0:
-            return {}, 204
+            return {}, 404
         else:
             return self.serialized_data, 200
 
@@ -52,7 +46,7 @@ class MetaResource(Resource):
             # TODO: take out the partial and make it work
             self.data = self.schema.load(request_data, partial=True)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            return {'error': str(val_err.normalized_messages())}, 400
 
         self.data['user_id'] = self.user_id
 
@@ -60,9 +54,11 @@ class MetaResource(Resource):
 
         if self.foreign_data is not None:
             for fk in self.foreign_data:
-                self.foreign_owner = self.foreign_data[fk].query.get(getattr(item, fk)).user_id
-                if not self.check_permissions():
-                    return {'error': 'You do not have to create this object.'}, 400
+                owner = self.foreign_data[fk].query.get(getattr(item, fk))
+                if owner is None:
+                    return {'error': 'You do not have permissions to create this object.'}, 400
+                if not self.check_permissions(owner.user_id):
+                    return {'error': 'You do not have permissions to create this object.'}, 400
 
         item.save()
 
@@ -75,14 +71,14 @@ class MetaResource(Resource):
         try:
             self.data = self.schema.load(request_data, partial=True)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            return {'error': str(val_err.normalized_messages())}, 400
 
         self.data['user_id'] = self.user_id
 
         item = getattr(self.model, self.query)(*args)
         if item is None:
             # TODO: why is sometimes 'message' and sometimes 'error' when it's 400
-            return {'message': 'The object to update does not exist.'}, 400
+            return {'error': 'The object to update does not exist.'}, 400
         item.update(self.data)
 
         return {'message': 'Updated correctly.'}, 200
@@ -92,7 +88,7 @@ class MetaResource(Resource):
         item = getattr(self.model, self.query)(*args)
 
         if item is None:
-            return {'message': 'The object to delete does not exist.'}, 400
+            return {'error': 'The object to delete does not exist.'}, 400
 
         # TODO: I think there's a model configuration in django to do this automatically.
         #  In this case, what happens when there are more than one "dependents"?
@@ -104,8 +100,8 @@ class MetaResource(Resource):
 
         return {'message': 'The object has been deleted'}, 200
 
-    def check_permissions(self):
-        if self.user_id != self.foreign_owner:
+    def check_permissions(self, owner):
+        if self.user_id != owner:
             return False
         else:
             return True

@@ -12,6 +12,7 @@ def run_example():
     a = client.sign_up(**config)
     a = client.login(email, pwd)
 
+
     import pulp
     prob = pulp.LpProblem("test_export_dict_MIP", pulp.LpMinimize)
     x = pulp.LpVariable("x", 0, 4)
