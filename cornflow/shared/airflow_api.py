@@ -24,7 +24,7 @@ class Airflow(object):
                data['scheduler']['status'] == 'healthy'
 
     def consume_dag_run(self, dag_name, payload, dag_run_id=None, method='POST'):
-        url = urljoin(self.url, '/api/v1/dags/{}/dagRuns'.format(dag_name))
+        url = "{}/api/v1/dags/{}/dagRuns".format(self.url, dag_name)
         if dag_run_id is not None:
             url = url + '/{}'.format(dag_run_id)
         response = requests.request(
