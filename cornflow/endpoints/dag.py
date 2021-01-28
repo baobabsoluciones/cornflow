@@ -10,6 +10,7 @@ from flask_restful import Resource
 from ..models import ExecutionModel
 from ..schemas import ExecutionSchema
 from ..shared.authentication import Auth
+from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
 
 execution_schema = ExecutionSchema()
 
@@ -38,6 +39,8 @@ class DAGEndpoint(Resource):
         # because we do not want to store airflow's user:
         req_data['user_id'] = execution.user_id
         req_data['finished'] = True
+        req_data['state'] = EXEC_STATE_CORRECT
+        req_data['state_message'] = EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_CORRECT]
         execution.update(req_data)
         execution.save()
         return {'message': 'results successfully saved'}, 201

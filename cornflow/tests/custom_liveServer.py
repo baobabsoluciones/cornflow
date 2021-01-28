@@ -8,6 +8,7 @@ from cornflow.shared.authentication import Auth
 
 import cornflow_client as cf
 
+
 class CustomTestCaseLive(LiveServerTestCase):
 
     def create_app(self):

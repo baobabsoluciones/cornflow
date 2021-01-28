@@ -135,10 +135,10 @@ class CustomTestCase(TestCase):
         self.assertEqual(404, response.status_code)
         return response
 
-    def repr_method(self, representation):
-        row = self.model.query.get(self.id)
+    def repr_method(self, id, representation):
+        row = self.model.query.get(id)
         self.assertEqual(repr(row), representation)
 
-    def str_method(self, string: str):
-        row = self.model.query.get(self.id)
+    def str_method(self, id, string: str):
+        row = self.model.query.get(id)
         self.assertEqual(str(row), string)
