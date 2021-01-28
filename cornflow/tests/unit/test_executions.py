@@ -60,6 +60,16 @@ class TestExecutionsModel(CustomTestCase):
 
     def setUp(self):
         super().setUp()
+        self.url = '/instance/'
+        self.model = InstanceModel
+        fk_id = self.create_new_row(INSTANCE_PATH)
+
+        self.foreign_keys = {'instance_id': fk_id}
+
+        self.url = '/execution/?run=0'
+        self.model = ExecutionModel
+
+        self.id = self.create_new_row(EXECUTION_PATH)
 
     # TODO: should these tests be implemented? The functions that these tests should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
@@ -91,7 +101,7 @@ class TestExecutionsModel(CustomTestCase):
         pass
 
     def test_repr_method(self):
-        pass
+        self.repr_method('<id {}>'.format(self.id))
 
     def test_str_method(self):
-        pass
+        self.str_method('<id {}>'.format(self.id))

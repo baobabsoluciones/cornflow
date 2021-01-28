@@ -69,9 +69,6 @@ class ExecutionModel(BaseAttributes):
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
     state_message = db.Column(TEXT, default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE], nullable=True)
 
-    __table_args__ = (CheckConstraint('state <= ' + str(MAX_EXECUTION_STATUS_CODE), name='check_status_less_than'),
-                      CheckConstraint('state >= ' + str(MIN_EXECUTION_STATUS_CODE), name='check_status_greater_than'))
-
     def __init__(self, data):
         super().__init__(data)
         self.user_id = data.get('user_id')
@@ -183,9 +180,18 @@ class ExecutionModel(BaseAttributes):
         
     def __repr__(self):
         """
-        Representation method
+        Method to represent the class :class:`ExecutionModel`
 
-        :return: the representation of the execution as string
+        :return: The representation of the :class:`ExecutionModel`
+        :rtype: str
+        """
+        return '<id {}>'.format(self.id)
+
+    def __str__(self):
+        """
+        Method to print a string representation of the :class:`ExecutionModel`
+
+        :return: The string for the :class:`ExecutionModel`
         :rtype: str
         """
         return '<id {}>'.format(self.id)

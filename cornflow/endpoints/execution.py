@@ -101,7 +101,6 @@ class ExecutionEndpoint(MetaResource):
         return result
 
 
-# TODO: delete an execution and its related data
 class ExecutionDetailsEndpoint(MetaResource):
     """
     Endpoint used to get the information of a certain execution
