@@ -63,8 +63,6 @@ Initialize the database::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    export SADMIN_USER=airflow_test@admin.com
-    export SADMIN_PWD=airflow_test_password
     python manage.py db upgrade
     python manage.py create_super_user \\
         --user=airflow_test@admin.com \\
@@ -81,7 +79,6 @@ Each time you run the flask server, execute the following::
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
-    export CORNFLOW_URL=http://localhost:5000
     export AIRFLOW_USER=admin
     export AIRFLOW_PWD=admin
     flask run

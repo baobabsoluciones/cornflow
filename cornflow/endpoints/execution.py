@@ -14,9 +14,12 @@ from ..models import InstanceModel, ExecutionModel
 from ..schemas import ExecutionSchema
 from ..shared.airflow_api import Airflow, AirflowApiError
 from ..shared.authentication import Auth
+from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
+    EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT
 
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
+
 
 class ExecutionEndpoint(MetaResource):
     """
@@ -68,22 +71,31 @@ class ExecutionEndpoint(MetaResource):
         # if we failed to save the execution, we do not continue
         if result[1] >= 300 or not_run:
             return result
+        elif not_run:
+            execution = ExecutionModel.get_one_execution_from_user(self.user_id, result[0][self.primary_key])
+            execution.update_state(EXEC_STATE_NOT_RUN)
+            return result
+
+        execution = ExecutionModel.get_one_execution_from_user(self.user_id, result[0][self.primary_key])
 
         # We now try to launch the task in airflow
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
-            return {'error': "Airflow is not accessible"}, 400
-        execution_id = result[0][self.primary_key]
+            execution.update_state(EXEC_STATE_ERROR_START)
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    'error': "Airflow is not accessible."}, 400
+
         try:
-            response = af_client.run_dag(execution_id, dag_name='solve_model_dag')
+            response = af_client.run_dag(execution.id, dag_name='solve_model_dag')
         except AirflowApiError as err:
-            return {'error': "Airflow responded with an error: {}".format(err)}, 400
+            execution.update_state(EXEC_STATE_ERROR)
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                    'error': "Airflow responded with an error: {}".format(err)}, 400
 
         # if we succeed, we register the dag_run_id in the execution table:
         data = response.json()
-        execution = ExecutionModel.get_one_execution_from_user(self.user_id, execution_id)
         execution.dag_run_id = data['dag_run_id']
-        execution.save()
+        execution.update_state(EXEC_STATE_RUNNING)
         return result
 
 
@@ -178,21 +190,31 @@ class ExecutionStatusEndpoint(MetaResource):
 
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, idx)
-        # TODO: change this after merge from GGS
-        if execution.finished:
-            return {'status': 'finished'}, 200
+        if execution.state == EXEC_STATE_CORRECT:
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_CORRECT], 'status': EXEC_STATE_CORRECT}, 200
+
         dag_run_id = execution.dag_run_id
         if not dag_run_id:
-            return {'error': 'The execution has no dag_run associated'}, 400
+            execution.update_state(EXEC_STATE_UNKNOWN)
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_UNKNOWN],
+                    'error': 'The execution has no dag_run associated.'}, 400
+
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
-            return {'error': "Airflow is not accessible"}, 400
+            execution.update_state(EXEC_STATE_ERROR_START)
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    'error': "Airflow is not accessible."}, 400
+
         try:
             response = af_client.get_dag_run_status(dag_name='solve_model_dag', dag_run_id=dag_run_id)
         except AirflowApiError as err:
-            return {'error': "Airflow responded with an error: {}".format(err)}, 400
+            execution.update_state(EXEC_STATE_ERROR)
+            return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                    'error': "Airflow responded with an error: {}".format(err)}, 400
+
         data = response.json()
-        return {'status': data['state']}, 200
+        execution.update_state(EXEC_STATE_RUNNING)
+        return {'message': EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_RUNNING], 'status': data['state']}, 200
 
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpoint):

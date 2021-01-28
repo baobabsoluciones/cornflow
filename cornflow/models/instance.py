@@ -48,7 +48,10 @@ class InstanceModel(BaseAttributes):
     data = db.Column(JSON, nullable=False)
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
-    executions = db.relationship('ExecutionModel', backref='instances', lazy=True)
+    executions = db.relationship('ExecutionModel', backref='instances', lazy=True,
+                                 primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
+                                             "ExecutionModel.deleted_at==None)"
+                                 )
 
     def __init__(self, data):
         super().__init__(data)
