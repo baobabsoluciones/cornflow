@@ -45,7 +45,3 @@ class BaseAttributes(TraceAttributes):
     def __init__(self, data):
         self.user_id = data.get('user_id')
         super().__init__()
-
-    def update(self, data):
-        self.user_id = data.get('user_id')
-        super().update(data)

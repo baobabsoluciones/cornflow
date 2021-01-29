@@ -89,6 +89,20 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         executions = [execution['id'] for execution in instance['executions']]
         self.assertFalse(id in executions)
 
+    def test_delete_instance_deletes_execution(self):
+        # we create a new instance
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row('/instance/', InstanceModel, payload)
+        payload = {**self.payload, **dict(instance_id=fk_id)}
+        # we create an execution for that instance
+        id = self.create_new_row(self.url + '?run=0', self.model, payload)
+        self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
+        # we delete the new instance
+        self.delete_row('/instance/' + fk_id + '/', InstanceModel)
+        # we check the execution does not exist
+        self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
+
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
 
@@ -119,10 +133,7 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         self.get_one_row('/execution/' + id + '/log/', payload)
 
 
-class TestExecutionsModel(CustomTestCase):
-
-    def setUp(self):
-        super().setUp()
+class TestExecutionsModel(TestExecutionsDetailEndpointMock):
 
     # TODO: should these tests be implemented? The functions that these tests should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
@@ -154,7 +165,9 @@ class TestExecutionsModel(CustomTestCase):
         pass
 
     def test_repr_method(self):
-        pass
+        id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
+        self.repr_method(id, '<id {}>'.format(id))
 
     def test_str_method(self):
-        pass
+        id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
+        self.str_method(id, '<id {}>'.format(id))
