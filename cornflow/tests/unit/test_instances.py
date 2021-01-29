@@ -110,7 +110,6 @@ class TestInstanceModelMethods(CustomTestCase):
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
-        self.id = self.create_new_row(self.url, self.model, self.payload)
 
     # TODO: should these test be implemented? The functions that these test should cover are already covered
     #  by other test cases, mainly the endpoint functions that use this functions
@@ -136,8 +135,10 @@ class TestInstanceModelMethods(CustomTestCase):
         pass
 
     def test_repr_method(self):
-        self.repr_method('<id {}>'.format(self.id))
+        id = self.create_new_row(self.url, self.model, self.payload)
+        self.repr_method(id, '<id {}>'.format(id))
 
     def test_str_method(self):
-        self.str_method('<id {}>'.format(self.id))
+        id = self.create_new_row(self.url, self.model, self.payload)
+        self.str_method(id, '<id {}>'.format(id))
 
