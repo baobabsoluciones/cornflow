@@ -6,5 +6,7 @@ Contents:
 .. toctree::
     :maxdepth: 3
 
-    includeme.rst
-    apireference.rst
+    includeme
+    models
+    endpoints
+    apireference
