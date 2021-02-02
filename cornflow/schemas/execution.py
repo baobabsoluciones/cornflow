@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema, validate
 from ..schemas.model_json import DataSchema
 from ..schemas.solution_log import LogSchema
-from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
+from ..shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 
 
 class OptionsSchema(Schema):
