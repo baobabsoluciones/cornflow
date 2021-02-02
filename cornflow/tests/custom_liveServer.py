@@ -1,12 +1,9 @@
-import json
 from flask_testing import LiveServerTestCase
+import cornflow_client as cf
 
 from cornflow.app import create_app
-from cornflow.models import UserModel
 from cornflow.shared.utils import db
-from cornflow.shared.authentication import Auth
 
-import cornflow_client as cf
 
 class CustomTestCaseLive(LiveServerTestCase):
 
@@ -14,33 +11,27 @@ class CustomTestCaseLive(LiveServerTestCase):
         app = create_app('testing')
         return app
 
-    def setUp(self):
-        server = self.get_server_url()
-        db.create_all()
+    def set_client(self, server):
+        self.client = cf.CornFlow(url=server)
+        return self.client
+
+    def setUp(self, create_all=True):
+        if create_all:
+            db.create_all()
         user_data =\
             dict(name='testname',
                  email='test@test.com',
-                 password='testpassword',
-                 super_admin=0
+                 pwd='testpassword',
                  )
-        admin_data = \
-            dict(name='testadmin',
-                 email='airflow_test@admin.com',
-                 password='airflow_test_password',
-                 super_admin=1
-                 )
-        for data in [user_data, admin_data]:
-            user = UserModel(data=data)
-            if data.get('super_admin', 0):
-                user.super_admin = 1
-            user.save()
-        db.session.commit()
-        self.client = cf.CornFlow(url=server)
-        response = self.client.login(user_data['email'], user_data['password'])
-        self.user = Auth.return_user_from_token(response['token'])
+        self.set_client(self.get_server_url())
+        try:
+            response = self.client.login(user_data['email'], user_data['pwd'])
+        except cf.CornFlowApiError:
+            response = self.client.sign_up(**user_data).json()
+        self.client.token = response['token']
         self.url = None
         self.model = None
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        # this can be a remote test server, do no touch!
+        pass

@@ -15,11 +15,10 @@ def solve_model(data, config):
     """
     print("Solving the model")
     var, model = pl.LpProblem.from_dict(data)
-    print(config)
 
     # we overwrite the logPath argument before solving.
     log_path = config['logPath'] = 'temp.log'
-    # log_path = ''
+    config['msg'] = 0
     solver = pl.get_solver_from_dict(config)
     if not solver.available():
         raise NoSolverException()

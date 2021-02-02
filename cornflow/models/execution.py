@@ -3,16 +3,19 @@ Model for the executions
 """
 
 # Import from libraries
+import datetime
 import hashlib
 
 # Imports from sqlalchemy
+from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
-from sqlalchemy.sql import expression
 
 # Imports from internal modules
 from .meta_model import BaseAttributes
 from ..models.instance import InstanceModel
+from ..shared.const import DEFAULT_EXECUTION_CODE, MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE, \
+    EXECUTION_STATE_MESSAGE_DICT
 from ..shared.utils import db
 
 
@@ -63,7 +66,8 @@ class ExecutionModel(BaseAttributes):
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
-    finished = db.Column(db.Boolean, server_default=expression.false(), default=False, nullable=False)
+    state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
+    state_message = db.Column(TEXT, default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE], nullable=True)
 
     def __init__(self, data):
         super().__init__(data)
@@ -76,7 +80,8 @@ class ExecutionModel(BaseAttributes):
         self.name = data.get('name')
         self.description = data.get('description', None)
         self.dag_run_id = data.get('dag_run_id', None)
-        self.finished = False
+        self.state = DEFAULT_EXECUTION_CODE
+        self.state_message = EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE]
         self.config = data.get('config')
 
     def save(self):
@@ -110,6 +115,17 @@ class ExecutionModel(BaseAttributes):
         """
         db.session.delete(self)
         db.session.commit()
+
+    def update_state(self, code):
+        """
+        Method to update the state code and message of an execution
+
+        :param int code: State code for the execution
+        :return: nothing
+        """
+        self.state = code
+        self.state_message = EXECUTION_STATE_MESSAGE_DICT[code]
+        super().update({})
 
     @staticmethod
     def get_all_executions(user):
@@ -164,9 +180,18 @@ class ExecutionModel(BaseAttributes):
         
     def __repr__(self):
         """
-        Representation method
+        Method to represent the class :class:`ExecutionModel`
 
-        :return: the representation of the execution as string
+        :return: The representation of the :class:`ExecutionModel`
+        :rtype: str
+        """
+        return '<id {}>'.format(self.id)
+
+    def __str__(self):
+        """
+        Method to print a string representation of the :class:`ExecutionModel`
+
+        :return: The string for the :class:`ExecutionModel`
         :rtype: str
         """
         return '<id {}>'.format(self.id)
