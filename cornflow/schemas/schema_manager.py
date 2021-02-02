@@ -338,7 +338,7 @@ class SchemaManager:
         elif "$ref" in content:
             schema_name = self._get_ref((None, content))
         elif "type" in content and content["type"] != "array":
-            return content["type"]
+            return self._get_type(content["type"])
         else:
             self.schema_dict.update(
                 {schema_name: [self._get_element_dict(i, self._get_required(content)) for i in content.items()]})
