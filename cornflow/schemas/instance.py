@@ -22,7 +22,8 @@ class InstanceSchema(Schema):
 class InstanceRequest(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)
-    data = fields.Nested(DataSchema, required=True)
+    data = fields.Raw(required=True)
+    data_schema = fields.String(required=False)
 
 
 class InstanceFileRequest(Schema):

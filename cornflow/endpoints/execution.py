@@ -81,6 +81,12 @@ class ExecutionEndpoint(MetaResource, MethodResource):
 
         # if we failed to save the execution, we already raised an error.
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, data[self.primary_key])
+        instance = InstanceModel.get_one_instance_from_user(self.user_id, execution.instance_id)
+        dag_name = kwargs.get('dag_name', 'solve_model_dag')
+        # execution.instance_id => objeto instance => instance.data
+        # dag_name => schema
+        # validar(schema, instance.data)
+        # TODO: validate that instance and dag_name are compatible
         if not_run:
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
@@ -94,8 +100,9 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             raise AirflowError(error=err,
                                payload=dict(message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                                             state=EXEC_STATE_ERROR_START))
+        # TODO: ask airflow if dag_name exists
         try:
-            response = af_client.run_dag(execution.id, dag_name='solve_model_dag')
+            response = af_client.run_dag(execution.id, dag_name=dag_name)
         except AirflowApiError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)

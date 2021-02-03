@@ -45,10 +45,11 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Nested(ConfigSchema)
+    config = fields.Nested(ConfigSchema, required=True)
     name = fields.String(required=True)
-    description = fields.String()
+    description = fields.String(required=False)
     instance_id = fields.String(required=True)
+    dag_name = fields.Str(required=False)
 
 
 class ExecutionEditRequest(Schema):

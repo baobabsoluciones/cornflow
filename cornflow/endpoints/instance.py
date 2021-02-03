@@ -15,6 +15,7 @@ import pulp
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import InstanceModel
+from ..schemas.model_json import DataSchema
 from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
@@ -68,6 +69,14 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        data_schema = kwargs.get('data_schema', 'pulp')
+        if data_schema == 'pulp':
+            validate = DataSchema().load(kwargs['data'])
+            err = ''
+            if validate is None:
+                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        else:
+            pass
         return self.post_list(kwargs)
 
 
