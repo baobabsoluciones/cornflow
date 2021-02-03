@@ -178,6 +178,7 @@ class SchemaManager:
         :return: a dict containing the flask marshmallow schemas
         """
         self.jsonschema_to_dict()
+        print(self.jsonschema_to_dict())
         return self.dict_to_flask()
         
     def load_schema(self, path):
