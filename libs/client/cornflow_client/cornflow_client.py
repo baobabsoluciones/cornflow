@@ -58,7 +58,7 @@ class CornFlow(object):
 
     @ask_token
     @log_call
-    def create_instance(self, data, name=None, description=''):
+    def create_instance(self, data, name=None, description='', data_schema='pulp'):
         if name is None:
             try:
                 name = data['parameters']['name']
@@ -67,7 +67,7 @@ class CornFlow(object):
         response = requests.post(
             urljoin(self.url, 'instance/'),
             headers={'Authorization': 'access_token ' + self.token},
-            json=dict(data=data, name=name, description=description))
+            json=dict(data=data, name=name, description=description, data_schema=data_schema))
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
                                    format(response.status_code, response.text))
@@ -90,11 +90,11 @@ class CornFlow(object):
 
     @log_call
     @ask_token
-    def create_execution(self, instance_id, config, name='test1', description=''):
+    def create_execution(self, instance_id, config, name='test1', description='', dag_name='solve_model_dag'):
         response = requests.post(
             urljoin(self.url, 'execution/'),
             headers={'Authorization': 'access_token ' + self.token},
-            json=dict(config=config, instance_id=instance_id, name=name, description=description))
+            json=dict(config=config, instance_id=instance_id, name=name, description=description, dag_name = dag_name))
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
                                    format(response.status_code, response.text))
