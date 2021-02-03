@@ -6,7 +6,7 @@ Contents:
 .. toctree::
     :maxdepth: 3
 
-    includeme
+    Install <includeme>
     models
     endpoints
-    apireference
+    API reference <stable-rest-api-ref>

@@ -22,9 +22,17 @@ sys.path.insert(0,os.path.abspath('../../'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 
-'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 
-'sphinx.ext.ifconfig', 'sphinx.ext.autosummary', 'sphinx.ext.mathjax']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax',
+    'sphinxcontrib.redoc',
+    ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -218,3 +226,18 @@ latex_documents = []
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/3': None}
+
+OPENAPI_FILE = os.path.join(
+    os.path.dirname(__file__), "..", "..", "cornflow", "static", "v1.json"
+)
+redoc = [
+    {
+        'name': 'Cornflow REST API',
+        'page': 'stable-rest-api-ref',
+        'spec': OPENAPI_FILE,
+        'opts': {
+            'hide-hostname': True,
+            'no-auto-auth': True,
+        },
+    },
+]
