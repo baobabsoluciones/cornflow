@@ -57,13 +57,14 @@ class CustomTestCase(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def create_new_row(self, url, model, payload):
+    def create_new_row(self, url, model, payload, expected_status=201, check_payload=True):
 
         response = self.client.post(url, data=json.dumps(payload), follow_redirects=True,
                                     headers=self.get_header_with_auth(self.token))
 
-        self.assertEqual(201, response.status_code)
-
+        self.assertEqual(expected_status, response.status_code)
+        if not check_payload:
+            return response.json
         row = model.query.get(response.json['id'])
         self.assertEqual(row.id, response.json['id'])
 
@@ -109,11 +110,12 @@ class CustomTestCase(TestCase):
         self.assertEqual(200, rows.status_code)
         return rows.json
 
-    def update_row(self, url, change, payload_to_check):
+    def update_row(self, url, change, payload_to_check, expected_status=200, check_payload=True):
         response = self.client.put(url, data=json.dumps(change), follow_redirects=True,
                                    headers=self.get_header_with_auth(self.token))
-        self.assertEqual(200, response.status_code)
-
+        self.assertEqual(expected_status, response.status_code)
+        if not check_payload:
+            return response.json
         row = self.client.get(url, follow_redirects=True,
                               headers=self.get_header_with_auth(self.token))
 

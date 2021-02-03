@@ -55,8 +55,6 @@ class InstanceModel(BaseAttributes):
 
     def __init__(self, data):
         super().__init__(data)
-        # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
-        #  that identifies it as an instance
         self.id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
         self.data = data.get('data')
         self.name = data.get('name')
@@ -98,7 +96,7 @@ class InstanceModel(BaseAttributes):
         Query to get all instances.
         BEWARE: only the admin should do this.
 
-        :return: The instances
+        :return: All instances
         :rtype: list(:class:`InstanceModel`)
         """
         return InstanceModel.query.filter_by(deleted_at=None)
@@ -115,9 +113,10 @@ class InstanceModel(BaseAttributes):
         return InstanceModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
-    def get_one_instance_from_id(idx):
+    def get_one_instance_from_id_admin(idx):
         """
         Query to get one instance from its ID
+        BEWARE: only the admin should do this.
 
         :param str idx: ID from the instance
         :return: The instance

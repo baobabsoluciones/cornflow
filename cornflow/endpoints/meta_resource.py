@@ -5,6 +5,7 @@ It should allow all CRUD (create, read, update, delete) operations
 # Import from libraries
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
+from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 # Import from internal modules
 
 
@@ -16,10 +17,6 @@ class MetaResource(Resource):
         self.user_id = None
         self.admin = None
         self.super_admin = None
-        # TODO: these properties (data, serialized_data) is always passed as an argument
-        #  so there's no need to store it
-        self.data = None
-        self.serialized_data = None
         self.model = None
         self.query = None
         self.schema = None
@@ -28,70 +25,50 @@ class MetaResource(Resource):
         self.foreign_data = None
 
     def get_list(self, *args):
-        self.data = getattr(self.model, self.query)(*args)
-        self.serialized_data = self.schema.dump(self.data, many=True)
-        return self.serialized_data, 200
+        data = getattr(self.model, self.query)(*args)
+        return data, 200
 
     def get_detail(self, *args):
-        self.data = getattr(self.model, self.query)(*args)
-        self.serialized_data = self.schema.dump(self.data, many=False)
-        if len(self.serialized_data) == 0:
-            return {}, 404
+        data = getattr(self.model, self.query)(*args)
+        if data is None:
+            raise ObjectDoesNotExist()
         else:
-            return self.serialized_data, 200
+            return data, 200
 
-    def post_list(self, request):
-        request_data = request.get_json()
-        try:
-            # TODO: take out the partial and make it work
-            self.data = self.schema.load(request_data, partial=True)
-        except ValidationError as val_err:
-            return {'error': str(val_err.normalized_messages())}, 400
-
-        self.data['user_id'] = self.user_id
-
-        item = self.model(self.data)
-
+    def post_list(self, data):
+        data = dict(data)
+        data['user_id'] = self.user_id
+        item = self.model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
-                    return {'error': 'You do not have permissions to create this object.'}, 400
+                    raise NoPermission()
                 if not self.check_permissions(owner.user_id):
-                    return {'error': 'You do not have permissions to create this object.'}, 400
-
+                    raise NoPermission()
         item.save()
 
         return {self.primary_key: getattr(item, self.primary_key)}, 201
 
-    def put_detail(self, request, *args):
+    def put_detail(self, data, *args):
 
-        request_data = request.get_json()
-
-        try:
-            self.data = self.schema.load(request_data, partial=True)
-        except ValidationError as val_err:
-            return {'error': str(val_err.normalized_messages())}, 400
-
-        self.data['user_id'] = self.user_id
+        data = dict(data)
+        data['user_id'] = self.user_id
 
         item = getattr(self.model, self.query)(*args)
         if item is None:
-            # TODO: why is sometimes 'message' and sometimes 'error' when it's 400
-            return {'error': 'The object to update does not exist.'}, 400
-        item.update(self.data)
+            raise ObjectDoesNotExist()
+        item.update(data)
 
-        return {'message': 'Updated correctly.'}, 200
+        return {'message': 'Updated correctly'}, 200
 
     def delete_detail(self, *args):
 
         item = getattr(self.model, self.query)(*args)
 
         if item is None:
-            return {'error': 'The object to delete does not exist.'}, 400
+            raise ObjectDoesNotExist()
 
-        # TODO: I think there's a model configuration in django to do this automatically.
-        #  In this case, what happens when there are more than one "dependents"?
         if self.dependents is not None:
             for element in getattr(item, self.dependents):
                 element.disable()
