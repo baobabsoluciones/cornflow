@@ -10,6 +10,7 @@ from marshmallow.exceptions import ValidationError
 from ..models import UserModel
 from ..schemas import UserSchema
 from ..shared.authentication import Auth
+from ..shared.exceptions import InvalidUsage, InvalidCredentials
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -31,23 +32,24 @@ class LoginEndpoint(Resource):
         try:
             data = user_schema.load(req_data, partial=True)
         except ValidationError as val_err:
-            return {'error': str(val_err.normalized_messages())}, 400
+            raise InvalidUsage(error=str(val_err.normalized_messages()))
 
         if not data.get('email') or not data.get('password'):
-            return {'error': 'You need email and password to sign in.'}, 400
+            raise InvalidUsage(error='You need email and password to sign in')
 
         user = UserModel.get_one_user_by_email(data.get('email'))
 
         if not user:
-            return {'error': 'Invalid credentials.'}, 400
+            raise InvalidCredentials()
 
         if not user.check_hash(data.get('password')):
-            return {'error': 'Invalid credentials.'}, 400
+            raise InvalidCredentials()
 
         ser_data = user_schema.dump(user)
         user_id = ser_data.get('id')
-        token, error = Auth.generate_token(user_id)
-        if error:
-            return error, 400
+        try:
+            token = Auth.generate_token(user_id)
+        except Exception as e:
+            raise InvalidUsage(error='error in generating user token: ' + str(e), status_code=400)
 
         return {'token': token, 'id': user_id}, 200
