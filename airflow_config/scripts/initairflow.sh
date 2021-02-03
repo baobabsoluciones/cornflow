@@ -136,7 +136,7 @@ case "$1" in
     ;;
   flower)
     sleep 10
-    exec airflow celery "$@"
+    exec airflow celery "$@" --basic-auth="$AIRFLOW_USER":"$AIRFLOW_PWD"
     ;;
   version)
     exec airflow "$@"
