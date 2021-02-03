@@ -1,7 +1,7 @@
-import requests
 from urllib.parse import urljoin
 import re
 import logging as log
+import requests
 
 
 class CornFlow(object):
