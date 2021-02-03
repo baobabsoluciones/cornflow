@@ -42,3 +42,50 @@ class ExecutionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     deleted_at = fields.DateTime(dump_only=True)
+
+
+class ExecutionRequest(Schema):
+    config = fields.Nested(ConfigSchema)
+    name = fields.String(required=True)
+    description = fields.String()
+    instance_id = fields.String(required=True)
+
+
+class ExecutionEditRequest(Schema):
+    name = fields.String()
+    description = fields.String()
+
+
+class ExecutionDagRequest(Schema):
+    execution_results = fields.Nested(DataSchema, required=True)
+    log_text = fields.Str(required=True)
+    log_json = fields.Nested(LogSchema, required=True)
+
+
+class ExecutionDetailsEndpointResponse(Schema):
+    id = fields.String()
+    config = fields.Nested(ConfigSchema)
+    name = fields.String()
+    description = fields.String()
+    created_at = fields.String()
+    instance_id = fields.String()
+    state = fields.Int()
+    message = fields.Str(attribute='state_message')
+
+
+class ExecutionStatusEndpointResponse(Schema):
+    id = fields.String()
+    state = fields.Int()
+    message = fields.Str(attribute='state_message')
+
+
+class ExecutionDataEndpointResponse(Schema):
+    id = fields.String()
+    name = fields.String()
+    data = fields.Nested(DataSchema, attribute='execution_results')
+
+
+class ExecutionLogEndpointResponse(Schema):
+    id = fields.String()
+    name = fields.String()
+    log = fields.Nested(LogSchema, attribute='log_json')

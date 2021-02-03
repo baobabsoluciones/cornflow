@@ -73,8 +73,6 @@ class ExecutionModel(BaseAttributes):
         super().__init__(data)
         self.user_id = data.get('user_id')
         self.instance_id = data.get('instance_id')
-        # TODO: check if reference id for the instance can be modified to either be smaller or have a prefix
-        #  that identifies it as an execution
         self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
         self.name = data.get('name')
@@ -88,7 +86,6 @@ class ExecutionModel(BaseAttributes):
         """
         Saves the execution to the database
         """
-        # TODO: check if we can implement any kind of rollback if needed
         db.session.add(self)
         db.session.commit()
 
@@ -101,13 +98,6 @@ class ExecutionModel(BaseAttributes):
         for key, item in data.items():
             setattr(self, key, item)
         super().update(data)
-
-    def disable(self):
-        """
-        Updates the deleted_at field of an execution to mark an execution as "deleted"
-        """
-        # TODO: if the method is the same as the parent: no need of adding it
-        super().disable()
 
     def delete(self):
         """
@@ -128,6 +118,16 @@ class ExecutionModel(BaseAttributes):
         super().update({})
 
     @staticmethod
+    def get_all_executions_admin():
+        """
+        Query to get all executions
+        BEWARE: only the admin should do this.
+
+        :return: All executions
+        """
+        return ExecutionModel.query.filter_by(deleted_at=None)
+
+    @staticmethod
     def get_all_executions(user):
         """
         Query to all executions from one user.
@@ -138,9 +138,10 @@ class ExecutionModel(BaseAttributes):
         return ExecutionModel.query.filter_by(user_id=user, deleted_at=None)
 
     @staticmethod
-    def get_one_execution_from_id(idx):
+    def get_one_execution_from_id_admin(idx):
         """
         Query to get one execution with the given id
+        BEWARE: this should only be called from the admin user
 
         :param str idx: Execution ID
         :return: The execution.
@@ -158,26 +159,6 @@ class ExecutionModel(BaseAttributes):
         """
         return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
 
-    @staticmethod
-    def get_execution_with_reference(reference_id):
-        return ExecutionModel.query.filter_by(id=reference_id, deleted_at=None).first()
-
-    @staticmethod
-    def get_execution_data(idx):
-        """
-        Query to get the configuration of the execution and the data for the execution from its parent instance
-        from a given id
-
-        :param str idx: The reference ID of the execution.
-        :return: a dict with the data from the parent instance (:class:`InstanceModel`)
-          and the configuration from the execution
-        :rtype: dict
-        """
-        execution = ExecutionModel.get_execution_with_reference(idx)
-        instance_data = InstanceModel.get_one_instance_from_id(execution.instance_id).data
-        config = execution.config
-        return {"data": instance_data, "config": config}
-        
     def __repr__(self):
         """
         Method to represent the class :class:`ExecutionModel`

@@ -10,6 +10,7 @@ from marshmallow.exceptions import ValidationError
 from ..models import UserModel
 from ..schemas import UserSchema
 from ..shared.authentication import Auth
+from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission, InvalidCredentials
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -31,23 +32,20 @@ class SignUpEndpoint(Resource):
         try:
             data = user_schema.load(req_data)
         except ValidationError as val_err:
-            # TODO: I'm making a text of all errors to be consistent.
-            #  but I'm not sure if we can do better than just wrapping everything in str
-            return {'error': str(val_err.normalized_messages())}, 400
+            raise InvalidUsage(error=str(val_err.normalized_messages()))
 
         user_in_db = UserModel.get_one_user_by_email(data.get('email'))
         if user_in_db:
-            message = {'error': 'email already in use, please supply another email address'}
-            return message, 400
+            raise InvalidCredentials(error='Email already in use, please supply another email address')
 
         user = UserModel(data)
         user.save()
 
         ser_data = user_schema.dump(user)
 
-        token, error = Auth.generate_token(ser_data.get('id'))
-
-        if error:
-            return error, 400
+        try:
+            token = Auth.generate_token(ser_data.get('id'))
+        except Exception as e:
+            raise InvalidUsage(error='Error in generating user token: ' + str(e), status_code=400)
 
         return {'token': token}, 201
