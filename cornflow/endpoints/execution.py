@@ -61,7 +61,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location=('json'))
-    def post(self, **kwargs):
+    def post(self, dag_name, **kwargs):
         """
         API method to create a new execution linked to an already existing instance
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -73,7 +73,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         """
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
-
+        
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         data, status_code = self.post_list(kwargs)
 
@@ -95,7 +95,8 @@ class ExecutionEndpoint(MetaResource, MethodResource):
                                payload=dict(message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                                             state=EXEC_STATE_ERROR_START))
         try:
-            response = af_client.run_dag(execution.id, dag_name='solve_model_dag')
+            #response = af_client.run_dag(execution.id, dag_name='solve_model_dag')
+            response = af_client.run_dag(execution.id, dag_name=dag_name)
         except AirflowApiError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)

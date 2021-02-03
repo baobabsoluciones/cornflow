@@ -68,13 +68,14 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        # TODO: tes tthe data here
         return self.post_list(kwargs)
 
 
 @doc(description='Get details of an instance', tags=['Instances'])
 class InstanceDetailsEndpoint(InstanceEndpoint):
     """
-    Endpoint used to get the information ofa single instance, edit it or delete it
+    Endpoint used to get the information of a single instance, edit it or delete it
     """
 
     def __init__(self):

@@ -28,6 +28,7 @@ class ExecutionSchema(Schema):
     id = fields.Str(dump_only=True)
     user_id = fields.Int(required=False, load_only=True)
     instance_id = fields.Str(required=True)
+    # TODO: dag_name = filds.Str(required=True)
     name = fields.Str()
     description = fields.Str()
     dag_run_id = fields.Str(required=False, dump_only=True)
