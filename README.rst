@@ -381,4 +381,3 @@ After if you want to check the coverage report you need to run::
 or to get the html reports::
 
     coverage html
-

@@ -1,4 +1,4 @@
-sphinx-glpi-theme
+sphinx_rtd_theme
 sphinxcontrib-applehelp
 sphinxcontrib-devhelp
 sphinxcontrib-htmlhelp

@@ -115,22 +115,21 @@ pygments_style = 'sphinx'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme = 'default'
 # html_theme = 'sphinx-glpi-theme'
-import sphinx_glpi_theme
 
-html_theme = "glpi"
+html_theme = "sphinx_rtd_theme"
 
-html_theme_path = sphinx_glpi_theme.get_html_themes_path()
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
 html_theme_options = {
-    'fixed_sidebar': True, 
-    'stickysidebar': True,
-    'github_banner': True,
-    'show_powered_by': False,
-    'github_user': 'baobabsoluciones',
-    'github_repo': 'corn'}
+    # 'fixed_sidebar': True, 
+    # 'stickysidebar': True,
+    # 'github_banner': True,
+    # 'show_powered_by': False,
+    # 'github_user': 'baobabsoluciones',
+    # 'github_repo': 'corn'
+}
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 

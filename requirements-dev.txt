@@ -14,7 +14,7 @@ Pygments==2.7.2
 pyparsing==2.4.7
 snowballstemmer==2.0.0
 Sphinx==3.2.1
-sphinx-glpi-theme==0.3
+sphinx_rtd_theme
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==1.0.3
