@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema
 
 options = dict(required=True, allow_none=True)
-
+pg_options = dict(many=True, required=True)
 
 class MatrixSchema(Schema):
     constraints = fields.Int(required=False)
@@ -16,15 +16,15 @@ class PresolveSchema(Schema):
 
 
 class ProgressSchema(Schema):
-    Node = fields.Str(many=True)
-    NodesLeft = fields.Str(many=True)
-    Objective = fields.Str(many=True)
-    IInf = fields.Str(many=True)
-    BestInteger = fields.Str(many=True)
-    CutsBestBound = fields.Str(many=True)
-    ItpNode = fields.Str(many=True)
-    Gap = fields.Str(many=True)
-    Time = fields.Str(many=True)
+    Node = fields.Str(**pg_options)
+    NodesLeft = fields.Str(**pg_options)
+    Objective = fields.Str(**pg_options)
+    IInf = fields.Str(**pg_options)
+    BestInteger = fields.Str(**pg_options)
+    CutsBestBound = fields.Str(**pg_options)
+    ItpNode = fields.Str(**pg_options)
+    Gap = fields.Str(**pg_options)
+    Time = fields.Str(**pg_options)
 
 
 class Cuts(Schema):

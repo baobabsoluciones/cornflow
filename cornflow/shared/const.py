@@ -18,3 +18,8 @@ EXECUTION_STATE_MESSAGE_DICT = {EXEC_STATE_CORRECT: "The execution has been solv
 MIN_EXECUTION_STATUS_CODE = min(EXECUTION_STATE_MESSAGE_DICT.keys())
 MAX_EXECUTION_STATUS_CODE = max(EXECUTION_STATE_MESSAGE_DICT.keys())
 DEFAULT_EXECUTION_CODE = EXEC_STATE_RUNNING
+
+AIRFLOW_TO_STATE_MAP = dict(success=EXEC_STATE_CORRECT,
+                            running=EXEC_STATE_RUNNING,
+                            failed=EXEC_STATE_ERROR
+                            )
