@@ -8,7 +8,7 @@ from flask import request
 from werkzeug.utils import secure_filename
 from marshmallow.exceptions import ValidationError
 from flask_apispec.views import MethodResource
-from flask_apispec import marshal_with, use_kwargs
+from flask_apispec import marshal_with, use_kwargs, doc
 import os
 import pulp
 
@@ -19,12 +19,13 @@ from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage
+from ..shared.exceptions import InvalidUsage, EndpointNotImplemented
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
 
+@doc(description='Get all instances', tags=['Instances'])
 class InstanceEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
@@ -70,6 +71,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         return self.post_list(kwargs)
 
 
+@doc(description='Get details of an instance', tags=['Instances'])
 class InstanceDetailsEndpoint(InstanceEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -127,7 +129,11 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)
 
+    @Auth.auth_required
+    def post(self, **kwargs):
+        raise EndpointNotImplemented()
 
+@doc(description='Get data of an instance', tags=['Instances'])
 class InstanceDataEndpoint(InstanceDetailsEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -154,6 +160,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
         return self.get_detail(self.user_id, idx)
 
 
+@doc(description='Load an instance with an mps file', tags=['Instances'])
 class InstanceFileEndpoint(InstanceEndpoint):
     """
     Endpoint to accept mps files to upload

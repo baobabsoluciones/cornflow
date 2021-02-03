@@ -7,7 +7,7 @@ These endpoints hve different access url, but manage the same data entities
 # Import from libraries
 from flask import request, current_app
 from flask_apispec.views import MethodResource
-from flask_apispec import marshal_with, use_kwargs
+from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -20,7 +20,7 @@ from ..shared.airflow_api import Airflow, AirflowApiError
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
-from ..shared.exceptions import InvalidUsage, AirflowError
+from ..shared.exceptions import AirflowError, EndpointNotImplemented
 
 import logging as log
 
@@ -28,6 +28,7 @@ import logging as log
 execution_schema = ExecutionSchema()
 
 
+@doc(description='Get all executions', tags=['Executions'])
 class ExecutionEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -110,6 +111,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         return execution, 200
 
 
+@doc(description='Get details of an executions', tags=['Executions'])
 class ExecutionDetailsEndpoint(ExecutionEndpoint):
     """
     Endpoint used to get the information of a certain execution. But not the data!
@@ -165,6 +167,10 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)
+
+    @Auth.auth_required
+    def post(self, **kwargs):
+        raise EndpointNotImplemented()
 
 
 class ExecutionStatusEndpoint(MetaResource, MethodResource):
@@ -239,11 +245,13 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.get_detail(self.user_id, idx)
 
+    @Auth.auth_required
     def delete(self, idx):
-        return {}, 501
+        raise EndpointNotImplemented()
 
+    @Auth.auth_required
     def put(self, **kwargs):
-        return {}, 501
+        raise EndpointNotImplemented
 
 
 class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
@@ -266,8 +274,10 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
         #  marshmallow: the arrays in the progress are converted into strings
         return self.get_detail(self.user_id, idx)
 
+    @Auth.auth_required
     def delete(self, idx):
-        return {}, 501
+        raise EndpointNotImplemented()
 
-    def put(self, idx):
-        return {}, 501
+    @Auth.auth_required
+    def put(self, **kwargs):
+        raise EndpointNotImplemented()

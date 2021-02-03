@@ -65,6 +65,9 @@ def create_app(env_name='development'):
     docs = FlaskApiSpec(app)
     docs.register(InstanceEndpoint, endpoint="instance")
     docs.register(InstanceDetailsEndpoint, endpoint="instances-detail")
+    docs.register(ExecutionDetailsEndpoint, endpoint="execution-detail")
+    docs.register(ExecutionEndpoint, endpoint="execution")
+
     _initialize_errorhandlers(app)
 
 

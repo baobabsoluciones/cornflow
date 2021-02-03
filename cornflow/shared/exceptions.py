@@ -45,6 +45,10 @@ class AirflowError(InvalidUsage):
             self.status_code = status_code
 
 
+class EndpointNotImplemented(InvalidUsage):
+    error = 'Endpoint not implemented'
+    status_code = 501
+
 
 def _initialize_errorhandlers(app):
 
