@@ -58,7 +58,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     @Auth.auth_required
     @use_kwargs(InstanceRequest, location=('json'))
-    def post(self, data_schema, data, **kwargs):
+    def post(self, **kwargs):
         """
         API (POST) method to create a new instance
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -69,8 +69,9 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
+        data_schema = kwargs.get('data_schema', 'pulp')
         if data_schema == 'pulp':
-            validate = DataSchema().load(data)
+            validate = DataSchema().load(kwargs['data'])
             err = ''
             if validate is None:
                 raise InvalidUsage(error='Bad instance data format: {}'.format(err))
