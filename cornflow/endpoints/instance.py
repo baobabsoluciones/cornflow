@@ -15,6 +15,7 @@ import pulp
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import InstanceModel
+from ..schemas.model_json import DataSchema
 from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
@@ -57,7 +58,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     @Auth.auth_required
     @use_kwargs(InstanceRequest, location=('json'))
-    def post(self, **kwargs):
+    def post(self, data_schema, data, **kwargs):
         """
         API (POST) method to create a new instance
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -68,7 +69,13 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        # TODO: tes tthe data here
+        if data_schema == 'pulp':
+            validate = DataSchema().load(data)
+            err = ''
+            if validate is None:
+                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        else:
+            pass
         return self.post_list(kwargs)
 
 
