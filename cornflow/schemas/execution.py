@@ -49,6 +49,7 @@ class ExecutionRequest(Schema):
     name = fields.String(required=True)
     description = fields.String()
     instance_id = fields.String(required=True)
+    dag_name = fields.Str(default='solve_model_dag')
 
 
 class ExecutionEditRequest(Schema):
