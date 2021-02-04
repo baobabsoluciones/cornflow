@@ -1,4 +1,4 @@
-name: build
+name: integration
 
 on: [push]
 
@@ -22,7 +22,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements-dev.txt
-        echo "AIRFLOW_HOME="${PWD}/airflow_config" >> $GITHUB_ENV
     - name: Install airflow
       run: |
         echo "$AIRFLOW_HOME"
@@ -46,7 +45,7 @@ jobs:
         deactivate
         sleep 5s
       env:
-        AIRFLOW_HOME: "${{venv.AIRFLOW_HOME}}"
+        AIRFLOW_HOME: "${{GITHUB_WORKSPACE}}/airflow_config"
         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
         AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
