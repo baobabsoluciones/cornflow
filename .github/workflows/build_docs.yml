@@ -13,8 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v2
       with:
         # Semantic version range syntax or exact version of a Python version
         python-version: '3.8'
@@ -22,6 +21,11 @@ jobs:
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
+        pre-build-command: |
+          python -V
+          python3 -V
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
         docs-folder: "docs/"
     # Great extra actions to compose with:
     # Publish built docs to gh-pages branch.
