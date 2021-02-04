@@ -194,7 +194,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
 
         :param str idx:  ID of the execution
         :return: A dictionary with a message (error if the execution does not exist or status of the execution)
-        and an integer with the HTTP status code.
+            and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         airflow_conf = dict(url=current_app.config['AIRFLOW_URL'],

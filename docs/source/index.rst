@@ -1,10 +1,17 @@
-This is cornflow!
-----------------------
+Cornflow documentation
+----------------------------
 
 Contents:
 
 .. toctree::
     :maxdepth: 3
 
-    includeme.rst
-    apireference.rst
+    Install <includeme>
+    concepts
+    architecture
+    admin-spa
+    python-api
+    examples
+    models
+    endpoints
+    API reference <stable-rest-api-ref>
