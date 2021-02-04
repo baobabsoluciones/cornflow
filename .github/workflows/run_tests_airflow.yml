@@ -44,15 +44,15 @@ jobs:
         deactivate
         sleep 5s
       env:
-        AIRFLOW_VERSION: "2.0.0"
-        PYTHON_VERSION: "$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-        CONSTRAINT_URL: "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-        AIRFLOW_HOME: "${PWD}/airflow_config"
         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
-        AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.basic_auth"
+        AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
         AIRFLOW__CORE__LOAD_EXAMPLES: 0
-        AIRFLOW_CONN_CF_URI: "cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000"
+        PYTHON_VERSION: "$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+        AIRFLOW_VERSION: 2.0.0
+        CONSTRAINT_URL: "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+        AIRFLOW_HOME: "${PWD}/airflow_config"
+        AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
     - name: Run unit tests
       run: python -m unittest discover -s cornflow.tests.integration
       env:
