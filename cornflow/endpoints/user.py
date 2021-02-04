@@ -2,34 +2,28 @@
 Endpoints for the user profiles
 """
 # Import from libraries
-from flask_restful import Resource, fields, marshal_with, marshal
+from flask_restful import Resource, marshal
 from flask import request
+from flask_apispec.views import MethodResource
+from flask_apispec import marshal_with
 
 # Import from internal modules
 from ..models import UserModel
-from ..schemas import UserSchema
+from ..schemas.user import UserSchema, UserEndpointResponse, UserDetailsEndpointResponse
 from ..shared.authentication import Auth
+from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
 
-
-class UserEndpoint(Resource):
+class UserEndpoint(Resource, MethodResource):
     """
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions
     """
-    resource_fields = dict(
-        id=fields.Integer,
-        admin=fields.Boolean(default=False),
-        super_admin=fields.Boolean(default=False),
-        name=fields.String,
-        email=fields.String,
-        created_at=fields.String
-    )
 
     @Auth.super_admin_required
-    @marshal_with(resource_fields)
+    @marshal_with(UserEndpointResponse(many=True))
     def get(self):
         """
         API (GET) method to get all the info from all the users
@@ -39,29 +33,19 @@ class UserEndpoint(Resource):
         :return: A dictionary with the user data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: maybe this method should be change in two ways:
-        #  * Only give back the information of all users that belong to the same project / organization
-        #  (not implemented yet) from the admin user demanding it.
-        #  * Only give back the info of all users to the super_admin (us) to be able to perform sanity checks.
         users = UserModel.get_all_users()
-        ser_users = user_schema.dump(users, many=True)
-        return ser_users, 200
+        return users, 200
 
 
 # TODO: the PUT method here could be used to change the password of the user.
 #   These endpoints could be used mainly by the cornflow webserver UI.
-class UserDetailsEndpoint(Resource):
+class UserDetailsEndpoint(Resource, MethodResource):
     """
     Endpoint use to get the information of one single user
     """
-    resource_fields = dict(
-        id=fields.Integer,
-        name=fields.String,
-        email=fields.String,
-        admin=fields.Boolean(default=False),
-    )
 
     @Auth.auth_required
+    @marshal_with(UserDetailsEndpointResponse)
     def get(self, user_id):
         """
 
@@ -71,12 +55,11 @@ class UserDetailsEndpoint(Resource):
         """
         ath_user_id, admin, super_admin = Auth.return_user_info(request)
         if ath_user_id != user_id and not (admin or super_admin):
-            return {'error': 'You have no permission to access given user'}, 400
+            raise InvalidUsage(error='You have no permission to access given user', status_code=400)
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            return {'error': 'The object does not exist'}, 404
-        ser_users = user_schema.dump(user_obj, many=False)
-        return marshal(ser_users, self.resource_fields), 200
+            raise InvalidUsage(error='The object does not exist', status_code=404)
+        return user_obj, 200
 
     @Auth.auth_required
     def delete(self, user_id):
@@ -88,14 +71,15 @@ class UserDetailsEndpoint(Resource):
         """
         ath_user_id, admin, super_admin = Auth.return_user_info(request)
         if ath_user_id != user_id and not (admin or super_admin):
-            return {'error': 'You have no permission to access given user'}, 400
+            raise NoPermission()
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            return {'error': 'The object does not exist'}, 404
+            raise ObjectDoesNotExist()
         user_obj.delete()
         return {'message': 'The object has been deleted'}, 200
 
     @Auth.auth_required
+    @marshal_with(UserDetailsEndpointResponse)
     def put(self, user_id):
         """
         API method to edit an existing user.
@@ -109,26 +93,21 @@ class UserDetailsEndpoint(Resource):
         """
         ath_user_id, admin, super_admin = Auth.return_user_info(request)
         if ath_user_id != user_id and not (admin or super_admin):
-            return {'error': 'You have no permission to access given user'}, 400
+            raise NoPermission()
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            return {'error': 'The object does not exist'}, 404
+            raise ObjectDoesNotExist()
         request_data = request.get_json()
-        data = self.schema.load(request_data, partial=True)
+        data = user_schema.load(request_data, partial=True)
         user_obj.update(data)
         user_obj.save()
-        return marshal(user_obj, self.resource_fields), 201
+        return user_obj, 201
 
-class ToggleUserAdmin(Resource):
 
-    resource_fields = dict(
-        id=fields.Integer,
-        name=fields.String,
-        email=fields.String,
-        admin=fields.Boolean(default=False),
-    )
+class ToggleUserAdmin(Resource, MethodResource):
 
     @Auth.super_admin_required
+    @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
         """
         API method to make admin or take out privileges.
@@ -142,11 +121,11 @@ class ToggleUserAdmin(Resource):
         """
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            return {'error': 'The object does not exist'}, 404
+            raise ObjectDoesNotExist()
         if make_admin:
             user_obj.admin = 1
         else:
             user_obj.admin = 0
         user_obj.save()
-        return marshal(user_obj, self.resource_fields), 201
+        return user_obj, 201
 

@@ -3,6 +3,9 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
+from flask_apispec.extension import FlaskApiSpec
+from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
 
 from .config import app_config
 from .endpoints import \
@@ -10,8 +13,8 @@ from .endpoints import \
     UserEndpoint, UserDetailsEndpoint, LoginEndpoint, \
     ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint, ExecutionDataEndpoint, ExecutionLogEndpoint, \
     DAGEndpoint, SignUpEndpoint, ToggleUserAdmin
+from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
-from flask_cors import CORS
 
 
 def create_app(env_name='development'):
@@ -29,11 +32,13 @@ def create_app(env_name='development'):
         CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
+
+    # TODO: maybe move the add_endpoints to a function inside endpoints/__init__.py
     api = Api(app)
-    api.add_resource(InstanceFileEndpoint, '/instancefile/', endpoint="instance-file")
+    api.add_resource(InstanceEndpoint, '/instance/', endpoint="instance")
     api.add_resource(InstanceDetailsEndpoint, '/instance/<string:idx>/', endpoint="instances-detail")
     api.add_resource(InstanceDataEndpoint, '/instance/<string:idx>/data/', endpoint="instances-data")
-    api.add_resource(InstanceEndpoint, '/instance/', endpoint="instance")
+    api.add_resource(InstanceFileEndpoint, '/instancefile/', endpoint="instance-file")
     api.add_resource(ExecutionDetailsEndpoint, '/execution/<string:idx>/', endpoint="execution-detail")
     api.add_resource(ExecutionStatusEndpoint, '/execution/<string:idx>/status/', endpoint="execution-status")
     api.add_resource(ExecutionDataEndpoint, '/execution/<string:idx>/data/', endpoint="execution-data")
@@ -45,6 +50,27 @@ def create_app(env_name='development'):
     api.add_resource(ToggleUserAdmin, '/user/<int:user_id>/<int:make_admin>/', endpoint="user-admin")
     api.add_resource(LoginEndpoint, '/login/', endpoint="login")
     api.add_resource(SignUpEndpoint, '/signup/', endpoint="signup")
+
+    # apispec time
+    app.config.update({
+        'APISPEC_SPEC': APISpec(
+            title='Cornflow API docs',
+            version='v1',
+            plugins=[MarshmallowPlugin()],
+            openapi_version='2.0.0'
+        ),
+        'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
+        'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
+    })
+    docs = FlaskApiSpec(app)
+    docs.register(InstanceEndpoint, endpoint="instance")
+    docs.register(InstanceDetailsEndpoint, endpoint="instances-detail")
+    docs.register(ExecutionDetailsEndpoint, endpoint="execution-detail")
+    docs.register(ExecutionEndpoint, endpoint="execution")
+
+    _initialize_errorhandlers(app)
+
+
 
     return app
 

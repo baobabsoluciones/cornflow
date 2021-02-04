@@ -3,7 +3,7 @@ from functools import wraps
 
 import jwt
 from flask import Response, request, json, g, current_app
-
+from ..shared.exceptions import InvalidUsage, InvalidCredentials, ObjectDoesNotExist, NoPermission
 import os
 
 from ..models.user import UserModel
@@ -18,17 +18,13 @@ class Auth:
         :param user_id:
         :return:
         """
-        try:
-            payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
-                'iat': datetime.datetime.utcnow(),
-                'sub': user_id
-            }
+        payload = {
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+            'iat': datetime.datetime.utcnow(),
+            'sub': user_id
+        }
 
-            return jwt.encode(payload, current_app.config['SECRET_KEY'], 'HS256').decode('utf8'), None
-
-        except Exception as e:
-            return '', {'error': 'error in generating user token (' + str(e) + ' )'}
+        return jwt.encode(payload, current_app.config['SECRET_KEY'], 'HS256').decode('utf8')
 
     @staticmethod
     def decode_token(token):
@@ -37,17 +33,36 @@ class Auth:
         :param token:
         :return:
         """
-        re = {'data': {}, 'error': {}}
         try:
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms='HS256')
-            re['data'] = {'user_id': payload['sub']}
-            return re
+            return {'user_id': payload['sub']}
         except jwt.ExpiredSignatureError:
-            re['error'] = {'error': 'Token expired, please login again.'}
-            return re
+            raise InvalidCredentials(error='Token expired, please login again', status_code=400)
         except jwt.InvalidTokenError:
-            re['error'] = {'error': 'Invalid token, please try again with a new token.'}
-            return re
+            raise InvalidCredentials(error='Invalid token, please try again with a new token', status_code=400)
+
+    @staticmethod
+    def get_token_from_header(headers):
+        if 'Authorization' not in headers:
+            raise InvalidCredentials(error='Auth token is not available', status_code=400)
+        auth_header = headers.get('Authorization')
+        if not auth_header:
+            return ''
+        try:
+            return auth_header.split(" ")[1]
+        except Exception as e:
+            raise InvalidCredentials(error='The Authorization header has a bad syntax: {}'.
+                                     format(e))
+
+    @staticmethod
+    def get_user_obj_from_header(headers):
+        token = Auth.get_token_from_header(headers)
+        data = Auth.decode_token(token)
+        user_id = data['user_id']
+        user = UserModel.get_one_user(user_id)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist, invalid token")
+        return user
 
     # user decorator
     @staticmethod
@@ -60,26 +75,8 @@ class Auth:
 
         @wraps(func)
         def decorated_user(*args, **kwargs):
-            if 'Authorization' not in request.headers:
-                return Response(mimetype="application/json",
-                                response=json.dumps({'error': 'Auth token is not available'}), status=400)
-            auth_header = request.headers.get('Authorization')
-            if auth_header:
-                # TODO: we need a try-catch here in case incorrect format of token is provided
-                token = auth_header.split(" ")[1]
-            else:
-                token = ''
-            data = Auth.decode_token(token)
-            if data['error']:
-                return Response(mimetype="application/json", response=json.dumps(data['error']), status=400)
-
-            user_id = data['data']['user_id']
-            check_user = UserModel.get_one_user(user_id)
-            if not check_user:
-                return Response(mimetype="application/json",
-                                response=json.dumps({'error': 'User does not exist, invalid token'}))
-
-            g.user = {'id': user_id}
+            user = Auth.get_user_obj_from_header(request.headers)
+            g.user = {'id': user.id}
             return func(*args, **kwargs)
 
         return decorated_user
@@ -95,43 +92,21 @@ class Auth:
 
         @wraps(func)
         def decorated_super_admin(*args, **kwargs):
-            if 'Authorization' not in request.headers:
-                return Response(mimetype="application/json",
-                                response=json.dumps({'error': 'Auth token is not available'}), status=400)
-            auth_header = request.headers.get('Authorization')
-            if auth_header:
-                token = auth_header.split(" ")[1]
-            else:
-                token = ''
-            data = Auth.decode_token(token)
-            if data['error']:
-                return Response(mimetype="application/json", response=json.dumps(data['error']), status=400)
+            user = Auth.get_user_obj_from_header(request.headers)
+            if not user.super_admin:
+                raise NoPermission(error='You do not have permission to access this endpoint')
 
-            user_id = data['data']['user_id']
-            check_user = UserModel.get_one_user(user_id)
-            if not check_user:
-                return Response(mimetype="application/json",
-                                response=json.dumps({'error': 'User does not exist, invalid token'}),
-                                status=400)
-
-            if not check_user.super_admin:
-                return Response(mimetype='application/json',
-                                response=json.dumps({'error': 'You do not have permission to access this endpoint'}),
-                                status=400)
-
-            g.user = {'id': user_id}
+            g.user = {'id': user.id}
             return func(*args, **kwargs)
 
         return decorated_super_admin
 
     @staticmethod
     def return_user_info(req_data):
-        token = req_data.headers.get('Authorization').split(" ")[1]
-        user_id = Auth.decode_token(token)['data']['user_id']
-        admin, super_admin = UserModel.get_user_info(user_id)
-        return user_id, admin, super_admin
+        user = Auth.get_user_obj_from_header(req_data.headers)
+        return user.id, user.admin, user.super_admin
 
     @staticmethod
     def return_user_from_token(token):
-        user_id = Auth.decode_token(token)['data']['user_id']
+        user_id = Auth.decode_token(token)['user_id']
         return user_id

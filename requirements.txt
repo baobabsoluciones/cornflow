@@ -36,3 +36,4 @@ flask-cors
 pulp
 jsonschema
 genson
+flask-apispec
