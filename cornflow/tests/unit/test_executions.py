@@ -64,11 +64,30 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
 
 class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
 
+    def test_get_nonexistent_execution(self):
+        result = self.get_one_row(self.url + 'some_key_' + '/', {},
+                                  expected_status=404, check_payload=False)
+
     def test_get_one_execution(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         payload = dict(self.payload)
         payload['id'] = id
         self.get_one_row(self.url + id, payload)
+
+    def test_incomplete_payload(self):
+        payload = {'description': 'arg'}
+        response = self.create_new_row(self.url + '?run=0', self.model, payload,
+                                       expected_status=400, check_payload=False)
+
+    def test_incomplete_payload2(self):
+        payload = {'description': 'arg', 'instance_id': self.payload['instance_id']}
+        response = self.create_new_row(self.url + '?run=0', self.model, payload,
+                                       expected_status=400, check_payload=False)
+
+    def test_payload_bad_format(self):
+        payload = {'name': 1}
+        response = self.create_new_row(self.url + '?run=0', self.model, payload,
+                                       expected_status=400, check_payload=False)
 
     def test_delete_one_execution(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
@@ -79,6 +98,11 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         payload = {**self.payload, **dict(id=id, name='new_name')}
         self.update_row(self.url + id + '/', dict(name='new_name'), payload)
+
+    def test_update_one_execution_bad_format(self):
+        id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
+        self.update_row(self.url + id + '/', dict(instance_id='some_id'), {},
+                        expected_status=400, check_payload=False)
 
     def test_create_delete_instance_load(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)

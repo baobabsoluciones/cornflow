@@ -59,7 +59,7 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('You need email and password to sign in.', response.json['error'])
+        self.assertEqual('You need email and password to sign in', response.json['error'])
 
     def test_missing_password(self):
         payload = self.data
@@ -69,7 +69,7 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('You need email and password to sign in.', response.json['error'])
+        self.assertEqual('You need email and password to sign in', response.json['error'])
 
     def test_invalid_email(self):
         payload = self.data
@@ -80,7 +80,7 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('Invalid credentials.', response.json['error'])
+        self.assertEqual('Invalid credentials', response.json['error'])
 
     def test_invalid_password(self):
         payload = self.data
@@ -91,7 +91,7 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('Invalid credentials.', response.json['error'])
+        self.assertEqual('Invalid credentials', response.json['error'])
 
     def test_token(self):
         # TODO: implement to check correct token creation
@@ -106,7 +106,16 @@ class TestLogIn(TestCase):
                                             "Authorization": 'Bearer ' + token})
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual('Token expired, please login again.', response.json['error'])
+        self.assertEqual('Token expired, please login again', response.json['error'])
+
+    def test_bad_format_token(self):
+        response = self.client.post('/login/', data=json.dumps(self.data), follow_redirects=True,
+                                    headers={"Content-Type": "application/json"})
+        token = response.json['token']
+        response = self.client.get('/user/' + str(self.id) + '/', follow_redirects=True,
+                                   headers={"Content-Type": "application/json",
+                                            "Authorization": 'Bearer' + token})
+        self.assertEqual(400, response.status_code)
 
     def test_invalid_token(self):
         token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ' \
@@ -117,4 +126,4 @@ class TestLogIn(TestCase):
                                             "Authorization": 'Bearer ' + token})
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual('Invalid token, please try again with a new token.', response.json['error'])
+        self.assertEqual('Invalid token, please try again with a new token', response.json['error'])

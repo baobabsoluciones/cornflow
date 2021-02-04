@@ -27,7 +27,7 @@ class TestInstances(CustomTestCase):
         payload = pulp.LpProblem.fromMPS(file)[1].toDict()
         self.assertEqual(row.data, payload)
 
-    def test_new_instance_pyclient(self):
+    def test_new_instance(self):
         self.create_new_row('./cornflow/tests/data/test_mps.mps')
 
     def test_new_instance_fail(self):

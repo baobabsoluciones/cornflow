@@ -1,37 +1,36 @@
 """
 External endpoints to manage the instances: create new ones, or get all the instances created by the user,
 or get only one.
-These endpoints have different access url, but manage the smae data entities
+These endpoints have different access url, but manage the same data entities
 """
 # Import from libraries
 from flask import request
 from werkzeug.utils import secure_filename
-from flask_restful import fields, marshal_with, marshal
 from marshmallow.exceptions import ValidationError
+from flask_apispec.views import MethodResource
+from flask_apispec import marshal_with, use_kwargs, doc
 import os
 import pulp
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import InstanceModel
-from ..schemas import InstanceSchema
+from ..schemas.model_json import DataSchema
+from ..schemas.instance import InstanceSchema, \
+    InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
+    InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
+from ..shared.exceptions import InvalidUsage, EndpointNotImplemented
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
-class InstanceEndpoint(MetaResource):
+
+@doc(description='Get all instances', tags=['Instances'])
+class InstanceEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
     """
-    resource_fields = \
-        dict(
-            id=fields.String,
-            name=fields.String,
-            description=fields.String,
-            created_at=fields.String,
-            user_id=fields.Integer,
-        )
 
     def __init__(self):
         super().__init__()
@@ -41,7 +40,7 @@ class InstanceEndpoint(MetaResource):
         self.primary_key = 'id'
 
     @Auth.auth_required
-    @marshal_with(resource_fields)
+    @marshal_with(InstanceEndpointResponse(many=True))
     def get(self):
         """
         API (GET) method to get all the instances created by the user and its related info
@@ -58,8 +57,8 @@ class InstanceEndpoint(MetaResource):
         return self.get_list(self.user_id)
 
     @Auth.auth_required
-    # @marshal_with(resource_fields)
-    def post(self):
+    @use_kwargs(InstanceRequest, location=('json'))
+    def post(self, **kwargs):
         """
         API (POST) method to create a new instance
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -70,33 +69,30 @@ class InstanceEndpoint(MetaResource):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.post_list(request)
+        data_schema = kwargs.get('data_schema', 'pulp')
+        if data_schema == 'pulp':
+            validate = DataSchema().load(kwargs['data'])
+            err = ''
+            if validate is None:
+                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        else:
+            pass
+        return self.post_list(kwargs)
 
 
+@doc(description='Get details of an instance', tags=['Instances'])
 class InstanceDetailsEndpoint(InstanceEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
-    resource_fields = dict(
-        id=fields.String,
-        name=fields.String,
-        description=fields.String,
-        created_at=fields.String,
-        executions= fields.List(fields.Nested(
-            dict(id=fields.String,
-                 config=fields.Raw,
-                 name=fields.String,
-                 created_at=fields.String,
-                 finished=fields.String)
-        ))
-    )
+
     def __init__(self):
         super().__init__()
         self.query = 'get_one_instance_from_user'
         self.dependents = 'executions'
 
     @Auth.auth_required
-    @marshal_with(resource_fields)
+    @marshal_with(InstanceDetailsEndpointResponse)
     def get(self, idx):
         """
         API method to get an instance created by the user and its related info.
@@ -112,7 +108,8 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
-    def put(self, idx):
+    @use_kwargs(InstanceEditRequest, location=('json'))
+    def put(self, idx, **data):
         """
         API method to edit an existing instance.
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -124,7 +121,7 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.put_detail(request, self.user_id, idx)
+        return self.put_detail(data, self.user_id, idx)
 
     @Auth.auth_required
     def delete(self, idx):
@@ -141,25 +138,22 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         return self.delete_detail(self.user_id, idx)
 
+    @Auth.auth_required
+    def post(self, **kwargs):
+        raise EndpointNotImplemented()
 
+@doc(description='Get data of an instance', tags=['Instances'])
 class InstanceDataEndpoint(InstanceDetailsEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
-    # TODO: not sure if we should give the data schema here.
-    #  it doesn't appear to accept Marshmallow schemas
-    #  fields.Raw does no validation.
-    resource_fields = dict(
-        id=fields.String,
-        name=fields.String,
-        data=fields.Raw,
-    )
+
     def __init__(self):
         super().__init__()
         self.dependents = None
 
     @Auth.auth_required
-    @marshal_with(resource_fields)
+    @marshal_with(InstanceDataEndpointResponse)
     def get(self, idx):
         """
         API method to get an instance data by the user and its related info.
@@ -175,13 +169,15 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
         return self.get_detail(self.user_id, idx)
 
 
+@doc(description='Load an instance with an mps file', tags=['Instances'])
 class InstanceFileEndpoint(InstanceEndpoint):
     """
     Endpoint to accept mps files to upload
     """
 
     @Auth.auth_required
-    def post(self):
+    @use_kwargs(InstanceFileRequest, location='form', inherit=False)
+    def post(self, name, description):
         """
 
         :param file:
@@ -189,20 +185,18 @@ class InstanceFileEndpoint(InstanceEndpoint):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        name = request.form.get('name', '')
-        description = request.form.get('description', '')
         if 'file' not in request.files:
-            return dict(error="No file was provided"), 400
+            raise InvalidUsage(error="No file was provided")
         file = request.files['file']
         filename = secure_filename(file.filename)
         if not (file and allowed_file(filename)):
-            return {'error': "Could not open file to upload. Check the extension matches {}.".
-                format(ALLOWED_EXTENSIONS)}, 400
+            raise InvalidUsage(error="Could not open file to upload. Check the extension matches {}".
+                               format(ALLOWED_EXTENSIONS))
         file.save(filename)
         try:
             _vars, problem = pulp.LpProblem.fromMPS(filename)
         except:
-            return {'error': "There was an error reading the file."}, 400
+            raise InvalidUsage(error="There was an error reading the file")
         try:
             os.remove(filename)
         except:
@@ -218,7 +212,7 @@ class InstanceFileEndpoint(InstanceEndpoint):
         try:
             self.data = self.schema.load(pb_data)
         except ValidationError as val_err:
-            return {'error': val_err.normalized_messages()}, 400
+            raise InvalidUsage(error=val_err.normalized_messages())
 
         item = self.model(self.data)
         item.save()

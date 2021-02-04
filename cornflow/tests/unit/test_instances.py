@@ -60,7 +60,7 @@ class TestInstancesDetailEndpoint(CustomTestCase):
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
-        self.response_items = {'id', 'name', 'description', 'created_at', 'executions'}
+        self.response_items = {'id', 'name', 'description', 'created_at', 'user_id', 'executions'}
         # we only check name and description because this endpoint does not return data
         self.items_to_check = ['name', 'description']
 
@@ -76,9 +76,18 @@ class TestInstancesDetailEndpoint(CustomTestCase):
         payload = {**self.payload, **dict(id=id, name='new_name')}
         self.update_row(self.url + id + '/', dict(name='new_name'), payload)
 
+    def test_update_one_instance_bad_format(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        self.update_row(self.url + id + '/', dict(instance_id='some_id'), {},
+                        expected_status=400, check_payload=False)
+
     def test_delete_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)
         self.delete_row(self.url + id + '/', self.model)
+
+    def test_get_nonexistent_instance(self):
+        result = self.get_one_row(self.url + 'some_key_' + '/', {},
+                                  expected_status=404, check_payload=False)
 
 
 class TestInstancesDataEndpoint(TestInstancesDetailEndpoint):
