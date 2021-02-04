@@ -1,0 +1,627 @@
+{
+  "definitions": {
+    "Coefficient": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }, 
+        "value": {
+          "type": "number"
+        }
+      }, 
+      "required": [
+        "name", 
+        "value"
+      ], 
+      "type": "object"
+    }, 
+    "Config": {
+      "properties": {
+        "gapAbs": {
+          "type": "number"
+        }, 
+        "gapRel": {
+          "type": "number"
+        }, 
+        "keepFiles": {
+          "type": "boolean"
+        }, 
+        "logPath": {
+          "type": "string"
+        }, 
+        "maxMemory": {
+          "type": "integer"
+        }, 
+        "maxNodes": {
+          "type": "integer"
+        }, 
+        "mip": {
+          "type": "boolean"
+        }, 
+        "msg": {
+          "type": "boolean"
+        }, 
+        "options": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array"
+        }, 
+        "solver": {
+          "type": "string"
+        }, 
+        "threads": {
+          "type": "integer"
+        }, 
+        "timeLimit": {
+          "type": "integer"
+        }, 
+        "warmStart": {
+          "type": "boolean"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "Constraints": {
+      "properties": {
+        "coefficients": {
+          "items": {
+            "$ref": "#/definitions/Coefficient"
+          }, 
+          "type": "array"
+        }, 
+        "constant": {
+          "type": "number", 
+          "x-nullable": true
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "pi": {
+          "type": "number", 
+          "x-nullable": true
+        }, 
+        "sense": {
+          "type": "integer"
+        }
+      }, 
+      "required": [
+        "coefficients", 
+        "name", 
+        "pi", 
+        "sense"
+      ], 
+      "type": "object"
+    }, 
+    "Data": {
+      "properties": {
+        "constraints": {
+          "items": {
+            "$ref": "#/definitions/Constraints"
+          }, 
+          "type": "array"
+        }, 
+        "objective": {
+          "$ref": "#/definitions/Objective"
+        }, 
+        "parameters": {
+          "$ref": "#/definitions/Parameters"
+        }, 
+        "sos1": {
+          "items": {
+            "$ref": "#/definitions/Sos1"
+          }, 
+          "type": "array"
+        }, 
+        "sos2": {
+          "items": {
+            "$ref": "#/definitions/Sos2"
+          }, 
+          "type": "array"
+        }, 
+        "variables": {
+          "items": {
+            "$ref": "#/definitions/Variables"
+          }, 
+          "type": "array"
+        }
+      }, 
+      "required": [
+        "constraints", 
+        "objective", 
+        "parameters", 
+        "sos1", 
+        "sos2", 
+        "variables"
+      ], 
+      "type": "object"
+    }, 
+    "ExecutionDetailsEndpointResponse": {
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "created_at": {
+          "type": "string"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "string"
+        }, 
+        "instance_id": {
+          "type": "string"
+        }, 
+        "message": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "state": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "ExecutionEditRequest": {
+      "properties": {
+        "description": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "ExecutionRequest": {
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "instance_id": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "instance_id", 
+        "name"
+      ], 
+      "type": "object"
+    }, 
+    "InstanceDetailsEndpointResponse": {
+      "properties": {
+        "created_at": {
+          "type": "string"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "executions": {
+          "items": {
+            "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+          }, 
+          "type": "array"
+        }, 
+        "id": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "user_id": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "InstanceEditRequest": {
+      "properties": {
+        "description": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "InstanceEndpointResponse": {
+      "properties": {
+        "created_at": {
+          "type": "string"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "user_id": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "InstanceRequest": {
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Data"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "data", 
+        "name"
+      ], 
+      "type": "object"
+    }, 
+    "Objective": {
+      "properties": {
+        "coefficients": {
+          "items": {
+            "$ref": "#/definitions/Coefficient"
+          }, 
+          "type": "array"
+        }, 
+        "name": {
+          "type": "string", 
+          "x-nullable": true
+        }
+      }, 
+      "required": [
+        "coefficients"
+      ], 
+      "type": "object"
+    }, 
+    "Parameters": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }, 
+        "sense": {
+          "type": "integer"
+        }, 
+        "sol_status": {
+          "type": "integer"
+        }, 
+        "status": {
+          "type": "integer"
+        }
+      }, 
+      "required": [
+        "name", 
+        "sense"
+      ], 
+      "type": "object"
+    }, 
+    "Sos1": {
+      "properties": {
+        "placeholder": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "Sos2": {
+      "properties": {
+        "placeholder": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "Variables": {
+      "properties": {
+        "cat": {
+          "type": "string"
+        }, 
+        "dj": {
+          "type": "number", 
+          "x-nullable": true
+        }, 
+        "lowBound": {
+          "type": "number", 
+          "x-nullable": true
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "upBound": {
+          "type": "number", 
+          "x-nullable": true
+        }, 
+        "varValue": {
+          "type": "number", 
+          "x-nullable": true
+        }
+      }, 
+      "required": [
+        "cat", 
+        "name"
+      ], 
+      "type": "object"
+    }
+  }, 
+  "info": {
+    "title": "Cornflow API docs", 
+    "version": "v1"
+  }, 
+  "paths": {
+    "/execution/": {
+      "get": {
+        "description": "Get all executions", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Executions"
+        ]
+      }, 
+      "post": {
+        "description": "Get all executions", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/ExecutionRequest"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Executions"
+        ]
+      }
+    }, 
+    "/execution/{idx}/": {
+      "delete": {
+        "description": "Get details of an executions", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Executions"
+        ]
+      }, 
+      "get": {
+        "description": "Get details of an executions", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Executions"
+        ]
+      }, 
+      "post": {
+        "description": "Get details of an executions", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/ExecutionRequest"
+            }
+          }, 
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Executions"
+        ]
+      }, 
+      "put": {
+        "description": "Get details of an executions", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/ExecutionEditRequest"
+            }
+          }, 
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Executions"
+        ]
+      }
+    }, 
+    "/instance/": {
+      "get": {
+        "description": "Get all instances", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/InstanceEndpointResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Instances"
+        ]
+      }, 
+      "post": {
+        "description": "Get all instances", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/InstanceRequest"
+            }
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Instances"
+        ]
+      }
+    }, 
+    "/instance/{idx}/": {
+      "delete": {
+        "description": "Get details of an instance", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Instances"
+        ]
+      }, 
+      "get": {
+        "description": "Get details of an instance", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Instances"
+        ]
+      }, 
+      "post": {
+        "description": "Get details of an instance", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/InstanceRequest"
+            }
+          }, 
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Instances"
+        ]
+      }, 
+      "put": {
+        "description": "Get details of an instance", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/InstanceEditRequest"
+            }
+          }, 
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Instances"
+        ]
+      }
+    }
+  }, 
+  "swagger": "2.0.0"
+}

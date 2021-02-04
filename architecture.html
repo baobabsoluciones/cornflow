@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Architecture &mdash; Cornflow 0.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Admin client" href="admin-spa.html" />
+    <link rel="prev" title="Concepts" href="concepts.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Cornflow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="includeme.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#components">Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cornflow">Cornflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#airflow">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#worker">Worker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#client">Client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-flows">Data flows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="admin-spa.html">Admin client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="endpoints.html">Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stable-rest-api-ref.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Cornflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Architecture</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/architecture.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="components">
+<h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cornflow">
+<h3>Cornflow<a class="headerlink" href="#cornflow" title="Permalink to this headline">¶</a></h3>
+<p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.</p>
+</div>
+<div class="section" id="airflow">
+<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
+<p>Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.</p>
+<p>Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
+<p>A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.</p>
+<p>Airflow is also built on top of flask+python. The project’s site is: airflow.apache.org/</p>
+</div>
+<div class="section" id="worker">
+<h3>Worker<a class="headerlink" href="#worker" title="Permalink to this headline">¶</a></h3>
+<p>A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial license (e.g., Gurobi or CPLEX) in order to use these solvers.</p>
+</div>
+<div class="section" id="client">
+<h3>Client<a class="headerlink" href="#client" title="Permalink to this headline">¶</a></h3>
+<p>Any library that uses the REST API to use Cornflow. There are two official clients that are currently maintained: a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-admin">SPA web app</a> and a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-client">python package</a>.</p>
+<p>The REST API is created with Open API standards (see <a class="reference internal" href="stable-rest-api-ref.html#rest-api-reference"><span class="std std-ref">REST API</span></a>), so it should be fairly easy to build new apis.</p>
+</div>
+</div>
+<div class="section" id="data-flows">
+<h2>Data flows<a class="headerlink" href="#data-flows" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id1">
+<span id="my-figure"></span><img alt="_images/architecture.png" src="_images/architecture.png" />
+<p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>CREATE INSTANCE (in green):</p>
+<ol class="arabic simple">
+<li><p>client calls Cornflow and sends instance.</p></li>
+<li><p>Cornflow saves the instance and gives back instance code to client.</p></li>
+</ol>
+<p>SOLVE INSTANCE (in orange):</p>
+<ol class="arabic simple">
+<li><p>client calls Cornflow and gives instance code and execution configuration.</p></li>
+<li><p>Cornflow creates execution, calls airflow dag and sends execution code.</p></li>
+<li><p>Cornflow, returns code to the user.</p></li>
+<li><p>Airflow executes a dag (creates a rundag for the instance) and sends it to a worker.</p></li>
+<li><p>the dagrun asks the data from Cornflow for the instance and the config for that execution.</p></li>
+<li><p>the dagrun solves the problem.</p></li>
+<li><p>the dagrun sends Cornflow the results of the execution.</p></li>
+</ol>
+<p>RETRIEVE INSTANCE (in purple):</p>
+<ol class="arabic simple">
+<li><p>The client can check the status of the execution via Cornflow.</p></li>
+<li><p>Cornflow asks Airflow for status and returns it to the user.</p></li>
+<li><p>The client can download the results when the execution finishes.</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="admin-spa.html" class="btn btn-neutral float-right" title="Admin client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="concepts.html" class="btn btn-neutral float-left" title="Concepts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
