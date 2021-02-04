@@ -1,3 +1,5 @@
+![example workflow name](https://github.com/baobabsoluciones/corn/workflows/build/badge.svg)
+
 Cornflow
 =========
 
