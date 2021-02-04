@@ -11,7 +11,7 @@ class TestCornflowClient(CustomTestCaseLive):
     # TODO: test joining urls with url_join goes bad
 
     def setUp(self, create_all=False):
-        super().setUp(False)
+        super().setUp(True)
         self.items_to_check = ['name', 'description', 'instance_id']
 
     def create_new_instance_file(self, mps_file):
