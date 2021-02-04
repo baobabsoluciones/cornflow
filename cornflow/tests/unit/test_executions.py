@@ -56,7 +56,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         self.model = ExecutionModel
         self.response_items = {'id', 'name', 'description', 'created_at', 'instance_id', 'finished'}
         # we only the following because this endpoint does not return data
-        self.items_to_check = ['name', 'description']
+        self.items_to_check = ['name', 'description', 'instance_id']
         self.url = '/execution/'
         with open(EXECUTION_PATH) as f:
             self.payload = json.load(f)

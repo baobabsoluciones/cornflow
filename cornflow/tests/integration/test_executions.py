@@ -7,7 +7,7 @@ EXECUTIONS_LIST = [EXECUTION_PATH, './cornflow/tests/data/new_execution_2.json']
 
 class TestExecutionAirflow(CustomTestCaseLive):
 
-    def setUp(self):
-        super().setUp()
+    def setUp(self, create_all=False):
+        super().setUp(create_all=create_all)
         self.url = None
         self.model = None

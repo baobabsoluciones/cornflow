@@ -31,6 +31,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.client.token = response['token']
         self.url = None
         self.model = None
+        self.items_to_check = []
 
     def tearDown(self):
         # this can be a remote test server, do no touch!
