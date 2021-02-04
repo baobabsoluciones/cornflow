@@ -225,7 +225,7 @@ Kill it::
 
     kill -9 CODE
 
-If you're filling lucky::
+If you're feeling lucky::
     
     kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
 
@@ -354,7 +354,7 @@ If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP
 
 More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
 
-Test cornflow
+Running tests
 ~~~~~~~~~~~~~~~~~~
 
 Then you have to run the following commands::
@@ -381,4 +381,3 @@ After if you want to check the coverage report you need to run::
 or to get the html reports::
 
     coverage html
-

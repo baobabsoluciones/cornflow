@@ -22,9 +22,17 @@ sys.path.insert(0,os.path.abspath('../../'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 
-'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 
-'sphinx.ext.ifconfig', 'sphinx.ext.autosummary', 'sphinx.ext.mathjax']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax',
+    'sphinxcontrib.redoc',
+    ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -107,22 +115,21 @@ pygments_style = 'sphinx'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme = 'default'
 # html_theme = 'sphinx-glpi-theme'
-import sphinx_glpi_theme
 
-html_theme = "glpi"
+html_theme = "sphinx_rtd_theme"
 
-html_theme_path = sphinx_glpi_theme.get_html_themes_path()
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
 html_theme_options = {
-    'fixed_sidebar': True, 
-    'stickysidebar': True,
-    'github_banner': True,
-    'show_powered_by': False,
-    'github_user': 'baobabsoluciones',
-    'github_repo': 'corn'}
+    # 'fixed_sidebar': True, 
+    # 'stickysidebar': True,
+    # 'github_banner': True,
+    # 'show_powered_by': False,
+    # 'github_user': 'baobabsoluciones',
+    # 'github_repo': 'corn'
+}
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
@@ -218,3 +225,18 @@ latex_documents = []
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/3': None}
+
+OPENAPI_FILE = os.path.join(
+    os.path.dirname(__file__), "..", "..", "cornflow", "static", "v1.json"
+)
+redoc = [
+    {
+        'name': 'Cornflow REST API',
+        'page': 'stable-rest-api-ref',
+        'spec': OPENAPI_FILE,
+        'opts': {
+            'hide-hostname': True,
+            'no-auto-auth': True,
+        },
+    },
+]
