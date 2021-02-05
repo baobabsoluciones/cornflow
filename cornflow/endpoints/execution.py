@@ -61,7 +61,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location=('json'))
-    def post(self, dag_name, **kwargs):
+    def post(self, **kwargs):
         """
         API method to create a new execution linked to an already existing instance
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -73,7 +73,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         """
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
-        
+
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         data, status_code = self.post_list(kwargs)
 
@@ -82,6 +82,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         # if we failed to save the execution, we already raised an error.
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, data[self.primary_key])
         instance = InstanceModel.get_one_instance_from_user(self.user_id, execution.instance_id)
+        dag_name = kwargs.get('dag_name', 'solve_model_dag')
         # execution.instance_id => objeto instance => instance.data
         # dag_name => schema
         # validar(schema, instance.data)
@@ -114,7 +115,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         af_data = response.json()
         execution.dag_run_id = af_data['dag_run_id']
         execution.update_state(EXEC_STATE_RUNNING)
-        return execution, 200
+        return execution, 201
 
 
 @doc(description='Get details of an executions', tags=['Executions'])
@@ -193,7 +194,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
 
         :param str idx:  ID of the execution
         :return: A dictionary with a message (error if the execution does not exist or status of the execution)
-        and an integer with the HTTP status code.
+            and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         airflow_conf = dict(url=current_app.config['AIRFLOW_URL'],

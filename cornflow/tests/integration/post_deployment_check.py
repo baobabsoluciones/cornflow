@@ -1,9 +1,9 @@
-from cornflow.tests.integration.test_cornflowclient import TestInstances
+from cornflow.tests.integration.test_cornflowclient import TestCornflowClient
 import os
 import logging as log
 
 
-class RemoteServerTest(TestInstances):
+class RemoteServerTest(TestCornflowClient):
 
     def __call__(self, result=None):
         self.server = os.environ.get('TEST_SERVER', 'http://localhost:5000')
