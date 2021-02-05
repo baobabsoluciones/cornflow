@@ -21,3 +21,7 @@ class RemoteServerTest(TestCornflowClient):
     def setUp(self, server_url=''):
         log.root.setLevel(log.DEBUG)
         super().setUp(create_all=False)
+
+    def tearDown(self):
+        # this can be a remote test server, do no touch!
+        pass

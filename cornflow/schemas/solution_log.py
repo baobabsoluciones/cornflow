@@ -2,6 +2,7 @@ from marshmallow import fields, Schema
 
 options = dict(required=True, allow_none=True)
 pg_options = dict(many=True, required=True)
+list_of_strings = fields.List(fields.Str, required=False, many=True)
 
 class MatrixSchema(Schema):
     constraints = fields.Int(required=False)
@@ -16,19 +17,17 @@ class PresolveSchema(Schema):
 
 
 class ProgressSchema(Schema):
-    Node = fields.Str(**pg_options)
-    NodesLeft = fields.Str(**pg_options)
-    Objective = fields.Str(**pg_options)
-    IInf = fields.Str(**pg_options)
-    BestInteger = fields.Str(**pg_options)
-    CutsBestBound = fields.Str(**pg_options)
-    ItpNode = fields.Str(**pg_options)
-    Gap = fields.Str(**pg_options)
-    Time = fields.Str(**pg_options)
-
+    Node = list_of_strings
+    NodesLeft = list_of_strings
+    Objective = list_of_strings
+    IInf = list_of_strings
+    BestInteger = list_of_strings
+    CutsBestBound = list_of_strings
+    ItpNode = list_of_strings
+    Gap = list_of_strings
+    Time = fields.List(fields.Int, required=False, many=True)
 
 class Cuts(Schema):
-    # TODO: this
     pass
 
 
@@ -63,5 +62,6 @@ class LogSchema(Schema):
     status_code = fields.Int(**options)
     sol_code = fields.Int(**options)
     nodes = fields.Int(**options)
-    progress = fields.Nested(ProgressSchema, required=True)
-    cut_info = fields.Nested(CutInfo, **options)
+    progress = fields.Nested(ProgressSchema, required=False)
+    cut_info = fields.Raw(required=False, allow_none=True)
+    # cut_info = fields.Nested(CutInfo, **options)

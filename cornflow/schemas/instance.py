@@ -29,6 +29,7 @@ class InstanceRequest(Schema):
 class InstanceFileRequest(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)
+    minimize = fields.Boolean(required=False)
 
 
 class InstanceEditRequest(Schema):

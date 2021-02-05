@@ -22,11 +22,9 @@ class DAGEndpoint(Resource):
     """
     Endpoint used for the DAG endpoint
     """
-    # TODO: this endpoint should be a PUT actually, as the execution is also created
-    #  and airflow is only writing the results to the needed fields
     @Auth.super_admin_required
     @use_kwargs(ExecutionDagRequest, location=('json'))
-    def post(self, idx, **req_data):
+    def put(self, idx, **req_data):
         """
         API method to write the results of the execution
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -36,14 +34,15 @@ class DAGEndpoint(Resource):
         :return: A dictionary with a message (body) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        state = req_data.get('state', EXEC_STATE_CORRECT)
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:
             raise ObjectDoesNotExist()
         new_data = \
             dict(
                 finished=True,
-                state=EXEC_STATE_CORRECT,
-                state_message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_CORRECT],
+                state=state,
+                state_message=EXECUTION_STATE_MESSAGE_DICT[state],
                 # because we do not want to store airflow's user:
                 user_id = execution.user_id
              )
@@ -69,6 +68,6 @@ class DAGEndpoint(Resource):
             raise ObjectDoesNotExist(error='The execution does not exist')
         instance = InstanceModel.get_one_instance_from_id_admin(execution.instance_id)
         if instance is None:
-            raise ObjectDoesNotExist(error='The insatnce does not exist')
+            raise ObjectDoesNotExist(error='The instance does not exist')
         config = execution.config
         return {"data": instance.data, "config": config}, 200
