@@ -38,6 +38,19 @@ class CornFlow(object):
             headers={'Authorization': 'access_token ' + self.token},
             json={})
 
+    def put_api_for_id(self, api, id, payload):
+        return requests.put(
+            urljoin(urljoin(self.url, api) + '/', str(id) + '/'),
+            headers={'Authorization': 'access_token ' + self.token},
+            json=payload)
+
+    def create_api(self, api, **kwargs):
+        return requests.post(
+            urljoin(self.url, api),
+            headers={'Authorization': 'access_token ' + self.token},
+            **kwargs)
+
+
     @log_call
     def sign_up(self, email, pwd, name):
         return requests.post(
@@ -64,10 +77,8 @@ class CornFlow(object):
                 name = data['parameters']['name']
             except IndexError:
                 raise CornFlowApiError('The `name` argument needs to be filled')
-        response = requests.post(
-            urljoin(self.url, 'instance/'),
-            headers={'Authorization': 'access_token ' + self.token},
-            json=dict(data=data, name=name, description=description, data_schema=data_schema))
+        payload = dict(data=data, name=name, description=description, data_schema=data_schema)
+        response = self.create_api('instance/', json=payload)
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
                                    format(response.status_code, response.text))
@@ -75,13 +86,11 @@ class CornFlow(object):
 
     @ask_token
     @log_call
-    def create_instance_file(self, filename, name, description=''):
+    def create_instance_file(self, filename, name, description='', minimize=True):
         with open(filename, 'rb') as file:
-            response = requests.post(
-                urljoin(self.url, 'instancefile/'),
-                headers={'Authorization': 'access_token ' + self.token},
-                files=dict(file=file),
-                data=dict(name=name, description=description))
+            response = self.create_api('instancefile/',
+                                       data=dict(name=name, description=description, minimize=minimize),
+                                       files=dict(file=file))
 
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
@@ -91,10 +100,8 @@ class CornFlow(object):
     @log_call
     @ask_token
     def create_execution(self, instance_id, config, name='test1', description='', dag_name='solve_model_dag'):
-        response = requests.post(
-            urljoin(self.url, 'execution/'),
-            headers={'Authorization': 'access_token ' + self.token},
-            json=dict(config=config, instance_id=instance_id, name=name, description=description, dag_name = dag_name))
+        payload = dict(config=config, instance_id=instance_id, name=name, description=description, dag_name = dag_name)
+        response = self.create_api('execution/', json=payload)
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
                                    format(response.status_code, response.text))
@@ -106,11 +113,12 @@ class CornFlow(object):
         return response.json()
 
     @ask_token
-    def write_solution(self, execution_id, solution, log_text=None, log_json=None):
-        response = requests.post(
-            urljoin(urljoin(self.url, 'dag/'), str(execution_id) + '/'),
-            headers={'Authorization': 'access_token ' + self.token},
-            json=dict(execution_results=solution, log_text=log_text, log_json=log_json))
+    def write_solution(self, execution_id, solution, log_text=None, log_json=None, state=1):
+        payload = dict(execution_results=solution, log_text=log_text, log_json=log_json, state=state)
+        response = self.put_api_for_id('dag/', id=execution_id, payload=payload)
+        if response.status_code != 201:
+            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
+                                   format(response.status_code, response.text))
         return response
 
     @log_call
