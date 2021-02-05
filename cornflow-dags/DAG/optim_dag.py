@@ -1,7 +1,7 @@
 from airflow import DAG, AirflowException
 from airflow.operators.python_operator import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-from cornflow_client import CornFlow
+from cornflow_client import CornFlow, CornFlowApiError
 from datetime import datetime, timedelta
 import model_functions as mf
 from urllib.parse import urlparse
@@ -28,14 +28,21 @@ def get_arg(arg, context):
     return context["dag_run"].conf[arg]
 
 
+def try_to_save_error(client, exec_id):
+    try:
+        client.put_api_for_id('dag/', id=exec_id, payload=dict(state=0))
+    except:
+        pass
+
+
 def run_solve(**kwargs):
     exec_id = get_arg("exec_id", kwargs)
 
     # This secret comes from airflow configuration
-    print("Getting connection information from ENV VAR=CF_URI")
     secrets = EnvironmentVariablesBackend()
     uri = secrets.get_conn_uri('CF_URI')
     conn = urlparse(uri)
+
     # TODO: what if https??
     airflow_user = CornFlow(url="http://{}:{}".format(conn.hostname, conn.port))
 
@@ -48,9 +55,19 @@ def run_solve(**kwargs):
     try:
         solution, log, log_dict = mf.solve_model(execution_data["data"], execution_data["config"])
     except mf.NoSolverException:
+        try_to_save_error(airflow_user, exec_id)
         raise AirflowException('No solver found')
+    except:
+        try_to_save_error(airflow_user, exec_id)
+        raise AirflowException('Unknown error')
     # write solution
-    airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
+    try:
+        airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
+    except CornFlowApiError:
+        try_to_save_error(airflow_user, exec_id)
+        # attempt to update the execution with a failed status.
+        raise AirflowException('The writing of the solution failed')
+
     if solution:
         return "Solution saved"
 
