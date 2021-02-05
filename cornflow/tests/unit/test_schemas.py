@@ -124,15 +124,35 @@ class SchemaGenerator(unittest.TestCase):
 
 
 class PuLPLogSchema(unittest.TestCase):
-    with open('./cornflow/tests/data/gc_20_7.json', 'r') as f:
-        data = json.load(f)
 
-    config = dict(solver="PULP_CBC_CMD", timeLimit=10)
+    def solve_model(self, input_data, config):
+        return solve_model(input_data, config)
 
-    def test_progress(self):
-        solution, log, log_dict = solve_model(self.data, self.config)
+    def dump_progress(self, log_dict):
         LS = LogSchema()
-        LS.dump(log_dict)
+        return LS.load(log_dict)
+
+    def solve_test_progress(self):
+        with open('./cornflow/tests/data/gc_20_7.json', 'r') as f:
+            data = json.load(f)
+
+        config = dict(solver="PULP_CBC_CMD", timeLimit=10)
+        solution, log, log_dict = self.solve_model(data, config)
+        loaded_data = self.dump_progress(log_dict)
+        self.assertEqual(loaded_data['solver'], 'CBC')
+        self.assertEqual(loaded_data['version'], '2.9.0')
+        matrix_keys = {'nonzeros', 'constraints', 'variables'}
+        a = matrix_keys.symmetric_difference(loaded_data['matrix'].keys())
+        self.assertEqual(len(a), 0)
+
+    def test_progress2(self):
+        with open('./cornflow/tests/data/gc_50_3_log.json', 'r') as f:
+            data = json.load(f)
+        loaded_data = self.dump_progress(data)
+        self.assertEqual(loaded_data['solver'], 'CPLEX')
+        self.assertEqual(len(loaded_data['progress']['Node']), 53)
+        self.assertEqual(len(loaded_data['cut_info']['cuts']), 6)
+        self.assertEqual(loaded_data['nodes'], 3242.0)
 
 
 if __name__ == '__main__':

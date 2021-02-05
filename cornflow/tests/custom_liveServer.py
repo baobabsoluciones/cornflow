@@ -15,6 +15,13 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.client = cf.CornFlow(url=server)
         return self.client
 
+    def login_or_signup(self, user_data):
+        try:
+            response = self.client.login(user_data['email'], user_data['pwd'])
+        except cf.CornFlowApiError:
+            response = self.client.sign_up(**user_data).json()
+        return response
+
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
@@ -24,15 +31,12 @@ class CustomTestCaseLive(LiveServerTestCase):
                  pwd='testpassword',
                  )
         self.set_client(self.get_server_url())
-        try:
-            response = self.client.login(user_data['email'], user_data['pwd'])
-        except cf.CornFlowApiError:
-            response = self.client.sign_up(**user_data).json()
+        response = self.login_or_signup(user_data)
         self.client.token = response['token']
         self.url = None
         self.model = None
         self.items_to_check = []
 
     def tearDown(self):
-        # this can be a remote test server, do no touch!
-        pass
+        db.session.remove()
+        db.drop_all()

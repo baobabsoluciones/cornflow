@@ -177,7 +177,7 @@ class InstanceFileEndpoint(InstanceEndpoint):
 
     @Auth.auth_required
     @use_kwargs(InstanceFileRequest, location='form', inherit=False)
-    def post(self, name, description):
+    def post(self, name, description, minimize=1):
         """
 
         :param file:
@@ -193,8 +193,9 @@ class InstanceFileEndpoint(InstanceEndpoint):
             raise InvalidUsage(error="Could not open file to upload. Check the extension matches {}".
                                format(ALLOWED_EXTENSIONS))
         file.save(filename)
+        sense = 1 if minimize else -1
         try:
-            _vars, problem = pulp.LpProblem.fromMPS(filename)
+            _vars, problem = pulp.LpProblem.fromMPS(filename, sense=sense)
         except:
             raise InvalidUsage(error="There was an error reading the file")
         try:
