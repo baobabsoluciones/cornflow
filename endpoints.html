@@ -186,8 +186,8 @@ This are the endpoints used by airflow in its communication with cornflow</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code></p>
 <p>Endpoint used for the DAG endpoint</p>
 <dl class="py method">
-<dt id="cornflow.endpoints.dag.DAGEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">req_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dt id="cornflow.endpoints.dag.DAGEndpoint.put">
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">req_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>API method to write the results of the execution
 It requires authentication to be passed in the form of a token that has to be linked to
 an existing session (login) made by the superuser created for the airflow webserver</p>
@@ -226,7 +226,7 @@ and <code class="xref py py-class docutils literal notranslate"><span class="pre
 
 <dl class="py attribute">
 <dt id="cornflow.endpoints.dag.DAGEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -716,7 +716,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 <p>Endpoint to accept mps files to upload</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.instance.InstanceFileEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span></em>, <em class="sig-param"><span class="n">minimize</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint.post" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>file</strong> – </p>
