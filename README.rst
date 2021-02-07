@@ -1,4 +1,5 @@
-![example workflow name](https://github.com/baobabsoluciones/corn/workflows/build/badge.svg)
+.. |build| image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg
+   :target:
 
 Cornflow
 =========
