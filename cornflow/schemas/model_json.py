@@ -6,5 +6,5 @@ fileDir = os.path.dirname(os.path.realpath(__file__))
 #
 # print(manager.jsonschema_to_dict())
 
-#manager = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+manager = SchemaManager.from_filepath("./json_schemas/data_schema.json")
 DataSchema = manager.jsonschema_to_flask()
