@@ -277,8 +277,6 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        # TODO: here, the execution log progress is read correctly but parsed incorrectly by
-        #  marshmallow: the arrays in the progress are converted into strings
         return self.get_detail(self.user_id, idx)
 
     @Auth.auth_required
