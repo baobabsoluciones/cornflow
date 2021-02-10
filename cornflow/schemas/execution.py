@@ -58,10 +58,11 @@ class ExecutionEditRequest(Schema):
 
 
 class ExecutionDagRequest(Schema):
-    execution_results = fields.Nested(DataSchema, required=False)
+    execution_results = fields.Raw(required=False)
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
+    solution_schema = fields.String(required=False)
 
 
 class ExecutionDetailsEndpointResponse(Schema):

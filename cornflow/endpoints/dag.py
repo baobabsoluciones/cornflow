@@ -13,7 +13,8 @@ from ..schemas import ExecutionSchema
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
 from ..schemas.execution import ExecutionDagRequest
-from ..shared.exceptions import ObjectDoesNotExist
+from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
+from ..schemas.model_json import DataSchema
 
 execution_schema = ExecutionSchema()
 
@@ -35,6 +36,16 @@ class DAGEndpoint(Resource):
         :rtype: Tuple(dict, integer)
         """
         state = req_data.get('state', EXEC_STATE_CORRECT)
+        solution_schema = req_data.get('solution_schema', "pulp")
+        
+        if solution_schema == 'pulp':
+            validate = DataSchema().load(req_data['data'])
+            err = ''
+            if validate is None:
+                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        else:
+            pass
+        
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:
             raise ObjectDoesNotExist()
