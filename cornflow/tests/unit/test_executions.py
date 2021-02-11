@@ -45,6 +45,13 @@ class TestExecutionsListEndpoint(CustomTestCase):
     def test_get_no_executions(self):
         self.get_no_rows(self.url)
 
+    def test_get_executions_superadmin(self):
+        self.get_rows(self.url, self.payloads)
+        token = self.create_super_admin()
+        rows = self.client.get(self.url, follow_redirects=True,
+                               headers=self.get_header_with_auth(token))
+        self.assertGreaterEqual(len(rows.json), len(self.payloads))
+
 
 class TestExecutionsDetailEndpointMock(CustomTestCase):
 
@@ -61,6 +68,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         with open(EXECUTION_PATH) as f:
             self.payload = json.load(f)
         self.payload['instance_id'] = fk_id
+
 
 class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
 
@@ -126,6 +134,11 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.delete_row('/instance/' + fk_id + '/', InstanceModel)
         # we check the execution does not exist
         self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
+
+    def test_get_one_execution_superadmin(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_super_admin()
+        self.get_one_row(self.url + id + '/', {**self.payload, **dict(id=id)}, token=token)
 
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):

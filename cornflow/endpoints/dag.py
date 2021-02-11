@@ -3,9 +3,9 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from flask import request
 from flask_restful import Resource
-from flask_apispec import use_kwargs
+from flask_apispec import use_kwargs, doc
+from flask_apispec.views import MethodResource
 
 # Import from internal modules
 from ..models import ExecutionModel, InstanceModel
@@ -18,12 +18,14 @@ from ..shared.exceptions import ObjectDoesNotExist
 execution_schema = ExecutionSchema()
 
 
-class DAGEndpoint(Resource):
+class DAGEndpoint(Resource, MethodResource):
     """
     Endpoint used for the DAG endpoint
     """
+
+    @doc(description='Add a solution to an execution', tags=['DAGs'])
     @Auth.super_admin_required
-    @use_kwargs(ExecutionDagRequest, location=('json'))
+    @use_kwargs(ExecutionDagRequest, location='json')
     def put(self, idx, **req_data):
         """
         API method to write the results of the execution
@@ -50,7 +52,8 @@ class DAGEndpoint(Resource):
         execution.update(req_data)
         execution.save()
         return {'message': 'results successfully saved'}, 201
-    
+
+    @doc(description='Get input data and configuration for an execution', tags=['DAGs'])
     @Auth.super_admin_required
     def get(self, idx):
         """

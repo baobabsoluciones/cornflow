@@ -116,7 +116,7 @@ class UserModel(TraceAttributes):
         :return: A list with all the users.
         :rtype: list(:class:`UserModel`)
         """
-        return UserModel.query.all()
+        return UserModel.query.filter_by(deleted_at=None)
 
     @staticmethod
     def get_one_user(idx):
@@ -127,7 +127,7 @@ class UserModel(TraceAttributes):
         :return: The user
         :rtype: :class:`UserModel`
         """
-        return UserModel.query.get(idx)
+        return UserModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
     def get_one_user_by_email(em):
@@ -138,7 +138,7 @@ class UserModel(TraceAttributes):
         :return: The user
         :rtype: :class:`UserModel`
         """
-        return UserModel.query.filter_by(email=em).first()
+        return UserModel.query.filter_by(email=em, deleted_at=None).first()
 
     @staticmethod
     def get_user_info(idx):
@@ -149,7 +149,7 @@ class UserModel(TraceAttributes):
         :return: A tuple with the values of admin adn super_admin for the given user
         :rtype: tuple(bool, bool)
         """
-        user = UserModel.query.get(idx)
+        user = UserModel.query.filter_by(id=idx, deleted_at=None).first()
         return user.admin, user.super_admin
 
     def __repr__(self):
