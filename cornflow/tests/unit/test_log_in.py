@@ -23,6 +23,8 @@ class TestLogIn(TestCase):
         user = UserModel(data=self.data)
         user.save()
         db.session.commit()
+        # we take out the name, we do not need it to sign in
+        self.data.pop('name')
         self.id = UserModel.query.filter_by(name='testname').first().id
 
     def tearDown(self):
@@ -59,7 +61,6 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('You need email and password to sign in', response.json['error'])
 
     def test_missing_password(self):
         payload = self.data
@@ -69,7 +70,6 @@ class TestLogIn(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        self.assertEqual('You need email and password to sign in', response.json['error'])
 
     def test_invalid_email(self):
         payload = self.data

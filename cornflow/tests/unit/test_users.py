@@ -16,14 +16,14 @@ class TestUserEndpoint(TestCase):
         db.create_all()
         self.url = '/user/'
         self.model = UserModel
-        self.data = dict(name='testname', email='test@test.com', password='testpassword', admin=False)
+        self.user = dict(name='testname', email='test@test.com', password='testpassword', admin=False)
         self.admin = dict(name='anAdminUser', email='admin@admin.com', password='testpassword', admin=True)
         self.super_admin = dict(name='anAdminSuperUser', email='super_admin@admin.com',
                                 password='tpass_super_admin', super_admin=True, admin=False)
         self.login_keys = ['email', 'password']
         self.items_to_check = ['email', 'name', 'id', 'admin']
 
-        for u_data in [self.data, self.admin, self.super_admin]:
+        for u_data in [self.user, self.admin, self.super_admin]:
             user = UserModel(data=u_data)
             user.admin = u_data.get('admin', False)
             user.super_admin = u_data.get('super_admin', False)
@@ -50,11 +50,19 @@ class TestUserEndpoint(TestCase):
 
     def make_admin(self, user_asks, user_asked, make_admin=1):
         data = {k: user_asks[k] for k in self.login_keys}
-        url = '{}{}/{}/'.format(self.url, user_asked['id'], make_admin)
         token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
+        url = '{}{}/{}/'.format(self.url, user_asked['id'], make_admin)
         return self.client.put(url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
+
+    def delete_user(self, user_asks, user_asked):
+        data = {k: user_asks[k] for k in self.login_keys}
+        token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+                                      headers={"Content-Type": "application/json"}).json['token']
+        url = '{}{}/'.format(self.url, user_asked['id'])
+        return self.client.delete(url, follow_redirects=True,
+                                  headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
 
     def test_get_all_users_superadmin(self):
         # the superadmin should be able to list all users
@@ -64,7 +72,7 @@ class TestUserEndpoint(TestCase):
 
     def test_get_all_users_user(self):
         # a simple user should not be able to do it
-        response = self.get_user(self.data)
+        response = self.get_user(self.user)
         self.assertEqual(400, response.status_code)
         self.assertTrue('error' in response.json)
 
@@ -76,7 +84,7 @@ class TestUserEndpoint(TestCase):
 
     def test_get_same_user(self):
         # if a user asks for itself: it's ok
-        for u_data in [self.data, self.admin, self.super_admin]:
+        for u_data in [self.user, self.admin, self.super_admin]:
             response = self.get_user(u_data, u_data)
             self.assertEqual(200, response.status_code)
             for item in self.items_to_check:
@@ -84,34 +92,34 @@ class TestUserEndpoint(TestCase):
                 self.assertEqual(response.json[item], u_data[item])
 
     def test_get_another_user(self):
-        response = self.get_user(self.data, self.admin)
+        response = self.get_user(self.user, self.admin)
         self.assertEqual(400, response.status_code)
         self.assertTrue('error' in response.json)
 
     def test_get_another_user_admin(self):
-        response = self.get_user(self.admin, self.data)
+        response = self.get_user(self.admin, self.user)
         self.assertEqual(200, response.status_code)
         for item in self.items_to_check:
-            self.assertEqual(response.json[item], self.data[item])
+            self.assertEqual(response.json[item], self.user[item])
 
     def test_user_makes_someone_admin(self):
-        response = self.make_admin(self.data, self.data)
+        response = self.make_admin(self.user, self.user)
         self.assertEqual(400, response.status_code)
 
     def test_admin_makes_someone_admin(self):
-        response = self.make_admin(self.admin, self.data)
+        response = self.make_admin(self.admin, self.user)
         self.assertEqual(400, response.status_code)
 
-    def zz_test_super_admin_makes_someone_admin(self):
-        response = self.make_admin(self.super_admin, self.data)
+    def test_super_admin_makes_someone_admin(self):
+        response = self.make_admin(self.super_admin, self.user)
         self.assertEqual(201, response.status_code)
         for item in self.items_to_check:
             if item == 'admin':
                 self.assertTrue(response.json[item])
             else:
-                self.assertEqual(response.json[item], self.data[item])
+                self.assertEqual(response.json[item], self.user[item])
 
-    def zz_test_super_admin_takes_someone_admin(self):
+    def test_super_admin_takes_someone_admin(self):
         response = self.make_admin(self.super_admin, self.admin, 0)
         self.assertEqual(201, response.status_code)
         for item in self.items_to_check:
@@ -119,3 +127,24 @@ class TestUserEndpoint(TestCase):
                 self.assertFalse(response.json[item])
             else:
                 self.assertEqual(response.json[item], self.admin[item])
+
+    def test_user_deletes_admin(self):
+        response = self.delete_user(self.user, self.admin)
+        self.assertEqual(400, response.status_code)
+
+    def test_admin_deletes_superadmin(self):
+        response = self.delete_user(self.admin, self.super_admin)
+        self.assertEqual(400, response.status_code)
+
+    def test_admin_deletes_user(self):
+        response = self.delete_user(self.admin, self.user)
+        self.assertEqual(200, response.status_code)
+        response = self.get_user(self.admin, self.user)
+        self.assertEqual(404, response.status_code)
+
+    def test_superadmin_deletes_admin(self):
+        response = self.delete_user(self.super_admin, self.admin)
+        self.assertEqual(200, response.status_code)
+        response = self.get_user(self.super_admin, self.admin)
+        self.assertEqual(404, response.status_code)
+

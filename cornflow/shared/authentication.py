@@ -102,11 +102,6 @@ class Auth:
         return decorated_super_admin
 
     @staticmethod
-    def return_user_info(req_data):
-        user = Auth.get_user_obj_from_header(req_data.headers)
-        return user.id, user.admin, user.super_admin
-
-    @staticmethod
     def return_user_from_token(token):
         user_id = Auth.decode_token(token)['user_id']
         return user_id

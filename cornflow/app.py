@@ -8,11 +8,7 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
 from .config import app_config
-from .endpoints import \
-    InstanceEndpoint, InstanceDetailsEndpoint, InstanceDataEndpoint, InstanceFileEndpoint, \
-    UserEndpoint, UserDetailsEndpoint, LoginEndpoint, \
-    ExecutionEndpoint, ExecutionDetailsEndpoint, ExecutionStatusEndpoint, ExecutionDataEndpoint, ExecutionLogEndpoint, \
-    DAGEndpoint, SignUpEndpoint, ToggleUserAdmin
+from .endpoints import resources
 from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
 
@@ -33,23 +29,9 @@ def create_app(env_name='development'):
     bcrypt.init_app(app)
     db.init_app(app)
 
-    # TODO: maybe move the add_endpoints to a function inside endpoints/__init__.py
     api = Api(app)
-    api.add_resource(InstanceEndpoint, '/instance/', endpoint="instance")
-    api.add_resource(InstanceDetailsEndpoint, '/instance/<string:idx>/', endpoint="instances-detail")
-    api.add_resource(InstanceDataEndpoint, '/instance/<string:idx>/data/', endpoint="instances-data")
-    api.add_resource(InstanceFileEndpoint, '/instancefile/', endpoint="instance-file")
-    api.add_resource(ExecutionDetailsEndpoint, '/execution/<string:idx>/', endpoint="execution-detail")
-    api.add_resource(ExecutionStatusEndpoint, '/execution/<string:idx>/status/', endpoint="execution-status")
-    api.add_resource(ExecutionDataEndpoint, '/execution/<string:idx>/data/', endpoint="execution-data")
-    api.add_resource(ExecutionLogEndpoint, '/execution/<string:idx>/log/', endpoint="execution-log")
-    api.add_resource(ExecutionEndpoint, '/execution/', endpoint="execution")
-    api.add_resource(DAGEndpoint, '/dag/<string:idx>/', endpoint="dag")
-    api.add_resource(UserEndpoint, '/user/', endpoint="user")
-    api.add_resource(UserDetailsEndpoint, '/user/<int:user_id>/', endpoint="user-detail")
-    api.add_resource(ToggleUserAdmin, '/user/<int:user_id>/<int:make_admin>/', endpoint="user-admin")
-    api.add_resource(LoginEndpoint, '/login/', endpoint="login")
-    api.add_resource(SignUpEndpoint, '/signup/', endpoint="signup")
+    for res in resources:
+        api.add_resource(res['resource'], res['urls'], endpoint=res['endpoint'])
 
     # apispec time
     app.config.update({
@@ -63,15 +45,10 @@ def create_app(env_name='development'):
         'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
     })
     docs = FlaskApiSpec(app)
-    docs.register(InstanceEndpoint, endpoint="instance")
-    docs.register(InstanceDetailsEndpoint, endpoint="instances-detail")
-    docs.register(ExecutionDetailsEndpoint, endpoint="execution-detail")
-    docs.register(ExecutionEndpoint, endpoint="execution")
+    for res in resources:
+        docs.register(target=res['resource'], endpoint=res['endpoint'])
 
     _initialize_errorhandlers(app)
-
-
-
     return app
 
 

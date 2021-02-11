@@ -44,13 +44,13 @@ class TestInstancesListEndpoint(CustomTestCase):
                                headers=self.get_header_with_auth(token))
         # TODO: here we get 5 >= 2. But this depends on the order of the tests...
         #  we should do something to really check the correct number
-        self.assertGreaterEqual(len(rows.json), len(INSTANCES_LIST))
+        self.assertEqual(len(rows.json), len(self.payloads))
 
     def test_get_no_instances(self):
         self.get_no_rows(self.url)
 
 
-class TestInstancesDetailEndpoint(CustomTestCase):
+class TestInstancesDetailEndpointBase(CustomTestCase):
 
     def setUp(self):
         super().setUp()
@@ -64,12 +64,19 @@ class TestInstancesDetailEndpoint(CustomTestCase):
         # we only check name and description because this endpoint does not return data
         self.items_to_check = ['name', 'description']
 
+class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
+
     def test_get_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=id)}
         result = self.get_one_row(self.url + id + '/', payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
+
+    def test_get_one_instance_superadmin(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_super_admin()
+        self.get_one_row(self.url + id + '/', {**self.payload, **dict(id=id)}, token=token)
 
     def test_update_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)
@@ -90,7 +97,7 @@ class TestInstancesDetailEndpoint(CustomTestCase):
                                   expected_status=404, check_payload=False)
 
 
-class TestInstancesDataEndpoint(TestInstancesDetailEndpoint):
+class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
 
     def setUp(self):
         super().setUp()

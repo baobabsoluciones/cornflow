@@ -4,9 +4,11 @@ It should allow all CRUD (create, read, update, delete) operations
 """
 # Import from libraries
 from flask_restful import Resource
-from marshmallow.exceptions import ValidationError
-from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from flask import request
+
 # Import from internal modules
+from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from ..shared.authentication import Auth
 
 
 class MetaResource(Resource):
@@ -14,15 +16,28 @@ class MetaResource(Resource):
 
     def __init__(self):
         super().__init__()
-        self.user_id = None
-        self.admin = None
-        self.super_admin = None
+        self.user = None
         self.model = None
         self.query = None
-        self.schema = None
         self.primary_key = None
         self.dependents = None
         self.foreign_data = None
+
+    def get_user(self):
+        if self.user is None:
+            self.user = Auth.get_user_obj_from_header(request.headers)
+            if self.user is None:
+                raise InvalidUsage("Error authenticating user")
+        return self.user
+
+    def get_user_id(self):
+        return self.get_user().id
+
+    def is_admin(self):
+        return self.get_user().admin or self.get_user().super_admin
+
+    def is_super_admin(self):
+        return self.get_user().super_admin
 
     def get_list(self, *args):
         data = getattr(self.model, self.query)(*args)
@@ -37,7 +52,7 @@ class MetaResource(Resource):
 
     def post_list(self, data):
         data = dict(data)
-        data['user_id'] = self.user_id
+        data['user_id'] = self.get_user_id()
         item = self.model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
@@ -52,12 +67,12 @@ class MetaResource(Resource):
 
     def put_detail(self, data, *args):
 
-        data = dict(data)
-        data['user_id'] = self.user_id
-
         item = getattr(self.model, self.query)(*args)
         if item is None:
             raise ObjectDoesNotExist()
+
+        data = dict(data)
+        data['user_id'] = self.get_user_id()
         item.update(data)
 
         return {'message': 'Updated correctly'}, 200
@@ -78,7 +93,7 @@ class MetaResource(Resource):
         return {'message': 'The object has been deleted'}, 200
 
     def check_permissions(self, owner):
-        if self.user_id != owner:
+        if self.get_user().id != owner:
             return False
         else:
             return True
