@@ -136,7 +136,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
 
     def test_get_one_execution_superadmin(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
+        id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         token = self.create_super_admin()
         self.get_one_row(self.url + id + '/', {**self.payload, **dict(id=id)}, token=token)
 
