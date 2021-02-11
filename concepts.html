@@ -185,35 +185,35 @@
 <div><p>In computability theory and computational complexity theory, a decision problem is a problem that can be posed as a yes-no question of the input values. An example of a decision problem is deciding whether a given natural number is prime. Another is the problem “given two numbers x and y, does x evenly divide y?”. The answer is either ‘yes’ or ‘no’ depending upon the values of x and y. A method for solving a decision problem, given in the form of an algorithm, is called a decision procedure for that problem. A decision procedure for the decision problem “given two numbers x and y, does x evenly divide y?” would give the steps for determining whether x evenly divides y. One such algorithm is long division. If the remainder is zero the answer is ‘yes’, otherwise it is ‘no’. A decision problem which can be solved by an algorithm is called decidable.</p>
 </div></blockquote>
 <p>In this guide, we do not make a clear difference between Decision problem and Optimization problem. In both cases we care on finding a solution (or the best solution) given a feasible solution space.</p>
-<p>In Cornflow, we refer to this Decision Problem as an Abstract Problem or just Problem. Some Problems are quite famouse, such as the  (<a class="reference external" href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">Traveling Salesman Problem</a>) and the <a class="reference external" href="https://en.wikipedia.org/wiki/Knapsack_problem">Knapsack Problem</a>. An Abstract Problem is useful because it can be used to design a Solution Method for that particular abstract problem.</p>
-<p>In Cornflow, it is represented by two <cite>schema</cite> json file. The first one describes the input data format each Instance of the problem must follow in order for it to belong to the Abstract Problem. The second one describes the output data format each Solution of the problem must follow in order for it to belong to the Abstract Problem.</p>
+<p>We sometimes refer to this Decision Problem as an Abstract Problem or just Problem. Some Problems are quite famous, such as the  <a class="reference external" href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">Traveling Salesman Problem</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Knapsack_problem">Knapsack Problem</a>. Naming a Problem makes it possible to design Solution Methods that are tailored for that particular Problem.</p>
+<p>In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.</p>
 </div>
 <div class="section" id="instance">
 <h2>Instance<a class="headerlink" href="#instance" title="Permalink to this headline">¶</a></h2>
-<p>An Instance is a particular case of a Problem. It represents all the data needed to completely formulate one case of a decision problem.</p>
-<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “Input Data”.</p>
+<p>An Instance represents all the data needed to completely formulate one case of a decision problem.</p>
+<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “input data”. It needs to follow the input data schema.</p>
 </div>
 <div class="section" id="feasible-solution-space">
 <h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Permalink to this headline">¶</a></h2>
-<p>Is the set of all Solutions that are valid given an Instance of a Problem.</p>
+<p>Is the set of all Solutions that are valid given an Instance of a Problem. In most problems this set is never calculated since it is too big to calculate or store.</p>
 </div>
 <div class="section" id="solution">
 <h2>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h2>
 <p>A Solution represents all data needed to completely represent a feasible solution to an Instance.</p>
-<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”.</p>
+<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”. It needs to follow the output data schema.</p>
 </div>
 <div class="section" id="experiment">
 <h2>Experiment<a class="headerlink" href="#experiment" title="Permalink to this headline">¶</a></h2>
-<p>This is just a convenient way to tie an Instance and a Solution together to be able to validate and compare solutions.</p>
+<p>This is just a convenient way to tie an Instance and a Solution together to be able to validate and compare solutions. It represents a “solved Instance”.</p>
 </div>
 <div class="section" id="solution-method">
 <h2>Solution Method<a class="headerlink" href="#solution-method" title="Permalink to this headline">¶</a></h2>
-<p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (it can prove it can find the best solution) or inexact (there is no proof).</p>
+<p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).</p>
 <p>In Cornflow, A Solution Method is a subclass of Experiment.</p>
 </div>
 <div class="section" id="solve-configuration">
 <h2>Solve Configuration<a class="headerlink" href="#solve-configuration" title="Permalink to this headline">¶</a></h2>
-<p>Each Solution Method has ways to personalize certain characteristics.</p>
+<p>Each Solution Method has ways to personalize certain characteristics. The Solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.</p>
 </div>
 <div class="section" id="execution">
 <h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>

@@ -183,7 +183,7 @@ This are the endpoints used by airflow in its communication with cornflow</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.dag.DAGEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.dag.</code><code class="sig-name descname">DAGEndpoint</code><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used for the DAG endpoint</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.dag.DAGEndpoint.put">
@@ -749,11 +749,11 @@ the data of the instance) and an integer with the HTTP status code.</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.login.LoginEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.login.</code><code class="sig-name descname">LoginEndpoint</code><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to do the login to the cornflow webserver</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.login.LoginEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>API (POST) method to log in in to the web server.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -780,12 +780,12 @@ and an integer with the HTTP status code</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.signup.SignUpEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.signup.</code><code class="sig-name descname">SignUpEndpoint</code><a class="headerlink" href="#cornflow.endpoints.signup.SignUpEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to sign up to the cornflow web server.</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.signup.SignUpEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.signup.SignUpEndpoint.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>API (POST) method tyo sign up to the cornflow webserver</p>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.signup.SignUpEndpoint.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>API (POST) method to sign up to the cornflow webserver</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A dictionary with a message (either an error during signup or the generated token for the user session)
@@ -811,7 +811,7 @@ and an integer with the HTTP status code</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.user.UserEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.user.</code><code class="sig-name descname">UserEndpoint</code><a class="headerlink" href="#cornflow.endpoints.user.UserEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint with a get method which gives back all the info related to the users.
 Including their instances and executions</p>
 <dl class="py method">
@@ -840,7 +840,7 @@ an existing session (login) made by the superuser</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.user.UserDetailsEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.user.</code><code class="sig-name descname">UserDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.user.UserDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint use to get the information of one single user</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.user.UserDetailsEndpoint.get">
@@ -876,7 +876,7 @@ an existing session (login) made by the superuser</p>
 
 <dl class="py method">
 <dt id="cornflow.endpoints.user.UserDetailsEndpoint.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.user.UserDetailsEndpoint.put" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.user.UserDetailsEndpoint.put" title="Permalink to this definition">¶</a></dt>
 <dd><p>API method to edit an existing user.
 It requires authentication to be passed in the form of a token that has to be linked to
 an existing session (login) made by a user. Only admin and superadmin can edit other users.</p>
