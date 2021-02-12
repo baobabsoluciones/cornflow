@@ -32,7 +32,7 @@ class TestSchemaManager(TestCase):
         self.assertTrue(val)
 
     def test_schema_validation_2(self):
-        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/hk_data_schema.json")
         val = sm.validate_file("./cornflow/tests/data/data_input.json")
         
         # Test that it can be transformed into a dict
@@ -55,7 +55,7 @@ class TestSchemaManager(TestCase):
         self.assertEqual(len(val), 3)
 
     def test_validation_errors3(self):
-        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        sm = SchemaManager.from_filepath("./cornflow/tests/data/hk_data_schema.json")
         bool = sm.validate_file("./cornflow/tests/data/data_input_bad.json")
         val = sm.get_file_errors("./cornflow/tests/data/data_input_bad.json")
         self.assertFalse(bool)

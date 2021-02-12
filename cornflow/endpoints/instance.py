@@ -16,11 +16,13 @@ import pulp
 from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas.model_json import DataSchema
+from ..schemas.schema_manager import SchemaManager
 from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage, EndpointNotImplemented
+from ...json_schemas import get_path
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
@@ -76,7 +78,12 @@ class InstanceEndpoint(MetaResource, MethodResource):
             if validate is None:
                 raise InvalidUsage(error='Bad instance data format: {}'.format(err))
         else:
-            pass
+            schema_path = get_path(data_schema)
+            manager = SchemaManager.from_filepath(schema_path)
+            err = manager.get_validation_errors(kwargs['data'])
+            if err:
+                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+            
         return self.post_list(kwargs)
 
 
