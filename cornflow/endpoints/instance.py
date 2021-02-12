@@ -79,6 +79,10 @@ class InstanceEndpoint(MetaResource, MethodResource):
                 raise InvalidUsage(error='Bad instance data format: {}'.format(err))
         else:
             schema_path = get_path(data_schema)
+            
+            if not schema_path:
+                raise InvalidUsage(error='Bad data schema name: this data schema does not exist')
+            
             manager = SchemaManager.from_filepath(schema_path)
             err = manager.get_validation_errors(kwargs['data'])
             if err:

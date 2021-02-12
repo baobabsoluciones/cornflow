@@ -15,6 +15,8 @@ from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
 from ..schemas.execution import ExecutionDagRequest
 from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
 from ..schemas.model_json import DataSchema
+from ..schemas.schema_manager import SchemaManager
+from ...json_schemas import get_path
 
 execution_schema = ExecutionSchema()
 
@@ -38,13 +40,22 @@ class DAGEndpoint(Resource):
         state = req_data.get('state', EXEC_STATE_CORRECT)
         solution_schema = req_data.get('solution_schema', "pulp")
         
+        # Check data fromat
         if solution_schema == 'pulp':
             validate = DataSchema().load(req_data['data'])
             err = ''
             if validate is None:
                 raise InvalidUsage(error='Bad instance data format: {}'.format(err))
         else:
-            pass
+            schema_path = get_path(solution_schema)
+    
+            if not schema_path:
+                raise InvalidUsage(error='Bad data schema name: this data schema does not exist')
+    
+            manager = SchemaManager.from_filepath(schema_path)
+            err = manager.get_validation_errors(req_data['execution_results'])
+            if err:
+                raise InvalidUsage(error='Bad solution data format: {}'.format(err))
         
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:

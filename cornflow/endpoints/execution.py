@@ -20,7 +20,9 @@ from ..shared.airflow_api import Airflow, AirflowApiError
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
-from ..shared.exceptions import AirflowError, EndpointNotImplemented
+from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
+from ...json_schemas import get_dag_schema
+from ..schemas.schema_manager import SchemaManager
 
 import logging as log
 
@@ -83,10 +85,18 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         execution = ExecutionModel.get_one_execution_from_user(self.user_id, data[self.primary_key])
         instance = InstanceModel.get_one_instance_from_user(self.user_id, execution.instance_id)
         dag_name = kwargs.get('dag_name', 'solve_model_dag')
-        # execution.instance_id => objeto instance => instance.data
-        # dag_name => schema
-        # validar(schema, instance.data)
-        # TODO: validate that instance and dag_name are compatible
+        
+        # Validate that instance and dag_name are compatible
+        schema_path = get_dag_schema(dag_name)
+
+        if not schema_path:
+            raise InvalidUsage(error='There is no data schema corresponding to this dag name')
+
+        manager = SchemaManager.from_filepath(schema_path)
+        err = manager.get_validation_errors(instance.data)
+        if err:
+            raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        
         if not_run:
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
@@ -100,7 +110,15 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             raise AirflowError(error=err,
                                payload=dict(message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                                             state=EXEC_STATE_ERROR_START))
-        # TODO: ask airflow if dag_name exists
+        # ask airflow if dag_name exists
+        dag_info = af_client.get_dag_info(dag_name)
+        info = dag_info.json()
+        
+        if info["is_paused"]:
+            #TODO: what state should we return?
+            err = "The dag exist but is paused in airflow"
+            raise AirflowError(error=err, payload = {})
+        
         try:
             response = af_client.run_dag(execution.id, dag_name=dag_name)
         except AirflowApiError as err:
