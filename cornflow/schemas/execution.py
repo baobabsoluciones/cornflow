@@ -85,7 +85,7 @@ class ExecutionStatusEndpointResponse(Schema):
 class ExecutionDataEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
-    data = fields.Nested(DataSchema, attribute='execution_results')
+    data = fields.Raw(attribute='execution_results')
 
 
 class ExecutionLogEndpointResponse(Schema):
