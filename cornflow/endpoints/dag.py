@@ -16,7 +16,7 @@ from ..schemas.execution import ExecutionDagRequest
 from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
 from ..schemas.model_json import DataSchema
 from ..schemas.schema_manager import SchemaManager
-from ...json_schemas import get_path
+from json_schemas import get_path
 
 execution_schema = ExecutionSchema()
 

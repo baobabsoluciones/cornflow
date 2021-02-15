@@ -21,7 +21,7 @@ from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
 from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
-from ...json_schemas import get_dag_schema
+from json_schemas import get_dag_schema
 from ..schemas.schema_manager import SchemaManager
 
 import logging as log

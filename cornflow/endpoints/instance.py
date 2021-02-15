@@ -22,7 +22,7 @@ from ..schemas.instance import InstanceSchema, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage, EndpointNotImplemented
-from ...json_schemas import get_path
+from json_schemas import get_path
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
