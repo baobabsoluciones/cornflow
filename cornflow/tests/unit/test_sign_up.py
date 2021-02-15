@@ -57,4 +57,3 @@ class TestSignUp(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json['error']))
-        # self.assertEqual('Not a valid email address.', response.json['error']['email'][0])

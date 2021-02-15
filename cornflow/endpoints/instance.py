@@ -28,7 +28,6 @@ from ...json_schemas import get_path
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
 
-@doc(description='Get all instances', tags=['Instances'])
 class InstanceEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
@@ -38,9 +37,9 @@ class InstanceEndpoint(MetaResource, MethodResource):
         super().__init__()
         self.model = InstanceModel
         self.query = 'get_all_instances'
-        self.schema = InstanceSchema()
         self.primary_key = 'id'
 
+    @doc(description='Get all instances', tags=['Instances'])
     @Auth.auth_required
     @marshal_with(InstanceEndpointResponse(many=True))
     def get(self):
@@ -53,13 +52,13 @@ class InstanceEndpoint(MetaResource, MethodResource):
           object with the data from the instances otherwise) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        if (self.admin or self.super_admin):
+        if self.is_admin():
             return InstanceModel.get_all_instances_admin()
-        return self.get_list(self.user_id)
+        return self.get_list(self.get_user_id())
 
+    @doc(description='Create a new instance', tags=['Instances'])
     @Auth.auth_required
-    @use_kwargs(InstanceRequest, location=('json'))
+    @use_kwargs(InstanceRequest, location='json')
     def post(self, **kwargs):
         """
         API (POST) method to create a new instance
@@ -70,7 +69,6 @@ class InstanceEndpoint(MetaResource, MethodResource):
           or the reference_id of the instance created if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         data_schema = kwargs.get('data_schema', 'pulp')
         if data_schema == 'pulp':
             validate = DataSchema().load(kwargs['data'])
@@ -91,7 +89,6 @@ class InstanceEndpoint(MetaResource, MethodResource):
         return self.post_list(kwargs)
 
 
-@doc(description='Get details of an instance', tags=['Instances'])
 class InstanceDetailsEndpoint(InstanceEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -102,6 +99,7 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         self.query = 'get_one_instance_from_user'
         self.dependents = 'executions'
 
+    @doc(description='Get one instance', tags=['Instances'])
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     def get(self, idx):
@@ -115,11 +113,13 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.get_detail(self.user_id, idx)
+        if self.is_admin():
+            return InstanceModel.get_one_instance_from_id_admin(idx)
+        return self.get_detail(self.get_user_id(), idx)
 
+    @doc(description='Edit an instance', tags=['Instances'])
     @Auth.auth_required
-    @use_kwargs(InstanceEditRequest, location=('json'))
+    @use_kwargs(InstanceEditRequest, location='json')
     def put(self, idx, **data):
         """
         API method to edit an existing instance.
@@ -131,9 +131,9 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.put_detail(data, self.user_id, idx)
+        return self.put_detail(data, self.get_user_id(), idx)
 
+    @doc(description='Delete an instance', tags=['Instances'])
     @Auth.auth_required
     def delete(self, idx):
         """
@@ -146,14 +146,14 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.delete_detail(self.user_id, idx)
+        return self.delete_detail(self.get_user_id(), idx)
 
     @Auth.auth_required
     def post(self, **kwargs):
         raise EndpointNotImplemented()
 
-@doc(description='Get data of an instance', tags=['Instances'])
+
+@doc(description='Get input data of an instance', tags=['Instances'])
 class InstanceDataEndpoint(InstanceDetailsEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -176,8 +176,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.get_detail(self.user_id, idx)
+        return self.get_detail(self.get_user_id(), idx)
 
 
 @doc(description='Load an instance with an mps file', tags=['Instances'])
@@ -195,7 +194,6 @@ class InstanceFileEndpoint(InstanceEndpoint):
         :return:
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         if 'file' not in request.files:
             raise InvalidUsage(error="No file was provided")
         file = request.files['file']
@@ -218,11 +216,11 @@ class InstanceFileEndpoint(InstanceEndpoint):
             data=problem.toDict()
             ,name=name
             ,description=description
-            ,user_id=self.user_id
+            ,user_id=self.get_user_id()
         )
 
         try:
-            self.data = self.schema.load(pb_data)
+            self.data = InstanceSchema().load(pb_data)
         except ValidationError as val_err:
             raise InvalidUsage(error=val_err.normalized_messages())
 

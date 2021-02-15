@@ -223,7 +223,10 @@ latex_documents = []
 #latex_use_modindex = True
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
+# getting the OPENAPI file instructions:
+# 1. Launch the flask app (assuming defaults(
+# 2. curl http://127.0.0.1:5000/swagger/ > cornflow/static/v1.json
+
 intersphinx_mapping = {'http://docs.python.org/3': None}
 
 OPENAPI_FILE = os.path.join(

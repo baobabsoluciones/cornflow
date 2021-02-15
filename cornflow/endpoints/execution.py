@@ -30,7 +30,6 @@ import logging as log
 execution_schema = ExecutionSchema()
 
 
-@doc(description='Get all executions', tags=['Executions'])
 class ExecutionEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -39,10 +38,10 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         super().__init__()
         self.model = ExecutionModel
         self.query = 'get_all_executions'
-        self.schema = ExecutionSchema()
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
 
+    @doc(description='Get all executions', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse(many=True))
     def get(self):
@@ -55,11 +54,11 @@ class ExecutionEndpoint(MetaResource, MethodResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        if (self.admin or self.super_admin):
+        if self.is_admin():
             return ExecutionModel.get_all_executions_admin()
-        return self.get_list(self.user_id)
+        return self.get_list(self.get_user_id())
 
+    @doc(description='Create a new execution', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location=('json'))
@@ -76,14 +75,13 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
 
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
         data, status_code = self.post_list(kwargs)
 
         not_run = request.args.get('run', '1') == '0'
 
         # if we failed to save the execution, we already raised an error.
-        execution = ExecutionModel.get_one_execution_from_user(self.user_id, data[self.primary_key])
-        instance = InstanceModel.get_one_instance_from_user(self.user_id, execution.instance_id)
+        execution = ExecutionModel.get_one_execution_from_user(self.get_user_id(), data[self.primary_key])
+        instance = InstanceModel.get_one_instance_from_user(self.get_user_id(), execution.instance_id)
         dag_name = kwargs.get('dag_name', 'solve_model_dag')
         
         # Validate that instance and dag_name are compatible
@@ -136,7 +134,6 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         return execution, 201
 
 
-@doc(description='Get details of an executions', tags=['Executions'])
 class ExecutionDetailsEndpoint(ExecutionEndpoint):
     """
     Endpoint used to get the information of a certain execution. But not the data!
@@ -146,6 +143,7 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         super().__init__()
         self.query = 'get_one_execution_from_user'
 
+    @doc(description='Get details of an executions', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     def get(self, idx):
@@ -159,11 +157,11 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        if (self.admin or self.super_admin):
+        if self.is_admin():
             return ExecutionModel.get_one_execution_from_id_admin(idx)
-        return self.get_detail(self.user_id, idx)
+        return self.get_detail(self.get_user_id(), idx)
 
+    @doc(description='Edit an execution', tags=['Executions'])
     @Auth.auth_required
     @use_kwargs(ExecutionEditRequest, location=('json'))
     def put(self, idx, **data):
@@ -175,9 +173,9 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.put_detail(data, self.user_id, idx)
+        return self.put_detail(data, self.get_user_id(), idx)
 
+    @doc(description='Delete an execution', tags=['Executions'])
     @Auth.auth_required
     def delete(self, idx):
         """
@@ -190,18 +188,19 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.delete_detail(self.user_id, idx)
+        return self.delete_detail(self.get_user_id(), idx)
 
     @Auth.auth_required
     def post(self, **kwargs):
         raise EndpointNotImplemented()
 
 
+@doc(description='Get status of an execution', tags=['Executions'])
 class ExecutionStatusEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to get the status of a certain execution that is running in the airflow webserver
     """
+
     @Auth.auth_required
     @marshal_with(ExecutionStatusEndpointResponse)
     def get(self, idx):
@@ -219,8 +218,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
                             user=current_app.config['AIRFLOW_USER'],
                             pwd=current_app.config['AIRFLOW_PWD'])
 
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        execution = ExecutionModel.get_one_execution_from_user(self.user_id, idx)
+        execution = ExecutionModel.get_one_execution_from_user(self.get_user_id(), idx)
         if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_UNKNOWN]:
             # we only care on asking airflow if the status is unknown or is running.
             return execution, 200
@@ -252,6 +250,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
         return execution, 200
 
 
+@doc(description='Get solution data of an execution', tags=['Executions'])
 class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
     """
     Endpoint used to get the solution of a certain execution.
@@ -267,8 +266,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.get_detail(self.user_id, idx)
+        return self.get_detail(self.get_user_id(), idx)
 
     @Auth.auth_required
     def delete(self, idx):
@@ -279,6 +277,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
         raise EndpointNotImplemented
 
 
+@doc(description='Get log of an execution', tags=['Executions'])
 class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
     """
     Endpoint used to get the log of a certain execution.
@@ -294,8 +293,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.user_id, self.admin, self.super_admin = Auth.return_user_info(request)
-        return self.get_detail(self.user_id, idx)
+        return self.get_detail(self.get_user_id(), idx)
 
     @Auth.auth_required
     def delete(self, idx):

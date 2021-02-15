@@ -31,3 +31,13 @@ class UserDetailsEndpointResponse(Schema):
     name = fields.String()
     email = fields.String()
     admin = fields.Boolean(default=False)
+
+
+class LoginEndpointRequest(Schema):
+    email = fields.String(required=True)
+    password = fields.String(required=True)
+
+
+class UserEditRequest(Schema):
+    name = fields.String(required=False)
+    email = fields.String(required=False)

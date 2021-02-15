@@ -23,6 +23,7 @@ class CustomTestCase(TestCase):
         user = UserModel(data=data)
         user.save()
         db.session.commit()
+        data.pop('name')
 
         self.token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
@@ -50,6 +51,7 @@ class CustomTestCase(TestCase):
         user.super_admin = True
         user.save()
         db.session.commit()
+        data.pop('name')
         return self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
 
@@ -91,10 +93,12 @@ class CustomTestCase(TestCase):
             return self.items_to_check
         return payload.keys()
 
-    def get_one_row(self, url, payload, expected_status=200, check_payload=True):
+    def get_one_row(self, url, payload, expected_status=200, check_payload=True, token=None):
+        if token is None:
+            token = self.token
 
         row = self.client.get(url, follow_redirects=True,
-                              headers=self.get_header_with_auth(self.token))
+                              headers=self.get_header_with_auth(token))
 
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
