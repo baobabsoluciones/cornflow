@@ -44,7 +44,7 @@ class DAGEndpoint(Resource, MethodResource):
         
         # Check data fromat
         if solution_schema == 'pulp':
-            validate = DataSchema().load(req_data['data'])
+            validate = DataSchema().load(req_data['execution_results'])
             err = ''
             if validate is None:
                 raise InvalidUsage(error='Bad instance data format: {}'.format(err))
