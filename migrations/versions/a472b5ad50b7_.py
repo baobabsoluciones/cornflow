@@ -25,8 +25,9 @@ def upgrade():
 
     op.add_column('executions', sa.Column('state_message', sa.TEXT(),
                                           nullable=True))
-
-    op.drop_column('executions', 'finished')
+    # workaround to make migration work in sqlite:
+    with op.batch_alter_table('executions') as batch_op:
+        batch_op.drop_column('finished')
     # ### end Alembic commands ###
 
 
