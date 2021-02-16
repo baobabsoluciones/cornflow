@@ -33,16 +33,22 @@ or, in windows::
 
     cfvenv/Scripts/activate
 
-**Possible error with psycopg2:**
-
-The installation of the psycopg2 may generate an error because it does not find the pg_config file.
-
-One way to solve this problem is to previously install libpq-dev which installs pg_config::
-
-    sudo apt install libpq-dev
 
 Setup cornflow database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This local example assumes sqlite as database engine. For an example of postgresql deployment, see the next section.
+
+Initialize the database::
+
+    source cfvenv/bin/activate
+    export FLASK_APP=cornflow.app
+    export DATABASE_URL=sqlite:///cornflow.db
+    python manage.py db upgrade
+    python manage.py create_super_user  --user=airflow_test@admin.com --password=airflow_test_password
+
+Setup cornflow database with PostgreSQL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
 
@@ -61,15 +67,17 @@ Create a new database::
     psql -c "create database cornflow"
     exit
 
-Initialize the database::
+Finally, the environment variable needs to be changed::
 
-    source cfvenv/bin/activate
-    export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-    python manage.py db upgrade
-    python manage.py create_super_user \\
-        --user=airflow_test@admin.com \\
-        --password=airflow_test_password
+
+**Possible error with psycopg2:**
+
+The installation of the psycopg2 may generate an error because it does not find the pg_config file.
+
+One way to solve this problem is to previously install libpq-dev which installs pg_config::
+
+    sudo apt install libpq-dev
 
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,7 +87,7 @@ Each time you run the flask server, execute the following::
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
     export FLASK_ENV=development
-    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    export DATABASE_URL=sqlite:///cornflow.db
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export AIRFLOW_URL=http://localhost:8080
     export AIRFLOW_USER=admin
