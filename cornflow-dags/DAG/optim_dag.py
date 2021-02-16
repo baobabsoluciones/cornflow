@@ -30,9 +30,9 @@ def get_arg(arg, context):
 
 def try_to_save_error(client, exec_id):
     try:
-        client.put_api_for_id('dag/', id=exec_id, payload=dict(state=0))
-    except:
-        pass
+        client.put_api_for_id('dag/', id=exec_id, payload=dict(state=-6))
+    except Exception as e:
+        print("An exception trying to register the failed status: {}".format(e))
 
 
 def run_solve(**kwargs):
