@@ -84,7 +84,8 @@ def sort_dict(dict_params):
             fails += 1
             count += 1
         if fails and fails == len(backup):
-            raise ValueError('Issue with the input dictionary')
+            raise ValueError('sort_dict: Issue with the input dictionary.'
+                             ' There may be schemas types which are not defined')
         # restart
         if count == len(backup):
             count = 0

@@ -67,9 +67,7 @@ Initialize the database::
     export FLASK_APP=cornflow.app
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
     python manage.py db upgrade
-    python manage.py create_super_user \\
-        --user=airflow_test@admin.com \\
-        --password=airflow_test_password
+    python manage.py create_super_user --user=airflow_test@admin.com --password=airflow_test_password
 
 Starting flask server
 ~~~~~~~~~~~~~~~~~~~~~~~

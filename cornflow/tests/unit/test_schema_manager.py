@@ -10,7 +10,7 @@ class TestSchemaManager(TestCase):
         pass
     
     def test_schema_dict(self):
-        sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
         dict_schema = sm.jsonschema_to_dict()
         
         self.assertCountEqual(dict_schema["CoefficientSchema"], dict_example["CoefficientSchema"])
@@ -27,12 +27,12 @@ class TestSchemaManager(TestCase):
         pass
     
     def test_schema_validation(self):
-        sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
         val = sm.validate_file("./cornflow/tests/data/pulp_example_data.json")
         self.assertTrue(val)
 
     def test_schema_validation_2(self):
-        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/hk_data_schema.json")
         val = sm.validate_file("./cornflow/tests/data/data_input.json")
         
         # Test that it can be transformed into a dict
@@ -40,7 +40,7 @@ class TestSchemaManager(TestCase):
         self.assertTrue(val)
     
     def test_validation_errors(self):
-        sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
         data = {"objective": [], "constraints": [], "variables": []}
         bool = sm.validate_data(data)
         val = sm.get_validation_errors(data)
@@ -49,13 +49,13 @@ class TestSchemaManager(TestCase):
         self.assertEqual(val[0].message, "[] is not of type 'object'")
     
     def test_validation_errors2(self):
-        sm = SchemaManager.from_filepath("./cornflow/schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
         data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
         val = sm.get_validation_errors(data)
         self.assertEqual(len(val), 3)
 
     def test_validation_errors3(self):
-        sm = SchemaManager.from_filepath("./cornflow/tests/data/data_schema.json")
+        sm = SchemaManager.from_filepath("./json_schemas/hk_data_schema.json")
         bool = sm.validate_file("./cornflow/tests/data/data_input_bad.json")
         val = sm.get_file_errors("./cornflow/tests/data/data_input_bad.json")
         self.assertFalse(bool)

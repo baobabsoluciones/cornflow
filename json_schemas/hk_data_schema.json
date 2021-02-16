@@ -1,0 +1,79 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"durations": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"duration": {
+						"type": "integer"
+					},
+					"job": {
+						"type": "integer"
+					},
+					"mode": {
+						"type": "integer"
+					}
+				},
+				"required": ["duration", "job", "mode"]
+			}
+		},
+		"jobs": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"successors": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				"required": ["id", "successors"]
+			}
+		},
+		"needs": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"job": {
+						"type": "integer"
+					},
+					"mode": {
+						"type": "integer"
+					},
+					"need": {
+						"type": "integer"
+					},
+					"resource": {
+						"type": "string"
+					}
+				},
+				"required": ["job", "mode", "need", "resource"]
+			}
+		},
+		"resources": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"available": {
+						"type": "integer"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": ["available", "id"]
+			}
+		}
+	},
+	"required": ["durations", "jobs", "needs", "resources"]
+}
