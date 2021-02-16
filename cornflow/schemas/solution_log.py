@@ -4,6 +4,7 @@ options = dict(required=True, allow_none=True)
 pg_options = dict(many=True, required=True)
 list_of_strings = fields.List(fields.Str, required=False, many=True)
 
+
 class MatrixSchema(Schema):
     constraints = fields.Int(required=False)
     variables = fields.Int(required=False)
@@ -25,7 +26,8 @@ class ProgressSchema(Schema):
     CutsBestBound = list_of_strings
     ItpNode = list_of_strings
     Gap = list_of_strings
-    Time = fields.List(fields.Int, required=False, many=True)
+    Time = list_of_strings
+
 
 class Cuts(Schema):
     pass
