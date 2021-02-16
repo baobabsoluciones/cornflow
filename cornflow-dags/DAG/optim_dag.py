@@ -3,6 +3,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 from cornflow_client import CornFlow, CornFlowApiError
 from datetime import datetime, timedelta
+from utils import get_arg
 import model_functions as mf
 from urllib.parse import urlparse
 
@@ -22,11 +23,6 @@ default_args = {
 }
 
 dag = DAG('solve_model_dag', default_args=default_args, schedule_interval=None)
-
-
-def get_arg(arg, context):
-    return context["dag_run"].conf[arg]
-
 
 def try_to_save_error(client, exec_id):
     try:
