@@ -4,8 +4,6 @@ import json
 from cornflow.schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
 from cornflow.schemas.solution_log import LogSchema
 from airflow_config.dags.model_functions import solve_model
-from cornflow.schemas.solution_log import LogSchema
-from airflow_config.dags.model_functions import solve_model
 from marshmallow import ValidationError, Schema, fields
 
 
@@ -150,10 +148,10 @@ class PuLPLogSchema(unittest.TestCase):
             data = json.load(f)
         loaded_data = self.dump_progress(data)
         self.assertEqual(loaded_data['solver'], 'CPLEX')
-        self.assertEqual(len(loaded_data['progress']['Node']), 53)
-        self.assertEqual(len(loaded_data['cut_info']['cuts']), 6)
-        self.assertEqual(loaded_data['nodes'], 3242.0)
-
+        self.assertEqual(type(loaded_data['progress']['Node'][0]), str)
+        self.assertEqual(type(loaded_data['progress']['Time'][0]), str)
+        self.assertEqual(type(loaded_data['cut_info']['cuts']['Clique']), int)
+        self.assertEqual(type(loaded_data['nodes']), int)
 
 if __name__ == '__main__':
     unittest.main()

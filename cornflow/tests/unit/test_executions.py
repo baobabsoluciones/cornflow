@@ -140,6 +140,11 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         token = self.create_super_admin()
         self.get_one_row(self.url + id + '/', {**self.payload, **dict(id=id)}, token=token)
 
+    def test_edit_one_execution(self):
+        id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
+        payload = {**self.payload, **dict(id=id, name='new_name')}
+        self.update_row(self.url + id + '/', dict(name='new_name'), payload)
+
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
 
@@ -171,35 +176,6 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
-
-    # TODO: should these tests be implemented? The functions that these tests should cover are already covered
-    #  by other test cases, mainly the endpoint functions that use this functions
-    def test_save(self):
-        pass
-
-    def test_update(self):
-        pass
-
-    def test_disable(self):
-        pass
-
-    def test_delete(self):
-        pass
-
-    def test_get_all_executions(self):
-        pass
-
-    def test_get_one_execution_from_id(self):
-        pass
-
-    def test_get_one_execution_from_user(self):
-        pass
-
-    def test_get_execution_with_reference(self):
-        pass
-
-    def test_get_execution_data(self):
-        pass
 
     def test_repr_method(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)

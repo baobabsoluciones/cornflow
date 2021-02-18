@@ -4,6 +4,9 @@ Architecture
 Components
 -------------
 
+TODO: add diagrams from ppt.
+TODO: update them to show that the instance post endpoint calls airflow now.
+
 Cornflow
 ***********
 

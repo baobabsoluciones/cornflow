@@ -65,6 +65,10 @@ class ExecutionDagRequest(Schema):
     solution_schema = fields.String(required=False)
 
 
+class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
+    pass
+
+
 class ExecutionDetailsEndpointResponse(Schema):
     id = fields.String()
     config = fields.Nested(ConfigSchema)

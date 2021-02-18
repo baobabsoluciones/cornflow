@@ -3,25 +3,28 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from flask_restful import Resource
-from flask_apispec import use_kwargs, doc
+from flask import current_app
+from flask_apispec import use_kwargs, doc, marshal_with
 from flask_apispec.views import MethodResource
 
 # Import from internal modules
+from .meta_resource import MetaResource
 from ..models import ExecutionModel, InstanceModel
 from ..schemas import ExecutionSchema
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
-from ..schemas.execution import ExecutionDagRequest
+from ..schemas.execution import ExecutionDagRequest, ExecutionDagPostRequest, \
+    ExecutionDetailsEndpointResponse
 from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
+from ..shared.airflow_api import get_schema, validate_and_continue
+from ..shared.const import EXEC_STATE_MANUAL
 from ..schemas.model_json import DataSchema
-from ..schemas.schema_manager import SchemaManager
-from json_schemas import get_path
+
 
 execution_schema = ExecutionSchema()
 
 
-class DAGEndpoint(Resource, MethodResource):
+class DAGEndpoint(MetaResource, MethodResource):
     """
     Endpoint used for the DAG endpoint
     """
@@ -39,29 +42,24 @@ class DAGEndpoint(Resource, MethodResource):
         :return: A dictionary with a message (body) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        state = req_data.get('state', EXEC_STATE_CORRECT)
-        solution_schema = req_data.get('solution_schema', "pulp")
-        
-        # Check data fromat
+        solution_schema = req_data.pop('solution_schema', "pulp")
+
+        # Check data format
+        data = req_data.get('execution_results')
+        if data is None:
+            # only check format if executions_results exist
+            solution_schema = None
         if solution_schema == 'pulp':
-            validate = DataSchema().load(req_data['execution_results'])
-            err = ''
-            if validate is None:
-                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
-        else:
-            schema_path = get_path(solution_schema)
-    
-            if not schema_path:
-                raise InvalidUsage(error='Bad data schema name: this data schema does not exist')
-    
-            manager = SchemaManager.from_filepath(schema_path)
-            err = manager.get_validation_errors(req_data['execution_results'])
-            if err:
-                raise InvalidUsage(error='Bad solution data format: {}'.format(err))
-        
+            validate_and_continue(DataSchema(), data)
+        elif solution_schema is not None:
+            config = current_app.config
+            marshmallow_obj = get_schema(config, solution_schema, 'output')
+            validate_and_continue(marshmallow_obj(), data)
+
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:
             raise ObjectDoesNotExist()
+        state = req_data.get('state', EXEC_STATE_CORRECT)
         new_data = \
             dict(
                 finished=True,
@@ -96,3 +94,33 @@ class DAGEndpoint(Resource, MethodResource):
             raise ObjectDoesNotExist(error='The instance does not exist')
         config = execution.config
         return {"data": instance.data, "config": config}, 200
+
+
+class DAGEndpointManual(MetaResource, MethodResource):
+
+    @doc(description='Create a complete execution manually.', tags=['DAGs'])
+    @Auth.super_admin_required
+    @marshal_with(ExecutionDetailsEndpointResponse)
+    @use_kwargs(ExecutionDagPostRequest, location='json')
+    def post(self, **kwargs):
+        solution_schema = kwargs.pop('dag_name', None)
+
+        # Check data format
+        data = kwargs.get('execution_results')
+        if data is None:
+            # only check format if executions_results exist
+            solution_schema = None
+        if solution_schema == 'pulp':
+            validate_and_continue(DataSchema(), data)
+        elif solution_schema is not None:
+            config = current_app.config
+            marshmallow_obj = get_schema(config, solution_schema, 'output')
+            validate_and_continue(marshmallow_obj(), data)
+
+        kwargs_copy = dict(kwargs)
+        # we force the state to manual
+        kwargs_copy['state'] = EXEC_STATE_MANUAL
+        kwargs_copy['user_id'] = self.get_user_id()
+        item = ExecutionModel(kwargs_copy)
+        item.save()
+        return item, 201

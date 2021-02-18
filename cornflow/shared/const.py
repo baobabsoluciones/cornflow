@@ -1,4 +1,5 @@
 EXEC_STATE_CORRECT = 1
+EXEC_STATE_MANUAL = 2
 EXEC_STATE_RUNNING = 0
 EXEC_STATE_ERROR = -1
 EXEC_STATE_STOPPED = -2
@@ -14,7 +15,9 @@ EXECUTION_STATE_MESSAGE_DICT = {EXEC_STATE_CORRECT: "The execution has been solv
                                 EXEC_STATE_ERROR_START: "The execution couldn't start running.",
                                 EXEC_STATE_NOT_RUN: "The execution wasn't run by user choice.",
                                 EXEC_STATE_UNKNOWN: "The execution has an unknown error.",
-                                EXEC_STATE_SAVING: "The execution executed ok but failed while saving it."}
+                                EXEC_STATE_SAVING: "The execution executed ok but failed while saving it.",
+                                EXEC_STATE_MANUAL: "The execution was loaded manually.",
+                                }
 
 # derived constants
 MIN_EXECUTION_STATUS_CODE = min(EXECUTION_STATE_MESSAGE_DICT.keys())

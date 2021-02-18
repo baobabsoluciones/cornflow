@@ -62,8 +62,7 @@ class MetaResource(Resource):
                 if not self.check_permissions(owner.user_id):
                     raise NoPermission()
         item.save()
-
-        return {self.primary_key: getattr(item, self.primary_key)}, 201
+        return item, 201
 
     def put_detail(self, data, *args):
 

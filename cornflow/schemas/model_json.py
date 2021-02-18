@@ -1,8 +1,8 @@
 from .schema_manager import SchemaManager
 import os
 
-fileDir = os.path.dirname(os.path.realpath(__file__))
-
-manager = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+fileDir = os.path.dirname(__file__)
+filePath = os.path.join(fileDir, '..', 'static', 'pulp_json_schema.json')
+manager = SchemaManager.from_filepath(filePath)
 
 DataSchema = manager.jsonschema_to_flask()

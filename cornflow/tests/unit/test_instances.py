@@ -42,8 +42,6 @@ class TestInstancesListEndpoint(CustomTestCase):
         token = self.create_super_admin()
         rows = self.client.get(self.url, follow_redirects=True,
                                headers=self.get_header_with_auth(token))
-        # TODO: here we get 5 >= 2. But this depends on the order of the tests...
-        #  we should do something to really check the correct number
         self.assertEqual(len(rows.json), len(self.payloads))
 
     def test_get_no_instances(self):
@@ -126,29 +124,6 @@ class TestInstanceModelMethods(CustomTestCase):
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
-
-    # TODO: should these test be implemented? The functions that these test should cover are already covered
-    #  by other test cases, mainly the endpoint functions that use this functions
-    def test_save(self):
-        pass
-
-    def test_update(self):
-        pass
-
-    def test_disable(self):
-        pass
-
-    def test_delete(self):
-        pass
-
-    def test_get_all_instances(self):
-        pass
-
-    def test_get_one_instance_from_id(self):
-        pass
-
-    def test_get_one_instance_from_user(self):
-        pass
 
     def test_repr_method(self):
         id = self.create_new_row(self.url, self.model, self.payload)
