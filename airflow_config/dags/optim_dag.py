@@ -1,14 +1,15 @@
 from airflow import DAG, AirflowException
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
 from cornflow_client import CornFlow, CornFlowApiError
 from datetime import datetime, timedelta
+from utils import get_arg
 import model_functions as mf
 from urllib.parse import urlparse
 
 
 # Following are defaults which can be overridden later on
-# TODO: clean this
 default_args = {
     'owner': 'baobab',
     'depends_on_past': False,
@@ -16,17 +17,12 @@ default_args = {
     'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,
     'retry_delay': timedelta(minutes=1),
     'schedule_interval': None
 }
-
-dag = DAG('solve_model_dag', default_args=default_args, schedule_interval=None)
-
-
-def get_arg(arg, context):
-    return context["dag_run"].conf[arg]
-
+dagname = 'solve_model_dag'
+dag = DAG(dagname, default_args=default_args, schedule_interval=None)
 
 def try_to_save_error(client, exec_id):
     try:
@@ -60,9 +56,6 @@ def run_solve(**kwargs):
     except:
         try_to_save_error(airflow_user, exec_id)
         raise AirflowException('Unknown error')
-    # import json
-    # with open('example.json', 'w') as f:
-    #     json.dump(log_dict, f)
     # write solution
     try:
         airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
@@ -81,3 +74,4 @@ solve_task = PythonOperator(
     python_callable=run_solve,
     dag=dag,
 )
+
