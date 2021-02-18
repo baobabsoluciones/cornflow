@@ -26,30 +26,33 @@ class CornFlow(object):
 
         return wrapper
 
+    @ask_token
     def get_api_for_id(self, api, id, post_url=''):
         return requests.get(
             urljoin(urljoin(self.url, api) + '/', str(id) + '/' + post_url),
             headers={'Authorization': 'access_token ' + self.token},
             json={})
 
+    @ask_token
     def delete_api_for_id(self, api, id):
         return requests.delete(
             urljoin(urljoin(self.url, api) + '/', str(id) + '/'),
             headers={'Authorization': 'access_token ' + self.token},
             json={})
 
+    @ask_token
     def put_api_for_id(self, api, id, payload):
         return requests.put(
             urljoin(urljoin(self.url, api) + '/', str(id) + '/'),
             headers={'Authorization': 'access_token ' + self.token},
             json=payload)
 
+    @ask_token
     def create_api(self, api, **kwargs):
         return requests.post(
             urljoin(self.url, api),
             headers={'Authorization': 'access_token ' + self.token},
             **kwargs)
-
 
     @log_call
     def sign_up(self, email, pwd, name):
@@ -119,7 +122,16 @@ class CornFlow(object):
         if response.status_code != 201:
             raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
                                    format(response.status_code, response.text))
-        return response
+        return response.json()
+
+    @ask_token
+    def manual_execution(self, instance_id, config, name, **kwargs):
+        payload = dict(config=config, instance_id=instance_id, name=name, **kwargs)
+        response = self.create_api('dag/', json=payload)
+        if response.status_code != 201:
+            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
+                                   format(response.status_code, response.text))
+        return response.json()
 
     @log_call
     @ask_token
@@ -177,7 +189,13 @@ class CornFlow(object):
         response = self.delete_api_for_id('instance', reference_id)
         return response
 
+    @ask_token
+    def get_schema(self, dag_name):
+        response = self.get_api_for_id('schema', dag_name)
+        return response.json()
 
+
+    
 class CornFlowApiError(Exception):
     """
     CornFlow returns an error
