@@ -16,15 +16,15 @@ from ..schemas.execution import \
     ExecutionSchema, \
     ExecutionDetailsEndpointResponse, ExecutionDataEndpointResponse, ExecutionLogEndpointResponse, \
     ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest
-from ..shared.airflow_api import Airflow, AirflowApiError
+from ..shared.airflow_api import Airflow
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
 from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
-from json_schemas import get_dag_schema
 from ..schemas.schema_manager import SchemaManager
 
 import logging as log
+import json
 
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
@@ -61,7 +61,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     @doc(description='Create a new execution', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
-    @use_kwargs(ExecutionRequest, location=('json'))
+    @use_kwargs(ExecutionRequest, location='json')
     def post(self, **kwargs):
         """
         API method to create a new execution linked to an already existing instance
@@ -74,27 +74,16 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         """
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
-
-        data, status_code = self.post_list(kwargs)
+        # TODO: maybe we need to filter the kwargs to avoid any user from
+        #  filling the state, execution_results, logs, etc.
+        execution, status_code = self.post_list(kwargs)
 
         not_run = request.args.get('run', '1') == '0'
 
         # if we failed to save the execution, we already raised an error.
-        execution = ExecutionModel.get_one_execution_from_user(self.get_user_id(), data[self.primary_key])
         instance = InstanceModel.get_one_instance_from_user(self.get_user_id(), execution.instance_id)
         dag_name = kwargs.get('dag_name', 'solve_model_dag')
-        
-        # Validate that instance and dag_name are compatible
-        schema_path = get_dag_schema(dag_name)
 
-        if not schema_path:
-            raise InvalidUsage(error='There is no data schema corresponding to this dag name')
-
-        manager = SchemaManager.from_filepath(schema_path)
-        err = manager.get_validation_errors(instance.data)
-        if err:
-            raise InvalidUsage(error='Bad instance data format: {}'.format(err))
-        
         if not_run:
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
@@ -110,16 +99,27 @@ class ExecutionEndpoint(MetaResource, MethodResource):
                                             state=EXEC_STATE_ERROR_START))
         # ask airflow if dag_name exists
         dag_info = af_client.get_dag_info(dag_name)
+
+        # Validate that instance and dag_name are compatible
+        schema = af_client.get_one_schema(dag_name, 'input')
+        input_schema = json.loads(schema)
+        manager = SchemaManager(input_schema)
+        err = manager.get_validation_errors(instance.data)
+        if err:
+            raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+
         info = dag_info.json()
-        
         if info["is_paused"]:
-            #TODO: what state should we return?
-            err = "The dag exist but is paused in airflow"
-            raise AirflowError(error=err, payload = {})
+            err = "The dag exists but it is paused in airflow"
+            log.error(err)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise AirflowError(error=err,
+                               payload=dict(message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                                            state=EXEC_STATE_ERROR_START))
         
         try:
             response = af_client.run_dag(execution.id, dag_name=dag_name)
-        except AirflowApiError as err:
+        except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)
             execution.update_state(EXEC_STATE_ERROR)
@@ -143,7 +143,7 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         super().__init__()
         self.query = 'get_one_execution_from_user'
 
-    @doc(description='Get details of an executions', tags=['Executions'])
+    @doc(description='Get details of an executions', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     def get(self, idx):
@@ -161,7 +161,7 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
             return ExecutionModel.get_one_execution_from_id_admin(idx)
         return self.get_detail(self.get_user_id(), idx)
 
-    @doc(description='Edit an execution', tags=['Executions'])
+    @doc(description='Edit an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @use_kwargs(ExecutionEditRequest, location=('json'))
     def put(self, idx, **data):
@@ -175,7 +175,7 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         """
         return self.put_detail(data, self.get_user_id(), idx)
 
-    @doc(description='Delete an execution', tags=['Executions'])
+    @doc(description='Delete an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     def delete(self, idx):
         """
@@ -241,7 +241,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
 
         try:
             response = af_client.get_dag_run_status(dag_name='solve_model_dag', dag_run_id=dag_run_id)
-        except AirflowApiError as err:
+        except AirflowError as err:
             _raise_af_error(execution, "Airflow responded with an error: {}".format(err))
 
         data = response.json()
@@ -250,7 +250,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
         return execution, 200
 
 
-@doc(description='Get solution data of an execution', tags=['Executions'])
+@doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
 class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
     """
     Endpoint used to get the solution of a certain execution.
@@ -274,10 +274,14 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
 
     @Auth.auth_required
     def put(self, **kwargs):
-        raise EndpointNotImplemented
+        raise EndpointNotImplemented()
+
+    @Auth.auth_required
+    def post(self, **kwargs):
+        raise EndpointNotImplemented()
 
 
-@doc(description='Get log of an execution', tags=['Executions'])
+@doc(description='Get log of an execution', tags=['Executions'], inherit=False)
 class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
     """
     Endpoint used to get the log of a certain execution.
@@ -301,4 +305,8 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
 
     @Auth.auth_required
     def put(self, **kwargs):
+        raise EndpointNotImplemented()
+
+    @Auth.auth_required
+    def post(self, **kwargs):
         raise EndpointNotImplemented()

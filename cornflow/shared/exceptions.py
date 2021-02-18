@@ -38,7 +38,7 @@ class InvalidCredentials(InvalidUsage):
 class AirflowError(InvalidUsage):
     status_code = 400
 
-    def __init__(self, payload, error, status_code=None):
+    def __init__(self, error, status_code=None, payload=None):
         self.error = error
         self.payload = payload
         if status_code is not None:

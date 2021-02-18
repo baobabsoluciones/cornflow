@@ -4,7 +4,7 @@ or get only one.
 These endpoints have different access url, but manage the same data entities
 """
 # Import from libraries
-from flask import request
+from flask import request, current_app
 from werkzeug.utils import secure_filename
 from marshmallow.exceptions import ValidationError
 from flask_apispec.views import MethodResource
@@ -16,13 +16,12 @@ import pulp
 from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas.model_json import DataSchema
-from ..schemas.schema_manager import SchemaManager
 from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage, EndpointNotImplemented
-from json_schemas import get_path
+from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
+from ..shared.airflow_api import get_schema, validate_and_continue
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
@@ -58,6 +57,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     @doc(description='Create a new instance', tags=['Instances'])
     @Auth.auth_required
+    @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location='json')
     def post(self, **kwargs):
         """
@@ -70,22 +70,22 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         data_schema = kwargs.get('data_schema', 'pulp')
+
+        if data_schema is None:
+            # no schema provided, no validation to do
+            return self.post_list(kwargs)
+
         if data_schema == 'pulp':
-            validate = DataSchema().load(kwargs['data'])
-            err = ''
-            if validate is None:
-                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
-        else:
-            schema_path = get_path(data_schema)
-            
-            if not schema_path:
-                raise InvalidUsage(error='Bad data schema name: this data schema does not exist')
-            
-            manager = SchemaManager.from_filepath(schema_path)
-            err = manager.get_validation_errors(kwargs['data'])
-            if err:
-                raise InvalidUsage(error='Bad instance data format: {}'.format(err))
-            
+            # this one we have the schema stored inside cornflow
+            validate_and_continue(DataSchema(), kwargs['data'])
+            return self.post_list(kwargs)
+
+        # for the rest of the schemas: we need to ask airflow for the schema
+        config = current_app.config
+        marshmallow_obj = get_schema(config, data_schema)
+        validate_and_continue(marshmallow_obj(), kwargs['data'])
+
+        # if we're here, we validated and the data seems to fit the schema
         return self.post_list(kwargs)
 
 
@@ -99,7 +99,7 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         self.query = 'get_one_instance_from_user'
         self.dependents = 'executions'
 
-    @doc(description='Get one instance', tags=['Instances'])
+    @doc(description='Get one instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     def get(self, idx):
@@ -153,7 +153,7 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         raise EndpointNotImplemented()
 
 
-@doc(description='Get input data of an instance', tags=['Instances'])
+@doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
 class InstanceDataEndpoint(InstanceDetailsEndpoint):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -179,7 +179,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
         return self.get_detail(self.get_user_id(), idx)
 
 
-@doc(description='Load an instance with an mps file', tags=['Instances'])
+@doc(description='Load an instance with an mps file', tags=['Instances'], inherit=False)
 class InstanceFileEndpoint(InstanceEndpoint):
     """
     Endpoint to accept mps files to upload

@@ -49,7 +49,11 @@ def gen_schema(cls_name, params, possible_dict=None):
         # p is a dictionary
         # we copy since we do not want to modify the original
         p = dict(p)
-        field_type = get_type(p.pop('type'), possible_dict=possible_dict)
+        p_type = p.pop('type')
+        field_type = get_type(p_type, possible_dict=possible_dict)
+        if p.get('many') and p_type in BASIC_TYPES:
+             # if this is a list: we need to make an explicit list
+             field_type = partial(fields.List, field_type)
         valid_values = p.pop("valid_values", None)
         name = p.pop('name')
         if valid_values is not None:

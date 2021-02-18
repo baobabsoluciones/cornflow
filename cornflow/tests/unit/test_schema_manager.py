@@ -3,14 +3,20 @@ from unittest import TestCase
 from cornflow.tests.data.dict_schema_example import dict_example
 from cornflow.schemas.constants import DATASCHEMA
 
+import json
+import os
 
 class TestSchemaManager(TestCase):
     
     def setUp(self):
+        self.root_data = os.path.join(os.path.dirname(__file__), '..', 'data')
         pass
-    
+
+    def get_data_file(self, filename):
+        return os.path.join(self.root_data, filename)
+
     def test_schema_dict(self):
-        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath(self.get_data_file('pulp_json_schema.json'))
         dict_schema = sm.jsonschema_to_dict()
         
         self.assertCountEqual(dict_schema["CoefficientSchema"], dict_example["CoefficientSchema"])
@@ -27,20 +33,30 @@ class TestSchemaManager(TestCase):
         pass
     
     def test_schema_validation(self):
-        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
         val = sm.validate_file("./cornflow/tests/data/pulp_example_data.json")
         self.assertTrue(val)
 
     def test_schema_validation_2(self):
-        sm = SchemaManager.from_filepath("./json_schemas/hk_data_schema.json")
-        val = sm.validate_file("./cornflow/tests/data/data_input.json")
-        
+        sm = SchemaManager.from_filepath(self.get_data_file("hk_data_schema.json"))
+        val = sm.validate_file(self.get_data_file("data_input.json"))
+        self.assertTrue(val)
         # Test that it can be transformed into a dict
         dict_schema = sm.jsonschema_to_dict()
-        self.assertTrue(val)
+        self.assertEqual(dict_schema['JobsSchema'][0],
+                         {'name': 'id', 'type': 'Integer', 'required': True, 'allow_none': False, 'many': False})
+        self.assertEqual(dict_schema['JobsSchema'][1],
+                         {'name': 'successors', 'type': 'Integer', 'many': True, 'required': True})
+        flask_schema = sm.dict_to_flask()
+        marshmallow_object = flask_schema()
+        self.assertEqual(marshmallow_object.fields.keys(), {'resources', 'needs', 'jobs', 'durations'})
+        with open(self.get_data_file("data_input.json"), 'r') as f:
+            content = json.load(f)
+        marshmallow_object.load(content)
+        # marshmallow_object.fields['jobs'].nested().fields['successors']
     
     def test_validation_errors(self):
-        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": [], "variables": []}
         bool = sm.validate_data(data)
         val = sm.get_validation_errors(data)
@@ -49,21 +65,20 @@ class TestSchemaManager(TestCase):
         self.assertEqual(val[0].message, "[] is not of type 'object'")
     
     def test_validation_errors2(self):
-        sm = SchemaManager.from_filepath("./json_schemas/pulp_json_schema.json")
+        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
         val = sm.get_validation_errors(data)
         self.assertEqual(len(val), 3)
 
     def test_validation_errors3(self):
-        sm = SchemaManager.from_filepath("./json_schemas/hk_data_schema.json")
-        bool = sm.validate_file("./cornflow/tests/data/data_input_bad.json")
-        val = sm.get_file_errors("./cornflow/tests/data/data_input_bad.json")
+        sm = SchemaManager.from_filepath(self.get_data_file("hk_data_schema.json"))
+        bool = sm.validate_file(self.get_data_file("data_input_bad.json"))
+        val = sm.get_file_errors(self.get_data_file("data_input_bad.json"))
         self.assertFalse(bool)
         self.assertEqual(len(val), 2)
      
     def test_schema_names(self):
-        sm = SchemaManager.from_filepath("./cornflow/tests/data/name_problem_schema.json")
+        sm = SchemaManager.from_filepath(self.get_data_file("name_problem_schema.json"))
         dict_schema = sm.jsonschema_to_dict()
         self.assertEqual(len(dict_schema["CoefficientsSchema"]), 2)
         self.assertEqual(len(dict_schema["Coefficients1Schema"]), 1)
-      

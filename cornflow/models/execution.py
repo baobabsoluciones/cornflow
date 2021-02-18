@@ -76,11 +76,15 @@ class ExecutionModel(BaseAttributes):
         self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
         self.name = data.get('name')
-        self.description = data.get('description', None)
-        self.dag_run_id = data.get('dag_run_id', None)
-        self.state = DEFAULT_EXECUTION_CODE
-        self.state_message = EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE]
+        self.description = data.get('description')
+        self.dag_run_id = data.get('dag_run_id')
+        self.state = data.get('state', DEFAULT_EXECUTION_CODE)
+        self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
         self.config = data.get('config')
+        self.execution_results = data.get('execution_results')
+        self.log_text = data.get('log_text')
+        self.log_json = data.get('log_json')
+
 
     def save(self):
         """

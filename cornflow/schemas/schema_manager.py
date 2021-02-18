@@ -5,10 +5,10 @@ Class to help create and manage data schema and to validate json files.
 
 import json
 import re
-from jsonschema import validate, Draft7Validator
+from jsonschema import Draft7Validator
 from copy import deepcopy
 from genson import SchemaBuilder
-from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict
+from ..schemas.schema_dict_functions import gen_schema, ParameterSchema, sort_dict, Schema
 from .constants import JSON_TYPES, DATASCHEMA
 
 
@@ -65,10 +65,11 @@ class SchemaManager:
         Validate json data according to the loaded jsonschema and return a list of errors.
         Return an empty list if data is valid.
 
-        :param data The path to the json file containing the data.
-        :param validator A jsonschema IValidator class. If None, will use self.default_validator.
+        :param dict data: data to validate.
+        :param validator: A jsonschema IValidator class. If None, will use self.default_validator.
 
         :return: A list of validation errors.
+
         For more details about the error format, see:
         https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError
         """
@@ -77,20 +78,19 @@ class SchemaManager:
         if validator is None:
             validator = self.default_validator
         v = validator(self.get_jsonschema())
-    
+
         if not v.is_valid(data):
             error_list = [e for e in v.iter_errors(data)]
             return error_list
-        else:
-            return []
+        return []
     
     def validate_data(self, data, validator=None, print_errors=False):
         """
         Validate json data according to the loaded jsonschema.
 
-        :param data The path to the json file containing the data.
-        :param validator A jsonschema IValidator class. If None, will use self.default_validator.
-        :param print_errors: If true, will print the errors.
+        :param dict data: the data to validate.
+        :param validator: A jsonschema IValidator class. If None, will use self.default_validator.
+        :param bool print_errors: If true, will print the errors.
 
         :return: True if data format is valid, else False.
         """
@@ -158,6 +158,7 @@ class SchemaManager:
         Create flask marshmallow schemas from self.dict_schema
         
         :return: a dict containing the flask marshmallow schemas
+        :rtype: Schema()
         """
         dict_params = self.schema_dict
         result_dict = {}
@@ -173,9 +174,9 @@ class SchemaManager:
     
     def jsonschema_to_flask(self):
         """
-        Create flask marshmallow schemas from the jsonschema
+        Create marshmallow schemas from the jsonschema
 
-        :return: a dict containing the flask marshmallow schemas
+        :return: a dict containing the marshmallow schema
         """
         self.jsonschema_to_dict()
         return self.dict_to_flask()
