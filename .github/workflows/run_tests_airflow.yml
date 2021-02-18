@@ -24,7 +24,6 @@ jobs:
         python -m pip install -r requirements-dev.txt
     - name: Install airflow
       run: |
-        echo "$AIRFLOW_HOME"
         python -m venv afvenv
         source afvenv/bin/activate
         AIRFLOW_VERSION=2.0.0
@@ -45,6 +44,7 @@ jobs:
         deactivate
         sleep 5s
       env:
+        AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
         AIRFLOW_HOME: "${GITHUB_WORKSPACE}/airflow_config"
         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
         AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
