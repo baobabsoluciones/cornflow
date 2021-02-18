@@ -94,15 +94,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#install-cornflow">Install cornflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setup-cornflow-database">Setup cornflow database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-cornflow-database-with-postgresql">Setup cornflow database with PostgreSQL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#starting-flask-server">Starting flask server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#install-and-configure-airflow">Install and configure airflow</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#in-ubuntu">In Ubuntu</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#on-windows">On Windows</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#launch-airflow">Launch airflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#deployment-of-airflow-with-postgresql">Deployment of airflow with PostgreSQL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#killing-airflow">Killing airflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-and-configure-airflow">Install and configure airflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-cornflow">Using cornflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#deploying-with-docker-compose">Deploying with docker-compose</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-airflow-with-reverse-proxy">Running airflow with reverse proxy</a></li>
@@ -213,15 +207,21 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfvenv</span><span class="o">/</span><span class="n">Scripts</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
-<p><strong>Possible error with psycopg2:</strong></p>
-<p>The installation of the psycopg2 may generate an error because it does not find the pg_config file.</p>
-<p>One way to solve this problem is to previously install libpq-dev which installs pg_config:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
 </div>
 <div class="section" id="setup-cornflow-database">
 <h2>Setup cornflow database<a class="headerlink" href="#setup-cornflow-database" title="Permalink to this headline">¶</a></h2>
+<p>This local example assumes sqlite as database engine. For an example of postgresql deployment, see the next section.</p>
+<p>Initialize the database:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
+<span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">sqlite</span><span class="p">:</span><span class="o">///</span><span class="n">cornflow</span><span class="o">.</span><span class="n">db</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">db</span> <span class="n">upgrade</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_super_user</span>  <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">airflow_test_password</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-cornflow-database-with-postgresql">
+<h2>Setup cornflow database with PostgreSQL<a class="headerlink" href="#setup-cornflow-database-with-postgresql" title="Permalink to this headline">¶</a></h2>
 <p>You now need to create a user and password in postgresql (we will be using <cite>postgres</cite> and <cite>postgresadmin</cite>). And also you need to create a database (we will be using one with the name <cite>cornflow</cite>).</p>
 <p>Create a new user:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">postgres</span> <span class="n">psql</span>
@@ -238,14 +238,14 @@
 <span class="n">exit</span>
 </pre></div>
 </div>
-<p>Initialize the database:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
-<span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
-<span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">postgres</span><span class="p">:</span><span class="n">postgresadmin</span><span class="o">@</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">db</span> <span class="n">upgrade</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_super_user</span> \\
-    <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> \\
-    <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">airflow_test_password</span>
+<p>Finally, the environment variable needs to be changed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">postgres</span><span class="p">:</span><span class="n">postgresadmin</span><span class="o">@</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
+</pre></div>
+</div>
+<p><strong>Possible error with psycopg2:</strong></p>
+<p>The installation of the psycopg2 may generate an error because it does not find the pg_config file.</p>
+<p>One way to solve this problem is to previously install libpq-dev which installs pg_config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
 </pre></div>
 </div>
 </div>
@@ -255,7 +255,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 <span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
 <span class="n">export</span> <span class="n">FLASK_ENV</span><span class="o">=</span><span class="n">development</span>
-<span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">postgres</span><span class="p">:</span><span class="n">postgresadmin</span><span class="o">@</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
+<span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">sqlite</span><span class="p">:</span><span class="o">///</span><span class="n">cornflow</span><span class="o">.</span><span class="n">db</span>
 <span class="n">export</span> <span class="n">SECRET_KEY</span><span class="o">=</span><span class="n">THISNEEDSTOBECHANGED</span>
 <span class="n">export</span> <span class="n">AIRFLOW_URL</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8080</span>
 <span class="n">export</span> <span class="n">AIRFLOW_USER</span><span class="o">=</span><span class="n">admin</span>
@@ -267,141 +267,7 @@
 </div>
 <div class="section" id="install-and-configure-airflow">
 <h2>Install and configure airflow<a class="headerlink" href="#install-and-configure-airflow" title="Permalink to this headline">¶</a></h2>
-<p>The instructions assume Ubuntu. For windows see below.</p>
-<div class="section" id="in-ubuntu">
-<h3>In Ubuntu<a class="headerlink" href="#in-ubuntu" title="Permalink to this headline">¶</a></h3>
-<p>Create a virtual environment for airflow:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">corn</span>
-<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">afvenv</span>
-<span class="n">source</span> <span class="n">afvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
-</pre></div>
-</div>
-<p>Then we install it with pip:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_VERSION</span><span class="o">=</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;$(python3 --version | cut -d &quot;</span> <span class="s2">&quot; -f 2 | cut -d &quot;</span><span class="o">.</span><span class="s2">&quot; -f 1-2)&quot;</span>
-<span class="n">CONSTRAINT_URL</span><span class="o">=</span><span class="s2">&quot;https://raw.githubusercontent.com/apache/airflow/constraints-$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">/constraints-$</span><span class="si">{PYTHON_VERSION}</span><span class="s2">.txt&quot;</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;apache-airflow==$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">&quot;</span> <span class="o">--</span><span class="n">constraint</span> <span class="s2">&quot;$</span><span class="si">{CONSTRAINT_URL}</span><span class="s2">&quot;</span>
-</pre></div>
-</div>
-<p>If in development, some additional packages are needed for the workers:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">orloge</span> <span class="n">cornflow_client</span> <span class="n">pulp</span>
-</pre></div>
-</div>
-<p>We now initialize the database and create an admin user:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">AIRFLOW_HOME</span><span class="o">=</span><span class="s2">&quot;$PWD/airflow_config&quot;</span>
-<span class="n">airflow</span> <span class="n">db</span> <span class="n">init</span>
-<span class="n">airflow</span> <span class="n">users</span> <span class="n">create</span> \
-      <span class="o">--</span><span class="n">username</span> <span class="n">admin</span> \
-      <span class="o">--</span><span class="n">firstname</span> <span class="n">admin</span> \
-      <span class="o">--</span><span class="n">lastname</span> <span class="n">admin</span> \
-      <span class="o">--</span><span class="n">role</span> <span class="n">Admin</span> \
-      <span class="o">--</span><span class="n">password</span> <span class="n">admin</span> \
-      <span class="o">--</span><span class="n">email</span> <span class="n">admin</span><span class="nd">@example</span><span class="o">.</span><span class="n">org</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="on-windows">
-<h3>On Windows<a class="headerlink" href="#on-windows" title="Permalink to this headline">¶</a></h3>
-<p>For windows, Windows subsystem for Linux (WSL) is used.</p>
-<p>Download and install WSL:</p>
-<ul class="simple">
-<li><p>Install Linux subsystems for linux (<a class="reference external" href="https://docs.microsoft.com/es-es/windows/wsl/install-win10">https://docs.microsoft.com/es-es/windows/wsl/install-win10</a>).</p></li>
-<li><p>Install Ubuntu 20.04 from windows store.</p></li>
-<li><p>Open the Ubuntu 20.04 terminal.</p></li>
-</ul>
-<p>Then, we will list the changes to the Ubuntu installing sequence.</p>
-<p>Update and install some basic tools that help building python packages:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
-<p>Creation of airflow directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span>
-<span class="n">mkdir</span> <span class="n">airflow</span>
-<span class="n">cd</span> <span class="n">airflow</span>
-<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">afvenv</span>
-<span class="n">source</span> <span class="n">afvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
-</pre></div>
-</div>
-<p>Then, install airflow and the development dependencies just as in Ubuntu:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>see above!
-</pre></div>
-</div>
-<p>Copy the dags from the original repository:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">airflow_config</span>
-<span class="n">cp</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">c</span><span class="o">/</span><span class="n">PATH_TO_CORNFLOW_PROJECT</span><span class="o">/</span><span class="n">airflow_config</span><span class="o">/</span><span class="n">dags</span> <span class="n">airflow_config</span><span class="o">/</span><span class="n">dags</span>
-<span class="n">chmod</span> <span class="o">-</span><span class="n">R</span> <span class="mi">775</span> <span class="n">airflow_config</span>
-</pre></div>
-</div>
-<p>Finally, initialize the database in the same way:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>see above!
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="launch-airflow">
-<h2>Launch airflow<a class="headerlink" href="#launch-airflow" title="Permalink to this headline">¶</a></h2>
-<p>We start the web server, default port is 8080.</p>
-<p>To set the base config and start the web server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">afvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
-<span class="n">export</span> <span class="n">AIRFLOW_HOME</span><span class="o">=</span><span class="s2">&quot;$PWD/airflow_config&quot;</span>
-<span class="n">export</span> <span class="n">AIRFLOW__CORE__LOAD_EXAMPLES</span><span class="o">=</span><span class="mi">0</span>
-<span class="n">export</span> <span class="n">AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION</span><span class="o">=</span><span class="mi">0</span>
-<span class="n">export</span> <span class="n">AIRFLOW__API__AUTH_BACKEND</span><span class="o">=</span><span class="n">airflow</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">basic_auth</span>
-<span class="n">export</span> <span class="n">AIRFLOW__WEBSERVER__SECRET_KEY</span><span class="o">=</span><span class="n">e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36</span>
-<span class="n">export</span> <span class="n">AIRFLOW_CONN_CF_URI</span><span class="o">=</span><span class="n">cornflow</span><span class="p">:</span><span class="o">//</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">airflow_test_password</span><span class="nd">@localhost</span><span class="p">:</span><span class="mi">5000</span>
-
-<span class="n">airflow</span> <span class="n">webserver</span> <span class="o">-</span><span class="n">p</span> <span class="mi">8080</span> <span class="o">&amp;</span>
-</pre></div>
-</div>
-<p>Also, start the scheduler:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">airflow</span> <span class="n">scheduler</span> <span class="o">&amp;</span>
-</pre></div>
-</div>
-<p>airflow gui will be at:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8080</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="deployment-of-airflow-with-postgresql">
-<h2>Deployment of airflow with PostgreSQL<a class="headerlink" href="#deployment-of-airflow-with-postgresql" title="Permalink to this headline">¶</a></h2>
-<p>For deployment with postgresql, some extra steps need to be done.</p>
-<p>Install the postgres plugin for airflow, as well as the postgres python package:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_VERSION</span><span class="o">=</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;$(python3 --version | cut -d &quot;</span> <span class="s2">&quot; -f 2 | cut -d &quot;</span><span class="o">.</span><span class="s2">&quot; -f 1-2)&quot;</span>
-<span class="n">CONSTRAINT_URL</span><span class="o">=</span><span class="s2">&quot;https://raw.githubusercontent.com/apache/airflow/constraints-$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">/constraints-$</span><span class="si">{PYTHON_VERSION}</span><span class="s2">.txt&quot;</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;apache-airflow-postgres==$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">&quot;</span> <span class="o">--</span><span class="n">constraint</span> <span class="s2">&quot;$</span><span class="si">{CONSTRAINT_URL}</span><span class="s2">&quot;</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="n">psycopg2</span>
-</pre></div>
-</div>
-<p>In the case of windows WSL, the python package in the last line is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">psycopg2</span><span class="o">-</span><span class="n">binary</span>
-</pre></div>
-</div>
-<p>Create the <cite>airflow</cite> database in postgresql:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">su</span> <span class="o">-</span> <span class="n">postgres</span>
-<span class="n">psql</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;create database airflow&quot;</span>
-<span class="n">exit</span>
-</pre></div>
-</div>
-<p>Tell airflow where the database is, <strong>before initializing it, and before launching it</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">AIRFLOW__CORE__SQL_ALCHEMY_CONN</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">postgres</span><span class="p">:</span><span class="n">postgresadmin</span><span class="o">@</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">airflow</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="killing-airflow">
-<h2>Killing airflow<a class="headerlink" href="#killing-airflow" title="Permalink to this headline">¶</a></h2>
-<p>Search for the code of the process in Linux:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">airflow</span>
-</pre></div>
-</div>
-<p>Kill it:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kill</span> <span class="o">-</span><span class="mi">9</span> <span class="n">CODE</span>
-</pre></div>
-</div>
-<p>If you’re feeling lucky:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kill -9 $(ps aux | grep &#39;airflow&#39; | awk &#39;{print $2}&#39;)
-</pre></div>
-</div>
+<p>(These instructions have been moved to the cornflow-dags private project).</p>
 </div>
 <div class="section" id="using-cornflow">
 <h2>Using cornflow<a class="headerlink" href="#using-cornflow" title="Permalink to this headline">¶</a></h2>
