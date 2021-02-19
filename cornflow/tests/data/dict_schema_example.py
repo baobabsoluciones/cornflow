@@ -1,4 +1,5 @@
-from cornflow.schemas.constants import DATASCHEMA
+from cornflow_client.constants import DATASCHEMA
+
 
 dict_example = \
     dict(

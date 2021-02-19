@@ -16,12 +16,12 @@ from ..schemas.execution import \
     ExecutionSchema, \
     ExecutionDetailsEndpointResponse, ExecutionDataEndpointResponse, ExecutionLogEndpointResponse, \
     ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest
-from ..shared.airflow_api import Airflow
+from ..shared.airflow_api import Airflow, validate_and_continue, get_schema
 from ..shared.authentication import Auth
 from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
-from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
-from ..schemas.schema_manager import SchemaManager
+from ..shared.exceptions import AirflowError
+
 
 import logging as log
 import json
@@ -101,12 +101,8 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         dag_info = af_client.get_dag_info(dag_name)
 
         # Validate that instance and dag_name are compatible
-        schema = af_client.get_one_schema(dag_name, 'input')
-        input_schema = json.loads(schema)
-        manager = SchemaManager(input_schema)
-        err = manager.get_validation_errors(instance.data)
-        if err:
-            raise InvalidUsage(error='Bad instance data format: {}'.format(err))
+        marshmallow_obj = get_schema(config, dag_name, 'input')
+        validate_and_continue(marshmallow_obj(), instance.data)
 
         info = dag_info.json()
         if info["is_paused"]:
@@ -134,14 +130,17 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         return execution, 201
 
 
-class ExecutionDetailsEndpoint(ExecutionEndpoint):
+class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
     """
     Endpoint used to get the information of a certain execution. But not the data!
     """
 
     def __init__(self):
         super().__init__()
+        self.model = ExecutionModel
         self.query = 'get_one_execution_from_user'
+        self.primary_key = 'id'
+        self.foreign_data = {'instance_id': InstanceModel}
 
     @doc(description='Get details of an executions', tags=['Executions'], inherit=False)
     @Auth.auth_required
@@ -160,6 +159,8 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         if self.is_admin():
             return ExecutionModel.get_one_execution_from_id_admin(idx)
         return self.get_detail(self.get_user_id(), idx)
+
+class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description='Edit an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
@@ -189,10 +190,6 @@ class ExecutionDetailsEndpoint(ExecutionEndpoint):
         :rtype: Tuple(dict, integer)
         """
         return self.delete_detail(self.get_user_id(), idx)
-
-    @Auth.auth_required
-    def post(self, **kwargs):
-        raise EndpointNotImplemented()
 
 
 @doc(description='Get status of an execution', tags=['Executions'])
@@ -251,7 +248,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
 
 
 @doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
-class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
+class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     """
     Endpoint used to get the solution of a certain execution.
     """
@@ -268,21 +265,9 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpoint):
         """
         return self.get_detail(self.get_user_id(), idx)
 
-    @Auth.auth_required
-    def delete(self, idx):
-        raise EndpointNotImplemented()
-
-    @Auth.auth_required
-    def put(self, **kwargs):
-        raise EndpointNotImplemented()
-
-    @Auth.auth_required
-    def post(self, **kwargs):
-        raise EndpointNotImplemented()
-
 
 @doc(description='Get log of an execution', tags=['Executions'], inherit=False)
-class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
+class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     """
     Endpoint used to get the log of a certain execution.
     """
@@ -298,15 +283,3 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         return self.get_detail(self.get_user_id(), idx)
-
-    @Auth.auth_required
-    def delete(self, idx):
-        raise EndpointNotImplemented()
-
-    @Auth.auth_required
-    def put(self, **kwargs):
-        raise EndpointNotImplemented()
-
-    @Auth.auth_required
-    def post(self, **kwargs):
-        raise EndpointNotImplemented()

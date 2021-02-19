@@ -1,7 +1,8 @@
-from cornflow.schemas.schema_manager import SchemaManager
+from cornflow_client import SchemaManager
+from cornflow_client.constants import DATASCHEMA
 from unittest import TestCase
 from cornflow.tests.data.dict_schema_example import dict_example
-from cornflow.schemas.constants import DATASCHEMA
+
 
 import json
 import os

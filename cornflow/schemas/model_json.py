@@ -1,4 +1,4 @@
-from .schema_manager import SchemaManager
+from cornflow_client import SchemaManager
 import os
 
 fileDir = os.path.dirname(__file__)

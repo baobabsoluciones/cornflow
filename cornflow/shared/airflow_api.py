@@ -2,9 +2,9 @@ import requests
 from requests.exceptions import ConnectionError, HTTPError
 import json
 from requests.auth import HTTPBasicAuth
+from cornflow_client import SchemaManager
 
 from ..shared.exceptions import AirflowError, InvalidUsage
-from ..schemas.schema_manager import SchemaManager
 
 
 class Airflow(object):

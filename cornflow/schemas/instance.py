@@ -1,7 +1,6 @@
 from marshmallow import fields, Schema
 
 from ..schemas.execution import ExecutionSchema, ExecutionDetailsEndpointResponse
-from ..schemas.model_json import DataSchema
 
 
 class InstanceSchema(Schema):
@@ -10,7 +9,7 @@ class InstanceSchema(Schema):
     """
     id = fields.Str(dump_only=True)
     user_id = fields.Int(required=True, load_only=True)
-    data = fields.Nested(DataSchema, required=True)
+    data = fields.Raw(required=True)
     name = fields.Str()
     description = fields.Str()
     created_at = fields.DateTime(dump_only=True)
@@ -57,4 +56,4 @@ class InstanceDetailsEndpointResponse(Schema):
 class InstanceDataEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
-    data = fields.Nested(DataSchema, required=True)
+    data = fields.Raw(required=True)

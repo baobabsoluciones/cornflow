@@ -227,7 +227,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
                        config=dict(solver='PULP_CBC_CMD', timeLimit=10),
                        description=description,
                        name=name,
-                       execution_results=instance_payload['data'],
+                       data=instance_payload['data'],
                        dag_name='solve_model_dag')
         response = self.client.manual_execution(**payload)
         execution = self.client.get_results(response['id'])
@@ -237,7 +237,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         response = self.client.get_status(response['id'])
         self.assertTrue('state' in response)
         execution_data = self.client.get_solution(response['id'])
-        self.assertEqual(execution_data['data'], payload['execution_results'])
+        self.assertEqual(execution_data['data'], payload['data'])
 
     def test_manual_execution2(self):
         def load_file(_file):
@@ -249,7 +249,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"
         description = 'test_execution_description_123'
-        # for the solution we can use the same standard than the instance data
         payload = dict(instance_id=one_instance['id'],
                        config=dict(solver='PULP_CBC_CMD', timeLimit=10),
                        description=description,
