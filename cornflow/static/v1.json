@@ -192,8 +192,8 @@
           "type": "string"
         }, 
         "state": {
-          "maximum": 1, 
-          "minimum": -5, 
+          "maximum": 2, 
+          "minimum": -6, 
           "type": "integer"
         }, 
         "state_message": {
@@ -214,15 +214,54 @@
       ], 
       "type": "object"
     }, 
-    "ExecutionDagRequest": {
+    "ExecutionDagPostRequest": {
       "properties": {
-        "execution_results": {
-          "$ref": "#/definitions/Data"
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "dag_name": {
+          "type": "string"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "execution_results": {}, 
+        "instance_id": {
+          "type": "string"
         }, 
         "log_json": {
           "$ref": "#/definitions/Log"
         }, 
         "log_text": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "solution_schema": {
+          "type": "string"
+        }, 
+        "state": {
+          "type": "integer"
+        }
+      }, 
+      "required": [
+        "config", 
+        "instance_id", 
+        "name"
+      ], 
+      "type": "object"
+    }, 
+    "ExecutionDagRequest": {
+      "properties": {
+        "execution_results": {}, 
+        "log_json": {
+          "$ref": "#/definitions/Log"
+        }, 
+        "log_text": {
+          "type": "string"
+        }, 
+        "solution_schema": {
           "type": "string"
         }, 
         "state": {
@@ -233,9 +272,7 @@
     }, 
     "ExecutionDataEndpointResponse": {
       "properties": {
-        "data": {
-          "$ref": "#/definitions/Data"
-        }, 
+        "data": {}, 
         "id": {
           "type": "string"
         }, 
@@ -752,7 +789,7 @@
         }, 
         "Time": {
           "items": {
-            "type": "integer"
+            "type": "string"
           }, 
           "type": "array"
         }
@@ -911,6 +948,32 @@
     "version": "v1"
   }, 
   "paths": {
+    "/dag/": {
+      "post": {
+        "description": "Create a complete execution manually.", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDagPostRequest"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "DAGs"
+        ]
+      }
+    }, 
     "/dag/{idx}/": {
       "get": {
         "description": "Get input data and configuration for an execution", 
@@ -1326,7 +1389,14 @@
             }
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1388,7 +1458,14 @@
             "type": "string"
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1473,7 +1550,14 @@
             "type": "string"
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1543,7 +1627,14 @@
             "type": "boolean"
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1565,6 +1656,23 @@
         "responses": {}, 
         "tags": [
           "Users"
+        ]
+      }
+    }, 
+    "/schema/{dag_name}/": {
+      "get": {
+        "description": "Get one schema", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "dag_name", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Schemas"
         ]
       }
     }, 
@@ -1686,14 +1794,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }

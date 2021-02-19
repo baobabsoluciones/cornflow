@@ -224,7 +224,7 @@ latex_documents = []
 
 
 # getting the OPENAPI file instructions:
-# 1. Launch the flask app (assuming defaults(
+# 1. Launch the flask app (assuming defaults)
 # 2. curl http://127.0.0.1:5000/swagger/ > cornflow/static/v1.json
 
 intersphinx_mapping = {'http://docs.python.org/3': None}
