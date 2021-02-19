@@ -1,2 +1,4 @@
 requests
-urllib3
+genson
+jsonschema
+marshmallow
