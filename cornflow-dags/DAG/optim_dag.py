@@ -1,15 +1,13 @@
-from airflow import DAG, AirflowException
-from airflow.operators.python_operator import PythonOperator
-from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-from cornflow_client import CornFlow, CornFlowApiError
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+
 from datetime import datetime, timedelta
-from utils import get_arg
-import model_functions as mf
-from urllib.parse import urlparse
+from utils import cf_solve
+import pulp as pl
+import orloge as ol
+import os
+from utils import NoSolverException
 
-
-# Following are defaults which can be overridden later on
-# TODO: clean this
 default_args = {
     'owner': 'baobab',
     'depends_on_past': False,
@@ -17,55 +15,66 @@ default_args = {
     'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
     'retry_delay': timedelta(minutes=1),
     'schedule_interval': None
 }
+dag_name = 'solve_model_dag'
+dag = DAG(dag_name, default_args=default_args, schedule_interval=None)
 
-dag = DAG('solve_model_dag', default_args=default_args, schedule_interval=None)
 
-def try_to_save_error(client, exec_id):
+def solve_model(data, config):
+    """
+    :param data: pulp json for the model
+    :param config: pulp config for solver
+    :return:
+    """
+    print("Solving the model")
+    var, model = pl.LpProblem.from_dict(data)
+
+    # we overwrite the logPath argument before solving.
+    log_path = config['logPath'] = 'temp.log'
+    config['msg'] = 0
     try:
-        client.put_api_for_id('dag/', id=exec_id, payload=dict(state=-6))
-    except Exception as e:
-        print("An exception trying to register the failed status: {}".format(e))
+        solver = pl.getSolverFromDict(config)
+    except pl.PulpSolverError:
+        raise NoSolverException("Missing solver attribute")
+    if solver is None or not solver.available():
+        raise NoSolverException("Solver {} is not available".format(solver))
+    model.solve(solver)
+    solution = model.to_dict()
+
+    print("Model solved")
+    with open(log_path, "r") as f:
+        log = f.read()
+
+    # we convert the log into orloge json
+    equivs = \
+        dict(
+            CPLEX_CMD='CPLEX', CPLEX_PY='CPLEX', CPLEX_DLL='CPLEX',
+            GUROBI='GUROBI', GUROBI_CMD='GUROBI',
+            PULP_CBC_CMD='CBC', COIN_CMD='CBC'
+        )
+    solver_name = equivs.get(solver.name)
+    log_dict = None
+    if solver_name:
+        try:
+            log_dict = ol.get_info_solver(path=log, solver=solver_name, get_progress=True, content=True)
+        except:
+            log_dict = dict()
+        else:
+            log_dict['progress'] = log_dict['progress'].fillna('').to_dict(orient='list')
+    print("Log read")
+
+    try:
+        os.remove(log_path)
+    except:
+        pass
+
+    return solution, log, log_dict
 
 
 def run_solve(**kwargs):
-    exec_id = get_arg("exec_id", kwargs)
-
-    # This secret comes from airflow configuration
-    secrets = EnvironmentVariablesBackend()
-    uri = secrets.get_conn_uri('CF_URI')
-    conn = urlparse(uri)
-
-    # TODO: what if https??
-    airflow_user = CornFlow(url="http://{}:{}".format(conn.hostname, conn.port))
-
-    # login
-    airflow_user.login(email=conn.username, pwd=conn.password)
-    print("starting to solve the model with execution %s" % exec_id)
-    # get data
-    execution_data = airflow_user.get_data(exec_id)
-    # solve model
-    try:
-        solution, log, log_dict = mf.solve_model(execution_data["data"], execution_data["config"])
-    except mf.NoSolverException:
-        try_to_save_error(airflow_user, exec_id)
-        raise AirflowException('No solver found')
-    except:
-        try_to_save_error(airflow_user, exec_id)
-        raise AirflowException('Unknown error')
-    # write solution
-    try:
-        airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
-    except CornFlowApiError:
-        try_to_save_error(airflow_user, exec_id)
-        # attempt to update the execution with a failed status.
-        raise AirflowException('The writing of the solution failed')
-
-    if solution:
-        return "Solution saved"
+    return cf_solve(solve_model, dag_name, **kwargs)
 
 
 solve_task = PythonOperator(

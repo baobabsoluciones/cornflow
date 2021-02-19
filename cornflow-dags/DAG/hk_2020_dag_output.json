@@ -1,0 +1,21 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	  "type": "array",
+	  "items": {
+		"type": "object",
+		"properties": {
+		  "period": {
+			"type": "integer"
+		  },
+		  "mode": {
+			"type": "integer"
+		  },
+		  "job": {
+			"type": "integer"
+		  }
+		},
+		"required": [
+		  "period", "mode", "job"
+		]
+	  }
+}

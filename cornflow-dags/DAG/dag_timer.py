@@ -1,5 +1,5 @@
 from airflow import DAG, AirflowException
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 import time
 from datetime import datetime, timedelta
@@ -19,6 +19,7 @@ default_args = {
 }
 
 dag = DAG('timer', default_args=default_args, schedule_interval=None)
+
 
 def run(**kwargs):
     seconds = kwargs["dag_run"].conf.get('seconds', 60)

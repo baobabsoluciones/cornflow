@@ -1,5 +1,5 @@
-from airflow import DAG, AirflowException
-from airflow.operators.python_operator import PythonOperator, PythonVirtualenvOperator
+from airflow import DAG
+from airflow.operators.python import PythonVirtualenvOperator
 from datetime import datetime, timedelta
 
 # Following are defaults which can be overridden later on
@@ -11,7 +11,6 @@ default_args = {
     'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
     'retry_delay': timedelta(minutes=1),
     'schedule_interval': None
 }
@@ -20,7 +19,7 @@ dag1 = DAG('hk_2020_dag_venv', default_args=default_args, schedule_interval=None
 
 def hk_in_venv(**kwargs):
 
-    from hackathonbaobab2020.solvers import get_solver
+    from hackathonbaobab2020 import get_solver
     from hackathonbaobab2020.core import Instance
     from hackathonbaobab2020.core.tools import dict_to_list
     from timeit import default_timer as timer
@@ -70,15 +69,16 @@ def hk_in_venv(**kwargs):
         return solve_from_dict(data, solver_name, options)
     
     return test_hk(**kwargs)
-    
-hackaton_task_venv = PythonVirtualenvOperator(
-    task_id='hk_2020_task_venv',
-    python_callable=hk_in_venv,
-    requirements= ["hackathonbaobab2020", "timeit"],
-    python_version = 3.8,
-    system_site_packages=True,
-    dag=dag1
-)
+
+#
+# hackaton_task_venv = PythonVirtualenvOperator(
+#     task_id='hk_2020_task_venv',
+#     python_callable=hk_in_venv,
+#     requirements= ["hackathonbaobab2020", "timeit"],
+#     python_version = 3.8,
+#     system_site_packages=True,
+#     dag=dag1
+# )
 
 
 
