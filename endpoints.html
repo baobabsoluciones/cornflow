@@ -300,13 +300,13 @@ the reference_id for the newly created execution if successful) and a integer wi
 </dd></dl>
 
 <dl class="py class">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint" title="cornflow.endpoints.execution.ExecutionEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionEndpoint</span></code></a></p>
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpointBase">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpointBase</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to get the information of a certain execution. But not the data!</p>
 <dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpointBase.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>API method to get an execution created by the user and its related info.
 It requires authentication to be passed in the form of a token that has to be linked to
 an existing session (login) made by a user.</p>
@@ -324,6 +324,17 @@ the data of the execution) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpointBase.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpointBase</span></code></a></p>
 <dl class="py method">
 <dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.put">
 <code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.put" title="Permalink to this definition">¶</a></dt>
@@ -362,26 +373,9 @@ a message) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>API method to create a new execution linked to an already existing instance
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dictionary with a message (error if authentication failed, error if data is not validated or
-the reference_id for the newly created execution if successful) and a integer wit the HTTP status code</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -421,7 +415,7 @@ and an integer with the HTTP status code.</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.execution.ExecutionDataEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDataEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="cornflow.endpoints.execution.ExecutionDetailsEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpoint</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpointBase</span></code></a></p>
 <p>Endpoint used to get the solution of a certain execution.</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.execution.ExecutionDataEndpoint.get">
@@ -440,64 +434,9 @@ the data of the execution) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDataEndpoint.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>API method to delete an execution created by the user and its related info.
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>idx</strong> (<em>string</em>) – ID of the execution.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary with a message (error if authentication failed, or the execution does not exist or
-a message) and an integer with the HTTP status code.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDataEndpoint.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Edit an existing execution</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>idx</strong> (<em>string</em>) – ID of the execution.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary with a message (error if authentication failed, or the execution does not exist or
-a message) and an integer with the HTTP status code.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDataEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>API method to create a new execution linked to an already existing instance
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dictionary with a message (error if authentication failed, error if data is not validated or
-the reference_id for the newly created execution if successful) and a integer wit the HTTP status code</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt id="cornflow.endpoints.execution.ExecutionDataEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -505,7 +444,7 @@ the reference_id for the newly created execution if successful) and a integer wi
 <dl class="py class">
 <dt id="cornflow.endpoints.execution.ExecutionLogEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionLogEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="cornflow.endpoints.execution.ExecutionDetailsEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpoint</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpointBase</span></code></a></p>
 <p>Endpoint used to get the log of a certain execution.</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.execution.ExecutionLogEndpoint.get">
@@ -524,64 +463,9 @@ the data of the execution) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionLogEndpoint.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>API method to delete an execution created by the user and its related info.
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>idx</strong> (<em>string</em>) – ID of the execution.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary with a message (error if authentication failed, or the execution does not exist or
-a message) and an integer with the HTTP status code.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionLogEndpoint.put">
-<code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Edit an existing execution</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>idx</strong> (<em>string</em>) – ID of the execution.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary with a message (error if authentication failed, or the execution does not exist or
-a message) and an integer with the HTTP status code.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionLogEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>API method to create a new execution linked to an already existing instance
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dictionary with a message (error if authentication failed, error if data is not validated or
-the reference_id for the newly created execution if successful) and a integer wit the HTTP status code</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt id="cornflow.endpoints.execution.ExecutionLogEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -639,13 +523,13 @@ or the reference_id of the instance created if successful) and an integer with t
 </dd></dl>
 
 <dl class="py class">
-<dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.instance.</code><code class="sig-name descname">InstanceDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint" title="cornflow.endpoints.instance.InstanceEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.instance.InstanceEndpoint</span></code></a></p>
+<dt id="cornflow.endpoints.instance.InstanceDetailsEndpointBase">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.instance.</code><code class="sig-name descname">InstanceDetailsEndpointBase</code><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to get the information ofa single instance, edit it or delete it</p>
 <dl class="py method">
-<dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dt id="cornflow.endpoints.instance.InstanceDetailsEndpointBase.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>API method to get an instance created by the user and its related info.
 It requires authentication to be passed in the form of a token that has to be linked to
 an existing session (login) made by a user.</p>
@@ -663,6 +547,17 @@ the data of the instance) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="cornflow.endpoints.instance.InstanceDetailsEndpointBase.methods">
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.instance.</code><code class="sig-name descname">InstanceDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase" title="cornflow.endpoints.instance.InstanceDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.instance.InstanceDetailsEndpointBase</span></code></a></p>
 <dl class="py method">
 <dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint.put">
 <code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.put" title="Permalink to this definition">¶</a></dt>
@@ -703,26 +598,9 @@ a message) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>API (POST) method to create a new instance
-It requires authentication to be passed in the form of a token that has to be linked to
-an existing session (login) made by a user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a dictionary with a message(either an error encountered during creation
-or the reference_id of the instance created if successful) and an integer with the HTTP status code</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt id="cornflow.endpoints.instance.InstanceDetailsEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -730,7 +608,7 @@ or the reference_id of the instance created if successful) and an integer with t
 <dl class="py class">
 <dt id="cornflow.endpoints.instance.InstanceDataEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.instance.</code><code class="sig-name descname">InstanceDataEndpoint</code><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDataEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint" title="cornflow.endpoints.instance.InstanceDetailsEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.instance.InstanceDetailsEndpoint</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase" title="cornflow.endpoints.instance.InstanceDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.instance.InstanceDetailsEndpointBase</span></code></a></p>
 <p>Endpoint used to get the information ofa single instance, edit it or delete it</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.instance.InstanceDataEndpoint.get">
@@ -754,7 +632,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 
 <dl class="py attribute">
 <dt id="cornflow.endpoints.instance.InstanceDataEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'DELETE', 'GET', 'POST', 'PUT'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDataEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceDataEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -762,7 +640,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.instance.InstanceFileEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.instance.</code><code class="sig-name descname">InstanceFileEndpoint</code><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint" title="cornflow.endpoints.instance.InstanceEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.instance.InstanceEndpoint</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint to accept mps files to upload</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.instance.InstanceFileEndpoint.post">
@@ -782,7 +660,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 
 <dl class="py attribute">
 <dt id="cornflow.endpoints.instance.InstanceFileEndpoint.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET', 'POST'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint.methods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint.methods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

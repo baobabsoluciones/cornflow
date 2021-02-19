@@ -1,20 +1,5 @@
 {
   "definitions": {
-    "Coefficient": {
-      "properties": {
-        "name": {
-          "type": "string"
-        }, 
-        "value": {
-          "type": "number"
-        }
-      }, 
-      "required": [
-        "name", 
-        "value"
-      ], 
-      "type": "object"
-    }, 
     "Config": {
       "properties": {
         "gapAbs": {
@@ -62,80 +47,6 @@
       }, 
       "type": "object"
     }, 
-    "Constraints": {
-      "properties": {
-        "coefficients": {
-          "items": {
-            "$ref": "#/definitions/Coefficient"
-          }, 
-          "type": "array"
-        }, 
-        "constant": {
-          "type": "number", 
-          "x-nullable": true
-        }, 
-        "name": {
-          "type": "string"
-        }, 
-        "pi": {
-          "type": "number", 
-          "x-nullable": true
-        }, 
-        "sense": {
-          "type": "integer"
-        }
-      }, 
-      "required": [
-        "coefficients", 
-        "name", 
-        "pi", 
-        "sense"
-      ], 
-      "type": "object"
-    }, 
-    "Data": {
-      "properties": {
-        "constraints": {
-          "items": {
-            "$ref": "#/definitions/Constraints"
-          }, 
-          "type": "array"
-        }, 
-        "objective": {
-          "$ref": "#/definitions/Objective"
-        }, 
-        "parameters": {
-          "$ref": "#/definitions/Parameters"
-        }, 
-        "sos1": {
-          "items": {
-            "$ref": "#/definitions/Sos1"
-          }, 
-          "type": "array"
-        }, 
-        "sos2": {
-          "items": {
-            "$ref": "#/definitions/Sos2"
-          }, 
-          "type": "array"
-        }, 
-        "variables": {
-          "items": {
-            "$ref": "#/definitions/Variables"
-          }, 
-          "type": "array"
-        }
-      }, 
-      "required": [
-        "constraints", 
-        "objective", 
-        "parameters", 
-        "sos1", 
-        "sos2", 
-        "variables"
-      ], 
-      "type": "object"
-    }, 
     "Execution": {
       "properties": {
         "config": {
@@ -150,6 +61,9 @@
           "readOnly": true, 
           "type": "string"
         }, 
+        "data": {
+          "readOnly": true
+        }, 
         "deleted_at": {
           "format": "date-time", 
           "readOnly": true, 
@@ -157,14 +71,6 @@
         }, 
         "description": {
           "type": "string"
-        }, 
-        "execution_results": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Data"
-            }
-          ], 
-          "readOnly": true
         }, 
         "finished": {
           "type": "boolean"
@@ -192,8 +98,8 @@
           "type": "string"
         }, 
         "state": {
-          "maximum": 1, 
-          "minimum": -5, 
+          "maximum": 2, 
+          "minimum": -6, 
           "type": "integer"
         }, 
         "state_message": {
@@ -214,16 +120,57 @@
       ], 
       "type": "object"
     }, 
-    "ExecutionDagRequest": {
+    "ExecutionDagPostRequest": {
       "properties": {
-        "execution_results": {
-          "$ref": "#/definitions/Data"
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "dag_name": {
+          "type": "string"
+        }, 
+        "data": {}, 
+        "description": {
+          "type": "string"
+        }, 
+        "instance_id": {
+          "type": "string"
         }, 
         "log_json": {
           "$ref": "#/definitions/Log"
         }, 
         "log_text": {
           "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "solution_schema": {
+          "type": "string", 
+          "x-nullable": true
+        }, 
+        "state": {
+          "type": "integer"
+        }
+      }, 
+      "required": [
+        "config", 
+        "instance_id", 
+        "name"
+      ], 
+      "type": "object"
+    }, 
+    "ExecutionDagRequest": {
+      "properties": {
+        "data": {}, 
+        "log_json": {
+          "$ref": "#/definitions/Log"
+        }, 
+        "log_text": {
+          "type": "string"
+        }, 
+        "solution_schema": {
+          "type": "string", 
+          "x-nullable": true
         }, 
         "state": {
           "type": "integer"
@@ -233,9 +180,7 @@
     }, 
     "ExecutionDataEndpointResponse": {
       "properties": {
-        "data": {
-          "$ref": "#/definitions/Data"
-        }, 
+        "data": {}, 
         "id": {
           "type": "string"
         }, 
@@ -372,9 +317,7 @@
           "readOnly": true, 
           "type": "string"
         }, 
-        "data": {
-          "$ref": "#/definitions/Data"
-        }, 
+        "data": {}, 
         "deleted_at": {
           "format": "date-time", 
           "readOnly": true, 
@@ -413,9 +356,7 @@
     }, 
     "InstanceDataEndpointResponse": {
       "properties": {
-        "data": {
-          "$ref": "#/definitions/Data"
-        }, 
+        "data": {}, 
         "id": {
           "type": "string"
         }, 
@@ -593,24 +534,6 @@
           "x-nullable": true
         }
       }, 
-      "required": [
-        "best_bound", 
-        "best_solution", 
-        "first_relaxed", 
-        "first_solution", 
-        "gap", 
-        "matrix", 
-        "matrix_post", 
-        "nodes", 
-        "presolve", 
-        "rootTime", 
-        "sol_code", 
-        "solver", 
-        "status", 
-        "status_code", 
-        "time", 
-        "version"
-      ], 
       "type": "object"
     }, 
     "LoginEndpointRequest": {
@@ -640,45 +563,6 @@
           "type": "integer"
         }
       }, 
-      "type": "object"
-    }, 
-    "Objective": {
-      "properties": {
-        "coefficients": {
-          "items": {
-            "$ref": "#/definitions/Coefficient"
-          }, 
-          "type": "array"
-        }, 
-        "name": {
-          "type": "string", 
-          "x-nullable": true
-        }
-      }, 
-      "required": [
-        "coefficients"
-      ], 
-      "type": "object"
-    }, 
-    "Parameters": {
-      "properties": {
-        "name": {
-          "type": "string"
-        }, 
-        "sense": {
-          "type": "integer"
-        }, 
-        "sol_status": {
-          "type": "integer"
-        }, 
-        "status": {
-          "type": "integer"
-        }
-      }, 
-      "required": [
-        "name", 
-        "sense"
-      ], 
       "type": "object"
     }, 
     "Presolve": {
@@ -752,25 +636,9 @@
         }, 
         "Time": {
           "items": {
-            "type": "integer"
+            "type": "string"
           }, 
           "type": "array"
-        }
-      }, 
-      "type": "object"
-    }, 
-    "Sos1": {
-      "properties": {
-        "placeholder": {
-          "type": "string"
-        }
-      }, 
-      "type": "object"
-    }, 
-    "Sos2": {
-      "properties": {
-        "placeholder": {
-          "type": "string"
         }
       }, 
       "type": "object"
@@ -873,37 +741,6 @@
         }
       }, 
       "type": "object"
-    }, 
-    "Variables": {
-      "properties": {
-        "cat": {
-          "type": "string"
-        }, 
-        "dj": {
-          "type": "number", 
-          "x-nullable": true
-        }, 
-        "lowBound": {
-          "type": "number", 
-          "x-nullable": true
-        }, 
-        "name": {
-          "type": "string"
-        }, 
-        "upBound": {
-          "type": "number", 
-          "x-nullable": true
-        }, 
-        "varValue": {
-          "type": "number", 
-          "x-nullable": true
-        }
-      }, 
-      "required": [
-        "cat", 
-        "name"
-      ], 
-      "type": "object"
     }
   }, 
   "info": {
@@ -911,6 +748,32 @@
     "version": "v1"
   }, 
   "paths": {
+    "/dag/": {
+      "post": {
+        "description": "Create a complete execution manually.", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDagPostRequest"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "DAGs"
+        ]
+      }
+    }, 
     "/dag/{idx}/": {
       "get": {
         "description": "Get input data and configuration for an execution", 
@@ -1033,36 +896,6 @@
           "Executions"
         ]
       }, 
-      "post": {
-        "description": "Create a new execution", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/ExecutionRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-            }
-          }
-        }, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
       "put": {
         "description": "Edit an execution", 
         "parameters": [
@@ -1088,21 +921,6 @@
       }
     }, 
     "/execution/{idx}/data/": {
-      "delete": {
-        "description": "Delete an execution", 
-        "parameters": [
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
       "get": {
         "description": "Get details of an executions", 
         "parameters": [
@@ -1124,77 +942,9 @@
         "tags": [
           "Executions"
         ]
-      }, 
-      "post": {
-        "description": "Create a new execution", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/ExecutionRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-            }
-          }
-        }, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
-      "put": {
-        "description": "Edit an execution", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/ExecutionEditRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Executions"
-        ]
       }
     }, 
     "/execution/{idx}/log/": {
-      "delete": {
-        "description": "Delete an execution", 
-        "parameters": [
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
       "get": {
         "description": "Get details of an executions", 
         "parameters": [
@@ -1213,59 +963,6 @@
             }
           }
         }, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
-      "post": {
-        "description": "Create a new execution", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/ExecutionRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-            }
-          }
-        }, 
-        "tags": [
-          "Executions"
-        ]
-      }, 
-      "put": {
-        "description": "Edit an execution", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/ExecutionEditRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
         "tags": [
           "Executions"
         ]
@@ -1326,7 +1023,14 @@
             }
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1370,29 +1074,6 @@
           "Instances"
         ]
       }, 
-      "post": {
-        "description": "Create a new instance", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/InstanceRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Instances"
-        ]
-      }, 
       "put": {
         "description": "Edit an instance", 
         "parameters": [
@@ -1418,21 +1099,6 @@
       }
     }, 
     "/instance/{idx}/data/": {
-      "delete": {
-        "description": "Delete an instance", 
-        "parameters": [
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Instances"
-        ]
-      }, 
       "get": {
         "description": "Get one instance", 
         "parameters": [
@@ -1454,75 +1120,11 @@
         "tags": [
           "Instances"
         ]
-      }, 
-      "post": {
-        "description": "Create a new instance", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/InstanceRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Instances"
-        ]
-      }, 
-      "put": {
-        "description": "Edit an instance", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/InstanceEditRequest"
-            }
-          }, 
-          {
-            "in": "path", 
-            "name": "idx", 
-            "required": true, 
-            "type": "string"
-          }
-        ], 
-        "responses": {}, 
-        "tags": [
-          "Instances"
-        ]
       }
     }, 
     "/instancefile/": {
-      "get": {
-        "description": "Get all instances", 
-        "parameters": [], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/InstanceEndpointResponse"
-              }, 
-              "type": "array"
-            }
-          }
-        }, 
-        "tags": [
-          "Instances"
-        ]
-      }, 
       "post": {
-        "description": "Create a new instance", 
+        "description": "Load an instance with an mps file", 
         "parameters": [
           {
             "in": "formData", 
@@ -1543,7 +1145,14 @@
             "type": "boolean"
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        }, 
         "tags": [
           "Instances"
         ]
@@ -1565,6 +1174,23 @@
         "responses": {}, 
         "tags": [
           "Users"
+        ]
+      }
+    }, 
+    "/schema/{dag_name}/": {
+      "get": {
+        "description": "Get one schema", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "dag_name", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Schemas"
         ]
       }
     }, 
@@ -1686,14 +1312,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }
