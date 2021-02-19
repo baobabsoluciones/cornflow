@@ -36,9 +36,9 @@ def run_example():
 
     execution_id = client.create_execution(instance_id, config)
     status = client.get_status(execution_id)
-    results = client.get_results(execution_id)
+    results = client.get_solution(execution_id)
 
-    _vars, prob = pulp.LpProblem.from_dict(results['execution_results'])
+    _vars, prob = pulp.LpProblem.from_dict(results['data'])
     actual_vars = group_variables_by_name(_vars, ['Route', 'BuildaPlant'], replace_underscores_with_spaces=True)
     actual_vars.keys()
     actual_vars['BuildaPlant']

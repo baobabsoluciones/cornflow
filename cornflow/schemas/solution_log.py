@@ -1,6 +1,7 @@
 from marshmallow import fields, Schema
 
 options = dict(required=True, allow_none=True)
+log_options = dict(required=False, allow_none=True)
 pg_options = dict(many=True, required=True)
 list_of_strings = fields.List(fields.Str, required=False, many=True)
 
@@ -48,22 +49,22 @@ class FirstSolution(Schema):
 
 
 class LogSchema(Schema):
-    version = fields.Str(**options)
-    solver = fields.Str(**options)
-    status = fields.Str(**options)
-    best_bound = fields.Float(**options)
-    best_solution = fields.Float(**options)
-    gap = fields.Float(**options)
-    time = fields.Float(**options)
-    matrix = fields.Nested(MatrixSchema, **options)
-    matrix_post = fields.Nested(MatrixSchema, **options)
-    rootTime = fields.Float(**options)
-    presolve = fields.Nested(PresolveSchema, **options)
-    first_relaxed = fields.Float(**options)
-    first_solution = fields.Nested(FirstSolution, **options)
-    status_code = fields.Int(**options)
-    sol_code = fields.Int(**options)
-    nodes = fields.Int(**options)
+    version = fields.Str(**log_options)
+    solver = fields.Str(**log_options)
+    status = fields.Str(**log_options)
+    best_bound = fields.Float(**log_options)
+    best_solution = fields.Float(**log_options)
+    gap = fields.Float(**log_options)
+    time = fields.Float(**log_options)
+    matrix = fields.Nested(MatrixSchema, **log_options)
+    matrix_post = fields.Nested(MatrixSchema, **log_options)
+    rootTime = fields.Float(**log_options)
+    presolve = fields.Nested(PresolveSchema, **log_options)
+    first_relaxed = fields.Float(**log_options)
+    first_solution = fields.Nested(FirstSolution, **log_options)
+    status_code = fields.Int(**log_options)
+    sol_code = fields.Int(**log_options)
+    nodes = fields.Int(**log_options)
     progress = fields.Nested(ProgressSchema, required=False)
-    cut_info = fields.Raw(required=False, allow_none=True)
-    # cut_info = fields.Nested(CutInfo, **options)
+    cut_info = fields.Raw(**log_options)
+

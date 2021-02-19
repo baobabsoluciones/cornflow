@@ -55,6 +55,7 @@ class DAGEndpoint(MetaResource, MethodResource):
             config = current_app.config
             marshmallow_obj = get_schema(config, solution_schema, 'output')
             validate_and_continue(marshmallow_obj(), data)
+            # marshmallow_obj().fields['jobs'].nested().fields['successors']
 
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:

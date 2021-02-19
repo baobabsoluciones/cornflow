@@ -86,12 +86,12 @@ def cf_solve(fun, solution_schema, **kwargs):
     airflow_user, data, config = cf_get_data(kwargs = kwargs)
     solution, log = fun(data, **config)
     if solution:
-        payload = dict(execution_results = solution, log_text=log, solution_schema = solution_schema, state = 1)
+        payload = dict(data = solution, log_text=log, solution_schema = solution_schema, state = 1)
     else:
         payload = dict(state = 1, log_text=log, solution_schema = "hk_solution_schema")
     
     # Send the solution to cornflow.
-    message = airflow_user.put_api_for_id('dag/', id=exec_id, payload=payload)
+    message = airflow_user.write_solution(execution_id=exec_id, **payload)
 
     if solution:
         return "Solution saved"

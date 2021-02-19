@@ -1,5 +1,4 @@
 from marshmallow import fields, Schema, validate
-from ..schemas.model_json import DataSchema
 from ..schemas.solution_log import LogSchema
 from ..shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 
@@ -32,7 +31,7 @@ class ExecutionSchema(Schema):
     description = fields.Str()
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
-    execution_results = fields.Nested(DataSchema, dump_only=True)
+    data = fields.Raw(dump_only=True, attribute="execution_results")
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
@@ -58,11 +57,11 @@ class ExecutionEditRequest(Schema):
 
 
 class ExecutionDagRequest(Schema):
-    execution_results = fields.Raw(required=False)
+    data = fields.Raw(required=False, attribute='execution_results')
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
-    solution_schema = fields.String(required=False)
+    solution_schema = fields.String(required=False, allow_none=True)
 
 
 class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):

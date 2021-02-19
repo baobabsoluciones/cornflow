@@ -20,7 +20,7 @@ from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest
 from ..shared.authentication import Auth
-from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
+from ..shared.exceptions import InvalidUsage
 from ..shared.airflow_api import get_schema, validate_and_continue
 
 # Initialize the schema that all endpoints are going to use
@@ -89,13 +89,15 @@ class InstanceEndpoint(MetaResource, MethodResource):
         return self.post_list(kwargs)
 
 
-class InstanceDetailsEndpoint(InstanceEndpoint):
+class InstanceDetailsEndpointBase(MetaResource, MethodResource):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
 
     def __init__(self):
         super().__init__()
+        self.model = InstanceModel
+        self.primary_key = 'id'
         self.query = 'get_one_instance_from_user'
         self.dependents = 'executions'
 
@@ -116,6 +118,9 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         if self.is_admin():
             return InstanceModel.get_one_instance_from_id_admin(idx)
         return self.get_detail(self.get_user_id(), idx)
+
+
+class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
     @doc(description='Edit an instance', tags=['Instances'])
     @Auth.auth_required
@@ -148,13 +153,9 @@ class InstanceDetailsEndpoint(InstanceEndpoint):
         """
         return self.delete_detail(self.get_user_id(), idx)
 
-    @Auth.auth_required
-    def post(self, **kwargs):
-        raise EndpointNotImplemented()
-
 
 @doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
-class InstanceDataEndpoint(InstanceDetailsEndpoint):
+class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
@@ -180,12 +181,13 @@ class InstanceDataEndpoint(InstanceDetailsEndpoint):
 
 
 @doc(description='Load an instance with an mps file', tags=['Instances'], inherit=False)
-class InstanceFileEndpoint(InstanceEndpoint):
+class InstanceFileEndpoint(MetaResource, MethodResource):
     """
     Endpoint to accept mps files to upload
     """
 
     @Auth.auth_required
+    @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceFileRequest, location='form', inherit=False)
     def post(self, name, description, minimize=1):
         """
@@ -220,14 +222,14 @@ class InstanceFileEndpoint(InstanceEndpoint):
         )
 
         try:
-            self.data = InstanceSchema().load(pb_data)
+            data = InstanceSchema().load(pb_data)
         except ValidationError as val_err:
             raise InvalidUsage(error=val_err.normalized_messages())
 
-        item = self.model(self.data)
+        item = InstanceModel(data)
         item.save()
 
-        return {self.primary_key: getattr(item, self.primary_key)}, 201
+        return item, 201
 
 
 def allowed_file(filename):
