@@ -47,79 +47,6 @@
       }, 
       "type": "object"
     }, 
-    "Execution": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        }, 
-        "created_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "dag_run_id": {
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "data": {
-          "readOnly": true
-        }, 
-        "deleted_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "description": {
-          "type": "string"
-        }, 
-        "finished": {
-          "type": "boolean"
-        }, 
-        "id": {
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "instance_id": {
-          "type": "string"
-        }, 
-        "log_json": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Log"
-            }
-          ], 
-          "readOnly": true
-        }, 
-        "log_text": {
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "name": {
-          "type": "string"
-        }, 
-        "state": {
-          "maximum": 2, 
-          "minimum": -6, 
-          "type": "integer"
-        }, 
-        "state_message": {
-          "type": "string"
-        }, 
-        "updated_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "user_id": {
-          "type": "integer"
-        }
-      }, 
-      "required": [
-        "config", 
-        "instance_id"
-      ], 
-      "type": "object"
-    }, 
     "ExecutionDagPostRequest": {
       "properties": {
         "config": {
@@ -307,50 +234,6 @@
         "CutsBestBound", 
         "Node", 
         "NodesLeft"
-      ], 
-      "type": "object"
-    }, 
-    "Instance": {
-      "properties": {
-        "created_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "data": {}, 
-        "deleted_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "description": {
-          "type": "string"
-        }, 
-        "executions": {
-          "items": {
-            "$ref": "#/definitions/Execution"
-          }, 
-          "type": "array"
-        }, 
-        "id": {
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "name": {
-          "type": "string"
-        }, 
-        "updated_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "user_id": {
-          "type": "integer"
-        }
-      }, 
-      "required": [
-        "data", 
-        "user_id"
       ], 
       "type": "object"
     }, 
@@ -643,54 +526,6 @@
       }, 
       "type": "object"
     }, 
-    "User": {
-      "properties": {
-        "admin": {
-          "readOnly": true, 
-          "type": "boolean"
-        }, 
-        "created_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "email": {
-          "format": "email", 
-          "type": "string"
-        }, 
-        "id": {
-          "readOnly": true, 
-          "type": "integer"
-        }, 
-        "instances": {
-          "items": {
-            "$ref": "#/definitions/Instance"
-          }, 
-          "type": "array"
-        }, 
-        "modified_at": {
-          "format": "date-time", 
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "name": {
-          "type": "string"
-        }, 
-        "password": {
-          "type": "string"
-        }, 
-        "super_admin": {
-          "readOnly": true, 
-          "type": "boolean"
-        }
-      }, 
-      "required": [
-        "email", 
-        "name", 
-        "password"
-      ], 
-      "type": "object"
-    }, 
     "UserDetailsEndpointResponse": {
       "properties": {
         "admin": {
@@ -741,6 +576,26 @@
         }
       }, 
       "type": "object"
+    }, 
+    "UserSignupRequest": {
+      "properties": {
+        "email": {
+          "format": "email", 
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "password": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "email", 
+        "name", 
+        "password"
+      ], 
+      "type": "object"
     }
   }, 
   "info": {
@@ -750,7 +605,7 @@
   "paths": {
     "/dag/": {
       "post": {
-        "description": "Create a complete execution manually.", 
+        "description": "Create an execution manually.", 
         "parameters": [
           {
             "in": "body", 
@@ -791,7 +646,7 @@
         ]
       }, 
       "put": {
-        "description": "Add a solution to an execution", 
+        "description": "Edit an execution", 
         "parameters": [
           {
             "in": "body", 
@@ -834,7 +689,7 @@
         ]
       }, 
       "post": {
-        "description": "Create a new execution", 
+        "description": "Create an execution", 
         "parameters": [
           {
             "in": "body", 
@@ -875,7 +730,7 @@
         ]
       }, 
       "get": {
-        "description": "Get details of an executions", 
+        "description": "Get details of an execution", 
         "parameters": [
           {
             "in": "path", 
@@ -922,7 +777,7 @@
     }, 
     "/execution/{idx}/data/": {
       "get": {
-        "description": "Get details of an executions", 
+        "description": "Get solution data of an execution", 
         "parameters": [
           {
             "in": "path", 
@@ -946,7 +801,7 @@
     }, 
     "/execution/{idx}/log/": {
       "get": {
-        "description": "Get details of an executions", 
+        "description": "Get log of an execution", 
         "parameters": [
           {
             "in": "path", 
@@ -1012,7 +867,7 @@
         ]
       }, 
       "post": {
-        "description": "Create a new instance", 
+        "description": "Create an instance", 
         "parameters": [
           {
             "in": "body", 
@@ -1100,7 +955,7 @@
     }, 
     "/instance/{idx}/data/": {
       "get": {
-        "description": "Get one instance", 
+        "description": "Get input data of an instance", 
         "parameters": [
           {
             "in": "path", 
@@ -1124,7 +979,7 @@
     }, 
     "/instancefile/": {
       "post": {
-        "description": "Load an instance with an mps file", 
+        "description": "Create an instance from an mps file", 
         "parameters": [
           {
             "in": "formData", 
@@ -1203,7 +1058,7 @@
             "name": "body", 
             "required": false, 
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/UserSignupRequest"
             }
           }
         ], 
@@ -1312,14 +1167,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }

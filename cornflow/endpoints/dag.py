@@ -29,7 +29,7 @@ class DAGEndpoint(MetaResource, MethodResource):
     Endpoint used for the DAG endpoint
     """
 
-    @doc(description='Add a solution to an execution', tags=['DAGs'])
+    @doc(description='Edit an execution', tags=['DAGs'])
     @Auth.super_admin_required
     @use_kwargs(ExecutionDagRequest, location='json')
     def put(self, idx, **req_data):
@@ -99,7 +99,7 @@ class DAGEndpoint(MetaResource, MethodResource):
 
 class DAGEndpointManual(MetaResource, MethodResource):
 
-    @doc(description='Create a complete execution manually.', tags=['DAGs'])
+    @doc(description='Create an execution manually.', tags=['DAGs'])
     @Auth.super_admin_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionDagPostRequest, location='json')

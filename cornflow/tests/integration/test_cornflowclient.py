@@ -13,7 +13,6 @@ INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
 
 class TestCornflowClientBasic(CustomTestCaseLive):
 
-
     def setUp(self, create_all=False):
         super().setUp()
         self.items_to_check = ['name', 'description']

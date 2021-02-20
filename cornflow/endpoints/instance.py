@@ -55,7 +55,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
             return InstanceModel.get_all_instances_admin()
         return self.get_list(self.get_user_id())
 
-    @doc(description='Create a new instance', tags=['Instances'])
+    @doc(description='Create an instance', tags=['Instances'])
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location='json')
@@ -154,7 +154,6 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         return self.delete_detail(self.get_user_id(), idx)
 
 
-@doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
@@ -164,6 +163,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         super().__init__()
         self.dependents = None
 
+    @doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDataEndpointResponse)
     def get(self, idx):
@@ -180,7 +180,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         return self.get_detail(self.get_user_id(), idx)
 
 
-@doc(description='Load an instance with an mps file', tags=['Instances'], inherit=False)
+@doc(description='Create an instance from an mps file', tags=['Instances'], inherit=False)
 class InstanceFileEndpoint(MetaResource, MethodResource):
     """
     Endpoint to accept mps files to upload
