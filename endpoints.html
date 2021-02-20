@@ -304,9 +304,15 @@ the reference_id for the newly created execution if successful) and a integer wi
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpointBase</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to get the information of a certain execution. But not the data!</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpointBase</span></code></a></p>
 <dl class="py method">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpointBase.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase.get" title="Permalink to this definition">¶</a></dt>
+<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>API method to get an execution created by the user and its related info.
 It requires authentication to be passed in the form of a token that has to be linked to
 an existing session (login) made by a user.</p>
@@ -324,17 +330,6 @@ the data of the execution) and an integer with the HTTP status code.</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpointBase.methods">
-<code class="sig-name descname">methods</code><em class="property"> = {'GET'}</em><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase.methods" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.execution.</code><code class="sig-name descname">ExecutionDetailsEndpoint</code><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.execution.ExecutionDetailsEndpointBase</span></code></a></p>
 <dl class="py method">
 <dt id="cornflow.endpoints.execution.ExecutionDetailsEndpoint.put">
 <code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.put" title="Permalink to this definition">¶</a></dt>
