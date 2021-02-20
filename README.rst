@@ -1,8 +1,10 @@
-.. |build| image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg
-   :target:
-
 Cornflow
 =========
+.. |build| image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg
+
+.. |docs| image:: https://github.com/baobabsoluciones/corn/workflows/docs/badge.svg
+
+.. |integration| image:: https://github.com/baobabsoluciones/corn/workflows/integration/badge.svg
 
 An open source multi-solver optimization server with a REST API.
 

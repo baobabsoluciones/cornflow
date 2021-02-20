@@ -58,7 +58,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             return ExecutionModel.get_all_executions_admin()
         return self.get_list(self.get_user_id())
 
-    @doc(description='Create a new execution', tags=['Executions'])
+    @doc(description='Create an execution', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location='json')
@@ -142,7 +142,10 @@ class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
 
-    @doc(description='Get details of an executions', tags=['Executions'], inherit=False)
+
+class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
+
+    @doc(description='Get details of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     def get(self, idx):
@@ -159,8 +162,6 @@ class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
         if self.is_admin():
             return ExecutionModel.get_one_execution_from_id_admin(idx)
         return self.get_detail(self.get_user_id(), idx)
-
-class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description='Edit an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
@@ -192,12 +193,12 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return self.delete_detail(self.get_user_id(), idx)
 
 
-@doc(description='Get status of an execution', tags=['Executions'])
 class ExecutionStatusEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to get the status of a certain execution that is running in the airflow webserver
     """
 
+    @doc(description='Get status of an execution', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionStatusEndpointResponse)
     def get(self, idx):
@@ -247,12 +248,12 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
         return execution, 200
 
 
-@doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     """
     Endpoint used to get the solution of a certain execution.
     """
 
+    @doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDataEndpointResponse)
     def get(self, idx):
@@ -266,12 +267,12 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
         return self.get_detail(self.get_user_id(), idx)
 
 
-@doc(description='Get log of an execution', tags=['Executions'], inherit=False)
 class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     """
     Endpoint used to get the log of a certain execution.
     """
 
+    @doc(description='Get log of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionLogEndpointResponse)
     def get(self, idx):

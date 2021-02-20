@@ -4,8 +4,9 @@ import os
 
 
 """
-Functions
+solve function in another file to test it without airflow installed
 """
+
 
 def solve_model(data, config):
     """
@@ -45,8 +46,6 @@ def solve_model(data, config):
             log_dict = dict()
         else:
             log_dict['progress'] = log_dict['progress'].fillna('').to_dict(orient='list')
-            # TODO: there is a problem with string quotes that brings problems when reading this json
-            #  from the database
     print("Log read")
 
     try:

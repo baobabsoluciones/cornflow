@@ -19,7 +19,7 @@ default_args = {
     'email_on_retry': False,
     'retries': 0,
     'retry_delay': timedelta(minutes=1),
-    'schedule_interval': None
+    'schedule_interval': None,
 }
 dagname = 'solve_model_dag'
 dag = DAG(dagname, default_args=default_args, schedule_interval=None)
@@ -58,7 +58,7 @@ def run_solve(**kwargs):
         raise AirflowException('Unknown error')
     # write solution
     try:
-        airflow_user.write_solution(exec_id, solution, log_text=log, log_json=log_dict)
+        airflow_user.write_solution(exec_id, data=solution, log_text=log, log_json=log_dict)
     except CornFlowApiError:
         try_to_save_error(airflow_user, exec_id)
         # attempt to update the execution with a failed status.

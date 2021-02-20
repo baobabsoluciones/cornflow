@@ -8,7 +8,7 @@ from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
 from ..models import UserModel
-from ..schemas import UserSchema
+from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission, InvalidCredentials
 
@@ -19,7 +19,7 @@ class SignUpEndpoint(Resource, MethodResource):
     """
 
     @doc(description='Sign up', tags=['Users'])
-    @use_kwargs(UserSchema, location='json')
+    @use_kwargs(UserSignupRequest, location='json')
     def post(self, **kwargs):
         """
         API (POST) method to sign up to the cornflow webserver
