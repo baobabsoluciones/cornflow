@@ -1,22 +1,9 @@
-from airflow import DAG, AirflowException
+from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 import time
-from datetime import datetime, timedelta
-
+from utils import default_args
 
 # Following are defaults which can be overridden later on
-default_args = {
-    'owner': 'baobab',
-    'depends_on_past': False,
-    'start_date': datetime(2020, 2, 1),
-    'email': [''],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1),
-    'schedule_interval': None
-}
 
 dag = DAG('timer', default_args=default_args, schedule_interval=None)
 

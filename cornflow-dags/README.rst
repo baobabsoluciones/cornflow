@@ -13,7 +13,7 @@ In Ubuntu
 
 Create a virtual environment for airflow::
 
-    cd corn
+    cd cornflow-dags
     python3 -m venv afvenv
     source afvenv/bin/activate
 
@@ -116,7 +116,7 @@ For deployment with postgresql, some extra steps need to be done.
 
 Install the postgres plugin for airflow, as well as the postgres python package::
 
-    AIRFLOW_VERSION=2.0.0
+    AIRFLOW_VERSION=2.0.1
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
     pip install "apache-airflow-postgres==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
@@ -152,67 +152,125 @@ If you're feeling lucky::
 
     kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
 
-
 Uploading a new app / solver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are three things that are needed when submitting a new solver.
+There are several things that are needed when submitting a new solver.
 
-1. the solver itself.
-2. the instance (input) schema.
-3. the solution (output) schema.
+1. a `solve` function.
+2. a `name` string.
+3. an `instance` dictionary.
+4. an `solution` dictionary.
+5. (optional) a `test_cases` function that returns a list of dictionaries.
 
-In the following lines we will explain each of these three concepts while using the hackathon example dag.
+In its most minimalistic form: an app constitutes one dag file that contains all of this.
+In the following lines we will explain each of these concepts while using the hackathon example dag.
 
 The solver
 ------------
 
-The solver comes in the form of a dag file with some additional "constraints" or rules.
+The solver comes in the form of a python function that takes exactly two arguments: `data` and `config`. The first one is a dictionary with the input data (Instance) to solve the problem. The second one is also a dictionary with the execution configuration.
 
-Basically, the **happy flow** of the dag should have three main parts:
+This function needs to be named `solve` and returns three things: a dictionary with the output data (Solution), a string that stores the whole log, and a dictionary with the log information processed.
 
-1. Call cornflow to get the input data (instance) for the execution.
-2. Produce a solution from that input data.
-3. Call cornflow to update the execution with the results.
+The function for the hackathon case is::
 
-This is exemplified in the `cf_solve` function in the `utils.py` file::
+    from hackathonbaobab2020 import get_solver, Instance
+    from utils import NoSolverException
+    from timeit import default_timer as timer
 
-    def cf_solve(fun, solution_schema, **kwargs):
-        # 1. get data from Cornflow
-        exec_id = get_arg("exec_id", kwargs)
-        airflow_user, data, config = cf_get_data(kwargs = kwargs)
-        # 2. produce a solution
-        solution, log = fun(data, **config)
-        if solution:
-            payload = dict(execution_results = solution, log_text=log, solution_schema = solution_schema, state = 1)
+    def solve(data, config):
+        """
+        :param data: json for the problem
+        :param config: execution configuration, including solver
+        :return: solution and log
+        """
+        print("Solving the model")
+        solver = config.get('solver')
+        solver_class = get_solver(name=solver)
+        if solver_class is None:
+            raise NoSolverException("Solver {} is not available".format(solver))
+        inst = Instance.from_dict(data)
+        algo = solver_class(inst)
+        start = timer()
+        try:
+            status = algo.solve(config)
+            print("ok")
+        except Exception as e:
+            print("problem was not solved")
+            print(e)
+            status = 0
+
+        if status != 0:
+            # export everything:
+            status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
+            log = dict(time=timer() - start, solver=solver, status=status_conv.get(status, "Unknown"))
+            sol = algo.solution.to_dict()
         else:
-            payload = dict(state = 1, log_text=log, solution_schema = solution_schema)
+            log = dict()
+            sol = {}
+        return sol, "", log
 
-        # 3. Send the solution to cornflow.
-        message = airflow_user.put_api_for_id('dag/', id=exec_id, payload=payload)
+This function is then wrapped inside another function that handles getting the information from cornflow, the solution validation and the writing of the solution. And finally, this function is wrapped inside the DAG creation.
 
-        if solution:
-            return "Solution saved"
+In the case of the hackathon this is done here::
 
-The first point is achieved by using the `execution_id` passed through the configuration to the dag. This id will be used to make a call to the cornflow server and retrieve the input data and solve configuration.
+    from airflow import DAG
+    from airflow.operators.python import PythonOperator
 
-The second point consists of a function that uses that data to generate a model / algorithm that returns the solution.
+    default_args = {
+        'owner': 'baobab',
+        'depends_on_past': False,
+        'start_date': datetime(2020, 2, 1),
+        'email': [''],
+        'email_on_failure': False,
+        'email_on_retry': False,
+        'retry_delay': timedelta(minutes=1),
+        'schedule_interval': None
+    }
 
-The third part will be a call to the cornflow server uploading a solution (if any is available).
+    from utils import cf_solve
+    dag_name = 'hk_2020_dag'
+    def solve_hk(**kwargs):
+        return cf_solve(solve_from_dict, dag_name, **kwargs)
 
-In anything goes wrong, the dag still needs to report to cornflow to tell it it's finished incorrectly.
+    hackathon_task = PythonOperator(
+        task_id='hk_2020_task',
+        python_callable=solve_hk,
+        dag=dag
+    )
 
-In the case of the hackathon2020, the dag file is named: `hk_2020_dag.py`
+Name
+-----
+
+Just put a name and use it inside the DAG generation. The name *needs* to be defined as a separate variable!
+
+In the hackathon we have::
+
+    name = 'hk_2020_dag'
+    dag = DAG(name, default_args=default_args, schedule_interval=None)
+
 
 The input schema and output schema
 -----------------------------------------
 
 Both schemas are built and deployed similarly so we present how the input schema is done.
 
-The input schema is a json schema file (https://json-schema.org/) that includes all the characteristics of the input data for this dag. This file can be built with many tools (a regular text editor could be enough). We will detail how to do this later.
+The input schema is a json schema file (https://json-schema.org/) that includes all the characteristics of the input data for each dag. This file can be built with many tools (a regular text editor could be enough). We will detail how to do this later.
 
-The input schema is stored in the Variables storage of Airflow. In order to upload it, only one option is currently supported: put the json file with the name of the dag (**NOT the dag-file name!**) followed by `_input.json` in the `DAG` directory. In the future, it would be possible to re-use a json schema by editing the `update_all_schemas.py` dag.
+The input schema is stored in the Variables storage of Airflow. In order to upload it: you need to have an `instance` variable available in your dag file.
+
+In the case of the hackathon, these variables are imported from the package::
+
+    from hackathonbaobab2020.schemas import instance, solution
 
 Once uploaded, these schemas will be accessible to cornflow and will be used to validate input data and solutions for this dag.
 
-In the case of the hackathon2020, the schemas are named: `hk_2020_dag_input.json` and `hk_2020_dag_output.json`
+Test cases
+------------
+
+This function is used in the unittests to be sure the solver works as intended. In the hackathon example we take the examples from the package::
+
+    def test_cases():
+        options = [('j10.mm.zip', 'j102_4.mm'), ('j10.mm.zip', 'j102_5.mm'), ('j10.mm.zip', 'j102_6.mm')]
+        return [get_test_instance(*op).to_dict() for op in options]

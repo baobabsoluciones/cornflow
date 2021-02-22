@@ -1,7 +1,6 @@
 from cornflow_client import CornFlow, SchemaManager
 from hackathonbaobab2020.tests import get_test_instance
 from hackathonbaobab2020 import get_solver
-from hackathonbaobab2020.core.tools import dict_to_list
 import json
 import os
 
@@ -9,6 +8,7 @@ import os
 email = 'pchtsp789@gmail.com'
 pwd = 'some_password'
 name = 'some_name'
+
 
 def run_example():
     server = "https://devsm.cornflow.baobabsoluciones.app"
@@ -31,11 +31,13 @@ def run_example():
                                       description=description,
                                       data_schema='hk_2020_dag')
 
-    config = dict(solver="ortools", timeLimit=10)
+    config = dict(solver="default", timeLimit=10)
     execution = client.create_execution(
-        instance['id'], config, name='ortools1', description='',
+        instance['id'], config, name='default1', description='',
         dag_name='hk_2020_dag'
     )
+    client.get_status(execution['id'])['state']
+    data = client.get_solution(execution['id'])
 
 
 def test_schema_solution():
@@ -43,17 +45,14 @@ def test_schema_solution():
     solver = get_solver('ortools')
     exp = solver(instance_obj)
     solution = exp.solve({})
-    solution_dict = dict_to_list(exp.solution.data, 'job')
+    solution_dict = exp.solution.to_dict()
     file_name = os.path.join(os.path.dirname(__file__), "..", 'DAG', 'hk_2020_dag_output.json')
     os.path.exists(file_name)
     with open(file_name, 'r') as f:
         schema = json.load(f)
-
     marshmallow_obj = SchemaManager(schema).jsonschema_to_flask()
     data = marshmallow_obj().load(solution_dict)
-    marshmallow_obj().__dict__
     # marshmallow_obj().fields['jobs'].nested().fields['successors']
-
 
 
 if __name__ == '__main__':

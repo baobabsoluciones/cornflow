@@ -11,9 +11,7 @@
       "required": ["name", "value"]
     }
   },
-
   "type": "object",
-
   "properties": {
     "objective": {
       "type": "object",
@@ -26,33 +24,17 @@
           }
         }
       },
-      "required": [
-        "coefficients"
-      ]
+      "required": ["coefficients"]
     },
     "constraints": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "sense": {
-            "type": "integer"
-          },
-          "pi": {
-            "type": [
-              "number",
-              "null"
-            ]
-          },
-          "constant": {
-            "type": [
-              "number",
-              "null"
-            ]
-          },
+          "name": {"type": "string"},
+          "sense": {"type": "integer"},
+          "pi": {"type": [ "number", "null" ]},
+          "constant": {"type": ["number", "null"]},
           "coefficients": {
             "type": "array",
             "items": {
@@ -60,12 +42,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "sense",
-          "pi",
-          "coefficients"
-        ]
+        "required": ["name", "sense", "pi", "coefficients"]
       }
     },
 	"variables": {

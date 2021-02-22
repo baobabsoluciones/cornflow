@@ -2,10 +2,33 @@ from cornflow_client import CornFlow, CornFlowApiError, SchemaManager
 from airflow import AirflowException
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 from urllib.parse import urlparse
+from marshmallow.exceptions import ValidationError
+from datetime import datetime, timedelta
 import json
 import os
 
 # TODO: move these functions to cornflow client
+
+default_args = {
+    'owner': 'baobab',
+    'depends_on_past': False,
+    'start_date': datetime(2020, 2, 1),
+    'email': [''],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retry_delay': timedelta(minutes=1),
+    'schedule_interval': None
+}
+
+
+def get_schemas_from_file(dag_name):
+    _dir = os.path.dirname(__file__)
+    with open(os.path.join(_dir, dag_name + '_input.json'), 'r') as f:
+        instance = json.load(f)
+    with open(os.path.join(_dir, dag_name + '_output.json'), 'r') as f:
+        solution = json.load(f)
+    return instance, solution
+
 
 def get_arg(arg, context):
     """
@@ -81,6 +104,23 @@ def try_to_save_error(client, exec_id, state=-1):
         print("An exception trying to register the failed status: {}".format(e))
 
 
+def try_to_write_solution(client, exec_id, payload):
+    try:
+        client.write_solution(execution_id=exec_id, **payload)
+    except CornFlowApiError:
+        try_to_save_error(client, exec_id, -6)
+        # attempt to update the execution with a failed status.
+        raise AirflowException('The writing of the solution failed')
+
+
+def get_schema(dag_name):
+    _file = os.path.join(os.path.dirname(__file__),
+                         "{}_output.json".format(dag_name))
+    with open(_file, 'r') as f:
+        schema = json.load(f)
+    return schema
+
+
 def cf_solve(fun, dag_name, **kwargs):
     """
     Connect to cornflow, ask for data, solve the problem and write the solution in cornflow
@@ -96,47 +136,38 @@ def cf_solve(fun, dag_name, **kwargs):
     try:
         solution, log, log_json = fun(data, config)
     except NoSolverException as e:
+        print("No solver found !")
         try_to_save_error(client, exec_id, -1)
         raise AirflowException(e)
     except Exception as e:
+        print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         raise AirflowException('There was an error during the solving')
+    payload = dict(state=1, log_json=log_json, log_text=log,
+                   solution_schema=dag_name)
+    if not solution:
+        # No solution found: we just send everything to cornflow.
+        try_to_write_solution(client, exec_id, payload)
+    # There is a solution:
+    # we first need to validate the schema.
+    # If it's not: we change the status to Invalid
+    # and take out the server validation of the schema\
+    # TODO: not sure if this idea makes sense
+    print("A solution was found: we will first validate it")
+    payload['data'] = solution
     try:
-
-        _file = os.path.join(os.path.dirname(__file__),
-                             "{}_output.json".format(dag_name))
-        with open(_file, 'r') as f:
-            schema = json.load(f)
-    except:
-        try_to_save_error(client, exec_id, -1)
-        raise AirflowException('Error while loading solution schema')
-    if solution:
-        # we check if the solution is compatible with the schema.
-        # If it's not: we change the status to Invalid
-        # and take out the server validation of the schema\
-        # TODO: not sure if this idea makes sense
+        schema = get_schema(dag_name)
         marshmallow_obj = SchemaManager(schema).jsonschema_to_flask()
-        data = marshmallow_obj().load(solution)
-        if data is None:
-            log_json['status'] = 'Invalid'
-            dag_name = None
-        payload = dict(data = solution, log_json=log_json, log_text=log,
-                       solution_schema = dag_name, state=1)
-    else:
-        payload = dict(state = 1, log_json=log_json, log_text=log,
-                       solution_schema = dag_name)
-    
-    # Send the solution to cornflow.
-    try:
-        client.write_solution(execution_id=exec_id, **payload)
-    except CornFlowApiError:
-        try_to_save_error(client, exec_id, -6)
-        # attempt to update the execution with a failed status.
-        raise AirflowException('The writing of the solution failed')
+        marshmallow_obj().load(solution)
+    except Exception as e:
+        print("Validation failed! we will save it still. {}".format(e))
+        payload['log_json']['status'] = 'Invalid'
+        payload['solution_schema'] = None
 
+    try_to_write_solution(client, exec_id, payload)
 
-    if solution:
-        return "Solution saved"
+    # The validation went correctly: can save the solution without problem
+    return "Solution saved"
 
 
 class NoSolverException(Exception):

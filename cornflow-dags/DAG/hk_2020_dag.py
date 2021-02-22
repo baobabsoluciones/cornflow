@@ -1,39 +1,34 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from datetime import datetime, timedelta
-from utils import cf_solve, NoSolverException
+try:
+    import utils
+except ImportError:
+    import DAG.utils as utils
 from hackathonbaobab2020 import get_solver, Instance
-from hackathonbaobab2020.core.tools import dict_to_list
+from hackathonbaobab2020.tests import get_test_instance
+
+# This needs to remain to we can get the instance and solution schemas from outside
+from hackathonbaobab2020.schemas import instance, solution
 
 from timeit import default_timer as timer
 
-default_args = {
-    'owner': 'baobab',
-    'depends_on_past': False,
-    'start_date': datetime(2020, 2, 1),
-    'email': [''],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retry_delay': timedelta(minutes=1),
-    'schedule_interval': None
-}
 
-dag_name = 'hk_2020_dag'
-dag = DAG(dag_name, default_args=default_args, schedule_interval=None)
+name = 'hk_2020_dag'
+dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 
 
-def solve_from_dict(data, config):
+def solve(data, config):
     """
     :param data: json for the problem
     :param config: execution configuration, including solver
     :return: solution and log
     """
     print("Solving the model")
-    solver = config.get('solver')
+    solver = config.get('solver', 'default')
     solver_class = get_solver(name=solver)
     if solver_class is None:
-        raise NoSolverException("Solver {} is not available".format(solver))
+        raise utils.NoSolverException("Solver {} is not available".format(solver))
     inst = Instance.from_dict(data)
     algo = solver_class(inst)
     start = timer()
@@ -50,7 +45,7 @@ def solve_from_dict(data, config):
         # export everything:
         status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
         log = dict(time=timer() - start, solver=solver, status=status_conv.get(status, "Unknown"))
-        sol = dict_to_list(algo.solution.data, 'job')
+        sol = algo.solution.to_dict()
     else:
         log = dict()
         sol = {}
@@ -58,7 +53,12 @@ def solve_from_dict(data, config):
 
 
 def solve_hk(**kwargs):
-    return cf_solve(solve_from_dict, dag_name, **kwargs)
+    return utils.cf_solve(solve, name, **kwargs)
+
+
+def test_cases():
+    options = [('j10.mm.zip', 'j102_4.mm'), ('j10.mm.zip', 'j102_5.mm'), ('j10.mm.zip', 'j102_6.mm')]
+    return [get_test_instance(*op).to_dict() for op in options]
 
 
 hackathon_task = PythonOperator(

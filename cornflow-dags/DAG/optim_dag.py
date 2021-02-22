@@ -1,28 +1,22 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from datetime import datetime, timedelta
-from utils import cf_solve
+try:
+    import utils
+except ImportError:
+    import DAG.utils as utils
+
 import pulp as pl
 import orloge as ol
 import os
-from utils import NoSolverException
-
-default_args = {
-    'owner': 'baobab',
-    'depends_on_past': False,
-    'start_date': datetime(2020, 2, 1),
-    'email': [''],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retry_delay': timedelta(minutes=1),
-    'schedule_interval': None
-}
-dag_name = 'solve_model_dag'
-dag = DAG(dag_name, default_args=default_args, schedule_interval=None)
 
 
-def solve_model(data, config):
+name = 'solve_model_dag'
+dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
+instance, solution = utils.get_schemas_from_file(name)
+
+
+def solve(data, config):
     """
     :param data: pulp json for the model
     :param config: pulp config for solver
@@ -34,12 +28,14 @@ def solve_model(data, config):
     # we overwrite the logPath argument before solving.
     log_path = config['logPath'] = 'temp.log'
     config['msg'] = 0
+    if 'solver' not in config:
+        config['solver'] = 'PULP_CBC_CMD'
     try:
         solver = pl.getSolverFromDict(config)
     except pl.PulpSolverError:
-        raise NoSolverException("Missing solver attribute")
+        raise utils.NoSolverException("Missing solver attribute")
     if solver is None or not solver.available():
-        raise NoSolverException("Solver {} is not available".format(solver))
+        raise utils.NoSolverException("Solver {} is not available".format(solver))
     model.solve(solver)
     solution = model.to_dict()
 
@@ -74,7 +70,19 @@ def solve_model(data, config):
 
 
 def run_solve(**kwargs):
-    return cf_solve(solve_model, dag_name, **kwargs)
+    return utils.cf_solve(solve, name, **kwargs)
+
+
+def test_cases():
+    prob = pl.LpProblem("test_export_dict_MIP", pl.LpMinimize)
+    x = pl.LpVariable("x", 0, 4)
+    y = pl.LpVariable("y", -1, 1)
+    z = pl.LpVariable("z", 0, None, pl.LpInteger)
+    prob += x + 4 * y + 9 * z, "obj"
+    prob += x + y <= 5, "c1"
+    prob += x + z >= 10, "c2"
+    prob += -y + z == 7.5, "c3"
+    return [prob.toDict()]
 
 
 solve_task = PythonOperator(
