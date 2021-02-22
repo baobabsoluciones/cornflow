@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "nodes": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "pairs": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n1": {
+                        "type": "integer"
+                    },
+                    "n2": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["n1", "n2"]
+            }
+        }
+    },
+    "required": ["nodes", "pairs"]
+}

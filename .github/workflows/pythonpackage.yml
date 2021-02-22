@@ -25,4 +25,4 @@ jobs:
         pip install .
     - name: Test
       run: |
-        python -m unittest discover -s tests
+        python -m unittest discover -s cornflow_client/tests

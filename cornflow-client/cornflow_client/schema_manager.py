@@ -141,13 +141,6 @@ class SchemaManager:
         
         self.schema_dict = self.get_empty_schema()
 
-        # if jsonschema["type"] == 'array':
-        #     item = "Object", jsonschema["items"]
-        #     self._get_element_dict(item)
-        #     item2 = "Object", jsonschema
-        #     self._create_data_schema(item2)
-        #     return self.schema_dict
-
         if "definitions" in jsonschema:
             for item in jsonschema["definitions"].items():
                 self._get_element_dict(item)
@@ -237,21 +230,21 @@ class SchemaManager:
         """
         Add a schema to self.schema_dict["DataSchema"]
 
-        :param item: (key, value) of a dict. The key cotain the name of the schema and the value containt its content.
+        :param item: (key, value) of a dict. The key contains the name of the schema
+            and the value contains its content.
 
         return the schema dict.
         """
-        name = item[0]
-        content = item[1]
-    
+        name, content = item
+
         schema = [dict(name=name,
-                       type=self._get_schema_name(name),
+                       type=self._get_type_or_new_schema(item),
                        many=("type" in content and content["type"] == "array"),
                        required=True)]
         self.schema_dict[DATASCHEMA] += schema
     
         return schema
-    
+
     def _get_element_dict(self, item, required_list=None):
         """
         Parse an item (key, value) from the jsonschema and return the corresponding dict.
@@ -264,8 +257,7 @@ class SchemaManager:
         if required_list is None:
             required_list = []
             
-        name = item[0]
-        content = item[1]
+        name, content = item
         if "type" not in content:
             if "$ref" in content:
                 return {
@@ -290,7 +282,7 @@ class SchemaManager:
                 "name": name,
                 "type": self._get_array_schema(item),
                 "many": True,
-                "required": (name in required_list)
+                "required": (name in required_list),
             }
         else:
             return self._get_field_dict(item, required_list)
@@ -310,8 +302,7 @@ class SchemaManager:
         
         :return: The schema name
         """
-        name = item[0]
-        content = item[1]
+        name, content = item
         schema_name = self._get_new_schema_name(name)
         ell = \
             {schema_name: [self._get_element_dict(i, self._get_required(content))
@@ -334,8 +325,8 @@ class SchemaManager:
 
         :return: The schema name
         """
-        name = item[0]
-        content = item[1]["items"]
+        name, content = item
+        content = content['items']
         schema_name = self._get_new_schema_name(name)
         if "type" in content and content["type"] == "object":
             self.schema_dict.update(
@@ -384,7 +375,21 @@ class SchemaManager:
         content = item[1]
         ref = re.search("definitions/(.+)", content["$ref"]).group(1)
         return self._get_schema_name(ref)
-    
+
+    def _get_type_or_new_schema(self, item):
+        """
+        returns a new schema or a type depending on the json_type
+
+        :param json_type: the type in jsonschema
+        """
+        name, content = item
+        if 'type' not in content or content["type"] == 'object':
+            return self._get_schema_name(name)
+        elif content["type"] == 'array':
+            return self._get_type_or_new_schema((name, content['items']))
+        else:
+            return self._get_type(content['type'])
+
     def _get_type(self, json_type):
         """
         Translate the type between jsonschema and schema_dict.
