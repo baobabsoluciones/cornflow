@@ -4,13 +4,18 @@ Architecture
 Components
 -------------
 
-TODO: add diagrams from ppt.
-TODO: update them to show that the instance post endpoint calls airflow now.
 
 Cornflow
 ***********
 
 The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.
+
+
+.. _architecture:
+
+.. figure:: ./../_static/architecture.png
+
+   Components with the connections between them
 
 
 Airflow
@@ -43,7 +48,7 @@ Data flows
 
 .. _my-figure:
 
-.. figure:: ./_static/architecture.png
+.. figure:: ./../_static/data_flow.png
 
    The main data flows between components
 

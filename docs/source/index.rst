@@ -4,14 +4,10 @@ Cornflow documentation
 Contents:
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
-    Install <includeme>
-    concepts
-    architecture
-    admin-spa
-    python-api
-    examples
-    models
-    endpoints
+    main/index
+    clients/index
+    guides/index
+    dev/index
     API reference <stable-rest-api-ref>
