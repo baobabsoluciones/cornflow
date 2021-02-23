@@ -61,5 +61,33 @@ def run_example():
     print(log['log'])
     # a json version of the log
 
+
+def example_migrate_execution():
+    email = 'airflow_test@admin.com'
+    pwd = 'airflow_test_password'
+    server = "http://127.0.0.1:5000"
+    client = CornFlow(url=server)
+    a = client.login(email, pwd)
+    info_all = client.get_all_instances()
+    instance = info_all[-1]
+    info = client.get_one_instance(instance['id'])
+    inst_data = client.get_api_for_id('instance/', instance['id'], 'data')
+    inst_data = inst_data.json()
+    execution = info['executions'][-1]
+    results = client.get_solution(execution['id'])
+    log = client.get_log(execution['id'])
+
+    # now we go to the other server:
+    server2 = "SOME_OTHER_SERVER"
+    client2 = CornFlow(url=server2)
+    client2.login('ADMIN_USER', 'ADMIN_PASS')
+
+    # create instance in another server
+    instance2 = client2.create_instance(inst_data['data'], name=info['name'], description=info['description'])
+    execution_new = client.manual_execution(instance_id=instance2['id'], config=execution['config'],
+                            name=execution['name'], data=results['data'],
+                            log_json=log['log'])
+
+
 if __name__ == '__main__':
     run_example()

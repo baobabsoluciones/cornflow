@@ -40,11 +40,11 @@ class TestInstances(CustomTestCase):
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext2(self):
-        file = './cornflow/tests/data/dict_schema_example.py'
+        file = './cornflow/tests/data/gc_20_7.json'
         response = self.create_new_row_file(file)
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext3(self):
-        file = './cornflow/tests/data/dict_schema_example.py'
+        file = './cornflow/tests/unit/test_instances.py'
         response = self.create_new_row_file(file, filename='test.mps')
         self.assertEqual(400, response.status_code)
