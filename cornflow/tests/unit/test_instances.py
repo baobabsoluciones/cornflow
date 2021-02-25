@@ -1,16 +1,14 @@
 import json
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
-
-INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
-INSTANCES_LIST = [INSTANCE_PATH, './cornflow/tests/data/new_instance_2.json']
+from cornflow.tests.const import INSTANCE_URL, INSTANCES_LIST, INSTANCE_PATH
 
 
 class TestInstancesListEndpoint(CustomTestCase):
 
     def setUp(self):
         super().setUp()
-        self.url = '/instance/'
+        self.url = INSTANCE_URL
         self.model = InstanceModel
         self.response_items = {'id', 'name', 'description', 'created_at'}
         self.items_to_check = ['name', 'description']
@@ -54,7 +52,7 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
         super().setUp()
         # the order of the following three lines *is important*
         # to create the instance and *then* update the url
-        self.url = '/instance/'
+        self.url = INSTANCE_URL
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
@@ -105,7 +103,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
     def test_get_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=id)}
-        result = self.get_one_row('/instance/' + id + '/data/', payload)
+        result = self.get_one_row(INSTANCE_URL + id + '/data/', payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -120,7 +118,7 @@ class TestInstanceModelMethods(CustomTestCase):
 
     def setUp(self):
         super().setUp()
-        self.url = '/instance/'
+        self.url = INSTANCE_URL
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)

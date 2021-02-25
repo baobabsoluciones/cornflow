@@ -4,18 +4,16 @@ Architecture
 Components
 -------------
 
-
-Cornflow
-***********
-
-The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.
-
-
 .. _architecture:
 
 .. figure:: ./../_static/architecture.png
 
    Components with the connections between them
+
+Cornflow
+***********
+
+The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.
 
 
 Airflow
@@ -53,24 +51,30 @@ Data flows
    The main data flows between components
 
 
-CREATE INSTANCE (in green):
+Create instance(data):
 
-#. client calls Cornflow and sends instance.
-#. Cornflow saves the instance and gives back instance code to client.
+#. Client calls Cornflow and sends instance.
+#. Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.
+#. Cornflow saves the instance and returns the instance code to client.
 
+Solve instance(instance, config, dag):
 
-SOLVE INSTANCE (in orange):
+#. Client calls Cornflow and gives instance code and execution configuration.
+#. Cornflow asks cornflow for schema and validates the instance matches the dag to execute.
+#. Cornflow calls airflow dag and assigns dagrun code to execution.
+#. Cornflow creates execution and returns the execution code to client.
+#. Airflow creates a rundag for the selected dag and sends it to a worker.
+#. the worker asks Cornflow for the instance and the config.
+#. the worker solves the problem.
+#. the worker sends Cornflow the results (solution and log) of the execution.
 
-#. client calls Cornflow and gives instance code and execution configuration.
-#. Cornflow creates execution, calls airflow dag and sends execution code.
-#. Cornflow, returns code to the user.
-#. Airflow executes a dag (creates a rundag for the instance) and sends it to a worker.
-#. the dagrun asks the data from Cornflow for the instance and the config for that execution.
-#. the dagrun solves the problem.
-#. the dagrun sends Cornflow the results of the execution.
+Retrieve status(execution):
 
-RETRIEVE INSTANCE (in purple):
+#. The client asks Cornflow for the results to an execution.
+#. If Cornflow does not know it: it asks Airflow for the status.
+#. Cornflow returns the status to the user.
 
-#. The client can check the status of the execution via Cornflow.
-#. Cornflow asks Airflow for status and returns it to the user.
-#. The client can download the results when the execution finishes.
+Retrieve results(execution):
+
+#. The client asks Cornflow for the results to an execution.
+#. Cornflow returns the execution solution and / or log.
