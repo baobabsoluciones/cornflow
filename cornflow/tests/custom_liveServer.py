@@ -3,6 +3,7 @@ import cornflow_client as cf
 
 from cornflow.app import create_app
 from cornflow.shared.utils import db
+from cornflow.tests.const import PREFIX
 
 
 class CustomTestCaseLive(LiveServerTestCase):
@@ -40,3 +41,12 @@ class CustomTestCaseLive(LiveServerTestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+
+    def get_server_url(self):
+        """
+        Return the url of the test server
+        """
+        prefix = PREFIX
+        if prefix:
+            prefix += '/'
+        return 'http://localhost:%s' % self._port_value.value + prefix

@@ -5,7 +5,7 @@ from cornflow.app import create_app
 from cornflow.models import UserModel
 from cornflow.shared.utils import db
 from cornflow.shared.authentication import Auth
-
+from cornflow.tests.const import LOGIN_URL
 
 class CustomTestCase(TestCase):
 
@@ -25,7 +25,7 @@ class CustomTestCase(TestCase):
         db.session.commit()
         data.pop('name')
 
-        self.token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+        self.token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
 
         self.user = Auth.return_user_from_token(self.token)
@@ -52,7 +52,7 @@ class CustomTestCase(TestCase):
         user.save()
         db.session.commit()
         data.pop('name')
-        return self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+        return self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
 
     def tearDown(self):

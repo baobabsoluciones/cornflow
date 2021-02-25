@@ -4,6 +4,7 @@ from flask_testing import TestCase
 
 from cornflow.app import create_app
 from cornflow.shared.utils import db
+from cornflow.tests.const import SIGNUP_URL
 
 
 class TestSignUp(TestCase):
@@ -28,7 +29,7 @@ class TestSignUp(TestCase):
     def test_successful_signup(self):
         payload = self.data
 
-        response = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+        response = self.client.post(SIGNUP_URL, data=json.dumps(payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json"})
 
         self.assertEqual(201, response.status_code)
@@ -38,10 +39,10 @@ class TestSignUp(TestCase):
     def test_existing_name_signup(self):
         payload = self.data
         
-        self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+        self.client.post(SIGNUP_URL, data=json.dumps(payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json"})
         
-        response2 = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+        response2 = self.client.post(SIGNUP_URL, data=json.dumps(payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json"})
         
         self.assertEqual(400, response2.status_code)
@@ -52,7 +53,7 @@ class TestSignUp(TestCase):
         payload = self.data
         payload['email'] = 'test'
 
-        response = self.client.post('/signup/', data=json.dumps(payload), follow_redirects=True,
+        response = self.client.post(SIGNUP_URL, data=json.dumps(payload), follow_redirects=True,
                                     headers={"Content-Type": "application/json"})
 
         self.assertEqual(400, response.status_code)
