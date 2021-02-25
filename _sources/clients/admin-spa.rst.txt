@@ -1,7 +1,7 @@
 Admin client
 ==============
 
-The `Cornflow-admin app <https://github.com/baobabsoluciones/cornflow-admin>`_ is an app that handles the basic functionality of the REST API to administer a Cornflow Server. It can also be used by any user to communicate with the server.
+The `Cornflow admin app <https://github.com/baobabsoluciones/cornflow-admin>`_ is an SPA app that handles the basic functionality of the REST API to administer a Cornflow Server. It can also be used by any user to communicate with the server.
 
 It allows the:
 
@@ -23,3 +23,6 @@ https://devsm.cornflow-admin.baobabsoluciones.app/
 .. figure:: ./../_static/spa_client.png
 
    SPA client showing an instance with an execution
+
+
+

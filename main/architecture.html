@@ -184,13 +184,13 @@
 <h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="components">
 <h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="cornflow">
-<h3>Cornflow<a class="headerlink" href="#cornflow" title="Permalink to this headline">¶</a></h3>
-<p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.</p>
 <div class="figure align-default" id="id2">
 <span id="id1"></span><img alt="../_images/architecture.png" src="../_images/architecture.png" />
 <p class="caption"><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
+<div class="section" id="cornflow">
+<h3>Cornflow<a class="headerlink" href="#cornflow" title="Permalink to this headline">¶</a></h3>
+<p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.</p>
 </div>
 <div class="section" id="airflow">
 <h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
@@ -215,26 +215,33 @@
 <span id="my-figure"></span><img alt="../_images/data_flow.png" src="../_images/data_flow.png" />
 <p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
-<p>CREATE INSTANCE (in green):</p>
+<p>Create instance(data):</p>
 <ol class="arabic simple">
-<li><p>client calls Cornflow and sends instance.</p></li>
-<li><p>Cornflow saves the instance and gives back instance code to client.</p></li>
+<li><p>Client calls Cornflow and sends instance.</p></li>
+<li><p>Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.</p></li>
+<li><p>Cornflow saves the instance and returns the instance code to client.</p></li>
 </ol>
-<p>SOLVE INSTANCE (in orange):</p>
+<p>Solve instance(instance, config, dag):</p>
 <ol class="arabic simple">
-<li><p>client calls Cornflow and gives instance code and execution configuration.</p></li>
-<li><p>Cornflow creates execution, calls airflow dag and sends execution code.</p></li>
-<li><p>Cornflow, returns code to the user.</p></li>
-<li><p>Airflow executes a dag (creates a rundag for the instance) and sends it to a worker.</p></li>
-<li><p>the dagrun asks the data from Cornflow for the instance and the config for that execution.</p></li>
-<li><p>the dagrun solves the problem.</p></li>
-<li><p>the dagrun sends Cornflow the results of the execution.</p></li>
+<li><p>Client calls Cornflow and gives instance code and execution configuration.</p></li>
+<li><p>Cornflow asks cornflow for schema and validates the instance matches the dag to execute.</p></li>
+<li><p>Cornflow calls airflow dag and assigns dagrun code to execution.</p></li>
+<li><p>Cornflow creates execution and returns the execution code to client.</p></li>
+<li><p>Airflow creates a rundag for the selected dag and sends it to a worker.</p></li>
+<li><p>the worker asks Cornflow for the instance and the config.</p></li>
+<li><p>the worker solves the problem.</p></li>
+<li><p>the worker sends Cornflow the results (solution and log) of the execution.</p></li>
 </ol>
-<p>RETRIEVE INSTANCE (in purple):</p>
+<p>Retrieve status(execution):</p>
 <ol class="arabic simple">
-<li><p>The client can check the status of the execution via Cornflow.</p></li>
-<li><p>Cornflow asks Airflow for status and returns it to the user.</p></li>
-<li><p>The client can download the results when the execution finishes.</p></li>
+<li><p>The client asks Cornflow for the results to an execution.</p></li>
+<li><p>If Cornflow does not know it: it asks Airflow for the status.</p></li>
+<li><p>Cornflow returns the status to the user.</p></li>
+</ol>
+<p>Retrieve results(execution):</p>
+<ol class="arabic simple">
+<li><p>The client asks Cornflow for the results to an execution.</p></li>
+<li><p>Cornflow returns the execution solution and / or log.</p></li>
 </ol>
 </div>
 </div>
