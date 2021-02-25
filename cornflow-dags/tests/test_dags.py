@@ -2,7 +2,7 @@ import os, sys
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
 import unittest
-from DAG.update_all_schemas import get_all_apps
+from update_all_schemas import get_all_apps
 from cornflow_client import SchemaManager
 
 
