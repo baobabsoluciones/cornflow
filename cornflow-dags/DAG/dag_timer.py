@@ -1,10 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 import time
-try:
-    import utils
-except ImportError:
-    import DAG.utils as utils
+import utils
 
 # Following are defaults which can be overridden later on
 name = 'timer'

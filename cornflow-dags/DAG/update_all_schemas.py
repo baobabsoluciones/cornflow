@@ -29,8 +29,9 @@ def get_all_apps():
     files = os.listdir(_dir)
     return [_import_file(os.path.splitext(f)[0]) for f in files if is_app(f)]
 
+
 def _import_file(filename):
-    return il.import_module('.' + filename, package='DAG')
+    return il.import_module(filename)
 
 
 def is_app(dag_module):

@@ -1,10 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-try:
-    import utils
-except ImportError:
-    import DAG.utils as utils
+import utils
 from hackathonbaobab2020 import get_solver, Instance
 from hackathonbaobab2020.tests import get_test_instance
 

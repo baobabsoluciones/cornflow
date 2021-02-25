@@ -1,10 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-try:
-    import utils
-except ImportError:
-    import DAG.utils as utils
+import utils
 
 import pulp as pl
 import orloge as ol

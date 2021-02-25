@@ -1,10 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-try:
-    import utils
-except ImportError:
-    import DAG.utils as utils
+import utils
 
 from ortools.sat.python import cp_model
 import pytups as pt
