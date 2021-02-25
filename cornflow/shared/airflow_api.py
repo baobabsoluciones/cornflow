@@ -25,21 +25,29 @@ class Airflow(object):
         return data['metadatabase']['status'] == 'healthy' and \
                data['scheduler']['status'] == 'healthy'
 
+    def request_headers_auth(self, status=200, **kwargs):
+        def_headers =\
+            {'Content-type': 'application/json',
+                   'Accept': 'application/json'}
+        headers = kwargs.get('headers', def_headers)
+        response = requests.request(headers=headers, auth=self.auth, **kwargs)
+        if status is None:
+            return response
+        if response.status_code != status:
+            raise AirflowError(error=response.text,
+                               status_code=response.status_code)
+        return response
+
     def consume_dag_run(self, dag_name, payload, dag_run_id=None, method='POST'):
         url = "{}/dags/{}/dagRuns".format(self.url, dag_name)
         if dag_run_id is not None:
             url = url + '/{}'.format(dag_run_id)
-        response = requests.request(
-            method=method,
-            url=url,
-            headers={'Content-type': 'application/json',
-                     'Accept': 'application/json'},
-            auth=self.auth,
-            json=payload)
-        if response.status_code != 200:
-            raise AirflowError(error='Airflow responded with a status: {}:\n{}'.
-                               format(response.status_code, response.text))
+        response = self.request_headers_auth(method=method, url=url, json=payload)
         return response
+
+    def set_dag_run_state(self, dag_name, payload):
+        url = "{}/dags/{}/updateTaskInstancesState".format(self.url, dag_name)
+        return self.request_headers_auth(method='POST', url=url, json=payload)
 
     def run_dag(self, execution_id, dag_name='solve_model_dag'):
         conf = dict(exec_id=execution_id)
@@ -49,33 +57,28 @@ class Airflow(object):
     def get_dag_run_status(self, dag_name, dag_run_id):
         return self.consume_dag_run(dag_name, payload=None, dag_run_id=dag_run_id, method='GET')
 
+    def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
+        # here, two calls have to be done:
+        # first we get information on the dag_run
+        dag_run = self.consume_dag_run(dag_name, payload=None, dag_run_id=dag_run_id, method='GET')
+        dag_run_data = dag_run.json()
+        # then, we use the "executed_date" to build a call to the change state api
+        # TODO: We assume the solving task is named as is parent dag!
+        payload = dict(dry_run=False, include_downstream=True, include_future=False, include_past=False,
+                       include_upstream=True, new_state=new_status, task_id=dag_name,
+                       execution_date=dag_run_data['execution_date'])
+        return self.set_dag_run_state(dag_name, payload=payload)
+
     def get_all_dag_runs(self, dag_name):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method='GET')
 
     def get_dag_info(self, dag_name, method='GET'):
         url = "{}/dags/{}".format(self.url, dag_name)
-        response = requests.request(
-            method=method,
-            url=url,
-            headers={'Content-type': 'application/json',
-                     'Accept': 'application/json'},
-            auth=self.auth)
-        if response.status_code != 200:
-            raise AirflowError(error='Airflow responded with a status: {}:\n{}'.
-                               format(response.status_code, response.text))
-        return response
+        return self.request_headers_auth(method=method, url=url)
 
     def get_one_variable(self, variable):
         url = "{}/variables/{}".format(self.url, variable)
-        response = requests.request(
-            method='GET',
-            url=url,
-            headers={'Content-type': 'application/json',
-                     'Accept': 'application/json'},
-            auth=self.auth)
-        if response.status_code != 200:
-            raise AirflowError(error=response.text,
-                               status_code=response.status_code)
+        response = self.request_headers_auth(method='GET', url=url)
         return response.json()['value']
 
     def get_one_schema(self, dag_name, schema):

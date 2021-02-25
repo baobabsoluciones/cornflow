@@ -28,6 +28,7 @@ class ProgressSchema(Schema):
     ItpNode = list_of_strings
     Gap = list_of_strings
     Time = list_of_strings
+    Depth = list_of_strings
 
 
 class Cuts(Schema):

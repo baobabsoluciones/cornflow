@@ -7,6 +7,7 @@ from cornflow_client import CornFlowApiError
 from cornflow.shared.utils import db
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 from cornflow.models import UserModel
+from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_STOPPED, EXEC_STATE_RUNNING
 from cornflow.tests.const import INSTANCE_PATH
 
 
@@ -81,11 +82,21 @@ class TestCornflowClientBasic(CustomTestCaseLive):
                        name=name)
         return self.create_new_execution(payload)
 
+    def create_timer_instance_and_execution(self, seconds=5):
+        payload = dict(data=dict(seconds=seconds), name="timer_instance",
+                       data_schema='timer', description='timer_description')
+        one_instance = self.create_new_instance_payload(payload)
+        payload = dict(instance_id=one_instance['id'],
+                       config=dict(),
+                       name="timer_execution",
+                       description='timer_exec_description',
+                       dag_name='timer')
+        return self.create_new_execution(payload)
+
 
 class TestCornflowClient(TestCornflowClientBasic):
 
     # TODO: user management
-    # TODO: test joining urls with url_join goes bad
     # TODO: infeasible execution
 
     def test_new_instance_file(self):
@@ -134,7 +145,7 @@ class TestCornflowClient(TestCornflowClientBasic):
                        description=description,
                        name=name,
                        dag_name='solve_model_dag_bad_this_does_not_exist')
-        _bad_func = lambda : self.client.create_execution(**payload)
+        _bad_func = lambda: self.client.create_execution(**payload)
         self.assertRaises(CornFlowApiError, _bad_func)
 
     def test_new_execution_with_schema(self):
@@ -195,7 +206,8 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         response = self.login_or_signup(user_data)
         self.client.token = response['token']
 
-    def create_super_admin(self, data):
+    @staticmethod
+    def create_super_admin(data):
         user = UserModel(data=data)
         user.super_admin = True
         user.save()
@@ -207,8 +219,22 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(15)
         status = self.client.get_status(execution['id'])
         results = self.client.get_results(execution['id'])
-        self.assertEqual(status['state'], 1)
-        self.assertEqual(results['state'], 1)
+        self.assertEqual(status['state'], EXEC_STATE_CORRECT)
+        self.assertEqual(results['state'], EXEC_STATE_CORRECT)
+
+    def test_interrupt(self):
+        execution = self.create_timer_instance_and_execution(5)
+        self.client.stop_execution(execution_id=execution['id'])
+        time.sleep(2)
+        status = self.client.get_status(execution['id'])
+        results = self.client.get_results(execution['id'])
+        self.assertEqual(status['state'], EXEC_STATE_STOPPED)
+        self.assertEqual(results['state'], EXEC_STATE_STOPPED)
+
+    def test_status_solving(self):
+        execution = self.create_timer_instance_and_execution(5)
+        status = self.client.get_status(execution['id'])
+        self.assertEqual(status['state'], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
         def load_file(_file):
@@ -267,7 +293,5 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         payload = dict(name='bla', config=dict(solver='CBC'), instance_id=one_instance['id'])
         execution = self.client.create_api('execution/?run=0', json=payload)
         payload = dict(log_text='')
-        response = self.client.put_api_for_id('dag/', execution.json()['id'], payload=payload)
+        response = self.client.put_api_for_id(api='dag/', id=execution.json()['id'], payload=payload)
         self.assertEqual(response.status_code, 201)
-
-

@@ -11,7 +11,6 @@ class Development(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
-    CORNFLOW_URL = os.getenv('CORNFLOW_URL')
     AIRFLOW_USER = os.getenv('AIRFLOW_USER')
     AIRFLOW_PWD = os.getenv('AIRFLOW_PWD')
 
@@ -26,7 +25,6 @@ class Testing(object):
     SECRET_KEY = 'TESTINGSECRETKEY'
     SQLALCHEMY_DATABASE_URI = "sqlite:///cornflow_test.db"
     AIRFLOW_URL = 'http://localhost:8080'
-    CORNFLOW_URL = 'http://localhost:5000'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = 'admin'
     AIRFLOW_PWD = 'admin'
@@ -42,7 +40,6 @@ class Production(object):
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     AIRFLOW_URL = os.getenv('AIRFLOW_URL')
-    CORNFLOW_URL = os.getenv('CORNFLOW_URL')
     AIRFLOW_USER = os.getenv('AIRFLOW_USER')
     AIRFLOW_PWD = os.getenv('AIRFLOW_PWD')
 
