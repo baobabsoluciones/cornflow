@@ -113,7 +113,7 @@ Set the base config::
     export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
     export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
-    export AIRFLOW_CONN_CF_URI=cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
+    export AIRFLOW_CONN_CF_URI=http://airflow_test@admin.com:airflow_test_password@localhost:5000
 
 Start the web server::
 

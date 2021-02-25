@@ -1,9 +1,9 @@
-from airflow import DAG, AirflowException
+from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 
 from datetime import datetime, timedelta
-import json
+import importlib as il
 import os
 
 default_args = {
@@ -18,16 +18,58 @@ default_args = {
     'schedule_interval': "@once"
 }
 
+schemas = [('instance', '_input'), ('solution', '_output')]
+
+
+def get_all_apps():
+    _dir = os.path.dirname(__file__)
+    print("looking for apps in dir={}".format(_dir))
+    print("Files are: {}".format(os.listdir(_dir)))
+    files = os.listdir(_dir)
+    return [_import_file(os.path.splitext(f)[0]) for f in files if is_app(f)]
+
+def _import_file(filename):
+    return il.import_module(filename)
+
+
+def is_app(dag_module):
+    filename, ext = os.path.splitext(dag_module)
+    if ext != '.py':
+        return False
+    try:
+        _module = _import_file(filename)
+        _module.name
+        _module.instance
+        return True
+    except Exception as e:
+        return False
+
+
+def get_schemas_dag_file(_module):
+    contents = [
+        (_module.name + tail, getattr(_module, attribute))
+        for attribute, tail in schemas
+    ]
+    return contents
+
+
+def get_all_schemas():
+    apps = get_all_apps()
+    names = [app.name for app in apps]
+    if len(apps):
+        print("Found the following apps: {}".format(names))
+    else:
+        print("No apps were found to update")
+    schemas = []
+    for dag_module in apps:
+        schemas.extend(get_schemas_dag_file(dag_module))
+    return schemas
+
 
 def update_schemas(**kwargs):
-    _dir = os.path.dirname(__file__)
-    schemas = [f for f in os.listdir(_dir) if os.path.splitext(f)[1] == '.json']
-    print("Found the following schemas: {}".format(schemas))
-    for schema in schemas:
-        with open(os.path.join(_dir, schema), 'r') as f:
-            content = json.load(f)
-        name = os.path.splitext(schema)[0]
-        Variable.set(key=name, value=content, serialize_json=True)
+    schemas = get_all_schemas()
+    for key, value in schemas:
+        Variable.set(key=key, value=value, serialize_json=True)
 
 
 dag = DAG('update_all_schemas', default_args=default_args, catchup=False)
