@@ -62,7 +62,7 @@ def test_cases():
 
 
 hackathon_task = PythonOperator(
-    task_id='hk_2020_task',
+    task_id='hk_2020_dag',
     python_callable=solve_hk,
     dag=dag
 )

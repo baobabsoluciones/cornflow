@@ -86,7 +86,7 @@ def test_cases():
 
 
 solve_task = PythonOperator(
-    task_id='solve_task',
+    task_id='solve_model_dag',
     provide_context=True,
     python_callable=run_solve,
     dag=dag,

@@ -15,7 +15,8 @@ default_args = {
     'email_on_retry': False,
     'retries': -1,
     'retry_delay': timedelta(minutes=1),
-    'schedule_interval': "@hourly"
+    'schedule_interval': "@hourly",
+    "catchup": False,
 }
 
 schemas = [('instance', '_input'), ('solution', '_output')]
@@ -23,6 +24,8 @@ schemas = [('instance', '_input'), ('solution', '_output')]
 
 def get_all_apps():
     _dir = os.path.dirname(__file__)
+    print("looking for apps in dir={}".format(_dir))
+    print("Files are: {}".format(os.listdir(_dir)))
     files = os.listdir(_dir)
     return [_import_file(os.path.splitext(f)[0]) for f in files if is_app(f)]
 
@@ -44,7 +47,6 @@ def is_app(dag_module):
 
 
 def get_schemas_dag_file(_module):
-    print("Found app: {}".format(_module.name))
     contents = [
         (_module.name + tail, getattr(_module, attribute))
         for attribute, tail in schemas
@@ -53,9 +55,14 @@ def get_schemas_dag_file(_module):
 
 
 def get_all_schemas():
-    dags = get_all_apps()
+    apps = get_all_apps()
+    names = [app.name for app in apps]
+    if len(apps):
+        print("Found the following apps: {}".format(names))
+    else:
+        print("No apps were found to update")
     schemas = []
-    for dag_module in dags:
+    for dag_module in apps:
         schemas.extend(get_schemas_dag_file(dag_module))
     return schemas
 

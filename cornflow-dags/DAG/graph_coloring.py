@@ -81,8 +81,8 @@ def read_file(filePath):
     return dict(nodes=list(nodes), pairs=pairs)
 
 
-hackathon_task = PythonOperator(
-    task_id='hk_2020_task',
+graph_coloring = PythonOperator(
+    task_id='graph_coloring',
     python_callable=solve_hk,
     dag=dag
 )

@@ -71,10 +71,17 @@ def connect_to_cornflow():
     secrets = EnvironmentVariablesBackend()
     uri = secrets.get_conn_uri('CF_URI')
     conn = urlparse(uri)
-    # TODO: what if https??
-    url="http://{}:{}".format(conn.hostname, conn.port)
-
-    airflow_user = CornFlow(url=url)
+    url = '{uri.scheme}://{uri.hostname}'.format(uri=conn)
+    if conn.port:
+        url += ':{uri.port}'.format(uri=conn)
+    if conn.path:
+        url += '{uri.path}/'.format(uri=conn)
+    # TODO: delete this when migrated
+    url2 = "http://{}:{}{}/".format(conn.hostname, conn.port, conn.path)
+    try:
+        airflow_user = CornFlow(url=url)
+    except:
+        airflow_user = CornFlow(url=url2)
     airflow_user.login(email=conn.username, pwd=conn.password)
     return airflow_user
 
