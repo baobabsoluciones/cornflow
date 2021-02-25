@@ -18,8 +18,10 @@ from ..schemas.execution import \
     ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest
 from ..shared.airflow_api import Airflow, validate_and_continue, get_schema
 from ..shared.authentication import Auth
-from ..shared.const import EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
-    EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP
+from ..shared.const import \
+    EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
+    EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP, \
+    EXEC_STATE_STOPPED
 from ..shared.exceptions import AirflowError
 
 
@@ -76,15 +78,13 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
         # TODO: maybe we need to filter the kwargs to avoid any user from
         #  filling the state, execution_results, logs, etc.
+        if 'dag_name' not in kwargs:
+            kwargs['dag_name'] = 'solve_model_dag'
         execution, status_code = self.post_list(kwargs)
-
-        not_run = request.args.get('run', '1') == '0'
-
-        # if we failed to save the execution, we already raised an error.
         instance = InstanceModel.get_one_instance_from_user(self.get_user_id(), execution.instance_id)
-        dag_name = kwargs.get('dag_name', 'solve_model_dag')
 
-        if not_run:
+        # this allows testing without airflow interaction:
+        if request.args.get('run', '1') == '0':
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
 
@@ -98,6 +98,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
                                payload=dict(message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                                             state=EXEC_STATE_ERROR_START))
         # ask airflow if dag_name exists
+        dag_name = execution.dag_name
         dag_info = af_client.get_dag_info(dag_name)
 
         # Validate that instance and dag_name are compatible
@@ -192,6 +193,19 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         """
         return self.delete_detail(self.get_user_id(), idx)
 
+    @doc(description='Stop an execution', tags=['Executions'], inherit=False)
+    @Auth.auth_required
+    def post(self, idx):
+        config = current_app.config
+        airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
+        execution, code = self.get_detail(self.get_user_id(), idx)
+        af_client = Airflow(**airflow_conf)
+        if not af_client.is_alive():
+            raise AirflowError(error="Airflow is not accessible")
+        response = af_client.set_dag_run_to_fail(dag_name=execution.dag_name, dag_run_id=execution.dag_run_id)
+        execution.update_state(EXEC_STATE_STOPPED)
+        return {'message': 'The execution has been stopped'}, 200
+
 
 class ExecutionStatusEndpoint(MetaResource, MethodResource):
     """
@@ -238,7 +252,8 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
             _raise_af_error(execution, "Airflow is not accessible")
 
         try:
-            response = af_client.get_dag_run_status(dag_name='solve_model_dag', dag_run_id=dag_run_id)
+            # TODO: get the dag_name from somewhere!
+            response = af_client.get_dag_run_status(dag_name=execution.dag_name, dag_run_id=dag_run_id)
         except AirflowError as err:
             _raise_af_error(execution, "Airflow responded with an error: {}".format(err))
 

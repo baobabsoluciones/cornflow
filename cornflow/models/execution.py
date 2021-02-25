@@ -63,6 +63,7 @@ class ExecutionModel(BaseAttributes):
     description = db.Column(TEXT, nullable=True)
     config = db.Column(JSON, nullable=False)
     dag_run_id = db.Column(db.String(256), nullable=True)
+    dag_name = db.Column(db.String(256), nullable=True)
     execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
@@ -78,6 +79,7 @@ class ExecutionModel(BaseAttributes):
         self.name = data.get('name')
         self.description = data.get('description')
         self.dag_run_id = data.get('dag_run_id')
+        self.dag_name = data.get('dag_name')
         self.state = data.get('state', DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
         self.config = data.get('config')

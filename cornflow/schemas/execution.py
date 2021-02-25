@@ -8,7 +8,7 @@ class OptionsSchema(Schema):
 
 
 class ConfigSchema(Schema):
-    solver = fields.Str(default="PULP_CBC_CMD")
+    solver = fields.Str(default="PULP_CBC_CMD", required=False)
     mip = fields.Boolean(required=False)
     msg = fields.Boolean(required=False)
     warmStart = fields.Boolean(required=False)
