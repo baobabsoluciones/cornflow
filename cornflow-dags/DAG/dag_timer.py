@@ -1,11 +1,22 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 import time
-import utils
+from datetime import datetime, timedelta
+
 
 # Following are defaults which can be overridden later on
 name = 'timer'
-dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
+default_args = {
+    'owner': 'baobab',
+    'depends_on_past': False,
+    'start_date': datetime(2020, 2, 1),
+    'email': [''],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retry_delay': timedelta(minutes=1),
+    'schedule_interval': None
+}
+dag = DAG(name, default_args=default_args, schedule_interval=None)
 
 
 def solve(**kwargs):

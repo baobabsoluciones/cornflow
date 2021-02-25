@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-import utils
-
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+import cornflow_client.airflow_dag_utilities as utils
 from ortools.sat.python import cp_model
 import pytups as pt
 import os
@@ -10,7 +10,7 @@ from timeit import default_timer as timer
 
 name = 'graph_coloring'
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
-instance, solution = utils.get_schemas_from_file(name)
+instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
 
 
 def solve(data, config):
@@ -53,7 +53,7 @@ def solve(data, config):
 
 
 def solve_hk(**kwargs):
-    return utils.cf_solve(solve, name, **kwargs)
+    return utils.cf_solve(solve, name, EnvironmentVariablesBackend(), **kwargs)
 
 
 def test_cases():

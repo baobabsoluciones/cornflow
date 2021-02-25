@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-import utils
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+import cornflow_client.airflow_dag_utilities as utils
 from hackathonbaobab2020 import get_solver, Instance
 from hackathonbaobab2020.tests import get_test_instance
 
@@ -50,7 +50,7 @@ def solve(data, config):
 
 
 def solve_hk(**kwargs):
-    return utils.cf_solve(solve, name, **kwargs)
+    return utils.cf_solve(fun=solve, dag_name=name, secrets=EnvironmentVariablesBackend(), **kwargs)
 
 
 def test_cases():
