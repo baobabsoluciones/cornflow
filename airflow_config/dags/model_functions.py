@@ -1,14 +1,15 @@
+
+import cornflow_client.airflow_dag_utilities as utils
 import pulp as pl
 import orloge as ol
 import os
 
 
-"""
-solve function in another file to test it without airflow installed
-"""
+name = 'solve_model_dag'
+instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
 
 
-def solve_model(data, config):
+def solve(data, config):
     """
     :param data: pulp json for the model
     :param config: pulp config for solver
@@ -20,9 +21,14 @@ def solve_model(data, config):
     # we overwrite the logPath argument before solving.
     log_path = config['logPath'] = 'temp.log'
     config['msg'] = 0
-    solver = pl.get_solver_from_dict(config)
-    if not solver.available():
-        raise NoSolverException()
+    if 'solver' not in config:
+        config['solver'] = 'PULP_CBC_CMD'
+    try:
+        solver = pl.getSolverFromDict(config)
+    except pl.PulpSolverError:
+        raise utils.NoSolverException("Missing solver attribute")
+    if solver is None or not solver.available():
+        raise utils.NoSolverException("Solver {} is not available".format(solver))
     model.solve(solver)
     solution = model.to_dict()
 
@@ -56,5 +62,14 @@ def solve_model(data, config):
     return solution, log, log_dict
 
 
-class NoSolverException(Exception):
-    pass
+def test_cases():
+    prob = pl.LpProblem("test_export_dict_MIP", pl.LpMinimize)
+    x = pl.LpVariable("x", 0, 4)
+    y = pl.LpVariable("y", -1, 1)
+    z = pl.LpVariable("z", 0, None, pl.LpInteger)
+    prob += x + 4 * y + 9 * z, "obj"
+    prob += x + y <= 5, "c1"
+    prob += x + z >= 10, "c2"
+    prob += -y + z == 7.5, "c3"
+    return [prob.toDict()]
+
