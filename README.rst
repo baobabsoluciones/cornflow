@@ -1,12 +1,41 @@
 Cornflow
 =========
-.. |build| image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg
 
-.. |docs| image:: https://github.com/baobabsoluciones/corn/workflows/docs/badge.svg
+.. image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/corn/actions
 
-.. |integration| image:: https://github.com/baobabsoluciones/corn/workflows/integration/badge.svg
+.. image:: https://github.com/baobabsoluciones/corn/workflows/docs/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/corn/actions
 
-An open source multi-solver optimization server with a REST API.
+.. image:: https://github.com/baobabsoluciones/corn/workflows/integration/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/corn/actions
+
+.. image:: https://img.shields.io/pypi/v/cornflow-client.svg?style=svg
+   :target: https://pypi.python.org/pypi/cornflow-client
+
+.. image:: https://img.shields.io/pypi/pyversions/cornflow-client.svg?style=svg
+   :target: https://pypi.python.org/pypi/cornflow-client
+
+.. image:: https://img.shields.io/badge/License-MIT-blue.svg?style=svg
+
+Cornflow is open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
+
+It supports generic MIP models via the pulp interface and thus connects to CPLEX, GUROBI, CBC, MOSEK, GLPK, XPRESS, MIPCL and others. In the future it will support a generic CP interface that will connect it to: ORTOOLS, CHOCO and CPO. Finally, it supports specific application "solvers" written in python (natively) or in any other language as long as they can be used from airflow.
+
+The aim of this project is to simplify the deployment of optimization-based applications by handling the following tasks:
+
+* storage of users, instances, solutions and logs.
+* deployment and maintenance of models, solvers and algorithms.
+* scheduling of executions in remote machines.
+* centralizing of commercial licenses.
+
+
+.. contents:: **Table of Contents**
+
+
+Installation instructions
+-------------------------
+
 
 Requirements
 ~~~~~~~~~~~~~~~~~~
@@ -69,9 +98,7 @@ In windows use ``set`` instead of ``export``.
 Install and configure airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The complete instructions have been moved to the cornflow-dags private project. Here are the minimal instructions to install and configure airflow with the default dags in this project.
-
-The instructions assume Ubuntu.
+Here are the minimal instructions to install and configure airflow with the default dags in this project. The instructions assume Ubuntu.
 
 Create a virtual environment for airflow::
 
@@ -113,7 +140,7 @@ Set the base config::
     export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
     export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
-    export AIRFLOW_CONN_CF_URI=cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
+    export AIRFLOW_CONN_CF_URI=http://airflow_test@admin.com:airflow_test_password@localhost:5000
 
 Start the web server::
 
@@ -127,8 +154,8 @@ airflow gui will be at::
 
     http://localhost:8080
 
-Using cornflow
-~~~~~~~~~~~~~~~~~~
+Using cornflow with the python client
+---------------------------------------
 
 Launch airflow (webserver and scheduler) and cornflow server (see sections above).
 
@@ -203,6 +230,8 @@ Retrieve the log of the solver::
     print(log['log'])
     # json format of the solver log
 
+Other deployment options
+--------------------------
 
 Deploying with docker-compose
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -260,7 +289,7 @@ Eg.::
       proxy_pass http://localhost:5000;
 	}
 
-If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP Cloud Balancer, just make changes on airflow.cfg through environment variables.
+If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP Cloud Balancer, just make changes on airflow.cfg through environment variables::
 	
 	[webserver]
 	AIRFLOW__WEBSERVER__BASE_URL=http://my_host/myorg/airflow
@@ -269,34 +298,6 @@ If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP
 	AIRFLOW__CELERY__FLOWER_URL_PREFIX=/myorg/flower
 
 More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
-
-Running tests
-~~~~~~~~~~~~~~~~~~
-
-Then you have to run the following commands::
-
-    export FLASK_ENV=testing
-
-Finally you can run all the tests with the following command::
-
-    python -m unittest discover -s cornflow.tests
-
-If you want to only run the unit tests (without a local airflow webserver)::
-
-    python -m unittest discover -s cornflow.tests.unit
-
-If you want to only run the integration test with a local airflow webserver::
-
-    python -m unittest discover -s cornflow.tests.integration
-
-After if you want to check the coverage report you need to run::
-
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
-    coverage report -m
-
-or to get the html reports::
-
-    coverage html
 
 Setup cornflow database with PostgreSQL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,3 +330,31 @@ The installation of the psycopg2 may generate an error because it does not find 
 One way to solve this problem is to previously install libpq-dev which installs pg_config::
 
     sudo apt install libpq-dev
+
+Running tests and coverage
+------------------------------
+
+Then you have to run the following commands::
+
+    export FLASK_ENV=testing
+
+Finally you can run all the tests with the following command::
+
+    python -m unittest discover -s cornflow.tests
+
+If you want to only run the unit tests (without a local airflow webserver)::
+
+    python -m unittest discover -s cornflow.tests.unit
+
+If you want to only run the integration test with a local airflow webserver::
+
+    python -m unittest discover -s cornflow.tests.integration
+
+After if you want to check the coverage report you need to run::
+
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
+    coverage report -m
+
+or to get the html reports::
+
+    coverage html
