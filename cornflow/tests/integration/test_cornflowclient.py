@@ -7,8 +7,7 @@ from cornflow_client import CornFlowApiError
 from cornflow.shared.utils import db
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 from cornflow.models import UserModel
-
-INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
+from cornflow.tests.const import INSTANCE_PATH
 
 
 class TestCornflowClientBasic(CustomTestCaseLive):
@@ -97,11 +96,11 @@ class TestCornflowClient(TestCornflowClientBasic):
 
     def test_delete_instance(self):
         instance = self.test_new_instance()
-        response = self.client.get_api_for_id('instance/', instance['id'])
+        response = self.client.get_api_for_id('instance', instance['id'])
         self.assertEqual(200, response.status_code)
-        response = self.client.delete_api_for_id('instance/', instance['id'])
+        response = self.client.delete_api_for_id('instance', instance['id'])
         self.assertEqual(200, response.status_code)
-        response = self.client.get_api_for_id('instance/', instance['id'])
+        response = self.client.get_api_for_id('instance', instance['id'])
         self.assertEqual(404, response.status_code)
 
     def test_new_execution(self):

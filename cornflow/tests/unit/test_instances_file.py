@@ -1,13 +1,14 @@
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 import pulp
+from cornflow.tests.const import INSTANCE_FILE_URL
 
 
 class TestInstances(CustomTestCase):
 
     def setUp(self):
         super().setUp()
-        self.url = '/instancefile/'
+        self.url = INSTANCE_FILE_URL
         self.model = InstanceModel
 
 

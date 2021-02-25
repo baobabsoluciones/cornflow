@@ -4,6 +4,7 @@ from cornflow.tests.custom_test_case import TestCase
 from cornflow.app import create_app
 from cornflow.models import UserModel
 from cornflow.shared.utils import db
+from cornflow.tests.const import USER_URL, LOGIN_URL
 
 
 class TestUserEndpoint(TestCase):
@@ -14,7 +15,7 @@ class TestUserEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.url = '/user/'
+        self.url = USER_URL
         self.model = UserModel
         self.user = dict(name='testname', email='test@test.com', password='testpassword', admin=False)
         self.admin = dict(name='anAdminUser', email='admin@admin.com', password='testpassword', admin=True)
@@ -43,14 +44,14 @@ class TestUserEndpoint(TestCase):
         url = self.url
         if user_asked is not None:
             url += '{}/'.format(user_asked['id'])
-        token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+        token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
         return self.client.get(url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
 
     def make_admin(self, user_asks, user_asked, make_admin=1):
         data = {k: user_asks[k] for k in self.login_keys}
-        token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+        token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
         url = '{}{}/{}/'.format(self.url, user_asked['id'], make_admin)
         return self.client.put(url, follow_redirects=True,
@@ -58,7 +59,7 @@ class TestUserEndpoint(TestCase):
 
     def delete_user(self, user_asks, user_asked):
         data = {k: user_asks[k] for k in self.login_keys}
-        token = self.client.post('/login/', data=json.dumps(data), follow_redirects=True,
+        token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
                                       headers={"Content-Type": "application/json"}).json['token']
         url = '{}{}/'.format(self.url, user_asked['id'])
         return self.client.delete(url, follow_redirects=True,

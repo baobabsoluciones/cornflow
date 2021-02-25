@@ -1,11 +1,8 @@
 from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 import json
-
-
-INSTANCE_PATH = './cornflow/tests/data/new_instance.json'
-EXECUTION_PATH = './cornflow/tests/data/new_execution.json'
-EXECUTIONS_LIST = [EXECUTION_PATH, './cornflow/tests/data/new_execution_2.json']
+from cornflow.tests.const import INSTANCE_PATH, EXECUTION_PATH, EXECUTIONS_LIST, EXECUTION_URL, \
+    EXECUTION_URL_NORUN, INSTANCE_URL
 
 
 class TestExecutionsListEndpoint(CustomTestCase):
@@ -15,8 +12,8 @@ class TestExecutionsListEndpoint(CustomTestCase):
 
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
-        fk_id = self.create_new_row('/instance/', InstanceModel, payload)
-        self.url = '/execution/?run=0'
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.url = EXECUTION_URL_NORUN
         self.model = ExecutionModel
 
         def load_file_fk(_file):
@@ -59,12 +56,12 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         super().setUp()
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
-        fk_id = self.create_new_row('/instance/', InstanceModel, payload)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
         self.model = ExecutionModel
         self.response_items = {'id', 'name', 'description', 'created_at', 'instance_id', 'finished'}
         # we only the following because this endpoint does not return data
         self.items_to_check = ['name', 'description']
-        self.url = '/execution/'
+        self.url = EXECUTION_URL
         with open(EXECUTION_PATH) as f:
             self.payload = json.load(f)
         self.payload['instance_id'] = fk_id
@@ -116,7 +113,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         execution = self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
         self.delete_row(self.url + id + '/', self.model)
-        instance = self.get_one_row('/instance/' + execution['instance_id'] + '/', payload={},
+        instance = self.get_one_row(INSTANCE_URL + execution['instance_id'] + '/', payload={},
                                     expected_status=200, check_payload=False)
         executions = [execution['id'] for execution in instance['executions']]
         self.assertFalse(id in executions)
@@ -125,13 +122,13 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         # we create a new instance
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
-        fk_id = self.create_new_row('/instance/', InstanceModel, payload)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
         payload = {**self.payload, **dict(instance_id=fk_id)}
         # we create an execution for that instance
         id = self.create_new_row(self.url + '?run=0', self.model, payload)
         self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
         # we delete the new instance
-        self.delete_row('/instance/' + fk_id + '/', InstanceModel)
+        self.delete_row(INSTANCE_URL + fk_id + '/', InstanceModel)
         # we check the execution does not exist
         self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
 
@@ -154,8 +151,8 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         self.items_to_check = ['name']
 
     def test_get_one_execution(self):
-        id = self.create_new_row('/execution/?run=0', self.model, self.payload)
-        self.url = '/execution/' + id + '/data/'
+        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        self.url = EXECUTION_URL + id + '/data/'
         payload = dict(self.payload)
         payload['id'] = id
         self.get_one_row(self.url, payload)
@@ -169,10 +166,10 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         self.items_to_check = ['name']
 
     def test_get_one_execution(self):
-        id = self.create_new_row('/execution/?run=0', self.model, self.payload)
+        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload['id'] = id
-        self.get_one_row('/execution/' + id + '/log/', payload)
+        self.get_one_row(EXECUTION_URL + id + '/log/', payload)
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
