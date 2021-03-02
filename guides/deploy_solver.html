@@ -177,11 +177,11 @@
 <h1>How to deploy a new solver<a class="headerlink" href="#how-to-deploy-a-new-solver" title="Permalink to this headline">¶</a></h1>
 <p>There are several things that are needed when submitting a new solver.</p>
 <ol class="arabic simple">
-<li><p>a <cite>solve</cite> function.</p></li>
-<li><p>a <cite>name</cite> string.</p></li>
-<li><p>an <cite>instance</cite> dictionary.</p></li>
-<li><p>an <cite>solution</cite> dictionary.</p></li>
-<li><p>(optional) a <cite>test_cases</cite> function that returns a list of dictionaries.</p></li>
+<li><p>A <cite>solve</cite> function.</p></li>
+<li><p>A <cite>name</cite> string.</p></li>
+<li><p>An <cite>instance</cite> dictionary.</p></li>
+<li><p>An <cite>solution</cite> dictionary.</p></li>
+<li><p>(optional) A <cite>test_cases</cite> function that returns a list of dictionaries.</p></li>
 </ol>
 <p>In its most minimalistic form: an app constitutes one dag file that contains all of this.
 In the following lines we will explain each of these concepts.</p>
@@ -199,7 +199,7 @@ In the following lines we will explain each of these concepts.</p>
 <p>Both schemas are built and deployed similarly so we present how the input schema is done.</p>
 <p>The input schema is a json schema file (<a class="reference external" href="https://json-schema.org/">https://json-schema.org/</a>) that includes all the characteristics of the input data for each dag. This file can be built with many tools (a regular text editor could be enough). We will detail how to do this later.</p>
 <p>The input schema is stored in the Variables storage of Airflow. In order to upload it: you need to have an <cite>instance</cite> variable available in your dag file.</p>
-<p>Once uploaded, these schemas will be accessible to cornflow and will be used to validate input data and solutions for this dag.</p>
+<p>Once uploaded, these schemas will be accessible to Cornflow and will be used to validate input data and solutions for this dag.</p>
 </div>
 <div class="section" id="test-cases">
 <h2>Test cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>

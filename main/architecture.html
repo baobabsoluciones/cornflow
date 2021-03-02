@@ -190,18 +190,18 @@
 </div>
 <div class="section" id="cornflow">
 <h3>Cornflow<a class="headerlink" href="#cornflow" title="Permalink to this headline">¶</a></h3>
-<p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.</p>
+<p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.</p>
 </div>
 <div class="section" id="airflow">
 <h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
 <p>Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.</p>
 <p>Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
 <p>A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.</p>
-<p>Airflow is also built on top of flask+python. The project’s site is: airflow.apache.org/</p>
+<p>Airflow is also built on top of flask+python. The project’s site is: <a class="reference external" href="airflow.apache.org/">airflow.apache.org/</a></p>
 </div>
 <div class="section" id="worker">
 <h3>Worker<a class="headerlink" href="#worker" title="Permalink to this headline">¶</a></h3>
-<p>A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial license (e.g., Gurobi or CPLEX) in order to use these solvers.</p>
+<p>A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial solver license (e.g., Gurobi or CPLEX) in order to use these solvers.</p>
 </div>
 <div class="section" id="client">
 <h3>Client<a class="headerlink" href="#client" title="Permalink to this headline">¶</a></h3>
@@ -215,32 +215,32 @@
 <span id="my-figure"></span><img alt="../_images/data_flow.png" src="../_images/data_flow.png" />
 <p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
-<p>Create instance(data):</p>
+<p>Create instance (data):</p>
 <ol class="arabic simple">
 <li><p>Client calls Cornflow and sends instance.</p></li>
 <li><p>Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.</p></li>
 <li><p>Cornflow saves the instance and returns the instance code to client.</p></li>
 </ol>
-<p>Solve instance(instance, config, dag):</p>
+<p>Solve instance (instance, config, dag):</p>
 <ol class="arabic simple">
 <li><p>Client calls Cornflow and gives instance code and execution configuration.</p></li>
 <li><p>Cornflow asks cornflow for schema and validates the instance matches the dag to execute.</p></li>
 <li><p>Cornflow calls airflow dag and assigns dagrun code to execution.</p></li>
 <li><p>Cornflow creates execution and returns the execution code to client.</p></li>
 <li><p>Airflow creates a rundag for the selected dag and sends it to a worker.</p></li>
-<li><p>the worker asks Cornflow for the instance and the config.</p></li>
-<li><p>the worker solves the problem.</p></li>
-<li><p>the worker sends Cornflow the results (solution and log) of the execution.</p></li>
+<li><p>The worker asks Cornflow for the instance and the config.</p></li>
+<li><p>The worker solves the problem.</p></li>
+<li><p>The worker sends Cornflow the results (solution and log) of the execution.</p></li>
 </ol>
-<p>Retrieve status(execution):</p>
+<p>Retrieve status (execution):</p>
 <ol class="arabic simple">
-<li><p>The client asks Cornflow for the results to an execution.</p></li>
+<li><p>Client asks Cornflow for the results to an execution.</p></li>
 <li><p>If Cornflow does not know it: it asks Airflow for the status.</p></li>
 <li><p>Cornflow returns the status to the user.</p></li>
 </ol>
-<p>Retrieve results(execution):</p>
+<p>Retrieve results (execution):</p>
 <ol class="arabic simple">
-<li><p>The client asks Cornflow for the results to an execution.</p></li>
+<li><p>Client asks Cornflow for the results to an execution.</p></li>
 <li><p>Cornflow returns the execution solution and / or log.</p></li>
 </ol>
 </div>

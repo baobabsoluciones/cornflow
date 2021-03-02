@@ -5,12 +5,12 @@ The `Cornflow admin app <https://github.com/baobabsoluciones/cornflow-admin>`_ i
 
 It allows the:
 
-#. management of users.
-#. management of instances and their executions.
-#. creation of new instances.
-#. creation of new executions.
-#. edition of deletion of instances and executions.
-#. visualization of execution progress and statistics.
+#. Management of users.
+#. Management of instances and their executions.
+#. Creation of new instances.
+#. Creation of new executions.
+#. Edition or deletion of instances and executions.
+#. Visualization of execution progress and statistics.
 
 The app is built in VueJS.
 
