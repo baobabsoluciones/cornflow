@@ -30,7 +30,7 @@ Airflow is also built on top of flask+python. The project's site is: `airflow.ap
 Worker
 ************
 
-A worker is a machine that is capable of executing an airflow task. Some of these workers will have a solver commercial license (e.g., Gurobi or CPLEX) in order to use these solvers.
+A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial solver license (e.g., Gurobi or CPLEX) in order to use these solvers.
 
 
 Client
