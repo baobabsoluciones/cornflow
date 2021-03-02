@@ -4,11 +4,11 @@ How to deploy a new solver
 
 There are several things that are needed when submitting a new solver.
 
-1. a `solve` function.
-2. a `name` string.
-3. an `instance` dictionary.
-4. an `solution` dictionary.
-5. (optional) a `test_cases` function that returns a list of dictionaries.
+1. A `solve` function.
+2. A `name` string.
+3. An `instance` dictionary.
+4. An `solution` dictionary.
+5. (optional) A `test_cases` function that returns a list of dictionaries.
 
 In its most minimalistic form: an app constitutes one dag file that contains all of this.
 In the following lines we will explain each of these concepts.
@@ -35,8 +35,7 @@ The input schema is a json schema file (https://json-schema.org/) that includes 
 
 The input schema is stored in the Variables storage of Airflow. In order to upload it: you need to have an `instance` variable available in your dag file.
 
-
-Once uploaded, these schemas will be accessible to cornflow and will be used to validate input data and solutions for this dag.
+Once uploaded, these schemas will be accessible to Cornflow and will be used to validate input data and solutions for this dag.
 
 Test cases
 ------------
