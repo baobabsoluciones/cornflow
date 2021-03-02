@@ -13,7 +13,7 @@ Components
 Cornflow
 ***********
 
-The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is used via an REST API.
+The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.
 
 
 Airflow
@@ -25,12 +25,12 @@ Airflow has its own nomenclature, which includes some concepts we refer to in Co
 
 A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.
 
-Airflow is also built on top of flask+python. The project's site is: airflow.apache.org/
+Airflow is also built on top of flask+python. The project's site is: `airflow.apache.org/ <airflow.apache.org/>`_
 
 Worker
 ************
 
-A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial license (e.g., Gurobi or CPLEX) in order to use these solvers.
+A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial solver license (e.g., Gurobi or CPLEX) in order to use these solvers.
 
 
 Client
@@ -51,30 +51,30 @@ Data flows
    The main data flows between components
 
 
-Create instance(data):
+Create instance (data):
 
 #. Client calls Cornflow and sends instance.
 #. Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.
 #. Cornflow saves the instance and returns the instance code to client.
 
-Solve instance(instance, config, dag):
+Solve instance (instance, config, dag):
 
 #. Client calls Cornflow and gives instance code and execution configuration.
 #. Cornflow asks cornflow for schema and validates the instance matches the dag to execute.
 #. Cornflow calls airflow dag and assigns dagrun code to execution.
 #. Cornflow creates execution and returns the execution code to client.
 #. Airflow creates a rundag for the selected dag and sends it to a worker.
-#. the worker asks Cornflow for the instance and the config.
-#. the worker solves the problem.
-#. the worker sends Cornflow the results (solution and log) of the execution.
+#. The worker asks Cornflow for the instance and the config.
+#. The worker solves the problem.
+#. The worker sends Cornflow the results (solution and log) of the execution.
 
-Retrieve status(execution):
+Retrieve status (execution):
 
-#. The client asks Cornflow for the results to an execution.
+#. Client asks Cornflow for the results to an execution.
 #. If Cornflow does not know it: it asks Airflow for the status.
 #. Cornflow returns the status to the user.
 
-Retrieve results(execution):
+Retrieve results (execution):
 
-#. The client asks Cornflow for the results to an execution.
+#. Client asks Cornflow for the results to an execution.
 #. Cornflow returns the execution solution and / or log.
