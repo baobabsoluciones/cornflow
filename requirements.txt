@@ -37,3 +37,4 @@ pulp
 flask-apispec
 cornflow-client
 flask-compress
+flask-inflate
