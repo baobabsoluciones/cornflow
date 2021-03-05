@@ -106,4 +106,4 @@ def validate_and_continue(obj, data):
     err = ''
     if validate is None:
         raise InvalidUsage(error='Bad data format: {}'.format(err))
-    return True
+    return validate

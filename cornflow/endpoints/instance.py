@@ -77,13 +77,13 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
         if data_schema == 'pulp':
             # this one we have the schema stored inside cornflow
-            validate_and_continue(DataSchema(), kwargs['data'])
+            kwargs['data'] = validate_and_continue(DataSchema(), kwargs['data'])
             return self.post_list(kwargs)
 
         # for the rest of the schemas: we need to ask airflow for the schema
         config = current_app.config
         marshmallow_obj = get_schema(config, data_schema)
-        validate_and_continue(marshmallow_obj(), kwargs['data'])
+        kwargs['data'] = validate_and_continue(marshmallow_obj(), kwargs['data'])
 
         # if we're here, we validated and the data seems to fit the schema
         return self.post_list(kwargs)

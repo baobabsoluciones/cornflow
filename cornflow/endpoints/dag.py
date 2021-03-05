@@ -50,13 +50,12 @@ class DAGEndpoint(MetaResource, MethodResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == 'pulp':
-            validate_and_continue(DataSchema(), data)
+            data = validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
             marshmallow_obj = get_schema(config, solution_schema, 'output')
-            validate_and_continue(marshmallow_obj(), data)
+            data = validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
-
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:
             raise ObjectDoesNotExist()
@@ -69,6 +68,9 @@ class DAGEndpoint(MetaResource, MethodResource):
                 # because we do not want to store airflow's user:
                 user_id = execution.user_id
              )
+        # newly validated data from marshmallow
+        if data is not None:
+            new_data['execution_results'] = data
         req_data.update(new_data)
         execution.update(req_data)
         execution.save()
@@ -108,20 +110,23 @@ class DAGEndpointManual(MetaResource, MethodResource):
 
         # Check data format
         data = kwargs.get('execution_results')
+        # TODO: create a function to validate and replace data/ execution_results
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == 'pulp':
-            validate_and_continue(DataSchema(), data)
+            data = validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
             marshmallow_obj = get_schema(config, solution_schema, 'output')
-            validate_and_continue(marshmallow_obj(), data)
+            data = validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)
         # we force the state to manual
         kwargs_copy['state'] = EXEC_STATE_MANUAL
         kwargs_copy['user_id'] = self.get_user_id()
+        if data is not None:
+            kwargs_copy['execution_results'] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
         return item, 201
