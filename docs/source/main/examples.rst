@@ -34,10 +34,10 @@ Use case 2
 
 The second use case is to use Cornflow as a repository of several **specific** solvers with one very well-specified problem as objective. For example: a solver to solve TSP problems, graph-coloring problems, or any other problem.
 
-Here, the client is in charge to send the the server an instance dataset with the appropiate format (schema) that matches the solver to use.
+Here, the client is in charge to send the the server an instance dataset with the appropriate format (schema) that matches the solver to use.
 
 .. _use_case2:
 
 .. figure:: ./../_static/use_case2.png
 
-   Use case 1: Cornflow as an application remote solver repository
+   Use case 2: Cornflow as an application remote solver repository
