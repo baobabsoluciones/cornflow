@@ -60,8 +60,8 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     @doc(description='Create an instance', tags=['Instances'])
     @Auth.auth_required
-    @marshal_with(InstanceDetailsEndpointResponse)
     @inflate
+    @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location='json')
     def post(self, **kwargs):
         """
