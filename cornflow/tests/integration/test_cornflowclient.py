@@ -105,6 +105,11 @@ class TestCornflowClient(TestCornflowClientBasic):
     def test_new_instance(self):
         return self.create_new_instance('./cornflow/tests/data/test_mps.mps')
 
+    def test_get_instance__data(self):
+        instance = self.create_new_instance('./cornflow/tests/data/test_mps.mps')
+        response = self.client.get_api_for_id('instance', instance['id'], 'data')
+        self.assertEqual(response.headers['Content-Encoding'], 'gzip')
+
     def test_delete_instance(self):
         instance = self.test_new_instance()
         response = self.client.get_api_for_id('instance', instance['id'])

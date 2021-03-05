@@ -22,9 +22,12 @@ from ..schemas.instance import InstanceSchema, \
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
 from ..shared.airflow_api import get_schema, validate_and_continue
+from ..shared.compress import compressed
+from flask_inflate import inflate
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
+
 
 
 class InstanceEndpoint(MetaResource, MethodResource):
@@ -57,6 +60,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     @doc(description='Create an instance', tags=['Instances'])
     @Auth.auth_required
+    @inflate
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location='json')
     def post(self, **kwargs):
@@ -166,6 +170,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     @doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDataEndpointResponse)
+    @compressed
     def get(self, idx):
         """
         API method to get an instance data by the user and its related info.
