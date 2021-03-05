@@ -54,7 +54,7 @@ In Cornflow, A Solution Method is a subclass of Experiment.
 Solve Configuration
 ---------------------
 
-Each Solution Method has ways to personalize certain characteristics. The Solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.
+Each Solution Method has ways to configure certain characteristics. The Solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.
 
 
 Execution

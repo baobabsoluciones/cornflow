@@ -11,12 +11,13 @@ from .config import app_config
 from .endpoints import resources
 from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
+from .shared.compress import init_compress
 
 
 def create_app(env_name='development'):
     """
 
-    :param str environment:
+    :param str env_name: 'testing' or 'development' or 'production'
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
@@ -33,7 +34,7 @@ def create_app(env_name='development'):
     for res in resources:
         api.add_resource(res['resource'], res['urls'], endpoint=res['endpoint'])
 
-    # apispec time
+    # apispec config
     app.config.update({
         'APISPEC_SPEC': APISpec(
             title='Cornflow API docs',
@@ -49,6 +50,11 @@ def create_app(env_name='development'):
         docs.register(target=res['resource'], endpoint=res['endpoint'])
 
     _initialize_errorhandlers(app)
+    init_compress(app)
+    # compress config
+    app.config.update({
+        'COMPRESS_REGISTER': False,
+    })
     return app
 
 

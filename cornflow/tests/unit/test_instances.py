@@ -1,4 +1,5 @@
 import json
+import zlib
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.const import INSTANCE_URL, INSTANCES_LIST, INSTANCE_PATH
@@ -60,6 +61,7 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
         # we only check name and description because this endpoint does not return data
         self.items_to_check = ['name', 'description']
 
+
 class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
 
     def test_get_one_instance(self):
@@ -107,12 +109,18 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
-    def test_update_one_instance(self):
-        pass
-
-    def test_delete_one_instance(self):
-        pass
-
+    def test_instance_compression(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        headers =\
+            {"Content-Type": "application/json",
+             "Authorization": 'Bearer ' + self.token,
+             'Accept-Encoding': 'gzip'}
+        response = self.client.get(INSTANCE_URL + id + '/data/', headers=headers)
+        self.assertEqual(response.headers['Content-Encoding'], 'gzip')
+        raw = zlib.decompress(response.data, 16+zlib.MAX_WBITS).decode("utf-8")
+        response = json.loads(raw)
+        self.assertEqual(self.payload['data'], response['data'])
+        # self.assertEqual(resp.headers[], 'br')
 
 class TestInstanceModelMethods(CustomTestCase):
 
