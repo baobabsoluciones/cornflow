@@ -22,9 +22,11 @@ from ..schemas.instance import InstanceSchema, \
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
 from ..shared.airflow_api import get_schema, validate_and_continue
+from ..shared.compress import compressed
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
+
 
 
 class InstanceEndpoint(MetaResource, MethodResource):
@@ -166,6 +168,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     @doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDataEndpointResponse)
+    @compressed
     def get(self, idx):
         """
         API method to get an instance data by the user and its related info.

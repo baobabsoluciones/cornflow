@@ -23,10 +23,10 @@ from ..shared.const import \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP, \
     EXEC_STATE_STOPPED
 from ..shared.exceptions import AirflowError
+from ..shared.compress import compressed
 
 
 import logging as log
-import json
 
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
@@ -271,6 +271,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     @doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDataEndpointResponse)
+    @compressed
     def get(self, idx):
         """
 
@@ -290,6 +291,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     @doc(description='Get log of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionLogEndpointResponse)
+    @compressed
     def get(self, idx):
         """
 
