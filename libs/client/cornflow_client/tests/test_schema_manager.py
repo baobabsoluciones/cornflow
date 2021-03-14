@@ -42,7 +42,7 @@ class TestSchemaManager(TestCase):
 
     def test_schema_validation_2(self):
         sm = SchemaManager.from_filepath(self.get_data_file("hk_data_schema.json"))
-        val = sm.validate_file(self.get_data_file("data_input.json"))
+        val = sm.validate_file(self.get_data_file("hk_data_input.json"))
         self.assertTrue(val)
         # Test that it can be transformed into a dict
         dict_schema = sm.jsonschema_to_dict()
@@ -53,7 +53,7 @@ class TestSchemaManager(TestCase):
         flask_schema = sm.dict_to_flask()
         marshmallow_object = flask_schema()
         self.assertEqual(marshmallow_object.fields.keys(), {'resources', 'needs', 'jobs', 'durations'})
-        with open(self.get_data_file("data_input.json"), 'r') as f:
+        with open(self.get_data_file("hk_data_input.json"), 'r') as f:
             content = json.load(f)
         marshmallow_object.load(content)
         # marshmallow_object.fields['jobs'].nested().fields['successors']
@@ -93,6 +93,14 @@ class TestSchemaManager(TestCase):
     def test_array_integer(self):
         sm = SchemaManager.from_filepath(self.get_data_file('graph_coloring_input.json'))
         sm.jsonschema_to_flask()
+
+    def test_non_mandatory(self):
+        sm = SchemaManager.from_filepath(self.get_data_file('instance-hackathon2.json'))
+        schema_marsh = sm.jsonschema_to_flask()
+        with open(self.get_data_file('hk_data_input.json'), 'r') as f:
+            content = json.load(f)
+        schema_marsh().validate(content)
+        return
 
     # TODO: fix this test and uncomment
     # def test_list_of_lists(self):

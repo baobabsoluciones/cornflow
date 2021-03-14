@@ -138,7 +138,7 @@ class SchemaManager:
         
         if not self.is_schema_loaded():
             return self.schema_dict
-        
+
         self.schema_dict = self.get_empty_schema()
 
         if "definitions" in jsonschema:
@@ -148,7 +148,7 @@ class SchemaManager:
         if "properties" in jsonschema:
             for item in jsonschema["properties"].items():
                 self._get_element_dict(item)
-                self._create_data_schema(item)
+                self._create_data_schema(item, required_list=jsonschema.get('required'))
 
         return self.schema_dict
 
@@ -226,7 +226,7 @@ class SchemaManager:
     """
     Functions used to translate jsonschema to schema_dict
     """
-    def _create_data_schema(self, item):
+    def _create_data_schema(self, item, required_list=None):
         """
         Add a schema to self.schema_dict["DataSchema"]
 
@@ -236,11 +236,13 @@ class SchemaManager:
         return the schema dict.
         """
         name, content = item
+        if required_list is None:
+            required_list = []
 
         schema = [dict(name=name,
                        type=self._get_type_or_new_schema(item),
                        many=("type" in content and content["type"] == "array"),
-                       required=True)]
+                       required=name in required_list)]
         self.schema_dict[DATASCHEMA] += schema
     
         return schema
