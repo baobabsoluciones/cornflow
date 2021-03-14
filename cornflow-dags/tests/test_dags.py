@@ -52,6 +52,8 @@ class DAGTests(unittest.TestCase):
         solution, log, log_dict = self.app.solve(data, {})
         marshm = SchemaManager(self.app.solution).jsonschema_to_flask()
         marshm().load(solution)
+        marshm().validate(solution)
+        self.assertTrue(len(solution) > 0)
 
 
 def testAll():

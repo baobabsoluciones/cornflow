@@ -38,14 +38,14 @@ def solve(data, config):
         print(e)
         status = 0
 
+    log = dict()
+    sol = None
     if status != 0:
         # export everything:
         status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
         log = dict(time=timer() - start, solver=solver, status=status_conv.get(status, "Unknown"))
-        sol = algo.solution.to_dict()
-    else:
-        log = dict()
-        sol = {}
+        if status in [2, 4]:
+            sol = algo.solution.to_dict()
     return sol, "", log
 
 
