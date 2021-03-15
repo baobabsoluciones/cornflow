@@ -105,5 +105,6 @@
 	    "placeholder": {"type": "string"}
 	  }
 	}
-  }
+  },
+  "required": ["sos1", "constraints", "objective", "parameters", "sos2", "variables"]
 }

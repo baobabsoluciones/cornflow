@@ -24,8 +24,9 @@ class SchemaManager:
         self.jsonschema = schema if schema is not None else {}
         self.types = JSON_TYPES
         self.schema_dict = self.get_empty_schema()
-    
-    def get_empty_schema(self):
+
+    @staticmethod
+    def get_empty_schema():
         """
         Create un empty schema dict
         """
