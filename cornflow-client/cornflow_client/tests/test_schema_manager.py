@@ -16,8 +16,11 @@ class TestSchemaManager(TestCase):
     def get_data_file(self, filename):
         return os.path.join(self.root_data, filename)
 
+    def get_project_data_file(self, filename):
+        return os.path.join(self.root_data, '../../data', filename)
+
     def test_schema_dict(self):
-        sm = SchemaManager.from_filepath(self.get_data_file('pulp_json_schema.json'))
+        sm = SchemaManager.from_filepath(self.get_project_data_file('../data/pulp_json_schema.json'))
         dict_schema = sm.jsonschema_to_dict()
         
         self.assertCountEqual(dict_schema["CoefficientSchema"], dict_example["CoefficientSchema"])
@@ -31,7 +34,7 @@ class TestSchemaManager(TestCase):
         sm.jsonschema_to_flask()
 
     def test_schema_validation(self):
-        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
+        sm = SchemaManager.from_filepath(self.get_project_data_file("pulp_json_schema.json"))
         val = sm.validate_file(self.get_data_file("pulp_example_data.json"))
         self.assertTrue(val)
         sm.jsonschema_to_flask()
@@ -54,7 +57,7 @@ class TestSchemaManager(TestCase):
         # marshmallow_object().fields['jobs'].nested().fields['successors']
     
     def test_validation_errors(self):
-        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
+        sm = SchemaManager.from_filepath(self.get_project_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": [], "variables": []}
         bool = sm.validate_data(data)
         val = sm.get_validation_errors(data)
@@ -64,7 +67,7 @@ class TestSchemaManager(TestCase):
         sm.jsonschema_to_flask()
     
     def test_validation_errors2(self):
-        sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
+        sm = SchemaManager.from_filepath(self.get_project_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
         val = sm.get_validation_errors(data)
         self.assertEqual(len(val), 6)
@@ -100,7 +103,7 @@ class TestSchemaManager(TestCase):
     def test_flask_schema_extra_info(self):
         with open(self.get_data_file('pulp_example_data.json'), 'r') as f:
             content = json.load(f)
-        sm = SchemaManager.from_filepath(self.get_data_file('pulp_json_schema.json'))
+        sm = SchemaManager.from_filepath(self.get_project_data_file('pulp_json_schema.json'))
         marshmallow_object = sm.jsonschema_to_flask()
         content['new_param'] = 1
         content['objective']['another_something_new'] = 1
