@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, INCLUDE
 from functools import partial
 from .constants import BOOLEAN_TYPE, STRING_TYPE, INTEGER_TYPE, FLOAT_TYPE, BASIC_TYPES
 
@@ -36,7 +36,7 @@ def get_type(param_type, possible_dict=None):
 
 def gen_schema(cls_name, params, possible_dict=None):
     """
-    returns a marshmallow schema as if it were generates with a python object
+    returns a marshmallow schema as if it were generated with a python object
 
     :param cls_name: string with the class name
     :param params: list of dictionaries
@@ -52,8 +52,8 @@ def gen_schema(cls_name, params, possible_dict=None):
         p_type = p.pop('type')
         field_type = get_type(p_type, possible_dict=possible_dict)
         if p.get('many') and p_type in BASIC_TYPES:
-             # if this is a list: we need to make an explicit list
-             field_type = partial(fields.List, field_type)
+            # if this is a list: we need to make an explicit list
+            field_type = partial(fields.List, field_type)
         valid_values = p.pop("valid_values", None)
         name = p.pop('name')
         if valid_values is not None:
@@ -61,7 +61,11 @@ def gen_schema(cls_name, params, possible_dict=None):
         else:
             dict_fields[name] = field_type(**p)
     schema = type(cls_name, (Schema,), dict_fields)
+    # HACKISH: This allows us to validate if something is missing.
+    # there's probably a better way to do this:
+    schema.opts.unknown = INCLUDE
     return schema
+
 
 def sort_dict(dict_params):
     """

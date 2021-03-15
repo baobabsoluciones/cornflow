@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 import json
 import os
 
-
+# TODO: convert everything to an object that encapsulates everything
+#  to make it clear and avoid all the arguments.
 # class DagApp(object):
 #
 #     def __init__(self, dag_name, secrets):
@@ -115,6 +116,9 @@ def cf_get_data(client, kwargs):
 
 
 def try_to_save_error(client, exec_id, state=-1):
+    """
+    Attempt at saving that the execution failed
+    """
     try:
         client.put_api_for_id('dag/', id=exec_id, payload=dict(state=state))
     except Exception as e:
@@ -122,6 +126,11 @@ def try_to_save_error(client, exec_id, state=-1):
 
 
 def try_to_write_solution(client, exec_id, payload):
+    """
+    Tries to write the payload into cornflow
+    If it fails tries to write again that it failed.
+    If it fails at least once: it raises an exception
+    """
     try:
         client.write_solution(execution_id=exec_id, **payload)
     except CornFlowApiError:

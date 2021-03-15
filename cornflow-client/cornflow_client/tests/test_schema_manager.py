@@ -30,10 +30,6 @@ class TestSchemaManager(TestCase):
         self.assertCountEqual(dict_schema[DATASCHEMA], dict_example[DATASCHEMA])
         sm.jsonschema_to_flask()
 
-    def test_flask_schema(self):
-        # TODO: I am not sure how to test that
-        pass
-    
     def test_schema_validation(self):
         sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
         val = sm.validate_file(self.get_data_file("pulp_example_data.json"))
@@ -50,13 +46,12 @@ class TestSchemaManager(TestCase):
                          {'name': 'id', 'type': 'Integer', 'required': True, 'allow_none': False, 'many': False})
         self.assertEqual(dict_schema['JobsSchema'][1],
                          {'name': 'successors', 'type': 'Integer', 'many': True, 'required': True})
-        flask_schema = sm.dict_to_flask()
-        marshmallow_object = flask_schema()
-        self.assertEqual(marshmallow_object.fields.keys(), {'resources', 'needs', 'jobs', 'durations'})
+        marshmallow_object = sm.dict_to_flask()
+        self.assertEqual(marshmallow_object().fields.keys(), {'resources', 'needs', 'jobs', 'durations'})
         with open(self.get_data_file("hk_data_input.json"), 'r') as f:
             content = json.load(f)
-        marshmallow_object.load(content)
-        # marshmallow_object.fields['jobs'].nested().fields['successors']
+        marshmallow_object().load(content)
+        # marshmallow_object().fields['jobs'].nested().fields['successors']
     
     def test_validation_errors(self):
         sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
@@ -64,7 +59,7 @@ class TestSchemaManager(TestCase):
         bool = sm.validate_data(data)
         val = sm.get_validation_errors(data)
         self.assertFalse(bool)
-        self.assertEqual(len(val), 1)
+        self.assertEqual(len(val), 4)
         self.assertEqual(val[0].message, "[] is not of type 'object'")
         sm.jsonschema_to_flask()
     
@@ -72,7 +67,7 @@ class TestSchemaManager(TestCase):
         sm = SchemaManager.from_filepath(self.get_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
         val = sm.get_validation_errors(data)
-        self.assertEqual(len(val), 3)
+        self.assertEqual(len(val), 6)
         sm.jsonschema_to_flask()
 
     def test_validation_errors3(self):
@@ -99,8 +94,18 @@ class TestSchemaManager(TestCase):
         schema_marsh = sm.jsonschema_to_flask()
         with open(self.get_data_file('hk_data_input.json'), 'r') as f:
             content = json.load(f)
-        schema_marsh().validate(content)
+        err = schema_marsh().load(content)
         return
+
+    def test_flask_schema_extra_info(self):
+        with open(self.get_data_file('pulp_example_data.json'), 'r') as f:
+            content = json.load(f)
+        sm = SchemaManager.from_filepath(self.get_data_file('pulp_json_schema.json'))
+        marshmallow_object = sm.jsonschema_to_flask()
+        content['new_param'] = 1
+        content['objective']['another_something_new'] = 1
+        marshmallow_object().load(content)
+
 
     # TODO: fix this test and uncomment
     # def test_list_of_lists(self):
