@@ -25,6 +25,14 @@ class TestInstancesListEndpoint(CustomTestCase):
     def test_new_instance(self):
         self.create_new_row(self.url, self.model, self.payload)
 
+    def test_new_instance_missing_info(self):
+        del self.payload['data']['parameters']
+        self.create_new_row(self.url, self.model, self.payload, expected_status=400, check_payload=False)
+
+    def test_new_instance_extra_info(self):
+        self.payload['data']['additional_param'] = 1
+        self.create_new_row(self.url, self.model, self.payload)
+
     def test_new_instance_bad_format(self):
         payload = dict(data1= 1, data2=dict(a=1))
         response = self.client.post(self.url, data=json.dumps(payload), follow_redirects=True,

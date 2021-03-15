@@ -3,6 +3,7 @@ from requests.exceptions import ConnectionError, HTTPError
 import json
 from requests.auth import HTTPBasicAuth
 from cornflow_client import SchemaManager
+from marshmallow import ValidationError, INCLUDE
 
 from ..shared.exceptions import AirflowError, InvalidUsage
 
@@ -84,12 +85,16 @@ class Airflow(object):
     def get_one_schema(self, dag_name, schema):
         return self.get_one_variable("{}_{}".format(dag_name, schema))
 
-
     def get_schemas_for_dag_name(self, dag_name):
         return {v: self.get_one_schema(dag_name, v) for v in ['input', 'output']}
 
 
 def get_schema(config, dag_name, schema='input'):
+    """
+    Gets a schema by name from airflow server. We use the variable api.
+    We transform the jsonschema into a marshmallow class
+
+    """
     airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
     af_client = Airflow(**airflow_conf)
     if not af_client.is_alive():
@@ -102,7 +107,16 @@ def get_schema(config, dag_name, schema='input'):
 
 
 def validate_and_continue(obj, data):
-    validate = obj.load(data)
+    """
+    This function validates some data meets a marshmallow object specs.
+    In case it does not: we raise an error.
+    In case we do, we return the transformed data
+
+    """
+    try:
+        validate = obj.load(data)
+    except ValidationError as e:
+        raise InvalidUsage(error='Bad data format: {}'.format(e))
     err = ''
     if validate is None:
         raise InvalidUsage(error='Bad data format: {}'.format(err))
