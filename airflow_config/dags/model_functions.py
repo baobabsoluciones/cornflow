@@ -1,12 +1,13 @@
 
 import cornflow_client.airflow_dag_utilities as utils
+from cornflow_client import get_pulp_jsonschema
 import pulp as pl
 import orloge as ol
 import os
 
 
 name = 'solve_model_dag'
-instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
+instance = solution = get_pulp_jsonschema()
 
 
 def solve(data, config):
@@ -72,4 +73,3 @@ def test_cases():
     prob += x + z >= 10, "c2"
     prob += -y + z == 7.5, "c3"
     return [prob.toDict()]
-
