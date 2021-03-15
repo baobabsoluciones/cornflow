@@ -1,8 +1,8 @@
-from cornflow_client import SchemaManager
+from cornflow_client import SchemaManager, get_pulp_jsonschema
 import os
 
 fileDir = os.path.dirname(__file__)
-filePath = os.path.join(fileDir, '..', 'static', 'pulp_json_schema.json')
-manager = SchemaManager.from_filepath(filePath)
+
+manager = SchemaManager(get_pulp_jsonschema())
 
 DataSchema = manager.jsonschema_to_flask()
