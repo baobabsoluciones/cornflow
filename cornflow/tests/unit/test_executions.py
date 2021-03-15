@@ -4,6 +4,7 @@ import json
 from cornflow.tests.const import INSTANCE_PATH, EXECUTION_PATH, EXECUTIONS_LIST, EXECUTION_URL, \
     EXECUTION_URL_NORUN, INSTANCE_URL
 
+# TODO: tests of the dag endpoint (put, post)
 
 class TestExecutionsListEndpoint(CustomTestCase):
 

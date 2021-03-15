@@ -187,6 +187,17 @@ class TestCornflowClient(TestCornflowClientBasic):
         _error_fun = lambda: self.client.create_instance(**payload)
         self.assertRaises(CornFlowApiError, _error_fun)
 
+    def test_new_instance_with_schema_additional_data(self):
+        def load_file(_file):
+            with open(_file) as f:
+                temp = json.load(f)
+            return temp
+
+        payload = load_file(INSTANCE_PATH)
+        payload['data']['objective']['inexistant_property'] = 1
+        payload['data_schema'] = 'solve_model_dag'
+        self.client.create_instance(**payload)
+
     def test_new_instance_with_schema_good(self):
         def load_file(_file):
             with open(_file) as f:
