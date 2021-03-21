@@ -1,6 +1,7 @@
 from marshmallow import fields, Schema
 
-from ..schemas.execution import ExecutionSchema, ExecutionDetailsEndpointResponse
+from .execution import ExecutionSchema, ExecutionDetailsEndpointResponse
+from .common import QueryFilters as QueryFiltersInstance
 
 
 class InstanceSchema(Schema):

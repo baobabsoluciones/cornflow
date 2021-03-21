@@ -4,7 +4,10 @@ import json
 from cornflow.tests.const import INSTANCE_PATH, EXECUTION_PATH, EXECUTIONS_LIST, EXECUTION_URL, \
     EXECUTION_URL_NORUN, INSTANCE_URL
 
+import datetime
+
 # TODO: tests of the dag endpoint (put, post)
+
 
 class TestExecutionsListEndpoint(CustomTestCase):
 
@@ -48,7 +51,42 @@ class TestExecutionsListEndpoint(CustomTestCase):
         token = self.create_super_admin()
         rows = self.client.get(self.url, follow_redirects=True,
                                headers=self.get_header_with_auth(token))
-        self.assertGreaterEqual(len(rows.json), len(self.payloads))
+        self.assertEqual(len(rows.json), len(self.payloads))
+
+    def test_opt_filters_limit(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+        self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
+
+    def test_opt_filters_offset(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+        self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
+
+    def test_opt_filters_date_lte(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+
+        a = datetime.datetime.fromisoformat(allrows.json[0]['created_at'])
+        b = datetime.datetime.fromisoformat(allrows.json[1]['created_at'])
+        date_limit = b + (a - b)/2
+        # we ask for one before the last one => we get the second from the last
+        self.apply_filter(self.url, dict(creation_date_lte=date_limit.isoformat(), limit=1),
+                          [allrows.json[1]])
+
+    def test_opt_filters_date_gte(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+
+        date_limit = datetime.datetime.fromisoformat(allrows.json[2]['created_at']) + \
+                     datetime.timedelta(microseconds=1)
+        # we ask for all after the third from the last => we get the last two
+        self.apply_filter(self.url, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
+        return
 
 
 class TestExecutionsDetailEndpointMock(CustomTestCase):
@@ -97,7 +135,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
 
     def test_delete_one_execution(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
-        self.delete_row(self.url + id + '/', self.model)
+        self.delete_row(self.url + id + '/')
         self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
 
     def test_update_one_execution(self):
@@ -113,7 +151,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
     def test_create_delete_instance_load(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         execution = self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
-        self.delete_row(self.url + id + '/', self.model)
+        self.delete_row(self.url + id + '/')
         instance = self.get_one_row(INSTANCE_URL + execution['instance_id'] + '/', payload={},
                                     expected_status=200, check_payload=False)
         executions = [execution['id'] for execution in instance['executions']]
@@ -129,7 +167,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         id = self.create_new_row(self.url + '?run=0', self.model, payload)
         self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
         # we delete the new instance
-        self.delete_row(INSTANCE_URL + fk_id + '/', InstanceModel)
+        self.delete_row(INSTANCE_URL + fk_id + '/')
         # we check the execution does not exist
         self.get_one_row(self.url + id, payload={}, expected_status=404, check_payload=False)
 
@@ -158,6 +196,13 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         payload['id'] = id
         self.get_one_row(self.url, payload)
 
+    def test_get_one_execution_superadmin(self):
+        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        payload = dict(self.payload)
+        payload['id'] = id
+        token = self.create_super_admin()
+        self.get_one_row(EXECUTION_URL + id + '/data/', payload, token=token)
+
 
 class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
 
@@ -171,6 +216,13 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         payload = dict(self.payload)
         payload['id'] = id
         self.get_one_row(EXECUTION_URL + id + '/log/', payload)
+
+    def test_get_one_execution_superadmin(self):
+        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        payload = dict(self.payload)
+        payload['id'] = id
+        token = self.create_super_admin()
+        self.get_one_row(EXECUTION_URL + id + '/log/', payload, token=token)
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):

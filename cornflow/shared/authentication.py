@@ -2,9 +2,8 @@ import datetime
 from functools import wraps
 
 import jwt
-from flask import Response, request, json, g, current_app
-from ..shared.exceptions import InvalidUsage, InvalidCredentials, ObjectDoesNotExist, NoPermission
-import os
+from flask import request, g, current_app
+from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
 
 from ..models.user import UserModel
 
@@ -56,6 +55,12 @@ class Auth:
 
     @staticmethod
     def get_user_obj_from_header(headers):
+        """
+        returns a user from the headers of the request
+
+        :return: user
+        :rtype: UserModel
+        """
         token = Auth.get_token_from_header(headers)
         data = Auth.decode_token(token)
         user_id = data['user_id']
