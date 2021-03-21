@@ -3,19 +3,15 @@ Model for the executions
 """
 
 # Import from libraries
-import datetime
 import hashlib
 
 # Imports from sqlalchemy
-from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
 # Imports from internal modules
 from .meta_model import BaseAttributes
-from ..models.instance import InstanceModel
-from ..shared.const import DEFAULT_EXECUTION_CODE, MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE, \
-    EXECUTION_STATE_MESSAGE_DICT
+from ..shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
 from ..shared.utils import db
 
 
@@ -124,26 +120,6 @@ class ExecutionModel(BaseAttributes):
         super().update({})
 
     @staticmethod
-    def get_all_executions_admin():
-        """
-        Query to get all executions
-        BEWARE: only the admin should do this.
-
-        :return: All executions
-        """
-        return ExecutionModel.query.filter_by(deleted_at=None)
-
-    @staticmethod
-    def get_all_executions(user):
-        """
-        Query to all executions from one user.
-
-        :param int user: User ID.
-        :return: The executions of the user.
-        """
-        return ExecutionModel.query.filter_by(user_id=user, deleted_at=None)
-
-    @staticmethod
     def get_one_execution_from_id_admin(idx):
         """
         Query to get one execution with the given id
@@ -153,17 +129,6 @@ class ExecutionModel(BaseAttributes):
         :return: The execution.
         """
         return ExecutionModel.query.filter_by(id=idx, deleted_at=None).first()
-
-    @staticmethod
-    def get_one_execution_from_user(user, idx):
-        """
-        Query to get one execution with the given id and from the user
-
-        :param int user: User performing the query
-        :param str idx: Execution ID
-        :return: The execution.
-        """
-        return ExecutionModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
 
     def __repr__(self):
         """

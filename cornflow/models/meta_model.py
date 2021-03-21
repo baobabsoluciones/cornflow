@@ -4,6 +4,7 @@
 import datetime
 
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import desc
 
 from ..shared.utils import db
 
@@ -45,3 +46,55 @@ class BaseAttributes(TraceAttributes):
     def __init__(self, data):
         self.user_id = data.get('user_id')
         super().__init__()
+
+    @classmethod
+    def get_all_objects(cls,
+                        user,
+                        data_schema=None,
+                        creation_date_gte=None,
+                        creation_date_lte=None,
+                        offset=None,
+                        limit=None):
+        """
+        Query to get all objects from a user
+
+        :param UserModel user: User object.
+        :param string data_schema: data_schema to filter (dag)
+        :param string creation_date_gte: created_at needs to be larger or equal to this
+        :param string creation_date_lte: created_at needs to be smaller or equal to this
+        :param int offset: query offset for pagination
+        :param int limit: query size limit
+        :return: The objects
+        :rtype: list(:class:`BaseAttributes`)
+        """
+        query = cls.query.filter(cls.deleted_at == None)
+        # TODO: in airflow they use: query = session.query(ExecutionModel)
+        if not user.is_admin():
+            query = query.filter(cls.user_id == user.id)
+
+        if data_schema:
+            query = query.filter(cls.dag_name == data_schema)
+        if creation_date_gte:
+            query = query.filter(cls.created_at >= creation_date_gte)
+        if creation_date_lte:
+            query = query.filter(cls.created_at <= creation_date_lte)
+        # if airflow they also return total_entries = query.count(), for some reason
+
+        return query.order_by(desc(cls.created_at)).\
+            offset(offset).limit(limit).all()
+
+    @classmethod
+    def get_one_object_from_user(cls, user, idx):
+        """
+        Query to get one object from the user and the id.
+
+        :param UserModel user: user object performing the query
+        :param str idx: ID from the object to get
+        :return: The object or None if it does not exist
+        :rtype: :class:`BaseAttributes`
+        """
+        query = cls.query.filter_by(id=idx, deleted_at=None)
+        if not user.is_admin():
+            query = query.filter_by(user_id=user.id)
+        return query.first()
+

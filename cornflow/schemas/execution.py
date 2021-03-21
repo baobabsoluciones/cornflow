@@ -1,10 +1,10 @@
 from marshmallow import fields, Schema, validate
-from ..schemas.solution_log import LogSchema
+from .solution_log import LogSchema
 from ..shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
+from .common import QueryFilters
 
-
-class OptionsSchema(Schema):
-    option1 = fields.Str(required=True, many=True)
+class QueryFiltersExecution(QueryFilters):
+    data_schema = fields.String(required=False)
 
 
 class ConfigSchema(Schema):

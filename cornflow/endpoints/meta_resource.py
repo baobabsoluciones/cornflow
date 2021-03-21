@@ -5,6 +5,7 @@ It should allow all CRUD (create, read, update, delete) operations
 # Import from libraries
 from flask_restful import Resource
 from flask import request
+from functools import wraps
 
 # Import from internal modules
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
@@ -19,11 +20,14 @@ class MetaResource(Resource):
         self.user = None
         self.model = None
         self.query = None
-        self.primary_key = None
         self.dependents = None
         self.foreign_data = None
 
     def get_user(self):
+        """
+        :return: a user of a request
+        :rtype: UserModel
+        """
         if self.user is None:
             self.user = Auth.get_user_obj_from_header(request.headers)
             if self.user is None:
@@ -31,24 +35,42 @@ class MetaResource(Resource):
         return self.user
 
     def get_user_id(self):
+        """
+        :return: the id of the user
+        :rtype: int
+        """
         return self.get_user().id
 
     def is_admin(self):
-        return self.get_user().admin or self.get_user().super_admin
+        """
+        :return: if user is admin
+        :rtype: bool
+        """
+        return self.get_user().is_admin()
 
     def is_super_admin(self):
-        return self.get_user().super_admin
+        """
+        :return: if user is superadmin
+        :rtype: bool
+        """
+        return self.get_user().is_super_admin()
 
-    def get_list(self, *args):
-        data = getattr(self.model, self.query)(*args)
-        return data, 200
+    @staticmethod
+    def get_data_or_404(func):
+        """
+        Auth decorator
+        :param func:
+        :return:
+        """
 
-    def get_detail(self, *args):
-        data = getattr(self.model, self.query)(*args)
-        if data is None:
-            raise ObjectDoesNotExist()
-        else:
-            return data, 200
+        @wraps(func)
+        def decorated_func(*args, **kwargs):
+            data = func(*args, **kwargs)
+            if data is None:
+                raise ObjectDoesNotExist()
+            return data
+
+        return decorated_func
 
     def post_list(self, data):
         data = dict(data)
@@ -65,8 +87,7 @@ class MetaResource(Resource):
         return item, 201
 
     def put_detail(self, data, *args):
-
-        item = getattr(self.model, self.query)(*args)
+        item = self.query(*args)
         if item is None:
             raise ObjectDoesNotExist()
 
@@ -78,7 +99,7 @@ class MetaResource(Resource):
 
     def delete_detail(self, *args):
 
-        item = getattr(self.model, self.query)(*args)
+        item = self.query(*args)
 
         if item is None:
             raise ObjectDoesNotExist()
@@ -91,8 +112,8 @@ class MetaResource(Resource):
 
         return {'message': 'The object has been deleted'}, 200
 
-    def check_permissions(self, owner):
-        if self.get_user().id != owner:
+    def check_permissions(self, user):
+        if self.get_user().id != user:
             return False
         else:
             return True
