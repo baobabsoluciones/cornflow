@@ -253,32 +253,6 @@ create a new execution</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.execution.ExecutionModel.get_all_executions_admin">
-<em class="property">static </em><code class="sig-name descname">get_all_executions_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.get_all_executions_admin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to get all executions
-BEWARE: only the admin should do this.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>All executions</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.models.execution.ExecutionModel.get_all_executions">
-<em class="property">static </em><code class="sig-name descname">get_all_executions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.get_all_executions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to all executions from one user.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The executions of the user.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="cornflow.models.execution.ExecutionModel.get_one_execution_from_id_admin">
 <em class="property">static </em><code class="sig-name descname">get_one_execution_from_id_admin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.get_one_execution_from_id_admin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query to get one execution with the given id
@@ -286,23 +260,6 @@ BEWARE: this should only be called from the admin user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Execution ID</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The execution.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.models.execution.ExecutionModel.get_one_execution_from_user">
-<em class="property">static </em><code class="sig-name descname">get_one_execution_from_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em>, <em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.get_one_execution_from_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to get one execution with the given id and from the user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User performing the query</p></li>
-<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Execution ID</p></li>
-</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The execution.</p>
@@ -377,38 +334,6 @@ a new instance</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.instance.InstanceModel.get_all_instances_admin">
-<em class="property">static </em><code class="sig-name descname">get_all_instances_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.get_all_instances_admin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to get all instances.
-BEWARE: only the admin should do this.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>All instances</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list(<a class="reference internal" href="#cornflow.models.instance.InstanceModel" title="cornflow.models.instance.InstanceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceModel</span></code></a>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.models.instance.InstanceModel.get_all_instances">
-<em class="property">static </em><code class="sig-name descname">get_all_instances</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.get_all_instances" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to get all instances from a user</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – ID from the user performing the query</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The instances</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list(<a class="reference internal" href="#cornflow.models.instance.InstanceModel" title="cornflow.models.instance.InstanceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceModel</span></code></a>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="cornflow.models.instance.InstanceModel.get_one_instance_from_id_admin">
 <em class="property">static </em><code class="sig-name descname">get_one_instance_from_id_admin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.get_one_instance_from_id_admin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query to get one instance from its ID
@@ -416,26 +341,6 @@ BEWARE: only the admin should do this.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – ID from the instance</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The instance</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.instance.InstanceModel" title="cornflow.models.instance.InstanceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceModel</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cornflow.models.instance.InstanceModel.get_one_instance_from_user">
-<em class="property">static </em><code class="sig-name descname">get_one_instance_from_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user</span></em>, <em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.get_one_instance_from_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query to get one instance from the user and the id.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – ID from the user performing the query</p></li>
-<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – ID from the instance</p></li>
-</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The instance</p>
