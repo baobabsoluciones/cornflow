@@ -7,6 +7,7 @@ from cornflow.shared.utils import db
 from cornflow.shared.authentication import Auth
 from cornflow.tests.const import LOGIN_URL
 
+
 class CustomTestCase(TestCase):
 
     def create_app(self):
@@ -31,8 +32,6 @@ class CustomTestCase(TestCase):
         self.user = Auth.return_user_from_token(self.token)
         self.url = None
         self.model = None
-        self.id = None
-        self.foreign_keys = None
         self.response_items = set()
         self.items_to_check = []
 
@@ -77,16 +76,16 @@ class CustomTestCase(TestCase):
     def get_rows(self, url, data):
 
         codes = [self.create_new_row(url=url, model=self.model, payload=d) for d in data]
-
         rows = self.client.get(url, follow_redirects=True,
                                headers=self.get_header_with_auth(self.token))
-
+        # rows now come in desc order of date, so we reverse them:
+        rows_data = list(reversed(rows.json))
         self.assertEqual(len(rows.json), len(data))
-
         for i in range(len(data)):
-            self.assertEqual(rows.json[i]['id'], codes[i])
+            self.assertEqual(rows_data[i]['id'], codes[i])
             for key in self.get_keys_to_check(data[i]):
-                self.assertEqual(rows.json[i][key], data[i][key])
+                self.assertEqual(rows_data[i][key], data[i][key])
+        return rows
 
     def get_keys_to_check(self, payload):
         if len(self.items_to_check):
@@ -129,7 +128,7 @@ class CustomTestCase(TestCase):
             self.assertEqual(row.json[key], payload_to_check[key])
         return row.json
 
-    def delete_row(self, url, model):
+    def delete_row(self, url):
 
         response = self.client.delete(url, follow_redirects=True,
                                       headers=self.get_header_with_auth(self.token))
@@ -140,6 +139,15 @@ class CustomTestCase(TestCase):
 
         self.assertEqual(404, response.status_code)
         return response
+
+    def apply_filter(self, url, _filter, result):
+        get_with_opts = lambda data: self.client.get(url, follow_redirects=True, data=json.dumps(data),
+                                                     headers=self.get_header_with_auth(self.token))
+        response = get_with_opts(_filter)
+        self.assertEqual(len(response.json), len(result))
+        for k, v in enumerate(result):
+            self.assertEqual(response.json[k], v)
+        return
 
     def repr_method(self, id, representation):
         row = self.model.query.get(id)

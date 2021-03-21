@@ -309,25 +309,6 @@
       }, 
       "type": "object"
     }, 
-    "InstanceRequest": {
-      "properties": {
-        "data": {}, 
-        "data_schema": {
-          "type": "string"
-        }, 
-        "description": {
-          "type": "string"
-        }, 
-        "name": {
-          "type": "string"
-        }
-      }, 
-      "required": [
-        "data", 
-        "name"
-      ], 
-      "type": "object"
-    }, 
     "Log": {
       "properties": {
         "best_bound": {
@@ -481,6 +462,12 @@
           }, 
           "type": "array"
         }, 
+        "Depth": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array"
+        }, 
         "Gap": {
           "items": {
             "type": "string"
@@ -522,6 +509,47 @@
             "type": "string"
           }, 
           "type": "array"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "QueryFilters": {
+      "properties": {
+        "creation_date_gte": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "creation_date_lte": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "limit": {
+          "type": "integer"
+        }, 
+        "offset": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "QueryFiltersExecution": {
+      "properties": {
+        "creation_date_gte": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "creation_date_lte": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "data_schema": {
+          "type": "string"
+        }, 
+        "limit": {
+          "type": "integer"
+        }, 
+        "offset": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -672,7 +700,16 @@
     "/execution/": {
       "get": {
         "description": "Get all executions", 
-        "parameters": [], 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/QueryFiltersExecution"
+            }
+          }
+        ], 
         "responses": {
           "default": {
             "description": "", 
@@ -747,6 +784,21 @@
             }
           }
         }, 
+        "tags": [
+          "Executions"
+        ]
+      }, 
+      "post": {
+        "description": "Stop an execution", 
+        "parameters": [
+          {
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "string"
+          }
+        ], 
+        "responses": {}, 
         "tags": [
           "Executions"
         ]
@@ -850,7 +902,16 @@
     "/instance/": {
       "get": {
         "description": "Get all instances", 
-        "parameters": [], 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/QueryFilters"
+            }
+          }
+        ], 
         "responses": {
           "default": {
             "description": "", 
@@ -868,24 +929,8 @@
       }, 
       "post": {
         "description": "Create an instance", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/InstanceRequest"
-            }
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
-            }
-          }
-        }, 
+        "parameters": [], 
+        "responses": {}, 
         "tags": [
           "Instances"
         ]
@@ -1167,14 +1212,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }

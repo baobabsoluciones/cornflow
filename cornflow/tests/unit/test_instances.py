@@ -1,8 +1,16 @@
 import json
 import zlib
+from datetime import datetime, timedelta
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.const import INSTANCE_URL, INSTANCES_LIST, INSTANCE_PATH
+
+try:
+    date_from_str = datetime.fromisoformat
+except:
+    def date_from_str(_string):
+        return datetime.\
+        strptime(_string, '%Y-%m-%d %H:%M:%S.%f')
 
 
 class TestInstancesListEndpoint(CustomTestCase):
@@ -54,6 +62,41 @@ class TestInstancesListEndpoint(CustomTestCase):
     def test_get_no_instances(self):
         self.get_no_rows(self.url)
 
+    def test_opt_filters_limit(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+        self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
+
+    def test_opt_filters_offset(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+        self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
+
+    def test_opt_filters_date_lte(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+
+        a = date_from_str(allrows.json[0]['created_at'])
+        b = date_from_str(allrows.json[1]['created_at'])
+        date_limit = b + (a - b)/2
+        # we ask for one before the last one => we get the second from the last
+        self.apply_filter(self.url, dict(creation_date_lte=date_limit.isoformat(), limit=1),
+                          [allrows.json[1]])
+
+    def test_opt_filters_date_gte(self):
+        # we create 4 instances
+        data_many = [self.payload for i in range(4)]
+        allrows = self.get_rows(self.url, data_many)
+
+        date_limit = date_from_str(allrows.json[2]['created_at']) + \
+                     timedelta(microseconds=1)
+        # we ask for all after the third from the last => we get the last two
+        self.apply_filter(self.url, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
+        return
+
 
 class TestInstancesDetailEndpointBase(CustomTestCase):
 
@@ -96,7 +139,7 @@ class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
 
     def test_delete_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)
-        self.delete_row(self.url + id + '/', self.model)
+        self.delete_row(self.url + id + '/')
 
     def test_get_nonexistent_instance(self):
         result = self.get_one_row(self.url + 'some_key_' + '/', {},
@@ -129,6 +172,13 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         response = json.loads(raw)
         self.assertEqual(self.payload['data'], response['data'])
         # self.assertEqual(resp.headers[], 'br')
+
+    def test_get_one_instance_superadmin(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_super_admin()
+        payload = {**self.payload, **dict(id=id)}
+        result = self.get_one_row(INSTANCE_URL + id + '/data/', payload, token=token)
+
 
 class TestInstanceModelMethods(CustomTestCase):
 

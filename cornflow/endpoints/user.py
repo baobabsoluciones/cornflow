@@ -16,6 +16,7 @@ from .meta_resource import MetaResource
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
 
+
 class UserEndpoint(MetaResource, MethodResource):
     """
     Endpoint with a get method which gives back all the info related to the users.

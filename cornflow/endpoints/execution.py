@@ -15,14 +15,14 @@ from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution import \
     ExecutionSchema, \
     ExecutionDetailsEndpointResponse, ExecutionDataEndpointResponse, ExecutionLogEndpointResponse, \
-    ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest
+    ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest, QueryFiltersExecution
 from ..shared.airflow_api import Airflow, validate_and_continue, get_schema
 from ..shared.authentication import Auth
 from ..shared.const import \
-    EXEC_STATE_CORRECT, EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
+    EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
     EXEC_STATE_NOT_RUN, EXEC_STATE_UNKNOWN, EXECUTION_STATE_MESSAGE_DICT, AIRFLOW_TO_STATE_MAP, \
     EXEC_STATE_STOPPED
-from ..shared.exceptions import AirflowError
+from ..shared.exceptions import AirflowError, ObjectDoesNotExist
 from ..shared.compress import compressed
 
 
@@ -39,14 +39,15 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
-        self.query = 'get_all_executions'
+        self.query = ExecutionModel.get_all_objects
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
 
     @doc(description='Get all executions', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse(many=True))
-    def get(self):
+    @use_kwargs(QueryFiltersExecution, location='json')
+    def get(self, **kwargs):
         """
         API method to get all the executions created by the user and its related info
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -56,9 +57,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        if self.is_admin():
-            return ExecutionModel.get_all_executions_admin()
-        return self.get_list(self.get_user_id())
+        return ExecutionModel.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description='Create an execution', tags=['Executions'])
     @Auth.auth_required
@@ -76,12 +75,12 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         """
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
-        # TODO: maybe we need to filter the kwargs to avoid any user from
-        #  filling the state, execution_results, logs, etc.
         if 'dag_name' not in kwargs:
             kwargs['dag_name'] = 'solve_model_dag'
         execution, status_code = self.post_list(kwargs)
-        instance = InstanceModel.get_one_instance_from_user(self.get_user_id(), execution.instance_id)
+        instance = InstanceModel.get_one_object_from_user(self.get_user(), execution.instance_id)
+        if instance is None:
+            raise ObjectDoesNotExist(error="The instance to solve does not exist")
 
         # this allows testing without airflow interaction:
         if request.args.get('run', '1') == '0':
@@ -139,7 +138,7 @@ class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
-        self.query = 'get_one_execution_from_user'
+        self.query = ExecutionModel.get_one_object_from_user
         self.primary_key = 'id'
         self.foreign_data = {'instance_id': InstanceModel}
 
@@ -149,6 +148,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description='Get details of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
+    @MetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get an execution created by the user and its related info.
@@ -160,9 +160,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        if self.is_admin():
-            return ExecutionModel.get_one_execution_from_id_admin(idx)
-        return self.get_detail(self.get_user_id(), idx)
+        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
 
     @doc(description='Edit an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
@@ -176,7 +174,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.put_detail(data, self.get_user_id(), idx)
+        return self.put_detail(data, self.get_user(), idx)
 
     @doc(description='Delete an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
@@ -191,14 +189,16 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.delete_detail(self.get_user_id(), idx)
+        return self.delete_detail(self.get_user(), idx)
 
     @doc(description='Stop an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     def post(self, idx):
         config = current_app.config
         airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
-        execution, code = self.get_detail(self.get_user_id(), idx)
+        execution = ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist()
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
             raise AirflowError(error="Airflow is not accessible")
@@ -230,7 +230,9 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
                             user=current_app.config['AIRFLOW_USER'],
                             pwd=current_app.config['AIRFLOW_PWD'])
 
-        execution = ExecutionModel.get_one_execution_from_user(self.get_user_id(), idx)
+        execution = ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist()
         if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_UNKNOWN]:
             # we only care on asking airflow if the status is unknown or is running.
             return execution, 200
@@ -271,6 +273,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     @doc(description='Get solution data of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionDataEndpointResponse)
+    @MetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -280,7 +283,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.get_detail(self.get_user_id(), idx)
+        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
 
 
 class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
@@ -291,6 +294,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     @doc(description='Get log of an execution', tags=['Executions'], inherit=False)
     @Auth.auth_required
     @marshal_with(ExecutionLogEndpointResponse)
+    @MetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -300,4 +304,4 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.get_detail(self.get_user_id(), idx)
+        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)

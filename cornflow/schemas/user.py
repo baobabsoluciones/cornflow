@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema
-from ..schemas.instance import InstanceSchema
+from .instance import InstanceSchema
 
 
 class UserSchema(Schema):

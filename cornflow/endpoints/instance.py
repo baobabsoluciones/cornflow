@@ -18,7 +18,7 @@ from ..models import InstanceModel
 from ..schemas.model_json import DataSchema
 from ..schemas.instance import InstanceSchema, \
     InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
-    InstanceRequest, InstanceEditRequest, InstanceFileRequest
+    InstanceRequest, InstanceEditRequest, InstanceFileRequest, QueryFiltersInstance
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
 from ..shared.airflow_api import get_schema, validate_and_continue
@@ -29,7 +29,6 @@ from flask_inflate import inflate
 ALLOWED_EXTENSIONS = {'mps', 'lp'}
 
 
-
 class InstanceEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
@@ -38,13 +37,14 @@ class InstanceEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = InstanceModel
-        self.query = 'get_all_instances'
+        self.query = InstanceModel.get_all_objects
         self.primary_key = 'id'
 
     @doc(description='Get all instances', tags=['Instances'])
     @Auth.auth_required
     @marshal_with(InstanceEndpointResponse(many=True))
-    def get(self):
+    @use_kwargs(QueryFiltersInstance, location='json')
+    def get(self, **kwargs):
         """
         API (GET) method to get all the instances created by the user and its related info
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -54,9 +54,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
           object with the data from the instances otherwise) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        if self.is_admin():
-            return InstanceModel.get_all_instances_admin()
-        return self.get_list(self.get_user_id())
+        return InstanceModel.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description='Create an instance', tags=['Instances'])
     @Auth.auth_required
@@ -102,12 +100,13 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
         super().__init__()
         self.model = InstanceModel
         self.primary_key = 'id'
-        self.query = 'get_one_instance_from_user'
+        self.query = InstanceModel.get_one_object_from_user
         self.dependents = 'executions'
 
     @doc(description='Get one instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
+    @MetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get an instance created by the user and its related info.
@@ -119,9 +118,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        if self.is_admin():
-            return InstanceModel.get_one_instance_from_id_admin(idx)
-        return self.get_detail(self.get_user_id(), idx)
+        return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
@@ -140,7 +137,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.put_detail(data, self.get_user_id(), idx)
+        return self.put_detail(data, self.get_user(), idx)
 
     @doc(description='Delete an instance', tags=['Instances'])
     @Auth.auth_required
@@ -155,7 +152,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.delete_detail(self.get_user_id(), idx)
+        return self.delete_detail(self.get_user(), idx)
 
 
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
@@ -170,6 +167,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     @doc(description='Get input data of an instance', tags=['Instances'], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDataEndpointResponse)
+    @MetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -182,7 +180,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.get_detail(self.get_user_id(), idx)
+        return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
 @doc(description='Create an instance from an mps file', tags=['Instances'], inherit=False)

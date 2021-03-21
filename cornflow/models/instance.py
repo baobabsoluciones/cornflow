@@ -4,6 +4,7 @@
 import hashlib
 
 # Import from sqlalchemy
+from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
@@ -91,28 +92,6 @@ class InstanceModel(BaseAttributes):
         db.session.commit()
 
     @staticmethod
-    def get_all_instances_admin():
-        """
-        Query to get all instances.
-        BEWARE: only the admin should do this.
-
-        :return: All instances
-        :rtype: list(:class:`InstanceModel`)
-        """
-        return InstanceModel.query.filter_by(deleted_at=None)
-
-    @staticmethod
-    def get_all_instances(user):
-        """
-        Query to get all instances from a user
-
-        :param int user: ID from the user performing the query
-        :return: The instances
-        :rtype: list(:class:`InstanceModel`)
-        """
-        return InstanceModel.query.filter_by(user_id=user, deleted_at=None)
-
-    @staticmethod
     def get_one_instance_from_id_admin(idx):
         """
         Query to get one instance from its ID
@@ -123,18 +102,6 @@ class InstanceModel(BaseAttributes):
         :rtype: :class:`InstanceModel`
         """
         return InstanceModel.query.filter_by(id=idx, deleted_at=None).first()
-
-    @staticmethod
-    def get_one_instance_from_user(user, idx):
-        """
-        Query to get one instance from the user and the id.
-
-        :param int user: ID from the user performing the query
-        :param str idx: ID from the instance
-        :return: The instance
-        :rtype: :class:`InstanceModel`
-        """
-        return InstanceModel.query.filter_by(user_id=user, id=idx, deleted_at=None).first()
 
     def __repr__(self):
         """

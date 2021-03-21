@@ -87,6 +87,12 @@ class UserModel(TraceAttributes):
         db.session.delete(self)
         db.session.commit()
 
+    def is_admin(self):
+        return self.admin or self.super_admin
+
+    def is_super_admin(self):
+        return self.super_admin
+
     @staticmethod
     def __generate_hash(password):
         """
