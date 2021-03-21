@@ -1,10 +1,17 @@
 from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 import json
+from datetime import datetime, timedelta
 from cornflow.tests.const import INSTANCE_PATH, EXECUTION_PATH, EXECUTIONS_LIST, EXECUTION_URL, \
     EXECUTION_URL_NORUN, INSTANCE_URL
 
-import datetime
+
+try:
+    date_from_str = datetime.fromisoformat
+except:
+    def date_from_str(_string):
+        return datetime.\
+        strptime(_string, '%Y-%m-%d %H:%M:%S.%f')
 
 # TODO: tests of the dag endpoint (put, post)
 
@@ -70,8 +77,8 @@ class TestExecutionsListEndpoint(CustomTestCase):
         data_many = [self.payload for i in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
-        a = datetime.datetime.fromisoformat(allrows.json[0]['created_at'])
-        b = datetime.datetime.fromisoformat(allrows.json[1]['created_at'])
+        a = date_from_str(allrows.json[0]['created_at'])
+        b = date_from_str(allrows.json[1]['created_at'])
         date_limit = b + (a - b)/2
         # we ask for one before the last one => we get the second from the last
         self.apply_filter(self.url, dict(creation_date_lte=date_limit.isoformat(), limit=1),
@@ -82,8 +89,8 @@ class TestExecutionsListEndpoint(CustomTestCase):
         data_many = [self.payload for i in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
-        date_limit = datetime.datetime.fromisoformat(allrows.json[2]['created_at']) + \
-                     datetime.timedelta(microseconds=1)
+        date_limit = date_from_str(allrows.json[2]['created_at']) + \
+                     timedelta(microseconds=1)
         # we ask for all after the third from the last => we get the last two
         self.apply_filter(self.url, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
         return
