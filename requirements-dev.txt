@@ -9,7 +9,7 @@ imagesize==1.2.0
 orloge
 packaging==20.4
 PuLP
-Pygments==2.7.2
+Pygments==2.7.4
 pyparsing==2.4.7
 snowballstemmer==2.0.0
 Sphinx==3.2.1
