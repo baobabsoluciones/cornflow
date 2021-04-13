@@ -5,8 +5,11 @@ import datetime
 
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import desc
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import TEXT
 
-from ..shared.utils import db
+
+from ..shared.utils import db, hash_json_256
 
 
 class TraceAttributes(db.Model):
@@ -34,17 +37,27 @@ class TraceAttributes(db.Model):
         db.session.commit()
 
 
-class BaseAttributes(TraceAttributes):
+class BaseDataModel(TraceAttributes):
     """
 
     """
     __abstract__ = True
+
+    data = db.Column(JSON, nullable=True)
+    name = db.Column(db.String(256), nullable=False)
+    description = db.Column(TEXT, nullable=True)
+    data_hash = db.Column(db.String(256), nullable=False)
+
     @declared_attr
     def user_id(cls):
         return db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __init__(self, data):
         self.user_id = data.get('user_id')
+        self.data = data.get('data') or data.get('execution_results')
+        self.data_hash = hash_json_256(self.data)
+        self.name = data.get('name')
+        self.description = data.get('description')
         super().__init__()
 
     @classmethod
@@ -53,8 +66,8 @@ class BaseAttributes(TraceAttributes):
                         data_schema=None,
                         creation_date_gte=None,
                         creation_date_lte=None,
-                        offset=None,
-                        limit=None):
+                        offset=0,
+                        limit=10):
         """
         Query to get all objects from a user
 
@@ -65,7 +78,7 @@ class BaseAttributes(TraceAttributes):
         :param int offset: query offset for pagination
         :param int limit: query size limit
         :return: The objects
-        :rtype: list(:class:`BaseAttributes`)
+        :rtype: list(:class:`BaseDataModel`)
         """
         query = cls.query.filter(cls.deleted_at == None)
         # TODO: in airflow they use: query = session.query(ExecutionModel)
@@ -91,7 +104,7 @@ class BaseAttributes(TraceAttributes):
         :param UserModel user: user object performing the query
         :param str idx: ID from the object to get
         :return: The object or None if it does not exist
-        :rtype: :class:`BaseAttributes`
+        :rtype: :class:`BaseDataModel`
         """
         query = cls.query.filter_by(id=idx, deleted_at=None)
         if not user.is_admin():

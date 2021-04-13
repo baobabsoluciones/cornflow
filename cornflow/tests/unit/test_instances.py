@@ -1,5 +1,7 @@
 import json
 import zlib
+import hashlib
+from cornflow.shared.utils import hash_json_256
 from datetime import datetime, timedelta
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
@@ -97,6 +99,26 @@ class TestInstancesListEndpoint(CustomTestCase):
         self.apply_filter(self.url, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
         return
 
+    def test_hash(self):
+        id = self.create_new_row(self.url, self.model, self.payload)
+        response = self.client.get(INSTANCE_URL + id + '/',
+                                   headers=self.get_header_with_auth(self.token))
+        self.assertEqual(response.json['data_hash'], "4e1ad86aa70efc6e588744aa4b2300cb9aea516b6bea9355bd00c50dac1ee6a2")
+
+    def test_hash2(self):
+        # The string / hash pair was taken from: https://reposhub.com/javascript/security/feross-simple-sha256.html
+        str_data = hashlib.sha256('hey there'.encode('utf-8')).hexdigest()
+        self.assertEqual(str_data, '74ef874a9fa69a86e091ea6dc2668047d7e102d518bebed19f8a3958f664e3da')
+
+    def test_hash3(self):
+        str_data = json.dumps(self.payload['data'], sort_keys=True, separators=(',', ':'))
+        _hash = hashlib.sha256(str_data.encode('utf-8')).hexdigest()
+        self.assertEqual(_hash, '4e1ad86aa70efc6e588744aa4b2300cb9aea516b6bea9355bd00c50dac1ee6a2')
+
+    def test_hash4(self):
+        str_object = hash_json_256({'hello':'goodbye', '123': 456})
+        self.assertEqual(str_object, '72804f4e0847a477ee69eae4fbf404b03a6c220bacf8d5df34c964985acd473f')
+
 
 class TestInstancesDetailEndpointBase(CustomTestCase):
 
@@ -108,7 +130,7 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
-        self.response_items = {'id', 'name', 'description', 'created_at', 'user_id', 'executions'}
+        self.response_items = {'id', 'name', 'description', 'created_at', 'user_id', 'executions', 'data_hash'}
         # we only check name and description because this endpoint does not return data
         self.items_to_check = ['name', 'description']
 
@@ -150,7 +172,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
 
     def setUp(self):
         super().setUp()
-        self.response_items = {'id', 'name', 'data'}
+        self.response_items = {'id', 'name', 'data', 'data_hash'}
         self.items_to_check = ['name', 'data']
 
     def test_get_one_instance(self):
