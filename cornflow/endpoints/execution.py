@@ -154,7 +154,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         API method to get an execution created by the user and its related info.
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
-
+    
         :param str idx: ID of the execution.
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           the data of the execution) and an integer with the HTTP status code.

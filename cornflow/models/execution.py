@@ -10,12 +10,12 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
 # Imports from internal modules
-from .meta_model import BaseAttributes
+from .meta_model import BaseDataModel
 from ..shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
 from ..shared.utils import db
 
 
-class ExecutionModel(BaseAttributes):
+class ExecutionModel(BaseDataModel):
     """
     Model class for the Executions.
     It inherits from :class:`BaseAttributes` to have the trace fields and user field
@@ -44,6 +44,7 @@ class ExecutionModel(BaseAttributes):
       actually, it is not deleted from the database, in order to have a command that cleans up deleted data
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.
+    - **data_hash**: a hash of the data json using SHA256
 
     :param dict data: the parsed json got from an endpoint that contains all the required information to
       create a new execution
@@ -55,12 +56,9 @@ class ExecutionModel(BaseAttributes):
     # Model fields
     id = db.Column(db.String(256), nullable=False, primary_key=True)
     instance_id = db.Column(db.String(256), db.ForeignKey('instances.id'), nullable=False)
-    name = db.Column(db.String(256), nullable=False)
-    description = db.Column(TEXT, nullable=True)
     config = db.Column(JSON, nullable=False)
     dag_run_id = db.Column(db.String(256), nullable=True)
     dag_name = db.Column(db.String(256), nullable=True)
-    execution_results = db.Column(JSON, nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
@@ -72,14 +70,12 @@ class ExecutionModel(BaseAttributes):
         self.instance_id = data.get('instance_id')
         self.id = hashlib.sha1(
             (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
-        self.name = data.get('name')
-        self.description = data.get('description')
+
         self.dag_run_id = data.get('dag_run_id')
         self.dag_name = data.get('dag_name')
         self.state = data.get('state', DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
         self.config = data.get('config')
-        self.execution_results = data.get('execution_results')
         self.log_text = data.get('log_text')
         self.log_json = data.get('log_json')
 

@@ -17,6 +17,7 @@ class InstanceSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     deleted_at = fields.DateTime(dump_only=True)
     executions = fields.Nested(ExecutionSchema, many=True)
+    data_hash = fields.String(dump_only=True)
 
 
 class InstanceRequest(Schema):
@@ -43,6 +44,7 @@ class InstanceEndpointResponse(Schema):
     description = fields.String()
     created_at = fields.String()
     user_id = fields.Integer()
+    data_hash = fields.String()
 
 
 class InstanceDetailsEndpointResponse(Schema):
@@ -52,9 +54,11 @@ class InstanceDetailsEndpointResponse(Schema):
     created_at = fields.String()
     user_id = fields.Integer()
     executions = fields.List(fields.Nested(ExecutionDetailsEndpointResponse))
+    data_hash = fields.String()
 
 
 class InstanceDataEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
     data = fields.Raw(required=True)
+    data_hash = fields.String()

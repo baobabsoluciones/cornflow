@@ -50,11 +50,11 @@ class DAGEndpoint(MetaResource, MethodResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == 'pulp':
-            data = validate_and_continue(DataSchema(), data)
+            validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
             marshmallow_obj = get_schema(config, solution_schema, 'output')
-            data = validate_and_continue(marshmallow_obj(), data)
+            validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
         if execution is None:
@@ -115,11 +115,11 @@ class DAGEndpointManual(MetaResource, MethodResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == 'pulp':
-            data = validate_and_continue(DataSchema(), data)
+            validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
             marshmallow_obj = get_schema(config, solution_schema, 'output')
-            data = validate_and_continue(marshmallow_obj(), data)
+            validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)
         # we force the state to manual
