@@ -13,6 +13,10 @@ JSON_TYPES = {"string": STRING_TYPE, "number": FLOAT_TYPE, "integer": INTEGER_TY
 
 DATASCHEMA = "DataSchema"
 
+INSTANCE_SCHEMA = 'instance'
+SOLUTION_SCHEMA = 'solution'
+CONFIG_SCHEMA = 'config'
+
 
 class InvalidUsage(Exception):
     status_code = 400

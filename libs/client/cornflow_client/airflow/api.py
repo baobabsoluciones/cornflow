@@ -83,13 +83,14 @@ class Airflow(object):
         return response.json()['value']
 
     def get_one_schema(self, dag_name, schema):
-        return self.get_one_variable("{}_{}".format(dag_name, schema))
+        json_str = self.get_schemas_for_dag_name(dag_name)
+        return json.loads(json_str)[schema]
 
     def get_schemas_for_dag_name(self, dag_name):
-        return {v: self.get_one_schema(dag_name, v) for v in ['input', 'output']}
+        return self.get_one_variable(dag_name)
 
 
-def get_schema(config, dag_name, schema='input'):
+def get_schema(config, dag_name, schema='instance'):
     """
     Gets a schema by name from airflow server. We use the variable api.
     We transform the jsonschema into a marshmallow class
@@ -100,8 +101,7 @@ def get_schema(config, dag_name, schema='input'):
     if not af_client.is_alive():
         raise AirflowError(error="Airflow is not accessible")
 
-    schema = af_client.get_one_schema(dag_name, schema)
-    schema_json = json.loads(schema)
+    schema_json = af_client.get_one_schema(dag_name, schema)
     manager = SchemaManager(schema_json)
     return manager.jsonschema_to_flask()
 
