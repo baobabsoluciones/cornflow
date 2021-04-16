@@ -16,7 +16,7 @@ from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
 from ..schemas.execution import ExecutionDagRequest, ExecutionDagPostRequest, \
     ExecutionDetailsEndpointResponse
 from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
-from ..shared.airflow_api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema, validate_and_continue
 from ..shared.const import EXEC_STATE_MANUAL
 from ..schemas.model_json import DataSchema
 

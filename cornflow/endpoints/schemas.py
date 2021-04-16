@@ -4,7 +4,7 @@ from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 
-from ..shared.airflow_api import Airflow
+from cornflow_client.airflow.api import Airflow
 from ..shared.authentication import Auth
 from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
 

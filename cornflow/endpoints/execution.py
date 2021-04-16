@@ -16,7 +16,7 @@ from ..schemas.execution import \
     ExecutionSchema, \
     ExecutionDetailsEndpointResponse, ExecutionDataEndpointResponse, ExecutionLogEndpointResponse, \
     ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest, QueryFiltersExecution
-from ..shared.airflow_api import Airflow, validate_and_continue, get_schema
+from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
 from ..shared.authentication import Auth
 from ..shared.const import \
     EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \

@@ -1,5 +1,5 @@
 
-import cornflow_client.airflow_dag_utilities as utils
+import cornflow_client.airflow.dag_utilities as utils
 from cornflow_client import get_pulp_jsonschema
 import pulp as pl
 import orloge as ol

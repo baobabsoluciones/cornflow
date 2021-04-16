@@ -21,7 +21,7 @@ from ..schemas.instance import InstanceSchema, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest, QueryFiltersInstance
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
-from ..shared.airflow_api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema, validate_and_continue
 from ..shared.compress import compressed
 from flask_inflate import inflate
 
