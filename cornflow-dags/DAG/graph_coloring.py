@@ -1,7 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-import cornflow_client.airflow_dag_utilities as utils
+import cornflow_client.airflow.dag_utilities as utils
+from cornflow_client import get_empty_schema
 from ortools.sat.python import cp_model
 import pytups as pt
 import os
@@ -11,6 +12,8 @@ from timeit import default_timer as timer
 name = 'graph_coloring'
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
+config = get_empty_schema()
+config["properties"] = dict(timeLimit=dict(type="number"))
 
 
 def solve(data, config):

@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 import time
 from datetime import datetime, timedelta
+from cornflow_client import get_empty_schema
 
 
 # Following are defaults which can be overridden later on
@@ -29,10 +30,9 @@ def solve(**kwargs):
     print("sleep finished")
     return "True"
 
+config = solution = get_empty_schema()
+instance = get_empty_schema()
 
-instance = dict(type="object", properties=dict(seconds=dict(type="integer")), required=[])
-instance['$schema'] = "http://json-schema.org/draft-07/schema#"
-solution = instance
 
 solve_task = PythonOperator(
     task_id=name,

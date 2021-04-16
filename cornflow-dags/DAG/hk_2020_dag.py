@@ -1,12 +1,12 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-import cornflow_client.airflow_dag_utilities as utils
+import cornflow_client.airflow.dag_utilities as utils
 from hackathonbaobab2020 import get_solver, Instance
 from hackathonbaobab2020.tests import get_test_instance
 
 # This needs to remain to we can get the instance and solution schemas from outside
-from hackathonbaobab2020.schemas import instance, solution
+from hackathonbaobab2020.schemas import instance, solution, config
 
 from timeit import default_timer as timer
 

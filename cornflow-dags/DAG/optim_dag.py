@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-import cornflow_client.airflow_dag_utilities as utils
+import cornflow_client.airflow.dag_utilities as utils
 from cornflow_client import get_pulp_jsonschema
 
 import pulp as pl
@@ -12,6 +12,7 @@ import os
 name = 'solve_model_dag'
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 instance = solution = get_pulp_jsonschema()
+config = get_pulp_jsonschema("solver_config.json")
 
 
 def solve(data, config):

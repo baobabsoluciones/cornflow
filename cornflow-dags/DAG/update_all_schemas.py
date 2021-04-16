@@ -20,7 +20,7 @@ default_args = {
     "catchup": False,
 }
 
-schemas = [('instance', '_input'), ('solution', '_output')]
+schemas = ['instance', 'solution', 'config']
 
 
 def get_all_apps():
@@ -49,23 +49,17 @@ def is_app(dag_module):
 
 
 def get_schemas_dag_file(_module):
-    contents = [
-        (_module.name + tail, getattr(_module, attribute))
-        for attribute, tail in schemas
-    ]
+    contents = {k: getattr(_module, k) for k in schemas}
     return contents
 
 
 def get_all_schemas():
     apps = get_all_apps()
-    names = [app.name for app in apps]
     if len(apps):
-        print("Found the following apps: {}".format(names))
+        print("Found the following apps: {}".format([app.name for app in apps]))
     else:
         print("No apps were found to update")
-    schemas = []
-    for dag_module in apps:
-        schemas.extend(get_schemas_dag_file(dag_module))
+    schemas = [(dag_module.name, get_schemas_dag_file(dag_module)) for dag_module in apps]
     return schemas
 
 
