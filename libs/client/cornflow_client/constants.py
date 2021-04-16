@@ -12,3 +12,31 @@ JSON_TYPES = {"string": STRING_TYPE, "number": FLOAT_TYPE, "integer": INTEGER_TY
               "boolean": BOOLEAN_TYPE}
 
 DATASCHEMA = "DataSchema"
+
+
+class InvalidUsage(Exception):
+    status_code = 400
+    error = 'Unknown error'
+
+    def __init__(self, error=None, status_code=None, payload=None):
+        Exception.__init__(self)
+        if error is not None:
+            self.error = error
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['error'] = self.error
+        return rv
+
+
+class AirflowError(InvalidUsage):
+    status_code = 400
+
+    def __init__(self, error, status_code=None, payload=None):
+        self.error = error
+        self.payload = payload
+        if status_code is not None:
+            self.status_code = status_code

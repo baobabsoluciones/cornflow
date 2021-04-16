@@ -7,8 +7,8 @@ import re
 from jsonschema import Draft7Validator
 from copy import deepcopy
 from genson import SchemaBuilder
-from .schema_dict_functions import gen_schema, ParameterSchema, sort_dict
-from .constants import JSON_TYPES, DATASCHEMA
+from .dict_functions import gen_schema, ParameterSchema, sort_dict
+from cornflow_client.constants import JSON_TYPES, DATASCHEMA
 
 
 class SchemaManager:

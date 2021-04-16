@@ -1,5 +1,5 @@
 from .cornflow_client import CornFlow, group_variables_by_name, CornFlowApiError
-from .schema_manager import SchemaManager
+from cornflow_client.schema.manager import SchemaManager
 import json
 import os
 
