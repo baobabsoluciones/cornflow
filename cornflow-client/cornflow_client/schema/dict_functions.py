@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, INCLUDE
 from functools import partial
-from .constants import BOOLEAN_TYPE, STRING_TYPE, INTEGER_TYPE, FLOAT_TYPE, BASIC_TYPES
+from cornflow_client.constants import BOOLEAN_TYPE, STRING_TYPE, INTEGER_TYPE, FLOAT_TYPE, BASIC_TYPES
 
 
 class ParameterSchema(Schema):
