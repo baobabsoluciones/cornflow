@@ -17,6 +17,7 @@ from ..schemas.execution import ExecutionDagRequest, ExecutionDagPostRequest, \
     ExecutionDetailsEndpointResponse
 from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
 from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from ..shared.const import EXEC_STATE_MANUAL
 from ..schemas.model_json import DataSchema
 
@@ -53,7 +54,7 @@ class DAGEndpoint(MetaResource, MethodResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, 'output')
+            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
         execution = ExecutionModel.get_one_execution_from_id_admin(idx)
@@ -118,7 +119,7 @@ class DAGEndpointManual(MetaResource, MethodResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, 'output')
+            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)

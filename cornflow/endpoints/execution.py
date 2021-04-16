@@ -17,6 +17,7 @@ from ..schemas.execution import \
     ExecutionDetailsEndpointResponse, ExecutionDataEndpointResponse, ExecutionLogEndpointResponse, \
     ExecutionStatusEndpointResponse, ExecutionRequest, ExecutionEditRequest, QueryFiltersExecution
 from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
+from cornflow_client.constants import INSTANCE_SCHEMA
 from ..shared.authentication import Auth
 from ..shared.const import \
     EXEC_STATE_RUNNING, EXEC_STATE_ERROR, EXEC_STATE_ERROR_START, \
@@ -101,7 +102,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         dag_info = af_client.get_dag_info(dag_name)
 
         # Validate that instance and dag_name are compatible
-        marshmallow_obj = get_schema(config, dag_name, 'input')
+        marshmallow_obj = get_schema(config, dag_name, INSTANCE_SCHEMA)
         validate_and_continue(marshmallow_obj(), instance.data)
 
         info = dag_info.json()
