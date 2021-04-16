@@ -1,23 +1,6 @@
 from flask import jsonify
 from webargs.flaskparser import parser
-
-
-class InvalidUsage(Exception):
-    status_code = 400
-    error = 'Unknown error'
-
-    def __init__(self, error=None, status_code=None, payload=None):
-        Exception.__init__(self)
-        if error is not None:
-            self.error = error
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['error'] = self.error
-        return rv
+from cornflow_client.constants import InvalidUsage, AirflowError
 
 
 class ObjectDoesNotExist(InvalidUsage):
@@ -35,16 +18,6 @@ class InvalidCredentials(InvalidUsage):
     error = 'Invalid credentials'
 
 
-class AirflowError(InvalidUsage):
-    status_code = 400
-
-    def __init__(self, error, status_code=None, payload=None):
-        self.error = error
-        self.payload = payload
-        if status_code is not None:
-            self.status_code = status_code
-
-
 class EndpointNotImplemented(InvalidUsage):
     error = 'Endpoint not implemented'
     status_code = 501
@@ -56,6 +29,8 @@ def _initialize_errorhandlers(app):
     @app.errorhandler(ObjectDoesNotExist)
     @app.errorhandler(NoPermission)
     @app.errorhandler(InvalidCredentials)
+    @app.errorhandler(EndpointNotImplemented)
+    @app.errorhandler(AirflowError)
     def handle_invalid_usage(error):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
