@@ -44,7 +44,7 @@ dict_example.update(
         dict(name='parameters', type='ParametersSchema', required=True, many=False),
         dict(name='constraints', type='ConstraintsSchema', many=True, required=True),
         dict(name='variables', type='VariablesSchema', many=True, required=True),
-        dict(name='sos1', type='Sos1Schema', many=True, required=True),
-        dict(name='sos2', type='Sos2Schema', many=True, required=True)
+        dict(name='sos1', type='Sos1Schema', many=True, required=False),
+        dict(name='sos2', type='Sos2Schema', many=True, required=False)
     ]}
 )

@@ -4,8 +4,12 @@ import json
 import os
 
 
-def get_pulp_jsonschema():
-    filename = os.path.join(os.path.dirname(__file__), 'data', "pulp_json_schema.json")
+def get_pulp_jsonschema(filename="pulp_json_schema.json"):
+    filename = os.path.join(os.path.dirname(__file__), 'data', filename)
     with open(filename, 'r') as f:
         content = json.load(f)
     return content
+
+
+def get_empty_schema():
+    return get_pulp_jsonschema("empty_schema.json")

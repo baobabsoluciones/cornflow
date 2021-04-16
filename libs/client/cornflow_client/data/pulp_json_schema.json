@@ -106,5 +106,5 @@
 	  }
 	}
   },
-  "required": ["sos1", "constraints", "objective", "parameters", "sos2", "variables"]
+  "required": ["constraints", "objective", "parameters", "variables"]
 }
