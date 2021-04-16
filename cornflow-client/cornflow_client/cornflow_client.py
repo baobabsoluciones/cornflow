@@ -47,9 +47,12 @@ class CornFlow(object):
     #     return partial(expect_status, status=200)
 
     def api_for_id(self, api, id, method, post_url='', **kwargs):
+        if post_url and post_url[-1] != '/':
+            post_url += '/'
+        url = urljoin(urljoin(self.url, api) + '/', str(id) + '/' + post_url)
         return requests.request(
             method=method,
-            url=urljoin(urljoin(self.url, api) + '/', str(id) + '/' + post_url),
+            url=url,
             headers={'Authorization': 'access_token ' + self.token},
             **kwargs
         )

@@ -62,7 +62,9 @@ class TestSchemaManager(TestCase):
         bool = sm.validate_data(data)
         val = sm.get_validation_errors(data)
         self.assertFalse(bool)
-        self.assertEqual(len(val), 4)
+        # The two errors are: objective should be an object and parameters is missing.
+        # we do not impose sos1 and sos2 to be there.
+        self.assertEqual(len(val), 2)
         self.assertEqual(val[0].message, "[] is not of type 'object'")
         sm.jsonschema_to_flask()
     
@@ -70,7 +72,9 @@ class TestSchemaManager(TestCase):
         sm = SchemaManager.from_filepath(self.get_project_data_file("pulp_json_schema.json"))
         data = {"objective": [], "constraints": ["notAConstraint"], "variables": ["notAVariable"]}
         val = sm.get_validation_errors(data)
-        self.assertEqual(len(val), 6)
+        # errors are: objective should be an object, there's a wrongly formatted constraint and variable.
+        # and parameters is missing
+        self.assertEqual(len(val), 4)
         sm.jsonschema_to_flask()
 
     def test_validation_errors3(self):
