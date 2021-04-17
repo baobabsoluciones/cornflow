@@ -104,8 +104,9 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             payload = json.load(f)
         fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
         self.model = ExecutionModel
-        self.response_items = {'id', 'name', 'description', 'created_at', 'instance_id', 'finished'}
-        # we only the following because this endpoint does not return data
+        self.response_items = {'id', 'name', 'description', 'created_at', 'instance_id',
+                               'data_hash', 'message', 'state', 'config'}
+        # we only check the following because this endpoint does not return data
         self.items_to_check = ['name', 'description']
         self.url = EXECUTION_URL
         with open(EXECUTION_PATH) as f:
@@ -118,12 +119,15 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
     def test_get_nonexistent_execution(self):
         result = self.get_one_row(self.url + 'some_key_' + '/', {},
                                   expected_status=404, check_payload=False)
+        return result
 
     def test_get_one_execution(self):
         id = self.create_new_row(self.url + '?run=0', self.model, self.payload)
         payload = dict(self.payload)
         payload['id'] = id
-        self.get_one_row(self.url + id, payload)
+        result = self.get_one_row(self.url + id, payload)
+        dif = self.response_items.symmetric_difference(result.keys())
+        self.assertEqual(len(dif), 0)
 
     def test_incomplete_payload(self):
         payload = {'description': 'arg'}

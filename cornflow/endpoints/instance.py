@@ -21,7 +21,7 @@ from ..schemas.instance import InstanceSchema, \
     InstanceRequest, InstanceEditRequest, InstanceFileRequest, QueryFiltersInstance
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
-from ..shared.airflow_api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema, validate_and_continue
 from ..shared.compress import compressed
 from flask_inflate import inflate
 
@@ -79,13 +79,13 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
         if data_schema == 'pulp':
             # this one we have the schema stored inside cornflow
-            kwargs['data'] = validate_and_continue(DataSchema(), kwargs['data'])
+            validate_and_continue(DataSchema(), kwargs['data'])
             return self.post_list(kwargs)
 
         # for the rest of the schemas: we need to ask airflow for the schema
         config = current_app.config
         marshmallow_obj = get_schema(config, data_schema)
-        kwargs['data'] = validate_and_continue(marshmallow_obj(), kwargs['data'])
+        validate_and_continue(marshmallow_obj(), kwargs['data'])
 
         # if we're here, we validated and the data seems to fit the schema
         return self.post_list(kwargs)
