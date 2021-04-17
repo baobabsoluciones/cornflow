@@ -8,6 +8,7 @@ import os
 
 name = 'solve_model_dag'
 instance = solution = get_pulp_jsonschema()
+config = get_pulp_jsonschema("solver_config.json")
 
 
 def solve(data, config):
