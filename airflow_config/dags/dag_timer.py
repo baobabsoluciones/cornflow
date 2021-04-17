@@ -1,11 +1,12 @@
-from airflow import DAG, AirflowException
+from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 import time
 from datetime import datetime, timedelta
+from cornflow_client import get_empty_schema
 
 
 # Following are defaults which can be overridden later on
+name = 'timer'
 default_args = {
     'owner': 'baobab',
     'depends_on_past': False,
@@ -13,16 +14,13 @@ default_args = {
     'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
     'retry_delay': timedelta(minutes=1),
     'schedule_interval': None
 }
-
-name = 'timer'
 dag = DAG(name, default_args=default_args, schedule_interval=None)
 
 
-def run(**kwargs):
+def solve(**kwargs):
     config = kwargs["dag_run"].conf
     seconds = config.get('seconds', 60)
     seconds = config.get('timeLimit', seconds)
@@ -32,14 +30,13 @@ def run(**kwargs):
     print("sleep finished")
     return "True"
 
+config = solution = get_empty_schema()
+instance = get_empty_schema()
 
-instance = dict(type="object", properties=dict(seconds=dict(type="integer")), required=[])
-instance['$schema'] = "http://json-schema.org/draft-07/schema#"
-solution = instance
 
 solve_task = PythonOperator(
     task_id=name,
     provide_context=True,
-    python_callable=run,
+    python_callable=solve,
     dag=dag,
 )

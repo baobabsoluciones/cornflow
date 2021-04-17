@@ -1,5 +1,5 @@
 
-import cornflow_client.airflow_dag_utilities as utils
+import cornflow_client.airflow.dag_utilities as utils
 from cornflow_client import get_pulp_jsonschema
 import pulp as pl
 import orloge as ol
@@ -8,6 +8,7 @@ import os
 
 name = 'solve_model_dag'
 instance = solution = get_pulp_jsonschema()
+config = get_pulp_jsonschema("solver_config.json")
 
 
 def solve(data, config):

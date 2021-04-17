@@ -3,6 +3,7 @@ import pulp
 import logging as log
 import time
 from cornflow_client import CornFlowApiError
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 from cornflow.shared.utils import db
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
@@ -133,8 +134,8 @@ class TestCornflowClient(TestCornflowClientBasic):
 
     def test_get_dag_schema_good(self):
         response = self.client.get_schema('solve_model_dag')
-        for sch in ['input', 'output']:
-            content = json.loads(response[sch])
+        for sch in [INSTANCE_SCHEMA, SOLUTION_SCHEMA]:
+            content = json.loads(response)[sch]
             self.assertTrue('properties' in content)
 
     def test_get_dag_schema_no_schema(self):

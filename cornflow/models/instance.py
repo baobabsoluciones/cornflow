@@ -3,17 +3,12 @@
 # Import from libraries
 import hashlib
 
-# Import from sqlalchemy
-from sqlalchemy import desc
-from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.dialects.postgresql import TEXT
-
 # Imported from internal models
-from .meta_model import BaseAttributes
+from .meta_model import BaseDataModel
 from ..shared.utils import db
 
 
-class InstanceModel(BaseAttributes):
+class InstanceModel(BaseDataModel):
     """
     Model class for the Instances
     It inherits from :class:`BaseAttributes` to have the trace fields and user field
@@ -36,6 +31,7 @@ class InstanceModel(BaseAttributes):
       actually, it is not deleted from the database, in order to have a command that cleans up deleted data
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.
+    - **data_hash**: a hash of the data json using SHA256
 
     :param dict data: the parsed json got from an endpoint that contains all the required information to create
       a new instance
@@ -46,9 +42,6 @@ class InstanceModel(BaseAttributes):
 
     # Model fields
     id = db.Column(db.String(256), nullable=False, primary_key=True)
-    data = db.Column(JSON, nullable=False)
-    name = db.Column(db.String(256), nullable=False)
-    description = db.Column(TEXT, nullable=True)
     executions = db.relationship('ExecutionModel', backref='instances', lazy=True,
                                  primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
                                              "ExecutionModel.deleted_at==None)"
@@ -57,9 +50,6 @@ class InstanceModel(BaseAttributes):
     def __init__(self, data):
         super().__init__(data)
         self.id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
-        self.data = data.get('data')
-        self.name = data.get('name')
-        self.description = data.get('description')
 
     def save(self):
         """
