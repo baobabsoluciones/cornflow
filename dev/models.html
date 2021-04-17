@@ -181,7 +181,7 @@
 <dl class="py class">
 <dt id="cornflow.models.execution.ExecutionModel">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.models.execution.</code><code class="sig-name descname">ExecutionModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseAttributes</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseDataModel</span></code></p>
 <p>Model class for the Executions.
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseAttributes</span></code> to have the trace fields and user field</p>
 <p>The <a class="reference internal" href="#cornflow.models.execution.ExecutionModel" title="cornflow.models.execution.ExecutionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionModel</span></code></a> has the following fields:</p>
@@ -208,6 +208,7 @@ This datetime is generated automatically, the user does not need to provide it.<
 actually, it is not deleted from the database, in order to have a command that cleans up deleted data
 after a certain time of its deletion.
 This datetime is generated automatically, the user does not need to provide it.</p></li>
+<li><p><strong>data_hash</strong>: a hash of the data json using SHA256</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -276,7 +277,7 @@ BEWARE: this should only be called from the admin user</p>
 <dl class="py class">
 <dt id="cornflow.models.instance.InstanceModel">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.models.instance.</code><code class="sig-name descname">InstanceModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseAttributes</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseDataModel</span></code></p>
 <p>Model class for the Instances
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseAttributes</span></code> to have the trace fields and user field</p>
 <p>The <a class="reference internal" href="#cornflow.models.instance.InstanceModel" title="cornflow.models.instance.InstanceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceModel</span></code></a> has the following fields:</p>
@@ -297,6 +298,7 @@ This datetime is generated automatically, the user does not need to provide it.<
 actually, it is not deleted from the database, in order to have a command that cleans up deleted data
 after a certain time of its deletion.
 This datetime is generated automatically, the user does not need to provide it.</p></li>
+<li><p><strong>data_hash</strong>: a hash of the data json using SHA256</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
