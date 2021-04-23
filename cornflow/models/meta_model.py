@@ -60,6 +60,29 @@ class BaseDataModel(TraceAttributes):
         self.description = data.get('description')
         super().__init__()
 
+    def save(self):
+        """
+        Saves the object to the database
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, data):
+        """
+        Updates the object in the database and automatically updates the updated_at field
+        :param dict data:  A dictionary containing the updated data for the execution
+        """
+        for key, item in data.items():
+            setattr(self, key, item)
+        super().update(data)
+
+    def delete(self):
+        """
+        Deletes an object permanently from the data base
+        """
+        db.session.delete(self)
+        db.session.commit()
+
     @classmethod
     def get_all_objects(cls,
                         user,
@@ -102,7 +125,7 @@ class BaseDataModel(TraceAttributes):
         Query to get one object from the user and the id.
 
         :param UserModel user: user object performing the query
-        :param str idx: ID from the object to get
+        :param str or int idx: ID from the object to get
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """

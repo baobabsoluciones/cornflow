@@ -3,7 +3,6 @@ File with the different defined commands
 """
 # Import from libraries
 from flask_script import Command, Option
-import os
 
 # Import from internal modules
 from cornflow.models import UserModel
@@ -14,11 +13,6 @@ class CreateSuperAdmin(Command):
     Creates the initial super user that is used by airflow to write the results of the execution back
     This command should only be used on deployment
     """
-
-    # def __init__(self, user, password):
-    #
-    #     self.user = user
-    #     self.password = password
 
     def get_options(self):
         return (
@@ -35,8 +29,6 @@ class CreateSuperAdmin(Command):
         Method to run the command and create the superuser
         It does not return anything
         """
-        # SADMIN_USER = os.getenv('SADMIN_USER')
-        # SADMIN_PWD = os.getenv('SADMIN_PWD')
         SADMIN_USER = user
         SADMIN_PWD = password
         sadmin_user = UserModel.get_one_user_by_email(SADMIN_USER)

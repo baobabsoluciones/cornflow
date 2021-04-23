@@ -213,9 +213,9 @@ class TestInstanceModelMethods(CustomTestCase):
 
     def test_repr_method(self):
         id = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(id, '<id {}>'.format(id))
+        self.repr_method(id, '<Instance {}>'.format(id))
 
     def test_str_method(self):
         id = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(id, '<id {}>'.format(id))
+        self.str_method(id, '<Instance {}>'.format(id))
 

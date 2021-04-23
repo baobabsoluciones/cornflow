@@ -11,6 +11,7 @@ from .login import LoginEndpoint
 from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
 from .schemas import SchemaEndpoint
+from .cases import CaseEndpoint
 
 resources = [
     dict(resource=InstanceEndpoint, urls='/instance/', endpoint="instance"),
@@ -30,4 +31,5 @@ resources = [
     dict(resource=LoginEndpoint, urls='/login/', endpoint="login"),
     dict(resource=SignUpEndpoint, urls='/signup/', endpoint="signup"),
     dict(resource=SchemaEndpoint, urls='/schema/<string:dag_name>/', endpoint="schema"),
+    dict(resource=CaseEndpoint, urls='/case/', endpoint="case"),
 ]

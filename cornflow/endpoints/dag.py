@@ -57,7 +57,7 @@ class DAGEndpoint(MetaResource, MethodResource):
             marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
-        execution = ExecutionModel.get_one_execution_from_id_admin(idx)
+        execution = ExecutionModel.get_one_object_from_user(self.get_user(), idx)
         if execution is None:
             raise ObjectDoesNotExist()
         state = req_data.get('state', EXEC_STATE_CORRECT)
@@ -90,10 +90,10 @@ class DAGEndpoint(MetaResource, MethodResource):
           and :class:`DataSchema` and an integer for HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        execution = ExecutionModel.get_one_execution_from_id_admin(idx)
+        execution = ExecutionModel.get_one_object_from_user(self.get_user(), idx)
         if execution is None:
             raise ObjectDoesNotExist(error='The execution does not exist')
-        instance = InstanceModel.get_one_instance_from_id_admin(execution.instance_id)
+        instance = InstanceModel.get_one_object_from_user(self.get_user(), execution.instance_id)
         if instance is None:
             raise ObjectDoesNotExist(error='The instance does not exist')
         config = execution.config

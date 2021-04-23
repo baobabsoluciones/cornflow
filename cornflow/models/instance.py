@@ -11,9 +11,7 @@ from ..shared.utils import db
 class InstanceModel(BaseDataModel):
     """
     Model class for the Instances
-    It inherits from :class:`BaseAttributes` to have the trace fields and user field
-
-    The :class:`InstanceModel` has the following fields:
+    It inherits from :class:`BaseDataModel` to have the trace fields and user field
 
     - **id**: int, the primary key for the executions, a hash generated upon creation of the instance 
       and the id given back to the user.The hash is generated from the creation time and the user id.
@@ -32,9 +30,6 @@ class InstanceModel(BaseDataModel):
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.
     - **data_hash**: a hash of the data json using SHA256
-
-    :param dict data: the parsed json got from an endpoint that contains all the required information to create
-      a new instance
     """
 
     # Table name in the database
@@ -48,50 +43,12 @@ class InstanceModel(BaseDataModel):
                                  )
 
     def __init__(self, data):
+        """
+            :param dict data: the parsed json got from an endpoint that contains all the required
+                information to create a new instance
+        """
         super().__init__(data)
         self.id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
-
-    def save(self):
-        """
-        Saves the instance to the data base
-        """
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, data):
-        """
-        Updates the execution in the data base and automatically updates the updated_at field
-
-        :param dict data: A dictionary containing the updated data for the instance
-        """
-        for key, item in data.items():
-            setattr(self, key, item)
-        super().update(data)
-
-    def disable(self):
-        """
-        Updates the deleted_at field of an execution to mark an execution as "deleted"
-        """
-        super().disable()
-
-    def delete(self):
-        """
-        Deletes an instance permanently from the data base
-        """
-        db.session.delete(self)
-        db.session.commit()
-
-    @staticmethod
-    def get_one_instance_from_id_admin(idx):
-        """
-        Query to get one instance from its ID
-        BEWARE: only the admin should do this.
-
-        :param str idx: ID from the instance
-        :return: The instance
-        :rtype: :class:`InstanceModel`
-        """
-        return InstanceModel.query.filter_by(id=idx, deleted_at=None).first()
 
     def __repr__(self):
         """
@@ -100,7 +57,7 @@ class InstanceModel(BaseDataModel):
         :return: The representation of the :class:`InstanceModel`
         :rtype: str
         """
-        return '<id {}>'.format(self.id)
+        return '<Instance {}>'.format(self.id)
 
     def __str__(self):
         """
@@ -109,4 +66,4 @@ class InstanceModel(BaseDataModel):
         :return: The string for the :class:`InstanceModel`
         :rtype: str
         """
-        return '<id {}>'.format(self.id)
+        return '<Instance {}>'.format(self.id)
