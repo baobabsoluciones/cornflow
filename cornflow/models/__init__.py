@@ -4,4 +4,4 @@ Initialization file for the models module
 from .execution import ExecutionModel
 from .instance import InstanceModel
 from .user import UserModel
-from .case import CaseModel
+# from .case import CaseModel
