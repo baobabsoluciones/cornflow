@@ -47,7 +47,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     @doc(description='Get all executions', tags=['Executions'])
     @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse(many=True))
-    @use_kwargs(QueryFiltersExecution, location='json')
+    @use_kwargs(QueryFiltersExecution, location='query')
     def get(self, **kwargs):
         """
         API method to get all the executions created by the user and its related info
