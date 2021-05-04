@@ -64,13 +64,13 @@ class TestExecutionsListEndpoint(CustomTestCase):
         # we create 4 instances
         data_many = [self.payload for i in range(4)]
         allrows = self.get_rows(self.url, data_many)
-        self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
+        self.apply_filter(EXECUTION_URL, dict(limit=1), [allrows.json[0]])
 
     def test_opt_filters_offset(self):
         # we create 4 instances
         data_many = [self.payload for i in range(4)]
         allrows = self.get_rows(self.url, data_many)
-        self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
+        self.apply_filter(EXECUTION_URL, dict(offset=1, limit=2), allrows.json[1:3])
 
     def test_opt_filters_date_lte(self):
         # we create 4 instances
@@ -81,7 +81,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
         b = date_from_str(allrows.json[1]['created_at'])
         date_limit = b + (a - b)/2
         # we ask for one before the last one => we get the second from the last
-        self.apply_filter(self.url, dict(creation_date_lte=date_limit.isoformat(), limit=1),
+        self.apply_filter(EXECUTION_URL, dict(creation_date_lte=date_limit.isoformat(), limit=1),
                           [allrows.json[1]])
 
     def test_opt_filters_date_gte(self):
@@ -92,7 +92,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
         date_limit = date_from_str(allrows.json[2]['created_at']) + \
                      timedelta(microseconds=1)
         # we ask for all after the third from the last => we get the last two
-        self.apply_filter(self.url, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
+        self.apply_filter(EXECUTION_URL, dict(creation_date_gte=date_limit.isoformat()), allrows.json[:2])
         return
 
 

@@ -141,7 +141,7 @@ class CustomTestCase(TestCase):
         return response
 
     def apply_filter(self, url, _filter, result):
-        get_with_opts = lambda data: self.client.get(url, follow_redirects=True, data=json.dumps(data),
+        get_with_opts = lambda data: self.client.get(url, follow_redirects=True, query_string=data,
                                                      headers=self.get_header_with_auth(self.token))
         response = get_with_opts(_filter)
         self.assertEqual(len(response.json), len(result))
