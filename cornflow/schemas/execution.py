@@ -6,6 +6,7 @@ from .common import QueryFilters
 
 class QueryFiltersExecution(QueryFilters):
     data_schema = fields.String(required=False)
+    # status = fields.Integer(required=False)
 
 
 class ConfigSchema(Schema):
