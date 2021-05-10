@@ -25,8 +25,10 @@ def solve(data, config):
     start = timer()
     model = cp_model.CpModel()
     input_data = pt.SuperDict.from_dict(data)
-    nodes = input_data['nodes']
     pairs = input_data['pairs']
+    n1s = pt.TupList(pairs).vapply(lambda v: v['n1'])
+    n2s = pt.TupList(pairs).vapply(lambda v: v['n2'])
+    nodes = (n1s + n2s).unique2()
     max_colors = len(nodes) - 1
 
     # variable declaration:
@@ -76,8 +78,7 @@ def read_file(filePath):
         vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
         # vapply(lambda v: [int(v[0]), int(v[1])])
     num_nodes, num_pairs = [int(a) for a in contents[0].split(' ')]
-    nodes = range(num_nodes)
-    return dict(nodes=list(nodes), pairs=pairs)
+    return dict(pairs=pairs)
 
 
 graph_coloring = PythonOperator(

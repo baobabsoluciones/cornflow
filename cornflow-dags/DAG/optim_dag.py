@@ -9,7 +9,7 @@ import orloge as ol
 import os
 
 
-name = 'solve_model_dag'
+name = "solve_model_dag"
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 instance = solution = get_pulp_jsonschema()
 config = get_pulp_jsonschema("solver_config.json")
@@ -25,10 +25,10 @@ def solve(data, config):
     var, model = pl.LpProblem.from_dict(data)
 
     # we overwrite the logPath argument before solving.
-    log_path = config['logPath'] = 'temp.log'
-    config['msg'] = 0
-    if 'solver' not in config:
-        config['solver'] = 'PULP_CBC_CMD'
+    log_path = config["logPath"] = "temp.log"
+    config["msg"] = 0
+    if "solver" not in config:
+        config["solver"] = "PULP_CBC_CMD"
     try:
         solver = pl.getSolverFromDict(config)
     except pl.PulpSolverError:
@@ -43,21 +43,28 @@ def solve(data, config):
         log = f.read()
 
     # we convert the log into orloge json
-    equivs = \
-        dict(
-            CPLEX_CMD='CPLEX', CPLEX_PY='CPLEX', CPLEX_DLL='CPLEX',
-            GUROBI='GUROBI', GUROBI_CMD='GUROBI',
-            PULP_CBC_CMD='CBC', COIN_CMD='CBC'
-        )
+    equivs = dict(
+        CPLEX_CMD="CPLEX",
+        CPLEX_PY="CPLEX",
+        CPLEX_DLL="CPLEX",
+        GUROBI="GUROBI",
+        GUROBI_CMD="GUROBI",
+        PULP_CBC_CMD="CBC",
+        COIN_CMD="CBC",
+    )
     solver_name = equivs.get(solver.name)
     log_dict = None
     if solver_name:
         try:
-            log_dict = ol.get_info_solver(path=log, solver=solver_name, get_progress=True, content=True)
+            log_dict = ol.get_info_solver(
+                path=log, solver=solver_name, get_progress=True, content=True
+            )
         except:
             log_dict = dict()
         else:
-            log_dict['progress'] = log_dict['progress'].fillna('').to_dict(orient='list')
+            log_dict["progress"] = (
+                log_dict["progress"].fillna("").to_dict(orient="list")
+            )
     print("Log read")
 
     try:
@@ -69,7 +76,9 @@ def solve(data, config):
 
 
 def run_solve(**kwargs):
-    return utils.cf_solve(fun=solve, dag_name=name, secrets=EnvironmentVariablesBackend(), **kwargs)
+    return utils.cf_solve(
+        fun=solve, dag_name=name, secrets=EnvironmentVariablesBackend(), **kwargs
+    )
 
 
 def test_cases():
@@ -85,7 +94,7 @@ def test_cases():
 
 
 solve_task = PythonOperator(
-    task_id='solve_model_dag',
+    task_id="solve_model_dag",
     provide_context=True,
     python_callable=run_solve,
     dag=dag,

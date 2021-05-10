@@ -8,19 +8,19 @@ import os
 
 
 default_args = {
-    'owner': 'baobab',
-    'depends_on_past': False,
-    'start_date': datetime(2020, 2, 1),
-    'email': [''],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': -1,
-    'retry_delay': timedelta(minutes=1),
-    'schedule_interval': "@hourly",
+    "owner": "baobab",
+    "depends_on_past": False,
+    "start_date": datetime(2020, 2, 1),
+    "email": [""],
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": -1,
+    "retry_delay": timedelta(minutes=1),
+    "schedule_interval": "@hourly",
     "catchup": False,
 }
 
-schemas = ['instance', 'solution', 'config']
+schemas = ["instance", "solution", "config"]
 
 
 def get_all_apps():
@@ -37,7 +37,7 @@ def _import_file(filename):
 
 def is_app(dag_module):
     filename, ext = os.path.splitext(dag_module)
-    if ext != '.py':
+    if ext != ".py":
         return False
     try:
         _module = _import_file(filename)
@@ -59,7 +59,9 @@ def get_all_schemas():
         print("Found the following apps: {}".format([app.name for app in apps]))
     else:
         print("No apps were found to update")
-    schemas = [(dag_module.name, get_schemas_dag_file(dag_module)) for dag_module in apps]
+    schemas = [
+        (dag_module.name, get_schemas_dag_file(dag_module)) for dag_module in apps
+    ]
     return schemas
 
 
@@ -69,15 +71,15 @@ def update_schemas(**kwargs):
         Variable.set(key=key, value=value, serialize_json=True)
 
 
-dag = DAG('update_all_schemas', default_args=default_args, catchup=False)
+dag = DAG("update_all_schemas", default_args=default_args, catchup=False)
 
 update_schema2 = PythonOperator(
-    task_id='update_all_schemas',
+    task_id="update_all_schemas",
     provide_context=True,
     python_callable=update_schemas,
     dag=dag,
 )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     update_schemas()
