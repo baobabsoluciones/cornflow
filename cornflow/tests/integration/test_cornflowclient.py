@@ -312,3 +312,4 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         payload = dict(log_text='')
         response = self.client.put_api_for_id(api='dag/', id=execution.json()['id'], payload=payload)
         self.assertEqual(response.status_code, 201)
+    
