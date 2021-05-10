@@ -2,13 +2,8 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "nodes": {
-            "type": "array",
-            "items": {
-                "type": "integer"
-            }
-        },
         "pairs": {
+            "description": "Pairs of nodes that cannot share the same color",
             "type": "array",
             "items": {
                 "type": "object",
@@ -24,5 +19,5 @@
             }
         }
     },
-    "required": ["nodes", "pairs"]
+    "required": ["pairs"]
 }

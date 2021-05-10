@@ -83,11 +83,11 @@ class Airflow(object):
         return response.json()['value']
 
     def get_one_schema(self, dag_name, schema):
-        json_str = self.get_schemas_for_dag_name(dag_name)
-        return json.loads(json_str)[schema]
+        response = self.get_schemas_for_dag_name(dag_name)
+        return response[schema]
 
     def get_schemas_for_dag_name(self, dag_name):
-        return self.get_one_variable(dag_name)
+        return json.loads(self.get_one_variable(dag_name))
 
 
 def get_schema(config, dag_name, schema='instance'):

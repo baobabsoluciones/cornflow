@@ -7,20 +7,16 @@
 			"items": {
 				"type": "object",
 				"properties": {
-					"period": {
+					"node": {
 						"type": "integer"
 					},
-					"mode": {
-						"type": "integer"
-					},
-					"job": {
+					"color": {
 						"type": "integer"
 					}
 				},
 				"required": [
-					"period",
-					"mode",
-					"job"
+					"color",
+					"node"
 				]
 			}
 		}
