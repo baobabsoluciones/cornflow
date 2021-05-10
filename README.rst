@@ -154,6 +154,22 @@ airflow gui will be at::
 
     http://localhost:8080
 
+Killing airflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Search for the code of the process in Linux::
+
+    ps aux | grep airflow
+
+Kill it::
+
+    kill -9 CODE
+
+If you're feeling lucky::
+
+    kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
+
+
 Using cornflow with the python client
 ---------------------------------------
 
