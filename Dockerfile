@@ -15,6 +15,7 @@ ENV TERM linux
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		dos2unix \
 		gcc \
+		git \
 		python3-dev \
 		libffi-dev \
 		libpq-dev
