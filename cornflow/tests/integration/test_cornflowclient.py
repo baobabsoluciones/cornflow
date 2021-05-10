@@ -135,7 +135,7 @@ class TestCornflowClient(TestCornflowClientBasic):
     def test_get_dag_schema_good(self):
         response = self.client.get_schema('solve_model_dag')
         for sch in [INSTANCE_SCHEMA, SOLUTION_SCHEMA]:
-            content = json.loads(response)[sch]
+            content = response[sch]
             self.assertTrue('properties' in content)
 
     def test_get_dag_schema_no_schema(self):
@@ -312,3 +312,4 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         payload = dict(log_text='')
         response = self.client.put_api_for_id(api='dag/', id=execution.json()['id'], payload=payload)
         self.assertEqual(response.status_code, 201)
+    

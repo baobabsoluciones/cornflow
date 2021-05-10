@@ -1,6 +1,6 @@
 import json
 
-from cornflow.tests.custom_test_case import TestCase
+from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.models import UserModel
 from cornflow.shared.utils import db
