@@ -99,6 +99,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#launch-cornflow-server">Launch cornflow server</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#install-and-configure-airflow">Install and configure airflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#launch-airflow-server">Launch airflow server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#killing-airflow">Killing airflow</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#using-cornflow-with-the-python-client">Using cornflow with the python client</a></li>
@@ -218,17 +219,18 @@
 <li><p><a class="reference internal" href="#launch-cornflow-server" id="id6">Launch cornflow server</a></p></li>
 <li><p><a class="reference internal" href="#install-and-configure-airflow" id="id7">Install and configure airflow</a></p></li>
 <li><p><a class="reference internal" href="#launch-airflow-server" id="id8">Launch airflow server</a></p></li>
+<li><p><a class="reference internal" href="#killing-airflow" id="id9">Killing airflow</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#using-cornflow-with-the-python-client" id="id9">Using cornflow with the python client</a></p></li>
-<li><p><a class="reference internal" href="#other-deployment-options" id="id10">Other deployment options</a></p>
+<li><p><a class="reference internal" href="#using-cornflow-with-the-python-client" id="id10">Using cornflow with the python client</a></p></li>
+<li><p><a class="reference internal" href="#other-deployment-options" id="id11">Other deployment options</a></p>
 <ul>
-<li><p><a class="reference internal" href="#deploying-with-docker-compose" id="id11">Deploying with docker-compose</a></p></li>
-<li><p><a class="reference internal" href="#running-airflow-with-reverse-proxy" id="id12">Running airflow with reverse proxy</a></p></li>
-<li><p><a class="reference internal" href="#setup-cornflow-database-with-postgresql" id="id13">Setup cornflow database with PostgreSQL</a></p></li>
+<li><p><a class="reference internal" href="#deploying-with-docker-compose" id="id12">Deploying with docker-compose</a></p></li>
+<li><p><a class="reference internal" href="#running-airflow-with-reverse-proxy" id="id13">Running airflow with reverse proxy</a></p></li>
+<li><p><a class="reference internal" href="#setup-cornflow-database-with-postgresql" id="id14">Setup cornflow database with PostgreSQL</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#running-tests-and-coverage" id="id14">Running tests and coverage</a></p></li>
+<li><p><a class="reference internal" href="#running-tests-and-coverage" id="id15">Running tests and coverage</a></p></li>
 </ul>
 </li>
 </ul>
@@ -348,9 +350,24 @@
 </pre></div>
 </div>
 </div>
+<div class="section" id="killing-airflow">
+<h3><a class="toc-backref" href="#id9">Killing airflow</a><a class="headerlink" href="#killing-airflow" title="Permalink to this headline">¶</a></h3>
+<p>Search for the code of the process in Linux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">airflow</span>
+</pre></div>
+</div>
+<p>Kill it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kill</span> <span class="o">-</span><span class="mi">9</span> <span class="n">CODE</span>
+</pre></div>
+</div>
+<p>If you’re feeling lucky:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kill -9 $(ps aux | grep &#39;airflow&#39; | awk &#39;{print $2}&#39;)
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="using-cornflow-with-the-python-client">
-<h2><a class="toc-backref" href="#id9">Using cornflow with the python client</a><a class="headerlink" href="#using-cornflow-with-the-python-client" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">Using cornflow with the python client</a><a class="headerlink" href="#using-cornflow-with-the-python-client" title="Permalink to this headline">¶</a></h2>
 <p>Launch airflow (webserver and scheduler) and cornflow server (see sections above).</p>
 <p>We’re going to test the cornflow server by using the <cite>cornflow-client</cite> and the <cite>pulp</cite> python package:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">cornflow</span><span class="o">-</span><span class="n">client</span> <span class="n">pulp</span>
@@ -424,9 +441,9 @@
 </div>
 </div>
 <div class="section" id="other-deployment-options">
-<h2><a class="toc-backref" href="#id10">Other deployment options</a><a class="headerlink" href="#other-deployment-options" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Other deployment options</a><a class="headerlink" href="#other-deployment-options" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="deploying-with-docker-compose">
-<h3><a class="toc-backref" href="#id11">Deploying with docker-compose</a><a class="headerlink" href="#deploying-with-docker-compose" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id12">Deploying with docker-compose</a><a class="headerlink" href="#deploying-with-docker-compose" title="Permalink to this headline">¶</a></h3>
 <p>The docker-compose.yml file write in version ‘3’ of the syntax describes the build of four docker containers:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="n">python3</span> <span class="n">cornflow</span> <span class="n">service</span>
 <span class="n">airflow</span> <span class="n">service</span> <span class="n">based</span> <span class="n">on</span> <span class="n">puckel</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span> <span class="n">image</span>
@@ -468,7 +485,7 @@
 </div>
 </div>
 <div class="section" id="running-airflow-with-reverse-proxy">
-<h3><a class="toc-backref" href="#id12">Running airflow with reverse proxy</a><a class="headerlink" href="#running-airflow-with-reverse-proxy" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id13">Running airflow with reverse proxy</a><a class="headerlink" href="#running-airflow-with-reverse-proxy" title="Permalink to this headline">¶</a></h3>
 <p>Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
 Eg.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Nginx</span><span class="p">]</span>
@@ -491,7 +508,7 @@ Eg.:</p>
 <p>More information in airflow doc page <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html">https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html</a></p>
 </div>
 <div class="section" id="setup-cornflow-database-with-postgresql">
-<h3><a class="toc-backref" href="#id13">Setup cornflow database with PostgreSQL</a><a class="headerlink" href="#setup-cornflow-database-with-postgresql" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id14">Setup cornflow database with PostgreSQL</a><a class="headerlink" href="#setup-cornflow-database-with-postgresql" title="Permalink to this headline">¶</a></h3>
 <p>You now need to create a user and password in postgresql (we will be using <cite>postgres</cite> and <cite>postgresadmin</cite>). And also you need to create a database (we will be using one with the name <cite>cornflow</cite>).</p>
 <p>Create a new user:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">postgres</span> <span class="n">psql</span>
@@ -521,7 +538,7 @@ Eg.:</p>
 </div>
 </div>
 <div class="section" id="running-tests-and-coverage">
-<h2><a class="toc-backref" href="#id14">Running tests and coverage</a><a class="headerlink" href="#running-tests-and-coverage" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Running tests and coverage</a><a class="headerlink" href="#running-tests-and-coverage" title="Permalink to this headline">¶</a></h2>
 <p>Then you have to run the following commands:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">FLASK_ENV</span><span class="o">=</span><span class="n">testing</span>
 </pre></div>
