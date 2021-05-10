@@ -159,3 +159,6 @@ build/
 # ssh keys
 cornssh
 cornssh.pub
+
+# DS Store
+.DS_Store
