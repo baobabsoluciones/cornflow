@@ -54,6 +54,9 @@ def gen_schema(cls_name, params, possible_dict=None):
         if p.get('many') and p_type in BASIC_TYPES:
             # if this is a list: we need to make an explicit list
             field_type = partial(fields.List, field_type)
+        if p_type in BASIC_TYPES:
+            # basic types do not support the "many" argument, apparently
+            p.pop('many', None)
         valid_values = p.pop("valid_values", None)
         name = p.pop('name')
         if valid_values is not None:

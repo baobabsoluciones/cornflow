@@ -113,7 +113,39 @@ class TestSchemaManager(TestCase):
         content['objective']['another_something_new'] = 1
         marshmallow_object().load(content)
 
+    def test_to_excel(self):
+        sm = SchemaManager.from_filepath(self.get_data_file('graph_coloring_input.json'))
+        template = sm.to_template()
+        import pandas as pd
+        dataframes = {k: pd.DataFrame.from_dict(v) for k, v in template.items()}
+        self.assertEqual(dataframes['pairs']['n1'][0], 1)
+        self.assertEqual(dataframes['pairs'].shape, (1, 2))
 
+    def test_to_excel2(self):
+        sm = SchemaManager.from_filepath(self.get_data_file('hk_data_schema.json'))
+        template = sm.to_template()
+        import pandas as pd
+        dataframes = {k: pd.DataFrame.from_dict(v) for k, v in template.items()}
+        self.assertEqual(dataframes['durations'].job[0], 1)
+        self.assertEqual(dataframes['durations'].shape, (1, 3))
+        self.assertEqual(dataframes['jobs'].shape, (1, 2))
+
+    def test_to_excel3(self):
+        path = self.get_data_file('../../data/empty_schema.json')
+        schema = SchemaManager.load_json(path)
+        schema['properties'] = dict(configuration=
+                                    dict(type='object',
+                                         properties=dict(
+                                             option1=dict(type='integer'),
+                                             option2=dict(type='string')
+                                         )))
+        sm = SchemaManager(schema)
+        template = sm.to_template()
+        import pandas as pd
+        dataframes = {k: pd.DataFrame.from_dict(v) for k, v in template.items()}
+        self.assertEqual(len(dataframes['configuration']), 2)
+        self.assertEqual(dataframes['configuration'].iloc[1,1], 'string')
+        self.assertEqual(dataframes['configuration'].iloc[0, 1], 1)
     # TODO: fix this test and uncomment
     # def test_list_of_lists(self):
     #     sm = SchemaManager.from_filepath(self.get_data_file('graph_coloring2_input.json'))
