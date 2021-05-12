@@ -40,4 +40,4 @@ class SignUpEndpoint(Resource, MethodResource):
         except Exception as e:
             raise InvalidUsage(error='Error in generating user token: ' + str(e), status_code=400)
 
-        return {'token': token}, 201
+        return {'token': token, 'id': user.id}, 201
