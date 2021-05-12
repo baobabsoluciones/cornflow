@@ -73,19 +73,19 @@ class TestExecutionsListEndpoint(CustomTestCase):
 
     def test_opt_filters_limit(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
         self.apply_filter(EXECUTION_URL, dict(limit=1), [allrows.json[0]])
 
     def test_opt_filters_offset(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
         self.apply_filter(EXECUTION_URL, dict(offset=1, limit=2), allrows.json[1:3])
 
     def test_opt_filters_date_lte(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
         a = date_from_str(allrows.json[0]["created_at"])
@@ -100,7 +100,7 @@ class TestExecutionsListEndpoint(CustomTestCase):
 
     def test_opt_filters_date_gte(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
         date_limit = date_from_str(allrows.json[2]["created_at"]) + timedelta(
@@ -149,10 +149,10 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         return result
 
     def test_get_one_execution(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         payload = dict(self.payload)
-        payload["id"] = id
-        result = self.get_one_row(self.url + id, payload)
+        payload["id"] = idx
+        result = self.get_one_row(self.url + idx, payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -187,21 +187,21 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
     def test_delete_one_execution(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.delete_row(self.url + id + "/")
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        self.delete_row(self.url + idx + "/")
         self.get_one_row(
-            self.url + id, payload={}, expected_status=404, check_payload=False
+            self.url + idx, payload={}, expected_status=404, check_payload=False
         )
 
     def test_update_one_execution(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        payload = {**self.payload, **dict(id=id, name="new_name")}
-        self.update_row(self.url + id + "/", dict(name="new_name"), payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx, name="new_name")}
+        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
 
     def test_update_one_execution_bad_format(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         self.update_row(
-            self.url + id + "/",
+            self.url + idx + "/",
             dict(instance_id="some_id"),
             {},
             expected_status=400,
@@ -209,11 +209,11 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
     def test_create_delete_instance_load(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         execution = self.get_one_row(
-            self.url + id, payload={**self.payload, **dict(id=id)}
+            self.url + idx, payload={**self.payload, **dict(id=idx)}
         )
-        self.delete_row(self.url + id + "/")
+        self.delete_row(self.url + idx + "/")
         instance = self.get_one_row(
             INSTANCE_URL + execution["instance_id"] + "/",
             payload={},
@@ -221,7 +221,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
             check_payload=False,
         )
         executions = [execution["id"] for execution in instance["executions"]]
-        self.assertFalse(id in executions)
+        self.assertFalse(idx in executions)
 
     def test_delete_instance_deletes_execution(self):
         # we create a new instance
@@ -230,8 +230,8 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
         payload = {**self.payload, **dict(instance_id=fk_id)}
         # we create an execution for that instance
-        id = self.create_new_row(self.url + "?run=0", self.model, payload)
-        self.get_one_row(self.url + id, payload={**self.payload, **dict(id=id)})
+        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
+        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
         # we delete the new instance
         self.delete_row(INSTANCE_URL + fk_id + "/")
         # we check the execution does not exist
@@ -240,16 +240,16 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
     def test_get_one_execution_superadmin(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         token = self.create_super_admin()
         self.get_one_row(
-            self.url + id + "/", {**self.payload, **dict(id=id)}, token=token
+            self.url + idx + "/", {**self.payload, **dict(id=idx)}, token=token
         )
 
     def test_edit_one_execution(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        payload = {**self.payload, **dict(id=id, name="new_name")}
-        self.update_row(self.url + id + "/", dict(name="new_name"), payload)
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx, name="new_name")}
+        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
 
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
@@ -259,18 +259,18 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         self.items_to_check = ["name"]
 
     def test_get_one_execution(self):
-        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        self.url = EXECUTION_URL + id + "/data/"
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        self.url = EXECUTION_URL + idx + "/data/"
         payload = dict(self.payload)
-        payload["id"] = id
+        payload["id"] = idx
         self.get_one_row(self.url, payload)
 
     def test_get_one_execution_superadmin(self):
-        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
-        payload["id"] = id
+        payload["id"] = idx
         token = self.create_super_admin()
-        self.get_one_row(EXECUTION_URL + id + "/data/", payload, token=token)
+        self.get_one_row(EXECUTION_URL + idx + "/data/", payload, token=token)
 
 
 class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
@@ -280,24 +280,24 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         self.items_to_check = ["name"]
 
     def test_get_one_execution(self):
-        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
-        payload["id"] = id
-        self.get_one_row(EXECUTION_URL + id + "/log/", payload)
+        payload["id"] = idx
+        self.get_one_row(EXECUTION_URL + idx + "/log/", payload)
 
     def test_get_one_execution_superadmin(self):
-        id = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
-        payload["id"] = id
+        payload["id"] = idx
         token = self.create_super_admin()
-        self.get_one_row(EXECUTION_URL + id + "/log/", payload, token=token)
+        self.get_one_row(EXECUTION_URL + idx + "/log/", payload, token=token)
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
     def test_repr_method(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.repr_method(id, "<id {}>".format(id))
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        self.repr_method(idx, "<id {}>".format(idx))
 
     def test_str_method(self):
-        id = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.str_method(id, "<id {}>".format(id))
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        self.str_method(idx, "<id {}>".format(idx))

@@ -182,10 +182,10 @@ class CustomTestCase(TestCase):
             self.assertEqual(response.json[k], v)
         return
 
-    def repr_method(self, id, representation):
-        row = self.model.query.get(id)
+    def repr_method(self, idx, representation):
+        row = self.model.query.get(idx)
         self.assertEqual(repr(row), representation)
 
-    def str_method(self, id, string: str):
-        row = self.model.query.get(id)
+    def str_method(self, idx, string: str):
+        row = self.model.query.get(idx)
         self.assertEqual(str(row), string)

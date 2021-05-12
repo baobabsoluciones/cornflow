@@ -40,6 +40,7 @@ class LoginEndpointRequest(Schema):
 class UserEditRequest(Schema):
     name = fields.String(required=False)
     email = fields.String(required=False)
+    password = fields.Str(required=False)
 
 
 class UserSignupRequest(Schema):
