@@ -1,4 +1,3 @@
-
 # Imports from sqlalchemy
 from sqlalchemy.sql import expression
 
@@ -32,22 +31,27 @@ class UserModel(TraceAttributes):
     :param dict data: the parsed json got from and endpoint that contains all the required information to
       create a new user.
     """
-    __tablename__ = 'users'
+
+    __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
-    admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
-    super_admin = db.Column(db.Boolean(), server_default=expression.false(), default=False, nullable=False)
-    instances = db.relationship('InstanceModel', backref='users', lazy=True)
+    admin = db.Column(
+        db.Boolean(), server_default=expression.false(), default=False, nullable=False
+    )
+    super_admin = db.Column(
+        db.Boolean(), server_default=expression.false(), default=False, nullable=False
+    )
+    instances = db.relationship("InstanceModel", backref="users", lazy=True)
 
     def __init__(self, data):
 
         super().__init__()
-        self.name = data.get('name')
-        self.email = data.get('email')
-        self.password = self.__generate_hash(data.get('password'))
+        self.name = data.get("name")
+        self.email = data.get("email")
+        self.password = self.__generate_hash(data.get("password"))
         self.admin = False
         self.super_admin = False
 
@@ -65,10 +69,10 @@ class UserModel(TraceAttributes):
         :param dict data: the data to update the user
         """
         for key, item in data.items():
-            if key == 'password':
+            if key == "password":
                 new_password = self.__generate_hash(item)
                 setattr(self, key, new_password)
-            elif key == 'admin' or key == 'super_admin':
+            elif key == "admin" or key == "super_admin":
                 continue
             else:
                 setattr(self, key, item)
@@ -104,7 +108,7 @@ class UserModel(TraceAttributes):
         :return: The hashed password.
         :rtype: str
         """
-        return bcrypt.generate_password_hash(password, rounds=10).decode('utf8')
+        return bcrypt.generate_password_hash(password, rounds=10).decode("utf8")
 
     def check_hash(self, password):
         """
@@ -167,4 +171,4 @@ class UserModel(TraceAttributes):
         :return: The representation of the class
         :rtype: str
         """
-        return '<id {}>'.format(self.id)
+        return "<id {}>".format(self.id)

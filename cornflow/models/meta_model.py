@@ -13,9 +13,8 @@ from ..shared.utils import db, hash_json_256
 
 
 class TraceAttributes(db.Model):
-    """
+    """ """
 
-    """
     __abstract__ = True
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
@@ -38,9 +37,8 @@ class TraceAttributes(db.Model):
 
 
 class BaseDataModel(TraceAttributes):
-    """
+    """ """
 
-    """
     __abstract__ = True
 
     data = db.Column(JSON, nullable=True)
@@ -50,24 +48,26 @@ class BaseDataModel(TraceAttributes):
 
     @declared_attr
     def user_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+        return db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     def __init__(self, data):
-        self.user_id = data.get('user_id')
-        self.data = data.get('data') or data.get('execution_results')
+        self.user_id = data.get("user_id")
+        self.data = data.get("data") or data.get("execution_results")
         self.data_hash = hash_json_256(self.data)
-        self.name = data.get('name')
-        self.description = data.get('description')
+        self.name = data.get("name")
+        self.description = data.get("description")
         super().__init__()
 
     @classmethod
-    def get_all_objects(cls,
-                        user,
-                        data_schema=None,
-                        creation_date_gte=None,
-                        creation_date_lte=None,
-                        offset=0,
-                        limit=10):
+    def get_all_objects(
+        cls,
+        user,
+        data_schema=None,
+        creation_date_gte=None,
+        creation_date_lte=None,
+        offset=0,
+        limit=10,
+    ):
         """
         Query to get all objects from a user
 
@@ -93,8 +93,7 @@ class BaseDataModel(TraceAttributes):
             query = query.filter(cls.created_at <= creation_date_lte)
         # if airflow they also return total_entries = query.count(), for some reason
 
-        return query.order_by(desc(cls.created_at)).\
-            offset(offset).limit(limit).all()
+        return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
 
     @classmethod
     def get_one_object_from_user(cls, user, idx):
