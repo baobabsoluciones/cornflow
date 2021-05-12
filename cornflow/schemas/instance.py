@@ -5,9 +5,8 @@ from .common import QueryFilters as QueryFiltersInstance
 
 
 class InstanceSchema(Schema):
-    """
+    """ """
 
-    """
     id = fields.Str(dump_only=True)
     user_id = fields.Int(required=True, load_only=True)
     data = fields.Raw(required=True)
