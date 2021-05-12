@@ -66,12 +66,14 @@ class UserModel(TraceAttributes):
         """
         for key, item in data.items():
             if key == 'password':
-                self.password = self.__generate_hash(item)
+                new_password = self.__generate_hash(item)
+                setattr(self, key, new_password)
             elif key == 'admin' or key == 'super_admin':
                 continue
-            setattr(self, key, item)
+            else:
+                setattr(self, key, item)
 
-        super().__init__()
+        super().update(data)
         db.session.commit()
 
     def disable(self):

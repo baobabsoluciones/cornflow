@@ -18,13 +18,15 @@ class TestUserEndpoint(TestCase):
         self.url = USER_URL
         self.model = UserModel
         self.user = dict(name='testname', email='test@test.com', password='testpassword', admin=False)
+        self.user_2 = dict(name='testname2', email='test2@test.com', password='testpassword2', admin=False)
         self.admin = dict(name='anAdminUser', email='admin@admin.com', password='testpassword', admin=True)
         self.super_admin = dict(name='anAdminSuperUser', email='super_admin@admin.com',
                                 password='tpass_super_admin', super_admin=True, admin=False)
         self.login_keys = ['email', 'password']
         self.items_to_check = ['email', 'name', 'id', 'admin']
+        self.modifiable_items = ['email', 'name', 'password']
 
-        for u_data in [self.user, self.admin, self.super_admin]:
+        for u_data in [self.user, self.user_2, self.admin, self.super_admin]:
             user = UserModel(data=u_data)
             user.admin = u_data.get('admin', False)
             user.super_admin = u_data.get('super_admin', False)
@@ -39,28 +41,42 @@ class TestUserEndpoint(TestCase):
         db.session.remove()
         db.drop_all()
 
+    def log_in(self, user):
+        data = {k: user[k] for k in self.login_keys}
+        return self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
+                                headers={"Content-Type": "application/json"})
+
     def get_user(self, user_asks, user_asked=None):
         data = {k: user_asks[k] for k in self.login_keys}
         url = self.url
         if user_asked is not None:
             url += '{}/'.format(user_asked['id'])
         token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
-                                      headers={"Content-Type": "application/json"}).json['token']
+                                 headers={"Content-Type": "application/json"}).json['token']
         return self.client.get(url, follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
 
     def make_admin(self, user_asks, user_asked, make_admin=1):
         data = {k: user_asks[k] for k in self.login_keys}
         token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
-                                      headers={"Content-Type": "application/json"}).json['token']
+                                 headers={"Content-Type": "application/json"}).json['token']
         url = '{}{}/{}/'.format(self.url, user_asked['id'], make_admin)
         return self.client.put(url, follow_redirects=True,
+                               headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
+
+    def modify_info(self, user_asks, user_asked, payload):
+        data = {k: user_asks[k] for k in self.login_keys}
+        token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
+                                 headers={"Content-Type": "application/json"}).json['token']
+
+        url = '{}{}/'.format(self.url, user_asked['id'])
+        return self.client.put(url, data=json.dumps(payload), follow_redirects=True,
                                headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
 
     def delete_user(self, user_asks, user_asked):
         data = {k: user_asks[k] for k in self.login_keys}
         token = self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
-                                      headers={"Content-Type": "application/json"}).json['token']
+                                 headers={"Content-Type": "application/json"}).json['token']
         url = '{}{}/'.format(self.url, user_asked['id'])
         return self.client.delete(url, follow_redirects=True,
                                   headers={"Content-Type": "application/json", "Authorization": 'Bearer ' + token})
@@ -69,7 +85,7 @@ class TestUserEndpoint(TestCase):
         # the superadmin should be able to list all users
         response = self.get_user(self.super_admin)
         self.assertEqual(200, response.status_code)
-        self.assertEqual(len(response.json), 3)
+        self.assertEqual(len(response.json), 4)
 
     def test_get_all_users_user(self):
         # a simple user should not be able to do it
@@ -149,3 +165,57 @@ class TestUserEndpoint(TestCase):
         response = self.get_user(self.super_admin, self.admin)
         self.assertEqual(404, response.status_code)
 
+    def test_edit_info(self):
+        payload = {'name': 'newtestname', 'email': 'newtest@test.com'}
+        response = self.modify_info(self.user, self.user, payload)
+        self.assertEqual(200, response.status_code)
+        for item in self.modifiable_items:
+            if item != 'password':
+                self.assertEqual(response.json[item], payload[item])
+                self.assertNotEqual(response.json[item], self.user[item])
+
+    def test_admin_edit_info(self):
+        payload = {'name': 'newtestname', 'email': 'newtest@test.com'}
+        response = self.modify_info(self.admin, self.user, payload)
+        self.assertEqual(200, response.status_code)
+        for item in self.modifiable_items:
+            if item != 'password':
+                self.assertEqual(response.json[item], payload[item])
+                self.assertNotEqual(response.json[item], self.user[item])
+
+    def test_edit_other_user_info(self):
+        payload = {'name': 'newtestname', 'email': 'newtest@test.com'}
+        response = self.modify_info(self.user_2, self.user, payload)
+        self.assertEqual(400, response.status_code)
+
+    def test_change_password(self):
+        payload = {'password': 'newtestpassword'}
+        response = self.modify_info(self.user, self.user, payload)
+        self.assertEqual(200, response.status_code)
+        self.user['password'] = payload['password']
+        response = self.log_in(self.user)
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json['token'])
+
+    def test_change_other_user_password(self):
+        payload = {'password': 'newtestpassword_2'}
+        response = self.modify_info(self.user_2, self.user, payload)
+        self.assertEqual(400, response.status_code)
+
+    def test_admin_change_password(self):
+        payload = {'password': 'newtestpassword_3'}
+        response = self.modify_info(self.admin, self.user, payload)
+        self.assertEqual(200, response.status_code)
+        self.user['password'] = payload['password']
+        response = self.log_in(self.user)
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json['token'])
+
+    def test_super_admin_change_password(self):
+        payload = {'password': 'newtestpassword_4'}
+        response = self.modify_info(self.super_admin, self.user, payload)
+        self.assertEqual(200, response.status_code)
+        self.user['password'] = payload['password']
+        response = self.log_in(self.user)
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json['token'])
