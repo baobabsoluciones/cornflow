@@ -10,6 +10,7 @@ from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsa
 
 import logging as log
 
+
 class SchemaEndpoint(Resource, MethodResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -18,7 +19,7 @@ class SchemaEndpoint(Resource, MethodResource):
     def __init__(self):
         super().__init__()
 
-    @doc(description='Get one schema', tags=['Schemas'])
+    @doc(description="Get one schema", tags=["Schemas"])
     @Auth.auth_required
     # @marshal_with(ExecutionDetailsEndpointResponse(many=True))
     def get(self, dag_name):
@@ -32,7 +33,11 @@ class SchemaEndpoint(Resource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
-        airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
+        airflow_conf = dict(
+            url=config["AIRFLOW_URL"],
+            user=config["AIRFLOW_USER"],
+            pwd=config["AIRFLOW_PWD"],
+        )
 
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
@@ -45,4 +50,3 @@ class SchemaEndpoint(Resource, MethodResource):
 
         # it exists: we try to get its schemas
         return af_client.get_schemas_for_dag_name(dag_name)
-

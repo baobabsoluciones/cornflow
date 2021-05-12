@@ -5,26 +5,25 @@ from cornflow_client.constants import InvalidUsage, AirflowError
 
 class ObjectDoesNotExist(InvalidUsage):
     status_code = 404
-    error = 'The object does not exist'
+    error = "The object does not exist"
 
 
 class NoPermission(InvalidUsage):
     status_code = 400
-    error = 'You have no permission to access the required object'
+    error = "You have no permission to access the required object"
 
 
 class InvalidCredentials(InvalidUsage):
     status_code = 400
-    error = 'Invalid credentials'
+    error = "Invalid credentials"
 
 
 class EndpointNotImplemented(InvalidUsage):
-    error = 'Endpoint not implemented'
+    error = "Endpoint not implemented"
     status_code = 501
 
 
 def _initialize_errorhandlers(app):
-
     @app.errorhandler(InvalidUsage)
     @app.errorhandler(ObjectDoesNotExist)
     @app.errorhandler(NoPermission)
@@ -45,4 +44,6 @@ def handle_request_parsing_error(err, req, schema, *, error_status_code, error_h
     """webargs error handler that uses Flask-RESTful's abort function to return
     a JSON error response to the client.
     """
-    raise InvalidUsage(error=str(err.normalized_messages()), status_code=error_status_code)
+    raise InvalidUsage(
+        error=str(err.normalized_messages()), status_code=error_status_code
+    )

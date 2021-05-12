@@ -21,8 +21,8 @@ class LoginEndpoint(Resource, MethodResource):
     Endpoint used to do the login to the cornflow webserver
     """
 
-    @doc(description='Log in', tags=['Users'])
-    @use_kwargs(LoginEndpointRequest, location='json')
+    @doc(description="Log in", tags=["Users"])
+    @use_kwargs(LoginEndpointRequest, location="json")
     def post(self, **kwargs):
         """
         API (POST) method to log in in to the web server.
@@ -32,17 +32,19 @@ class LoginEndpoint(Resource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
 
-        user = UserModel.get_one_user_by_email(kwargs.get('email'))
+        user = UserModel.get_one_user_by_email(kwargs.get("email"))
 
         if not user:
             raise InvalidCredentials()
 
-        if not user.check_hash(kwargs.get('password')):
+        if not user.check_hash(kwargs.get("password")):
             raise InvalidCredentials()
 
         try:
             token = Auth.generate_token(user.id)
         except Exception as e:
-            raise InvalidUsage(error='error in generating user token: ' + str(e), status_code=400)
+            raise InvalidUsage(
+                error="error in generating user token: " + str(e), status_code=400
+            )
 
-        return {'token': token, 'id': user.id}, 200
+        return {"token": token, "id": user.id}, 200

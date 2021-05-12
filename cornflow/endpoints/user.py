@@ -8,7 +8,12 @@ from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from ..models import UserModel
-from ..schemas.user import UserSchema, UserEndpointResponse, UserDetailsEndpointResponse, UserEditRequest
+from ..schemas.user import (
+    UserSchema,
+    UserEndpointResponse,
+    UserDetailsEndpointResponse,
+    UserEditRequest,
+)
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 from .meta_resource import MetaResource
@@ -23,7 +28,7 @@ class UserEndpoint(MetaResource, MethodResource):
     Including their instances and executions
     """
 
-    @doc(description='Get all users', tags=['Users'])
+    @doc(description="Get all users", tags=["Users"])
     @Auth.super_admin_required
     @marshal_with(UserEndpointResponse(many=True))
     def get(self):
@@ -46,7 +51,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     Endpoint use to get the information of one single user
     """
 
-    @doc(description='Get a user', tags=['Users'])
+    @doc(description="Get a user", tags=["Users"])
     @Auth.auth_required
     @marshal_with(UserDetailsEndpointResponse)
     def get(self, user_id):
@@ -57,13 +62,15 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         if self.get_user_id() != user_id and not self.is_admin():
-            raise InvalidUsage(error='You have no permission to access given user', status_code=400)
+            raise InvalidUsage(
+                error="You have no permission to access given user", status_code=400
+            )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            raise InvalidUsage(error='The object does not exist', status_code=404)
+            raise InvalidUsage(error="The object does not exist", status_code=404)
         return user_obj, 200
 
-    @doc(description='Delete a user', tags=['Users'])
+    @doc(description="Delete a user", tags=["Users"])
     @Auth.auth_required
     def delete(self, user_id):
         """
@@ -80,12 +87,12 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if user_obj.super_admin and not self.is_super_admin():
             raise NoPermission()
         user_obj.delete()
-        return {'message': 'The object has been deleted'}, 200
+        return {"message": "The object has been deleted"}, 200
 
-    @doc(description='Edit a user', tags=['Users'])
+    @doc(description="Edit a user", tags=["Users"])
     @Auth.auth_required
     @marshal_with(UserDetailsEndpointResponse)
-    @use_kwargs(UserEditRequest, location='json')
+    @use_kwargs(UserEditRequest, location="json")
     def put(self, user_id, **data):
         """
         API method to edit an existing user.
@@ -104,12 +111,11 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise ObjectDoesNotExist()
         user_obj.update(data)
         user_obj.save()
-        return user_obj, 201
+        return user_obj, 200
 
 
 class ToggleUserAdmin(Resource, MethodResource):
-
-    @doc(description='Toggle user into admin', tags=['Users'])
+    @doc(description="Toggle user into admin", tags=["Users"])
     @Auth.super_admin_required
     @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
@@ -119,6 +125,7 @@ class ToggleUserAdmin(Resource, MethodResource):
         an existing session (login) made by a user. Only superadmin can change this.
 
         :param int user_id: id of the user
+        :param make_admin: 0 if the user is not going to be made admin, 1 if the user has to be made admin
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
@@ -132,4 +139,3 @@ class ToggleUserAdmin(Resource, MethodResource):
             user_obj.admin = 0
         user_obj.save()
         return user_obj, 201
-
