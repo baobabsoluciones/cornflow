@@ -52,7 +52,7 @@ class CustomTestCase(TestCase):
         db.session.commit()
         data.pop('name')
         return self.client.post(LOGIN_URL, data=json.dumps(data), follow_redirects=True,
-                                      headers={"Content-Type": "application/json"}).json['token']
+                                headers={"Content-Type": "application/json"}).json['token']
 
     def tearDown(self):
         db.session.remove()
@@ -149,10 +149,10 @@ class CustomTestCase(TestCase):
             self.assertEqual(response.json[k], v)
         return
 
-    def repr_method(self, id, representation):
-        row = self.model.query.get(id)
+    def repr_method(self, idx, representation):
+        row = self.model.query.get(idx)
         self.assertEqual(repr(row), representation)
 
-    def str_method(self, id, string: str):
-        row = self.model.query.get(id)
+    def str_method(self, idx, string: str):
+        row = self.model.query.get(idx)
         self.assertEqual(str(row), string)

@@ -104,7 +104,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise ObjectDoesNotExist()
         user_obj.update(data)
         user_obj.save()
-        return user_obj, 201
+        return user_obj, 200
 
 
 class ToggleUserAdmin(Resource, MethodResource):
@@ -119,6 +119,7 @@ class ToggleUserAdmin(Resource, MethodResource):
         an existing session (login) made by a user. Only superadmin can change this.
 
         :param int user_id: id of the user
+        :param make_admin: 0 if the user is not going to be made admin, 1 if the user has to be made admin
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
@@ -132,4 +133,3 @@ class ToggleUserAdmin(Resource, MethodResource):
             user_obj.admin = 0
         user_obj.save()
         return user_obj, 201
-

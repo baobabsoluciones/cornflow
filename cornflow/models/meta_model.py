@@ -110,4 +110,3 @@ class BaseDataModel(TraceAttributes):
         if not user.is_admin():
             query = query.filter_by(user_id=user.id)
         return query.first()
-

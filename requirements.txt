@@ -38,3 +38,4 @@ flask-apispec
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow-client@master
 flask-compress
 flask-inflate
+webargs==8.0.0
