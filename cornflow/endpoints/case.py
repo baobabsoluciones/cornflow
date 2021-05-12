@@ -16,9 +16,16 @@ import pulp
 from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas.model_json import DataSchema
-from ..schemas.instance import InstanceSchema, \
-    InstanceEndpointResponse, InstanceDetailsEndpointResponse, InstanceDataEndpointResponse, \
-    InstanceRequest, InstanceEditRequest, InstanceFileRequest, QueryFiltersInstance
+from ..schemas.instance import (
+    InstanceSchema,
+    InstanceEndpointResponse,
+    InstanceDetailsEndpointResponse,
+    InstanceDataEndpointResponse,
+    InstanceRequest,
+    InstanceEditRequest,
+    InstanceFileRequest,
+    QueryFiltersInstance,
+)
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage
 from cornflow_client.airflow.api import get_schema, validate_and_continue
@@ -26,6 +33,7 @@ from ..shared.compress import compressed
 from flask_inflate import inflate
 
 #
+
 
 class CaseEndpoint(MetaResource, MethodResource):
     """
@@ -36,9 +44,9 @@ class CaseEndpoint(MetaResource, MethodResource):
         super().__init__()
         self.model = InstanceModel
         self.query = InstanceModel.get_all_objects
-        self.primary_key = 'id'
+        self.primary_key = "id"
 
-    @doc(description='Get all cases', tags=['Cases'])
+    @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
     # @marshal_with(InstanceEndpointResponse(many=True))
     # @use_kwargs(QueryFiltersInstance, location='json')
@@ -53,11 +61,11 @@ class CaseEndpoint(MetaResource, MethodResource):
         """
         return None
 
-    @doc(description='Create an instance', tags=['Instances'])
+    @doc(description="Create an instance", tags=["Instances"])
     @Auth.auth_required
     @inflate
     # @marshal_with(InstanceDetailsEndpointResponse)
-    @use_kwargs(InstanceRequest, location='json')
+    @use_kwargs(InstanceRequest, location="json")
     def post(self, **kwargs):
         """
         API (POST) method to a new case
@@ -68,21 +76,21 @@ class CaseEndpoint(MetaResource, MethodResource):
           or the reference_id of the instance created if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        data_schema = kwargs.get('data_schema', 'pulp')
+        data_schema = kwargs.get("data_schema", "pulp")
 
         if data_schema is None:
             # no schema provided, no validation to do
             return self.post_list(kwargs)
 
-        if data_schema == 'pulp':
+        if data_schema == "pulp":
             # this one we have the schema stored inside cornflow
-            validate_and_continue(DataSchema(), kwargs['data'])
+            validate_and_continue(DataSchema(), kwargs["data"])
             return self.post_list(kwargs)
 
         # for the rest of the schemas: we need to ask airflow for the schema
         config = current_app.config
         marshmallow_obj = get_schema(config, data_schema)
-        validate_and_continue(marshmallow_obj(), kwargs['data'])
+        validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # if we're here, we validated and the data seems to fit the schema
         return self.post_list(kwargs)
@@ -96,11 +104,11 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = InstanceModel
-        self.primary_key = 'id'
+        self.primary_key = "id"
         self.query = InstanceModel.get_one_object_from_user
-        self.dependents = 'executions'
+        self.dependents = "executions"
 
-    @doc(description='Get one instance', tags=['Instances'], inherit=False)
+    @doc(description="Get one instance", tags=["Instances"], inherit=False)
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     @MetaResource.get_data_or_404
@@ -116,4 +124,3 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         return InstanceModel.get_one_object_from_user(self.get_user(), idx)
-
