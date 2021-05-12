@@ -37,8 +37,12 @@ class ExecutionSchema(Schema):
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
-    state = fields.Int(validate=validate.Range(min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE),
-                       required=False)
+    state = fields.Int(
+        validate=validate.Range(
+            min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE
+        ),
+        required=False,
+    )
     state_message = fields.Str(required=False)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
@@ -78,14 +82,14 @@ class ExecutionDetailsEndpointResponse(Schema):
     created_at = fields.String()
     instance_id = fields.String()
     state = fields.Int()
-    message = fields.Str(attribute='state_message')
+    message = fields.Str(attribute="state_message")
     data_hash = fields.String(dump_only=True)
 
 
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.String()
     state = fields.Int()
-    message = fields.Str(attribute='state_message')
+    message = fields.Str(attribute="state_message")
     data_hash = fields.String(dump_only=True)
 
 
@@ -99,5 +103,5 @@ class ExecutionDataEndpointResponse(Schema):
 class ExecutionLogEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
-    log = fields.Nested(LogSchema, attribute='log_json')
+    log = fields.Nested(LogSchema, attribute="log_json")
     data_hash = fields.String(dump_only=True)

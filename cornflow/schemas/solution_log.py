@@ -68,4 +68,3 @@ class LogSchema(Schema):
     nodes = fields.Int(**log_options)
     progress = fields.Nested(ProgressSchema, required=False)
     cut_info = fields.Raw(**log_options)
-

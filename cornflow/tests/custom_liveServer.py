@@ -7,9 +7,8 @@ from cornflow.tests.const import PREFIX
 
 
 class CustomTestCaseLive(LiveServerTestCase):
-
     def create_app(self):
-        app = create_app('testing')
+        app = create_app("testing")
         return app
 
     def set_client(self, server):
@@ -18,7 +17,7 @@ class CustomTestCaseLive(LiveServerTestCase):
 
     def login_or_signup(self, user_data):
         try:
-            response = self.client.login(user_data['email'], user_data['pwd'])
+            response = self.client.login(user_data["email"], user_data["pwd"])
         except cf.CornFlowApiError:
             response = self.client.sign_up(**user_data).json()
         return response
@@ -26,14 +25,14 @@ class CustomTestCaseLive(LiveServerTestCase):
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
-        user_data =\
-            dict(name='testname',
-                 email='test@test.com',
-                 pwd='testpassword',
-                 )
+        user_data = dict(
+            name="testname",
+            email="test@test.com",
+            pwd="testpassword",
+        )
         self.set_client(self.get_server_url())
         response = self.login_or_signup(user_data)
-        self.client.token = response['token']
+        self.client.token = response["token"]
         self.url = None
         self.model = None
         self.items_to_check = []
@@ -48,5 +47,5 @@ class CustomTestCaseLive(LiveServerTestCase):
         """
         prefix = PREFIX
         if prefix:
-            prefix += '/'
-        return 'http://localhost:%s' % self._port_value.value + prefix
+            prefix += "/"
+        return "http://localhost:%s" % self._port_value.value + prefix
