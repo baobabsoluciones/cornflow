@@ -831,7 +831,10 @@ It requires authentication to be passed in the form of a token that has to be li
 an existing session (login) made by a user. Only superadmin can change this.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – id of the user</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – id of the user</p></li>
+<li><p><strong>make_admin</strong> – 0 if the user is not going to be made admin, 1 if the user has to be made admin</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A dictionary with a message (error if authentication failed, or the execution does not exist or
