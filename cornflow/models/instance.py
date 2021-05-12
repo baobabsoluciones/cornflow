@@ -13,7 +13,7 @@ class InstanceModel(BaseDataModel):
     Model class for the Instances
     It inherits from :class:`BaseDataModel` to have the trace fields and user field
 
-    - **id**: int, the primary key for the executions, a hash generated upon creation of the instance 
+    - **id**: int, the primary key for the executions, a hash generated upon creation of the instance
       and the id given back to the user.The hash is generated from the creation time and the user id.
     - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
     - **name**: str, the name given to the instance by the user.
@@ -33,22 +33,27 @@ class InstanceModel(BaseDataModel):
     """
 
     # Table name in the database
-    __tablename__ = 'instances'
+    __tablename__ = "instances"
 
     # Model fields
     id = db.Column(db.String(256), nullable=False, primary_key=True)
-    executions = db.relationship('ExecutionModel', backref='instances', lazy=True,
-                                 primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
-                                             "ExecutionModel.deleted_at==None)"
-                                 )
+    executions = db.relationship(
+        "ExecutionModel",
+        backref="instances",
+        lazy=True,
+        primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
+        "ExecutionModel.deleted_at==None)",
+    )
 
     def __init__(self, data):
         """
-            :param dict data: the parsed json got from an endpoint that contains all the required
-                information to create a new instance
+        :param dict data: the parsed json got from an endpoint that contains all the required
+            information to create a new instance
         """
         super().__init__(data)
-        self.id = hashlib.sha1((str(self.created_at) + ' ' + str(self.user_id)).encode()).hexdigest()
+        self.id = hashlib.sha1(
+            (str(self.created_at) + " " + str(self.user_id)).encode()
+        ).hexdigest()
 
     def __repr__(self):
         """
@@ -57,7 +62,7 @@ class InstanceModel(BaseDataModel):
         :return: The representation of the :class:`InstanceModel`
         :rtype: str
         """
-        return '<Instance {}>'.format(self.id)
+        return "<Instance {}>".format(self.id)
 
     def __str__(self):
         """
@@ -66,4 +71,4 @@ class InstanceModel(BaseDataModel):
         :return: The string for the :class:`InstanceModel`
         :rtype: str
         """
-        return '<Instance {}>'.format(self.id)
+        return "<Instance {}>".format(self.id)

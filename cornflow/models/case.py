@@ -15,7 +15,7 @@ from cornflow.shared.utils import db
 # from sqlalchemy.sql.expression import cast
 
 
-SEPARATOR = '/'
+SEPARATOR = "/"
 # LENGTH_STR = 5
 
 
@@ -31,7 +31,9 @@ class CaseModel(BaseDataModel):
         "CaseModel",
         viewonly=True,
         order_by=path,
-        primaryjoin=db.remote(db.foreign(path)).like(path.concat(id).concat(SEPARATOR + "%")),
+        primaryjoin=db.remote(db.foreign(path)).like(
+            path.concat(id).concat(SEPARATOR + "%")
+        ),
     )
 
     # TODO: maybe implement this while making it compatible with sqlite:
@@ -67,8 +69,8 @@ class CaseModel(BaseDataModel):
         super().__init__(data)
         if parent is None:
             # No parent: we set to empty path
-            self.path = ''
-        elif parent.path == '':
+            self.path = ""
+        elif parent.path == "":
             # first level has empty path
             self.path = str(parent.id) + SEPARATOR
         else:
@@ -76,7 +78,7 @@ class CaseModel(BaseDataModel):
             self.path = parent.path + str(parent.id) + SEPARATOR
 
     def __repr__(self):
-        return '<Case {}>'.format(self.id)
+        return "<Case {}>".format(self.id)
 
     def move_to(self, new_parent):
         new_path = new_parent.path + str(new_parent.id) + SEPARATOR

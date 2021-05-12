@@ -5,7 +5,7 @@ from .common import QueryFilters
 
 
 class QueryFiltersExecution(QueryFilters):
-    data_schema = fields.String(required=False)
+    schema = fields.String(required=False)
 
 
 class ConfigSchema(Schema):
@@ -30,14 +30,19 @@ class ExecutionSchema(Schema):
     instance_id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
+    schema = fields.String(required=False)
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
-    state = fields.Int(validate=validate.Range(min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE),
-                       required=False)
+    state = fields.Int(
+        validate=validate.Range(
+            min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE
+        ),
+        required=False,
+    )
     state_message = fields.Str(required=False)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
@@ -49,7 +54,7 @@ class ExecutionRequest(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)
     instance_id = fields.String(required=True)
-    dag_name = fields.Str(required=False)
+    schema = fields.Str(required=False)
 
 
 class ExecutionEditRequest(Schema):
@@ -77,14 +82,15 @@ class ExecutionDetailsEndpointResponse(Schema):
     created_at = fields.String()
     instance_id = fields.String()
     state = fields.Int()
-    message = fields.Str(attribute='state_message')
+    message = fields.Str(attribute="state_message")
     data_hash = fields.String(dump_only=True)
+    schema = fields.String(required=False)
 
 
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.String()
     state = fields.Int()
-    message = fields.Str(attribute='state_message')
+    message = fields.Str(attribute="state_message")
     data_hash = fields.String(dump_only=True)
 
 
@@ -98,5 +104,5 @@ class ExecutionDataEndpointResponse(Schema):
 class ExecutionLogEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
-    log = fields.Nested(LogSchema, attribute='log_json')
+    log = fields.Nested(LogSchema, attribute="log_json")
     data_hash = fields.String(dump_only=True)

@@ -50,33 +50,46 @@ class ExecutionModel(BaseDataModel):
     """
 
     # Table name in the database
-    __tablename__ = 'executions'
+    __tablename__ = "executions"
 
     # Model fields
     id = db.Column(db.String(256), nullable=False, primary_key=True)
-    instance_id = db.Column(db.String(256), db.ForeignKey('instances.id'), nullable=False)
+    instance_id = db.Column(
+        db.String(256), db.ForeignKey("instances.id"), nullable=False
+    )
     config = db.Column(JSON, nullable=False)
     dag_run_id = db.Column(db.String(256), nullable=True)
-    dag_name = db.Column(db.String(256), nullable=True)
+    schema = db.Column(db.String(256), nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
-    state_message = db.Column(TEXT, default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE], nullable=True)
+    state_message = db.Column(
+        TEXT,
+        default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE],
+        nullable=True,
+    )
 
     def __init__(self, data):
         super().__init__(data)
-        self.user_id = data.get('user_id')
-        self.instance_id = data.get('instance_id')
+        self.user_id = data.get("user_id")
+        self.instance_id = data.get("instance_id")
         self.id = hashlib.sha1(
-            (str(self.created_at) + ' ' + str(self.user_id) + ' ' + str(self.instance_id)).encode()).hexdigest()
+            (
+                str(self.created_at)
+                + " "
+                + str(self.user_id)
+                + " "
+                + str(self.instance_id)
+            ).encode()
+        ).hexdigest()
 
-        self.dag_run_id = data.get('dag_run_id')
-        self.dag_name = data.get('dag_name')
-        self.state = data.get('state', DEFAULT_EXECUTION_CODE)
+        self.dag_run_id = data.get("dag_run_id")
+        self.schema = data.get("schema")
+        self.state = data.get("state", DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
-        self.config = data.get('config')
-        self.log_text = data.get('log_text')
-        self.log_json = data.get('log_json')
+        self.config = data.get("config")
+        self.log_text = data.get("log_text")
+        self.log_json = data.get("log_json")
 
     def update_state(self, code):
         """
@@ -96,7 +109,7 @@ class ExecutionModel(BaseDataModel):
         :return: The representation of the :class:`ExecutionModel`
         :rtype: str
         """
-        return '<Execution {}>'.format(self.id)
+        return "<Execution {}>".format(self.id)
 
     def __str__(self):
         """
@@ -105,4 +118,4 @@ class ExecutionModel(BaseDataModel):
         :return: The string for the :class:`ExecutionModel`
         :rtype: str
         """
-        return '<Execution {}>'.format(self.id)
+        return "<Execution {}>".format(self.id)

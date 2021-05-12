@@ -93,8 +93,8 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             user=config["AIRFLOW_USER"],
             pwd=config["AIRFLOW_PWD"],
         )
-        if "dag_name" not in kwargs:
-            kwargs["dag_name"] = "solve_model_dag"
+        if "schema" not in kwargs:
+            kwargs["schema"] = "solve_model_dag"
         execution, status_code = self.post_list(kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id

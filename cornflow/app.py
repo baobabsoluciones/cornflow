@@ -14,7 +14,7 @@ from .shared.utils import db, bcrypt
 from .shared.compress import init_compress
 
 
-def create_app(env_name='development'):
+def create_app(env_name="development"):
     """
 
     :param str env_name: 'testing' or 'development' or 'production'
@@ -24,7 +24,7 @@ def create_app(env_name='development'):
 
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
-    if env_name == 'development' or env_name == 'testing':
+    if env_name == "development" or env_name == "testing":
         # TODO: not sure if we should keep this line and if so, here.
         CORS(app)
     bcrypt.init_app(app)
@@ -32,34 +32,38 @@ def create_app(env_name='development'):
 
     api = Api(app)
     for res in resources:
-        api.add_resource(res['resource'], res['urls'], endpoint=res['endpoint'])
+        api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
     # apispec config
-    app.config.update({
-        'APISPEC_SPEC': APISpec(
-            title='Cornflow API docs',
-            version='v1',
-            plugins=[MarshmallowPlugin()],
-            openapi_version='2.0.0'
-        ),
-        'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
-        'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
-    })
+    app.config.update(
+        {
+            "APISPEC_SPEC": APISpec(
+                title="Cornflow API docs",
+                version="v1",
+                plugins=[MarshmallowPlugin()],
+                openapi_version="2.0.0",
+            ),
+            "APISPEC_SWAGGER_URL": "/swagger/",  # URI to access API Doc JSON
+            "APISPEC_SWAGGER_UI_URL": "/swagger-ui/",  # URI to access UI of API Doc
+        }
+    )
     docs = FlaskApiSpec(app)
     for res in resources:
-        docs.register(target=res['resource'], endpoint=res['endpoint'])
+        docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     _initialize_errorhandlers(app)
     init_compress(app)
     # compress config
-    app.config.update({
-        'COMPRESS_REGISTER': False,
-    })
+    app.config.update(
+        {
+            "COMPRESS_REGISTER": False,
+        }
+    )
     return app
 
 
-if __name__ == '__main__':
-    environment_name = os.getenv('FLASK_ENV', 'development')
+if __name__ == "__main__":
+    environment_name = os.getenv("FLASK_ENV", "development")
     # env_name = 'development'
     app = create_app(environment_name)
     app.run()

@@ -5,47 +5,48 @@ from cornflow.tests.const import INSTANCE_FILE_URL
 
 
 class TestInstances(CustomTestCase):
-
     def setUp(self):
         super().setUp()
         self.url = INSTANCE_FILE_URL
         self.model = InstanceModel
 
-
-    def create_new_row_file(self, file, name='test1', description='', filename=None):
+    def create_new_row_file(self, file, name="test1", description="", filename=None):
         data = dict(name=name, description=description)
-        with open(file, 'rb') as file_obj:
+        with open(file, "rb") as file_obj:
             if filename is None:
-                data['file'] = file_obj
+                data["file"] = file_obj
             else:
-                data['file'] = (file_obj, filename)
-            return self.client.post(self.url,
-                                        data=data,
-                                        follow_redirects=True,
-                                        headers={"Content-Type": "multipart/form-data",
-                                                 "Authorization": 'Bearer ' + self.token}
-                                        )
+                data["file"] = (file_obj, filename)
+            return self.client.post(
+                self.url,
+                data=data,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": "Bearer " + self.token,
+                },
+            )
 
     def test_new_instance(self):
-        file = './cornflow/tests/data/test_mps.mps'
+        file = "./cornflow/tests/data/test_mps.mps"
         response = self.create_new_row_file(file)
         self.assertEqual(201, response.status_code)
-        row = self.model.query.get(response.json['id'])
-        self.assertEqual(row.id, response.json['id'])
+        row = self.model.query.get(response.json["id"])
+        self.assertEqual(row.id, response.json["id"])
         payload = pulp.LpProblem.fromMPS(file, sense=1)[1].toDict()
         self.assertEqual(row.data, payload)
 
     def test_new_instance_fail_ext(self):
-        file = './cornflow/tests/data/test_mps.mps'
-        response = self.create_new_row_file(file, filename='test.json')
+        file = "./cornflow/tests/data/test_mps.mps"
+        response = self.create_new_row_file(file, filename="test.json")
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext2(self):
-        file = './cornflow/tests/data/gc_20_7.json'
+        file = "./cornflow/tests/data/gc_20_7.json"
         response = self.create_new_row_file(file)
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext3(self):
-        file = './cornflow/tests/unit/test_instances.py'
-        response = self.create_new_row_file(file, filename='test.mps')
+        file = "./cornflow/tests/unit/test_instances.py"
+        response = self.create_new_row_file(file, filename="test.mps")
         self.assertEqual(400, response.status_code)

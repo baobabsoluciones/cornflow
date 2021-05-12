@@ -12,13 +12,12 @@ from cornflow.models import CaseModel, UserModel
 try:
     date_from_str = datetime.fromisoformat
 except:
+
     def date_from_str(_string):
-        return datetime.\
-        strptime(_string, '%Y-%m-%d %H:%M:%S.%f')
+        return datetime.strptime(_string, "%Y-%m-%d %H:%M:%S.%f")
 
 
 class TestCasesModels(CustomTestCase):
-
     def setUp(self):
         super().setUp()
 
@@ -41,16 +40,16 @@ class TestCasesModels(CustomTestCase):
     def test_new_case(self):
         user = UserModel.get_one_user(self.user)
         case = CaseModel.get_one_object_from_user(user=user, idx=6)
-        self.assertEqual(case.path, '1/3/')
+        self.assertEqual(case.path, "1/3/")
         case = CaseModel.get_one_object_from_user(user=user, idx=11)
-        self.assertEqual(case.path, '1/7/')
+        self.assertEqual(case.path, "1/7/")
 
     def test_move_case(self):
         user = UserModel.get_one_user(self.user)
         case6 = CaseModel.get_one_object_from_user(user=user, idx=6)
         case11 = CaseModel.get_one_object_from_user(user=user, idx=11)
         case6.move_to(case11)
-        self.assertEqual(case6.path, '1/7/11/')
+        self.assertEqual(case6.path, "1/7/11/")
 
     def test_move_case2(self):
         user = UserModel.get_one_user(self.user)
@@ -60,7 +59,7 @@ class TestCasesModels(CustomTestCase):
         case10 = CaseModel.get_one_object_from_user(user=user, idx=10)
         case3.move_to(case11)
         case9.move_to(case3)
-        self.assertEqual(case10.path, '1/7/11/3/9/')
+        self.assertEqual(case10.path, "1/7/11/3/9/")
 
     def test_delete_case(self):
         user = UserModel.get_one_user(self.user)
