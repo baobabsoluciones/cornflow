@@ -236,7 +236,7 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.delete_row(INSTANCE_URL + fk_id + "/")
         # we check the execution does not exist
         self.get_one_row(
-            self.url + id, payload={}, expected_status=404, check_payload=False
+            self.url + idx, payload={}, expected_status=404, check_payload=False
         )
 
     def test_get_one_execution_superadmin(self):
