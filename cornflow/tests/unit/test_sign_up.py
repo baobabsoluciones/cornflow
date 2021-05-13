@@ -37,6 +37,7 @@ class TestSignUp(TestCase):
 
         self.assertEqual(201, response.status_code)
         self.assertEqual(str, type(response.json["token"]))
+        self.assertEqual(int, type(response.json["id"]))
 
     # Test that registering again with the same name give an error
     def test_existing_name_signup(self):
