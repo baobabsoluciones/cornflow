@@ -45,6 +45,7 @@ class BaseDataModel(TraceAttributes):
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     data_hash = db.Column(db.String(256), nullable=False)
+    schema = db.Column(db.String(256), nullable=True)
 
     @declared_attr
     def user_id(cls):
@@ -56,6 +57,7 @@ class BaseDataModel(TraceAttributes):
         self.data_hash = hash_json_256(self.data)
         self.name = data.get("name")
         self.description = data.get("description")
+        self.schema = data.get("schema")
         super().__init__()
 
     def save(self):

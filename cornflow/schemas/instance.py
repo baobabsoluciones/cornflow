@@ -24,6 +24,7 @@ class InstanceRequest(Schema):
     description = fields.String(required=False)
     data = fields.Raw(required=True)
     data_schema = fields.String(required=False)
+    schema = fields.String(required=False)
 
 
 class InstanceFileRequest(Schema):
@@ -44,6 +45,7 @@ class InstanceEndpointResponse(Schema):
     created_at = fields.String()
     user_id = fields.Integer()
     data_hash = fields.String()
+    schema = fields.String(required=False)
 
 
 class InstanceDetailsEndpointResponse(Schema):
@@ -54,6 +56,7 @@ class InstanceDetailsEndpointResponse(Schema):
     user_id = fields.Integer()
     executions = fields.List(fields.Nested(ExecutionDetailsEndpointResponse))
     data_hash = fields.String()
+    schema = fields.String(required=False)
 
 
 class InstanceDataEndpointResponse(Schema):
@@ -61,3 +64,4 @@ class InstanceDataEndpointResponse(Schema):
     name = fields.String()
     data = fields.Raw(required=True)
     data_hash = fields.String()
+    schema = fields.String(required=False)

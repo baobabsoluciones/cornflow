@@ -20,8 +20,8 @@ class TestInstancesListEndpoint(CustomTestCase):
         super().setUp()
         self.url = INSTANCE_URL
         self.model = InstanceModel
-        self.response_items = {"id", "name", "description", "created_at"}
-        self.items_to_check = ["name", "description"]
+        self.response_items = {"id", "name", "description", "created_at", "schema"}
+        self.items_to_check = ["name", "description", "schema"]
 
         def load_file(_file):
             with open(_file) as f:
@@ -164,9 +164,10 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
             "user_id",
             "executions",
             "data_hash",
+            "schema",
         }
         # we only check name and description because this endpoint does not return data
-        self.items_to_check = ["name", "description"]
+        self.items_to_check = ["name", "description", "schema"]
 
 
 class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
@@ -212,8 +213,8 @@ class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
 class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "data", "data_hash"}
-        self.items_to_check = ["name", "data"]
+        self.response_items = {"id", "name", "data", "data_hash", "schema"}
+        self.items_to_check = ["name", "data", "schema"]
 
     def test_get_one_instance(self):
         id = self.create_new_row(self.url, self.model, self.payload)

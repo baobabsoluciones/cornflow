@@ -59,7 +59,6 @@ class ExecutionModel(BaseDataModel):
     )
     config = db.Column(JSON, nullable=False)
     dag_run_id = db.Column(db.String(256), nullable=True)
-    schema = db.Column(db.String(256), nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
@@ -84,7 +83,6 @@ class ExecutionModel(BaseDataModel):
         ).hexdigest()
 
         self.dag_run_id = data.get("dag_run_id")
-        self.schema = data.get("schema")
         self.state = data.get("state", DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
         self.config = data.get("config")

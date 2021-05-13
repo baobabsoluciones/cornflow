@@ -122,4 +122,5 @@
     "sos2": []
 },
 "name":"instance_1",
-"description":"This is a test instance to check if name and description get saved succesfully"}
+"description":"This is a test instance to check if name and description get saved succesfully",
+"schema":  "solve_model_dag"}

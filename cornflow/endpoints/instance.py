@@ -76,13 +76,13 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :return: an object with the data for the created instance and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        data_schema = kwargs.get("data_schema", "pulp")
+        data_schema = kwargs.get("schema", "solve_model_dag")
 
         if data_schema is None:
             # no schema provided, no validation to do
             return self.post_list(kwargs)
 
-        if data_schema == "pulp":
+        if data_schema == "pulp" or data_schema == "solve_model_dag":
             # this one we have the schema stored inside cornflow
             validate_and_continue(DataSchema(), kwargs["data"])
             return self.post_list(kwargs)

@@ -75,7 +75,6 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
@@ -105,7 +104,7 @@ class CustomTestCase(TestCase):
 
     def get_keys_to_check(self, payload):
         if len(self.items_to_check):
-            return self.items_to_check
+            return self.items_to_check & payload.keys()
         return payload.keys()
 
     def get_one_row(
