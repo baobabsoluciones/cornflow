@@ -285,7 +285,7 @@ On Linux, the mounted volumes in container use the native Linux filesystem user/
 
 Now you can start all services::
 
-    docker-compose up
+    docker-compose up -d
 
 Cornflow service available at http://localhost:5000
 Airflow service available at http://localhost:8080
@@ -294,8 +294,24 @@ In the second terminal you can check the condition of the containers and make su
 
     docker ps
 
+**Stop and clean docker environment**
+
+Stop the docker services::
+
+    docker compose down
+
+Clean up all docker volumes::
+
+    docker volume prune -f
+
 Cornflow docker stack
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+**Image build**
+
+The Dockerfile in `cornflow github project <https://github.com/baobabsoluciones/corn>`_ is builded from python3-slim-buster docker image.
+Installation path of cornflow app is ``/usr/src/app``.
+There is no docker volumes attached to deployment for cornflow app.
 
 **Environment variables**
 
@@ -325,6 +341,7 @@ The image entrypoint works as follows::
 
 **Running cornflow with simultaneous resolutions**
 
+For do this kind of deployment you can use the template ``docker-compose-cornflow-celery.yml``.
 Airflow service allow you to run with CeleryExecutor. For more information, see `Basic Airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
 
 Other deployment options
