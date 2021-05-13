@@ -246,53 +246,43 @@ Retrieve the log of the solver::
     print(log['log'])
     # json format of the solver log
 
+Docker deployment for Cornflow App
+------------------------------------
+
+From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
+In this repository you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
+
+The docker-compose template yml files are writen in version '3' of the syntax and describes the build of this possible services::
+
+    cornflow application
+    airflow webserver, scheduler and workers services
+    `postgres <https://www.postgresql.org/>`_ service for cornflow and airflow internal database
+    `redis <https://redis.io/>`_ data message broker
+
+Requirements
+~~~~~~~~~~~~~~
+
+Technologies used
+~~~~~~~~~~~~~~~~~~~
+
+Docker images
+~~~~~~~~~~~~~~~
+
+- Building the images
+- Entrypoints
+- Services and ports
+- Run with docker-compose
+
+Docker references
+~~~~~~~~~~~~~~~~~~~
+
+- Build Arguments
+- Set admin users
+
 Other deployment options
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Deploying with docker-compose
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The docker-compose.yml file write in version '3' of the syntax describes the build of four docker containers::
-
-    app python3 cornflow service
-    airflow service based on puckel/docker-airflow image
-    cornflow postgres database service
-    airflow postgres database service
-
-Create containers::
-
-    docker-compose up --build -d
-	
-List containers::
-
-    docker-compose ps
-
-Interact with container::
-
-    docker exec -it CONTAINER_ID bash
-
-See the logs for a particular service (e.g., SERVICE=cornflow)::
-
-    docker-compose logs SERVICE
-
-Stop the containers::
-    
-    docker-compose down
-	
-destroy all container and images (be careful! this destroys all docker images of non running container)::
-
-    docker system prune -af
-
-Appended in this repository are three more docker-compose files for different kind of deployment::
-	
-    Use "docker-compose -f docker-compose-cornflow-celery.yml up -d" for deploy cornflow with airflow celery executor and one worker. If a larger number of workers are required, use --scale parameter of docker-compose.
-
-    Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
-
-    Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
-
-Running airflow with reverse proxy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Running airflow with reverse proxy**
 
 Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
 Eg.::
@@ -315,8 +305,7 @@ If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP
 
 More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
 
-Setup cornflow database with PostgreSQL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Setup cornflow database with PostgreSQL**
 
 You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
 
@@ -338,6 +327,32 @@ Create a new database::
 Finally, the environment variable needs to be changed::
 
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    
+**Connect to your own airflow deployment**
+
+Recommendations for production
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Recommended arguments customization
+- Enforce security
+* LDAP configuration
+* SSL
+
+Operations and logs
+~~~~~~~~~~~~~~~~~~~~~
+
+- Configure users
+* Create admin users
+* Delete users
+* Configure
+- Operate the services
+- Service log
+    * Cornflow log
+    * Airflow log
+    * Solver log
+
+Known problems
+~~~~~~~~~~~~~~~~
 
 **Possible error with psycopg2:**
 
