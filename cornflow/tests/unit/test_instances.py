@@ -182,7 +182,7 @@ class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
         idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_super_admin()
         self.get_one_row(
-            self.url + id + "/", {**self.payload, **dict(id=idx)}, token=token
+            self.url + idx + "/", {**self.payload, **dict(id=idx)}, token=token
         )
 
     def test_update_one_instance(self):
