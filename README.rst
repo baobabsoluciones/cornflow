@@ -344,10 +344,10 @@ The image entrypoint works as follows::
 **Airflow docker image**
 
 For this project we have created a custom Ariflow image that we will maintain for the life cycle of the Cornflow application.
-Airflow has different execution modes: `SecuentialExucutor`, `CeleryExecutor` and `KubernetesExecutor`. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
+Airflow has different execution modes: `SecuentialExecutor`, `CeleryExecutor` and `KubernetesExecutor`. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
 By default is set on ``SequentialExecutor`` which allows you to perform resolutions sequentially. That is, when you enter a resolution, the next one is not executed until the previous one has finished.
 
-The airflow environment variables included in ``docker-compose.yml`` are:
+The airflow environment variables included in ``docker-compose.yml`` are::
 
     AIRFLOW_USER - airflow administrator´s username
     AIRFLOW_PWD - airflow administrator´s password
@@ -367,7 +367,7 @@ These volumes allow you to persist the DAG files and also link the development p
 **PostgreSQL docker image**
 
 The image displayed in the container will be the official image of the popular `PostgreSQL <https://hub.docker.com/_/postgres>`_ database engine.
-The postgresql environment variables included in ``docker-compose.yml`` are:
+The postgresql environment variables included in ``docker-compose.yml`` are::
 
     POSTGRES_USER - database username of service 
     POSTGRES_PASSWORD - database user´s password of service 
@@ -380,13 +380,13 @@ The postgresql deployment requires mounting one volume linked to the directory c
 **Running cornflow with simultaneous resolutions**
 
 For do this kind of deployment, you could use the template ``docker-compose-cornflow-celery.yml``.
-Airflow service allow you to run with CeleryExecutor. For more information, see `Basic Airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
+Airflow service allow you to run with CeleryExecutor. For more information, see `Basic airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
 
 For running with CeleryExecutor is::
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d
 
-The number of ``workers``deployed depends on ``--scale``. For example, if number of workers needed is 2::
+The number of ``workers`` deployed depends on ``--scale`` argument. For example, if number of workers needed is 2::
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d --scale worker=2
 
@@ -398,7 +398,10 @@ If you are running cornflow with multiple workers, there are additional services
 
 New environment variables must also be taken into account for services running in Celery mode::
 
+    EXECUTOR - Airflow execution mode. You must enter as a value ``Celery``.
+    FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
 
+Flower service available at http://localhost:5555
 
 Other deployment options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
