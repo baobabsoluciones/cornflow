@@ -252,13 +252,13 @@ Docker deployment for Cornflow App
 From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
 In this repository you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
 
-The docker-compose template yml files are writen in version '3' of the syntax and describes the build of this possible services::
+The ``docker-compose.yml`` describes the build of this services::
 
     cornflow application
     postgres service for cornflow internal database
     airflow webserver and scheduler service
 
-Since to run cornflow it is essential to have the airflow application, the docker-compose.yml file includes a deployment of said platform.
+Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
 
 **Before you begin**
 
@@ -296,13 +296,9 @@ In the second terminal you can check the condition of the containers and make su
 
 **Stop and clean docker environment**
 
-Stop the docker services::
+Stop the docker services and remove all volumes::
 
-    docker compose down
-
-Clean up all docker volumes::
-
-    docker volume prune -f
+    docker-compose down --volumes --rmi all
 
 Cornflow docker stack
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,6 +308,12 @@ Cornflow docker stack
 The Dockerfile in `cornflow github project <https://github.com/baobabsoluciones/corn>`_ is builded from python3-slim-buster docker image.
 Installation path of cornflow app is ``/usr/src/app``.
 There is no docker volumes attached to deployment for cornflow app.
+
+You can customize certain environment variables after building the image. To build the image in a custom way, run the command::
+
+    docker build . --tag my-image:my-tag 
+
+Where my-image is the name you want to name it and my-tag is the tag you want to tag the image with.
 
 **Environment variables**
 
@@ -330,7 +332,7 @@ Main cornflow environment variables::
 
 **Entrypoint**
 
-If you are using the default entrypoint of the production image, it will execute initapp script wich use and initialize environment variables to work with postgresql and airflow defined in docker-compose.yml.
+If you are using the default entrypoint of the production image, it will execute ``initapp.sh`` script wich use and initialize environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
 The image entrypoint works as follows::
 
     A new fernet secret key it will be generated.
@@ -339,10 +341,64 @@ The image entrypoint works as follows::
     For the very first time will create the cornflow superuser.
     Finally launch gunicorn server with 3 gevent workers.
 
+**Airflow docker image**
+
+For this project we have created a custom Ariflow image that we will maintain for the life cycle of the Cornflow application.
+Airflow has different execution modes: `SecuentialExucutor`, `CeleryExecutor` and `KubernetesExecutor`. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
+By default is set on ``SequentialExecutor`` which allows you to perform resolutions sequentially. That is, when you enter a resolution, the next one is not executed until the previous one has finished.
+
+The airflow environment variables included in ``docker-compose.yml`` are:
+
+    AIRFLOW_USER - airflow administrator´s username
+    AIRFLOW_PWD - airflow administrator´s password
+    AIRFLOW_DB_HOST - airflow postgresql server
+    AIRFLOW_DB_PORT - airflow postgresql server port
+    AIRFLOW_DB_USER - airflow database username
+    AIRFLOW_DB_PASSWORD - airflow database password
+    AIRFLOW_DB - airflow database name
+
+The airflow deployment requires mounting two volumes linked to the directory created on the host::
+
+    airflow_config/dags:/usr/local/airflow/dags - DAG folder inside of installation path.
+    airflow_config/requirements.txt:/requirements.txt - development packages required to install.
+
+These volumes allow you to persist the DAG files and also link the development packages necessary for their execution.
+
+**PostgreSQL docker image**
+
+The image displayed in the container will be the official image of the popular `PostgreSQL <https://hub.docker.com/_/postgres>`_ database engine.
+The postgresql environment variables included in ``docker-compose.yml`` are:
+
+    POSTGRES_USER - database username of service 
+    POSTGRES_PASSWORD - database user´s password of service 
+    POSTGRES_DB - database name of service
+   
+The postgresql deployment requires mounting one volume linked to the directory created on the host::
+
+    postgres_cf_data:/var/lib/postgresql/data/ - This volume stores the database files
+
 **Running cornflow with simultaneous resolutions**
 
-For do this kind of deployment you can use the template ``docker-compose-cornflow-celery.yml``.
+For do this kind of deployment, you could use the template ``docker-compose-cornflow-celery.yml``.
 Airflow service allow you to run with CeleryExecutor. For more information, see `Basic Airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
+
+For running with CeleryExecutor is::
+
+    docker-compose up -f docker-compose-cornflow-celery.yml -d
+
+The number of ``workers``deployed depends on ``--scale``. For example, if number of workers needed is 2::
+
+    docker-compose up -f docker-compose-cornflow-celery.yml -d --scale worker=2
+
+If you are running cornflow with multiple workers, there are additional services that must be provided in your deployment::
+
+    airflow worker service
+    airflow flower service
+    redis message broker service
+
+New environment variables must also be taken into account for services running in Celery mode::
+
+
 
 Other deployment options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
