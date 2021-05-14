@@ -10,7 +10,12 @@ from flask_apispec import use_kwargs, doc
 from ..models import UserModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission, InvalidCredentials
+from ..shared.exceptions import (
+    InvalidUsage,
+    ObjectDoesNotExist,
+    NoPermission,
+    InvalidCredentials,
+)
 
 
 class SignUpEndpoint(Resource, MethodResource):
@@ -18,8 +23,8 @@ class SignUpEndpoint(Resource, MethodResource):
     Endpoint used to sign up to the cornflow web server.
     """
 
-    @doc(description='Sign up', tags=['Users'])
-    @use_kwargs(UserSignupRequest, location='json')
+    @doc(description="Sign up", tags=["Users"])
+    @use_kwargs(UserSignupRequest, location="json")
     def post(self, **kwargs):
         """
         API (POST) method to sign up to the cornflow webserver
@@ -28,9 +33,11 @@ class SignUpEndpoint(Resource, MethodResource):
           and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user_in_db = UserModel.get_one_user_by_email(kwargs.get('email'))
+        user_in_db = UserModel.get_one_user_by_email(kwargs.get("email"))
         if user_in_db:
-            raise InvalidCredentials(error='Email already in use, please supply another email address')
+            raise InvalidCredentials(
+                error="Email already in use, please supply another email address"
+            )
 
         user = UserModel(kwargs)
         user.save()
@@ -38,6 +45,8 @@ class SignUpEndpoint(Resource, MethodResource):
         try:
             token = Auth.generate_token(user.id)
         except Exception as e:
-            raise InvalidUsage(error='Error in generating user token: ' + str(e), status_code=400)
+            raise InvalidUsage(
+                error="Error in generating user token: " + str(e), status_code=400
+            )
 
-        return {'token': token}, 201
+        return {"token": token, "id": user.id}, 201

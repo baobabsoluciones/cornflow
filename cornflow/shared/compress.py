@@ -9,7 +9,7 @@ def compressed(f):
     @functools.wraps(f)
     def view_func(*args, **kwargs):
         def compressor(response):
-            compress = current_app.extensions['compress']
+            compress = current_app.extensions["compress"]
             return compress.after_request(response)
 
         after_this_request(compressor)
@@ -21,8 +21,9 @@ def compressed(f):
 
 def init_compress(flask_app):
     """Initialize flask_compress extension"""
-    flask_app.config["COMPRESS_REGISTER"] = False  # disable default compression of all eligible requests
+    flask_app.config[
+        "COMPRESS_REGISTER"
+    ] = False  # disable default compression of all eligible requests
 
     compress = Compress(app=flask_app)
-    flask_app.extensions['compress'] = compress
-
+    flask_app.extensions["compress"] = compress

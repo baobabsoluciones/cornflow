@@ -74,7 +74,7 @@ class MetaResource(Resource):
 
     def post_list(self, data):
         data = dict(data)
-        data['user_id'] = self.get_user_id()
+        data["user_id"] = self.get_user_id()
         item = self.model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
@@ -92,10 +92,10 @@ class MetaResource(Resource):
             raise ObjectDoesNotExist()
 
         data = dict(data)
-        data['user_id'] = self.get_user_id()
+        data["user_id"] = self.get_user_id()
         item.update(data)
 
-        return {'message': 'Updated correctly'}, 200
+        return {"message": "Updated correctly"}, 200
 
     def delete_detail(self, *args):
 
@@ -110,7 +110,7 @@ class MetaResource(Resource):
         if item:
             item.disable()
 
-        return {'message': 'The object has been deleted'}, 200
+        return {"message": "The object has been deleted"}, 200
 
     def check_permissions(self, user):
         if self.get_user().id != user:

@@ -154,6 +154,22 @@ airflow gui will be at::
 
     http://localhost:8080
 
+Killing airflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Search for the code of the process in Linux::
+
+    ps aux | grep airflow
+
+Kill it::
+
+    kill -9 CODE
+
+If you're feeling lucky::
+
+    kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
+
+
 Using cornflow with the python client
 ---------------------------------------
 
@@ -230,53 +246,108 @@ Retrieve the log of the solver::
     print(log['log'])
     # json format of the solver log
 
+Docker deployment for Cornflow App
+------------------------------------
+
+From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
+In this repository you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
+
+The docker-compose template yml files are writen in version '3' of the syntax and describes the build of this possible services::
+
+    cornflow application
+    postgres service for cornflow internal database
+    airflow webserver and scheduler service
+
+Since to run cornflow it is essential to have the airflow application, the docker-compose.yml file includes a deployment of said platform.
+
+**Before you begin**
+
+Follow these steps to install the necessary tools:
+
+1. Install `Docker Community Edition (CE) <https://docs.docker.com/engine/installation/>`_ on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.
+2. Install `Docker Compose <https://docs.docker.com/compose/install/>`_ and newer on your workstation.
+
+Older versions of docker-compose do not support all features required by docker-compose.yml file, so double check that it meets the minimum version requirements.
+
+**docker-compose.yml**
+
+To deploy cornflow on Docker Compose, you should fetch docker-compose.yml::
+
+    curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose.yml'
+
+Before starting cornflow for the first time, You need to prepare your environment, i.e. create the necessary files, directories and initialize the database.
+On Linux, the mounted volumes in container use the native Linux filesystem user/group permissions, so you have to make sure the container and host computer have matching file permissions::
+
+    mkdir -p ./airflow_config/dags
+    cp "yourpathtofilerequirements.txt" ./airflow_config/requirements.txt
+
+**Running cornflow**
+
+Now you can start all services::
+
+    docker-compose up -d
+
+Cornflow service available at http://localhost:5000
+Airflow service available at http://localhost:8080
+
+In the second terminal you can check the condition of the containers and make sure that no containers are in unhealthy condition::
+
+    docker ps
+
+**Stop and clean docker environment**
+
+Stop the docker services::
+
+    docker compose down
+
+Clean up all docker volumes::
+
+    docker volume prune -f
+
+Cornflow docker stack
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**Image build**
+
+The Dockerfile in `cornflow github project <https://github.com/baobabsoluciones/corn>`_ is builded from python3-slim-buster docker image.
+Installation path of cornflow app is ``/usr/src/app``.
+There is no docker volumes attached to deployment for cornflow app.
+
+**Environment variables**
+
+Main cornflow environment variables::
+
+    ADMIN_USER - cornflow root admin user
+    ADMIN_PWD - cornflow root admin pwd
+    AIRFLOW_USER - airflow admin user
+    AIRFLOW_PWD - airflow admin pwd
+    AIRFLOW_URL - airflow url service
+    CORNFLOW_URL - cornflow url service 
+    CORNFLOW_DB_CONN - postgresql connection for cornflow database
+    SECRET_KEY - encrypted key like fernet for keep data safe
+    FLASK_APP - python3 cornflow app (cornflow.app) 
+    FLASK_ENV - cornflow deployment environment
+
+**Entrypoint**
+
+If you are using the default entrypoint of the production image, it will execute initapp script wich use and initialize environment variables to work with postgresql and airflow defined in docker-compose.yml.
+The image entrypoint works as follows::
+
+    A new fernet secret key it will be generated.
+    Check cornflow postgresql database connection.
+    The migrations and upgrade of the database is executed on every deployment.
+    For the very first time will create the cornflow superuser.
+    Finally launch gunicorn server with 3 gevent workers.
+
+**Running cornflow with simultaneous resolutions**
+
+For do this kind of deployment you can use the template ``docker-compose-cornflow-celery.yml``.
+Airflow service allow you to run with CeleryExecutor. For more information, see `Basic Airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
+
 Other deployment options
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Deploying with docker-compose
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The docker-compose.yml file write in version '3' of the syntax describes the build of four docker containers::
-
-    app python3 cornflow service
-    airflow service based on puckel/docker-airflow image
-    cornflow postgres database service
-    airflow postgres database service
-
-Create containers::
-
-    docker-compose up --build -d
-	
-List containers::
-
-    docker-compose ps
-
-Interact with container::
-
-    docker exec -it CONTAINER_ID bash
-
-See the logs for a particular service (e.g., SERVICE=cornflow)::
-
-    docker-compose logs SERVICE
-
-Stop the containers::
-    
-    docker-compose down
-	
-destroy all container and images (be careful! this destroys all docker images of non running container)::
-
-    docker system prune -af
-
-Appended in this repository are three more docker-compose files for different kind of deployment::
-	
-    Use "docker-compose -f docker-compose-cornflow-celery.yml up -d" for deploy cornflow with airflow celery executor and one worker. If a larger number of workers are required, use --scale parameter of docker-compose.
-
-    Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
-
-    Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
-
-Running airflow with reverse proxy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Running airflow with reverse proxy**
 
 Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
 Eg.::
@@ -299,8 +370,7 @@ If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP
 
 More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
 
-Setup cornflow database with PostgreSQL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Setup cornflow database with PostgreSQL**
 
 You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
 
@@ -322,6 +392,35 @@ Create a new database::
 Finally, the environment variable needs to be changed::
 
     export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    
+**Connect to your own airflow deployment**
+
+Recommendations for production
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Recommended arguments customization**
+
+**Enforce security**
+
+**LDAP configuration**
+
+**SSL**
+
+Operations and logs
+~~~~~~~~~~~~~~~~~~~~~
+
+**Manage users**
+
+**Service log**
+    
+    - Cornflow log
+    
+    - Airflow log
+    
+    - Solver log
+
+Known problems
+~~~~~~~~~~~~~~~~
 
 **Possible error with psycopg2:**
 
