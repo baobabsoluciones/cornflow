@@ -382,6 +382,9 @@ The postgresql deployment requires mounting one volume linked to the directory c
 For do this kind of deployment, you could use the template ``docker-compose-cornflow-celery.yml``.
 Airflow service allow you to run with CeleryExecutor. For more information, see `Basic airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
 
+This type of deployment allows simultaneous execution of resolution jobs. For this, different machines are created with an airflow installation that communicate with the main server through a message broker. These machines are defined as ``workers``.
+You can deploy as many workers as you want, but taking into account that each parallel execution will consume hardware host resources.
+
 For running with CeleryExecutor is::
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d
@@ -398,10 +401,14 @@ If you are running cornflow with multiple workers, there are additional services
 
 New environment variables must also be taken into account for services running in Celery mode::
 
-    EXECUTOR - Airflow execution mode. You must enter as a value ``Celery``.
+    EXECUTOR - Airflow execution mode. In this case the value it should have is Celery.
     FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
 
 Flower service available at http://localhost:5555
+
+If you want to stop the docker services and remove all volumes::
+
+    docker-compose down -f docker-compose-cornflow-celery.yml --volumes --rmi all
 
 Other deployment options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
