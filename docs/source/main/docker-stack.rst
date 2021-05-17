@@ -249,10 +249,12 @@ Production Deployment
 It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself `production-ready <https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html>`_.
 
 Database backend
-****************+
+*****************
 
 Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
-You can change the backend using the following config `DATABASE_URL=postgres://myuser:myuserpwd@myserverip:5432/cornflow`
+You can change the backend using the following config::
+
+    DATABASE_URL=postgres://myuser:myuserpwd@myserverip:5432/cornflow
 
 SSL
 ******
@@ -260,7 +262,7 @@ SSL
 At the moment cornflow does not have built-in `SSL <https://en.wikipedia.org/wiki/Transport_Layer_Security>`_ support. You can use a reverse proxy service such as `Nginx <http://nginx.org/>`_ to give adequate security to the connection with your server.
 Please go to the `Nginx documentation page <http://nginx.org/en/docs/http/configuring_https_servers.html>`_ to correctly configure your server's certificates. 
 
-This is a Nginx configuration template (`/etc/nginx/conf.d/mysite.conf`) that we can use to configure the ssl encryption with the cornflow service::
+This is a Nginx configuration template (``/etc/nginx/conf.d/mysite.conf``) that we can use to configure the ssl encryption with the cornflow service::
 
     server {
        listen 443 ssl;
