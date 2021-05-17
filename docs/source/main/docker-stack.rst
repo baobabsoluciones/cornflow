@@ -4,11 +4,11 @@ Cornflow docker deployment
 From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
 In this repository you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
 
-The ``docker-compose.yml`` describes the build of this services::
+The ``docker-compose.yml`` describes the build of this services:
 
-    cornflow application
-    postgres service for cornflow internal database
-    airflow webserver and scheduler service
+#.cornflow application
+#.postgres service for cornflow internal database
+#.airflow webserver and scheduler service
 
 Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
 
@@ -17,8 +17,8 @@ Before you begin
 
 Follow these steps to install the necessary tools:
 
-1. Install `Docker Community Edition (CE) <https://docs.docker.com/engine/installation/>`_ on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.
-2. Install `Docker Compose <https://docs.docker.com/compose/install/>`_ and newer on your workstation.
+#.Install `Docker Community Edition (CE) <https://docs.docker.com/engine/installation/>`_ on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.
+#.Install `Docker Compose <https://docs.docker.com/compose/install/>`_ and newer on your workstation.
 
 Older versions of docker-compose do not support all features required by docker-compose.yml file, so double check that it meets the minimum version requirements.
 
@@ -72,6 +72,13 @@ You can customize certain environment variables after building the image. To bui
 
 Where my-image is the name you want to name it and my-tag is the tag you want to tag the image with.
 
+Official image build
+***********************
+
+The cornflow image is built from the Dockerfile file hosted in the official repository. The image is built from the new changes on the main development branch, creating an image with the label "latest"::
+
+    docker pull baobabsoluciones/cornflow:latest
+
 Environment variables
 ************************
 
@@ -94,16 +101,16 @@ Entrypoint
 If you are using the default entrypoint of the production image, it will execute ``initapp.sh`` script wich use and initialize environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
 The image entrypoint works as follows::
 
-    A new fernet secret key it will be generated.
-    Check cornflow postgresql database connection.
-    The migrations and upgrade of the database is executed on every deployment.
-    For the very first time will create the cornflow superuser.
-    Finally launch gunicorn server with 3 gevent workers.
+#.A new fernet secret key it will be generated.
+#.Check cornflow postgresql database connection.
+#.The migrations and upgrade of the database is executed on every deployment.
+#.For the very first time will create the cornflow superuser.
+#.Finally launch gunicorn server with 3 gevent workers.
 
 Airflow image personalized for cornflow
 ******************************************
 
-For this project we have created a custom Ariflow image that we will maintain for the life cycle of the Cornflow application.
+For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
 Airflow has different execution modes: `SecuentialExecutor`, `CeleryExecutor` and `KubernetesExecutor`. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
 By default is set on ``SequentialExecutor`` which allows you to perform resolutions sequentially. That is, when you enter a resolution, the next one is not executed until the previous one has finished.
 
@@ -142,7 +149,11 @@ Running cornflow with simultaneous resolutions
 --------------------------------------------------
 
 For do this kind of deployment, you could use the template ``docker-compose-cornflow-celery.yml``.
-Airflow service allow you to run with CeleryExecutor. For more information, see `Basic airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#architecture>`_.
+To deploy you should fetch docker-compose-cornflow-celery.yml::
+
+    curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-celery.yml'
+
+Airflow service allow you to run with CeleryExecutor. For more information, see `Basic airflow architecture <https://airflow.apache.org/docs/apache-airflow/stable/concepts.html>`_.
 
 This type of deployment allows simultaneous execution of resolution jobs. For this, different machines are created with an airflow installation that communicate with the main server through a message broker. These machines are defined as ``workers``.
 You can deploy as many workers as you want, but taking into account that each parallel execution will consume hardware host resources.
@@ -155,17 +166,18 @@ The number of ``workers`` deployed depends on ``--scale`` argument. For example,
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d --scale worker=2
 
-If you are running cornflow with multiple workers, there are additional services that must be provided in your deployment::
+If you are running cornflow with multiple workers, there are additional services that must be provided in your deployment:
 
-    airflow worker service
-    airflow flower service
-    redis message broker service
+#.airflow worker service
+#.airflow flower service
+#.redis message broker service
 
 New environment variables must also be taken into account for services running in Celery mode::
 
     EXECUTOR - Airflow execution mode. In this case the value it should have is Celery.
     FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
 
+Airflow service available at http://localhost:8080
 Flower service available at http://localhost:5555
 
 If you want to stop the docker services and remove all volumes::
@@ -197,52 +209,99 @@ If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP
 	[flower]
 	AIRFLOW__CELERY__FLOWER_URL_PREFIX=/myorg/flower
 
-More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
+More information in `airflow documentation page <https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html>`_
 
 Setup cornflow database with your own PostgreSQL server
 ***********************************************************
 
-You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
+Please visit the official `PostgreSQL <https://www.postgresql.org/docs/>`_ documentation page to learn more about this database engine.
 
-Create a new user::
+**Create user, password and database**
+
+To create a database, you must be a superuser. A user called postgres is made on and the user postgres has full superadmin access to entire PostgreSQL::
 
     sudo -u postgres psql
+    postgres=# create database cornflowdb;
+    postgres=# create user myuser with encrypted password 'myuserpwd';
+    postgres=# grant all privileges on database cornflowdb to myuser;
 
-Edit the password for the user ``postgres``::
+**Cornflow set connection to database**
 
-    ALTER USER postgres PASSWORD 'postgresadmin';
-    \q
+Before deploying Cornflow, set the environment variable with the address of the database::
 
-Create a new database::
-
-    sudo su - postgres
-    psql -c "create database cornflow"
-    exit
-
-Finally, the environment variable needs to be changed::
-
-    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
+    docker run -e DATABASE_URL=postgres://myuser:myuserpwd@myserverip:myserverport/cornflow -d --name=cornflow baobabsoluciones/cornflow
     
 Connect to your own airflow deployment
 *******************************************
 
+For do this kind of deployment, you could use the template ``docker-compose-cornflow-separate.yml``.
+To deploy you should fetch docker-compose-cornflow-separate.yml::
 
-Recommendations for production
----------------------------------
+    curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml'
 
-Recommended arguments customization
-***************************************
+Before deploying Cornflow, set the required airflow environment variables::
 
-Enforce security
-********************
+    docker run -e "AIRFLOW_USER=myairflowuser" -e "AIRFLOW_PWD=myairflowuserpwd" -e "AIRFLOW_URL=http://myairflowurl:8080" -e "AIRFLOW_CONN_CF_URI=http://mycornflowuser:mycornflowpassword@mycornflowurl" -d --name=cornflow baobabsoluciones/cornflow
 
-LDAP configuration
-**********************
+Production Deployment
+---------------------------
+
+It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself `production-ready <https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html>`_.
+
+Database backend
+****************+
+
+Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
+You can change the backend using the following config `DATABASE_URL=postgres://myuser:myuserpwd@myserverip:5432/cornflow`
 
 SSL
 ******
 
-Operations and logs
+At the moment cornflow does not have built-in `SSL <https://en.wikipedia.org/wiki/Transport_Layer_Security>`_ support. You can use a reverse proxy service such as `Nginx <http://nginx.org/>`_ to give adequate security to the connection with your server.
+Please go to the `Nginx documentation page <http://nginx.org/en/docs/http/configuring_https_servers.html>`_ to correctly configure your server's certificates. 
+
+This is a Nginx configuration template (`/etc/nginx/conf.d/mysite.conf`) that we can use to configure the ssl encryption with the cornflow service::
+
+    server {
+       listen 443 ssl;
+       server_name mycornflowsite.com;
+       location / {
+       rewrite ^/v1/(.*)$ /$1 break;
+         proxy_pass http://localhost:5000;
+         proxy_set_header Host $host;
+         proxy_redirect off;
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection "upgrade";
+       }
+	   ssl_certificate /pathtocertificate/mysite.crt;
+       ssl_certificate_key /pathtocertificatekey/mysite.key;
+       error_page 400 /400.json;
+       location /400.json {
+           return 400 '{"error":{"code":400,"message":"Bad Request"}}';
+       }
+       error_page 403 /403.json;
+       location /403.json {
+           return 403 '{"error":{"code":403,"message": "Forbidden"}}';
+       }
+       error_page 500 /500.json;
+       location /500.json {
+           return 500 '{"error":{"code":500,"message":"Internal Server Error"}}';
+       }
+    }
+
+Enforce security
+********************
+
+When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
+If you are running docker services in production, it is also convenient to use the `docker secret manager <https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose>`_.
+
+LDAP Authentication
+**********************
+
+In progress.
+
+Users and logging
 -----------------------
 
 Manage users
