@@ -111,10 +111,14 @@ The image entrypoint works as follows:
 #. For the very first time will create the cornflow superuser.
 #. Finally launch gunicorn server with 3 gevent workers.
 
-Airflow image personalized for cornflow
+Airflow personalized image for cornflow
 ******************************************
 
 For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
+The airflow personalized image is built from the Dockerfile file hosted in the official cornflow repository. The image is built from the new changes on the main development branch, creating an image with the label "latest"::
+
+    docker pull baobabsoluciones/docker-airflow:latest
+
 Airflow has different execution modes: `SecuentialExecutor`, `CeleryExecutor` and `KubernetesExecutor`. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
 By default is set on ``SequentialExecutor`` which allows you to perform resolutions sequentially. That is, when you enter a resolution, the next one is not executed until the previous one has finished.
 
