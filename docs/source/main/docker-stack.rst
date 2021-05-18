@@ -301,22 +301,36 @@ If you are running docker services in production, it is also convenient to use t
 LDAP Authentication
 **********************
 
-In progress.
+At the moment, cornflow does not support the integration of LDAP servers to manage the users of the application. Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
 
-Users and logging
+Access control
 -----------------------
 
-Manage users
-****************
+Cornflow supports multi-user access using password encryption authentication. In this section we will see how to create users, delete them or change the user´s access password.
 
-Logs
-*******
+Manage cornflow users
+***********************
+
+In progess.
+
+Manage airflow users
+***********************
+
+`Access Control of Airflow Webserver UI <https://airflow.apache.org/docs/apache-airflow/stable/security/access-control.html>`_ is handled by Flask AppBuilder (FAB). Please read its related security document regarding its `security model <http://flask-appbuilder.readthedocs.io/en/latest/security.html>`_.
+
+Logging and monitoring
+--------------------------
+
+In progess.
+
+Cornflow log
+***************
     
-    - Cornflow log
-    
-    - Airflow log
-    
-    - Solver log
+Airflow log
+************
+
+Worker log
+************
 
 Known problems
 ------------------
