@@ -22,21 +22,21 @@ import os
 
 
 default_args = {
-    'owner': 'baobab',
-    'depends_on_past': False,
-    'start_date': datetime(2020, 2, 1),
-    'email': [''],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retry_delay': timedelta(minutes=1),
-    'schedule_interval': None
+    "owner": "baobab",
+    "depends_on_past": False,
+    "start_date": datetime(2020, 2, 1),
+    "email": [""],
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retry_delay": timedelta(minutes=1),
+    "schedule_interval": None,
 }
 
 
 def get_schemas_from_file(_dir, dag_name):
-    with open(os.path.join(_dir, dag_name + '_input.json'), 'r') as f:
+    with open(os.path.join(_dir, dag_name + "_input.json"), "r") as f:
         instance = json.load(f)
-    with open(os.path.join(_dir, dag_name + '_output.json'), 'r') as f:
+    with open(os.path.join(_dir, dag_name + "_output.json"), "r") as f:
         solution = json.load(f)
     return instance, solution
 
@@ -79,13 +79,13 @@ def connect_to_cornflow(secrets):
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
-    uri = secrets.get_conn_uri('CF_URI')
+    uri = secrets.get_conn_uri("CF_URI")
     conn = urlparse(uri)
-    url = '{uri.scheme}://{uri.hostname}'.format(uri=conn)
+    url = "{uri.scheme}://{uri.hostname}".format(uri=conn)
     if conn.port:
-        url += ':{uri.port}'.format(uri=conn)
+        url += ":{uri.port}".format(uri=conn)
     if conn.path:
-        url += '{uri.path}/'.format(uri=conn)
+        url += "{uri.path}/".format(uri=conn)
     # TODO: delete this when migrated
     url2 = "http://{}:{}{}/".format(conn.hostname, conn.port, conn.path)
     try:
@@ -120,7 +120,7 @@ def try_to_save_error(client, exec_id, state=-1):
     Attempt at saving that the execution failed
     """
     try:
-        client.put_api_for_id('dag/', id=exec_id, payload=dict(state=state))
+        client.put_api_for_id("dag/", id=exec_id, payload=dict(state=state))
     except Exception as e:
         print("An exception trying to register the failed status: {}".format(e))
 
@@ -136,13 +136,12 @@ def try_to_write_solution(client, exec_id, payload):
     except CornFlowApiError:
         try_to_save_error(client, exec_id, -6)
         # attempt to update the execution with a failed status.
-        raise AirflowDagException('The writing of the solution failed')
+        raise AirflowDagException("The writing of the solution failed")
 
 
 def get_schema(dag_name):
-    _file = os.path.join(os.path.dirname(__file__),
-                         "{}_output.json".format(dag_name))
-    with open(_file, 'r') as f:
+    _file = os.path.join(os.path.dirname(__file__), "{}_output.json".format(dag_name))
+    with open(_file, "r") as f:
         schema = json.load(f)
     return schema
 
@@ -168,9 +167,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     except Exception as e:
         print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
-        raise AirflowDagException('There was an error during the solving')
-    payload = dict(state=1, log_json=log_json, log_text=log,
-                   solution_schema=dag_name)
+        raise AirflowDagException("There was an error during the solving")
+    payload = dict(state=1, log_json=log_json, log_text=log, solution_schema=dag_name)
     if not solution:
         # No solution found: we just send everything to cornflow.
         print("No solution found: we save what we have.")
@@ -181,7 +179,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     # If it's not: we change the status to Invalid
     # and take out the server validation of the schema\
     # TODO: not sure if this idea makes sense
-    payload['data'] = solution
+    payload["data"] = solution
     print("A solution was found: we will first validate it")
     # try:
     #     schema = get_schema(dag_name)
