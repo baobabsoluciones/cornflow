@@ -10,13 +10,11 @@ The ``docker-compose.yml`` describes the build of this services:
 #. postgresql server for cornflow and airflow internal database
 #. airflow webserver and scheduler server
 
-Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
-
 .. _cornflow_docker_stack:
 
 .. figure:: ./../_static/cornflow_docker_stack.png
 
-   Components with the connections between them
+   Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
 
 Before you begin
 --------------------
