@@ -10,7 +10,6 @@ from .dictSchema import DictSchema
 
 
 class SchemaManager:
-
     def __init__(self, schema, validator=Draft7Validator):
         """
         Class to help create and manage data schema.
@@ -25,21 +24,21 @@ class SchemaManager:
     def from_filepath(cls, path):
         """
         Load a json schema from a json file.
-        
+
         :param path the file path
-        
+
         return The SchemaManager instance
         """
 
         schema = cls.load_json(path)
         return cls(schema)
-    
+
     def get_jsonschema(self):
         """
         Return a copy of the stored jsonschema.
         """
         return deepcopy(self.jsonschema)
-    
+
     def get_validation_errors(self, data):
         """
         Validate json data according to the loaded jsonschema and return a list of errors.
@@ -58,7 +57,7 @@ class SchemaManager:
             error_list = [e for e in v.iter_errors(data)]
             return error_list
         return []
-    
+
     def validate_data(self, data, print_errors=False):
         """
         Validate json data according to the loaded jsonschema.
@@ -69,13 +68,13 @@ class SchemaManager:
         :return: True if data format is valid, else False.
         """
         errors_list = self.get_validation_errors(data)
-        
+
         if print_errors:
             for e in errors_list:
                 print(e)
-        
+
         return len(errors_list) == 0
-    
+
     def get_file_errors(self, path):
         """
         Get json file errors according to the loaded jsonschema.
@@ -88,14 +87,14 @@ class SchemaManager:
         """
         data = self.load_json(path)
         return self.get_validation_errors(data)
-    
+
     def validate_file(self, path, print_errors=False):
         """
         Validate a json file according to the loaded jsonschema.
-        
+
         :param path the file path
         :param print_errors: If true, will print the errors.
-        
+
         :return: True if the data is valid and False if it is not.
         """
         data = self.load_json(path)
@@ -104,9 +103,9 @@ class SchemaManager:
     def to_dict_schema(self):
         """
         Transform a jsonschema into a dictionary format
-        
+
         :return: The schema dictionary
-        """ 
+        """
 
         return self.to_schema_dict_obj().get_schema()
 
@@ -124,7 +123,7 @@ class SchemaManager:
     def to_marshmallow(self):
         """
         Create marshmallow schemas
-        
+
         :return: a dict containing the flask marshmallow schemas
         :rtype: Schema()
         """
@@ -139,25 +138,25 @@ class SchemaManager:
         :return: nothing
         """
         self.save_json(self.to_dict_schema(), path)
-    
+
     def draft_schema_from(self, path, save_path=None):
         """
         Create a draft jsonschema from a json file of data.
-        
+
         :param path: path to the json file.
         :param save_path: path where to save the generated schema.
-        
+
         :return: the generated schema.
         """
         file = self.load_json(path)
-        
+
         builder = SchemaBuilder()
         builder.add_schema({"type": "object", "properties": {}})
         builder.add_object(file)
-        
+
         draft_schema = builder.to_json()
         if save_path is not None:
-            with open(save_path, 'w') as outfile:
+            with open(save_path, "w") as outfile:
                 outfile.write(draft_schema)
         return draft_schema
 
@@ -173,47 +172,54 @@ class SchemaManager:
         }
 
         """
-        master_table_name = '_README'
+        master_table_name = "_README"
         example = dict(integer=1, string="string")
         tables = {master_table_name: []}
-        for key, value in self.jsonschema['properties'].items():
+        for key, value in self.jsonschema["properties"].items():
             if key.startswith("$"):
                 continue
-            description = value.get('description', "")
+            description = value.get("description", "")
             # update the master table of tables:
             tables[master_table_name].append(dict(name=key, description=description))
             # several cases here:
-            if value['type'] == 'object':
+            if value["type"] == "object":
                 # two columns: key-value in two columns
-                properties = value['properties']
-                tables[key] = [dict(key=k, value=example[v['type']]) for k, v in properties.items()]
+                properties = value["properties"]
+                tables[key] = [
+                    dict(key=k, value=example[v["type"]]) for k, v in properties.items()
+                ]
                 continue
             # we're here, we're probably in an array
-            assert value['type'] == 'array'
-            items = value['items']
-            if items['type'] != 'object':
+            assert value["type"] == "array"
+            items = value["items"]
+            if items["type"] != "object":
                 # only one column with name
-                tables[key] = [example[items['type']]]
+                tables[key] = [example[items["type"]]]
                 continue
             # here is a regular table:
-            props = items['properties']
+            props = items["properties"]
             # if there are array of single values, we flatten them into one column:
-            p_arrays = {k: v['items'] for k, v in props.items()
-                        if v['type']=='array' and v['items']['type'] != 'object'}
+            p_arrays = {
+                k: v["items"]
+                for k, v in props.items()
+                if v["type"] == "array" and v["items"]["type"] != "object"
+            }
             # if a column is an array of objects: we flatten the object into several columns
-            p_arrays_objects = {'{}.{}'.format(k, kk): vv['items'] for k, v in props.items()
-                                if v['type'] == 'array' and v['items']['type'] == 'object'
-                                for kk, vv in v['items']['properties'].items()
-                                }
+            p_arrays_objects = {
+                "{}.{}".format(k, kk): vv["items"]
+                for k, v in props.items()
+                if v["type"] == "array" and v["items"]["type"] == "object"
+                for kk, vv in v["items"]["properties"].items()
+            }
             # the rest of columns stay the same
-            p_no_array = {k: v for k, v in props.items() if v['type'] != 'array'}
+            p_no_array = {k: v for k, v in props.items() if v["type"] != "array"}
             props = {**p_arrays, **p_no_array, **p_arrays_objects}
-            required = items['required']
+            required = items["required"]
             rm_keys = props.keys() - set(required)
             # order is: first required in order, then the rest:
-            one_line = {k: example[props[k]['type']] for k in required}
+            one_line = {k: example[props[k]["type"]] for k in required}
             for k in rm_keys:
-                one_line[k] = example[props[k]['type']]
+                one_line[k] = example[props[k]["type"]]
             tables[key] = [one_line]
         return tables
 
@@ -232,7 +238,7 @@ class SchemaManager:
 
     @staticmethod
     def save_json(data, path):
-        with open(path, 'w') as outfile:
+        with open(path, "w") as outfile:
             json.dump(data, outfile)
 
     """

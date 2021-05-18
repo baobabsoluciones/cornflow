@@ -2,25 +2,30 @@
 Constants values used in schemas functions.
 """
 
-STRING_TYPE = 'String'
-BOOLEAN_TYPE = 'Boolean'
-INTEGER_TYPE = 'Integer'
-FLOAT_TYPE = 'Float'
+STRING_TYPE = "String"
+BOOLEAN_TYPE = "Boolean"
+INTEGER_TYPE = "Integer"
+FLOAT_TYPE = "Float"
 BASIC_TYPES = [STRING_TYPE, BOOLEAN_TYPE, INTEGER_TYPE, FLOAT_TYPE]
 
-JSON_TYPES = {"string": STRING_TYPE, "number": FLOAT_TYPE, "integer": INTEGER_TYPE, "null": None,
-              "boolean": BOOLEAN_TYPE}
+JSON_TYPES = {
+    "string": STRING_TYPE,
+    "number": FLOAT_TYPE,
+    "integer": INTEGER_TYPE,
+    "null": None,
+    "boolean": BOOLEAN_TYPE,
+}
 
 DATASCHEMA = "DataSchema"
 
-INSTANCE_SCHEMA = 'instance'
-SOLUTION_SCHEMA = 'solution'
-CONFIG_SCHEMA = 'config'
+INSTANCE_SCHEMA = "instance"
+SOLUTION_SCHEMA = "solution"
+CONFIG_SCHEMA = "config"
 
 
 class InvalidUsage(Exception):
     status_code = 400
-    error = 'Unknown error'
+    error = "Unknown error"
 
     def __init__(self, error=None, status_code=None, payload=None):
         Exception.__init__(self)
@@ -32,7 +37,7 @@ class InvalidUsage(Exception):
 
     def to_dict(self):
         rv = dict(self.payload or ())
-        rv['error'] = self.error
+        rv["error"] = self.error
         return rv
 
 

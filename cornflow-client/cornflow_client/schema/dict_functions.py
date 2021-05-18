@@ -1,6 +1,12 @@
 from marshmallow import Schema, fields, INCLUDE
 from functools import partial
-from cornflow_client.constants import BOOLEAN_TYPE, STRING_TYPE, INTEGER_TYPE, FLOAT_TYPE, BASIC_TYPES
+from cornflow_client.constants import (
+    BOOLEAN_TYPE,
+    STRING_TYPE,
+    INTEGER_TYPE,
+    FLOAT_TYPE,
+    BASIC_TYPES,
+)
 
 
 class ParameterSchema(Schema):
@@ -49,18 +55,20 @@ def gen_schema(cls_name, params, possible_dict=None):
         # p is a dictionary
         # we copy since we do not want to modify the original
         p = dict(p)
-        p_type = p.pop('type')
+        p_type = p.pop("type")
         field_type = get_type(p_type, possible_dict=possible_dict)
-        if p.get('many') and p_type in BASIC_TYPES:
+        if p.get("many") and p_type in BASIC_TYPES:
             # if this is a list: we need to make an explicit list
             field_type = partial(fields.List, field_type)
         if p_type in BASIC_TYPES:
             # basic types do not support the "many" argument, apparently
-            p.pop('many', None)
+            p.pop("many", None)
         valid_values = p.pop("valid_values", None)
-        name = p.pop('name')
+        name = p.pop("name")
         if valid_values is not None:
-            dict_fields[name] = field_type(validate=partial(validator, valid_values), **p)
+            dict_fields[name] = field_type(
+                validate=partial(validator, valid_values), **p
+            )
         else:
             dict_fields[name] = field_type(**p)
     schema = type(cls_name, (Schema,), dict_fields)
@@ -84,7 +92,7 @@ def sort_dict(dict_params):
     check = set(BASIC_TYPES)
     while len(backup):
         key, el = backup[count]
-        at_least_unseen_dependency = [ell for ell in el if ell['type'] not in check]
+        at_least_unseen_dependency = [ell for ell in el if ell["type"] not in check]
         if not len(at_least_unseen_dependency):
             order[key] = pos
             backup.pop(count)
@@ -95,8 +103,10 @@ def sort_dict(dict_params):
             fails += 1
             count += 1
         if fails and fails == len(backup):
-            raise ValueError('sort_dict: Issue with the input dictionary.'
-                             ' There may be schemas types which are not defined')
+            raise ValueError(
+                "sort_dict: Issue with the input dictionary."
+                " There may be schemas types which are not defined"
+            )
         # restart
         if count == len(backup):
             count = 0
