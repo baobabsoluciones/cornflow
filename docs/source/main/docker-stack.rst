@@ -6,9 +6,9 @@ In this repository you can find various templates for `docker-compose <https://d
 
 The ``docker-compose.yml`` describes the build of this services:
 
-#.cornflow application
-#.postgres service for cornflow internal database
-#.airflow webserver and scheduler service
+#. cornflow application server
+#. postgresql server for cornflow internal database
+#. airflow webserver and scheduler server
 
 Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
 
@@ -17,8 +17,8 @@ Before you begin
 
 Follow these steps to install the necessary tools:
 
-#.Install `Docker Community Edition (CE) <https://docs.docker.com/engine/installation/>`_ on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.
-#.Install `Docker Compose <https://docs.docker.com/compose/install/>`_ and newer on your workstation.
+#. Install `Docker Community Edition (CE) <https://docs.docker.com/engine/installation/>`_ on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.
+#. Install `Docker Compose <https://docs.docker.com/compose/install/>`_ and newer on your workstation.
 
 Older versions of docker-compose do not support all features required by docker-compose.yml file, so double check that it meets the minimum version requirements.
 
@@ -99,13 +99,13 @@ Entrypoint
 *************
 
 If you are using the default entrypoint of the production image, it will execute ``initapp.sh`` script wich use and initialize environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
-The image entrypoint works as follows::
+The image entrypoint works as follows:
 
-#.A new fernet secret key it will be generated.
-#.Check cornflow postgresql database connection.
-#.The migrations and upgrade of the database is executed on every deployment.
-#.For the very first time will create the cornflow superuser.
-#.Finally launch gunicorn server with 3 gevent workers.
+#. A new fernet secret key it will be generated.
+#. Check cornflow postgresql database connection.
+#. The migrations and upgrade of the database is executed on every deployment.
+#. For the very first time will create the cornflow superuser.
+#. Finally launch gunicorn server with 3 gevent workers.
 
 Airflow image personalized for cornflow
 ******************************************
@@ -166,11 +166,11 @@ The number of ``workers`` deployed depends on ``--scale`` argument. For example,
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d --scale worker=2
 
-If you are running cornflow with multiple workers, there are additional services that must be provided in your deployment:
+If you are running cornflow with multiple workers, there are additional resources that must be provided in your deployment:
 
-#.airflow worker service
-#.airflow flower service
-#.redis message broker service
+#. airflow worker machines
+#. airflow flower server
+#. redis message broker server
 
 New environment variables must also be taken into account for services running in Celery mode::
 
@@ -322,15 +322,6 @@ Logging and monitoring
 --------------------------
 
 In progess.
-
-Cornflow log
-***************
-    
-Airflow log
-************
-
-Worker log
-************
 
 Known problems
 ------------------
