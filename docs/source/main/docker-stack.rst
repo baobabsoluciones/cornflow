@@ -13,7 +13,6 @@ The ``docker-compose.yml`` describes the build of this services:
 .. _cornflow_docker_stack:
 
 .. figure:: ./../_static/cornflow_docker_stack.png
-
    Since to run cornflow it is essential to have the airflow application, the ``docker-compose.yml`` file includes a deployment of said platform.
 
 Before you begin
@@ -166,7 +165,12 @@ Airflow service allow you to run with CeleryExecutor. For more information, see 
 This type of deployment allows simultaneous execution of resolution jobs. For this, different machines are created with an airflow installation that communicate with the main server through a message broker. These machines are defined as ``workers``.
 You can deploy as many workers as you want, but taking into account that each parallel execution will consume hardware host resources.
 
-For running with CeleryExecutor is::
+.. _cornflow_celery_docker_stack:
+
+.. figure:: ./../_static/cornflow_celery_docker_stack.png
+    Demonstration of the cornflow service with three instances of simultaneous execution communicating through redis.
+
+For running with CeleryExecutor execute this command::
 
     docker-compose up -f docker-compose-cornflow-celery.yml -d
 
