@@ -60,7 +60,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :return: a list of objects with the data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return InstanceModel.get_all_objects(self.get_user(), **kwargs)
+        return self.model.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
     @Auth.auth_required

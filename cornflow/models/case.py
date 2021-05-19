@@ -1,5 +1,16 @@
+"""
+
+"""
+
+
+# Import from libraries
+from sqlalchemy.dialects.postgresql import JSON
+
+# Import from internal modules
 from cornflow.models.meta_model import BaseDataModel
 from cornflow.shared.utils import db
+
+from cornflow.shared.utils import hash_json_256
 
 # Originally inspired by this:
 # https://docs.sqlalchemy.org/en/13/_modules/examples/materialized_paths/materialized_paths.html
@@ -35,6 +46,8 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
+    solution = db.Column(JSON, nullable=True)
+    solution_hash = db.Column(db.String(256), nullable=False)
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
@@ -77,8 +90,11 @@ class CaseModel(BaseDataModel):
             # we compose the path with its parent
             self.path = parent.path + str(parent.id) + SEPARATOR
 
+        self.solution = data.get("solution", None)
+        self.solution_hash = hash_json_256(self.solution)
+
     def __repr__(self):
-        return "<Case {}>".format(self.id)
+        return "<Case {}. Path: {}>".format(self.id, self.path)
 
     def move_to(self, new_parent):
         new_path = new_parent.path + str(new_parent.id) + SEPARATOR

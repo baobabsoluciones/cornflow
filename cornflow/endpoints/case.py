@@ -3,53 +3,46 @@ External endpoints to manage the instances: create new ones, or get all the inst
 or get only one.
 These endpoints have different access url, but manage the same data entities
 """
+
 # Import from libraries
-from flask import request, current_app
-from werkzeug.utils import secure_filename
-from marshmallow.exceptions import ValidationError
-from flask_apispec.views import MethodResource
+from cornflow_client.airflow.api import get_schema, validate_and_continue
+from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
-import os
-import pulp
+from flask_apispec.views import MethodResource
+from flask_inflate import inflate
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import InstanceModel
-from ..schemas.model_json import DataSchema
+from ..models import CaseModel, ExecutionModel, InstanceModel
+from ..schemas.case import CaseBase, CaseFromInstanceExecution, CaseRawData, CaseSchema
 from ..schemas.instance import (
-    InstanceSchema,
-    InstanceEndpointResponse,
     InstanceDetailsEndpointResponse,
-    InstanceDataEndpointResponse,
     InstanceRequest,
-    InstanceEditRequest,
-    InstanceFileRequest,
     QueryFiltersInstance,
 )
+from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage
-from cornflow_client.airflow.api import get_schema, validate_and_continue
-from ..shared.compress import compressed
-from flask_inflate import inflate
+from ..shared.exceptions import InvalidData
+
 
 #
 
 
-class CaseEndpoint(MetaResource, MethodResource):
+class CaseListEndpoint(MetaResource, MethodResource):
     """
-    Endpoint used to create a new instance or get all the instances and their related information
+    Endpoint used to create a new case or get all the cases and their related information
     """
 
     def __init__(self):
         super().__init__()
-        self.model = InstanceModel
+        self.model = CaseModel
         self.query = InstanceModel.get_all_objects
         self.primary_key = "id"
 
     @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
     # @marshal_with(InstanceEndpointResponse(many=True))
-    # @use_kwargs(QueryFiltersInstance, location='json')
+    @use_kwargs(QueryFiltersInstance, location="json")
     def get(self, **kwargs):
         """
         API (GET) method to get all directory structure of cases for the user
@@ -59,7 +52,7 @@ class CaseEndpoint(MetaResource, MethodResource):
         :return: a dictionary with a tree structure of the cases and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return None
+        return CaseModel.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
     @Auth.auth_required
@@ -94,6 +87,147 @@ class CaseEndpoint(MetaResource, MethodResource):
 
         # if we're here, we validated and the data seems to fit the schema
         return self.post_list(kwargs)
+
+
+class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
+    """
+    Endpoint used to create a new case from an already existing instance and execution
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = CaseModel
+        self.query = self.model.get_all_objects
+        self.primary_key = "id"
+        self.map_instance_fields = {"data": "data", "schema": "schema"}
+        self.map_execution_fields = {"solution": "data"}
+
+    @doc(description="Create a new case from instance and execution", tags=["Cases"])
+    @Auth.auth_required
+    @inflate
+    @marshal_with(CaseBase)
+    @use_kwargs(CaseFromInstanceExecution, location="json")
+    def post(self, **kwargs):
+        """ """
+        instance_id = kwargs.get("instance_id", None)
+        execution_id = kwargs.get("execution_id", None)
+
+        data = {
+            "name": kwargs.get("name", ""),
+            "description": kwargs.get("description", ""),
+            "path": kwargs.get("path", ""),
+        }
+
+        if instance_id is not None and execution_id is not None:
+            raise InvalidData(
+                error="Send only instance or execution id", status_code=400
+            )
+
+        elif instance_id is not None:
+            instance = InstanceModel.get_one_object_from_user(
+                self.get_user(), instance_id
+            )
+
+            instance_data = {
+                key: getattr(instance, value)
+                for key, value in self.map_instance_fields.items()
+            }
+
+            data = {**data, **instance_data}
+
+        elif execution_id is not None:
+            execution = ExecutionModel.get_one_object_from_user(
+                self.get_user(), kwargs.get("execution_id", None)
+            )
+
+            instance = InstanceModel.get_one_object_from_user(
+                self.get_user(), execution.instance_id
+            )
+
+            execution_data = {
+                key: getattr(execution, value)
+                for key, value in self.map_execution_fields.items()
+            }
+
+            instance_data = {
+                key: getattr(instance, value)
+                for key, value in self.map_instance_fields.items()
+            }
+
+            data = {**data, **instance_data, **execution_data}
+
+        return self.post_list(data)
+
+
+class CaseFromInstance(MetaResource, MethodResource):
+    """
+    Endpoint used to create a new case from an already existing instance
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = CaseModel
+        self.query = self.model.get_all_objects
+        self.primary_key = "id"
+
+
+class CaseFromRawEndpoint(MetaResource, MethodResource):
+    """
+    Endpoint used to create a new case from raw database
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = CaseModel
+        self.query = self.model.get_all_objects
+        self.primary_key = "id"
+
+    @doc(description="Create a new case from raw data", tags=["Cases"])
+    @Auth.auth_required
+    @inflate
+    @marshal_with(CaseBase)
+    @use_kwargs(CaseRawData, location="json")
+    def post(self, **kwargs):
+        """ """
+        return self.post_list(kwargs)
+
+
+class CaseCopyEndpoint(MetaResource, MethodResource):
+    """
+    Copies the case to a new case. Original case id goes in the url
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = CaseModel
+        self.query = self.model.get_all_objects
+        self.primary_key = "id"
+        self.fields_to_copy = [
+            "name",
+            "description",
+            "data",
+            "schema",
+            "solution",
+            "path",
+        ]
+        self.fields_to_modify = ["name"]
+
+    @doc(description="Copies a case to a new one", tags=["Cases"])
+    @Auth.auth_required
+    @inflate
+    @marshal_with(CaseBase)
+    @use_kwargs(CaseSchema, location="json")
+    def post(self, **kwargs):
+        """ """
+        case = self.model.get_one_object_from_user(self.get_user(), kwargs.get("id"))
+        data = case.__dict__
+        payload = dict()
+        for key in data.keys():
+            if key in self.fields_to_copy:
+                payload[key] = data[key]
+            if key in self.fields_to_modify:
+                payload[key] = "Copy_" + payload[key]
+        return self.post_list(payload)
 
 
 class InstanceDetailsEndpointBase(MetaResource, MethodResource):

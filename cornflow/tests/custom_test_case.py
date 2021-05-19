@@ -13,6 +13,14 @@ class CustomTestCase(TestCase):
         app = create_app("testing")
         return app
 
+    @staticmethod
+    def load_file(_file, fk=None, fk_id=None):
+        with open(_file) as f:
+            temp = json.load(f)
+        if fk is not None and fk_id is not None:
+            temp[fk] = fk_id
+        return temp
+
     def setUp(self):
         db.create_all()
         data = {
@@ -35,7 +43,7 @@ class CustomTestCase(TestCase):
         self.user = Auth.return_user_from_token(self.token)
         self.url = None
         self.model = None
-        self.response_items = set()
+        self.copied_items = set()
         self.items_to_check = []
 
     @staticmethod
