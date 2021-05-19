@@ -53,6 +53,12 @@ In the second terminal you can check the condition of the containers and make su
 
     docker ps
 
+    CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS                    PORTS                                                           NAMES
+    10863a20e7d6   baobabsoluciones/cornflow         "./initapp.sh"           16 minutes ago   Up 16 minutes             0.0.0.0:5000->5000/tcp, :::5000->5000/tcp                       corn_cornflow_1
+    0cfdd4debaab   baobabsoluciones/docker-airflow   "/initairflow.sh web…"   16 minutes ago   Up 16 minutes (healthy)   5555/tcp, 8793/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   corn_webserver_1
+    9bc91747cd37   postgres                          "docker-entrypoint.s…"   16 minutes ago   Up 16 minutes             5432/tcp                                                        corn_airflow_db_1
+    c477c235b199   postgres                          "docker-entrypoint.s…"   16 minutes ago   Up 16 minutes             5432/tcp                                                        corn_cornflow_db_1
+
 Stop and clean docker environment
 ***********************************
 
