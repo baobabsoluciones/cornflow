@@ -190,6 +190,7 @@ New environment variables must also be taken into account for services running i
 
     EXECUTOR - Airflow execution mode. In this case the value it should have is Celery.
     FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
+    AIRFLOW__CELERY__BROKER_URL - CeleryExecutor drives the need for a Celery broker, here Redis is used.
 
 Airflow service available at http://localhost:8080
 Flower service available at http://localhost:5555
@@ -312,6 +313,12 @@ Enforce security
 When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the `docker secret manager <https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose>`_.
 
+It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key::
+
+    REDIS_PASSWORD="myredispassword"
+
+Flower has by default a `basic authentication <https://flower.readthedocs.io/en/latest/auth.html>`_ shared with the airflow server in the deployment.
+
 LDAP Authentication
 **********************
 
@@ -325,11 +332,23 @@ Cornflow supports multi-user access using password encryption authentication. In
 Manage cornflow users
 ***********************
 
-In progess.
+In the cornflow image, if no environment variables are set, an admin user is created with these credentials::
+
+    name - user@cornflow.com
+    password - cornflow1234
+
+It is advisable to change the default admin user and keep the password in a safe place.
+It is only possible to create new cornflow administrator users using another user with those privileges.
 
 Manage airflow users
 ***********************
 
+The default administrator user for airflow and flower will be::
+
+    name - admin
+    password - admin
+
+It is advisable to change the default admin user and keep the password in a safe place.
 `Access Control of Airflow Webserver UI <https://airflow.apache.org/docs/apache-airflow/stable/security/access-control.html>`_ is handled by Flask AppBuilder (FAB). Please read its related security document regarding its `security model <http://flask-appbuilder.readthedocs.io/en/latest/security.html>`_.
 
 Logging and monitoring
