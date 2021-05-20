@@ -282,9 +282,16 @@ To deploy you should fetch docker-compose-cornflow-separate.yml::
 
     curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml'
 
-Before deploying Cornflow, set the required airflow environment variables::
+Before deploying Cornflow, set the required airflow environment variables. For example with a file named ``.env.airflow`` ::
 
-    docker run -e "AIRFLOW_USER=myairflowuser" -e "AIRFLOW_PWD=myairflowuserpwd" -e "AIRFLOW_URL=http://myairflowurl:8080" -e "AIRFLOW_CONN_CF_URI=http://mycornflowuser:mycornflowpassword@mycornflowurl" -d --name=cornflow baobabsoluciones/cornflow
+    AIRFLOW_USER=myairflowuser
+    AIRFLOW_PWD=myairflowuserpwd
+    AIRFLOW_URL=http://myairflowurl:8080
+    AIRFLOW_CONN_CF_URI=http://mycornflowuser:mycornflowpassword@mycornflowurl
+
+Then execute this::
+
+    docker-compose -f docker-compose-cornflow-separate.yml --env-file .env.airflow up -d
 
 Production Deployment
 ---------------------------
@@ -360,13 +367,21 @@ Cornflow supports multi-user access using password encryption authentication. In
 Manage cornflow users
 ***********************
 
-In the cornflow image, if no environment variables are set, an admin user is created with these credentials::
+In the cornflow image, if no environment variables are set, a super-admin user is created with these credentials::
 
     name - user@cornflow.com
     password - cornflow1234
 
-It is advisable to change the default admin user and keep the password in a safe place.
-It is only possible to create new cornflow administrator users using another user with those privileges.
+It is advisable to change the default super-admin user and keep the password in a safe place.
+
+To create a user, you must interact with the cornflow application through an `endpoint of its API <https://baobabsoluciones.github.io/corn/dev/endpoints.html#module-cornflow.endpoints.user>`_
+It is only possible to create new cornflow admin user using another one with those privileges.
+
+In cornflow there is a differentiation between three user roles with different characteristics::
+
+    super-admin - This user can manage the rest of cornflow users and also has access to make changes to the airflow platform
+    admin - This user can manage the rest of the cornflow users but does not have privileged access to the airflow service
+    user - The general user of cornflow can create jobs and send models to solve
 
 Manage airflow users
 ***********************
@@ -382,7 +397,53 @@ It is advisable to change the default admin user and keep the password in a safe
 Logging and monitoring
 --------------------------
 
-In progess.
+Cornflow logs
+****************
+
+At the moment cornflow does not have a log storage folder. All application logs are written to console output. In this way we can visualize them by launching the following command::
+
+    docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
+
+Airflow logs
+****************
+
+Airflow supports a variety of logging and monitoring mechanisms as shown on it´s `documentation page <https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/index.html#logging-monitoring>`_.
+
+Scheduler log
+^^^^^^^^^^^^^^^^
+
+The logs are stored in the logs folder within the ``$AIRFLOW_HOME`` directory.
+
+First we navigate to where the log file is::
+    docker exec -it `docker ps -q --filter name=scheduler` bash -c "ls -l ${AIRFLOW_HOME}logs/scheduler/latest/"
+    -rw-r--r-- 1 airflow airflow 1377544 May 20 10:04 dag_timer.py.log
+    -rw-r--r-- 1 airflow airflow 1168103 May 20 10:03 graph_coloring.py.log
+    -rw-r--r-- 1 airflow airflow 1454702 May 20 10:04 hk_2020_dag.py.log
+    -rw-r--r-- 1 airflow airflow 1370681 May 20 10:03 optim_dag.py.log
+    -rw-r--r-- 1 airflow airflow 1495255 May 20 10:03 update_all_schemas.py.log
+
+Worker logs
+^^^^^^^^^^^^^^^^
+
+As in the rest of airflow services, the logs are stored in the logs folder within the ``$AIRFLOW_HOME``directory.
+The logs are divided into folders with the name of the DAGs and into subfolders with their execution dates.
+
+If we want to view logs with a command, here things get a bit complicated since we can have different workers deployed, with different DAGs. We must help ourselves with the linux bash commands to filter the search as much as possible. Let's say we want to review today logs of the DAG ``update_all_squemas`` in every worker::
+
+    for id in `docker ps -q --filter name=worker_`; do docker exec -it $id bash -c "tail ${AIRFLOW_HOME}logs/update_all_schemas/update_all_schemas/$(date +%Y-%m-%d)*/*.log";done;
+
+    [2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - looking for apps in dir=/usr/local/airflow/dags
+    [2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - Files are: ['graph_coloring.py', 'update_all_schemas.py', '__init__.py', 'graph_coloring_output.json', 'hk_2020_dag.py', 'dag_timer.py', 'graph_coloring_input.json', '__pycache__', 'optim_dag.py']
+    [2021-05-19 17:37:28,149] {logging_mixin.py:104} WARNING - /usr/local/airflow/.local/lib/python3.8/site-packages/hackathonbaobab2020/execution/__init__.py:7 UserWarning: To use the benchmark functions, you need to install the benchmark dependencies:
+    `pip install hackathonbaobab2020[benchmark]`
+    [2021-05-19 17:37:28,251] {logging_mixin.py:104} INFO - Found the following apps: ['graph_coloring', 'hk_2020_dag', 'timer', 'solve_model_dag']
+    [2021-05-19 17:37:28,571] {python.py:118} INFO - Done. Returned value was: None
+    [2021-05-19 17:37:28,588] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=update_all_schemas, task_id=update_all_schemas, execution_date=20210518T173709, start_date=20210519T173726, end_date=20210519T173728
+    [2021-05-19 17:37:28,629] {taskinstance.py:1246} INFO - 0 downstream tasks scheduled from follow-on schedule check
+    [2021-05-19 17:37:28,654] {local_task_job.py:146} INFO - Task exited with return code 0
+    'logs/update_all_schemas/update_all_schemas/2021-05-18*/*.log': No such file or directory
+
+Note that we can get an error of the type (``No such file or directory``) because that log does not exist in all workers.
 
 Known problems
 ------------------
