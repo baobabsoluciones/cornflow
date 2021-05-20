@@ -417,7 +417,7 @@ The logs are stored in the logs folder within the ``$AIRFLOW_HOME`` directory.
 The scheduler logs are named after the DAGs handled by the service. Navigate to where the log file is::
 
     docker exec -it `docker ps -q --filter name=scheduler` bash -c "ls -l ${AIRFLOW_HOME}logs/scheduler/latest/"
-    
+
     -rw-r--r-- 1 airflow airflow 1377544 May 20 10:04 dag_timer.py.log
     -rw-r--r-- 1 airflow airflow 1168103 May 20 10:03 graph_coloring.py.log
     -rw-r--r-- 1 airflow airflow 1454702 May 20 10:04 hk_2020_dag.py.log
@@ -446,6 +446,19 @@ If we want to view logs with a command, here things get a bit complicated since 
     'logs/update_all_schemas/update_all_schemas/2021-05-18*/*.log': No such file or directory
 
 Note that we can get an error of the type (``No such file or directory``) because that log does not exist in all workers.
+
+Monitoring
+*************
+
+Cornflow monitoring
+^^^^^^^^^^^^^^^^^^^^^
+
+You can prepare a json to send to any cornflow API endpoint and get a status 200 to check the health of the service.
+
+Airflow monitoring
+^^^^^^^^^^^^^^^^^^^^^
+
+To check the `health status of your Airflow instance <https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html#checking-airflow-health-status>`_, you can simply access the endpoint /health. It will return a JSON object in which a high-level glance is provided.
 
 Known problems
 ------------------
