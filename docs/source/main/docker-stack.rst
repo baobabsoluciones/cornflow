@@ -414,8 +414,10 @@ Scheduler log
 
 The logs are stored in the logs folder within the ``$AIRFLOW_HOME`` directory.
 
-First we navigate to where the log file is::
+The scheduler logs are named after the DAGs handled by the service. Navigate to where the log file is::
+
     docker exec -it `docker ps -q --filter name=scheduler` bash -c "ls -l ${AIRFLOW_HOME}logs/scheduler/latest/"
+    
     -rw-r--r-- 1 airflow airflow 1377544 May 20 10:04 dag_timer.py.log
     -rw-r--r-- 1 airflow airflow 1168103 May 20 10:03 graph_coloring.py.log
     -rw-r--r-- 1 airflow airflow 1454702 May 20 10:04 hk_2020_dag.py.log
