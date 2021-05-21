@@ -246,6 +246,35 @@ Retrieve the log of the solver::
     print(log['log'])
     # json format of the solver log
 
+
+Running tests and coverage
+------------------------------
+
+Then you have to run the following commands::
+
+    export FLASK_ENV=testing
+
+Finally you can run all the tests with the following command::
+
+    python -m unittest discover -s cornflow.tests
+
+If you want to only run the unit tests (without a local airflow webserver)::
+
+    python -m unittest discover -s cornflow.tests.unit
+
+If you want to only run the integration test with a local airflow webserver::
+
+    python -m unittest discover -s cornflow.tests.integration
+
+After if you want to check the coverage report you need to run::
+
+    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
+    coverage report -m
+
+or to get the html reports::
+
+    coverage html
+
 Other deployment options
 --------------------------
 
@@ -346,31 +375,3 @@ The installation of the psycopg2 may generate an error because it does not find 
 One way to solve this problem is to previously install libpq-dev which installs pg_config::
 
     sudo apt install libpq-dev
-
-Running tests and coverage
-------------------------------
-
-Then you have to run the following commands::
-
-    export FLASK_ENV=testing
-
-Finally you can run all the tests with the following command::
-
-    python -m unittest discover -s cornflow.tests
-
-If you want to only run the unit tests (without a local airflow webserver)::
-
-    python -m unittest discover -s cornflow.tests.unit
-
-If you want to only run the integration test with a local airflow webserver::
-
-    python -m unittest discover -s cornflow.tests.integration
-
-After if you want to check the coverage report you need to run::
-
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
-    coverage report -m
-
-or to get the html reports::
-
-    coverage html
