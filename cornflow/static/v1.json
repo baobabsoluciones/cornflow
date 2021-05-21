@@ -108,6 +108,10 @@
     "ExecutionDataEndpointResponse": {
       "properties": {
         "data": {}, 
+        "data_hash": {
+          "readOnly": true, 
+          "type": "string"
+        }, 
         "id": {
           "type": "string"
         }, 
@@ -123,6 +127,10 @@
           "$ref": "#/definitions/Config"
         }, 
         "created_at": {
+          "type": "string"
+        }, 
+        "data_hash": {
+          "readOnly": true, 
           "type": "string"
         }, 
         "description": {
@@ -159,6 +167,10 @@
     }, 
     "ExecutionLogEndpointResponse": {
       "properties": {
+        "data_hash": {
+          "readOnly": true, 
+          "type": "string"
+        }, 
         "id": {
           "type": "string"
         }, 
@@ -198,6 +210,10 @@
     }, 
     "ExecutionStatusEndpointResponse": {
       "properties": {
+        "data_hash": {
+          "readOnly": true, 
+          "type": "string"
+        }, 
         "id": {
           "type": "string"
         }, 
@@ -240,6 +256,9 @@
     "InstanceDataEndpointResponse": {
       "properties": {
         "data": {}, 
+        "data_hash": {
+          "type": "string"
+        }, 
         "id": {
           "type": "string"
         }, 
@@ -255,6 +274,9 @@
     "InstanceDetailsEndpointResponse": {
       "properties": {
         "created_at": {
+          "type": "string"
+        }, 
+        "data_hash": {
           "type": "string"
         }, 
         "description": {
@@ -292,6 +314,9 @@
     "InstanceEndpointResponse": {
       "properties": {
         "created_at": {
+          "type": "string"
+        }, 
+        "data_hash": {
           "type": "string"
         }, 
         "description": {
@@ -513,47 +538,6 @@
       }, 
       "type": "object"
     }, 
-    "QueryFilters": {
-      "properties": {
-        "creation_date_gte": {
-          "format": "date-time", 
-          "type": "string"
-        }, 
-        "creation_date_lte": {
-          "format": "date-time", 
-          "type": "string"
-        }, 
-        "limit": {
-          "type": "integer"
-        }, 
-        "offset": {
-          "type": "integer"
-        }
-      }, 
-      "type": "object"
-    }, 
-    "QueryFiltersExecution": {
-      "properties": {
-        "creation_date_gte": {
-          "format": "date-time", 
-          "type": "string"
-        }, 
-        "creation_date_lte": {
-          "format": "date-time", 
-          "type": "string"
-        }, 
-        "data_schema": {
-          "type": "string"
-        }, 
-        "limit": {
-          "type": "integer"
-        }, 
-        "offset": {
-          "type": "integer"
-        }
-      }, 
-      "type": "object"
-    }, 
     "UserDetailsEndpointResponse": {
       "properties": {
         "admin": {
@@ -577,6 +561,9 @@
           "type": "string"
         }, 
         "name": {
+          "type": "string"
+        }, 
+        "password": {
           "type": "string"
         }
       }, 
@@ -702,12 +689,36 @@
         "description": "Get all executions", 
         "parameters": [
           {
-            "in": "body", 
-            "name": "body", 
+            "in": "query", 
+            "name": "limit", 
             "required": false, 
-            "schema": {
-              "$ref": "#/definitions/QueryFiltersExecution"
-            }
+            "type": "integer"
+          }, 
+          {
+            "in": "query", 
+            "name": "offset", 
+            "required": false, 
+            "type": "integer"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_gte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_lte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "in": "query", 
+            "name": "data_schema", 
+            "required": false, 
+            "type": "string"
           }
         ], 
         "responses": {
@@ -904,12 +915,30 @@
         "description": "Get all instances", 
         "parameters": [
           {
-            "in": "body", 
-            "name": "body", 
+            "in": "query", 
+            "name": "limit", 
             "required": false, 
-            "schema": {
-              "$ref": "#/definitions/QueryFilters"
-            }
+            "type": "integer"
+          }, 
+          {
+            "in": "query", 
+            "name": "offset", 
+            "required": false, 
+            "type": "integer"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_gte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_lte", 
+            "required": false, 
+            "type": "string"
           }
         ], 
         "responses": {
@@ -1212,14 +1241,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }
