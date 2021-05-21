@@ -1,4 +1,4 @@
-cornflow-client>=0.0.5
-orloge>=0.13
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow-client@master
+orloge @ git+https://github.com/pchtsp/orloge@master
 PuLP>=2.3
 pandas>=1.0
