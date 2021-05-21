@@ -4,7 +4,6 @@ from cornflow_client.constants import JSON_TYPES, DATASCHEMA
 
 
 class DictSchema:
-
     def __init__(self, jsonschema):
         """
         Class to manage internal dictionary schema
@@ -21,7 +20,11 @@ class DictSchema:
         if "properties" in jsonschema:
             for item in jsonschema["properties"].items():
                 self._get_element_dict(schema_dict=schema_dict, item=item)
-                self._create_data_schema(schema_dict=schema_dict, item=item, required_list=jsonschema.get('required'))
+                self._create_data_schema(
+                    schema_dict=schema_dict,
+                    item=item,
+                    required_list=jsonschema.get("required"),
+                )
         self.schema = schema_dict
 
     def get_schema(self):
@@ -47,10 +50,12 @@ class DictSchema:
         if required_list is None:
             required_list = []
 
-        schema = dict(name=name,
-                       type=self._get_type_or_new_schema(item),
-                       many=("type" in content and content["type"] == "array"),
-                       required=name in required_list)
+        schema = dict(
+            name=name,
+            type=self._get_type_or_new_schema(item),
+            many=("type" in content and content["type"] == "array"),
+            required=name in required_list,
+        )
         schema_dict[DATASCHEMA].append(schema)
 
         return schema
@@ -74,7 +79,7 @@ class DictSchema:
                     "name": name,
                     "type": self._get_ref(item),
                     "many": False,
-                    "required": (name in required_list)
+                    "required": (name in required_list),
                 }
             else:
                 print("\nType missing for item: {}".format(name))
@@ -85,7 +90,7 @@ class DictSchema:
                 "name": name,
                 "type": self._get_object_schema(schema_dict=schema_dict, item=item),
                 "many": False,
-                "required": (name in required_list)
+                "required": (name in required_list),
             }
         elif content["type"] == "array":
             return {
@@ -114,10 +119,16 @@ class DictSchema:
         """
         name, content = item
         schema_name = self._get_new_schema_name(schema_dict=schema_dict, name=name)
-        ell = \
-            {schema_name: [self._get_element_dict(schema_dict=schema_dict, item=i,
-                                                  required_list=self._get_required(content))
-                           for i in content["properties"].items()]}
+        ell = {
+            schema_name: [
+                self._get_element_dict(
+                    schema_dict=schema_dict,
+                    item=i,
+                    required_list=self._get_required(content),
+                )
+                for i in content["properties"].items()
+            ]
+        }
         schema_dict.update(ell)
         return schema_name
 
@@ -137,13 +148,20 @@ class DictSchema:
         :return: The schema name
         """
         name, content = item
-        content = content['items']
+        content = content["items"]
         schema_name = self._get_new_schema_name(schema_dict=schema_dict, name=name)
         if "type" in content and content["type"] == "object":
             schema_dict.update(
-                {schema_name: [self._get_element_dict(schema_dict=schema_dict, item=i,
-                                                      required_list=self._get_required(content))
-                               for i in content["properties"].items()]}
+                {
+                    schema_name: [
+                        self._get_element_dict(
+                            schema_dict=schema_dict,
+                            item=i,
+                            required_list=self._get_required(content),
+                        )
+                        for i in content["properties"].items()
+                    ]
+                }
             )
         elif "$ref" in content:
             schema_name = self._get_ref((None, content))
@@ -151,9 +169,17 @@ class DictSchema:
             return self._get_type(content["type"])
         else:
             schema_dict.update(
-                {schema_name: [self._get_element_dict(schema_dict=schema_dict, item=i,
-                                                      required_list=self._get_required(content)) for i in
-                               content.items()]})
+                {
+                    schema_name: [
+                        self._get_element_dict(
+                            schema_dict=schema_dict,
+                            item=i,
+                            required_list=self._get_required(content),
+                        )
+                        for i in content.items()
+                    ]
+                }
+            )
         return schema_name
 
     def _get_field_dict(self, item, required_list=None):
@@ -172,7 +198,8 @@ class DictSchema:
             type=self._get_type(item[1]["type"]),
             required=(item[0] in required_list),
             allow_none=("null" in item[1]["type"]),
-            many=False)
+            many=False,
+        )
         return d
 
     def _get_ref(self, item):
@@ -195,12 +222,12 @@ class DictSchema:
         returns a new schema or a type depending on the json_type
         """
         name, content = item
-        if 'type' not in content or content["type"] == 'object':
+        if "type" not in content or content["type"] == "object":
             return self._get_schema_name(name)
-        elif content["type"] == 'array':
-            return self._get_type_or_new_schema((name, content['items']))
+        elif content["type"] == "array":
+            return self._get_type_or_new_schema((name, content["items"]))
         else:
-            return self._get_type(content['type'])
+            return self._get_type(content["type"])
 
     def _get_type(self, json_type):
         """
@@ -239,7 +266,9 @@ class DictSchema:
         try_name = self._get_schema_name(name, n)
 
         if try_name in schema_dict:
-            return self._get_new_schema_name(schema_dict=schema_dict, name=name, n=n + 1)
+            return self._get_new_schema_name(
+                schema_dict=schema_dict, name=name, n=n + 1
+            )
         else:
             return try_name
 

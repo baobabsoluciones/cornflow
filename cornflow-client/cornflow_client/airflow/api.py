@@ -9,78 +9,87 @@ from cornflow_client.constants import AirflowError, InvalidUsage
 
 
 class Airflow(object):
-
     def __init__(self, url, user, pwd):
-        self.url = url + '/api/v1'
+        self.url = url + "/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
 
     def is_alive(self):
         try:
-            response = requests.get(self.url + '/health')
+            response = requests.get(self.url + "/health")
         except (ConnectionError, HTTPError):
             return False
         try:
             data = response.json()
         except json.JSONDecodeError:
             return False
-        return data['metadatabase']['status'] == 'healthy' and \
-               data['scheduler']['status'] == 'healthy'
+        return (
+            data["metadatabase"]["status"] == "healthy"
+            and data["scheduler"]["status"] == "healthy"
+        )
 
     def request_headers_auth(self, status=200, **kwargs):
-        def_headers =\
-            {'Content-type': 'application/json',
-                   'Accept': 'application/json'}
-        headers = kwargs.get('headers', def_headers)
+        def_headers = {"Content-type": "application/json", "Accept": "application/json"}
+        headers = kwargs.get("headers", def_headers)
         response = requests.request(headers=headers, auth=self.auth, **kwargs)
         if status is None:
             return response
         if response.status_code != status:
-            raise AirflowError(error=response.text,
-                               status_code=response.status_code)
+            raise AirflowError(error=response.text, status_code=response.status_code)
         return response
 
-    def consume_dag_run(self, dag_name, payload, dag_run_id=None, method='POST'):
+    def consume_dag_run(self, dag_name, payload, dag_run_id=None, method="POST"):
         url = "{}/dags/{}/dagRuns".format(self.url, dag_name)
         if dag_run_id is not None:
-            url = url + '/{}'.format(dag_run_id)
+            url = url + "/{}".format(dag_run_id)
         response = self.request_headers_auth(method=method, url=url, json=payload)
         return response
 
     def set_dag_run_state(self, dag_name, payload):
         url = "{}/dags/{}/updateTaskInstancesState".format(self.url, dag_name)
-        return self.request_headers_auth(method='POST', url=url, json=payload)
+        return self.request_headers_auth(method="POST", url=url, json=payload)
 
-    def run_dag(self, execution_id, dag_name='solve_model_dag'):
+    def run_dag(self, execution_id, dag_name="solve_model_dag"):
         conf = dict(exec_id=execution_id)
         payload = dict(conf=conf)
-        return self.consume_dag_run(dag_name, payload=payload, method='POST')
+        return self.consume_dag_run(dag_name, payload=payload, method="POST")
 
     def get_dag_run_status(self, dag_name, dag_run_id):
-        return self.consume_dag_run(dag_name, payload=None, dag_run_id=dag_run_id, method='GET')
+        return self.consume_dag_run(
+            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+        )
 
     def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
         # here, two calls have to be done:
         # first we get information on the dag_run
-        dag_run = self.consume_dag_run(dag_name, payload=None, dag_run_id=dag_run_id, method='GET')
+        dag_run = self.consume_dag_run(
+            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+        )
         dag_run_data = dag_run.json()
         # then, we use the "executed_date" to build a call to the change state api
         # TODO: We assume the solving task is named as is parent dag!
-        payload = dict(dry_run=False, include_downstream=True, include_future=False, include_past=False,
-                       include_upstream=True, new_state=new_status, task_id=dag_name,
-                       execution_date=dag_run_data['execution_date'])
+        payload = dict(
+            dry_run=False,
+            include_downstream=True,
+            include_future=False,
+            include_past=False,
+            include_upstream=True,
+            new_state=new_status,
+            task_id=dag_name,
+            execution_date=dag_run_data["execution_date"],
+        )
         return self.set_dag_run_state(dag_name, payload=payload)
 
     def get_all_dag_runs(self, dag_name):
-        return self.consume_dag_run(dag_name=dag_name, payload=None, method='GET')
+        return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
-    def get_dag_info(self, dag_name, method='GET'):
+    def get_dag_info(self, dag_name, method="GET"):
         url = "{}/dags/{}".format(self.url, dag_name)
         return self.request_headers_auth(method=method, url=url)
 
     def get_one_variable(self, variable):
         url = "{}/variables/{}".format(self.url, variable)
-        response = self.request_headers_auth(method='GET', url=url)
-        return response.json()['value']
+        response = self.request_headers_auth(method="GET", url=url)
+        return response.json()["value"]
 
     def get_one_schema(self, dag_name, schema):
         response = self.get_schemas_for_dag_name(dag_name)
@@ -90,13 +99,17 @@ class Airflow(object):
         return json.loads(self.get_one_variable(dag_name))
 
 
-def get_schema(config, dag_name, schema='instance'):
+def get_schema(config, dag_name, schema="instance"):
     """
     Gets a schema by name from airflow server. We use the variable api.
     We transform the jsonschema into a marshmallow class
 
     """
-    airflow_conf = dict(url=config['AIRFLOW_URL'], user=config['AIRFLOW_USER'], pwd=config['AIRFLOW_PWD'])
+    airflow_conf = dict(
+        url=config["AIRFLOW_URL"],
+        user=config["AIRFLOW_USER"],
+        pwd=config["AIRFLOW_PWD"],
+    )
     af_client = Airflow(**airflow_conf)
     if not af_client.is_alive():
         raise AirflowError(error="Airflow is not accessible")
@@ -116,9 +129,8 @@ def validate_and_continue(obj, data):
     try:
         validate = obj.load(data)
     except ValidationError as e:
-        raise InvalidUsage(error='Bad data format: {}'.format(e))
-    err = ''
+        raise InvalidUsage(error="Bad data format: {}".format(e))
+    err = ""
     if validate is None:
-        raise InvalidUsage(error='Bad data format: {}'.format(err))
+        raise InvalidUsage(error="Bad data format: {}".format(err))
     return validate
-

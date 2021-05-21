@@ -17,7 +17,6 @@ from functools import partial, wraps
 
 
 class CornFlow(object):
-
     def __init__(self, url, token=None):
         self.url = url
         self.token = token
@@ -46,45 +45,49 @@ class CornFlow(object):
     # def expect_200(func):
     #     return partial(expect_status, status=200)
 
-    def api_for_id(self, api, id, method, post_url='', **kwargs):
-        if post_url and post_url[-1] != '/':
-            post_url += '/'
-        url = urljoin(urljoin(self.url, api) + '/', str(id) + '/' + post_url)
+    def api_for_id(self, api, id, method, post_url="", **kwargs):
+        if post_url and post_url[-1] != "/":
+            post_url += "/"
+        url = urljoin(urljoin(self.url, api) + "/", str(id) + "/" + post_url)
         return requests.request(
             method=method,
             url=url,
-            headers={'Authorization': 'access_token ' + self.token},
+            headers={"Authorization": "access_token " + self.token},
             **kwargs
         )
 
     @ask_token
-    def get_api_for_id(self, api, id, post_url='', **kwargs):
-        return self.api_for_id(api=api, id=id, post_url=post_url, **kwargs, method='get')
+    def get_api_for_id(self, api, id, post_url="", **kwargs):
+        return self.api_for_id(
+            api=api, id=id, post_url=post_url, **kwargs, method="get"
+        )
 
     @ask_token
     def delete_api_for_id(self, api, id, **kwargs):
-        return self.api_for_id(api=api, id=id, **kwargs, method='delete')
+        return self.api_for_id(api=api, id=id, **kwargs, method="delete")
 
     @ask_token
     def put_api_for_id(self, api, id, payload, **kwargs):
-        return self.api_for_id(api=api, id=id, json=payload, method='put', **kwargs)
+        return self.api_for_id(api=api, id=id, json=payload, method="put", **kwargs)
 
     @ask_token
     def post_api_for_id(self, api, id, **kwargs):
-        return self.api_for_id(api=api, id=id, method='post', **kwargs)
+        return self.api_for_id(api=api, id=id, method="post", **kwargs)
 
     @ask_token
     def create_api(self, api, **kwargs):
         return requests.post(
             urljoin(self.url, api),
-            headers={'Authorization': 'access_token ' + self.token},
-            **kwargs)
+            headers={"Authorization": "access_token " + self.token},
+            **kwargs
+        )
 
     @log_call
     def sign_up(self, email, pwd, name):
         return requests.post(
-            urljoin(self.url, 'signup/'),
-            json={"email": email, "password": pwd, "name": name})
+            urljoin(self.url, "signup/"),
+            json={"email": email, "password": pwd, "name": name},
+        )
 
     @log_call
     def is_alive(self):
@@ -96,145 +99,193 @@ class CornFlow(object):
 
     def login(self, email, pwd):
         response = requests.post(
-            urljoin(self.url, 'login/'),
-            json={"email": email, "password": pwd})
+            urljoin(self.url, "login/"), json={"email": email, "password": pwd}
+        )
         if response.status_code == 200:
             result = response.json()
-            self.token = result['token']
+            self.token = result["token"]
             return result
         else:
-            raise CornFlowApiError("Login failed with status code: {}: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Login failed with status code: {}: {}".format(
+                    response.status_code, response.text
+                )
+            )
 
     # TODO: those status_code checks should be done via a decorator. But I do not know how.
     @ask_token
     @log_call
-    def create_instance(self, data, name=None, description='', data_schema='pulp'):
+    def create_instance(self, data, name=None, description="", data_schema="pulp"):
         if name is None:
             try:
-                name = data['parameters']['name']
+                name = data["parameters"]["name"]
             except IndexError:
-                raise CornFlowApiError('The `name` argument needs to be filled')
-        payload = dict(data=data, name=name, description=description, data_schema=data_schema)
-        response = self.create_api('instance/', json=payload)
+                raise CornFlowApiError("The `name` argument needs to be filled")
+        payload = dict(
+            data=data, name=name, description=description, data_schema=data_schema
+        )
+        response = self.create_api("instance/", json=payload)
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @ask_token
     @log_call
-    def create_instance_file(self, filename, name, description='', minimize=True):
-        with open(filename, 'rb') as file:
-            response = self.create_api('instancefile/',
-                                       data=dict(name=name, description=description, minimize=minimize),
-                                       files=dict(file=file))
+    def create_instance_file(self, filename, name, description="", minimize=True):
+        with open(filename, "rb") as file:
+            response = self.create_api(
+                "instancefile/",
+                data=dict(name=name, description=description, minimize=minimize),
+                files=dict(file=file),
+            )
 
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @log_call
     @ask_token
-    def create_execution(self, instance_id, config, name='test1', description='', dag_name='solve_model_dag'):
-        payload = dict(config=config, instance_id=instance_id, name=name, description=description, dag_name = dag_name)
-        response = self.create_api('execution/', json=payload)
+    def create_execution(
+        self,
+        instance_id,
+        config,
+        name="test1",
+        description="",
+        dag_name="solve_model_dag",
+    ):
+        payload = dict(
+            config=config,
+            instance_id=instance_id,
+            name=name,
+            description=description,
+            dag_name=dag_name,
+        )
+        response = self.create_api("execution/", json=payload)
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @ask_token
     def get_data(self, execution_id):
-        response = self.get_api_for_id(api='dag/', id=execution_id)
+        response = self.get_api_for_id(api="dag/", id=execution_id)
         return response.json()
 
     @ask_token
     def write_solution(self, execution_id, **kwargs):
-        response = self.put_api_for_id('dag/', id=execution_id, payload=kwargs)
+        response = self.put_api_for_id("dag/", id=execution_id, payload=kwargs)
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @log_call
     @ask_token
     def stop_execution(self, execution_id):
-        response = self.post_api_for_id(api='execution/', id=execution_id)
+        response = self.post_api_for_id(api="execution/", id=execution_id)
         if response.status_code != 200:
-            raise CornFlowApiError("Expected a code 200, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 200, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @ask_token
     def manual_execution(self, instance_id, config, name, **kwargs):
         payload = dict(config=config, instance_id=instance_id, name=name, **kwargs)
-        response = self.create_api('dag/', json=payload)
+        response = self.create_api("dag/", json=payload)
         if response.status_code != 201:
-            raise CornFlowApiError("Expected a code 201, got a {} error instead: {}".
-                                   format(response.status_code, response.text))
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
         return response.json()
 
     @log_call
     @ask_token
     def get_results(self, execution_id):
-        response = self.get_api_for_id(api='execution/', id=execution_id)
+        response = self.get_api_for_id(api="execution/", id=execution_id)
         return response.json()
 
     @log_call
     @ask_token
     def get_status(self, execution_id):
-        response = self.get_api_for_id(api='execution/', id=execution_id, post_url='status')
+        response = self.get_api_for_id(
+            api="execution/", id=execution_id, post_url="status"
+        )
         return response.json()
 
     @log_call
     @ask_token
     def get_log(self, execution_id):
-        response = self.get_api_for_id(api='execution/', id=execution_id, post_url='log')
+        response = self.get_api_for_id(
+            api="execution/", id=execution_id, post_url="log"
+        )
         return response.json()
 
     @log_call
     @ask_token
     def get_solution(self, execution_id):
-        response = self.get_api_for_id(api='execution/', id=execution_id, post_url='data')
+        response = self.get_api_for_id(
+            api="execution/", id=execution_id, post_url="data"
+        )
         return response.json()
 
     @log_call
     @ask_token
     def get_all_instances(self):
-        response = requests.get(urljoin(self.url, 'instance/'),
-                                headers={'Authorization': 'access_token ' + self.token},
-                                json={})
+        response = requests.get(
+            urljoin(self.url, "instance/"),
+            headers={"Authorization": "access_token " + self.token},
+            json={},
+        )
         return response.json()
 
     @log_call
     @ask_token
     def get_all_users(self):
-        return requests.get(urljoin(self.url, 'user/'),
-                            headers={'Authorization': 'access_token ' + self.token},
-                            json={})
+        return requests.get(
+            urljoin(self.url, "user/"),
+            headers={"Authorization": "access_token " + self.token},
+            json={},
+        )
 
     @log_call
     @ask_token
     def get_one_user(self, user_id):
-        return self.get_api_for_id(api='user', id=user_id)
+        return self.get_api_for_id(api="user", id=user_id)
 
     @log_call
     @ask_token
     def get_one_instance(self, reference_id):
-        response = self.get_api_for_id(api='instance', id=reference_id)
+        response = self.get_api_for_id(api="instance", id=reference_id)
         return response.json()
 
     @log_call
     @ask_token
     def delete_one_instance(self, reference_id):
-        response = self.delete_api_for_id(api='instance', id=reference_id)
+        response = self.delete_api_for_id(api="instance", id=reference_id)
         return response
 
     @ask_token
     def get_schema(self, dag_name):
-        response = self.get_api_for_id(api='schema', id=dag_name)
+        response = self.get_api_for_id(api="schema", id=dag_name)
         return response.json()
 
 
@@ -242,12 +293,15 @@ class CornFlowApiError(Exception):
     """
     CornFlow returns an error
     """
+
     pass
 
 
-def arg_to_value(some_string, replace_underscores_with_spaces=False, force_number=False):
+def arg_to_value(
+    some_string, replace_underscores_with_spaces=False, force_number=False
+):
     if replace_underscores_with_spaces:
-        some_string = re.sub(pattern=r'_', repl=r' ', string=some_string)
+        some_string = re.sub(pattern=r"_", repl=r" ", string=some_string)
     if some_string[0] == "'" and some_string[-1] == "'":
         # this means its a string, no need to continue
         return some_string[1:-1]
@@ -267,11 +321,11 @@ def get_tuple_from_root(rest: str, **kwargs):
         # it matches exactly, no index.
         raise CornFlowApiError("There is not rest: there is just one variable")
 
-    if rest[0] == '(':
+    if rest[0] == "(":
         # key is a tuple.
-        args = re.split(',_?', rest[1:-1])
-        kwargs = {**kwargs, 'force_number':True}
-        new_args = [arg_to_value(arg, **kwargs) for arg in args if arg != '']
+        args = re.split(",_?", rest[1:-1])
+        kwargs = {**kwargs, "force_number": True}
+        new_args = [arg_to_value(arg, **kwargs) for arg in args if arg != ""]
         return tuple(new_args)
     # key is a single value
     return arg_to_value(rest, **kwargs)
@@ -289,12 +343,13 @@ def group_variables_by_name(_vars, names_list, **kwargs):
     __vars = {k: {} for k in names_list}
     for root in names_list:
         # 1. match root name to variables
-        candidates = {name: obj for name, obj in _vars.items() if
-                      name.startswith(root)}
+        candidates = {name: obj for name, obj in _vars.items() if name.startswith(root)}
         # 2 extract and store said variables
         try:
-            __vars[root] = {get_tuple_from_root(name[len(root)+1:], **kwargs): obj
-                            for name, obj in candidates.items()}
+            __vars[root] = {
+                get_tuple_from_root(name[len(root) + 1 :], **kwargs): obj
+                for name, obj in candidates.items()
+            }
         except CornFlowApiError:
             __vars[root] = list(candidates.values())[0]
         # 3. take out from list
