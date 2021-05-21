@@ -253,6 +253,17 @@
       ], 
       "type": "object"
     }, 
+    "HealthResponse": {
+      "properties": {
+        "airflow_status": {
+          "type": "string"
+        }, 
+        "cornflow_status": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
     "InstanceDataEndpointResponse": {
       "properties": {
         "data": {}, 
@@ -907,6 +918,23 @@
         }, 
         "tags": [
           "Executions"
+        ]
+      }
+    }, 
+    "/health/": {
+      "get": {
+        "description": "Health check", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/HealthResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Health"
         ]
       }
     }, 
