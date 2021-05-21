@@ -86,6 +86,14 @@ class CornFlow(object):
             urljoin(self.url, 'signup/'),
             json={"email": email, "password": pwd, "name": name})
 
+    @log_call
+    def is_alive(self):
+        response = requests.get(urljoin(self.url, 'health/'))
+        if response.status_code == 200:
+            return response.json()
+        raise CornFlowApiError("Connection failed with status code: {}: {}".
+                               format(response.status_code, response.text))
+
     def login(self, email, pwd):
         response = requests.post(
             urljoin(self.url, 'login/'),
