@@ -19,8 +19,13 @@ class InvalidCredentials(InvalidUsage):
 
 
 class EndpointNotImplemented(InvalidUsage):
-    error = "Endpoint not implemented"
     status_code = 501
+    error = "Endpoint not implemented"
+
+
+class InvalidData(InvalidUsage):
+    status_code = 400
+    error = "The data sent is not valid"
 
 
 def _initialize_errorhandlers(app):

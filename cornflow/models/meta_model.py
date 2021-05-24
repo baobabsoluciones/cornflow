@@ -45,6 +45,7 @@ class BaseDataModel(TraceAttributes):
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     data_hash = db.Column(db.String(256), nullable=False)
+    schema = db.Column(db.String(256), nullable=True)
 
     @declared_attr
     def user_id(cls):
@@ -56,7 +57,31 @@ class BaseDataModel(TraceAttributes):
         self.data_hash = hash_json_256(self.data)
         self.name = data.get("name")
         self.description = data.get("description")
+        self.schema = data.get("schema")
         super().__init__()
+
+    def save(self):
+        """
+        Saves the object to the database
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, data):
+        """
+        Updates the object in the database and automatically updates the updated_at field
+        :param dict data:  A dictionary containing the updated data for the execution
+        """
+        for key, item in data.items():
+            setattr(self, key, item)
+        super().update(data)
+
+    def delete(self):
+        """
+        Deletes an object permanently from the data base
+        """
+        db.session.delete(self)
+        db.session.commit()
 
     @classmethod
     def get_all_objects(
@@ -101,7 +126,7 @@ class BaseDataModel(TraceAttributes):
         Query to get one object from the user and the id.
 
         :param UserModel user: user object performing the query
-        :param str idx: ID from the object to get
+        :param str or int idx: ID from the object to get
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """

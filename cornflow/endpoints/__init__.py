@@ -22,6 +22,13 @@ from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
 from .schemas import SchemaEndpoint
 from .health import HealthEndpoint
+from .case import (
+    CaseListEndpoint,
+    CaseFromInstanceExecutionEndpoint,
+    CaseFromRawEndpoint,
+    CaseCopyEndpoint,
+    CaseDetailsEndpoint,
+)
 
 
 resources = [
@@ -77,4 +84,13 @@ resources = [
     dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
     dict(resource=SchemaEndpoint, urls="/schema/<string:dag_name>/", endpoint="schema"),
     dict(resource=HealthEndpoint, urls="/health/", endpoint="health"),
+dict(
+        resource=CaseFromInstanceExecutionEndpoint,
+        urls="/case/instance/",
+        endpoint="case-instance-execution",
+    ),
+    dict(resource=CaseFromRawEndpoint, urls="/case/raw/", endpoint="case-raw"),
+    dict(resource=CaseCopyEndpoint, urls="/case/copy/", endpoint="case-copy"),
+    dict(resource=CaseListEndpoint, urls="/case/", endpoint="case-list"),
+    dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
 ]

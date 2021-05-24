@@ -5,7 +5,7 @@ from .common import QueryFilters
 
 
 class QueryFiltersExecution(QueryFilters):
-    data_schema = fields.String(required=False)
+    schema = fields.String(required=False)
     # status = fields.Integer(required=False)
 
 
@@ -31,6 +31,7 @@ class ExecutionSchema(Schema):
     instance_id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
+    schema = fields.String(required=False)
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
@@ -54,7 +55,7 @@ class ExecutionRequest(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)
     instance_id = fields.String(required=True)
-    dag_name = fields.Str(required=False)
+    schema = fields.Str(required=False)
 
 
 class ExecutionEditRequest(Schema):
@@ -84,6 +85,7 @@ class ExecutionDetailsEndpointResponse(Schema):
     state = fields.Int()
     message = fields.Str(attribute="state_message")
     data_hash = fields.String(dump_only=True)
+    schema = fields.String(required=False)
 
 
 class ExecutionStatusEndpointResponse(Schema):

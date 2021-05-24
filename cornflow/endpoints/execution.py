@@ -87,14 +87,16 @@ class ExecutionEndpoint(MetaResource, MethodResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        # TODO: should validation should be done even if the execution is not going to be run?
+        # TODO: should the schema field be cross valdiated with the instance schema field?
         config = current_app.config
         airflow_conf = dict(
             url=config["AIRFLOW_URL"],
             user=config["AIRFLOW_USER"],
             pwd=config["AIRFLOW_PWD"],
         )
-        if "dag_name" not in kwargs:
-            kwargs["dag_name"] = "solve_model_dag"
+        if "schema" not in kwargs:
+            kwargs["schema"] = "solve_model_dag"
         execution, status_code = self.post_list(kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id
@@ -121,14 +123,14 @@ class ExecutionEndpoint(MetaResource, MethodResource):
                 ),
             )
         # ask airflow if dag_name exists
-        dag_name = execution.dag_name
-        dag_info = af_client.get_dag_info(dag_name)
+        schema = execution.schema
+        schema_info = af_client.get_dag_info(schema)
 
         # Validate that instance and dag_name are compatible
-        marshmallow_obj = get_schema(config, dag_name, INSTANCE_SCHEMA)
+        marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
         validate_and_continue(marshmallow_obj(), instance.data)
 
-        info = dag_info.json()
+        info = schema_info.json()
         if info["is_paused"]:
             err = "The dag exists but it is paused in airflow"
             log.error(err)
@@ -142,7 +144,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             )
 
         try:
-            response = af_client.run_dag(execution.id, dag_name=dag_name)
+            response = af_client.run_dag(execution.id, dag_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)
@@ -240,7 +242,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if not af_client.is_alive():
             raise AirflowError(error="Airflow is not accessible")
         response = af_client.set_dag_run_to_fail(
-            dag_name=execution.dag_name, dag_run_id=execution.dag_run_id
+            dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
         return {"message": "The execution has been stopped"}, 200
@@ -301,7 +303,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
         try:
             # TODO: get the dag_name from somewhere!
             response = af_client.get_dag_run_status(
-                dag_name=execution.dag_name, dag_run_id=dag_run_id
+                dag_name=execution.schema, dag_run_id=dag_run_id
             )
         except AirflowError as err:
             _raise_af_error(
