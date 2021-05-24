@@ -14,6 +14,7 @@ from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
 )
 from cornflow.tests.const import INSTANCE_PATH
+from cornflow.shared.const import STATUS_HEALTHY
 
 
 class TestCornflowClientBasic(CustomTestCaseLive):
@@ -228,6 +229,15 @@ class TestCornflowClient(TestCornflowClientBasic):
         payload = load_file(INSTANCE_PATH)
         payload["schema"] = "solve_model_dag"
         self.create_new_instance_payload(payload)
+
+    def test_server_alive(self):
+        data = self.client.is_alive()
+        cf_status = data["cornflow_status"]
+        af_status = data["airflow_status"]
+        self.assertEqual(str, type(cf_status))
+        self.assertEqual(str, type(af_status))
+        self.assertEqual(cf_status, STATUS_HEALTHY)
+        self.assertEqual(af_status, STATUS_HEALTHY)
 
 
 class TestCornflowClientAdmin(TestCornflowClientBasic):

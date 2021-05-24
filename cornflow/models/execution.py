@@ -107,7 +107,7 @@ class ExecutionModel(BaseDataModel):
         :return: The representation of the :class:`ExecutionModel`
         :rtype: str
         """
-        return "<Execution {}>".format(self.id)
+        return "<id {}>".format(self.id)
 
     def __str__(self):
         """
@@ -116,4 +116,4 @@ class ExecutionModel(BaseDataModel):
         :return: The string for the :class:`ExecutionModel`
         :rtype: str
         """
-        return "<Execution {}>".format(self.id)
+        return "<id {}>".format(self.id)

@@ -19,4 +19,9 @@ LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"
 USER_URL = PREFIX + "/user/"
 
+SCHEMA_URL = PREFIX + "/schema/"
+
+
 INSTANCE_FILE_URL = PREFIX + "/instancefile/"
+
+HEALTH_URL = PREFIX + "/health/"

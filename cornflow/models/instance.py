@@ -13,6 +13,8 @@ class InstanceModel(BaseDataModel):
     Model class for the Instances
     It inherits from :class:`BaseDataModel` to have the trace fields and user field
 
+    The :class:`InstanceModel` has the following fields:
+
     - **id**: int, the primary key for the executions, a hash generated upon creation of the instance
       and the id given back to the user.The hash is generated from the creation time and the user id.
     - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
@@ -62,7 +64,7 @@ class InstanceModel(BaseDataModel):
         :return: The representation of the :class:`InstanceModel`
         :rtype: str
         """
-        return "<Instance {}>".format(self.id)
+        return "<id {}>".format(self.id)
 
     def __str__(self):
         """
@@ -71,4 +73,4 @@ class InstanceModel(BaseDataModel):
         :return: The string for the :class:`InstanceModel`
         :rtype: str
         """
-        return "<Instance {}>".format(self.id)
+        return "<id {}>".format(self.id)

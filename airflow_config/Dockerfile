@@ -10,9 +10,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.0.0
+ARG AIRFLOW_VERSION=2.0.2
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
-ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.0.0/constraints-3.8.txt"
+ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.0.2/constraints-3.8.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
@@ -20,6 +20,7 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		dos2unix \
         gcc \
+        git \
 		freetds-bin \
         krb5-user \
         ldap-utils \

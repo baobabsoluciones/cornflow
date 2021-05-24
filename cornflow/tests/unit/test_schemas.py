@@ -1,10 +1,17 @@
 import unittest
 import json
 
+from flask_testing import TestCase
+from cornflow.tests.custom_test_case import CustomTestCase
+from cornflow.tests.const import SCHEMA_URL
+from unittest.mock import patch, Mock
 from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
+from cornflow_client import get_pulp_jsonschema
 from cornflow.schemas.solution_log import LogSchema
 from airflow_config.dags.model_functions import solve as solve_model
 from marshmallow import ValidationError, Schema, fields
+
+# from cornflow_client.airflow.api import Airflow
 
 
 class SchemaGenerator(unittest.TestCase):
@@ -176,6 +183,34 @@ class PuLPLogSchema(unittest.TestCase):
         self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)
         self.assertEqual(type(loaded_data["cut_info"]["cuts"]["Clique"]), int)
         self.assertEqual(type(loaded_data["nodes"]), int)
+
+
+class TestSchemaEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.schema = get_pulp_jsonschema()
+        self.url = SCHEMA_URL
+
+    # TODO: for some reason this does not work and we have to call the schemas.Airflow
+    #  @patch("cornflow_client.airflow.api.Airflow")
+    @patch("cornflow.endpoints.schemas.Airflow")
+    def test_get_schema(self, Airflow):
+        instance = Airflow.return_value
+        instance.is_alive.return_value = True
+        instance.get_dag_info.return_value = {}
+        instance.get_schemas_for_dag_name.return_value = dict(
+            instance=self.schema, solution=self.schema
+        )
+        schemas = self.get_one_row(
+            self.url + "pulp/", {}, expected_status=200, check_payload=False
+        )
+        self.assertIn("instance", schemas)
+        self.assertIn("solution", schemas)
+        self.assertEqual(schemas["instance"], self.schema)
+        self.assertEqual(schemas["solution"], self.schema)
+        instance.is_alive.assert_called_once()
+        instance.get_dag_info.assert_called_once()
+        instance.get_schemas_for_dag_name.assert_called_once()
 
 
 if __name__ == "__main__":

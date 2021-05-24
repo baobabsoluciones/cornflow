@@ -50,7 +50,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
     @doc(description="Get all instances", tags=["Instances"])
     @Auth.auth_required
     @marshal_with(InstanceEndpointResponse(many=True))
-    @use_kwargs(QueryFiltersInstance, location="json")
+    @use_kwargs(QueryFiltersInstance, location="query")
     def get(self, **kwargs):
         """
         API (GET) method to get all the instances created by the user and its related info

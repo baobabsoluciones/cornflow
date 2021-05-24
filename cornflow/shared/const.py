@@ -1,3 +1,8 @@
+# endpoints responses for health check
+STATUS_HEALTHY = "healthy"
+STATUS_UNHEALTHY = "unhealthy"
+
+# execution states for executions table
 EXEC_STATE_CORRECT = 1
 EXEC_STATE_MANUAL = 2
 EXEC_STATE_RUNNING = 0
