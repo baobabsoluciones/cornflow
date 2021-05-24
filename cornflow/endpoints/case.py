@@ -14,7 +14,13 @@ from flask_inflate import inflate
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import CaseModel, ExecutionModel, InstanceModel
-from ..schemas.case import CaseBase, CaseFromInstanceExecution, CaseRawData, CaseSchema
+from ..schemas.case import (
+    CaseBase,
+    CaseFromInstanceExecution,
+    CaseRawData,
+    CaseSchema,
+    CaseListResponse,
+)
 from ..schemas.instance import (
     InstanceDetailsEndpointResponse,
     InstanceRequest,
@@ -36,12 +42,12 @@ class CaseListEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = CaseModel
-        self.query = InstanceModel.get_all_objects
+        self.query = CaseModel.get_all_objects
         self.primary_key = "id"
 
     @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
-    # @marshal_with(InstanceEndpointResponse(many=True))
+    @marshal_with(CaseListResponse(many=True))
     @use_kwargs(QueryFiltersInstance, location="json")
     def get(self, **kwargs):
         """
@@ -53,40 +59,6 @@ class CaseListEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_all_objects(self.get_user(), **kwargs)
-
-    @doc(description="Create an instance", tags=["Instances"])
-    @Auth.auth_required
-    @inflate
-    # @marshal_with(InstanceDetailsEndpointResponse)
-    @use_kwargs(InstanceRequest, location="json")
-    def post(self, **kwargs):
-        """
-        API (POST) method to a new case
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user
-
-        :return: a dictionary with a message(either an error encountered during creation
-          or the reference_id of the instance created if successful) and an integer with the HTTP status code
-        :rtype: Tuple(dict, integer)
-        """
-        data_schema = kwargs.get("data_schema", "pulp")
-
-        if data_schema is None:
-            # no schema provided, no validation to do
-            return self.post_list(kwargs)
-
-        if data_schema == "pulp":
-            # this one we have the schema stored inside cornflow
-            validate_and_continue(DataSchema(), kwargs["data"])
-            return self.post_list(kwargs)
-
-        # for the rest of the schemas: we need to ask airflow for the schema
-        config = current_app.config
-        marshmallow_obj = get_schema(config, data_schema)
-        validate_and_continue(marshmallow_obj(), kwargs["data"])
-
-        # if we're here, we validated and the data seems to fit the schema
-        return self.post_list(kwargs)
 
 
 class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
@@ -159,18 +131,6 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
         return self.post_list(data)
 
 
-class CaseFromInstance(MetaResource, MethodResource):
-    """
-    Endpoint used to create a new case from an already existing instance
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.model = CaseModel
-        self.query = self.model.get_all_objects
-        self.primary_key = "id"
-
-
 class CaseFromRawEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new case from raw database
@@ -230,21 +190,20 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
         return self.post_list(payload)
 
 
-class InstanceDetailsEndpointBase(MetaResource, MethodResource):
+class CaseDetailsEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to get the information ofa single instance, edit it or delete it
     """
 
     def __init__(self):
         super().__init__()
-        self.model = InstanceModel
+        self.model = CaseModel
         self.primary_key = "id"
-        self.query = InstanceModel.get_one_object_from_user
-        self.dependents = "executions"
+        self.query = CaseModel.get_one_object_from_user
 
-    @doc(description="Get one instance", tags=["Instances"], inherit=False)
+    @doc(description="Get one case", tags=["Cases"], inherit=False)
     @Auth.auth_required
-    @marshal_with(InstanceDetailsEndpointResponse)
+    @marshal_with(CaseBase)
     @MetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -257,4 +216,4 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return InstanceModel.get_one_object_from_user(self.get_user(), idx)
+        return CaseModel.get_one_object_from_user(self.get_user(), idx)

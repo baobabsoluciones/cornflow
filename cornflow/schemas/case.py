@@ -28,6 +28,18 @@ class CaseRawData(Schema):
     solution = fields.Raw()
 
 
+class CaseListResponse(Schema):
+    id = fields.Int()
+    path = fields.Str()
+    name = fields.Str()
+    description = fields.Str()
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()
+    deleted_at = fields.DateTime()
+    schema = fields.String()
+    dependents = fields.List(fields.Int())
+
+
 class CaseSchema(Schema):
     """ """
 

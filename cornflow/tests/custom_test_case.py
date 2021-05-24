@@ -93,10 +93,13 @@ class CustomTestCase(TestCase):
             self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data):
+    def get_rows(self, url, data, post_url=None):
+
+        if post_url is None:
+            post_url = url
 
         codes = [
-            self.create_new_row(url=url, model=self.model, payload=d) for d in data
+            self.create_new_row(url=post_url, model=self.model, payload=d) for d in data
         ]
         rows = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)

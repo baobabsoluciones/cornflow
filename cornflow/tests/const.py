@@ -8,7 +8,9 @@ EXECUTIONS_LIST = [EXECUTION_PATH, "./cornflow/tests/data/new_execution_2.json"]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
 
-CASE_PATH = "./cornflow/tests/data/new_case.json"
+CASE_PATH = "./cornflow/tests/data/new_case_raw.json"
+CASES_LIST = [CASE_PATH, "./cornflow/tests/data/new_case_raw_2.json"]
+CASE_LIST_URL = PREFIX + "/case/"
 CASE_INSTANCE_URL = PREFIX + "/case/instance/"
 CASE_RAW_URL = PREFIX + "/case/raw/"
 CASE_COPY_URL = PREFIX + "/case/copy/"

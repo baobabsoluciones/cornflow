@@ -11,10 +11,12 @@ from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
     EXECUTION_URL_NORUN,
+    CASE_LIST_URL,
     CASE_INSTANCE_URL,
     CASE_RAW_URL,
     CASE_COPY_URL,
     CASE_PATH,
+    CASES_LIST,
 )
 
 from cornflow.models import CaseModel, UserModel
@@ -222,3 +224,60 @@ class TestCaseCopyEndpoint(CustomTestCase):
 
         for key in self.new_items:
             self.assertNotEqual(getattr(original_case, key), getattr(new_case, key))
+
+
+class TestCaseListEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.payloads = [self.load_file(f) for f in CASES_LIST]
+        self.model = CaseModel
+        self.items_to_check = ["name", "description", "path", "schema"]
+        self.url = CASE_LIST_URL
+
+    def test_get_rows(self):
+        self.get_rows(self.url, self.payloads, CASE_RAW_URL)
+
+
+class TestCaseDetailEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.items_to_check = [
+            "name",
+            "description",
+            "path",
+            "schema",
+            "data",
+            "data_hash",
+            "solution",
+            "solution_hash",
+        ]
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "path",
+            "schema",
+            "data",
+            "data_hash",
+            "solution",
+            "solution_hash",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+        }
+        self.url = CASE_RAW_URL
+
+    def test_get_one_instance(self):
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx)}
+        result = self.get_one_row(CASE_LIST_URL + str(idx) + "/", payload)
+        diff = self.response_items.symmetric_difference(result.keys())
+        self.assertEqual(len(diff), 0)
+
+    def test_get_nonexistent_instance(self):
+        self.get_one_row(
+            self.url + "500" + "/", {}, expected_status=404, check_payload=False
+        )
