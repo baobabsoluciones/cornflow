@@ -31,7 +31,7 @@ jobs:
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
         python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip install -U orloge pulp
-        python -m pip install -U git+https://github.com/baobabsoluciones/cornflow-client@feature/schemas
+        python -m pip install -U git+https://github.com/baobabsoluciones/cornflow-client@master
         airflow db init
         airflow users create \
               --username admin \
