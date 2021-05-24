@@ -115,14 +115,14 @@ class CornFlow(object):
     # TODO: those status_code checks should be done via a decorator. But I do not know how.
     @ask_token
     @log_call
-    def create_instance(self, data, name=None, description="", data_schema="pulp"):
+    def create_instance(self, data, name=None, description="", schema="solve_model_dag"):
         if name is None:
             try:
                 name = data["parameters"]["name"]
             except IndexError:
                 raise CornFlowApiError("The `name` argument needs to be filled")
         payload = dict(
-            data=data, name=name, description=description, data_schema=data_schema
+            data=data, name=name, description=description, schema=schema
         )
         response = self.create_api("instance/", json=payload)
         if response.status_code != 201:
@@ -159,14 +159,14 @@ class CornFlow(object):
         config,
         name="test1",
         description="",
-        dag_name="solve_model_dag",
+        schema="solve_model_dag",
     ):
         payload = dict(
             config=config,
             instance_id=instance_id,
             name=name,
             description=description,
-            dag_name=dag_name,
+            schema=schema,
         )
         response = self.create_api("execution/", json=payload)
         if response.status_code != 201:
