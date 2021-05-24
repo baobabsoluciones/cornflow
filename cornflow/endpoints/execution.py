@@ -242,7 +242,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if not af_client.is_alive():
             raise AirflowError(error="Airflow is not accessible")
         response = af_client.set_dag_run_to_fail(
-            dag_name=execution.dag_name, dag_run_id=execution.dag_run_id
+            dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
         return {"message": "The execution has been stopped"}, 200
@@ -303,7 +303,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
         try:
             # TODO: get the dag_name from somewhere!
             response = af_client.get_dag_run_status(
-                dag_name=execution.dag_name, dag_run_id=dag_run_id
+                dag_name=execution.schema, dag_run_id=dag_run_id
             )
         except AirflowError as err:
             _raise_af_error(
