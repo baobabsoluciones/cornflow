@@ -150,7 +150,7 @@ class TestCornflowClient(TestCornflowClientBasic):
 
     def test_get_dag_schema_good(self):
         response = self.client.get_schema("solve_model_dag")
-        print(response.json)
+        print(response)
         for sch in [INSTANCE_SCHEMA, SOLUTION_SCHEMA]:
             content = json.loads(response)[sch]
             self.assertTrue("properties" in content)
