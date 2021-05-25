@@ -73,7 +73,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 
-        :return: an object with the data for the created instance and an integer with the HTTP status code
+        :return:
         :rtype: Tuple(dict, integer)
         """
         data_schema = kwargs.get("schema", "solve_model_dag")

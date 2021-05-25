@@ -5,6 +5,8 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
+from cornflow_client.airflow.api import get_schema, validate_and_continue
+from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
 from flask_inflate import inflate
@@ -19,10 +21,13 @@ from ..schemas.case import (
     CaseSchema,
     CaseListResponse,
     CaseEditRequest,
+    CaseToLive,
     QueryFiltersCase,
 )
+from ..schemas.instance import InstanceDetailsEndpointResponse
+from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidData
+from ..shared.exceptions import InvalidData, ObjectDoesNotExist
 
 
 #
@@ -74,7 +79,9 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
     @marshal_with(CaseBase)
     @use_kwargs(CaseFromInstanceExecution, location="json")
     def post(self, **kwargs):
-        """ """
+        """
+        API method to create a new case from an existing instance or execution
+        """
         instance_id = kwargs.get("instance_id", None)
         execution_id = kwargs.get("execution_id", None)
 
@@ -240,3 +247,57 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         self.delete_detail(self.get_user(), idx)
+
+
+class CaseToInstance(MetaResource, MethodResource):
+    """
+    Endpoint used to create a new instance or instance and execution from a stored case
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = InstanceModel
+        self.query = InstanceModel.get_all_objects
+        self.primary_key = "id"
+
+    @doc(
+        description="Copies the information stored in a case into a nerw instance or instance and execution",
+        tags=["Cases"],
+    )
+    @Auth.auth_required
+    @marshal_with(InstanceDetailsEndpointResponse)
+    def post(self, idx):
+        """
+        API method to copy the information stored in a case to a new instance or a new instance and execution.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user
+
+        :param int idx: ID of the case that has to be copied to an instance or instance and execution
+        :return: an object with the instance or instance and execution ID that have been created and the status code
+        :rtype: Tuple (dict, integer)
+        """
+        case = CaseModel.get_one_object_from_user(self.get_user(), idx)
+
+        if case is None:
+            raise ObjectDoesNotExist()
+
+        schema = case.schema
+        payload = {
+            "name": "instance_from_" + case.name,
+            "description": "Instance created from " + case.description,
+            "data": case.data,
+            "schema": case.schema,
+        }
+
+        if schema is None:
+            return self.post_list(payload)
+
+        if schema == "pulp" or schema == "solve_model_dag":
+            validate_and_continue(DataSchema(), payload["data"])
+            return self.post_list(payload)
+
+        config = current_app.config
+        marshmallow_obj = get_schema(config, schema)
+        validate_and_continue(marshmallow_obj(), payload["data"])
+
+        return self.post_list(payload)

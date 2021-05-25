@@ -28,6 +28,7 @@ from .case import (
     CaseFromRawEndpoint,
     CaseCopyEndpoint,
     CaseDetailsEndpoint,
+    CaseToInstance,
 )
 
 
@@ -84,7 +85,7 @@ resources = [
     dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
     dict(resource=SchemaEndpoint, urls="/schema/<string:dag_name>/", endpoint="schema"),
     dict(resource=HealthEndpoint, urls="/health/", endpoint="health"),
-dict(
+    dict(
         resource=CaseFromInstanceExecutionEndpoint,
         urls="/case/instance/",
         endpoint="case-instance-execution",
@@ -93,4 +94,5 @@ dict(
     dict(resource=CaseCopyEndpoint, urls="/case/copy/", endpoint="case-copy"),
     dict(resource=CaseListEndpoint, urls="/case/", endpoint="case-list"),
     dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
+    dict(resource=CaseToInstance, urls="/case/live/<int:idx>/", endpoint="case-live"),
 ]

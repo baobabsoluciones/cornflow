@@ -14,6 +14,7 @@ CASE_LIST_URL = PREFIX + "/case/"
 CASE_INSTANCE_URL = PREFIX + "/case/instance/"
 CASE_RAW_URL = PREFIX + "/case/raw/"
 CASE_COPY_URL = PREFIX + "/case/copy/"
+CASE_TO_INSTANCE_URL = PREFIX + "/case/live/"
 
 LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"

@@ -69,3 +69,11 @@ class CaseFromInstanceExecution(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
     path = fields.Str(required=True)
+
+
+class CaseToLive(Schema):
+    """ """
+
+    instance_id = fields.Str(required=True)
+    execution_id = fields.Str()
+    schema = fields.Str(required=True)

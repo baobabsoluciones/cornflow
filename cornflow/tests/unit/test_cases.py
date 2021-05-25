@@ -17,6 +17,7 @@ from cornflow.tests.const import (
     CASE_COPY_URL,
     CASE_PATH,
     CASES_LIST,
+    CASE_TO_INSTANCE_URL,
 )
 
 from cornflow.models import CaseModel, UserModel
@@ -308,3 +309,49 @@ class TestCaseDetailEndpoint(CustomTestCase):
     def test_delete_one_case(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.delete_row(CASE_LIST_URL + str(idx) + "/")
+
+
+class TestCaseToInstanceEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.case_id = self.create_new_row(CASE_RAW_URL, self.model, self.payload)
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "executions",
+            "data_hash",
+            "schema",
+        }
+
+    def test_case_to_new_instance(self):
+        response = self.client.post(
+            CASE_TO_INSTANCE_URL + str(self.case_id) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = response.json
+        result = self.get_one_row(INSTANCE_URL + payload["id"] + "/", payload)
+        dif = self.response_items.symmetric_difference(result.keys())
+        self.assertEqual(len(dif), 0)
+
+        self.items_to_check = ["id", "name", "data", "data_hash", "schema"]
+        self.response_items = set(self.items_to_check)
+
+        result = self.get_one_row(INSTANCE_URL + payload["id"] + "/data/", payload)
+        dif = self.response_items.symmetric_difference(result.keys())
+        self.assertEqual(len(dif), 0)
+
+    def test_case_does_not_exist(self):
+        response = self.client.post(
+            CASE_TO_INSTANCE_URL + str(2) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json["error"], "The object does not exist")
