@@ -1,5 +1,7 @@
 from marshmallow import fields, Schema
 
+from .common import QueryFilters as QueryFiltersCase
+
 
 class CaseBase(Schema):
     """ """
@@ -38,6 +40,13 @@ class CaseListResponse(Schema):
     deleted_at = fields.DateTime()
     schema = fields.String()
     dependents = fields.List(fields.Int())
+
+
+class CaseEditRequest(Schema):
+    path = fields.Str()
+    name = fields.Str()
+    description = fields.Str()
+    schema = fields.String()
 
 
 class CaseSchema(Schema):

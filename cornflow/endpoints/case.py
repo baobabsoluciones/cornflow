@@ -5,8 +5,6 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema, validate_and_continue
-from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
 from flask_inflate import inflate
@@ -20,13 +18,9 @@ from ..schemas.case import (
     CaseRawData,
     CaseSchema,
     CaseListResponse,
+    CaseEditRequest,
+    QueryFiltersCase,
 )
-from ..schemas.instance import (
-    InstanceDetailsEndpointResponse,
-    InstanceRequest,
-    QueryFiltersInstance,
-)
-from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidData
 
@@ -48,7 +42,7 @@ class CaseListEndpoint(MetaResource, MethodResource):
     @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
     @marshal_with(CaseListResponse(many=True))
-    @use_kwargs(QueryFiltersInstance, location="json")
+    @use_kwargs(QueryFiltersCase, location="query")
     def get(self, **kwargs):
         """
         API (GET) method to get all directory structure of cases for the user
@@ -207,13 +201,42 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     @MetaResource.get_data_or_404
     def get(self, idx):
         """
-        API method to get an instance created by the user and its related info.
+        API method to get a case created by the user and its related info.
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
-        :param str idx: ID of the instance
+        :param int idx: ID of the case
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_one_object_from_user(self.get_user(), idx)
+
+    @doc(description="Edit a case", tags=["Cases"])
+    @Auth.auth_required
+    @use_kwargs(CaseEditRequest, location="json")
+    def put(self, idx, **kwargs):
+        """
+        API method to edit a case created vy the user and its basic related info (name, description, path and schema).
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param int idx: ID of the case
+        :return: A dictionary with a confirmation message and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        return self.put_detail(kwargs, self.get_user(), idx)
+
+    @doc(description="Delete a case", tags=["Cases"])
+    @Auth.auth_required
+    def delete(self, idx):
+        """
+        API method to delete an existing case.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param int idx: ID of the case
+        :return: A dictionary with a confirmation message and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        self.delete_detail(self.get_user(), idx)

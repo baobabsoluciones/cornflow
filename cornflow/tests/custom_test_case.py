@@ -152,17 +152,22 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
+
         self.assertEqual(expected_status, response.status_code)
+
         if not check_payload:
             return response.json
+
         row = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json["id"], payload_to_check["id"])
+
         for key in self.get_keys_to_check(payload_to_check):
             self.assertEqual(row.json[key], payload_to_check[key])
+
         return row.json
 
     def delete_row(self, url):

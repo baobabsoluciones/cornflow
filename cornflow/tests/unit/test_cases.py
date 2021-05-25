@@ -281,3 +281,30 @@ class TestCaseDetailEndpoint(CustomTestCase):
         self.get_one_row(
             self.url + "500" + "/", {}, expected_status=404, check_payload=False
         )
+
+    def test_update_one_instance(self):
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx, name="new_name")}
+        self.update_row(CASE_LIST_URL + str(idx) + "/", dict(name="new_name"), payload)
+
+    def test_update_one_instance_bad_format(self):
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.update_row(
+            CASE_LIST_URL + str(idx) + "/",
+            dict(id=10),
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+        self.update_row(
+            CASE_LIST_URL + str(idx) + "/",
+            dict(data_hash=""),
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_delete_one_case(self):
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.delete_row(CASE_LIST_URL + str(idx) + "/")
