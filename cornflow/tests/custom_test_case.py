@@ -13,7 +13,7 @@ try:
 except:
 
     def date_from_str(_string):
-        return datetime.strptime(_string, "%Y-%m-%d %H:%M:%S.%f")
+        return datetime.strptime(_string, "%Y-%m-%dT%H:%M:%S.%f")
 
 
 class CustomTestCase(TestCase):
@@ -91,6 +91,7 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
+        print(response.text)
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
