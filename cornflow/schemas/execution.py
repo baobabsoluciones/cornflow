@@ -64,6 +64,7 @@ class ExecutionEditRequest(Schema):
 
 
 class ExecutionDagRequest(Schema):
+    # TODO: change name of solution_schema
     data = fields.Raw(required=False)
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)

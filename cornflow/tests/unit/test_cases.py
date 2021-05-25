@@ -173,6 +173,11 @@ class TestCasesRawDataEndpoint(CustomTestCase):
     def test_new_case(self):
         self.create_new_row(self.url, self.model, self.payload)
 
+    def test_new_case_without_solution(self):
+        # payload = dict(self.payload)
+        # payload.pop("solution")
+        self.create_new_row(self.url, self.model, self.payload)
+
 
 class TestCaseCopyEndpoint(CustomTestCase):
     def setUp(self):
@@ -240,9 +245,7 @@ class TestCaseDetailEndpoint(CustomTestCase):
             "description",
             "path",
             "schema",
-            "data",
             "data_hash",
-            "solution",
             "solution_hash",
         ]
         self.response_items = {
@@ -251,17 +254,14 @@ class TestCaseDetailEndpoint(CustomTestCase):
             "description",
             "path",
             "schema",
-            "data",
             "data_hash",
-            "solution",
             "solution_hash",
             "created_at",
             "updated_at",
-            "deleted_at",
         }
         self.url = CASE_URL
 
-    def test_get_one_instance(self):
+    def test_get_one_case(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=idx)}
         result = self.get_one_row(self.url + str(idx) + "/", payload)

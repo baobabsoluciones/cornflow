@@ -27,6 +27,7 @@ from .case import (
     CaseFromInstanceExecutionEndpoint,
     CaseCopyEndpoint,
     CaseDetailsEndpoint,
+    CaseDataEndpoint,
 )
 
 
@@ -91,4 +92,5 @@ resources = [
     dict(resource=CaseCopyEndpoint, urls="/case/copy/", endpoint="case-copy"),
     dict(resource=CaseEndpoint, urls="/case/", endpoint="case"),
     dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
+    dict(resource=CaseDataEndpoint, urls="/case/<int:idx>/data/", endpoint="case-data"),
 ]
