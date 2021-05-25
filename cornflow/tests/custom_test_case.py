@@ -6,6 +6,14 @@ from cornflow.models import UserModel
 from cornflow.shared.utils import db
 from cornflow.shared.authentication import Auth
 from cornflow.tests.const import LOGIN_URL
+from datetime import datetime, timedelta
+
+try:
+    date_from_str = datetime.fromisoformat
+except:
+
+    def date_from_str(_string):
+        return datetime.strptime(_string, "%Y-%m-%d %H:%M:%S.%f")
 
 
 class CustomTestCase(TestCase):
@@ -93,13 +101,10 @@ class CustomTestCase(TestCase):
             self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data, post_url=None):
-
-        if post_url is None:
-            post_url = url
+    def get_rows(self, url, data):
 
         codes = [
-            self.create_new_row(url=post_url, model=self.model, payload=d) for d in data
+            self.create_new_row(url=url, model=self.model, payload=d) for d in data
         ]
         rows = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
@@ -180,8 +185,9 @@ class CustomTestCase(TestCase):
         return response
 
     def apply_filter(self, url, _filter, result):
+        # we take out the potential query (e.g., ?param=1) arguments inside the url
         get_with_opts = lambda data: self.client.get(
-            url,
+            url.split("?")[0],
             follow_redirects=True,
             query_string=data,
             headers=self.get_header_with_auth(self.token),
@@ -199,3 +205,62 @@ class CustomTestCase(TestCase):
     def str_method(self, idx, string: str):
         row = self.model.query.get(idx)
         self.assertEqual(str(row), string)
+
+
+class BaseTestCases:
+    class ListFilters(CustomTestCase):
+        def setUp(self):
+            self.payload = None
+            super().setUp()
+
+        def test_opt_filters_limit(self):
+            # we create 4 instances
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
+
+        def test_opt_filters_offset(self):
+            # we create 4 instances
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
+
+        def test_opt_filters_schema(self):
+            # we create 4 instances
+            data_many = [self.payload for _ in range(4)]
+            data_many[-1] = {**data_many[0], **dict(schema="timer")}
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(schema="timer"), allrows.json[:1])
+
+        def test_opt_filters_date_lte(self):
+            # we create 4 instances
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+
+            a = date_from_str(allrows.json[0]["created_at"])
+            b = date_from_str(allrows.json[1]["created_at"])
+            date_limit = b + (a - b) / 2
+            # we ask for one before the last one => we get the second from the last
+            self.apply_filter(
+                self.url,
+                dict(creation_date_lte=date_limit.isoformat(), limit=1),
+                [allrows.json[1]],
+            )
+
+        def test_opt_filters_date_gte(self):
+            # we create 4 instances
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+
+            date_limit = date_from_str(allrows.json[2]["created_at"]) + timedelta(
+                microseconds=1
+            )
+            # we ask for all after the third from the last => we get the last two
+            self.apply_filter(
+                self.url,
+                dict(creation_date_gte=date_limit.isoformat()),
+                allrows.json[:2],
+            )
+            return
+
+        pass

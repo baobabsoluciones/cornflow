@@ -5,7 +5,7 @@ from .common import QueryFilters
 
 
 class QueryFiltersExecution(QueryFilters):
-    schema = fields.String(required=False)
+    pass
     # status = fields.Integer(required=False)
 
 

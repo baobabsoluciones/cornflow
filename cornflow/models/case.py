@@ -7,7 +7,7 @@
 from sqlalchemy.dialects.postgresql import JSON
 
 # Import from internal modules
-from cornflow.models.meta_model import BaseDataModel
+from .meta_model import BaseDataModel
 from cornflow.shared.utils import db
 
 from cornflow.shared.utils import hash_json_256

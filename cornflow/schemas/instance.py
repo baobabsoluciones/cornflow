@@ -1,8 +1,10 @@
 from marshmallow import fields, Schema
 from .execution import ExecutionSchema, ExecutionDetailsEndpointResponse
+from .common import QueryFilters
 
-#  this import needs to be there:
-from .common import QueryFilters as QueryFiltersInstance
+
+class QueryFiltersInstance(QueryFilters):
+    pass
 
 
 class InstanceSchema(Schema):

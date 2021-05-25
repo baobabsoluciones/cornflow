@@ -34,7 +34,7 @@ from ..shared.exceptions import InvalidData
 #
 
 
-class CaseListEndpoint(MetaResource, MethodResource):
+class CaseEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new case or get all the cases and their related information
     """
@@ -48,7 +48,7 @@ class CaseListEndpoint(MetaResource, MethodResource):
     @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
     @marshal_with(CaseListResponse(many=True))
-    @use_kwargs(QueryFiltersInstance, location="json")
+    @use_kwargs(QueryFiltersInstance, location="query")
     def get(self, **kwargs):
         """
         API (GET) method to get all directory structure of cases for the user
@@ -59,6 +59,15 @@ class CaseListEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_all_objects(self.get_user(), **kwargs)
+
+    @doc(description="Create a new case from raw data", tags=["Cases"])
+    @Auth.auth_required
+    @inflate
+    @marshal_with(CaseBase)
+    @use_kwargs(CaseRawData, location="json")
+    def post(self, **kwargs):
+        """ """
+        return self.post_list(kwargs)
 
 
 class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
@@ -129,27 +138,6 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
             data = {**data, **instance_data, **execution_data}
 
         return self.post_list(data)
-
-
-class CaseFromRawEndpoint(MetaResource, MethodResource):
-    """
-    Endpoint used to create a new case from raw database
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.model = CaseModel
-        self.query = self.model.get_all_objects
-        self.primary_key = "id"
-
-    @doc(description="Create a new case from raw data", tags=["Cases"])
-    @Auth.auth_required
-    @inflate
-    @marshal_with(CaseBase)
-    @use_kwargs(CaseRawData, location="json")
-    def post(self, **kwargs):
-        """ """
-        return self.post_list(kwargs)
 
 
 class CaseCopyEndpoint(MetaResource, MethodResource):
