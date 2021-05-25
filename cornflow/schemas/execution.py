@@ -81,7 +81,7 @@ class ExecutionDetailsEndpointResponse(Schema):
     config = fields.Nested(ConfigSchema)
     name = fields.String()
     description = fields.String()
-    created_at = fields.String()
+    created_at = fields.DateTime()
     instance_id = fields.String()
     state = fields.Int()
     message = fields.Str(attribute="state_message")

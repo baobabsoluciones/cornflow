@@ -45,7 +45,7 @@ class InstanceEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
     description = fields.String()
-    created_at = fields.String()
+    created_at = fields.DateTime()
     user_id = fields.Integer()
     data_hash = fields.String()
     schema = fields.String(required=False)
