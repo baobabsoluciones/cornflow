@@ -71,6 +71,10 @@ class CornFlow(object):
         return self.api_for_id(api=api, id=id, json=payload, method="put", **kwargs)
 
     @ask_token
+    def patch_api_for_id(self, api, id, payload, **kwargs):
+        return self.api_for_id(api=api, id=id, json=payload, method="patch", **kwargs)
+
+    @ask_token
     def post_api_for_id(self, api, id, **kwargs):
         return self.api_for_id(api=api, id=id, method="post", **kwargs)
 
@@ -91,11 +95,14 @@ class CornFlow(object):
 
     @log_call
     def is_alive(self):
-        response = requests.get(urljoin(self.url, 'health/'))
+        response = requests.get(urljoin(self.url, "health/"))
         if response.status_code == 200:
             return response.json()
-        raise CornFlowApiError("Connection failed with status code: {}: {}".
-                               format(response.status_code, response.text))
+        raise CornFlowApiError(
+            "Connection failed with status code: {}: {}".format(
+                response.status_code, response.text
+            )
+        )
 
     def login(self, email, pwd):
         response = requests.post(
@@ -115,15 +122,15 @@ class CornFlow(object):
     # TODO: those status_code checks should be done via a decorator. But I do not know how.
     @ask_token
     @log_call
-    def create_instance(self, data, name=None, description="", schema="solve_model_dag"):
+    def create_instance(
+        self, data, name=None, description="", schema="solve_model_dag"
+    ):
         if name is None:
             try:
                 name = data["parameters"]["name"]
             except IndexError:
                 raise CornFlowApiError("The `name` argument needs to be filled")
-        payload = dict(
-            data=data, name=name, description=description, schema=schema
-        )
+        payload = dict(data=data, name=name, description=description, schema=schema)
         response = self.create_api("instance/", json=payload)
         if response.status_code != 201:
             raise CornFlowApiError(
@@ -131,6 +138,35 @@ class CornFlow(object):
                     response.status_code, response.text
                 )
             )
+        return response.json()
+
+    def create_case(self, name, schema, path, data, description="", solution=None):
+        payload = dict(
+            data=data,
+            name=name,
+            description=description,
+            schema=schema,
+            path=path,
+        )
+        if solution is not None:
+            payload["solution"] = None
+        response = self.create_api("case/", json=payload)
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                "Expected a code 201, got a {} error instead: {}".format(
+                    response.status_code, response.text
+                )
+            )
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_all_cases(self):
+        response = requests.get(
+            urljoin(self.url, "case/"),
+            headers={"Authorization": "access_token " + self.token},
+            json={},
+        )
         return response.json()
 
     @ask_token
@@ -275,6 +311,30 @@ class CornFlow(object):
     @ask_token
     def get_one_instance(self, reference_id):
         response = self.get_api_for_id(api="instance", id=reference_id)
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_one_case(self, reference_id):
+        response = self.get_api_for_id(api="case", id=reference_id)
+        return response.json()
+
+    @log_call
+    @ask_token
+    def delete_one_case(self, reference_id):
+        response = self.delete_api_for_id(api="case", id=reference_id)
+        return response.json()
+
+    @log_call
+    @ask_token
+    def put_one_case(self, reference_id, payload):
+        response = self.put_api_for_id(api="case", id=reference_id, payload=payload)
+        return response.json()
+
+    @log_call
+    @ask_token
+    def patch_one_case(self, reference_id, payload):
+        response = self.patch_api_for_id(api="case", id=reference_id, payload=payload)
         return response.json()
 
     @log_call
