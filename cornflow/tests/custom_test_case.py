@@ -92,7 +92,6 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-        print(response.text)
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
