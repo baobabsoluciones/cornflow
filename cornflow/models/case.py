@@ -48,7 +48,6 @@ class CaseModel(BaseDataModel):
     )
     solution = db.Column(JSON, nullable=True)
     solution_hash = db.Column(db.String(256), nullable=False)
-    # TODO: should it store the configuration as well to compare two cases?
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
