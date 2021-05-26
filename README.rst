@@ -275,100 +275,71 @@ or to get the html reports::
 
     coverage html
 
-Other deployment options
---------------------------
+Install with docker
+---------------------
 
-Deploying with docker-compose
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pull
+~~~~~~~~
 
-The docker-compose.yml file write in version '3' of the syntax describes the build of four docker containers::
+Pull the image from the Docker repository.
 
-    app python3 cornflow service
-    airflow service based on puckel/docker-airflow image
-    cornflow postgres database service
-    airflow postgres database service
+    docker pull baobabsoluciones/cornflow
 
-Create containers::
+Build
+~~~~~~~~~~
+
+Build cornflow image::
+
+    docker build -t cornflow .
+
+Optionally install Airflow personalized image in folder `airflow_config` ::
+
+    cd airflow_config && docker build -t docker-airflow .
+
+Don't forget to update the images in the docker-compose files to baobabsoluciones/cornflow:latest and baobabsoluciones/docker-airflow:latest.
+
+Usage
+~~~~~~~~~~
+
+We have created several `docker-compose.yml` files so that you can use them and deploy the test environment:
+By default, docker-airflow runs Airflow with SequentialExecutor::
 
     docker-compose up --build -d
 	
+For CeleryExecutor::
+
+    docker-compose -f docker-compose-cornflow-celery.yml up -d
+
 List containers::
 
     docker-compose ps
 
 Interact with container::
 
-    docker exec -it CONTAINER_ID bash
+    docker exec -it `docker ps -q --filter ancestor=baobabsoluciones/cornflow` bash
 
 See the logs for a particular service (e.g., SERVICE=cornflow)::
 
-    docker-compose logs SERVICE
+    docker-compose logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
 
 Stop the containers and clean volumes::
     
     docker-compose down --volumes --rmi all
-	
-destroy all container and images (be careful! this destroys all docker images of non running container)::
 
-    docker system prune -af
+Help me
+----------
 
-Appended in this repository are three more docker-compose files for different kind of deployment::
-	
-    Use "docker-compose -f docker-compose-cornflow-celery.yml up -d" for deploy cornflow with airflow celery executor and one worker. If a larger number of workers are required, use --scale parameter of docker-compose.
+If you have a database server and you only want to create the database or, for example, you already have an airflow environment, you can go to the following links to learn more about other types of cornflow deployment.
 
-    Use "docker-compose -f docker-compose-cornflow-separate.yml up -d" for deploy cornflow and postgres without the airflow platform. Please, replace "airflowurl" string inside with your airflow address.
+`Cornflow complete install documentation <https://baobabsoluciones.github.io/corn/main/includeme.html#install-cornflow>`_
+`Deploy cornflow with docker <https://baobabsoluciones.github.io/corn/deploy/index.html>`_
+`Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.0.2/index.html>`_
 
-    Use "docker-compose -f docker-compose-airflow-celery-separate.yml up -d" for deploy just the airflow celery executor and two workers.
+Development known errors
+---------------------------
 
-Running airflow with reverse proxy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
-Eg.::
-
-    [Nginx]
-    server {
-    listen 80;
-    server_name localhost;
-    location / {
-      proxy_pass http://localhost:5000;
-	}
-
-If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP Cloud Balancer, just make changes on airflow.cfg through environment variables::
-	
-	[webserver]
-	AIRFLOW__WEBSERVER__BASE_URL=http://my_host/myorg/airflow
-    AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX=True
-	[flower]
-	AIRFLOW__CELERY__FLOWER_URL_PREFIX=/myorg/flower
-
-More information in airflow doc page https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
-
-Setup cornflow database with PostgreSQL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You now need to create a user and password in postgresql (we will be using `postgres` and `postgresadmin`). And also you need to create a database (we will be using one with the name `cornflow`).
-
-Create a new user::
-
-    sudo -u postgres psql
-
-Edit the password for the user ``postgres``::
-
-    ALTER USER postgres PASSWORD 'postgresadmin';
-    \q
-
-Create a new database::
-
-    sudo su - postgres
-    psql -c "create database cornflow"
-    exit
-
-Finally, the environment variable needs to be changed::
-
-    export DATABASE_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow
-
-**Possible error with psycopg2:**
+Possible error with psycopg2
+******************************
 
 The installation of the psycopg2 may generate an error because it does not find the pg_config file.
 
