@@ -13,6 +13,14 @@ class CustomTestCase(TestCase):
         app = create_app("testing")
         return app
 
+    @staticmethod
+    def load_file(_file, fk=None, fk_id=None):
+        with open(_file) as f:
+            temp = json.load(f)
+        if fk is not None and fk_id is not None:
+            temp[fk] = fk_id
+        return temp
+
     def setUp(self):
         db.create_all()
         data = {
@@ -35,7 +43,7 @@ class CustomTestCase(TestCase):
         self.user = Auth.return_user_from_token(self.token)
         self.url = None
         self.model = None
-        self.response_items = set()
+        self.copied_items = set()
         self.items_to_check = []
 
     @staticmethod
@@ -75,7 +83,6 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
@@ -86,10 +93,13 @@ class CustomTestCase(TestCase):
             self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data):
+    def get_rows(self, url, data, post_url=None):
+
+        if post_url is None:
+            post_url = url
 
         codes = [
-            self.create_new_row(url=url, model=self.model, payload=d) for d in data
+            self.create_new_row(url=post_url, model=self.model, payload=d) for d in data
         ]
         rows = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
@@ -105,7 +115,7 @@ class CustomTestCase(TestCase):
 
     def get_keys_to_check(self, payload):
         if len(self.items_to_check):
-            return self.items_to_check
+            return self.items_to_check & payload.keys()
         return payload.keys()
 
     def get_one_row(

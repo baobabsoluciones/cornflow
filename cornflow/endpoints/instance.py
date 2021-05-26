@@ -57,11 +57,10 @@ class InstanceEndpoint(MetaResource, MethodResource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 
-        :return: a dictionary with a message or an object (message if it an error is encountered,
-          object with the data from the instances otherwise) and an integer with the HTTP status code
+        :return: a list of objects with the data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return InstanceModel.get_all_objects(self.get_user(), **kwargs)
+        return self.model.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
     @Auth.auth_required
@@ -74,17 +73,16 @@ class InstanceEndpoint(MetaResource, MethodResource):
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 
-        :return: a dictionary with a message(either an error encountered during creation
-          or the reference_id of the instance created if successful) and an integer with the HTTP status code
+        :return: an object with the data for the created instance and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        data_schema = kwargs.get("data_schema", "pulp")
+        data_schema = kwargs.get("schema", "solve_model_dag")
 
         if data_schema is None:
             # no schema provided, no validation to do
             return self.post_list(kwargs)
 
-        if data_schema == "pulp":
+        if data_schema == "pulp" or data_schema == "solve_model_dag":
             # this one we have the schema stored inside cornflow
             validate_and_continue(DataSchema(), kwargs["data"])
             return self.post_list(kwargs)
@@ -139,8 +137,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         an existing session (login) made by a user.
 
         :param str idx: ID of the instance
-        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
-          a message) and an integer with the HTTP status code.
+        :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         return self.put_detail(data, self.get_user(), idx)

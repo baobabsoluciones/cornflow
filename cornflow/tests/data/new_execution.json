@@ -14,5 +14,6 @@
     "logPath": "test_export_solver_json.log"
 },
 "name": "execution_1",
-"description": "This is a test for the executions"
+"description": "This is a test for the executions",
+"schema": "solve_model_dag"
 }

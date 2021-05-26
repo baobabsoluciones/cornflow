@@ -20,8 +20,8 @@ class TestInstancesListEndpoint(CustomTestCase):
         super().setUp()
         self.url = INSTANCE_URL
         self.model = InstanceModel
-        self.response_items = {"id", "name", "description", "created_at"}
-        self.items_to_check = ["name", "description"]
+        self.response_items = {"id", "name", "description", "created_at", "schema"}
+        self.items_to_check = ["name", "description", "schema"]
 
         def load_file(_file):
             with open(_file) as f:
@@ -74,19 +74,19 @@ class TestInstancesListEndpoint(CustomTestCase):
 
     def test_opt_filters_limit(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
         self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
 
     def test_opt_filters_offset(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
         self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
 
     def test_opt_filters_date_lte(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
         a = date_from_str(allrows.json[0]["created_at"])
@@ -101,7 +101,7 @@ class TestInstancesListEndpoint(CustomTestCase):
 
     def test_opt_filters_date_gte(self):
         # we create 4 instances
-        data_many = [self.payload for i in range(4)]
+        data_many = [self.payload for _ in range(4)]
         allrows = self.get_rows(self.url, data_many)
 
         date_limit = date_from_str(allrows.json[2]["created_at"]) + timedelta(
@@ -164,35 +164,36 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
             "user_id",
             "executions",
             "data_hash",
+            "schema",
         }
         # we only check name and description because this endpoint does not return data
-        self.items_to_check = ["name", "description"]
+        self.items_to_check = ["name", "description", "schema"]
 
 
 class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
     def test_get_one_instance(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=id)}
-        result = self.get_one_row(self.url + id + "/", payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx)}
+        result = self.get_one_row(self.url + idx + "/", payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
     def test_get_one_instance_superadmin(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_super_admin()
         self.get_one_row(
-            self.url + id + "/", {**self.payload, **dict(id=id)}, token=token
+            self.url + idx + "/", {**self.payload, **dict(id=idx)}, token=token
         )
 
     def test_update_one_instance(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=id, name="new_name")}
-        self.update_row(self.url + id + "/", dict(name="new_name"), payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx, name="new_name")}
+        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
 
     def test_update_one_instance_bad_format(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
         self.update_row(
-            self.url + id + "/",
+            self.url + idx + "/",
             dict(instance_id="some_id"),
             {},
             expected_status=400,
@@ -200,11 +201,11 @@ class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
         )
 
     def test_delete_one_instance(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        self.delete_row(self.url + id + "/")
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.delete_row(self.url + idx + "/")
 
     def test_get_nonexistent_instance(self):
-        result = self.get_one_row(
+        self.get_one_row(
             self.url + "some_key_" + "/", {}, expected_status=404, check_payload=False
         )
 
@@ -212,24 +213,24 @@ class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
 class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "data", "data_hash"}
-        self.items_to_check = ["name", "data"]
+        self.response_items = {"id", "name", "data", "data_hash", "schema"}
+        self.items_to_check = ["name", "data", "schema"]
 
     def test_get_one_instance(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=id)}
-        result = self.get_one_row(INSTANCE_URL + id + "/data/", payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {**self.payload, **dict(id=idx)}
+        result = self.get_one_row(INSTANCE_URL + idx + "/data/", payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
     def test_instance_compression(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + self.token,
             "Accept-Encoding": "gzip",
         }
-        response = self.client.get(INSTANCE_URL + id + "/data/", headers=headers)
+        response = self.client.get(INSTANCE_URL + idx + "/data/", headers=headers)
         self.assertEqual(response.headers["Content-Encoding"], "gzip")
         raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
         response = json.loads(raw)
@@ -237,10 +238,10 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         # self.assertEqual(resp.headers[], 'br')
 
     def test_get_one_instance_superadmin(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
+        idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_super_admin()
-        payload = {**self.payload, **dict(id=id)}
-        result = self.get_one_row(INSTANCE_URL + id + "/data/", payload, token=token)
+        payload = {**self.payload, **dict(id=idx)}
+        self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
 
 
 class TestInstanceModelMethods(CustomTestCase):
@@ -252,9 +253,9 @@ class TestInstanceModelMethods(CustomTestCase):
             self.payload = json.load(f)
 
     def test_repr_method(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(id, "<id {}>".format(id))
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.repr_method(idx, "<id {}>".format(idx))
 
     def test_str_method(self):
-        id = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(id, "<id {}>".format(id))
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.str_method(idx, "<id {}>".format(idx))

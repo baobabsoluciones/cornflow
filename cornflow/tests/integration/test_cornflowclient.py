@@ -47,6 +47,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         name = "test_instance1"
         description = "description123"
         data = pulp.LpProblem.fromMPS(mps_file, sense=1)[1].toDict()
+        schema = "solve_model_dag"
         payload = dict(data=data, name=name, description=description)
         return self.create_new_instance_payload(payload)
 
@@ -83,11 +84,13 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
         name = "test_execution_name_123"
         description = "test_execution_description_123"
+        schema = "solve_model_dag"
         payload = dict(
             instance_id=one_instance["id"],
             config=dict(solver="PULP_CBC_CMD", timeLimit=10),
             description=description,
             name=name,
+            schema=schema,
         )
         return self.create_new_execution(payload)
 
@@ -95,7 +98,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         payload = dict(
             data=dict(seconds=seconds),
             name="timer_instance",
-            data_schema="timer",
+            schema="timer",
             description="timer_description",
         )
         one_instance = self.create_new_instance_payload(payload)
@@ -104,7 +107,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
             config=dict(),
             name="timer_execution",
             description="timer_exec_description",
-            dag_name="timer",
+            schema="timer",
         )
         return self.create_new_execution(payload)
 
@@ -165,7 +168,7 @@ class TestCornflowClient(TestCornflowClientBasic):
             config=dict(solver="PULP_CBC_CMD", timeLimit=10),
             description=description,
             name=name,
-            dag_name="solve_model_dag_bad_this_does_not_exist",
+            schema="solve_model_dag_bad_this_does_not_exist",
         )
         _bad_func = lambda: self.client.create_execution(**payload)
         self.assertRaises(CornFlowApiError, _bad_func)
@@ -179,7 +182,7 @@ class TestCornflowClient(TestCornflowClientBasic):
             config=dict(solver="PULP_CBC_CMD", timeLimit=10),
             description=description,
             name=name,
-            dag_name="solve_model_dag",
+            schema="solve_model_dag",
         )
         return self.create_new_execution(payload)
 
@@ -202,7 +205,7 @@ class TestCornflowClient(TestCornflowClientBasic):
 
         payload = load_file(INSTANCE_PATH)
         payload["data"].pop("objective")
-        payload["data_schema"] = "solve_model_dag"
+        payload["schema"] = "solve_model_dag"
         _error_fun = lambda: self.client.create_instance(**payload)
         self.assertRaises(CornFlowApiError, _error_fun)
 
@@ -214,7 +217,7 @@ class TestCornflowClient(TestCornflowClientBasic):
 
         payload = load_file(INSTANCE_PATH)
         payload["data"]["objective"]["inexistant_property"] = 1
-        payload["data_schema"] = "solve_model_dag"
+        payload["schema"] = "solve_model_dag"
         self.client.create_instance(**payload)
 
     def test_new_instance_with_schema_good(self):
@@ -224,7 +227,7 @@ class TestCornflowClient(TestCornflowClientBasic):
             return temp
 
         payload = load_file(INSTANCE_PATH)
-        payload["data_schema"] = "solve_model_dag"
+        payload["schema"] = "solve_model_dag"
         self.create_new_instance_payload(payload)
 
     def test_server_alive(self):
@@ -298,7 +301,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             description=description,
             name=name,
             data=instance_payload["data"],
-            dag_name="solve_model_dag",
+            schema="solve_model_dag",
         )
         response = self.client.manual_execution(**payload)
         execution = self.client.get_results(response["id"])
@@ -325,7 +328,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             config=dict(solver="PULP_CBC_CMD", timeLimit=10),
             description=description,
             name=name,
-            dag_name="solve_model_dag",
+            schema="solve_model_dag",
         )
         response = self.client.manual_execution(**payload)
         execution = self.client.get_results(response["id"])
