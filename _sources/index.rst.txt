@@ -7,6 +7,7 @@ Contents:
     :maxdepth: 2
 
     main/index
+    deploy/index
     clients/index
     guides/index
     dev/index

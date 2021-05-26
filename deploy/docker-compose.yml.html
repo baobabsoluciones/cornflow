@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>docker-compose.yml &mdash; Cornflow 0.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Docker stack" href="docker-stack.html" />
+    <link rel="prev" title="Before you begin" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deployment</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">docker-compose.yml</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-cornflow">Running cornflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stop-and-clean-docker-environment">Stop and clean docker environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cornflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Deployment</a> &raquo;</li>
+        
+      <li>docker-compose.yml</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/deploy/docker-compose.yml.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="docker-compose-yml">
+<h1>docker-compose.yml<a class="headerlink" href="#docker-compose-yml" title="Permalink to this headline">¶</a></h1>
+<p>To deploy cornflow on Docker Compose, you should fetch the <cite>docker-compose.yml</cite> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose.yml&#39;</span>
+</pre></div>
+</div>
+<p>Before starting cornflow for the first time, You need to prepare your environment, i.e. create the necessary files, directories and initialize the database.
+On Linux, the mounted volumes in the container use the native Linux filesystem user/group permissions, so you have to make sure the container and host computer have matching file permissions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">./</span><span class="n">airflow_config</span><span class="o">/</span><span class="n">dags</span>
+<span class="n">cp</span> <span class="s2">&quot;yourpathtofilerequirements.txt&quot;</span> <span class="o">./</span><span class="n">airflow_config</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<div class="section" id="running-cornflow">
+<h2>Running cornflow<a class="headerlink" href="#running-cornflow" title="Permalink to this headline">¶</a></h2>
+<p>Now you can start all services:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+</pre></div>
+</div>
+<p>Cornflow service available at <a class="reference external" href="http://localhost:5000">http://localhost:5000</a>
+Airflow service available at <a class="reference external" href="http://localhost:8080">http://localhost:8080</a></p>
+<p>In the second terminal you can check the condition of the containers and make sure that no containers are in unhealthy condition:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
+
+<span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>          <span class="n">STATUS</span>                    <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
+<span class="mi">10863</span><span class="n">a20e7d6</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
+<span class="mi">0</span><span class="n">cfdd4debaab</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
+<span class="mi">9</span><span class="n">bc91747cd37</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
+<span class="n">c477c235b199</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="stop-and-clean-docker-environment">
+<h2>Stop and clean docker environment<a class="headerlink" href="#stop-and-clean-docker-environment" title="Permalink to this headline">¶</a></h2>
+<p>Stop the docker services and remove all volumes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span> <span class="o">--</span><span class="n">volumes</span> <span class="o">--</span><span class="n">rmi</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="docker-stack.html" class="btn btn-neutral float-right" title="Docker stack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="intro.html" class="btn btn-neutral float-left" title="Before you begin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

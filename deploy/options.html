@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Deployment options &mdash; Cornflow 0.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Production deployment and security" href="production.html" />
+    <link rel="prev" title="Running with simultaneous resolutions" href="simultaneous.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deployment</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Deployment options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-airflow-with-reverse-proxy">Running airflow with reverse proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-cornflow-database-with-your-own-postgresql-server">Setup cornflow database with your own PostgreSQL server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connect-to-your-own-airflow-deployment">Connect to your own airflow deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cornflow</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Deployment</a> &raquo;</li>
+        
+      <li>Deployment options</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/deploy/options.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="deployment-options">
+<h1>Deployment options<a class="headerlink" href="#deployment-options" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="running-airflow-with-reverse-proxy">
+<h2>Running airflow with reverse proxy<a class="headerlink" href="#running-airflow-with-reverse-proxy" title="Permalink to this headline">¶</a></h2>
+<p>Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
+Eg.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Nginx</span><span class="p">]</span>
+<span class="n">server</span> <span class="p">{</span>
+<span class="n">listen</span> <span class="mi">80</span><span class="p">;</span>
+<span class="n">server_name</span> <span class="n">localhost</span><span class="p">;</span>
+<span class="n">location</span> <span class="o">/</span> <span class="p">{</span>
+  <span class="n">proxy_pass</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">5000</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you want to run the solution with reverse proxy like Nginx, Amazon ELB or GCP Cloud Balancer, just make changes on airflow.cfg through environment variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">webserver</span><span class="p">]</span>
+<span class="n">AIRFLOW__WEBSERVER__BASE_URL</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">my_host</span><span class="o">/</span><span class="n">myorg</span><span class="o">/</span><span class="n">airflow</span>
+<span class="n">AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">[</span><span class="n">flower</span><span class="p">]</span>
+<span class="n">AIRFLOW__CELERY__FLOWER_URL_PREFIX</span><span class="o">=/</span><span class="n">myorg</span><span class="o">/</span><span class="n">flower</span>
+</pre></div>
+</div>
+<p>More information in <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html">airflow documentation page</a></p>
+</div>
+<div class="section" id="setup-cornflow-database-with-your-own-postgresql-server">
+<h2>Setup cornflow database with your own PostgreSQL server<a class="headerlink" href="#setup-cornflow-database-with-your-own-postgresql-server" title="Permalink to this headline">¶</a></h2>
+<p>Please visit the official <a class="reference external" href="https://www.postgresql.org/docs/">PostgreSQL</a> documentation page to learn more about this database engine.</p>
+<p><strong>Create user, password and database</strong></p>
+<p>To create a database, you must be a superuser. A user called postgres is made on and the user postgres has full superadmin access to entire PostgreSQL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">postgres</span> <span class="n">psql</span>
+<span class="n">postgres</span><span class="o">=</span><span class="c1"># create database cornflowdb;</span>
+<span class="n">postgres</span><span class="o">=</span><span class="c1"># create user myuser with encrypted password &#39;myuserpwd&#39;;</span>
+<span class="n">postgres</span><span class="o">=</span><span class="c1"># grant all privileges on database cornflowdb to myuser;</span>
+</pre></div>
+</div>
+<p><strong>Cornflow set connection to database</strong></p>
+<p>Before deploying Cornflow, set the environment variable with the address of the database:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="n">myserverport</span><span class="o">/</span><span class="n">cornflow</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">cornflow</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="connect-to-your-own-airflow-deployment">
+<h2>Connect to your own airflow deployment<a class="headerlink" href="#connect-to-your-own-airflow-deployment" title="Permalink to this headline">¶</a></h2>
+<p>For do this kind of deployment, you could use the template <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-separate.yml</span></code>.
+To deploy you should fetch docker-compose-cornflow-separate.yml:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml&#39;</span>
+</pre></div>
+</div>
+<p>Before deploying Cornflow, set the required airflow environment variables. For example with a file named <code class="docutils literal notranslate"><span class="pre">.env.airflow</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_USER</span><span class="o">=</span><span class="n">myairflowuser</span>
+<span class="n">AIRFLOW_PWD</span><span class="o">=</span><span class="n">myairflowuserpwd</span>
+<span class="n">AIRFLOW_URL</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">myairflowurl</span><span class="p">:</span><span class="mi">8080</span>
+<span class="n">AIRFLOW_CONN_CF_URI</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mycornflowuser</span><span class="p">:</span><span class="n">mycornflowpassword</span><span class="nd">@mycornflowurl</span>
+</pre></div>
+</div>
+<p>Then execute this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">separate</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">env</span><span class="o">-</span><span class="n">file</span> <span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">airflow</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="production.html" class="btn btn-neutral float-right" title="Production deployment and security" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="simultaneous.html" class="btn btn-neutral float-left" title="Running with simultaneous resolutions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

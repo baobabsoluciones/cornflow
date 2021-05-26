@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Supported clients &mdash; Cornflow 0.4 documentation</title>
+  <title>Before you begin &mdash; Cornflow 0.4 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Admin client" href="admin-spa.html" />
-    <link rel="prev" title="Logging and monitoring" href="../deploy/logs.html" /> 
+    <link rel="next" title="docker-compose.yml" href="docker-compose.yml.html" />
+    <link rel="prev" title="Deployment" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,12 +91,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deployment</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported clients</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="admin-spa.html">Web SPA client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="python-api.html">Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deployment</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Before you begin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -148,13 +154,15 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Supported clients</li>
+          <li><a href="index.html">Deployment</a> &raquo;</li>
+        
+      <li>Before you begin</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/clients/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/deploy/intro.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -167,15 +175,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="supported-clients">
-<h1>Supported clients<a class="headerlink" href="#supported-clients" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="admin-spa.html">Web SPA client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python-api.html">Python API</a></li>
-</ul>
-</div>
+  <div class="section" id="before-you-begin">
+<h1>Before you begin<a class="headerlink" href="#before-you-begin" title="Permalink to this headline">¶</a></h1>
+<p>Follow these steps to install the necessary tools:</p>
+<ol class="arabic simple">
+<li><p>Install <a class="reference external" href="https://docs.docker.com/engine/installation/">Docker Community Edition (CE)</a> on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly. Please refer to the Resources section if using Docker for Windows or Docker for Mac for more information.</p></li>
+<li><p>Install <a class="reference external" href="https://docs.docker.com/compose/install/">Docker Compose</a> and newer on your workstation.</p></li>
+</ol>
+<p>Older versions of docker-compose do not support all features required by the <cite>docker-compose.yml</cite> file, so double check that it meets the minimum version requirements.</p>
 </div>
 
 
@@ -184,8 +191,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="admin-spa.html" class="btn btn-neutral float-right" title="Admin client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../deploy/logs.html" class="btn btn-neutral float-left" title="Logging and monitoring" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="docker-compose.yml.html" class="btn btn-neutral float-right" title="docker-compose.yml" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Deployment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

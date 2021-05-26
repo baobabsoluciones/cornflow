@@ -1269,14 +1269,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "user_id", 
+            "name": "make_admin", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "make_admin", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }
