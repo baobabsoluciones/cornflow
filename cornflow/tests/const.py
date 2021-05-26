@@ -13,7 +13,6 @@ CASES_LIST = [CASE_PATH, "./cornflow/tests/data/new_case_raw_2.json"]
 CASE_URL = PREFIX + "/case/"
 CASE_INSTANCE_URL = PREFIX + "/case/instance/"
 CASE_COPY_URL = PREFIX + "/case/copy/"
-CASE_TO_INSTANCE_URL = PREFIX + "/case/live/"
 
 LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"

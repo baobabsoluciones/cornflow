@@ -15,7 +15,6 @@ from cornflow.tests.const import (
     CASE_COPY_URL,
     CASE_PATH,
     CASES_LIST,
-    CASE_TO_INSTANCE_URL,
 )
 
 from cornflow.models import CaseModel, UserModel
@@ -321,13 +320,12 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
 
     def test_case_to_new_instance(self):
         response = self.client.post(
-            CASE_TO_INSTANCE_URL + str(self.case_id) + "/",
+            CASE_URL + str(self.case_id) + "/instance/",
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
 
         payload = response.json
-        print(payload)
         result = self.get_one_row(INSTANCE_URL + payload["id"] + "/", payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
@@ -341,7 +339,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
 
     def test_case_does_not_exist(self):
         response = self.client.post(
-            CASE_TO_INSTANCE_URL + str(2) + "/",
+            CASE_URL + str(2) + "/instance/",
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )

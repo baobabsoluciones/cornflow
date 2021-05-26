@@ -94,5 +94,7 @@ resources = [
     dict(resource=CaseEndpoint, urls="/case/", endpoint="case"),
     dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
     dict(resource=CaseDataEndpoint, urls="/case/<int:idx>/data/", endpoint="case-data"),
-    dict(resource=CaseToInstance, urls="/case/live/<int:idx>/", endpoint="case-live"),
+    dict(
+        resource=CaseToInstance, urls="/case/<int:idx>/instance/", endpoint="case-live"
+    ),
 ]
