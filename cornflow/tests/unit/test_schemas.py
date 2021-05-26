@@ -1,7 +1,6 @@
 import unittest
 import json
 
-from flask_testing import TestCase
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.const import SCHEMA_URL
 from unittest.mock import patch, Mock
@@ -10,8 +9,6 @@ from cornflow_client import get_pulp_jsonschema
 from cornflow.schemas.solution_log import LogSchema
 from airflow_config.dags.model_functions import solve as solve_model
 from marshmallow import ValidationError, Schema, fields
-
-# from cornflow_client.airflow.api import Airflow
 
 
 class SchemaGenerator(unittest.TestCase):

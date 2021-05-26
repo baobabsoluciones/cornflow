@@ -1,24 +1,7 @@
 from marshmallow import fields, Schema
 
 
-class CaseBase(Schema):
-    """ """
-
-    id = fields.Int()
-    path = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    data = fields.Raw()
-    data_hash = fields.String()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
-    deleted_at = fields.DateTime()
-    solution = fields.Raw()
-    solution_hash = fields.String()
-    schema = fields.String()
-
-
-class CaseRawData(Schema):
+class CaseRawRequest(Schema):
 
     name = fields.Str(required=True)
     description = fields.Str()
@@ -33,11 +16,19 @@ class CaseListResponse(Schema):
     path = fields.Str()
     name = fields.Str()
     description = fields.Str()
+    data_hash = fields.String()
+    solution_hash = fields.String()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    deleted_at = fields.DateTime()
     schema = fields.String()
     dependents = fields.List(fields.Int())
+
+
+class CaseBase(CaseListResponse):
+    """ """
+
+    data = fields.Raw()
+    solution = fields.Raw()
 
 
 class CaseSchema(Schema):

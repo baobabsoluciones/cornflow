@@ -5,7 +5,7 @@ from .common import QueryFilters
 
 
 class QueryFiltersExecution(QueryFilters):
-    schema = fields.String(required=False)
+    pass
     # status = fields.Integer(required=False)
 
 
@@ -64,6 +64,7 @@ class ExecutionEditRequest(Schema):
 
 
 class ExecutionDagRequest(Schema):
+    # TODO: change name of solution_schema
     data = fields.Raw(required=False)
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
@@ -80,7 +81,7 @@ class ExecutionDetailsEndpointResponse(Schema):
     config = fields.Nested(ConfigSchema)
     name = fields.String()
     description = fields.String()
-    created_at = fields.String()
+    created_at = fields.DateTime()
     instance_id = fields.String()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
