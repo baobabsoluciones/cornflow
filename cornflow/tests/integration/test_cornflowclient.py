@@ -17,6 +17,12 @@ from cornflow.tests.const import INSTANCE_PATH
 from cornflow.shared.const import STATUS_HEALTHY
 
 
+def load_file(_file):
+    with open(_file) as f:
+        temp = json.load(f)
+    return temp
+
+
 class TestCornflowClientBasic(CustomTestCaseLive):
     def setUp(self, create_all=False):
         super().setUp()
@@ -65,6 +71,19 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         ).json()
         self.assertEqual(instance_data["data"], payload["data"])
         return instance
+
+    def create_new_case_payload(self, payload):
+        response = self.client.create_case(**payload)
+        log.debug("Created case with id: {}".format(response["id"]))
+        self.assertTrue("id" in response)
+        case = self.client.get_one_case(response["id"])
+        log.debug("Case with id={} exists in server".format(case["id"]))
+        self.assertEqual(case["id"], response["id"])
+        self.assertEqual(case["name"], payload["name"])
+        self.assertEqual(case["description"], payload["description"])
+        case_data = self.client.get_api_for_id("case", response["id"], "data").json()
+        self.assertEqual(case_data["data"], payload["data"])
+        return case
 
     def create_new_execution(self, payload):
         response = self.client.create_execution(**payload)
@@ -187,22 +206,12 @@ class TestCornflowClient(TestCornflowClientBasic):
         return self.create_new_execution(payload)
 
     def test_new_instance_with_default_schema_bad(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
-
         payload = load_file(INSTANCE_PATH)
         payload["data"].pop("objective")
         _error_fun = lambda: self.client.create_instance(**payload)
         self.assertRaises(CornFlowApiError, _error_fun)
 
     def test_new_instance_with_schema_bad(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
-
         payload = load_file(INSTANCE_PATH)
         payload["data"].pop("objective")
         payload["schema"] = "solve_model_dag"
@@ -210,25 +219,21 @@ class TestCornflowClient(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _error_fun)
 
     def test_new_instance_with_schema_additional_data(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
-
         payload = load_file(INSTANCE_PATH)
         payload["data"]["objective"]["inexistant_property"] = 1
         payload["schema"] = "solve_model_dag"
         self.client.create_instance(**payload)
 
     def test_new_instance_with_schema_good(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
 
         payload = load_file(INSTANCE_PATH)
         payload["schema"] = "solve_model_dag"
         self.create_new_instance_payload(payload)
+
+    def test_new_case_without_path(self):
+        payload = load_file(INSTANCE_PATH)
+        payload["path"] = ""
+        self.create_new_case_payload(payload)
 
     def test_server_alive(self):
         data = self.client.is_alive()
@@ -285,10 +290,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
 
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
@@ -314,11 +315,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(execution_data["data"], payload["data"])
 
     def test_manual_execution2(self):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
-
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"

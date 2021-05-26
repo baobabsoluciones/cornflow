@@ -2,18 +2,16 @@ import json
 import zlib
 import hashlib
 from cornflow.shared.utils import hash_json_256
-from datetime import datetime, timedelta
 from cornflow.models import InstanceModel, ExecutionModel
-from cornflow.tests.custom_test_case import CustomTestCase
+from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
     INSTANCE_PATH,
     EXECUTION_PATH,
     EXECUTION_URL_NORUN,
-    CASE_LIST_URL,
     CASE_INSTANCE_URL,
-    CASE_RAW_URL,
+    CASE_URL,
     CASE_COPY_URL,
     CASE_PATH,
     CASES_LIST,
@@ -21,13 +19,6 @@ from cornflow.tests.const import (
 )
 
 from cornflow.models import CaseModel, UserModel
-
-try:
-    date_from_str = datetime.fromisoformat
-except:
-
-    def date_from_str(_string):
-        return datetime.strptime(_string, "%Y-%m-%d %H:%M:%S.%f")
 
 
 class TestCasesModels(CustomTestCase):
@@ -176,11 +167,16 @@ class TestCasesRawDataEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.payload = self.load_file(CASE_PATH)
-        self.url = CASE_RAW_URL
+        self.url = CASE_URL
         self.model = CaseModel
         self.items_to_check = ["name", "description", "path", "schema"]
 
     def test_new_case(self):
+        self.create_new_row(self.url, self.model, self.payload)
+
+    def test_new_case_without_solution(self):
+        # payload = dict(self.payload)
+        # payload.pop("solution")
         self.create_new_row(self.url, self.model, self.payload)
 
 
@@ -190,7 +186,7 @@ class TestCaseCopyEndpoint(CustomTestCase):
         payload = self.load_file(CASE_PATH)
         self.model = CaseModel
         self.items_to_check = ["name", "description", "path", "schema"]
-        self.case_id = self.create_new_row(CASE_RAW_URL, self.model, payload)
+        self.case_id = self.create_new_row(CASE_URL, self.model, payload)
         self.payload = {"id": self.case_id}
         self.url = CASE_COPY_URL
         self.copied_items = [
@@ -227,17 +223,17 @@ class TestCaseCopyEndpoint(CustomTestCase):
             self.assertNotEqual(getattr(original_case, key), getattr(new_case, key))
 
 
-class TestCaseListEndpoint(CustomTestCase):
+class TestCaseListEndpoint(BaseTestCases.ListFilters):
     def setUp(self):
         super().setUp()
         self.payload = self.load_file(CASE_PATH)
         self.payloads = [self.load_file(f) for f in CASES_LIST]
         self.model = CaseModel
         self.items_to_check = ["name", "description", "path", "schema"]
-        self.url = CASE_LIST_URL
+        self.url = CASE_URL
 
     def test_get_rows(self):
-        self.get_rows(self.url, self.payloads, CASE_RAW_URL)
+        self.get_rows(self.url, self.payloads)
 
 
 class TestCaseDetailEndpoint(CustomTestCase):
@@ -250,9 +246,7 @@ class TestCaseDetailEndpoint(CustomTestCase):
             "description",
             "path",
             "schema",
-            "data",
             "data_hash",
-            "solution",
             "solution_hash",
         ]
         self.response_items = {
@@ -261,20 +255,17 @@ class TestCaseDetailEndpoint(CustomTestCase):
             "description",
             "path",
             "schema",
-            "data",
             "data_hash",
-            "solution",
             "solution_hash",
             "created_at",
             "updated_at",
-            "deleted_at",
         }
-        self.url = CASE_RAW_URL
+        self.url = CASE_URL
 
-    def test_get_one_instance(self):
+    def test_get_one_case(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=idx)}
-        result = self.get_one_row(CASE_LIST_URL + str(idx) + "/", payload)
+        result = self.get_one_row(self.url + str(idx) + "/", payload)
         diff = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(diff), 0)
 
@@ -286,12 +277,12 @@ class TestCaseDetailEndpoint(CustomTestCase):
     def test_update_one_instance(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=idx, name="new_name")}
-        self.update_row(CASE_LIST_URL + str(idx) + "/", dict(name="new_name"), payload)
+        self.update_row(CASE_URL + str(idx) + "/", dict(name="new_name"), payload)
 
     def test_update_one_instance_bad_format(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.update_row(
-            CASE_LIST_URL + str(idx) + "/",
+            CASE_URL + str(idx) + "/",
             dict(id=10),
             {},
             expected_status=400,
@@ -299,7 +290,7 @@ class TestCaseDetailEndpoint(CustomTestCase):
         )
 
         self.update_row(
-            CASE_LIST_URL + str(idx) + "/",
+            CASE_URL + str(idx) + "/",
             dict(data_hash=""),
             {},
             expected_status=400,
@@ -308,7 +299,7 @@ class TestCaseDetailEndpoint(CustomTestCase):
 
     def test_delete_one_case(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.delete_row(CASE_LIST_URL + str(idx) + "/")
+        self.delete_row(CASE_URL + str(idx) + "/")
 
 
 class TestCaseToInstanceEndpoint(CustomTestCase):
@@ -316,7 +307,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         super().setUp()
         self.payload = self.load_file(CASE_PATH)
         self.model = CaseModel
-        self.case_id = self.create_new_row(CASE_RAW_URL, self.model, self.payload)
+        self.case_id = self.create_new_row(CASE_URL, self.model, self.payload)
         self.response_items = {
             "id",
             "name",
@@ -336,6 +327,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         )
 
         payload = response.json
+        print(payload)
         result = self.get_one_row(INSTANCE_URL + payload["id"] + "/", payload)
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)

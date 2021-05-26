@@ -3,24 +3,7 @@ from marshmallow import fields, Schema
 from .common import QueryFilters as QueryFiltersCase
 
 
-class CaseBase(Schema):
-    """ """
-
-    id = fields.Int()
-    path = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    data = fields.Raw()
-    data_hash = fields.String()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
-    deleted_at = fields.DateTime()
-    solution = fields.Raw()
-    solution_hash = fields.String()
-    schema = fields.String()
-
-
-class CaseRawData(Schema):
+class CaseRawRequest(Schema):
 
     name = fields.Str(required=True)
     description = fields.Str()
@@ -35,18 +18,19 @@ class CaseListResponse(Schema):
     path = fields.Str()
     name = fields.Str()
     description = fields.Str()
+    data_hash = fields.String()
+    solution_hash = fields.String()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    deleted_at = fields.DateTime()
     schema = fields.String()
     dependents = fields.List(fields.Int())
 
 
-class CaseEditRequest(Schema):
-    path = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    schema = fields.String()
+class CaseBase(CaseListResponse):
+    """ """
+
+    data = fields.Raw()
+    solution = fields.Raw()
 
 
 class CaseSchema(Schema):
@@ -74,6 +58,12 @@ class CaseFromInstanceExecution(Schema):
 class CaseToLive(Schema):
     """ """
 
-    instance_id = fields.Str(required=True)
-    execution_id = fields.Str()
+    id = fields.Str(required=True)
     schema = fields.Str(required=True)
+
+
+class CaseEditRequest(Schema):
+    name = fields.String()
+    description = fields.String()
+    schema = fields.String()
+    path = fields.Str()

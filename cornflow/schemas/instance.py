@@ -1,8 +1,10 @@
 from marshmallow import fields, Schema
 from .execution import ExecutionSchema, ExecutionDetailsEndpointResponse
+from .common import QueryFilters
 
-#  this import needs to be there:
-from .common import QueryFilters as QueryFiltersInstance
+
+class QueryFiltersInstance(QueryFilters):
+    pass
 
 
 class InstanceSchema(Schema):
@@ -43,7 +45,7 @@ class InstanceEndpointResponse(Schema):
     id = fields.String()
     name = fields.String()
     description = fields.String()
-    created_at = fields.String()
+    created_at = fields.DateTime()
     user_id = fields.Integer()
     data_hash = fields.String()
     schema = fields.String(required=False)

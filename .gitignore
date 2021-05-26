@@ -160,5 +160,6 @@ build/
 cornssh
 cornssh.pub
 
-# DS Store
+# DS Store and vscode
 .DS_Store
+.vscode
