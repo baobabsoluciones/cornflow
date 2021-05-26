@@ -339,7 +339,7 @@ Development known errors
 ---------------------------
 
 Possible error with psycopg2
-******************************
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The installation of the psycopg2 may generate an error because it does not find the pg_config file.
 
