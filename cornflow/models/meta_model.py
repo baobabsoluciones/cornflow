@@ -87,7 +87,7 @@ class BaseDataModel(TraceAttributes):
     def get_all_objects(
         cls,
         user,
-        data_schema=None,
+        schema=None,
         creation_date_gte=None,
         creation_date_lte=None,
         offset=0,
@@ -97,7 +97,7 @@ class BaseDataModel(TraceAttributes):
         Query to get all objects from a user
 
         :param UserModel user: User object.
-        :param string data_schema: data_schema to filter (dag)
+        :param string schema: data_schema to filter (dag)
         :param string creation_date_gte: created_at needs to be larger or equal to this
         :param string creation_date_lte: created_at needs to be smaller or equal to this
         :param int offset: query offset for pagination
@@ -110,8 +110,8 @@ class BaseDataModel(TraceAttributes):
         if not user.is_admin():
             query = query.filter(cls.user_id == user.id)
 
-        if data_schema:
-            query = query.filter(cls.dag_name == data_schema)
+        if schema:
+            query = query.filter(cls.schema == schema)
         if creation_date_gte:
             query = query.filter(cls.created_at >= creation_date_gte)
         if creation_date_lte:
