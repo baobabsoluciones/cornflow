@@ -19,14 +19,13 @@ from ..schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
     CaseRawRequest,
-    CaseSchema,
     CaseListResponse,
     CaseToInstanceResponse,
     CaseEditRequest,
     QueryFiltersCase,
 )
 
-from ..schemas.common import JsonPatchSchema, QueryFilters
+from ..schemas.common import JsonPatchSchema
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
