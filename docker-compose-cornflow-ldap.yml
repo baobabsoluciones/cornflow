@@ -1,0 +1,105 @@
+version: '3'
+
+services:
+  cornflow:
+    image: baobabsoluciones/cornflow
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      - AIRFLOW_USER=admin
+      - AIRFLOW_PWD=admin
+      - CORNFLOW_DB_HOST=cornflow_db
+      - CORNFLOW_DB_PORT=5432
+      - CORNFLOW_DB_USER=cornflow
+      - CORNFLOW_DB_PASSWORD=cornflow
+      - CORNFLOW_DB=cornflow
+    depends_on:
+      - cornflow_db
+      - webserver
+
+  cornflow_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=cornflow
+      - POSTGRES_PASSWORD=cornflow
+      - POSTGRES_DB=cornflow
+    volumes:
+      - postgres_cf_data:/var/lib/postgresql/data/
+
+  webserver:
+    image: baobabsoluciones/docker-airflow
+    restart: always
+    volumes:
+      - ./airflow_config/dags:/usr/local/airflow/dags
+      - ./airflow_config/requirements.txt:/requirements.txt
+    environment:
+      - AIRFLOW_USER=admin
+      - AIRFLOW_PWD=admin
+      - AIRFLOW_DB_HOST=airflow_db
+      - AIRFLOW_DB_PORT=5432
+      - AIRFLOW_DB_USER=airflow
+      - AIRFLOW_DB_PASSWORD=airflow
+      - AIRFLOW_DB=airflow
+      - AIRFLOW_LDAP_ENABLE=true
+      - AIRFLOW_LDAP_URI=ldap://openldap:389
+      - AIRFLOW_LDAP_SEARCH=dc=cornflow,dc=com
+      - AIRFLOW_LDAP_BIND_USER=cn=admin,dc=cornflow,dc=com
+      - AIRFLOW_LDAP_BIND_PASSWORD=adminldap
+      - AIRFLOW_LDAP_UID_FIELD=cn
+    ports:
+      - 8080:8080
+    depends_on:
+      - airflow_db
+      - openldap
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+
+  airflow_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres_af_data:/var/lib/postgresql/data/
+
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    hostname: openldap
+    ports:
+      - 389:389
+      - 636:636
+    volumes:
+      - ./data/certificates:/container/service/slapd/assets/certs
+      - ./data/slapd/database:/var/lib/ldap
+      - ./data/slapd/config:/etc/ldap/slapd.d
+    environment: 
+      - LDAP_ORGANISATION=cornflow
+      - LDAP_DOMAIN=cornflow.com
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminldap
+      - LDAP_CONFIG_PASSWORD=admin
+      - LDAP_TLS=false
+      - "LDAP_BASE_DN=dc=cornflow,dc=com"
+
+  phpldapadmin:
+    image: osixia/phpldapadmin
+    container_name: phpldapadmin
+    hostname: phpldapadmin
+    ports:
+      - 8081:80
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    depends_on: 
+      - openldap
+
+volumes:
+  postgres_cf_data:
+  postgres_af_data:

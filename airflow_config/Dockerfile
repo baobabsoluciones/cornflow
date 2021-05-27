@@ -26,22 +26,28 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         ldap-utils \
         libffi6 \
         libffi-dev \
+        libldap2-dev \
 		libpq-dev \
         libsasl2-2 \
+        libsasl2-dev \
         libsasl2-modules \
         libssl1.1 \
+        libssl-dev \
         locales  \
         lsb-release \
 		python3-dev \
         sasl2-bin \
+        slapd \
         sqlite3 \
         unixodbc
 
 # install Airflow and extras: celery,postgres and redis
 RUN pip install "apache-airflow[celery,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+RUN pip install python-ldap
 
 # copy init script and config to container
 COPY scripts/initairflow.sh /initairflow.sh
+COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
 RUN chown -R airflow: /usr/local/airflow
