@@ -1,5 +1,122 @@
 {
   "definitions": {
+    "Case": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      }, 
+      "required": [
+        "id"
+      ], 
+      "type": "object"
+    }, 
+    "CaseBase": {
+      "properties": {
+        "created_at": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "data": {}, 
+        "data_hash": {
+          "type": "string"
+        }, 
+        "dependents": {
+          "items": {
+            "type": "integer"
+          }, 
+          "type": "array"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "integer"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "path": {
+          "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
+        }, 
+        "solution": {}, 
+        "solution_hash": {
+          "type": "string"
+        }, 
+        "updated_at": {
+          "format": "date-time", 
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "CaseFromInstanceExecution": {
+      "properties": {
+        "description": {
+          "type": "string"
+        }, 
+        "execution_id": {
+          "type": "string"
+        }, 
+        "instance_id": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "path": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "name", 
+        "path"
+      ], 
+      "type": "object"
+    }, 
+    "CaseListResponse": {
+      "properties": {
+        "created_at": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "data_hash": {
+          "type": "string"
+        }, 
+        "dependents": {
+          "items": {
+            "type": "integer"
+          }, 
+          "type": "array"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "integer"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "path": {
+          "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
+        }, 
+        "solution_hash": {
+          "type": "string"
+        }, 
+        "updated_at": {
+          "format": "date-time", 
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
     "Config": {
       "properties": {
         "gapAbs": {
@@ -52,9 +169,6 @@
         "config": {
           "$ref": "#/definitions/Config"
         }, 
-        "dag_name": {
-          "type": "string"
-        }, 
         "data": {}, 
         "description": {
           "type": "string"
@@ -69,6 +183,9 @@
           "type": "string"
         }, 
         "name": {
+          "type": "string"
+        }, 
+        "schema": {
           "type": "string"
         }, 
         "solution_schema": {
@@ -127,6 +244,7 @@
           "$ref": "#/definitions/Config"
         }, 
         "created_at": {
+          "format": "date-time", 
           "type": "string"
         }, 
         "data_hash": {
@@ -146,6 +264,9 @@
           "type": "string"
         }, 
         "name": {
+          "type": "string"
+        }, 
+        "schema": {
           "type": "string"
         }, 
         "state": {
@@ -188,9 +309,6 @@
         "config": {
           "$ref": "#/definitions/Config"
         }, 
-        "dag_name": {
-          "type": "string"
-        }, 
         "description": {
           "type": "string"
         }, 
@@ -198,6 +316,9 @@
           "type": "string"
         }, 
         "name": {
+          "type": "string"
+        }, 
+        "schema": {
           "type": "string"
         }
       }, 
@@ -275,6 +396,9 @@
         }, 
         "name": {
           "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
         }
       }, 
       "required": [
@@ -305,6 +429,9 @@
         "name": {
           "type": "string"
         }, 
+        "schema": {
+          "type": "string"
+        }, 
         "user_id": {
           "type": "integer"
         }
@@ -325,6 +452,7 @@
     "InstanceEndpointResponse": {
       "properties": {
         "created_at": {
+          "format": "date-time", 
           "type": "string"
         }, 
         "data_hash": {
@@ -337,6 +465,9 @@
           "type": "string"
         }, 
         "name": {
+          "type": "string"
+        }, 
+        "schema": {
           "type": "string"
         }, 
         "user_id": {
@@ -629,6 +760,169 @@
     "version": "v1"
   }, 
   "paths": {
+    "/case/": {
+      "get": {
+        "description": "Get all cases", 
+        "parameters": [
+          {
+            "in": "query", 
+            "name": "limit", 
+            "required": false, 
+            "type": "integer"
+          }, 
+          {
+            "in": "query", 
+            "name": "offset", 
+            "required": false, 
+            "type": "integer"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_gte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "format": "date-time", 
+            "in": "query", 
+            "name": "creation_date_lte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "in": "query", 
+            "name": "schema", 
+            "required": false, 
+            "type": "string"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/CaseListResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
+      "post": {
+        "description": "Create a new case from raw data", 
+        "parameters": [], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/copy/": {
+      "post": {
+        "description": "Copies a case to a new one", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/Case"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/instance/": {
+      "post": {
+        "description": "Create a new case from instance and execution", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/CaseFromInstanceExecution"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/{idx}/": {
+      "get": {
+        "description": "Get one case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/{idx}/data/": {
+      "get": {
+        "description": "Get data of a case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseBase"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
     "/dag/": {
       "post": {
         "description": "Create an execution manually.", 
@@ -727,7 +1021,7 @@
           }, 
           {
             "in": "query", 
-            "name": "data_schema", 
+            "name": "schema", 
             "required": false, 
             "type": "string"
           }
@@ -965,6 +1259,12 @@
             "format": "date-time", 
             "in": "query", 
             "name": "creation_date_lte", 
+            "required": false, 
+            "type": "string"
+          }, 
+          {
+            "in": "query", 
+            "name": "schema", 
             "required": false, 
             "type": "string"
           }

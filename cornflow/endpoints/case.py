@@ -83,7 +83,6 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
 
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
     @Auth.auth_required
-    @inflate
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseFromInstanceExecution, location="json")
     def post(self, **kwargs):
@@ -160,7 +159,6 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
 
     @doc(description="Copies a case to a new one", tags=["Cases"])
     @Auth.auth_required
-    @inflate
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseSchema, location="json")
     def post(self, **kwargs):
