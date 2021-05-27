@@ -1,3 +1,6 @@
+"""
+File with the schemas used by the cases endpoints
+"""
 from marshmallow import fields, Schema
 
 from .common import QueryFilters as QueryFiltersCase

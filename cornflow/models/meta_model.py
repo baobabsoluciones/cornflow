@@ -1,19 +1,24 @@
 """
 
 """
+# Import from libraries
 import datetime
-
-from sqlalchemy.ext.declarative import declared_attr
+import jsonpatch
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
+from sqlalchemy.ext.declarative import declared_attr
 
-
+# Import from internal modules
+from ..shared.exceptions import InvalidPatch
 from ..shared.utils import db, hash_json_256
 
 
 class TraceAttributes(db.Model):
-    """ """
+    """
+    Abstract data model that defines the trace attributes of each model. This help trace when an object was created,
+     updated and deleted
+    """
 
     __abstract__ = True
     created_at = db.Column(db.DateTime, nullable=False)
@@ -74,6 +79,23 @@ class BaseDataModel(TraceAttributes):
         """
         for key, item in data.items():
             setattr(self, key, item)
+        super().update(data)
+
+    def patch(self, data):
+        """
+
+        :param dict data:
+        :type data:
+        """
+        try:
+            self.data = jsonpatch.apply_patch(self.data, data.get("patch"))
+        except jsonpatch.JsonPatchConflict as e:
+            raise InvalidPatch(payload={"message": str(e)})
+        except jsonpatch.JsonPointerException as e:
+            raise InvalidPatch(payload={"message": str(e)})
+
+        self.data_hash = hash_json_256(self.data)
+        self.user_id = data.get("user_id")
         super().update(data)
 
     def delete(self):

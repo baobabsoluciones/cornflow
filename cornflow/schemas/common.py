@@ -1,3 +1,6 @@
+"""
+File with the common schemas used in cornflow
+"""
 from marshmallow import fields, Schema
 
 
@@ -16,4 +19,4 @@ class PatchOperation(Schema):
 
 
 class JsonPatchSchema(Schema):
-    jsonpatch = fields.Nested(PatchOperation, many=True)
+    patch = fields.Nested(PatchOperation, many=True)

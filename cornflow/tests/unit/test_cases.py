@@ -1,10 +1,17 @@
+"""
+Unit test for the cases models and endpoints
+"""
+
+# Import from libraries
+import hashlib
 import json
 import jsonpatch
 import zlib
-import hashlib
+
+
+# Import from internal modules
+from cornflow.models import CaseModel, ExecutionModel, InstanceModel, UserModel
 from cornflow.shared.utils import hash_json_256
-from cornflow.models import InstanceModel, ExecutionModel
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
@@ -17,8 +24,7 @@ from cornflow.tests.const import (
     CASE_PATH,
     CASES_LIST,
 )
-
-from cornflow.models import CaseModel, UserModel
+from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
 
 class TestCasesModels(CustomTestCase):
@@ -357,19 +363,56 @@ class TestCaseJsonPatch(CustomTestCase):
         self.payloads = [self.load_file(f) for f in CASES_LIST]
         self.items_to_check = ["name", "description", "path", "schema"]
         self.url = CASE_URL
+        self.patch = {
+            "patch": jsonpatch.make_patch(
+                self.payloads[0]["data"], self.payloads[1]["data"]
+            ).patch
+        }
 
     def test_json_patch(self):
-        patch = jsonpatch.make_patch(self.payloads[0], self.payloads[1])
-        # print(self.url + str(self.case_id) + "/data/")
-        # print(json.dumps(patch.__dict__["patch"]))
-        payload = dict()
-        payload["jsonpatch"] = patch.__dict__["patch"]
-        print(payload)
-        response = self.client.put(
+        self.patch_row(
             self.url + str(self.case_id) + "/data/",
-            data=payload,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
+            self.patch,
+            self.payloads[1]["data"],
         )
 
-        print(response.json)
+    def test_not_valid_json_patch(self):
+        payload = {"patch": "Not a valid patch"}
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            payload,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_not_valid_json_patch_2(self):
+        payload = {"some_key": "some_value"}
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            payload,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_patch_non_existing_case(self):
+        self.patch_row(
+            self.url + str(500) + "/data/",
+            self.patch,
+            {},
+            expected_status=404,
+            check_payload=False,
+        )
+
+    def test_test_not_valid_json_patch_3(self):
+        payload = {
+            "patch": jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch
+        }
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            payload,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
