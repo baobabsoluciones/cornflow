@@ -216,8 +216,8 @@ class CustomTestCase(TestCase):
 class BaseTestCases:
     class ListFilters(CustomTestCase):
         def setUp(self):
-            self.payload = None
             super().setUp()
+            self.payload = None
 
         def test_opt_filters_limit(self):
             # we create 4 instances
@@ -273,3 +273,98 @@ class BaseTestCases:
                 allrows.json[:2],
             )
             return
+
+    class DetailEndpoint(CustomTestCase):
+        def setUp(self):
+            super().setUp()
+            self.payload = None
+            self.response_items = None
+            self.query_arguments = None
+
+        def url_with_query_arguments(self):
+            if self.query_arguments is None:
+                return self.url
+            else:
+                return (
+                    self.url
+                    + "?"
+                    + "&".join(["%s=%s" % _ for _ in self.query_arguments.items()])
+                )
+
+        def test_get_one_row(self):
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            payload = {**self.payload, **dict(id=idx)}
+            result = self.get_one_row(self.url + str(idx) + "/", payload)
+            diff = self.response_items.symmetric_difference(result.keys())
+            self.assertEqual(len(diff), 0)
+
+        def test_get_one_row_superadmin(self):
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            token = self.create_super_admin()
+            self.get_one_row(
+                self.url + str(idx) + "/", {**self.payload, **dict(id=idx)}, token=token
+            )
+
+        def test_get_nonexistent_row(self):
+            self.get_one_row(
+                self.url + "500" + "/", {}, expected_status=404, check_payload=False
+            )
+
+        def test_update_one_row(self):
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            payload = {**self.payload, **dict(id=idx, name="new_name")}
+            self.update_row(self.url + str(idx) + "/", dict(name="new_name"), payload)
+
+        def test_update_one_row_bad_format(self):
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            self.update_row(
+                self.url + str(idx) + "/",
+                dict(id=10),
+                {},
+                expected_status=400,
+                check_payload=False,
+            )
+
+            self.update_row(
+                self.url + str(idx) + "/",
+                dict(data_hash=""),
+                {},
+                expected_status=400,
+                check_payload=False,
+            )
+
+        def test_delete_one_row(self):
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            self.delete_row(self.url + str(idx) + "/")
+
+        # TODO: move to base endpoint custom class
+        def test_incomplete_payload(self):
+            payload = {"description": "arg"}
+            self.create_new_row(
+                self.url_with_query_arguments(),
+                self.model,
+                payload,
+                expected_status=400,
+                check_payload=False,
+            )
+
+        # TODO: move to base endpoint custom class
+        def test_payload_bad_format(self):
+            payload = {"name": 1}
+            self.create_new_row(
+                self.url_with_query_arguments(),
+                self.model,
+                payload,
+                expected_status=400,
+                check_payload=False,
+            )

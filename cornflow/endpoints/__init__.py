@@ -90,11 +90,13 @@ resources = [
         urls="/case/instance/",
         endpoint="case-instance-execution",
     ),
-    dict(resource=CaseCopyEndpoint, urls="/case/copy/", endpoint="case-copy"),
+    dict(resource=CaseCopyEndpoint, urls="/case/<int:idx>/copy/", endpoint="case-copy"),
     dict(resource=CaseEndpoint, urls="/case/", endpoint="case"),
     dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
     dict(resource=CaseDataEndpoint, urls="/case/<int:idx>/data/", endpoint="case-data"),
     dict(
-        resource=CaseToInstance, urls="/case/<int:idx>/instance/", endpoint="case-live"
+        resource=CaseToInstance,
+        urls="/case/<int:idx>/instance/",
+        endpoint="case-instance",
     ),
 ]

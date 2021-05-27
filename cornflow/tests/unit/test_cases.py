@@ -12,7 +12,6 @@ from cornflow.tests.const import (
     EXECUTION_URL_NORUN,
     CASE_INSTANCE_URL,
     CASE_URL,
-    CASE_COPY_URL,
     CASE_PATH,
     CASES_LIST,
 )
@@ -187,7 +186,7 @@ class TestCaseCopyEndpoint(CustomTestCase):
         self.items_to_check = ["name", "description", "path", "schema"]
         self.case_id = self.create_new_row(CASE_URL, self.model, payload)
         self.payload = {"id": self.case_id}
-        self.url = CASE_COPY_URL
+        self.url = CASE_URL
         self.copied_items = [
             "description",
             "data",
@@ -203,11 +202,13 @@ class TestCaseCopyEndpoint(CustomTestCase):
         self.new_items = ["created_at", "updated_at"]
 
     def test_copy_case(self):
-        new_case_id = self.create_new_row(self.url, self.model, self.payload)
+        new_case = self.create_new_row(
+            self.url + str(self.case_id) + "/copy/", self.model, {}, check_payload=False
+        )
         user = UserModel.get_one_user(self.user)
 
         original_case = CaseModel.get_one_object_from_user(user, self.case_id)
-        new_case = CaseModel.get_one_object_from_user(user, new_case_id)
+        new_case = CaseModel.get_one_object_from_user(user, new_case["id"])
 
         for key in self.copied_items:
             self.assertEqual(getattr(original_case, key), getattr(new_case, key))
@@ -235,7 +236,7 @@ class TestCaseListEndpoint(BaseTestCases.ListFilters):
         self.get_rows(self.url, self.payloads)
 
 
-class TestCaseDetailEndpoint(CustomTestCase):
+class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
     def setUp(self):
         super().setUp()
         self.payload = self.load_file(CASE_PATH)
@@ -260,45 +261,6 @@ class TestCaseDetailEndpoint(CustomTestCase):
             "updated_at",
         }
         self.url = CASE_URL
-
-    def test_get_one_case(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx)}
-        result = self.get_one_row(self.url + str(idx) + "/", payload)
-        diff = self.response_items.symmetric_difference(result.keys())
-        self.assertEqual(len(diff), 0)
-
-    def test_get_nonexistent_instance(self):
-        self.get_one_row(
-            self.url + "500" + "/", {}, expected_status=404, check_payload=False
-        )
-
-    def test_update_one_instance(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx, name="new_name")}
-        self.update_row(CASE_URL + str(idx) + "/", dict(name="new_name"), payload)
-
-    def test_update_one_instance_bad_format(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.update_row(
-            CASE_URL + str(idx) + "/",
-            dict(id=10),
-            {},
-            expected_status=400,
-            check_payload=False,
-        )
-
-        self.update_row(
-            CASE_URL + str(idx) + "/",
-            dict(data_hash=""),
-            {},
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_delete_one_case(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.delete_row(CASE_URL + str(idx) + "/")
 
 
 class TestCaseToInstanceEndpoint(CustomTestCase):

@@ -1,6 +1,13 @@
+"""
+This file contains the schemas used to validate the incoming data to the different cases endpoints
+and to serialize the response data given by the same endpoints.
+"""
+
+# Imports from marshmallow library
 from marshmallow import fields, Schema
 
-from .common import QueryFilters as QueryFiltersCase
+# Import from internal modules
+from .common import QueryFilters
 
 
 class CaseRawRequest(Schema):
@@ -55,7 +62,7 @@ class CaseFromInstanceExecution(Schema):
     path = fields.Str(required=True)
 
 
-class CaseToLive(Schema):
+class CaseToInstanceResponse(Schema):
     """ """
 
     id = fields.Str(required=True)
@@ -66,4 +73,7 @@ class CaseEditRequest(Schema):
     name = fields.String()
     description = fields.String()
     schema = fields.String()
-    path = fields.Str()
+
+
+class QueryFiltersCase(QueryFilters):
+    pass
