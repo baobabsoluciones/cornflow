@@ -26,6 +26,7 @@ from ..schemas.case import (
     QueryFiltersCase,
 )
 
+from ..schemas.common import JsonPatchSchema, QueryFilters
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidData, ObjectDoesNotExist
@@ -236,6 +237,10 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
+    """
+    Endpoint used to get the data of a given case
+    """
+
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @marshal_with(CaseBase)
@@ -253,6 +258,14 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_one_object_from_user(self.get_user(), idx)
+
+    @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
+    @Auth.auth_required
+    @use_kwargs(QueryFilters, location="json")
+    def put(self, idx, **kwargs):
+        print(idx)
+        print(**kwargs)
+        return {}, 200
 
 
 class CaseToInstance(MetaResource, MethodResource):

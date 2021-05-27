@@ -1,4 +1,5 @@
 import json
+import jsonpatch
 import zlib
 import hashlib
 from cornflow.shared.utils import hash_json_256
@@ -345,3 +346,30 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json["error"], "The object does not exist")
+
+
+class TestCaseJsonPatch(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.case_id = self.create_new_row(CASE_URL, self.model, self.payload)
+        self.payloads = [self.load_file(f) for f in CASES_LIST]
+        self.items_to_check = ["name", "description", "path", "schema"]
+        self.url = CASE_URL
+
+    def test_json_patch(self):
+        patch = jsonpatch.make_patch(self.payloads[0], self.payloads[1])
+        # print(self.url + str(self.case_id) + "/data/")
+        # print(json.dumps(patch.__dict__["patch"]))
+        payload = dict()
+        payload["jsonpatch"] = patch.__dict__["patch"]
+        print(payload)
+        response = self.client.put(
+            self.url + str(self.case_id) + "/data/",
+            data=payload,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        print(response.json)

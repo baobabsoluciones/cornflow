@@ -6,4 +6,14 @@ class QueryFilters(Schema):
     offset = fields.Int(required=False, default=0)
     creation_date_gte = fields.DateTime(required=False)
     creation_date_lte = fields.DateTime(required=False)
-    schema = fields.String(required=False)
+    schema = fields.Str(required=False)
+
+
+class PatchOperation(Schema):
+    op = fields.Str(required=True)
+    path = fields.Str(required=True)
+    value = fields.Raw()
+
+
+class JsonPatchSchema(Schema):
+    jsonpatch = fields.Nested(PatchOperation, many=True)

@@ -17,29 +17,29 @@ class UserSchema(Schema):
 
 
 class UserEndpointResponse(Schema):
-    id = fields.Integer()
+    id = fields.Int()
     admin = fields.Boolean(default=False)
     super_admin = fields.Boolean(default=False)
-    name = fields.String()
-    email = fields.String()
-    created_at = fields.String()
+    name = fields.Str()
+    email = fields.Str()
+    created_at = fields.Str()
 
 
 class UserDetailsEndpointResponse(Schema):
-    id = fields.Integer()
-    name = fields.String()
-    email = fields.String()
+    id = fields.Int()
+    name = fields.Str()
+    email = fields.Str()
     admin = fields.Boolean(default=False)
 
 
 class LoginEndpointRequest(Schema):
-    email = fields.String(required=True)
-    password = fields.String(required=True)
+    email = fields.Str(required=True)
+    password = fields.Str(required=True)
 
 
 class UserEditRequest(Schema):
-    name = fields.String(required=False)
-    email = fields.String(required=False)
+    name = fields.Str(required=False)
+    email = fields.Str(required=False)
     password = fields.Str(required=False)
 
 

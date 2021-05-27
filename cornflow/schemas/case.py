@@ -7,7 +7,7 @@ class CaseRawRequest(Schema):
 
     name = fields.Str(required=True)
     description = fields.Str()
-    schema = fields.String(required=True)
+    schema = fields.Str(required=True)
     path = fields.Str(required=True)
     data = fields.Raw(required=True)
     solution = fields.Raw()
@@ -18,11 +18,11 @@ class CaseListResponse(Schema):
     path = fields.Str()
     name = fields.Str()
     description = fields.Str()
-    data_hash = fields.String()
-    solution_hash = fields.String()
+    data_hash = fields.Str()
+    solution_hash = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    schema = fields.String()
+    schema = fields.Str()
     dependents = fields.List(fields.Int())
 
 
@@ -63,7 +63,7 @@ class CaseToLive(Schema):
 
 
 class CaseEditRequest(Schema):
-    name = fields.String()
-    description = fields.String()
-    schema = fields.String()
+    name = fields.Str()
+    description = fields.Str()
+    schema = fields.Str()
     path = fields.Str()
