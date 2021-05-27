@@ -89,69 +89,21 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         self.payload["instance_id"] = fk_id
 
 
-class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
-    def test_get_nonexistent_execution(self):
-        result = self.get_one_row(
-            self.url + "some_key_" + "/", {}, expected_status=404, check_payload=False
-        )
-        return result
+class TestExecutionsDetailEndpoint(
+    TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
+):
+    def setUp(self):
+        super().setUp()
+        self.url = self.url
+        self.query_arguments = {"run": 0}
 
-    def test_get_one_execution(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        result = self.get_one_row(self.url + idx, payload)
-        dif = self.response_items.symmetric_difference(result.keys())
-        self.assertEqual(len(dif), 0)
-
-    def test_incomplete_payload(self):
-        payload = {"description": "arg"}
-        response = self.create_new_row(
-            self.url + "?run=0",
-            self.model,
-            payload,
-            expected_status=400,
-            check_payload=False,
-        )
-
+    # TODO: this test should be moved as it is not using the detail endpoint
     def test_incomplete_payload2(self):
         payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
         response = self.create_new_row(
             self.url + "?run=0",
             self.model,
             payload,
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_payload_bad_format(self):
-        payload = {"name": 1}
-        response = self.create_new_row(
-            self.url + "?run=0",
-            self.model,
-            payload,
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_delete_one_execution(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.delete_row(self.url + idx + "/")
-        self.get_one_row(
-            self.url + idx, payload={}, expected_status=404, check_payload=False
-        )
-
-    def test_update_one_execution(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx, name="new_name")}
-        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
-
-    def test_update_one_execution_bad_format(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.update_row(
-            self.url + idx + "/",
-            dict(instance_id="some_id"),
-            {},
             expected_status=400,
             check_payload=False,
         )
@@ -186,18 +138,6 @@ class TestExecutionsDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.get_one_row(
             self.url + idx, payload={}, expected_status=404, check_payload=False
         )
-
-    def test_get_one_execution_superadmin(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        token = self.create_super_admin()
-        self.get_one_row(
-            self.url + idx + "/", {**self.payload, **dict(id=idx)}, token=token
-        )
-
-    def test_edit_one_execution(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx, name="new_name")}
-        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
 
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
