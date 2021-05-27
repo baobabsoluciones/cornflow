@@ -21,7 +21,7 @@ from ..schemas.case import (
     CaseRawRequest,
     CaseSchema,
     CaseListResponse,
-    CaseToLive,
+    CaseToInstanceResponse,
     CaseEditRequest,
     QueryFiltersCase,
 )
@@ -84,7 +84,6 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
 
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
     @Auth.auth_required
-    @inflate
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseFromInstanceExecution, location="json")
     def post(self, **kwargs):
@@ -163,12 +162,10 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
 
     @doc(description="Copies a case to a new one", tags=["Cases"])
     @Auth.auth_required
-    @inflate
     @marshal_with(CaseListResponse)
-    @use_kwargs(CaseSchema, location="json")
-    def post(self, **kwargs):
+    def post(self, idx):
         """ """
-        case = self.model.get_one_object_from_user(self.get_user(), kwargs.get("id"))
+        case = self.model.get_one_object_from_user(self.get_user(), idx)
         data = case.__dict__
         payload = dict()
         for key in data.keys():
@@ -212,7 +209,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
-        API method to edit a case created by the user and its basic related info (name, description, path and schema).
+        API method to edit a case created by the user and its basic related info (name, description and schema).
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
@@ -283,7 +280,7 @@ class CaseToInstance(MetaResource, MethodResource):
         tags=["Cases"],
     )
     @Auth.auth_required
-    @marshal_with(CaseToLive)
+    @marshal_with(CaseToInstanceResponse)
     def post(self, idx):
         """
         API method to copy the information stored in a case to a new instance or a new instance and execution.
