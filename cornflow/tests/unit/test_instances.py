@@ -122,44 +122,10 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
         self.items_to_check = ["name", "description", "schema"]
 
 
-class TestInstancesDetailEndpoint(TestInstancesDetailEndpointBase):
-    def test_get_one_instance(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx)}
-        result = self.get_one_row(self.url + idx + "/", payload)
-        dif = self.response_items.symmetric_difference(result.keys())
-        self.assertEqual(len(dif), 0)
-
-    def test_get_one_instance_superadmin(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        token = self.create_super_admin()
-        self.get_one_row(
-            self.url + idx + "/", {**self.payload, **dict(id=idx)}, token=token
-        )
-
-    def test_update_one_instance(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        payload = {**self.payload, **dict(id=idx, name="new_name")}
-        self.update_row(self.url + idx + "/", dict(name="new_name"), payload)
-
-    def test_update_one_instance_bad_format(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.update_row(
-            self.url + idx + "/",
-            dict(instance_id="some_id"),
-            {},
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_delete_one_instance(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.delete_row(self.url + idx + "/")
-
-    def test_get_nonexistent_instance(self):
-        self.get_one_row(
-            self.url + "some_key_" + "/", {}, expected_status=404, check_payload=False
-        )
+class TestInstancesDetailEndpoint(
+    TestInstancesDetailEndpointBase, BaseTestCases.DetailEndpoint
+):
+    pass
 
 
 class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):

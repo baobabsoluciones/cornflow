@@ -98,7 +98,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
 class InstanceDetailsEndpointBase(MetaResource, MethodResource):
     """
-    Endpoint used to get the information ofa single instance, edit it or delete it
+    Endpoint used to get the information of a single instance, edit it or delete it
     """
 
     def __init__(self):
