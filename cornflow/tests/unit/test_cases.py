@@ -3,10 +3,8 @@ Unit test for the cases models and endpoints
 """
 
 # Import from libraries
-import hashlib
 import json
 import jsonpatch
-import zlib
 
 
 # Import from internal modules
@@ -22,6 +20,8 @@ from cornflow.tests.const import (
     CASE_URL,
     CASE_PATH,
     CASES_LIST,
+    JSON_PATCH_GOOD_PATH,
+    JSON_PATCH_BAD_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
@@ -315,6 +315,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json["error"], "The object does not exist")
 
+
 class TestCaseJsonPatch(CustomTestCase):
     def setUp(self):
         super().setUp()
@@ -329,11 +330,19 @@ class TestCaseJsonPatch(CustomTestCase):
                 self.payloads[0]["data"], self.payloads[1]["data"]
             ).patch
         }
+        self.patch_file = self.load_file(JSON_PATCH_GOOD_PATH)
 
     def test_json_patch(self):
         self.patch_row(
             self.url + str(self.case_id) + "/data/",
             self.patch,
+            self.payloads[1]["data"],
+        )
+
+    def test_json_patch_file(self):
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            self.patch_file,
             self.payloads[1]["data"],
         )
 
@@ -357,6 +366,28 @@ class TestCaseJsonPatch(CustomTestCase):
             check_payload=False,
         )
 
+    def test_not_valid_json_patch_3(self):
+        patch = {
+            "patch": jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch
+        }
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            patch,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_not_valid_json_patch_4(self):
+        patch = self.load_file(JSON_PATCH_BAD_PATH)
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            patch,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
     def test_patch_non_existing_case(self):
         self.patch_row(
             self.url + str(500) + "/data/",
@@ -366,14 +397,16 @@ class TestCaseJsonPatch(CustomTestCase):
             check_payload=False,
         )
 
-    def test_test_not_valid_json_patch_3(self):
-        payload = {
-            "patch": jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch
-        }
-        self.patch_row(
-            self.url + str(self.case_id) + "/data/",
-            payload,
-            {},
-            expected_status=400,
-            check_payload=False,
+    def test_patch_created_properly(self):
+        self.assertEqual(len(self.patch_file["patch"]), len(self.patch["patch"]))
+
+    def test_patch_not_created_properly(self):
+        # Compares the number of operations, not the operations themselves
+        self.assertNotEqual(
+            len(self.patch_file["patch"]),
+            len(jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch),
         )
+
+        # Compares the number of operations, not the operations themselves
+        patch = self.load_file(JSON_PATCH_BAD_PATH)
+        self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))

@@ -89,10 +89,10 @@ class BaseDataModel(TraceAttributes):
         """
         try:
             self.data = jsonpatch.apply_patch(self.data, data.get("patch"))
-        except jsonpatch.JsonPatchConflict as e:
-            raise InvalidPatch(payload={"message": str(e)})
-        except jsonpatch.JsonPointerException as e:
-            raise InvalidPatch(payload={"message": str(e)})
+        except jsonpatch.JsonPatchConflict:
+            raise InvalidPatch()
+        except jsonpatch.JsonPointerException:
+            raise InvalidPatch()
 
         self.data_hash = hash_json_256(self.data)
         self.user_id = data.get("user_id")
