@@ -121,6 +121,7 @@ if [ "$AIRFLOW_LDAP_ENABLE" = "true" ]; then
   # Default values corresponding to the default compose files
     : "${AIRFLOW_LDAP_URI:="ldap://openldap:389"}"
     : "${AIRFLOW_LDAP_SEARCH:="dc=cornflow,dc=com"}"
+    : "${AIRFLOW_USER_REGISTRATION_ROLE:="Admin"}"
     : "${AIRFLOW_LDAP_BIND_USER:="cn=admin,dc=cornflow,dc=com"}"
     : "${AIRFLOW_LDAP_UID_FIELD:="cn"}"
     : "${AIRFLOW_LDAP_BIND_PASSWORD:="adminldap"}"

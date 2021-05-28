@@ -89,7 +89,7 @@ services:
       - "LDAP_BASE_DN=dc=cornflow,dc=com"
 
   phpldapadmin:
-    image: osixia/phpldapadmin
+    image: osixia/phpldapadmin:0.9.0
     container_name: phpldapadmin
     hostname: phpldapadmin
     ports:

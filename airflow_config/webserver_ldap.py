@@ -40,7 +40,7 @@ AUTH_TYPE = AUTH_LDAP
 # Will allow user self registration
 AUTH_USER_REGISTRATION = True
 # The default user self registration role
-AUTH_USER_REGISTRATION_ROLE = "Admin"
+AUTH_USER_REGISTRATION_ROLE = os.environ.get('AIRFLOW_USER_REGISTRATION_ROLE')
 
 # When using LDAP Auth, setup the ldap server
 AUTH_LDAP_SERVER = os.environ.get('AIRFLOW_LDAP_URI')
