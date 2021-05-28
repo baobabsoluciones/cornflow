@@ -8,7 +8,7 @@
         "coefficients": [
             {
                 "name": "x",
-                "value": 1
+                "value": 3
             },
             {
                 "name": "y",
@@ -24,12 +24,12 @@
         {
             "sense": -1,
             "pi": null,
-            "constant": -5,
+            "constant": -3,
             "name": "c1",
             "coefficients": [
                 {
                     "name": "x",
-                    "value": 1
+                    "value": 2
                 },
                 {
                     "name": "y",
@@ -56,7 +56,7 @@
         {
             "sense": 0,
             "pi": null,
-            "constant": -7,
+            "constant": -10,
             "name": "c3",
             "coefficients": [
                 {

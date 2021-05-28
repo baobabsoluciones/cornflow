@@ -1,6 +1,9 @@
+"""
+
+"""
+from cornflow_client.constants import InvalidUsage, AirflowError
 from flask import jsonify
 from webargs.flaskparser import parser
-from cornflow_client.constants import InvalidUsage, AirflowError
 
 
 class ObjectDoesNotExist(InvalidUsage):
@@ -26,6 +29,11 @@ class EndpointNotImplemented(InvalidUsage):
 class InvalidData(InvalidUsage):
     status_code = 400
     error = "The data sent is not valid"
+
+
+class InvalidPatch(InvalidUsage):
+    status_code = 400
+    error = "The json patch sent is not valid"
 
 
 def _initialize_errorhandlers(app):

@@ -1,13 +1,19 @@
-import json
+"""
+This file contains the different custom test classes used to generalize the unit testing of cornflow.
+"""
+# Import from libraries
+from datetime import datetime, timedelta
 from flask_testing import TestCase
+import json
+from unittest.mock import patch, Mock
 
+# Import from internal modules
 from cornflow.app import create_app
 from cornflow.models import UserModel
-from cornflow.shared.utils import db
 from cornflow.shared.authentication import Auth
+from cornflow.shared.utils import db
 from cornflow.tests.const import LOGIN_URL
-from datetime import datetime, timedelta
-from unittest.mock import patch, Mock
+
 
 try:
     date_from_str = datetime.fromisoformat
@@ -175,6 +181,27 @@ class CustomTestCase(TestCase):
             self.assertEqual(row.json[key], payload_to_check[key])
 
         return row.json
+
+    def patch_row(
+        self, url, json_patch, payload_to_check, expected_status=200, check_payload=True
+    ):
+        response = self.client.patch(
+            url,
+            data=json.dumps(json_patch),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(expected_status, response.status_code)
+
+        if not check_payload:
+            return response.json
+
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(expected_status, row.status_code)
+        self.assertEqual(payload_to_check, row.json["data"])
 
     def delete_row(self, url):
 

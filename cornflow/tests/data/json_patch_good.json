@@ -1,0 +1,24 @@
+{"patch":
+  [
+    {
+      "op": "replace",
+      "path": "/objective/coefficients/0/value",
+      "value": 3
+    },
+    {
+      "op": "replace",
+      "path": "/constraints/0/constant",
+      "value": -3
+    },
+    {
+      "op": "replace",
+      "path": "/constraints/0/coefficients/0/value",
+      "value": 2
+    },
+    {
+      "op": "replace",
+      "path": "/constraints/2/constant",
+      "value": -10
+    }
+  ]
+}
