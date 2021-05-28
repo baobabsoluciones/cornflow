@@ -1,6 +1,6 @@
 """
-External endpoints to manage the instances: create new ones, or get all the instances created by the user,
-or get only one.
+External endpoints to manage the cases: create new cases from raw data, from an existing instance or execution
+or from an existing case, update the case info, patch its data, get all of them or one, move them and delete them.
 These endpoints have different access url, but manage the same data entities
 """
 
@@ -10,7 +10,7 @@ from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
 from flask_inflate import inflate
-from ..shared.compress import compressed
+
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -19,15 +19,16 @@ from ..schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
     CaseRawRequest,
-    CaseSchema,
     CaseListResponse,
     CaseToInstanceResponse,
     CaseEditRequest,
     QueryFiltersCase,
 )
 
+from ..schemas.common import JsonPatchSchema
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
+from ..shared.compress import compressed
 from ..shared.exceptions import InvalidData, ObjectDoesNotExist
 
 
@@ -207,7 +208,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
-        API method to edit a case created vy the user and its basic related info (name, description and schema).
+        API method to edit a case created by the user and its basic related info (name, description and schema).
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
@@ -233,6 +234,10 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
+    """
+    Endpoint used to get the data of a given case
+    """
+
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @marshal_with(CaseBase)
@@ -250,6 +255,12 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_one_object_from_user(self.get_user(), idx)
+
+    @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
+    @Auth.auth_required
+    @use_kwargs(JsonPatchSchema, location="json")
+    def patch(self, idx, **kwargs):
+        return self.patch_detail(kwargs, self.get_user(), idx)
 
 
 class CaseToInstance(MetaResource, MethodResource):

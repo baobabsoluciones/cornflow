@@ -19,52 +19,52 @@ class InstanceSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     deleted_at = fields.DateTime(dump_only=True)
     executions = fields.Nested(ExecutionSchema, many=True)
-    data_hash = fields.String(dump_only=True)
+    data_hash = fields.Str(dump_only=True)
 
 
 class InstanceRequest(Schema):
-    name = fields.String(required=True)
-    description = fields.String(required=False)
+    name = fields.Str(required=True)
+    description = fields.Str(required=False)
     data = fields.Raw(required=True)
-    data_schema = fields.String(required=False)
-    schema = fields.String(required=False)
+    data_schema = fields.Str(required=False)
+    schema = fields.Str(required=False)
 
 
 class InstanceFileRequest(Schema):
-    name = fields.String(required=True)
-    description = fields.String(required=False)
+    name = fields.Str(required=True)
+    description = fields.Str(required=False)
     minimize = fields.Boolean(required=False)
 
 
 class InstanceEditRequest(Schema):
-    name = fields.String()
-    description = fields.String()
+    name = fields.Str()
+    description = fields.Str()
 
 
 class InstanceEndpointResponse(Schema):
-    id = fields.String()
-    name = fields.String()
-    description = fields.String()
+    id = fields.Str()
+    name = fields.Str()
+    description = fields.Str()
     created_at = fields.DateTime()
-    user_id = fields.Integer()
-    data_hash = fields.String()
-    schema = fields.String(required=False)
+    user_id = fields.Int()
+    data_hash = fields.Str()
+    schema = fields.Str(required=False)
 
 
 class InstanceDetailsEndpointResponse(Schema):
-    id = fields.String()
-    name = fields.String()
-    description = fields.String()
-    created_at = fields.String()
-    user_id = fields.Integer()
+    id = fields.Str()
+    name = fields.Str()
+    description = fields.Str()
+    created_at = fields.Str()
+    user_id = fields.Int()
     executions = fields.List(fields.Nested(ExecutionDetailsEndpointResponse))
-    data_hash = fields.String()
-    schema = fields.String(required=False)
+    data_hash = fields.Str()
+    schema = fields.Str(required=False)
 
 
 class InstanceDataEndpointResponse(Schema):
-    id = fields.String()
-    name = fields.String()
+    id = fields.Str()
+    name = fields.Str()
     data = fields.Raw(required=True)
-    data_hash = fields.String()
-    schema = fields.String(required=False)
+    data_hash = fields.Str()
+    schema = fields.Str(required=False)

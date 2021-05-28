@@ -3,13 +3,13 @@ Meta resource used in the endpoints to generalize the methods and how they work 
 It should allow all CRUD (create, read, update, delete) operations
 """
 # Import from libraries
-from flask_restful import Resource
 from flask import request
+from flask_restful import Resource
 from functools import wraps
 
 # Import from internal modules
-from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 from ..shared.authentication import Auth
+from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class MetaResource(Resource):
@@ -96,6 +96,17 @@ class MetaResource(Resource):
         item.update(data)
 
         return {"message": "Updated correctly"}, 200
+
+    def patch_detail(self, data, *args):
+        item = self.query(*args)
+        if item is None:
+            raise ObjectDoesNotExist()
+
+        data = dict(data)
+        data["user_id"] = self.get_user_id()
+        item.patch(data)
+
+        return {"message": "Patched correctly"}, 200
 
     def delete_detail(self, *args):
 
