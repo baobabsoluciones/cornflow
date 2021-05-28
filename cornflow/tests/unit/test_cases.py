@@ -22,6 +22,8 @@ from cornflow.tests.const import (
     CASES_LIST,
     JSON_PATCH_GOOD_PATH,
     JSON_PATCH_BAD_PATH,
+    FULL_CASE_LIST,
+    FULL_CASE_JSON_PATCH_1,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
@@ -410,3 +412,91 @@ class TestCaseJsonPatch(CustomTestCase):
         # Compares the number of operations, not the operations themselves
         patch = self.load_file(JSON_PATCH_BAD_PATH)
         self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))
+
+
+class TestCaseCompare(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payloads = [self.load_file(f) for f in FULL_CASE_LIST]
+        self.url = CASE_URL
+        self.model = CaseModel
+        self.cases_id = [
+            self.create_new_row(self.url, self.model, p) for p in self.payloads
+        ]
+        self.items_to_check = ["name", "description", "path", "schema"]
+
+    def test_get_full_patch(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_same_case_error(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(400, response.status_code)
+
+    def test_get_only_data(self):
+        response = self.client.get(
+            self.url
+            + str(self.cases_id[0])
+            + "/"
+            + str(self.cases_id[1])
+            + "/?solution=0",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        payload.pop("solution_patch")
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_get_only_solution(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/?data=0",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        payload.pop("data_patch")
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_patch_not_symmetric(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[1]) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertNotEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_case_does_not_exist(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(500) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(404, response.status_code)
+
+        response = self.client.get(
+            self.url + str(400) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(404, response.status_code)
