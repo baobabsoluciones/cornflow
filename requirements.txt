@@ -36,7 +36,7 @@ Werkzeug==1.0.1
 flask-cors
 pulp
 flask-apispec
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow-client@master
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow-client@feature/get_test_data
 flask-compress
 flask-inflate
 webargs==8.0.0

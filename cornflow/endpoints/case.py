@@ -262,6 +262,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @use_kwargs(JsonPatchSchema, location="json")
+    @inflate
     def patch(self, idx, **kwargs):
         return self.patch_detail(kwargs, self.get_user(), idx)
 
@@ -338,6 +339,7 @@ class CaseCompare(MetaResource, MethodResource):
     @Auth.auth_required
     @marshal_with(CaseCompareResponse)
     @use_kwargs(QueryCaseCompare, location="query")
+    @compressed
     def get(self, idx1, idx2, **kwargs):
         """
         API method to generate the json patch of two cases given by the user
@@ -355,12 +357,18 @@ class CaseCompare(MetaResource, MethodResource):
         case_2 = self.model.get_one_object_from_user(self.get_user(), idx2)
 
         if case_1 is None:
-            raise ObjectDoesNotExist("The first case does not exist")
+            raise ObjectDoesNotExist(
+                "You don't have access to the first case or it doesn't exist"
+            )
         elif case_2 is None:
-            raise ObjectDoesNotExist("The first case does not exist")
+            raise ObjectDoesNotExist(
+                "You don't have access to the second case or it doesn't exist"
+            )
+        elif case_1.schema != case_2.schema:
+            raise InvalidData("The cases asked to compare do not share the same schema")
 
-        data = kwargs.get("data", 1)
-        solution = kwargs.get("solution", 1)
+        data = kwargs.get("data", True)
+        solution = kwargs.get("solution", True)
         payload = dict()
 
         if data:

@@ -3,8 +3,10 @@ Unit test for the cases models and endpoints
 """
 
 # Import from libraries
+from cornflow_client import get_pulp_jsonschema
 import json
 import jsonpatch
+import zlib
 
 
 # Import from internal modules
@@ -182,8 +184,6 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_case_without_solution(self):
-        # payload = dict(self.payload)
-        # payload.pop("solution")
         self.create_new_row(self.url, self.model, self.payload)
 
 
@@ -414,16 +414,81 @@ class TestCaseJsonPatch(CustomTestCase):
         self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))
 
 
+class TestCaseDataEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.payload["id"] = self.create_new_row(CASE_URL, self.model, self.payload)
+        self.url = CASE_URL
+        self.items_to_check = [
+            "name",
+            "description",
+            "path",
+            "schema",
+            "data",
+        ]
+
+    def test_get_data(self):
+        self.get_one_row(self.url + str(self.payload["id"]) + "/data/", self.payload)
+
+    def test_get_no_data(self):
+        self.get_one_row(
+            self.url + str(500) + "/data/", {}, expected_status=404, check_payload=False
+        )
+
+    def test_get_compressed_data(self):
+        headers = self.get_header_with_auth(self.token)
+        headers["Accept-Encoding"] = "gzip"
+
+        response = self.client.get(
+            self.url + str(self.payload["id"]) + "/data/", headers=headers
+        )
+        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+        raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
+        response = json.loads(raw)
+        for i in self.items_to_check:
+            self.assertEqual(self.payload[i], response[i])
+
+
 class TestCaseCompare(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.payloads = [self.load_file(f) for f in FULL_CASE_LIST]
+        self.payloads[0]["data"] = get_pulp_jsonschema("gc_input.json", folder="test")
+        self.payloads[0]["solution"] = get_pulp_jsonschema(
+            "gc_output.json", folder="test"
+        )
+        self.payloads[1]["data"] = get_pulp_jsonschema("gc_input.json", folder="test")
+        self.payloads[1]["solution"] = get_pulp_jsonschema(
+            "gc_output.json", folder="test"
+        )
+
+        self.payloads[1] = self.modify_data(self.payloads[1])
+
         self.url = CASE_URL
         self.model = CaseModel
         self.cases_id = [
             self.create_new_row(self.url, self.model, p) for p in self.payloads
         ]
         self.items_to_check = ["name", "description", "path", "schema"]
+
+    @staticmethod
+    def modify_data(data):
+        data["data"]["pairs"][16]["n2"] = 10
+        data["data"]["pairs"][27]["n2"] = 3
+        data["data"]["pairs"][30]["n1"] = 6
+        data["data"]["pairs"][50]["n2"] = 14
+        data["data"]["pairs"][56]["n1"] = 11
+        data["data"]["pairs"][83]["n2"] = 37
+        data["data"]["pairs"][103]["n1"] = 26
+
+        data["solution"]["assignment"][4]["color"] = 3
+        data["solution"]["assignment"][7]["color"] = 2
+        data["solution"]["assignment"][24]["color"] = 1
+        data["solution"]["assignment"][42]["color"] = 3
+
+        return data
 
     def test_get_full_patch(self):
         response = self.client.get(
@@ -500,3 +565,18 @@ class TestCaseCompare(CustomTestCase):
         )
 
         self.assertEqual(404, response.status_code)
+
+    def test_case_compare_compression(self):
+        headers = self.get_header_with_auth(self.token)
+        headers["Accept-Encoding"] = "gzip"
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=headers,
+        )
+
+        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+        raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
+        response = json.loads(raw)
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertEqual(payload, response)
