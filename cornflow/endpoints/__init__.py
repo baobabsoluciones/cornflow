@@ -29,6 +29,7 @@ from .case import (
     CaseDetailsEndpoint,
     CaseDataEndpoint,
     CaseToInstance,
+    CaseCompare,
 )
 
 
@@ -98,5 +99,10 @@ resources = [
         resource=CaseToInstance,
         urls="/case/<int:idx>/instance/",
         endpoint="case-instance",
+    ),
+    dict(
+        resource=CaseCompare,
+        urls="/case/<int:idx1>/<int:idx2>/",
+        endpoint="case-compare",
     ),
 ]
