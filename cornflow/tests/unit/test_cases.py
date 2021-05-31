@@ -455,13 +455,13 @@ class TestCaseCompare(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.payloads = [self.load_file(f) for f in FULL_CASE_LIST]
-        self.payloads[0]["data"] = get_pulp_jsonschema("gc_input.json", folder="test")
+        self.payloads[0]["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
         self.payloads[0]["solution"] = get_pulp_jsonschema(
-            "gc_output.json", folder="test"
+            "../tests/data/gc_output.json"
         )
-        self.payloads[1]["data"] = get_pulp_jsonschema("gc_input.json", folder="test")
+        self.payloads[1]["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
         self.payloads[1]["solution"] = get_pulp_jsonschema(
-            "gc_output.json", folder="test"
+            "../tests/data/gc_output.json"
         )
 
         self.payloads[1] = self.modify_data(self.payloads[1])
