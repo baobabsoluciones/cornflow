@@ -3,3 +3,4 @@ include MANIFEST.in
 include README.rst
 include setup.py
 include cornflow_client/data/*
+include cornflow_client/tests/data/*
