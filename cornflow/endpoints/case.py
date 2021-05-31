@@ -233,7 +233,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.delete_detail(self.get_user(), idx)
+        return self.delete_detail(self.get_user(), idx)
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
