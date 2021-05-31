@@ -7,7 +7,7 @@ and to serialize the response data given by the same endpoints.
 from marshmallow import fields, Schema
 
 # Import from internal modules
-from .common import QueryFilters
+from .common import QueryFilters, PatchOperation
 
 
 class CaseRawRequest(Schema):
@@ -75,5 +75,15 @@ class CaseEditRequest(Schema):
     schema = fields.Str()
 
 
+class CaseCompareResponse(Schema):
+    data_patch = fields.Nested(PatchOperation, many=True)
+    solution_patch = fields.Nested(PatchOperation, many=True)
+
+
 class QueryFiltersCase(QueryFilters):
     pass
+
+
+class QueryCaseCompare(Schema):
+    data = fields.Boolean(required=False, default=1)
+    solution = fields.Boolean(required=False, default=1)
