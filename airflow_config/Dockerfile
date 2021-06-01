@@ -1,6 +1,6 @@
-# VERSION 2.1.0
+# VERSION 2.x.x
 # AUTHOR: sistemas@baobabsoluciones.es
-# DESCRIPTION: Airflow 2.1.0 image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
+# DESCRIPTION: Airflow 2.x.x image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
 
 FROM python:3.8-slim-buster
 LABEL maintainer="sistemas@baobabsoluciones"
