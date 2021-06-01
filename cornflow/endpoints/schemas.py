@@ -13,18 +13,16 @@ import logging as log
 
 class SchemaEndpoint(Resource, MethodResource):
     """
-    Endpoint used to create a new execution or get all the executions and their information back
+    Endpoint used to obtain schemas
     """
 
     def __init__(self):
         super().__init__()
 
     @doc(description="Get one schema", tags=["Schemas"])
-    @Auth.auth_required
-    # @marshal_with(ExecutionDetailsEndpointResponse(many=True))
     def get(self, dag_name):
         """
-        API method to get the input and output schemas for a given dag
+        API method to get the input, output and config schemas for a given dag
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 
