@@ -1,5 +1,5 @@
 import json
-
+from flask import current_app
 from flask_testing import TestCase
 
 from cornflow.app import create_app
@@ -16,17 +16,23 @@ class TestLogIn(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.data = {
-            "name": "testname",
-            "email": "test@test.com",
-            "password": "testpassword",
-        }
-        user = UserModel(data=self.data)
-        user.save()
-        db.session.commit()
-        # we take out the name, we do not need it to sign in
-        self.data.pop("name")
-        self.id = UserModel.query.filter_by(name="testname").first().id
+        self.LOGIN_METHOD = current_app.config["CORNFLOW_LDAP_ENABLE"]
+
+        if not self.LOGIN_METHOD:
+            self.data = {
+                "name": "testname",
+                "email": "test@test.com",
+                "password": "testpassword",
+            }
+            user = UserModel(data=self.data)
+            user.save()
+            db.session.commit()
+            # we take out the name, we do not need it to sign in
+            self.data.pop("name")
+            self.id = UserModel.query.filter_by(name="testname").first().id
+
+        else:
+            self.data = {"email": "testname", "password": "testpassword"}
 
     def tearDown(self):
         db.session.remove()
@@ -44,7 +50,8 @@ class TestLogIn(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(str, type(response.json["token"]))
-        self.assertEqual(self.id, response.json["id"])
+        if not self.LOGIN_METHOD:
+            self.assertEqual(self.id, response.json["id"])
 
     def test_validation_error(self):
         payload = self.data

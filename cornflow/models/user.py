@@ -153,6 +153,17 @@ class UserModel(TraceAttributes):
         return UserModel.query.filter_by(email=em, deleted_at=None).first()
 
     @staticmethod
+    def get_one_user_by_username(username):
+        """
+
+        :param username:
+        :type username:
+        :return:
+        :rtype:
+        """
+        return UserModel.query.filter_by(name=username, deleted_at=None).first()
+
+    @staticmethod
     def get_user_info(idx):
         """
         Query to get the permission levels of a user

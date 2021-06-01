@@ -2,9 +2,10 @@
 External endpoint for the user to login to the cornflow webserver
 """
 # Import from libraries
-from flask_restful import Resource
-from flask_apispec.views import MethodResource
+from flask import current_app
 from flask_apispec import use_kwargs, doc
+from flask_apispec.views import MethodResource
+from flask_restful import Resource
 
 # Import from internal modules
 from ..models import UserModel
@@ -32,13 +33,34 @@ class LoginEndpoint(Resource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
 
-        user = UserModel.get_one_user_by_email(kwargs.get("email"))
+        LOGIN_METHOD = current_app.config["CORNFLOW_LDAP_ENABLE"]
 
-        if not user:
-            raise InvalidCredentials()
+        if not LOGIN_METHOD:
+            user = UserModel.get_one_user_by_email(kwargs.get("email"))
 
-        if not user.check_hash(kwargs.get("password")):
-            raise InvalidCredentials()
+            if not user:
+                raise InvalidCredentials()
+
+            if not user.check_hash(kwargs.get("password")):
+                raise InvalidCredentials()
+
+        elif LOGIN_METHOD:
+            if not Auth.ldap_authenticate(kwargs.get("email"), kwargs.get("password")):
+                raise InvalidCredentials()
+            user = UserModel.get_one_user_by_username(kwargs.get("email"))
+
+            if not user:
+                email = Auth.get_user_email(kwargs.get("email"))
+                if not email:
+                    email = ""
+                data = {
+                    "name": kwargs.get("email"),
+                    "password": kwargs.get("password"),
+                    "email": email,
+                }
+                user = UserModel(data=data)
+                user.save()
+                user = UserModel.get_one_user_by_username(kwargs.get("email"))
 
         try:
             token = Auth.generate_token(user.id)
