@@ -328,7 +328,7 @@ class TestCaseJsonPatch(CustomTestCase):
         self.items_to_check = ["name", "description", "path", "schema"]
         self.url = CASE_URL
         self.patch = {
-            "patch": jsonpatch.make_patch(
+            "data_patch": jsonpatch.make_patch(
                 self.payloads[0]["data"], self.payloads[1]["data"]
             ).patch
         }
@@ -338,14 +338,14 @@ class TestCaseJsonPatch(CustomTestCase):
         self.patch_row(
             self.url + str(self.case_id) + "/data/",
             self.patch,
-            self.payloads[1]["data"],
+            self.payloads[1],
         )
 
     def test_json_patch_file(self):
         self.patch_row(
             self.url + str(self.case_id) + "/data/",
             self.patch_file,
-            self.payloads[1]["data"],
+            self.payloads[1],
         )
 
     def test_not_valid_json_patch(self):
@@ -400,18 +400,20 @@ class TestCaseJsonPatch(CustomTestCase):
         )
 
     def test_patch_created_properly(self):
-        self.assertEqual(len(self.patch_file["patch"]), len(self.patch["patch"]))
+        self.assertEqual(
+            len(self.patch_file["data_patch"]), len(self.patch["data_patch"])
+        )
 
     def test_patch_not_created_properly(self):
         # Compares the number of operations, not the operations themselves
         self.assertNotEqual(
-            len(self.patch_file["patch"]),
+            len(self.patch_file["data_patch"]),
             len(jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch),
         )
 
         # Compares the number of operations, not the operations themselves
         patch = self.load_file(JSON_PATCH_BAD_PATH)
-        self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))
+        self.assertNotEqual(len(patch["data_patch"]), len(self.patch["data_patch"]))
 
 
 class TestCaseDataEndpoint(CustomTestCase):
@@ -580,3 +582,22 @@ class TestCaseCompare(CustomTestCase):
         response = json.loads(raw)
         payload = self.load_file(FULL_CASE_JSON_PATCH_1)
         self.assertEqual(payload, response)
+
+    def test_get_patch_and_apply(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        case_to_compare = self.client.get(
+            self.url + str(self.cases_id[1]) + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.patch_row(
+            self.url + str(self.cases_id[0]) + "/data/",
+            response.json,
+            case_to_compare.json,
+        )

@@ -87,14 +87,25 @@ class BaseDataModel(TraceAttributes):
         :param dict data:
         :type data:
         """
-        try:
-            self.data = jsonpatch.apply_patch(self.data, data.get("patch"))
-        except jsonpatch.JsonPatchConflict:
-            raise InvalidPatch()
-        except jsonpatch.JsonPointerException:
-            raise InvalidPatch()
+        for key, item in data.items():
+            if "patch" in key:
+                try:
+                    setattr(
+                        self,
+                        key.split("_")[0],
+                        jsonpatch.apply_patch(getattr(self, key.split("_")[0]), item),
+                    )
+                except jsonpatch.JsonPatchConflict:
+                    raise InvalidPatch()
+                except jsonpatch.JsonPointerException:
+                    raise InvalidPatch()
+            else:
+                setattr(self, key, item)
 
-        self.data_hash = hash_json_256(self.data)
+        for key, item in vars(self).items():
+            if "hash" in key:
+                setattr(self, key, hash_json_256(getattr(self, key.split("_")[0])))
+
         self.user_id = data.get("user_id")
         super().update(data)
 
