@@ -1,12 +1,11 @@
 # Import from libraries
-from flask import request, current_app
+from flask import current_app
 from flask_restful import Resource
 from flask_apispec.views import MethodResource
-from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec import doc
 
 from cornflow_client.airflow.api import Airflow
-from ..shared.authentication import Auth
-from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
+from ..shared.exceptions import AirflowError
 
 import logging as log
 
@@ -19,7 +18,7 @@ class SchemaEndpoint(Resource, MethodResource):
     def __init__(self):
         super().__init__()
 
-    @doc(description="Get one schema", tags=["Schemas"])
+    @doc(description="Get instance, solution and config schema", tags=["Schemas"])
     def get(self, dag_name):
         """
         API method to get the input, output and config schemas for a given dag
