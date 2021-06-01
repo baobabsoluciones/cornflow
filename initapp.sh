@@ -24,7 +24,17 @@ export \
   DATABASE_URL \
   FLASK_APP \
   FLASK_ENV \
-  SECRET_KEY
+  SECRET_KEY \
+  CORNFLOW_LDAP_ENABLE \
+  LDAP_PROTOCOL_VERSION \
+  LDAP_BIND_PASSWORD \
+  LDAP_BIND_DN \
+  LDAP_USE_TLS \
+  LDAP_HOST \
+  LDAP_USERNAME_ATTRIBUTE \
+  LDAP_USER_BASE \
+  LDAP_EMAIL_ATTRIBUTE \
+  LDAP_USER_OBJECT_CLASS
 
 # check database param from docker env
 if [ -z "$CORNFLOW_DB_CONN" ];  then
@@ -42,6 +52,21 @@ fi
 if [[ -z "$DATABASE_URL" ]]; then
 	 >&2 printf '%s\n' "FATAL: you need to provide a postgres database for Cornflow"
      exit 1
+fi
+
+# Check LDAP parameters for active directory
+if [ "$CORNFLOW_LDAP_ENABLE" = "True" ]; then
+  # Default values corresponding to the default compose files
+    : "${LDAP_PROTOCOL_VERSION:="3"}"
+    : "${LDAP_BIND_PASSWORD:="adminldap"}"
+    : "${LDAP_BIND_DN:="cn=admin,dc=cornflow,dc=com"}"
+    : "${LDAP_USE_TLS:="False"}"
+    : "${LDAP_HOST:="ldap://openldap:389"}"
+    : "${LDAP_USERNAME_ATTRIBUTE:="cn"}"
+    : "${LDAP_USER_BASE:="dc=cornflow,dc=com"}"
+    : "${LDAP_EMAIL_ATTRIBUTE:="mail"}"
+    : "${LDAP_USER_OBJECT_CLASS:="top"}"
+  >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
 fi
 
 # make initdb and/or migrations

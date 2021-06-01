@@ -14,6 +14,7 @@ services:
       - CORNFLOW_DB_USER=cornflow
       - CORNFLOW_DB_PASSWORD=cornflow
       - CORNFLOW_DB=cornflow
+      - CORNFLOW_LDAP_ENABLE=True
     depends_on:
       - cornflow_db
       - webserver
@@ -41,7 +42,7 @@ services:
       - AIRFLOW_DB_USER=airflow
       - AIRFLOW_DB_PASSWORD=airflow
       - AIRFLOW_DB=airflow
-      - AIRFLOW_LDAP_ENABLE=true
+      - AIRFLOW_LDAP_ENABLE=True
       - AIRFLOW_LDAP_URI=ldap://openldap:389
       - AIRFLOW_LDAP_SEARCH=dc=cornflow,dc=com
       - AIRFLOW_LDAP_BIND_USER=cn=admin,dc=cornflow,dc=com

@@ -117,7 +117,7 @@ fi
   fi
 
 # Check LDAP parameters for active directory
-if [ "$AIRFLOW_LDAP_ENABLE" = "true" ]; then
+if [ "$AIRFLOW_LDAP_ENABLE" = "True" ]; then
   # Default values corresponding to the default compose files
     : "${AIRFLOW_LDAP_URI:="ldap://openldap:389"}"
     : "${AIRFLOW_LDAP_SEARCH:="dc=cornflow,dc=com"}"
@@ -128,7 +128,7 @@ if [ "$AIRFLOW_LDAP_ENABLE" = "true" ]; then
     mv "$AIRFLOW_HOME"/webserver_ldap.py "$AIRFLOW_HOME"/webserver_config.py
   # Special condition for using TLS
   if [[ "$AIRFLOW_LDAP_USE_TLS" == "True" ]]; then
-    [[ -z "$AIRFLOW_LDAP_TLS_CA_CERTIFICATE" ]] && printf '%s\n' "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
+    [[ -z "$AIRFLOW_LDAP_TLS_CA_CERTIFICATE" ]] && >&2 printf '%s\n' "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
        exit 1
        fi
   fi
