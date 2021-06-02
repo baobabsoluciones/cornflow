@@ -12,6 +12,7 @@ from ..models import UserModel
 from ..schemas.user import UserSchema, LoginEndpointRequest
 from ..shared.authentication import Auth
 from ..shared.exceptions import InvalidUsage, InvalidCredentials
+from ..shared.ldap import LDAP
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -45,12 +46,12 @@ class LoginEndpoint(Resource, MethodResource):
                 raise InvalidCredentials()
 
         elif LOGIN_METHOD:
-            if not Auth.ldap_authenticate(kwargs.get("email"), kwargs.get("password")):
+            if not LDAP.authenticate(kwargs.get("email"), kwargs.get("password")):
                 raise InvalidCredentials()
             user = UserModel.get_one_user_by_username(kwargs.get("email"))
 
             if not user:
-                email = Auth.get_user_email(kwargs.get("email"))
+                email = LDAP.get_user_email(kwargs.get("email"))
                 if not email:
                     email = ""
                 data = {
