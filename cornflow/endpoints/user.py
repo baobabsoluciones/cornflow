@@ -61,6 +61,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         :return:
         :rtype: Tuple(dict, integer)
         """
+        print(user_id)
         if self.get_user_id() != user_id and not self.is_admin():
             raise InvalidUsage(
                 error="You have no permission to access given user", status_code=400

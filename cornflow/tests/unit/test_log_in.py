@@ -52,6 +52,11 @@ class TestLogIn(TestCase):
         self.assertEqual(str, type(response.json["token"]))
         if not self.LOGIN_METHOD:
             self.assertEqual(self.id, response.json["id"])
+        else:
+            self.assertEqual(
+                UserModel.get_one_user_by_username(self.data["email"]).id,
+                response.json["id"],
+            )
 
     def test_validation_error(self):
         payload = self.data
@@ -134,6 +139,18 @@ class TestLogIn(TestCase):
             ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
         )
 
+        if self.LOGIN_METHOD:
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.id = response.json["id"]
+
         response = self.client.get(
             USER_URL + str(self.id) + "/",
             follow_redirects=True,
@@ -154,6 +171,10 @@ class TestLogIn(TestCase):
             headers={"Content-Type": "application/json"},
         )
         token = response.json["token"]
+
+        if self.LOGIN_METHOD:
+            self.id = response.json["id"]
+
         response = self.client.get(
             USER_URL + str(self.id) + "/",
             follow_redirects=True,
@@ -169,6 +190,17 @@ class TestLogIn(TestCase):
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
             ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
         )
+
+        if self.LOGIN_METHOD:
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+            self.id = response.json["id"]
 
         response = self.client.get(
             USER_URL + str(self.id) + "/",

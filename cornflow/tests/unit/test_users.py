@@ -86,6 +86,9 @@ class TestUserEndpoint(TestCase):
             },
         )
 
+    def get_nonexisting_user(self):
+        pass
+
     def make_admin(self, user_asks, user_asked, make_admin=1):
         data = {k: user_asks[k] for k in self.login_keys}
         token = self.client.post(
