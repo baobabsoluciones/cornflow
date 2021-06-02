@@ -1,35 +1,29 @@
 # Import from libraries
-from flask import request, current_app
+from flask import current_app
 from flask_restful import Resource
 from flask_apispec.views import MethodResource
-from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec import doc
 
 from cornflow_client.airflow.api import Airflow
-from ..shared.authentication import Auth
-from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
+from ..shared.exceptions import AirflowError
 
 import logging as log
 
 
 class SchemaEndpoint(Resource, MethodResource):
     """
-    Endpoint used to create a new execution or get all the executions and their information back
+    Endpoint used to obtain schemas
     """
 
     def __init__(self):
         super().__init__()
 
-    @doc(description="Get one schema", tags=["Schemas"])
-    @Auth.auth_required
-    # @marshal_with(ExecutionDetailsEndpointResponse(many=True))
+    @doc(description="Get instance, solution and config schema", tags=["Schemas"])
     def get(self, dag_name):
         """
-        API method to get the input and output schemas for a given dag
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user
+        API method to get the input, output and config schemas for a given dag
 
-        :return: A dictionary with a message (error if authentication failed or a list with all the executions
-          created by the authenticated user) and a integer with the HTTP status code
+        :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
