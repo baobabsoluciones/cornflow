@@ -30,3 +30,8 @@ SCHEMA_URL = PREFIX + "/schema/"
 INSTANCE_FILE_URL = PREFIX + "/instancefile/"
 
 HEALTH_URL = PREFIX + "/health/"
+
+ACTIONS_URL = PREFIX + "/action/"
+PERMISSION_URL = PREFIX + "/permission/"
+
+ROLES_URL = PREFIX + "/roles/"

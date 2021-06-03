@@ -55,20 +55,16 @@ class TestUserEndpoint(TestCase):
             u_data["id"] = response.json["id"]
 
             if "admin" in u_data["email"]:
-                user_role = UserRoleModel(user_id=u_data["id"], role_id=ADMIN_ROLE)
+                user_role = UserRoleModel(
+                    {"user_id": u_data["id"], "role_id": ADMIN_ROLE}
+                )
                 user_role.save()
 
             if "super_admin" in u_data["email"]:
                 user_role = UserRoleModel(
-                    user_id=u_data["id"], role_id=SUPER_ADMIN_ROLE
+                    {"user_id": u_data["id"], "role_id": SUPER_ADMIN_ROLE}
                 )
                 user_role.save()
-
-            # user = UserModel(data=u_data)
-            # user.admin = u_data.get("admin", False)
-            # user.super_admin = u_data.get("super_admin", False)
-            # user.save()
-            # u_data["id"] = user.id
 
         db.session.commit()
 

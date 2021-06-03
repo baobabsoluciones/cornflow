@@ -6,15 +6,15 @@ from flask_script import Command, Option
 
 # Import from internal modules
 from cornflow.models import (
+    ActionModel,
     ApiViewModel,
-    PermissionModel,
     PermissionViewRoleModel,
     RoleModel,
     UserModel,
     UserRoleModel,
 )
 from cornflow.shared.const import (
-    BASE_PERMISSIONS,
+    BASE_ACTIONS,
     BASE_PERMISSION_ASSIGNATION,
     BASE_ROLES,
     SUPER_ADMIN_ROLE,
@@ -54,7 +54,7 @@ class CreateSuperAdmin(Command):
         )
         user.super_admin = True
         user.save()
-        user_role = UserRoleModel(user_id=user.id, role_id=SUPER_ADMIN_ROLE)
+        user_role = UserRoleModel({"user_id": user.id, "role_id": SUPER_ADMIN_ROLE})
         user_role.save()
         return
 
@@ -72,14 +72,13 @@ class CleanHistoricData(Command):
         pass
 
 
-class RegisterPermissions(Command):
+class RegisterActions(Command):
     def run(self):
         # TODO: empty table beforehand
-        permissions_list = [
-            PermissionModel(id=key, name=value)
-            for key, value in BASE_PERMISSIONS.items()
+        actions_list = [
+            ActionModel(id=key, name=value) for key, value in BASE_ACTIONS.items()
         ]
-        db.session.bulk_save_objects(permissions_list)
+        db.session.bulk_save_objects(actions_list)
 
         return
 
@@ -110,7 +109,9 @@ class UpdateViews(Command):
 
 class RegisterRoles(Command):
     def run(self):
-        role_list = [RoleModel(id=key, name=value) for key, value in BASE_ROLES.items()]
+        role_list = [
+            RoleModel({"id": key, "name": value}) for key, value in BASE_ROLES.items()
+        ]
         db.session.bulk_save_objects(role_list)
 
         return
@@ -118,13 +119,12 @@ class RegisterRoles(Command):
 
 class BasePermissionAssignationRegistration(Command):
     def run(self):
-        assign_list = []
 
         assign_list = [
             PermissionViewRoleModel(
                 {
                     "role_id": perm[0],
-                    "permission_id": perm[1],
+                    "action_id": perm[1],
                     "api_view_id": ApiViewModel.query.filter_by(name=view["endpoint"])
                     .first()
                     .id,
@@ -142,7 +142,7 @@ class BasePermissionAssignationRegistration(Command):
 
 class SecurityInitialization(Command):
     def run(self):
-        RegisterPermissions().run()
+        RegisterActions().run()
         RegisterViews().run()
         RegisterRoles().run()
         BasePermissionAssignationRegistration().run()

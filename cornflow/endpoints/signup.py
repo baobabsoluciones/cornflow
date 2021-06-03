@@ -42,7 +42,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
         user = UserModel(kwargs)
         user.save()
 
-        user_role = UserRoleModel(user_id=user.id, role_id=DEFAULT_ROLE)
+        user_role = UserRoleModel({"user_id": user.id, "role_id": DEFAULT_ROLE})
         user_role.save()
 
         try:

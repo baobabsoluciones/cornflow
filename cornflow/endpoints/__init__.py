@@ -3,25 +3,8 @@ Initialization file for the endpoints module
 All references to endpoints should be imported from here
 """
 
-from .dag import DAGEndpoint, DAGEndpointManual
-from .execution import (
-    ExecutionEndpoint,
-    ExecutionDetailsEndpoint,
-    ExecutionStatusEndpoint,
-    ExecutionDataEndpoint,
-    ExecutionLogEndpoint,
-)
-from .instance import (
-    InstanceEndpoint,
-    InstanceDetailsEndpoint,
-    InstanceFileEndpoint,
-    InstanceDataEndpoint,
-)
-from .login import LoginEndpoint
-from .signup import SignUpEndpoint
-from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
-from .schemas import SchemaEndpoint
-from .health import HealthEndpoint
+from .action import ActionListEndpoint
+
 from .case import (
     CaseEndpoint,
     CaseFromInstanceExecutionEndpoint,
@@ -31,6 +14,31 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
+from .dag import DAGEndpoint, DAGEndpointManual
+
+from .execution import (
+    ExecutionEndpoint,
+    ExecutionDetailsEndpoint,
+    ExecutionStatusEndpoint,
+    ExecutionDataEndpoint,
+    ExecutionLogEndpoint,
+)
+
+from .health import HealthEndpoint
+
+from .instance import (
+    InstanceEndpoint,
+    InstanceDetailsEndpoint,
+    InstanceFileEndpoint,
+    InstanceDataEndpoint,
+)
+
+from .login import LoginEndpoint
+from .permission import PermissionsViewRoleEndpoint
+from .roles import RolesListEndpoint, RoleDetailEndpoint
+from .schemas import SchemaEndpoint
+from .signup import SignUpEndpoint
+from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
 
 
 resources = [
@@ -104,5 +112,15 @@ resources = [
         resource=CaseCompare,
         urls="/case/<int:idx1>/<int:idx2>/",
         endpoint="case-compare",
+    ),
+    dict(resource=ActionListEndpoint, urls="/action/", endpoint="actions"),
+    dict(
+        resource=PermissionsViewRoleEndpoint,
+        urls="/permission/",
+        endpoint="permissions",
+    ),
+    dict(resource=RolesListEndpoint, urls="/roles/", endpoint="roles"),
+    dict(
+        resource=RoleDetailEndpoint, urls="/roles/<int:idx>/", endpoint="roles-detail"
     ),
 ]

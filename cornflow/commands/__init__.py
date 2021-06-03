@@ -6,7 +6,7 @@ from .commands import (
     BasePermissionAssignationRegistration,
     CreateSuperAdmin,
     CleanHistoricData,
-    RegisterPermissions,
+    RegisterActions,
     RegisterRoles,
     RegisterViews,
     SecurityInitialization,

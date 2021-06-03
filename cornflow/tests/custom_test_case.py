@@ -12,7 +12,7 @@ from cornflow.app import create_app
 from cornflow.commands import SecurityInitialization
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import SUPER_ADMIN_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
 
@@ -89,12 +89,44 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        user_role = UserRoleModel(user_id=response.json["id"], role_id=SUPER_ADMIN_ROLE)
+        user_role = UserRoleModel(
+            {"user_id": response.json["id"], "role_id": SUPER_ADMIN_ROLE}
+        )
         user_role.save()
 
         db.session.commit()
 
         data.pop("name")
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        ).json["token"]
+
+    def create_admin(self):
+        data = {
+            "name": "testadmin",
+            "email": "admin@test.org",
+            "password": "testpassword",
+        }
+
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        user_role = UserRoleModel(
+            {"user_id": response.json["id"], "role_id": ADMIN_ROLE}
+        )
+        user_role.save()
+
+        db.session.commit()
+
+        data.pop("name")
+
         return self.client.post(
             LOGIN_URL,
             data=json.dumps(data),

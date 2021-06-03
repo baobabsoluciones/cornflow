@@ -1,19 +1,28 @@
-from .meta_model import EmptyModel
+from .meta_model import TraceAttributes
 from ..shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
 from ..shared.utils import db
 
 
-class RoleModel(EmptyModel):
+class RoleModel(TraceAttributes):
     __tablename__ = "roles"
 
     id = db.Column(db.Integer, db.Sequence("roles_id_sq"), primary_key=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
 
+    def __init__(self, data):
+        super().__init__()
+        self.id = data.get("id")
+        self.name = data.get("name")
+
+    @staticmethod
+    def get_all_objects():
+        return RoleModel.query.all()
+
     def __repr__(self):
         return self.name
 
 
-class UserRoleModel(EmptyModel):
+class UserRoleModel(TraceAttributes):
     __tablename__ = "user_role"
 
     id = db.Column(db.Integer, db.Sequence("user_roles_id_sq"), primary_key=True)
@@ -22,6 +31,11 @@ class UserRoleModel(EmptyModel):
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     role = db.relationship("RoleModel")
+
+    def __init__(self, data):
+        super().__init__()
+        self.user_id = data.get("user_id")
+        self.role_id = data.get("role_id")
 
     @staticmethod
     def get_one_user(user_id):

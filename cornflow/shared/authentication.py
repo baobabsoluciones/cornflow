@@ -91,12 +91,12 @@ class Auth:
         if user_role is None:
             raise NoPermission("You do not have permission to access this endpoint")
 
-        permission_id = PERMISSION_METHOD_MAP[method]
+        action_id = PERMISSION_METHOD_MAP[method]
         view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
 
         for role in user_role:
             has_permission = PermissionViewRoleModel.get_permission(
-                role.role_id, view_id, permission_id
+                role.role_id, view_id, action_id
             )
 
             if has_permission is not None:
@@ -115,7 +115,6 @@ class Auth:
 
         @wraps(func)
         def decorated_user(*args, **kwargs):
-            print(request.__dict__)
             user = Auth.get_user_obj_from_header(request.headers)
             Auth.get_permission_for_request(request, user.id)
             g.user = {"id": user.id}

@@ -4,21 +4,21 @@ from cornflow.app import create_app
 from cornflow.commands import (
     BasePermissionAssignationRegistration,
     CreateSuperAdmin,
-    RegisterPermissions,
+    RegisterActions,
     RegisterRoles,
     RegisterViews,
     UpdateViews,
 )
 from cornflow.endpoints import resources
 from cornflow.models import (
+    ActionModel,
     ApiViewModel,
-    PermissionModel,
     PermissionViewRoleModel,
     RoleModel,
     UserModel,
 )
 from cornflow.shared.const import (
-    BASE_PERMISSIONS,
+    BASE_ACTIONS,
     BASE_ROLES,
     BASE_PERMISSION_ASSIGNATION,
 )
@@ -53,13 +53,13 @@ class TestCommands(TestCase):
         self.assertEqual(self.payload["email"], user.email)
 
     def test_register_permissions(self):
-        command = RegisterPermissions()
+        command = RegisterActions()
         command.run()
 
-        permissions = PermissionModel.query.all()
+        actions = ActionModel.query.all()
 
-        for p in permissions:
-            self.assertEqual(BASE_PERMISSIONS[p.id], p.name)
+        for a in actions:
+            self.assertEqual(BASE_ACTIONS[a.id], a.name)
 
     def test_register_views(self):
         command = RegisterViews()
@@ -103,7 +103,7 @@ class TestCommands(TestCase):
             self.assertEqual(BASE_ROLES[r.id], r.name)
 
     def test_base_permissions_assignation(self):
-        command = RegisterPermissions()
+        command = RegisterActions()
         command.run()
 
         command = RegisterViews()

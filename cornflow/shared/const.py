@@ -37,7 +37,7 @@ AIRFLOW_TO_STATE_MAP = dict(
 AUTH_DB = 1
 AUTH_LDAP = 2
 
-BASE_PERMISSIONS = {
+BASE_ACTIONS = {
     1: "can_get",
     2: "can_patch",
     3: "can_post",
