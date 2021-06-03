@@ -82,7 +82,8 @@ class LDAP:
         c = Connection(current_app.config["LDAP_HOST"], user=user_dn, password=password)
 
         if not c.bind():
-            print("Unable to bind user")
+            c.unbind()
             return False
 
+        c.unbind()
         return True

@@ -44,7 +44,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(404, response.status_code)
         self.assertTrue("error" in response.json)
 
     def test_get_executions(self):

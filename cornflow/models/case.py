@@ -8,9 +8,8 @@ from sqlalchemy.dialects.postgresql import JSON
 
 # Import from internal modules
 from .meta_model import BaseDataModel
-from cornflow.shared.utils import db
-
-from cornflow.shared.utils import hash_json_256
+from ..shared.utils import db
+from ..shared.utils import hash_json_256
 
 # Originally inspired by this:
 # https://docs.sqlalchemy.org/en/13/_modules/examples/materialized_paths/materialized_paths.html

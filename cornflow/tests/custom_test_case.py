@@ -9,10 +9,12 @@ from unittest.mock import patch, Mock
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.models import UserModel
+from cornflow.commands import SecurityInitialization
+from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
+from cornflow.shared.const import SUPER_ADMIN_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
 
 
 try:
@@ -38,14 +40,22 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
+        SecurityInitialization().run()
         data = {
             "name": "testname",
             "email": "test@test.com",
             "password": "testpassword",
         }
-        user = UserModel(data=data)
-        user.save()
-        db.session.commit()
+        # user = UserModel(data=data)
+        # user.save()
+        self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        # db.session.commit()
         data.pop("name")
 
         self.token = self.client.post(
@@ -72,10 +82,18 @@ class CustomTestCase(TestCase):
             "password": "THISNEEDSTOBECHANGED",
         }
 
-        user = UserModel(data=data)
-        user.super_admin = True
-        user.save()
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        user_role = UserRoleModel(user_id=response.json["id"], role_id=SUPER_ADMIN_ROLE)
+        user_role.save()
+
         db.session.commit()
+
         data.pop("name")
         return self.client.post(
             LOGIN_URL,

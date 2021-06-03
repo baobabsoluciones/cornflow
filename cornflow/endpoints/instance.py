@@ -46,9 +46,11 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     def __init__(self):
         super().__init__()
+        self.name = "instance"
         self.model = InstanceModel
         self.query = InstanceModel.get_all_objects
         self.primary_key = "id"
+        self.permissions = [1, 3]
 
     @doc(description="Get all instances", tags=["Instances"])
     @Auth.auth_required
@@ -66,10 +68,10 @@ class InstanceEndpoint(MetaResource, MethodResource):
         return self.model.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
-    @Auth.auth_required
     @inflate
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location="json")
+    @Auth.auth_required
     def post(self, **kwargs):
         """
         API (POST) method to create a new instance
@@ -110,6 +112,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
         self.primary_key = "id"
         self.query = InstanceModel.get_one_object_from_user
         self.dependents = "executions"
+        self.permissions = [1, 4, 5]
 
     @doc(description="Get one instance", tags=["Instances"], inherit=False)
     @Auth.auth_required

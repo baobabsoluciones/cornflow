@@ -4,6 +4,7 @@ from flask_testing import TestCase
 
 from cornflow.app import create_app
 from cornflow.models import UserModel
+from cornflow.shared.const import AUTH_DB, AUTH_LDAP
 from cornflow.shared.utils import db
 from cornflow.tests.const import USER_URL, LOGIN_URL
 
@@ -16,9 +17,9 @@ class TestLogIn(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.LOGIN_METHOD = current_app.config["CORNFLOW_LDAP_ENABLE"]
+        self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
 
-        if not self.LOGIN_METHOD:
+        if self.AUTH_TYPE == AUTH_DB:
             self.data = {
                 "name": "testname",
                 "email": "test@test.com",
@@ -31,7 +32,7 @@ class TestLogIn(TestCase):
             self.data.pop("name")
             self.id = UserModel.query.filter_by(name="testname").first().id
 
-        else:
+        elif self.AUTH_TYPE == AUTH_LDAP:
             self.data = {"email": "testname", "password": "testpassword"}
 
     def tearDown(self):
@@ -50,9 +51,11 @@ class TestLogIn(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(str, type(response.json["token"]))
-        if not self.LOGIN_METHOD:
+
+        if self.AUTH_TYPE == AUTH_DB:
             self.assertEqual(self.id, response.json["id"])
-        else:
+
+        elif self.AUTH_TYPE == AUTH_LDAP:
             self.assertEqual(
                 UserModel.get_one_user_by_username(self.data["email"]).id,
                 response.json["id"],
@@ -139,7 +142,7 @@ class TestLogIn(TestCase):
             ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
         )
 
-        if self.LOGIN_METHOD:
+        if self.AUTH_TYPE == AUTH_LDAP:
             payload = self.data
 
             response = self.client.post(
@@ -172,7 +175,7 @@ class TestLogIn(TestCase):
         )
         token = response.json["token"]
 
-        if self.LOGIN_METHOD:
+        if self.AUTH_TYPE == AUTH_LDAP:
             self.id = response.json["id"]
 
         response = self.client.get(
@@ -191,7 +194,7 @@ class TestLogIn(TestCase):
             ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
         )
 
-        if self.LOGIN_METHOD:
+        if self.AUTH_TYPE == AUTH_LDAP:
             payload = self.data
 
             response = self.client.post(

@@ -7,18 +7,18 @@ from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
-from ..models import UserModel
+from .meta_resource import MetaResource
+from ..models import UserModel, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
+from ..shared.const import DEFAULT_ROLE
 from ..shared.exceptions import (
     InvalidUsage,
-    ObjectDoesNotExist,
-    NoPermission,
     InvalidCredentials,
 )
 
 
-class SignUpEndpoint(Resource, MethodResource):
+class SignUpEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to sign up to the cornflow web server.
     """
@@ -41,6 +41,9 @@ class SignUpEndpoint(Resource, MethodResource):
 
         user = UserModel(kwargs)
         user.save()
+
+        user_role = UserRoleModel(user_id=user.id, role_id=DEFAULT_ROLE)
+        user_role.save()
 
         try:
             token = Auth.generate_token(user.id)

@@ -8,9 +8,11 @@ from flask_apispec.views import MethodResource
 from flask_restful import Resource
 
 # Import from internal modules
+from .meta_resource import MetaResource
 from ..models import UserModel
 from ..schemas.user import UserSchema, LoginEndpointRequest
 from ..shared.authentication import Auth
+from ..shared.const import AUTH_DB, AUTH_LDAP
 from ..shared.exceptions import InvalidUsage, InvalidCredentials
 from ..shared.ldap import LDAP
 
@@ -18,7 +20,7 @@ from ..shared.ldap import LDAP
 user_schema = UserSchema()
 
 
-class LoginEndpoint(Resource, MethodResource):
+class LoginEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to do the login to the cornflow webserver
     """
@@ -34,9 +36,9 @@ class LoginEndpoint(Resource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
 
-        LOGIN_METHOD = current_app.config["CORNFLOW_LDAP_ENABLE"]
+        AUTH_TYPE = current_app.config["AUTH_TYPE"]
 
-        if not LOGIN_METHOD:
+        if AUTH_TYPE == AUTH_DB:
             user = UserModel.get_one_user_by_email(kwargs.get("email"))
 
             if not user:
@@ -45,7 +47,7 @@ class LoginEndpoint(Resource, MethodResource):
             if not user.check_hash(kwargs.get("password")):
                 raise InvalidCredentials()
 
-        elif LOGIN_METHOD:
+        elif AUTH_TYPE == AUTH_LDAP:
             if not LDAP.authenticate(kwargs.get("email"), kwargs.get("password")):
                 raise InvalidCredentials()
             user = UserModel.get_one_user_by_username(kwargs.get("email"))

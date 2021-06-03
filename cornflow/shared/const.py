@@ -33,3 +33,43 @@ DEFAULT_EXECUTION_CODE = EXEC_STATE_RUNNING
 AIRFLOW_TO_STATE_MAP = dict(
     success=EXEC_STATE_CORRECT, running=EXEC_STATE_RUNNING, failed=EXEC_STATE_ERROR
 )
+
+AUTH_DB = 1
+AUTH_LDAP = 2
+
+BASE_PERMISSIONS = {
+    1: "can_get",
+    2: "can_patch",
+    3: "can_post",
+    4: "can_put",
+    5: "can_delete",
+}
+
+PERMISSION_METHOD_MAP = {"GET": 1, "PATCH": 2, "POST": 3, "PUT": 4, "DELETE": 5}
+
+DEFAULT_ROLE = 1
+ADMIN_ROLE = 2
+SUPER_ADMIN_ROLE = 3
+BASE_ROLES = {
+    DEFAULT_ROLE: "user",
+    ADMIN_ROLE: "admin",
+    SUPER_ADMIN_ROLE: "super-admin",
+}
+
+BASE_PERMISSION_ASSIGNATION = [
+    (1, 1),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (2, 1),
+    (2, 2),
+    (2, 3),
+    (2, 4),
+    (2, 5),
+    (3, 1),
+    (3, 2),
+    (3, 3),
+    (3, 4),
+    (3, 5),
+]

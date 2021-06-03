@@ -3,6 +3,7 @@ from sqlalchemy.sql import expression
 
 # Imports from internal modules
 from .meta_model import TraceAttributes
+from .roles import UserRoleModel
 from ..shared.utils import bcrypt, db
 
 
@@ -35,7 +36,11 @@ class UserModel(TraceAttributes):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
+    # TODO: should be first_name
     name = db.Column(db.String(128), nullable=False)
+    last_name = db.Column(db.String(128), nullable=True)
+    # TODO: should be unique
+    username = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
     admin = db.Column(
@@ -45,22 +50,18 @@ class UserModel(TraceAttributes):
         db.Boolean(), server_default=expression.false(), default=False, nullable=False
     )
     instances = db.relationship("InstanceModel", backref="users", lazy=True)
+    # roles = db.relationship("RoleModel", secondary="UserRoleModel", backref="users")
 
     def __init__(self, data):
 
         super().__init__()
         self.name = data.get("name")
+        self.last_name = data.get("last_name")
+        self.username = data.get("username")
         self.email = data.get("email")
         self.password = self.__generate_hash(data.get("password"))
         self.admin = False
         self.super_admin = False
-
-    def save(self):
-        """
-        Saves the user to the database
-        """
-        db.session.add(self)
-        db.session.commit()
 
     def update(self, data):
         """
@@ -94,10 +95,10 @@ class UserModel(TraceAttributes):
         db.session.commit()
 
     def is_admin(self):
-        return self.admin or self.super_admin
+        return UserRoleModel.is_admin(self.id)
 
     def is_super_admin(self):
-        return self.super_admin
+        return UserRoleModel.is_super_admin(self.id)
 
     @staticmethod
     def __generate_hash(password):

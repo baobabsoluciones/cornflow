@@ -3,7 +3,8 @@ from flask import request, g, current_app
 from functools import wraps
 import jwt
 
-from ..models.user import UserModel
+from ..models import ApiViewModel, UserModel, UserRoleModel, PermissionViewRoleModel
+from ..shared.const import PERMISSION_METHOD_MAP
 from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
 
 
@@ -64,6 +65,10 @@ class Auth:
             )
 
     @staticmethod
+    def get_request_info(req):
+        return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
+
+    @staticmethod
     def get_user_obj_from_header(headers):
         """
         returns a user from the headers of the request
@@ -75,9 +80,29 @@ class Auth:
         data = Auth.decode_token(token)
         user_id = data["user_id"]
         user = UserModel.get_one_user(user_id)
-        if not user:
+        if user is None:
             raise ObjectDoesNotExist("User does not exist, invalid token")
         return user
+
+    @staticmethod
+    def get_permission_for_request(req, user_id):
+        method, url = Auth.get_request_info(req)
+        user_role = UserRoleModel.query.filter_by(user_id=user_id).all()
+        if user_role is None:
+            raise NoPermission("You do not have permission to access this endpoint")
+
+        permission_id = PERMISSION_METHOD_MAP[method]
+        view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
+
+        for role in user_role:
+            has_permission = PermissionViewRoleModel.get_permission(
+                role.role_id, view_id, permission_id
+            )
+
+            if has_permission is not None:
+                return True
+
+        raise NoPermission("You do not have permission to access this endpoint")
 
     # user decorator
     @staticmethod
@@ -91,6 +116,7 @@ class Auth:
         @wraps(func)
         def decorated_user(*args, **kwargs):
             user = Auth.get_user_obj_from_header(request.headers)
+            Auth.get_permission_for_request(request, user.id)
             g.user = {"id": user.id}
             return func(*args, **kwargs)
 
@@ -107,7 +133,7 @@ class Auth:
 
         @wraps(func)
         def decorated_super_admin(*args, **kwargs):
-            user = Auth.get_user_obj_from_header(request.headers)
+            user = Auth.get_user_obj_from_header(request)
             if not user.super_admin:
                 raise NoPermission(
                     error="You do not have permission to access this endpoint"

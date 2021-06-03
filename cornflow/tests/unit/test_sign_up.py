@@ -3,6 +3,9 @@ import json
 from flask_testing import TestCase
 
 from cornflow.app import create_app
+from cornflow.commands import SecurityInitialization
+from cornflow.models import UserModel, UserRoleModel
+from cornflow.shared.const import DEFAULT_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import SIGNUP_URL
 
@@ -15,6 +18,7 @@ class TestSignUp(TestCase):
 
     def setUp(self):
         db.create_all()
+        SecurityInitialization().run()
         self.data = {
             "name": "testname",
             "email": "test@test.com",
@@ -38,6 +42,11 @@ class TestSignUp(TestCase):
         self.assertEqual(201, response.status_code)
         self.assertEqual(str, type(response.json["token"]))
         self.assertEqual(int, type(response.json["id"]))
+        self.assertEqual(
+            DEFAULT_ROLE,
+            UserRoleModel.query.filter_by(user_id=response.json["id"]).first().role_id,
+        )
+        self.assertNotEqual(None, UserModel.get_one_user_by_email(self.data["email"]))
 
     # Test that registering again with the same name give an error
     def test_existing_name_signup(self):

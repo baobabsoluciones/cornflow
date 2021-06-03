@@ -9,11 +9,13 @@ from functools import wraps
 
 # Import from internal modules
 from ..shared.authentication import Auth
+from ..shared.const import BASE_ROLES
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class MetaResource(Resource):
     # method_decorators = [Auth.auth_required]
+    ROLES_WITH_ACCESS = [role for role in BASE_ROLES]
 
     def __init__(self):
         super().__init__()
@@ -80,7 +82,7 @@ class MetaResource(Resource):
             for fk in self.foreign_data:
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
-                    raise NoPermission()
+                    raise ObjectDoesNotExist()
                 if not self.check_permissions(owner.user_id):
                     raise NoPermission()
         item.save()

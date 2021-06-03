@@ -15,6 +15,7 @@ from ..schemas.user import (
     UserEditRequest,
 )
 from ..shared.authentication import Auth
+from ..shared.const import SUPER_ADMIN_ROLE
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 from .meta_resource import MetaResource
 
@@ -28,8 +29,10 @@ class UserEndpoint(MetaResource, MethodResource):
     Including their instances and executions
     """
 
+    ROLES_WITH_ACCESS = [SUPER_ADMIN_ROLE]
+
     @doc(description="Get all users", tags=["Users"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @marshal_with(UserEndpointResponse(many=True))
     def get(self):
         """
@@ -61,7 +64,6 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         :return:
         :rtype: Tuple(dict, integer)
         """
-        print(user_id)
         if self.get_user_id() != user_id and not self.is_admin():
             raise InvalidUsage(
                 error="You have no permission to access given user", status_code=400
@@ -85,7 +87,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
-        if user_obj.super_admin and not self.is_super_admin():
+        if user_obj.is_super_admin() and not self.is_super_admin():
             raise NoPermission()
         user_obj.delete()
         return {"message": "The object has been deleted"}, 200
@@ -115,7 +117,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         return user_obj, 200
 
 
-class ToggleUserAdmin(Resource, MethodResource):
+class ToggleUserAdmin(MetaResource, MethodResource):
     @doc(description="Toggle user into admin", tags=["Users"])
     @Auth.super_admin_required
     @marshal_with(UserEndpointResponse)

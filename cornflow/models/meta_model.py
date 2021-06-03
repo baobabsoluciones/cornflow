@@ -14,7 +14,19 @@ from ..shared.exceptions import InvalidPatch
 from ..shared.utils import db, hash_json_256
 
 
-class TraceAttributes(db.Model):
+class EmptyModel(db.Model):
+    __abstract__ = True
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class TraceAttributes(EmptyModel):
     """
     Abstract data model that defines the trace attributes of each model. This help trace when an object was created,
      updated and deleted

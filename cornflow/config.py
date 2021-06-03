@@ -1,4 +1,5 @@
 import os
+from .shared.const import AUTH_LDAP
 
 
 class Development(object):
@@ -12,9 +13,9 @@ class Development(object):
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
-    CORNFLOW_LDAP_ENABLE = os.getenv("CORNFLOW_LDAP_ENABLE")
+    AUTH_TYPE = os.getenv("AUTH_TYPE", 1)
 
-    if CORNFLOW_LDAP_ENABLE:
+    if AUTH_TYPE == AUTH_LDAP:
         LDAP_PROTOCOL_VERSION = os.getenv("LDAP_PROTOCOL_VERSION")
         LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
         LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
@@ -37,8 +38,9 @@ class Testing(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"
     AIRFLOW_PWD = "admin"
-    CORNFLOW_LDAP_ENABLE = False
-    if CORNFLOW_LDAP_ENABLE:
+    AUTH_TYPE = 1
+
+    if AUTH_TYPE == AUTH_LDAP:
         LDAP_PROTOCOL_VERSION = 3
         LDAP_BIND_PASSWORD = "adminldap"
         LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
@@ -61,8 +63,9 @@ class Production(object):
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
-    CORNFLOW_LDAP_ENABLE = os.getenv("CORNFLOW_LDAP_ENABLE")
-    if CORNFLOW_LDAP_ENABLE:
+    AUTH_TYPE = os.getenv("AUTH_TYPE", 1)
+
+    if AUTH_TYPE == AUTH_LDAP:
         LDAP_PROTOCOL_VERSION = os.getenv("LDAP_PROTOCOL_VERSION")
         LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
         LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")

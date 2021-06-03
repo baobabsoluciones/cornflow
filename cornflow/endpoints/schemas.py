@@ -5,13 +5,14 @@ from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 
 from cornflow_client.airflow.api import Airflow
+from .meta_resource import MetaResource
 from ..shared.authentication import Auth
 from ..shared.exceptions import AirflowError, EndpointNotImplemented, InvalidUsage
 
 import logging as log
 
 
-class SchemaEndpoint(Resource, MethodResource):
+class SchemaEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
     """
