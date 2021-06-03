@@ -115,6 +115,7 @@ class Auth:
 
         @wraps(func)
         def decorated_user(*args, **kwargs):
+            print(request.__dict__)
             user = Auth.get_user_obj_from_header(request.headers)
             Auth.get_permission_for_request(request, user.id)
             g.user = {"id": user.id}
