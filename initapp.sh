@@ -65,7 +65,7 @@ if [ "$CORNFLOW_LDAP_ENABLE" = "True" ]; then
     : "${LDAP_USERNAME_ATTRIBUTE:="cn"}"
     : "${LDAP_USER_BASE:="dc=cornflow,dc=com"}"
     : "${LDAP_EMAIL_ATTRIBUTE:="mail"}"
-    : "${LDAP_USER_OBJECT_CLASS:="top"}"
+    : "${LDAP_USER_OBJECT_CLASS:="inetOrgPerson"}"
   >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
 fi
 
