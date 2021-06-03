@@ -62,4 +62,23 @@ Flower has by default a `basic authentication <https://flower.readthedocs.io/en/
 LDAP Authentication
 **********************
 
-At the moment, cornflow does not support the integration of LDAP servers to manage the users of the application. Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
+Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
+To activate the functionality that supports this type of access, it is necessary set the value of the following variables before starting the cornflow service::
+
+    CORNFLOW_LDAP_ENABLE = True - This activate LDAP authentication
+    LDAP_PROTOCOL_VERSION - LDAPv3 will be use (optional)
+    LDAP_BIND_DN - Bind operations are used to authenticate clients
+    LDAP_BIND_PASSWORD - Password for bind operations
+    LDAP_USE_TLS - Secure connection to the LDAP server (to activate set value to "True")
+    LDAP_HOST - LDAP server of your organization
+    LDAP_USERNAME_ATTRIBUTE - Name for the object of the common name in LDAP (it´s usually like "cn")
+    LDAP_USER_BASE - The LDAP search base (for example "ou=users,dc=example,dc=com")
+    LDAP_EMAIL_ATTRIBUTE - Object name which contains email address of users
+    LDAP_USER_OBJECT_CLASS - Object class for the users (this is a group policy schema inside the organization, for example "inetOrgPerson")
+
+In the repository we have an example of deployment with docker to configure access with LDAP protocol::
+
+    curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-ldap.yml'
+    docker-compose -f docker-compose-cornflow-ldap.yml up -d
+
+Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
