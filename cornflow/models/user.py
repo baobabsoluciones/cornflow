@@ -74,6 +74,7 @@ class UserModel(TraceAttributes):
                 new_password = self.__generate_hash(item)
                 setattr(self, key, new_password)
             elif key == "admin" or key == "super_admin":
+                # TODO: delete
                 continue
             else:
                 setattr(self, key, item)
@@ -97,8 +98,8 @@ class UserModel(TraceAttributes):
     def is_admin(self):
         return UserRoleModel.is_admin(self.id)
 
-    def is_super_admin(self):
-        return UserRoleModel.is_super_admin(self.id)
+    def is_service_user(self):
+        return UserRoleModel.is_service_user(self.id)
 
     @staticmethod
     def __generate_hash(password):
@@ -163,18 +164,6 @@ class UserModel(TraceAttributes):
         :rtype:
         """
         return UserModel.query.filter_by(name=username, deleted_at=None).first()
-
-    @staticmethod
-    def get_user_info(idx):
-        """
-        Query to get the permission levels of a user
-
-        :param int idx: The user id.
-        :return: A tuple with the values of admin adn super_admin for the given user
-        :rtype: tuple(bool, bool)
-        """
-        user = UserModel.query.filter_by(id=idx, deleted_at=None).first()
-        return user.admin, user.super_admin
 
     def __repr__(self):
         """

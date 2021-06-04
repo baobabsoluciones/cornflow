@@ -254,13 +254,14 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             password="airflow_test_password",
         )
         # we guarantee that the admin is there for airflow
-        self.create_super_admin(user_data)
+        self.create_service_user(user_data)
         user_data["pwd"] = user_data["password"]
         response = self.login_or_signup(user_data)
         self.client.token = response["token"]
 
     @staticmethod
-    def create_super_admin(data):
+    def create_service_user(data):
+        # TODO: update
         user = UserModel(data=data)
         user.super_admin = True
         user.save()

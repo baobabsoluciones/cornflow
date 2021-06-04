@@ -3,7 +3,7 @@ from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.commands import (
     BasePermissionAssignationRegistration,
-    CreateSuperAdmin,
+    CreateServiceUser,
     RegisterActions,
     RegisterRoles,
     RegisterViews,
@@ -43,7 +43,7 @@ class TestCommands(TestCase):
         db.drop_all()
 
     def test_super_user_command(self):
-        command = CreateSuperAdmin()
+        command = CreateServiceUser()
 
         command.run(user=self.payload["email"], password=self.payload["password"])
 

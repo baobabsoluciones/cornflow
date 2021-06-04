@@ -47,21 +47,20 @@ BASE_ACTIONS = {
 
 PERMISSION_METHOD_MAP = {"GET": 1, "PATCH": 2, "POST": 3, "PUT": 4, "DELETE": 5}
 
-DEFAULT_ROLE = 1
-ADMIN_ROLE = 2
-SUPER_ADMIN_ROLE = 3
+VIEWER_ROLE = 1
+PLANNER_ROLE = 2
+ADMIN_ROLE = 3
+SERVICE_ROLE = 4
+
 BASE_ROLES = {
-    DEFAULT_ROLE: "user",
+    PLANNER_ROLE: "planner",
+    VIEWER_ROLE: "viewer",
     ADMIN_ROLE: "admin",
-    SUPER_ADMIN_ROLE: "super-admin",
+    SERVICE_ROLE: "service",
 }
 
 BASE_PERMISSION_ASSIGNATION = [
     (1, 1),
-    (1, 2),
-    (1, 3),
-    (1, 4),
-    (1, 5),
     (2, 1),
     (2, 2),
     (2, 3),
@@ -72,4 +71,9 @@ BASE_PERMISSION_ASSIGNATION = [
     (3, 3),
     (3, 4),
     (3, 5),
+    (4, 1),
+    (4, 2),
+    (4, 3),
+    (4, 4),
+    (4, 5),
 ]

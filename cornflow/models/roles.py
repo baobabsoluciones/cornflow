@@ -1,5 +1,5 @@
 from .meta_model import TraceAttributes
-from ..shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
+from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 from ..shared.utils import db
 
 
@@ -14,9 +14,22 @@ class RoleModel(TraceAttributes):
         self.id = data.get("id")
         self.name = data.get("name")
 
+    def update(self, data):
+        """
+        Updates the object in the database and automatically updates the updated_at field
+        :param dict data:  A dictionary containing the updated data for the execution
+        """
+        for key, item in data.items():
+            setattr(self, key, item)
+        super().update(data)
+
     @staticmethod
     def get_all_objects():
         return RoleModel.query.all()
+
+    @staticmethod
+    def get_one_object(idx):
+        return RoleModel.query.get(idx)
 
     def __repr__(self):
         return self.name
@@ -45,16 +58,16 @@ class UserRoleModel(TraceAttributes):
     def is_admin(user_id):
         user_roles = UserRoleModel.query.filter_by(user_id=user_id).all()
         for role in user_roles:
-            if role.role_id == ADMIN_ROLE or role.role_id == SUPER_ADMIN_ROLE:
+            if role.role_id == ADMIN_ROLE or role.role_id == SERVICE_ROLE:
                 return True
 
         return False
 
     @staticmethod
-    def is_super_admin(user_id):
+    def is_service_user(user_id):
         user_roles = UserRoleModel.query.filter_by(user_id=user_id).all()
         for role in user_roles:
-            if role.role_id == SUPER_ADMIN_ROLE:
+            if role.role_id == SERVICE_ROLE:
                 return True
 
         return False

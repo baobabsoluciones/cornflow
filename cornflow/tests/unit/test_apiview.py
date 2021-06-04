@@ -1,31 +1,36 @@
 """
-Unit test for the actions endpoint
+Unit test for the api views endpoint
 """
 
-# Import from libraries
-from cornflow.endpoints import ActionListEndpoint
-from cornflow.shared.const import BASE_ACTIONS, BASE_ROLES
-from cornflow.tests.const import ACTIONS_URL
+# Import from internal modules
+from cornflow.endpoints import ApiViewListEndpoint, resources
+from cornflow.shared.const import BASE_ROLES
+from cornflow.tests.const import APIVIEW_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
-class TestActionsListEndpoint(CustomTestCase):
+class TestApiViewListEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.roles_with_access = ActionListEndpoint.ROLES_WITH_ACCESS
+        self.roles_with_access = ApiViewListEndpoint.ROLES_WITH_ACCESS
         self.payload = [
-            {"id": key, "name": value.replace("_", " ")}
-            for key, value in BASE_ACTIONS.items()
+            {
+                "name": view["endpoint"],
+                "url_rule": view["urls"],
+                "description": view["resource"].DESCRIPTION,
+            }
+            for view in resources
         ]
+        self.items_to_check = ["name", "description", "url_rule"]
 
     def tearDown(self):
         super().tearDown()
 
-    def test_get_actions_authorized(self):
+    def test_get_api_view_authorized(self):
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
             response = self.client.get(
-                ACTIONS_URL,
+                APIVIEW_URL,
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -33,14 +38,18 @@ class TestActionsListEndpoint(CustomTestCase):
                 },
             )
             self.assertEqual(200, response.status_code)
-            self.assertCountEqual(self.payload, response.json)
+            for item in range(len(self.payload)):
+                for field in self.items_to_check:
+                    self.assertEqual(
+                        self.payload[item][field], response.json[item][field]
+                    )
 
-    def test_get_actions_not_authorized(self):
+    def test_get_api_view_not_authorized(self):
         for role in BASE_ROLES:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
-                    ACTIONS_URL,
+                    APIVIEW_URL,
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",

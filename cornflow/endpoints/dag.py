@@ -15,7 +15,7 @@ from ..shared.authentication import Auth
 from ..shared.const import (
     EXEC_STATE_CORRECT,
     EXECUTION_STATE_MESSAGE_DICT,
-    SUPER_ADMIN_ROLE,
+    SERVICE_ROLE,
 )
 from ..schemas.execution import (
     ExecutionDagRequest,
@@ -37,7 +37,7 @@ class DAGEndpoint(MetaResource, MethodResource):
     Endpoint used for the DAG endpoint
     """
 
-    ROLES_WITH_ACCESS = [SUPER_ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     @doc(description="Edit an execution", tags=["DAGs"])
     @Auth.auth_required
@@ -111,7 +111,7 @@ class DAGEndpoint(MetaResource, MethodResource):
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [SUPER_ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     @doc(description="Create an execution manually.", tags=["DAGs"])
     @Auth.auth_required

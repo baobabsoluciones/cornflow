@@ -11,7 +11,7 @@ from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
-from ..shared.const import DEFAULT_ROLE
+from ..shared.const import PLANNER_ROLE
 from ..shared.exceptions import (
     InvalidUsage,
     InvalidCredentials,
@@ -42,7 +42,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
         user = UserModel(kwargs)
         user.save()
 
-        user_role = UserRoleModel({"user_id": user.id, "role_id": DEFAULT_ROLE})
+        user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
         user_role.save()
 
         try:

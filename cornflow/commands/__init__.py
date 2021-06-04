@@ -4,7 +4,7 @@ Initialization file for the commands module
 
 from .commands import (
     BasePermissionAssignationRegistration,
-    CreateSuperAdmin,
+    CreateServiceUser,
     CleanHistoricData,
     RegisterActions,
     RegisterRoles,

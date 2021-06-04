@@ -15,7 +15,7 @@ from ..schemas.user import (
     UserEditRequest,
 )
 from ..shared.authentication import Auth
-from ..shared.const import SUPER_ADMIN_ROLE
+from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 from .meta_resource import MetaResource
 
@@ -29,7 +29,7 @@ class UserEndpoint(MetaResource, MethodResource):
     Including their instances and executions
     """
 
-    ROLES_WITH_ACCESS = [SUPER_ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     @doc(description="Get all users", tags=["Users"])
     @Auth.auth_required
@@ -87,7 +87,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
-        if user_obj.is_super_admin() and not self.is_super_admin():
+        if user_obj.is_service_user() and not self.is_service_user():
             raise NoPermission()
         user_obj.delete()
         return {"message": "The object has been deleted"}, 200
@@ -118,8 +118,10 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
 
 
 class ToggleUserAdmin(MetaResource, MethodResource):
+    ROLES_WITH_ACCESS = [SERVICE_ROLE, ADMIN_ROLE]
+
     @doc(description="Toggle user into admin", tags=["Users"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
         """

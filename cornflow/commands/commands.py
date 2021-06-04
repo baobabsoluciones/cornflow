@@ -17,13 +17,13 @@ from cornflow.shared.const import (
     BASE_ACTIONS,
     BASE_PERMISSION_ASSIGNATION,
     BASE_ROLES,
-    SUPER_ADMIN_ROLE,
+    SERVICE_ROLE,
 )
 from cornflow.endpoints import resources
 from cornflow.shared.utils import db
 
 
-class CreateSuperAdmin(Command):
+class CreateServiceUser(Command):
     """
     Creates the initial super user that is used by airflow to write the results of the execution back
     This command should only be used on deployment
@@ -31,8 +31,8 @@ class CreateSuperAdmin(Command):
 
     def get_options(self):
         return (
-            Option("-u", "--user", dest="user", help="Superadmin username"),
-            Option("-p", "--password", dest="password", help="Superadmin password"),
+            Option("-u", "--user", dest="user", help="Service user username"),
+            Option("-p", "--password", dest="password", help="Service user password"),
         )
 
     def run(self, user, password):
@@ -40,21 +40,21 @@ class CreateSuperAdmin(Command):
         Method to run the command and create the superuser
         It does not return anything
         """
-        SADMIN_USER = user
-        SADMIN_PWD = password
-        sadmin_user = UserModel.get_one_user_by_email(SADMIN_USER)
-        if sadmin_user is not None:
-            if not sadmin_user.super_admin:
-                sadmin_user.super_admin = 1
-                sadmin_user.save()
+        SERVICE_NAME = user
+        SERVICE_PASSWORD = password
+        service_user = UserModel.get_one_user_by_email(SERVICE_NAME)
+        if service_user is not None:
+            if not service_user.super_admin:
+                service_user.super_admin = 1
+                service_user.save()
             print("Airflow super user already exists")
             return
         user = UserModel(
-            data=dict(name="airflow", email=SADMIN_USER, password=SADMIN_PWD)
+            data=dict(name="airflow", email=SERVICE_NAME, password=SERVICE_PASSWORD)
         )
         user.super_admin = True
         user.save()
-        user_role = UserRoleModel({"user_id": user.id, "role_id": SUPER_ADMIN_ROLE})
+        user_role = UserRoleModel({"user_id": user.id, "role_id": SERVICE_ROLE})
         user_role.save()
         return
 
@@ -79,6 +79,7 @@ class RegisterActions(Command):
             ActionModel(id=key, name=value) for key, value in BASE_ACTIONS.items()
         ]
         db.session.bulk_save_objects(actions_list)
+        db.session.commit()
 
         return
 
@@ -87,10 +88,17 @@ class RegisterViews(Command):
     def run(self):
         # TODO: empty table beforehand
         views_list = [
-            ApiViewModel(name=view["endpoint"], url_rule=view["urls"])
+            ApiViewModel(
+                {
+                    "name": view["endpoint"],
+                    "url_rule": view["urls"],
+                    "description": view["resource"].DESCRIPTION,
+                }
+            )
             for view in resources
         ]
         db.session.bulk_save_objects(views_list)
+        db.session.commit()
 
         return
 
@@ -98,11 +106,18 @@ class RegisterViews(Command):
 class UpdateViews(Command):
     def run(self):
         views_list = [
-            ApiViewModel(name=view["endpoint"], url_rule=view["urls"])
+            ApiViewModel(
+                {
+                    "name": view["endpoint"],
+                    "url_rule": view["urls"],
+                    "description": view["resource"].DESCRIPTION,
+                }
+            )
             for view in resources
             if ApiViewModel.get_one_by_name(view["endpoint"]) is None
         ]
         db.session.bulk_save_objects(views_list)
+        db.session.commit()
 
         return
 
@@ -113,6 +128,7 @@ class RegisterRoles(Command):
             RoleModel({"id": key, "name": value}) for key, value in BASE_ROLES.items()
         ]
         db.session.bulk_save_objects(role_list)
+        db.session.commit()
 
         return
 
@@ -136,6 +152,7 @@ class BasePermissionAssignationRegistration(Command):
         ]
 
         db.session.bulk_save_objects(assign_list)
+        db.session.commit()
 
         return
 

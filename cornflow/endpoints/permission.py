@@ -12,11 +12,11 @@ from ..models import PermissionViewRoleModel
 from ..schemas.permission import PermissionViewRoleResponse
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from ..shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
+from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SUPER_ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -44,7 +44,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
 
 
 class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SUPER_ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()

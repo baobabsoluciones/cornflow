@@ -12,7 +12,7 @@ from cornflow.app import create_app
 from cornflow.commands import SecurityInitialization
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
 
@@ -75,64 +75,35 @@ class CustomTestCase(TestCase):
     def get_header_with_auth(token):
         return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
 
-    def create_super_admin(self):
+    def create_user_with_role(self, role_id):
         data = {
-            "name": "airflow",
-            "email": "airflow@baobabsoluciones.es",
-            "password": "THISNEEDSTOBECHANGED",
-        }
-
-        response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(data),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        user_role = UserRoleModel(
-            {"user_id": response.json["id"], "role_id": SUPER_ADMIN_ROLE}
-        )
-        user_role.save()
-
-        db.session.commit()
-
-        data.pop("name")
-        return self.client.post(
-            LOGIN_URL,
-            data=json.dumps(data),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        ).json["token"]
-
-    def create_admin(self):
-        data = {
-            "name": "testadmin",
-            "email": "admin@test.org",
+            "name": "testuser" + str(role_id),
+            "email": "testemail" + str(role_id) + "@test.org",
             "password": "testpassword",
         }
-
         response = self.client.post(
             SIGNUP_URL,
             data=json.dumps(data),
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
-
-        user_role = UserRoleModel(
-            {"user_id": response.json["id"], "role_id": ADMIN_ROLE}
-        )
+        user_role = UserRoleModel({"user_id": response.json["id"], "role_id": role_id})
         user_role.save()
 
         db.session.commit()
-
         data.pop("name")
-
         return self.client.post(
             LOGIN_URL,
             data=json.dumps(data),
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         ).json["token"]
+
+    def create_service_user(self):
+        return self.create_user_with_role(SERVICE_ROLE)
+
+    def create_admin(self):
+        return self.create_user_with_role(ADMIN_ROLE)
 
     def tearDown(self):
         db.session.remove()
@@ -381,7 +352,7 @@ class BaseTestCases:
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
-            token = self.create_super_admin()
+            token = self.create_service_user()
             self.get_one_row(
                 self.url + str(idx) + "/", {**self.payload, **dict(id=idx)}, token=token
             )

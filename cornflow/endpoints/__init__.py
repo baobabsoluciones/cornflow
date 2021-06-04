@@ -4,6 +4,7 @@ All references to endpoints should be imported from here
 """
 
 from .action import ActionListEndpoint
+from .apiview import ApiViewListEndpoint
 
 from .case import (
     CaseEndpoint,
@@ -123,4 +124,5 @@ resources = [
     dict(
         resource=RoleDetailEndpoint, urls="/roles/<int:idx>/", endpoint="roles-detail"
     ),
+    dict(resource=ApiViewListEndpoint, urls="/apiview/", endpoint="api-view"),
 ]

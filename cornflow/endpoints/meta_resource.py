@@ -16,6 +16,7 @@ from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 class MetaResource(Resource):
     # method_decorators = [Auth.auth_required]
     ROLES_WITH_ACCESS = [role for role in BASE_ROLES]
+    DESCRIPTION = ""
 
     def __init__(self):
         super().__init__()
@@ -50,12 +51,12 @@ class MetaResource(Resource):
         """
         return self.get_user().is_admin()
 
-    def is_super_admin(self):
+    def is_service_user(self):
         """
         :return: if user is superadmin
         :rtype: bool
         """
-        return self.get_user().is_super_admin()
+        return self.get_user().is_service_user()
 
     @staticmethod
     def get_data_or_404(func):

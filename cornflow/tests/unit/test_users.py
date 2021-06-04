@@ -4,7 +4,7 @@ from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.commands import SecurityInitialization
 from cornflow.models import UserModel, UserRoleModel
-from cornflow.shared.const import DEFAULT_ROLE, ADMIN_ROLE, SUPER_ADMIN_ROLE
+from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import USER_URL, LOGIN_URL, SIGNUP_URL
 
@@ -35,16 +35,16 @@ class TestUserEndpoint(TestCase):
             email="admin@admin.com",
             password="testpassword",
         )
-        self.super_admin = dict(
+        self.service_user = dict(
             name="anAdminSuperUser",
-            email="super_admin@admin.com",
-            password="tpass_super_admin",
+            email="service_user@admin.com",
+            password="tpass_service_user",
         )
         self.login_keys = ["email", "password"]
         self.items_to_check = ["email", "name", "id"]
         self.modifiable_items = ["email", "name", "password"]
 
-        for u_data in [self.user, self.user_2, self.admin, self.super_admin]:
+        for u_data in [self.user, self.user_2, self.admin, self.service_user]:
             response = self.client.post(
                 SIGNUP_URL,
                 data=json.dumps(u_data),
@@ -60,9 +60,9 @@ class TestUserEndpoint(TestCase):
                 )
                 user_role.save()
 
-            if "super_admin" in u_data["email"]:
+            if "service_user" in u_data["email"]:
                 user_role = UserRoleModel(
-                    {"user_id": u_data["id"], "role_id": SUPER_ADMIN_ROLE}
+                    {"user_id": u_data["id"], "role_id": SERVICE_ROLE}
                 )
                 user_role.save()
 
@@ -162,7 +162,7 @@ class TestUserEndpoint(TestCase):
 
     def test_get_all_users_superadmin(self):
         # the superadmin should be able to list all users
-        response = self.get_user(self.super_admin)
+        response = self.get_user(self.service_user)
         self.assertEqual(200, response.status_code)
         self.assertEqual(len(response.json), 4)
 
@@ -180,7 +180,7 @@ class TestUserEndpoint(TestCase):
 
     def test_get_same_user(self):
         # if a user asks for itself: it's ok
-        for u_data in [self.user, self.admin, self.super_admin]:
+        for u_data in [self.user, self.admin, self.service_user]:
             response = self.get_user(u_data, u_data)
             self.assertEqual(200, response.status_code)
             for item in self.items_to_check:
@@ -228,7 +228,7 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(403, response.status_code)
 
     def test_admin_deletes_superadmin(self):
-        response = self.delete_user(self.admin, self.super_admin)
+        response = self.delete_user(self.admin, self.service_user)
         self.assertEqual(403, response.status_code)
 
     def test_admin_deletes_user(self):
@@ -238,9 +238,9 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(404, response.status_code)
 
     def test_superadmin_deletes_admin(self):
-        response = self.delete_user(self.super_admin, self.admin)
+        response = self.delete_user(self.service_user, self.admin)
         self.assertEqual(200, response.status_code)
-        response = self.get_user(self.super_admin, self.admin)
+        response = self.get_user(self.service_user, self.admin)
         self.assertEqual(404, response.status_code)
 
     def test_edit_info(self):
@@ -289,9 +289,9 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])
 
-    def test_super_admin_change_password(self):
+    def test_service_user_change_password(self):
         payload = {"password": "newtestpassword_4"}
-        response = self.modify_info(self.super_admin, self.user, payload)
+        response = self.modify_info(self.service_user, self.user, payload)
         self.assertEqual(200, response.status_code)
         self.user["password"] = payload["password"]
         response = self.log_in(self.user)

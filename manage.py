@@ -11,7 +11,7 @@ migrate = Migrate(app=app, db=db)
 manager = Manager(app=app)
 
 manager.add_command("db", MigrateCommand)
-manager.add_command("create_super_user", CreateSuperAdmin)
+manager.add_command("create_service_user", CreateServiceUser)
 manager.add_command("clean_historic_data", CleanHistoricData)
 manager.add_command("register_actions", RegisterActions)
 manager.add_command("register_views", RegisterViews)

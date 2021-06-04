@@ -2,7 +2,7 @@ import json
 
 
 from cornflow.models import UserRoleModel
-from cornflow.shared.const import ADMIN_ROLE, SUPER_ADMIN_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.tests.const import LOGIN_URL, PERMISSION_URL, SIGNUP_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -15,7 +15,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
         super().tearDown()
 
     def test_get_permissions_view_role(self):
-        token = self.create_super_admin()
+        token = self.create_service_user()
         response = self.client.get(
             PERMISSION_URL,
             follow_redirects=True,

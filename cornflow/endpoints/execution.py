@@ -95,12 +95,14 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             user=config["AIRFLOW_USER"],
             pwd=config["AIRFLOW_PWD"],
         )
+
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
         execution, status_code = self.post_list(kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id
         )
+
         if instance is None:
             raise ObjectDoesNotExist(error="The instance to solve does not exist")
 

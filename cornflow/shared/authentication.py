@@ -122,28 +122,6 @@ class Auth:
 
         return decorated_user
 
-    # super admin decorator
-    @staticmethod
-    def super_admin_required(func):
-        """
-        Auth decorator that checks if user is super_admin
-        :param func:
-        :return:
-        """
-
-        @wraps(func)
-        def decorated_super_admin(*args, **kwargs):
-            user = Auth.get_user_obj_from_header(request)
-            if not user.super_admin:
-                raise NoPermission(
-                    error="You do not have permission to access this endpoint"
-                )
-
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
-
-        return decorated_super_admin
-
     @staticmethod
     def return_user_from_token(token):
         user_id = Auth.decode_token(token)["user_id"]
