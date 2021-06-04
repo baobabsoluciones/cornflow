@@ -58,7 +58,7 @@ class UserRoleModel(TraceAttributes):
     def is_admin(user_id):
         user_roles = UserRoleModel.query.filter_by(user_id=user_id).all()
         for role in user_roles:
-            if role.role_id == ADMIN_ROLE or role.role_id == SERVICE_ROLE:
+            if role.role_id == ADMIN_ROLE:
                 return True
 
         return False

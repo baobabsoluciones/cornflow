@@ -16,7 +16,7 @@ from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -44,7 +44,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
 
 
 class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()

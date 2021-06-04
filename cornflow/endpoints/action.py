@@ -14,7 +14,7 @@ from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 
 
 class ActionListEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 
     def __init__(self):

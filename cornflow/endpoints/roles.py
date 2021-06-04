@@ -16,7 +16,7 @@ from ..shared.exceptions import EndpointNotImplemented
 
 
 class RolesListEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get or create the current roles in the application"
 
     def __init__(self):
@@ -65,7 +65,7 @@ class RolesListEndpoint(MetaResource, MethodResource):
 
 
 class RoleDetailEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get, modify or delete a specific role of the application"
 
     def __init__(self):

@@ -14,7 +14,7 @@ from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 
 
 class ApiViewListEndpoint(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of all the endpoints defined in cornflow and its url"
     )

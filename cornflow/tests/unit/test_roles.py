@@ -5,7 +5,7 @@ Unit test for the role endpoints
 # Import from internal modules
 from cornflow.endpoints import RoleDetailEndpoint, RolesListEndpoint
 from cornflow.models import RoleModel
-from cornflow.shared.const import BASE_ROLES, SERVICE_ROLE, VIEWER_ROLE
+from cornflow.shared.const import BASE_ROLES, ADMIN_ROLE, VIEWER_ROLE
 from cornflow.tests.const import ROLES_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -142,7 +142,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
                 )
 
     def test_delete_role_authorized(self):
-        self.token = self.create_user_with_role(SERVICE_ROLE)
+        self.token = self.create_user_with_role(ADMIN_ROLE)
         response = self.client.delete(
             self.url + str(VIEWER_ROLE) + "/",
             follow_redirects=True,

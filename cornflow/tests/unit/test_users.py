@@ -37,7 +37,7 @@ class TestUserEndpoint(TestCase):
         )
         self.service_user = dict(
             name="anAdminSuperUser",
-            email="service_user@admin.com",
+            email="service_user@test.com",
             password="tpass_service_user",
         )
         self.login_keys = ["email", "password"]
@@ -101,7 +101,7 @@ class TestUserEndpoint(TestCase):
             },
         )
 
-    def get_nonexisting_user(self):
+    def get_non_existing_user(self):
         pass
 
     def make_admin(self, user_asks, user_asked, make_admin=1):
@@ -161,10 +161,9 @@ class TestUserEndpoint(TestCase):
         )
 
     def test_get_all_users_superadmin(self):
-        # the superadmin should be able to list all users
+        # the service role should not be able to get the users
         response = self.get_user(self.service_user)
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(len(response.json), 4)
+        self.assertEqual(403, response.status_code)
 
     def test_get_all_users_user(self):
         # a simple user should not be able to do it
@@ -173,10 +172,10 @@ class TestUserEndpoint(TestCase):
         self.assertTrue("error" in response.json)
 
     def test_get_all_users_admin(self):
-        # an admin should not be able to do it
+        # An admin should be able to get all users
         response = self.get_user(self.admin)
-        self.assertEqual(403, response.status_code)
-        self.assertTrue("error" in response.json)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(len(response.json), 4)
 
     def test_get_same_user(self):
         # if a user asks for itself: it's ok
@@ -239,9 +238,7 @@ class TestUserEndpoint(TestCase):
 
     def test_superadmin_deletes_admin(self):
         response = self.delete_user(self.service_user, self.admin)
-        self.assertEqual(200, response.status_code)
-        response = self.get_user(self.service_user, self.admin)
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_edit_info(self):
         payload = {"name": "newtestname", "email": "newtest@test.com"}
@@ -292,8 +289,4 @@ class TestUserEndpoint(TestCase):
     def test_service_user_change_password(self):
         payload = {"password": "newtestpassword_4"}
         response = self.modify_info(self.service_user, self.user, payload)
-        self.assertEqual(200, response.status_code)
-        self.user["password"] = payload["password"]
-        response = self.log_in(self.user)
-        self.assertEqual(200, response.status_code)
-        self.assertIsNotNone(response.json["token"])
+        self.assertEqual(403, response.status_code)

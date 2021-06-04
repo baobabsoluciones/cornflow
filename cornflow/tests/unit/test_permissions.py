@@ -1,40 +1,48 @@
-import json
+"""
+Unit test for the permissions table
+"""
 
-
-from cornflow.models import UserRoleModel
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.tests.const import LOGIN_URL, PERMISSION_URL, SIGNUP_URL
+# Import from internal modules
+from cornflow.endpoints import PermissionsViewRoleEndpoint
+from cornflow.shared.const import BASE_ROLES
+from cornflow.tests.const import PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
 class TestPermissionsViewRoleEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
+        self.roles_with_access = PermissionsViewRoleEndpoint.ROLES_WITH_ACCESS
 
     def tearDown(self):
         super().tearDown()
 
     def test_get_permissions_view_role(self):
-        token = self.create_service_user()
-        response = self.client.get(
-            PERMISSION_URL,
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token,
-            },
-        )
+        for role in self.roles_with_access:
+            self.token = self.create_user_with_role(role)
 
-        self.assertEqual(200, response.status_code)
+            response = self.client.get(
+                PERMISSION_URL,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + self.token,
+                },
+            )
+
+            self.assertEqual(200, response.status_code)
 
     def test_get_no_permissions_view_role(self):
-        response = self.client.get(
-            PERMISSION_URL,
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
+        for role in BASE_ROLES:
+            if role not in self.roles_with_access:
+                self.token = self.create_user_with_role(role)
+                response = self.client.get(
+                    PERMISSION_URL,
+                    follow_redirects=True,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + self.token,
+                    },
+                )
 
-        self.assertEqual(403, response.status_code)
+                self.assertEqual(403, response.status_code)

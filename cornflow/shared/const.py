@@ -37,20 +37,32 @@ AIRFLOW_TO_STATE_MAP = dict(
 AUTH_DB = 1
 AUTH_LDAP = 2
 
-BASE_ACTIONS = {
-    1: "can_get",
-    2: "can_patch",
-    3: "can_post",
-    4: "can_put",
-    5: "can_delete",
-}
-
-PERMISSION_METHOD_MAP = {"GET": 1, "PATCH": 2, "POST": 3, "PUT": 4, "DELETE": 5}
+GET_ACTION = 1
+PATCH_ACTION = 2
+POST_ACTION = 3
+PUT_ACTION = 4
+DELETE_ACTION = 5
 
 VIEWER_ROLE = 1
 PLANNER_ROLE = 2
 ADMIN_ROLE = 3
 SERVICE_ROLE = 4
+
+BASE_ACTIONS = {
+    GET_ACTION: "can_get",
+    PATCH_ACTION: "can_patch",
+    POST_ACTION: "can_post",
+    PUT_ACTION: "can_put",
+    DELETE_ACTION: "can_delete",
+}
+
+PERMISSION_METHOD_MAP = {
+    "GET": GET_ACTION,
+    "PATCH": PATCH_ACTION,
+    "POST": POST_ACTION,
+    "PUT": PUT_ACTION,
+    "DELETE": DELETE_ACTION,
+}
 
 BASE_ROLES = {
     PLANNER_ROLE: "planner",
@@ -60,20 +72,19 @@ BASE_ROLES = {
 }
 
 BASE_PERMISSION_ASSIGNATION = [
-    (1, 1),
-    (2, 1),
-    (2, 2),
-    (2, 3),
-    (2, 4),
-    (2, 5),
-    (3, 1),
-    (3, 2),
-    (3, 3),
-    (3, 4),
-    (3, 5),
-    (4, 1),
-    (4, 2),
-    (4, 3),
-    (4, 4),
-    (4, 5),
+    (VIEWER_ROLE, GET_ACTION),
+    (PLANNER_ROLE, GET_ACTION),
+    (PLANNER_ROLE, PATCH_ACTION),
+    (PLANNER_ROLE, POST_ACTION),
+    (PLANNER_ROLE, PUT_ACTION),
+    (PLANNER_ROLE, DELETE_ACTION),
+    (ADMIN_ROLE, GET_ACTION),
+    (ADMIN_ROLE, PATCH_ACTION),
+    (ADMIN_ROLE, POST_ACTION),
+    (ADMIN_ROLE, PUT_ACTION),
+    (ADMIN_ROLE, DELETE_ACTION),
+    (SERVICE_ROLE, GET_ACTION),
+    (SERVICE_ROLE, PATCH_ACTION),
+    (SERVICE_ROLE, PUT_ACTION),
+    (SERVICE_ROLE, DELETE_ACTION),
 ]
