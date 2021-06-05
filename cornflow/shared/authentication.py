@@ -87,7 +87,7 @@ class Auth:
     @staticmethod
     def get_permission_for_request(req, user_id):
         method, url = Auth.get_request_info(req)
-        user_role = UserRoleModel.query.filter_by(user_id=user_id).all()
+        user_role = UserRoleModel.get_one_user(user_id=user_id)
         if user_role is None:
             raise NoPermission("You do not have permission to access this endpoint")
 

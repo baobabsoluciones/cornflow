@@ -1,12 +1,15 @@
 """
-
+This file contains the schemas used for the endpoints that manage the permissions on views by roles
 """
+
 # Imports from marshmallow library
 from marshmallow import fields, Schema
 
 
 class PermissionViewRoleResponse(Schema):
-    """"""
+    """
+    Schema used for the get methods
+    """
 
     id = fields.Int()
     action_id = fields.Int()

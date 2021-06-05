@@ -75,9 +75,9 @@ class MetaResource(Resource):
 
         return decorated_func
 
-    def post_list(self, data):
+    def post_list(self, data, trace_field="user_id"):
         data = dict(data)
-        data["user_id"] = self.get_user_id()
+        data[trace_field] = self.get_user_id()
         item = self.model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:

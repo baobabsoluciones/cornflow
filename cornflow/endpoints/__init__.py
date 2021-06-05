@@ -36,7 +36,12 @@ from .instance import (
 
 from .login import LoginEndpoint
 from .permission import PermissionsViewRoleEndpoint
-from .roles import RolesListEndpoint, RoleDetailEndpoint
+from .roles import (
+    RolesListEndpoint,
+    RoleDetailEndpoint,
+    UserRoleListEndpoint,
+    UserRoleDetailEndpoint,
+)
 from .schemas import SchemaEndpoint
 from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
@@ -125,4 +130,10 @@ resources = [
         resource=RoleDetailEndpoint, urls="/roles/<int:idx>/", endpoint="roles-detail"
     ),
     dict(resource=ApiViewListEndpoint, urls="/apiview/", endpoint="api-view"),
+    dict(resource=UserRoleListEndpoint, urls="/user/role/", endpoint="user-roles"),
+    dict(
+        resource=UserRoleDetailEndpoint,
+        urls="/user/role/<int:idx>/",
+        endpoint="user-roles-detail",
+    ),
 ]

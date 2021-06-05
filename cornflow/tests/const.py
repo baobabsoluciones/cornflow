@@ -35,5 +35,6 @@ ACTIONS_URL = PREFIX + "/action/"
 PERMISSION_URL = PREFIX + "/permission/"
 
 ROLES_URL = PREFIX + "/roles/"
+USER_ROLE_URL = PREFIX + "/user/role/"
 
 APIVIEW_URL = PREFIX + "/apiview/"

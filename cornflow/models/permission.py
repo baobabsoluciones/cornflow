@@ -1,4 +1,4 @@
-from .meta_model import EmptyModel, TraceAttributes
+from .meta_model import TraceAttributes
 from ..shared.utils import db
 
 

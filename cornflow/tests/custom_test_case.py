@@ -70,6 +70,7 @@ class CustomTestCase(TestCase):
         self.model = None
         self.copied_items = set()
         self.items_to_check = []
+        self.roles_with_access = []
 
     @staticmethod
     def get_header_with_auth(token):
