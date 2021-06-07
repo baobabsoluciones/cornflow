@@ -46,7 +46,6 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
     def __init__(self):
         super().__init__()
-        self.name = "instance"
         self.model = InstanceModel
         self.query = InstanceModel.get_all_objects
         self.primary_key = "id"
