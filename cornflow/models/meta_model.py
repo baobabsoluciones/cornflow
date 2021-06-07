@@ -3,14 +3,12 @@
 """
 # Import from libraries
 import datetime
-import jsonpatch
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
 # Import from internal modules
-from ..shared.exceptions import InvalidPatch
 from ..shared.utils import db, hash_json_256
 
 
@@ -79,34 +77,6 @@ class BaseDataModel(TraceAttributes):
         """
         for key, item in data.items():
             setattr(self, key, item)
-        super().update(data)
-
-    def patch(self, data):
-        """
-
-        :param dict data:
-        :type data:
-        """
-        for key, item in data.items():
-            if "patch" in key:
-                try:
-                    setattr(
-                        self,
-                        key.split("_")[0],
-                        jsonpatch.apply_patch(getattr(self, key.split("_")[0]), item),
-                    )
-                except jsonpatch.JsonPatchConflict:
-                    raise InvalidPatch()
-                except jsonpatch.JsonPointerException:
-                    raise InvalidPatch()
-            else:
-                setattr(self, key, item)
-
-        for key, item in vars(self).items():
-            if "hash" in key:
-                setattr(self, key, hash_json_256(getattr(self, key.split("_")[0])))
-
-        self.user_id = data.get("user_id")
         super().update(data)
 
     def delete(self):
