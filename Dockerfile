@@ -9,8 +9,6 @@ LABEL maintainer="sistemas@baobabsoluciones"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
-# Cornflow vars
-
 # install dos2unix for initapp.sh
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		dos2unix \

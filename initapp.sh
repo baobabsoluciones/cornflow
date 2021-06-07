@@ -10,15 +10,19 @@
 : "${FLASK_ENV:="development"}"
 : "${SECRET_KEY=${FERNET_KEY:=$(python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)")}}"
 : "${DATABASE_URL=${CORNFLOW_DB_CONN}}"
-: "${ADMIN_USER:="user@cornflow.com"}"
-: "${ADMIN_PWD:="cornflow1234"}"
+: "${CORNFLOW_ADMIN_USER:="user@cornflow.com"}"
+: "${CORNFLOW_ADMIN_PWD:="admincornflow1234"}"
+: "${CORNFLOW_SERVICE_USER:="serviceuser@cornflow.com"}"
+: "${CORNFLOW_SERVICE_PWD:="servicecornflow1234"}"
 
 export \
   AIRFLOW_USER \
   AIRFLOW_PWD \
   AIRFLOW_URL \
-  ADMIN_USER \
-  ADMIN_PWD \
+  CORNFLOW_ADMIN_USER \
+  CORNFLOW_ADMIN_PWD \
+  CORNFLOW_SERVICE_USER \
+  CORNFLOW_SERVICE_PWD \
   CORNFLOW_DB_CONN \
   CORNFLOW_URL \
   DATABASE_URL \
@@ -55,7 +59,7 @@ if [[ -z "$DATABASE_URL" ]]; then
 fi
 
 # Check LDAP parameters for active directory
-if [ "$CORNFLOW_LDAP_ENABLE" = "True" ]; then
+if [ "$AUTH_TYPE" = "2" ]; then
   # Default values corresponding to the default compose files
     : "${LDAP_PROTOCOL_VERSION:="3"}"
     : "${LDAP_BIND_PASSWORD:="adminldap"}"
@@ -71,8 +75,10 @@ fi
 
 # make initdb and/or migrations
 python manage.py db upgrade
-# create airflow superuser
-python manage.py create_super_user --user="$ADMIN_USER" --password="$ADMIN_PWD"
+# create cornflow admin user
+python manage.py create_admin_user --user="$CORNFLOW_ADMIN_USER" --password="$CORNFLOW_ADMIN_PWD"
+# create cornflow service user
+python manage.py create_service_user --user="$CORNFLOW_SERVICE_USER" --password="$CORNFLOW_SERVICE_PWD"
 
 # execute gunicorn with config file "gunicorn.py"
 /usr/local/bin/gunicorn -c cornflow/gunicorn.py "cornflow:create_app('$FLASK_ENV')"

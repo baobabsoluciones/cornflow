@@ -18,6 +18,8 @@
 : "${AIRFLOW_ROLE:="Admin"}"
 : "${AIRFLOW_PWD:="admin"}"
 : "${AIRFLOW_USER_EMAIL:="admin@example.com"}"
+: "${CORNFLOW_SERVICE_USER:="serviceuser@cornflow.com"}"
+: "${CORNFLOW_SERVICE_PWD:="servicecornflow1234"}"
 
 export \
 	AIRFLOW_HOME \
@@ -32,6 +34,8 @@ export \
 	AIRFLOW_ROLE \
 	AIRFLOW_PWD \
 	AIRFLOW_USER_EMAIL \
+  CORNFLOW_SERVICE_USER \
+  CORNFLOW_SERVICE_PWD \
   AIRFLOW_LDAP_ENABLE \
   AIRFLOW_LDAP_URI \
   AIRFLOW_LDAP_SEARCH \
@@ -109,10 +113,8 @@ fi
     # Default values corresponding to the default compose files
     : "${CORNFLOW_HOST:="cornflow"}"
     : "${CORNFLOW_PORT:="5000"}"
-    : "${CORNFLOW_ADMIN_USER:="user@cornflow.com"}"
-    : "${CORNFLOW_ADMIN_PWD:="cornflow1234"}"
 
-    AIRFLOW_CONN_CF_URI="cornflow://${CORNFLOW_ADMIN_USER}:${CORNFLOW_ADMIN_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
+    AIRFLOW_CONN_CF_URI="cornflow://${CORNFLOW_SERVICE_USER}:${CORNFLOW_SERVICE_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
     export AIRFLOW_CONN_CF_URI
   fi
 
