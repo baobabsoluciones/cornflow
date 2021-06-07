@@ -76,9 +76,9 @@ fi
 # make initdb and/or migrations
 python manage.py db upgrade
 # create cornflow admin user
-python manage.py create_admin_user --user="$CORNFLOW_ADMIN_USER" --password="$CORNFLOW_ADMIN_PWD"
+python manage.py create_super_user --user="$CORNFLOW_ADMIN_USER" --password="$CORNFLOW_ADMIN_PWD"
 # create cornflow service user
-python manage.py create_service_user --user="$CORNFLOW_SERVICE_USER" --password="$CORNFLOW_SERVICE_PWD"
+python manage.py create_super_user --user="$CORNFLOW_SERVICE_USER" --password="$CORNFLOW_SERVICE_PWD"
 
 # execute gunicorn with config file "gunicorn.py"
 /usr/local/bin/gunicorn -c cornflow/gunicorn.py "cornflow:create_app('$FLASK_ENV')"
