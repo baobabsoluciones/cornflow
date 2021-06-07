@@ -76,6 +76,7 @@ Initialize the database::
     export FLASK_APP=cornflow.app
     export DATABASE_URL=sqlite:///cornflow.db
     python manage.py db upgrade
+    python manage.py access_init
     python manage.py create_service_user  --email=airflow_test@admin.com --password=airflow_test_password
     python manage.py create_admin_user  --email=cornflow_admin@admin.com --password=cornflow_admin_password
 
