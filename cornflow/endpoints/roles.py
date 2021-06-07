@@ -66,7 +66,7 @@ class RolesListEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The roles have to be created in the active directory."
+                "The roles have to be created in the directory."
             )
         return self.post_list(kwargs)
 
@@ -117,7 +117,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The roles have to be modified in the active directory."
+                "The roles have to be modified in the directory."
             )
         return self.put_detail(kwargs, idx)
 
@@ -136,9 +136,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        raise EndpointNotImplemented(
-            "The roles have to be deleted in the active directory."
-        )
+        raise EndpointNotImplemented("Roles can not be deleted")
 
 
 class UserRoleListEndpoint(MetaResource, MethodResource):
@@ -189,7 +187,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The roles have to be created in the active directory."
+                "The roles have to be created in the directory."
             )
         return self.post_list(kwargs, trace_field="admin_id")
 
@@ -236,6 +234,6 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The roles have to be created in the active directory."
+                "The roles have to be created in the directory."
             )
         return self.delete_detail(idx)

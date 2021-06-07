@@ -110,6 +110,8 @@ class UserModel(TraceAttributes):
         :return: The hashed password.
         :rtype: str
         """
+        if password is None:
+            return None
         return bcrypt.generate_password_hash(password, rounds=10).decode("utf8")
 
     def check_hash(self, password):

@@ -2,7 +2,7 @@ from flask_testing import LiveServerTestCase
 import cornflow_client as cf
 
 from cornflow.app import create_app
-from cornflow.commands import SecurityInitialization
+from cornflow.commands import AccessInitialization
 from cornflow.shared.utils import db
 from cornflow.tests.const import PREFIX
 
@@ -26,7 +26,7 @@ class CustomTestCaseLive(LiveServerTestCase):
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
-        SecurityInitialization().run()
+        AccessInitialization().run()
         user_data = dict(
             name="testname",
             email="test@test.com",

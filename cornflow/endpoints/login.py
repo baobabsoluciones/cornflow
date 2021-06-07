@@ -5,7 +5,6 @@ External endpoint for the user to login to the cornflow webserver
 from flask import current_app
 from flask_apispec import use_kwargs, doc
 from flask_apispec.views import MethodResource
-from flask_restful import Resource
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -37,33 +36,13 @@ class LoginEndpoint(MetaResource, MethodResource):
         """
 
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
+        email, password = kwargs.get("email"), kwargs.get("password")
 
         if AUTH_TYPE == AUTH_DB:
-            user = UserModel.get_one_user_by_email(kwargs.get("email"))
-
-            if not user:
-                raise InvalidCredentials()
-
-            if not user.check_hash(kwargs.get("password")):
-                raise InvalidCredentials()
+            user = self.auth_db_authenticate(email, password)
 
         elif AUTH_TYPE == AUTH_LDAP:
-            if not LDAP.authenticate(kwargs.get("email"), kwargs.get("password")):
-                raise InvalidCredentials()
-            user = UserModel.get_one_user_by_username(kwargs.get("email"))
-
-            if not user:
-                email = LDAP.get_user_email(kwargs.get("email"))
-                if not email:
-                    email = ""
-                data = {
-                    "name": kwargs.get("email"),
-                    "password": kwargs.get("password"),
-                    "email": email,
-                }
-                user = UserModel(data=data)
-                user.save()
-                user = UserModel.get_one_user_by_username(kwargs.get("email"))
+            user = self.auth_ldap_authenticate(email, password)
 
         try:
             token = Auth.generate_token(user.id)
@@ -73,3 +52,32 @@ class LoginEndpoint(MetaResource, MethodResource):
             )
 
         return {"token": token, "id": user.id}, 200
+
+    @staticmethod
+    def auth_db_authenticate(email, password):
+        user = UserModel.get_one_user_by_email(email)
+
+        if not user:
+            raise InvalidCredentials()
+
+        if not user.check_hash(password):
+            raise InvalidCredentials()
+
+        return user
+
+    @staticmethod
+    def auth_ldap_authenticate(username, password):
+        if not LDAP.authenticate(username, password):
+            raise InvalidCredentials()
+        user = UserModel.get_one_user_by_username(username)
+
+        if not user:
+            email = LDAP.get_user_email(username)
+            if not email:
+                email = ""
+            data = {"name": username, "email": email}
+            user = UserModel(data=data)
+            user.save()
+            user = UserModel.get_one_user_by_username(username)
+
+        return user

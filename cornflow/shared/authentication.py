@@ -99,7 +99,7 @@ class Auth:
                 role.role_id, view_id, action_id
             )
 
-            if has_permission is not None:
+            if has_permission:
                 return True
 
         raise NoPermission("You do not have permission to access this endpoint")

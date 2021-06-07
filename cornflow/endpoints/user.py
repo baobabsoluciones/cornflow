@@ -1,23 +1,26 @@
 """
 Endpoints for the user profiles
 """
+
 # Import from libraries
-from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
-from ..models import UserModel
+from .meta_resource import MetaResource
+from ..models import UserModel, UserRoleModel
 from ..schemas.user import (
     UserSchema,
     UserEndpointResponse,
     UserDetailsEndpointResponse,
     UserEditRequest,
 )
+
 from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
+from ..shared.const import ADMIN_ROLE
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
-from .meta_resource import MetaResource
+from ..shared.utils import db
+
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -76,6 +79,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     @doc(description="Delete a user", tags=["Users"])
     @Auth.auth_required
     def delete(self, user_id):
+        # TODO: what to do in case of LDAP?
         """
 
         :param int user_id: User id.
@@ -87,6 +91,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
+        # Service user can not be deleted
         if user_obj.is_service_user():
             raise NoPermission()
         user_obj.delete()
@@ -97,6 +102,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     @marshal_with(UserDetailsEndpointResponse)
     @use_kwargs(UserEditRequest, location="json")
     def put(self, user_id, **data):
+        # TODO: what to do in case of LDAP?
         """
         API method to edit an existing user.
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -139,8 +145,9 @@ class ToggleUserAdmin(MetaResource, MethodResource):
         if user_obj is None:
             raise ObjectDoesNotExist()
         if make_admin:
-            user_obj.admin = 1
+            UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
         else:
-            user_obj.admin = 0
-        user_obj.save()
-        return user_obj, 201
+            UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
+            db.session.commit()
+
+        return user_obj, 200

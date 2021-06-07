@@ -7,12 +7,11 @@ from cornflow_client.airflow.api import Airflow
 from flask import current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import doc
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..shared.exceptions import AirflowError
-
-import logging as log
 
 
 class SchemaEndpoint(MetaResource, MethodResource):

@@ -2,7 +2,6 @@
 External endpoint for the user to signup
 """
 # Import from libraries
-from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
 

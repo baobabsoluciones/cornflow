@@ -3,6 +3,8 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
+from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
 from flask_apispec.views import MethodResource
@@ -10,24 +12,24 @@ from flask_apispec.views import MethodResource
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import ExecutionModel, InstanceModel
-from ..schemas import ExecutionSchema
+from ..schemas.execution import (
+    ExecutionDagPostRequest,
+    ExecutionDagRequest,
+    ExecutionDetailsEndpointResponse,
+    ExecutionSchema,
+)
+
+from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.const import (
+    ADMIN_ROLE,
     EXEC_STATE_CORRECT,
+    EXEC_STATE_MANUAL,
     EXECUTION_STATE_MESSAGE_DICT,
     SERVICE_ROLE,
 )
-from ..schemas.execution import (
-    ExecutionDagRequest,
-    ExecutionDagPostRequest,
-    ExecutionDetailsEndpointResponse,
-)
-from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
-from cornflow_client.airflow.api import get_schema, validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
-from ..shared.const import EXEC_STATE_MANUAL
-from ..schemas.model_json import DataSchema
 
+from ..shared.exceptions import ObjectDoesNotExist
 
 execution_schema = ExecutionSchema()
 
@@ -37,7 +39,7 @@ class DAGEndpoint(MetaResource, MethodResource):
     Endpoint used for the DAG endpoint
     """
 
-    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Edit an execution", tags=["DAGs"])
     @Auth.auth_required
@@ -111,7 +113,9 @@ class DAGEndpoint(MetaResource, MethodResource):
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
-    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+    """ """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Create an execution manually.", tags=["DAGs"])
     @Auth.auth_required

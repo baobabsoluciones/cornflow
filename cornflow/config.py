@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_LDAP
+from .shared.const import AUTH_DB, AUTH_LDAP
 
 
 class Development(object):
@@ -13,17 +13,17 @@ class Development(object):
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
-    AUTH_TYPE = os.getenv("AUTH_TYPE", 1)
+    AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
 
-    if AUTH_TYPE == AUTH_LDAP:
-        LDAP_PROTOCOL_VERSION = os.getenv("LDAP_PROTOCOL_VERSION")
-        LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
-        LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
-        LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
-        LDAP_HOST = os.getenv("LDAP_HOST")
-        LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
-        LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
-        LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
+    # LDAP configuration
+    LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
+    LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
+    LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
+    LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
+    LDAP_HOST = os.getenv("LDAP_HOST")
+    LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
+    LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
+    LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
 
 
 class Testing(object):
@@ -38,18 +38,18 @@ class Testing(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"
     AIRFLOW_PWD = "admin"
-    AUTH_TYPE = 1
+    AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
 
-    if AUTH_TYPE == AUTH_LDAP:
-        LDAP_PROTOCOL_VERSION = 3
-        LDAP_BIND_PASSWORD = "adminldap"
-        LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
-        LDAP_USE_TLS = False
-        LDAP_HOST = "ldap://35.205.18.159:389"
-        LDAP_USERNAME_ATTRIBUTE = "cn"
-        LDAP_USER_BASE = "ou=user,dc=example,dc=org"
-        LDAP_EMAIL_ATTRIBUTE = "mail"
-        LDAP_USER_OBJECT_CLASS = "inetOrgPerson"
+    # LDAP configuration
+    LDAP_PROTOCOL_VERSION = 3
+    LDAP_BIND_PASSWORD = "adminldap"
+    LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
+    LDAP_USE_TLS = False
+    LDAP_HOST = "ldap://35.205.18.159:389"
+    LDAP_USERNAME_ATTRIBUTE = "cn"
+    LDAP_USER_BASE = "ou=user,dc=example,dc=org"
+    LDAP_EMAIL_ATTRIBUTE = "mail"
+    LDAP_USER_OBJECT_CLASS = "inetOrgPerson"
 
 
 class Production(object):
@@ -63,17 +63,17 @@ class Production(object):
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
-    AUTH_TYPE = os.getenv("AUTH_TYPE", 1)
+    AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
 
-    if AUTH_TYPE == AUTH_LDAP:
-        LDAP_PROTOCOL_VERSION = os.getenv("LDAP_PROTOCOL_VERSION")
-        LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
-        LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
-        LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
-        LDAP_HOST = os.getenv("LDAP_HOST")
-        LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
-        LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
-        LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
+    # LDAP configuration
+    LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
+    LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
+    LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
+    LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
+    LDAP_HOST = os.getenv("LDAP_HOST")
+    LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
+    LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
+    LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}

@@ -3,6 +3,7 @@ from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.commands import (
     BasePermissionAssignationRegistration,
+    CreateAdminUser,
     CreateServiceUser,
     RegisterActions,
     RegisterRoles,
@@ -18,8 +19,8 @@ from cornflow.models import (
     UserModel,
 )
 from cornflow.shared.const import (
-    BASE_ACTIONS,
-    BASE_ROLES,
+    ACTIONS_MAP,
+    ROLES_MAP,
     BASE_PERMISSION_ASSIGNATION,
 )
 from cornflow.shared.utils import db
@@ -33,8 +34,8 @@ class TestCommands(TestCase):
     def setUp(self):
         db.create_all()
         self.payload = {
-            "email": "superadmin@test.org",
-            "password": "superadminpassword",
+            "email": "testemail@test.org",
+            "password": "testpassword",
         }
         self.resources = resources
 
@@ -42,12 +43,22 @@ class TestCommands(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_super_user_command(self):
+    def test_service_user_command(self):
         command = CreateServiceUser()
 
-        command.run(user=self.payload["email"], password=self.payload["password"])
+        command.run(email=self.payload["email"], password=self.payload["password"])
 
-        user = UserModel.get_one_user_by_email("superadmin@test.org")
+        user = UserModel.get_one_user_by_email("testemail@test.org")
+
+        self.assertNotEqual(None, user)
+        self.assertEqual(self.payload["email"], user.email)
+
+    def test_admin_user_command(self):
+        command = CreateAdminUser()
+
+        command.run(email=self.payload["email"], password=self.payload["password"])
+
+        user = UserModel.get_one_user_by_email("testemail@test.org")
 
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
@@ -59,7 +70,7 @@ class TestCommands(TestCase):
         actions = ActionModel.query.all()
 
         for a in actions:
-            self.assertEqual(BASE_ACTIONS[a.id], a.name)
+            self.assertEqual(ACTIONS_MAP[a.id], a.name)
 
     def test_register_views(self):
         command = RegisterViews()
@@ -100,7 +111,7 @@ class TestCommands(TestCase):
         roles = RoleModel.query.all()
 
         for r in roles:
-            self.assertEqual(BASE_ROLES[r.id], r.name)
+            self.assertEqual(ROLES_MAP[r.id], r.name)
 
     def test_base_permissions_assignation(self):
         command = RegisterActions()
@@ -125,4 +136,4 @@ class TestCommands(TestCase):
                         base[1],
                     )
 
-                    self.assertNotEqual(None, permission)
+                    self.assertEqual(True, permission)

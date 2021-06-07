@@ -3,7 +3,7 @@ import json
 from flask_testing import TestCase
 
 from cornflow.app import create_app
-from cornflow.commands import SecurityInitialization
+from cornflow.commands import AccessInitialization
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow.shared.utils import db
@@ -18,7 +18,7 @@ class TestSignUp(TestCase):
 
     def setUp(self):
         db.create_all()
-        SecurityInitialization().run()
+        AccessInitialization().run()
         self.data = {
             "name": "testname",
             "email": "test@test.com",

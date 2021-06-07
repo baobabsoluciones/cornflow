@@ -10,7 +10,7 @@ from cornflow.endpoints import (
     UserRoleDetailEndpoint,
 )
 from cornflow.models import RoleModel, UserRoleModel
-from cornflow.shared.const import BASE_ROLES, ADMIN_ROLE, VIEWER_ROLE
+from cornflow.shared.const import ROLES_MAP, ADMIN_ROLE, VIEWER_ROLE
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -19,9 +19,7 @@ class TestRolesListEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.payload = {"name": "new_role"}
-        self.payloads = [
-            {"id": key, "name": value} for key, value in BASE_ROLES.items()
-        ]
+        self.payloads = [{"id": key, "name": value} for key, value in ROLES_MAP.items()]
         self.url = ROLES_URL
         self.model = RoleModel
         self.items_to_check = ["name"]
@@ -45,7 +43,7 @@ class TestRolesListEndpoint(CustomTestCase):
             self.assertCountEqual(self.payloads, response.json)
 
     def test_get_no_roles(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
@@ -65,7 +63,7 @@ class TestRolesListEndpoint(CustomTestCase):
             self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_role_not_authorized(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 self.create_new_row(
@@ -97,7 +95,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
 
     def test_get_one_role_not_authorized(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 token = self.create_user_with_role(role)
                 response = self.client.get(
@@ -135,7 +133,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
             )
 
     def test_modify_role_not_authorized(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 self.update_row(
@@ -215,7 +213,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.assertEqual(self.payload, response.json)
 
     def test_get_user_roles_not_authorized_user(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
@@ -234,7 +232,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.create_new_row(self.url, self.model, self.new_user_role)
 
     def test_post_role_assignment_not_authorized_user(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 self.create_new_row(
@@ -274,7 +272,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(self.payload, response.json)
 
     def test_get_user_role_not_authorized_user(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
@@ -301,7 +299,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
 
     def test_delete_user_role_not_authorized_user(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.delete(

@@ -1,8 +1,14 @@
+"""
+
+"""
+
+# Import from libraries
+from cornflow_client.airflow.api import Airflow
 from flask import current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
-from cornflow_client.airflow.api import Airflow
+# Import from internal modules
 from .meta_resource import MetaResource
 from ..schemas.health import HealthResponse
 from ..shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY

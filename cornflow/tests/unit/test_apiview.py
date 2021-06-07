@@ -4,7 +4,7 @@ Unit test for the api views endpoint
 
 # Import from internal modules
 from cornflow.endpoints import ApiViewListEndpoint, resources
-from cornflow.shared.const import BASE_ROLES
+from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import APIVIEW_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -45,7 +45,7 @@ class TestApiViewListEndpoint(CustomTestCase):
                     )
 
     def test_get_api_view_not_authorized(self):
-        for role in BASE_ROLES:
+        for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(

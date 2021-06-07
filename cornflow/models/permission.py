@@ -27,12 +27,15 @@ class PermissionViewRoleModel(TraceAttributes):
 
     @staticmethod
     def get_permission(role_id, view_id, action_id):
-        return PermissionViewRoleModel.query.filter_by(
+        permission = PermissionViewRoleModel.query.filter_by(
             role_id=role_id,
             api_view_id=view_id,
             action_id=action_id,
             deleted_at=None,
         ).first()
+
+        if permission is not None:
+            return True
 
     @staticmethod
     def get_all_objects():

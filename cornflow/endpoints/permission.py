@@ -12,7 +12,8 @@ from ..models import PermissionViewRoleModel
 from ..schemas.permission import PermissionViewRoleResponse
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
+from ..shared.const import ADMIN_ROLE
+from ..shared.exceptions import EndpointNotImplemented
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
@@ -40,7 +41,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
         return PermissionViewRoleModel.get_all_objects()
 
     def post(self):
-        pass
+        return EndpointNotImplemented()
 
 
 class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
@@ -53,7 +54,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     def put(self):
-        pass
+        raise EndpointNotImplemented()
 
     def delete(self):
-        pass
+        raise EndpointNotImplemented()

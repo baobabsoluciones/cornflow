@@ -5,9 +5,12 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
+from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
+from cornflow_client.constants import INSTANCE_SCHEMA
 from flask import request, current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -22,8 +25,7 @@ from ..schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
 )
-from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA
+
 from ..shared.authentication import Auth
 from ..shared.const import (
     EXEC_STATE_RUNNING,
@@ -35,11 +37,10 @@ from ..shared.const import (
     AIRFLOW_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
 )
+
 from ..shared.exceptions import AirflowError, ObjectDoesNotExist
 from ..shared.compress import compressed
 
-
-import logging as log
 
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
