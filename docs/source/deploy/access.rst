@@ -1,19 +1,21 @@
 Access control
 -----------------------
 
-Cornflow supports multi-user access using password encryption authentication. In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.
+Cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
+In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.
 
 User access data
 *********************
 
-The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
+Right now cornflow has two valid user authentication methods. The first is AUTH_DB, which in addition to being the one that is activated by default, is the easiest to configure since the authentication is carried out against the application itself that stores the credentials in encrypted form.
+The second method is AUTH_LDAP. This method allows you to link cornflow with your own security directory and thus the application will delegate the authentication of the users.
 
 With Auth-DB (default)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Cornflow has an environment variable to control the type of authentication we want to activate::
 
-    AUTH_TYPE = 1 (default)
+    AUTH_TYPE = 1 (Auth-DB default method)
 
 User datatable default content::
 
@@ -27,12 +29,12 @@ User datatable default content::
 
 The password is stored encrypted in the database. If a user does not have a password an email will be sent with the temporary access password.
 
-With LDAP
-^^^^^^^^^^^^^^
+With Auth-LDAP
+^^^^^^^^^^^^^^^^^
 
-Cornflow has an environment variable to control the type of authentication we want to activate::
+As we saw previously cornflow has an environment variable to control the type of authentication we want to activate::
 
-    AUTH_TYPE = 2 (LDAP authentication)
+    AUTH_TYPE = 2 (Auth-LDAP authentication)
 
 This authentication will be through a unique user code "common name" (user name) and password. The password will never be stored on the cornflow server but other data will be stored that will allow users to migrate or import to change the type of authentication. This operation cannot be performed with the server running.
 In the event that you consult the connection through LDAP, the following information will be requested from the server.,
@@ -55,7 +57,7 @@ No password is stored in the database. No confirmation email is sent with a temp
 
 In cornflow we have used this library to develop authentication methods. With this configuration the cornflow backend will be connected to external LDAP server:
 
-Any installation can run with LDAP as its backend with these settings::
+Any installation can run with Auth-LDAP as its backend with these settings::
 
     LDAP_HOST - ldap server address 
     LDAP_BIND_DN - ldap admin search for domain
@@ -88,7 +90,7 @@ In this table we have the role assignment for each user. May be more than one ro
 Data storage::
 
     User ID - internal cornflow user identification 
-    Role ID assigned - internal cornflow role identification
+    Role ID assigned - role identification assigned to the user
 
 **Role data storage (in all authentication types)**
 
@@ -97,8 +99,8 @@ Master data of roles in application::
     Role ID - internal cornflow role identification
     Role name - role name
 
-Roles with LDAP
-^^^^^^^^^^^^^^^^^
+Roles with Auth-LDAP
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the cornflow server deployment, the LDAP server roles will be configured through environment variables. Cornflow roles to bind to ldap server::
 
