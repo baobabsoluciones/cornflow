@@ -82,16 +82,16 @@ objectclass: top
 
 
 # Entry:
-dn: cn=admin,ou=users,dc=example,dc=org
-cn:  admin
+dn: cn=administrator,ou=users,dc=example,dc=org
+cn:  administrator
 gidnumber: 500
-homedirectory: /home/users/admin
-mail: admin@cornflow.com
+homedirectory: /home/users/administrator
+mail: administrator@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top
-sn: admin
-uid: admin
+sn: administrator
+uid: administrator
 uidnumber: 1000
 userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
 
@@ -100,7 +100,7 @@ dn: cn=viewer,ou=users,dc=example,dc=org
 cn:  viewer
 gidnumber: 501
 homedirectory: /home/users/viewer
-mail: viewer@cornflow.com
+mail: viewer@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top
@@ -114,7 +114,7 @@ dn: cn=planner,ou=users,dc=example,dc=org
 cn:  planner
 gidnumber: 502
 homedirectory: /home/users/planner
-mail: planner@cornflow.com
+mail: planner@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top
@@ -128,7 +128,7 @@ dn: cn=service,ou=users,dc=example,dc=org
 cn:  service
 gidnumber: 503
 homedirectory: /home/users/service
-mail: service@cornflow.com
+mail: service@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top

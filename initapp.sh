@@ -63,7 +63,7 @@ fi
 if [ "$AUTH_TYPE" = "2" ]; then
   # Default values corresponding to the default compose files
     : "${LDAP_PROTOCOL_VERSION:="3"}"
-    : "${LDAP_BIND_PASSWORD:="adminldap"}"
+    : "${LDAP_BIND_PASSWORD:="admin"}"
     : "${LDAP_BIND_DN:="cn=admin,dc=example,dc=org"}"
     : "${LDAP_USE_TLS:="False"}"
     : "${LDAP_HOST:="ldap://openldap:389"}"

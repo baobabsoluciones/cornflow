@@ -24,8 +24,6 @@ from flask_appbuilder.security.manager import AUTH_LDAP
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
-
 # ----------------------------------------------------
 # AUTHENTICATION CONFIG
 # ----------------------------------------------------
@@ -40,7 +38,7 @@ AUTH_TYPE = AUTH_LDAP
 # Will allow user self registration
 AUTH_USER_REGISTRATION = True
 # The default user self registration role
-AUTH_USER_REGISTRATION_ROLE = os.environ.get('AIRFLOW_USER_REGISTRATION_ROLE')
+AUTH_USER_REGISTRATION_ROLE = "Op"
 
 # When using LDAP Auth, setup the ldap server
 AUTH_LDAP_SERVER = os.environ.get('AIRFLOW_LDAP_URI')
@@ -52,3 +50,15 @@ AUTH_LDAP_UID_FIELD = os.environ.get('AIRFLOW_LDAP_UID_FIELD')
 # The user must be the LDAP USER as defined in LDAP_ADMIN_USERNAME
 AUTH_LDAP_BIND_USER = os.environ.get('AIRFLOW_LDAP_BIND_USER')
 AUTH_LDAP_BIND_PASSWORD = os.environ.get('AIRFLOW_LDAP_BIND_PASSWORD')
+
+# a mapping from LDAP DN to a list of FAB roles
+AUTH_ROLES_MAPPING = {
+    "cn=administrators,ou=groups,dc=example,dc=org": ["Admin"],
+    "cn=services,ou=groups,dc=example,dc=org": ["Op"],
+    "cn=viewers,ou=groups,dc=example,dc=org": ["Public"],
+    "cn=planners,ou=groups,dc=example,dc=org": ["User"],
+}
+AUTH_ROLES_SYNC_AT_LOGIN = True
+# the LDAP user attribute which has their role DNs
+AUTH_LDAP_GROUP_FIELD = "memberUid"
+

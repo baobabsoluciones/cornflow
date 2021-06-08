@@ -9,14 +9,15 @@ services:
     ports:
       - 5000:5000
     environment:
-      - CORNFLOW_ADMIN_USER=user@cornflow.com
-      - CORNFLOW_ADMIN_PWD=admincornflow1234
       - CORNFLOW_DB_HOST=cornflow_db
       - CORNFLOW_DB_PORT=5432
       - CORNFLOW_DB_USER=cornflow
       - CORNFLOW_DB_PASSWORD=cornflow
       - CORNFLOW_DB=cornflow
       - AUTH_TYPE=2
+      - LDAP_HOST=ldap://openldap:389
+      - LDAP_BIND_DN=cn=admin,dc=example,dc=org
+      - LDAP_BIND_PASSWORD=admin
     depends_on:
       - cornflow_db
       - webserver
@@ -81,9 +82,6 @@ services:
       - 636:636
     volumes:
       - ./airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
-      - ./data/certificates:/container/service/slapd/assets/certs
-      - ./data/slapd/database:/var/lib/ldap
-      - ./data/slapd/config:/etc/ldap/slapd.d
     environment: 
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
 
