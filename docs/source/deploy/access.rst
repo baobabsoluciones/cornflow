@@ -55,7 +55,7 @@ No password is stored in the database. No confirmation email is sent with a temp
 
 **LDAP authentication library**
 
-In cornflow we have used this library to develop authentication methods. With this configuration the cornflow backend will be connected to external LDAP server:
+In cornflow we have used `this library <https://github.com/tedivm/tedivms-flask>`_ to develop authentication methods. With this configuration the cornflow backend will be connected to external LDAP server:
 
 Any installation can run with Auth-LDAP as its backend with these settings::
 
@@ -64,6 +64,7 @@ Any installation can run with Auth-LDAP as its backend with these settings::
     LDAP_BIND_PASSWORD - ldap admin search password
     LDAP_USERNAME_ATTRIBUTE - The name of the attribute that represents the unique ID of the user
     LDAP_USER_BASE - The base DN subtree that is used when searching for user entries on the LDAP server
+    LDAP_USER_OBJECT_CLASS - The object classes are defined in the LDAP directory schema (they constitute a class hierarchy there)
     LDAP_GROUP_OBJECT_CLASS - Filter used for returning a list of group member entries that are in the LDAP base DN (groups) subtree
     LDAP_GROUP_ATTRIBUTE - The name of the attribute in the group search filter that represents the group name
     LDAP_GROUP_BASE - The base DN subtree that is used when searching for group entries on the LDAP server

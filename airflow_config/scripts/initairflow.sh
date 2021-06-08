@@ -15,7 +15,7 @@
 : "${AIRFLOW_USER:="admin"}"
 : "${AIRFLOW_FIRSTNAME:="admin"}"
 : "${AIRFLOW_LASTNAME:="admin"}"
-: "${AIRFLOW_ROLE:="Admin"}"
+: "${AIRFLOW_ROLE:="Op"}"
 : "${AIRFLOW_PWD:="admin"}"
 : "${AIRFLOW_USER_EMAIL:="admin@example.com"}"
 : "${CORNFLOW_SERVICE_USER:="serviceuser@cornflow.com"}"
@@ -122,11 +122,11 @@ fi
 if [ "$AIRFLOW_LDAP_ENABLE" = "True" ]; then
   # Default values corresponding to the default compose files
     : "${AIRFLOW_LDAP_URI:="ldap://openldap:389"}"
-    : "${AIRFLOW_LDAP_SEARCH:="dc=cornflow,dc=com"}"
+    : "${AIRFLOW_LDAP_SEARCH:="ou=users,dc=example,dc=org"}"
     : "${AIRFLOW_USER_REGISTRATION_ROLE:="Admin"}"
-    : "${AIRFLOW_LDAP_BIND_USER:="cn=admin,dc=cornflow,dc=com"}"
+    : "${AIRFLOW_LDAP_BIND_USER:="cn=admin,dc=example,dc=org"}"
     : "${AIRFLOW_LDAP_UID_FIELD:="cn"}"
-    : "${AIRFLOW_LDAP_BIND_PASSWORD:="adminldap"}"
+    : "${AIRFLOW_LDAP_BIND_PASSWORD:="admin"}"
     mv "$AIRFLOW_HOME"/webserver_ldap.py "$AIRFLOW_HOME"/webserver_config.py
   # Special condition for using TLS
   if [[ "$AIRFLOW_LDAP_USE_TLS" == "True" ]]; then

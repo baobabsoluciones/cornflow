@@ -1,0 +1,138 @@
+# LDIF Export for dc=example,dc=org
+# Server: ldap (ldap)
+# Search Scope: sub
+# Search Filter: (objectClass=*)
+
+
+version: 1
+
+
+#
+# LDAP Root
+#
+
+
+# Entry:
+#dn: dc=example,dc=org
+#dc: example
+#o: Example Inc.
+#objectclass: top
+#objectclass: dcObject
+#objectclass: organization
+
+
+
+#
+# LDAP Organizational Units - Users and Groups
+#
+
+# Entry:
+dn: ou=groups,dc=example,dc=org
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+# Entry:
+dn: ou=users,dc=example,dc=org
+objectclass: organizationalUnit
+objectclass: top
+ou: users
+
+
+#
+# LDAP Groups
+#
+
+# Entry:
+dn: cn=administrators,ou=groups,dc=example,dc=org
+cn: administrators
+gidnumber: 500
+memberuid: admin
+objectclass: posixGroup
+objectclass: top
+
+# Entry:
+dn: cn=viewers,ou=groups,dc=example,dc=org
+cn: viewers
+gidnumber: 501
+memberuid: viewer
+objectclass: posixGroup
+objectclass: top
+
+# Entry:
+dn: cn=planners,ou=groups,dc=example,dc=org
+cn: planners
+gidnumber: 502
+memberuid: planner
+objectclass: posixGroup
+objectclass: top
+
+# Entry:
+dn: cn=services,ou=groups,dc=example,dc=org
+cn: services
+gidnumber: 503
+memberuid: service
+objectclass: posixGroup
+objectclass: top
+
+
+#
+# LDAP Users
+#
+
+
+# Entry:
+dn: cn=admin,ou=users,dc=example,dc=org
+cn:  admin
+gidnumber: 500
+homedirectory: /home/users/admin
+mail: admin@cornflow.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: admin
+uid: admin
+uidnumber: 1000
+userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+
+# Entry:
+dn: cn=viewer,ou=users,dc=example,dc=org
+cn:  viewer
+gidnumber: 501
+homedirectory: /home/users/viewer
+mail: viewer@cornflow.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: viewer
+uid: viewer
+uidnumber: 1001
+userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+
+# Entry:
+dn: cn=planner,ou=users,dc=example,dc=org
+cn:  planner
+gidnumber: 502
+homedirectory: /home/users/planner
+mail: planner@cornflow.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: planner
+uid: planner
+uidnumber: 1002
+userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+
+# Entry:
+dn: cn=service,ou=users,dc=example,dc=org
+cn:  service
+gidnumber: 503
+homedirectory: /home/users/service
+mail: service@cornflow.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: service
+uid: service
+uidnumber: 1002
+userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==

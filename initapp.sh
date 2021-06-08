@@ -29,7 +29,7 @@ export \
   FLASK_APP \
   FLASK_ENV \
   SECRET_KEY \
-  CORNFLOW_LDAP_ENABLE \
+  AUTH_TYPE \
   LDAP_PROTOCOL_VERSION \
   LDAP_BIND_PASSWORD \
   LDAP_BIND_DN \
@@ -38,7 +38,8 @@ export \
   LDAP_USERNAME_ATTRIBUTE \
   LDAP_USER_BASE \
   LDAP_EMAIL_ATTRIBUTE \
-  LDAP_USER_OBJECT_CLASS
+  LDAP_USER_OBJECT_CLASS \
+  LDAP_GROUP_OBJECT_CLASS
 
 # check database param from docker env
 if [ -z "$CORNFLOW_DB_CONN" ];  then
@@ -63,13 +64,20 @@ if [ "$AUTH_TYPE" = "2" ]; then
   # Default values corresponding to the default compose files
     : "${LDAP_PROTOCOL_VERSION:="3"}"
     : "${LDAP_BIND_PASSWORD:="adminldap"}"
-    : "${LDAP_BIND_DN:="cn=admin,dc=cornflow,dc=com"}"
+    : "${LDAP_BIND_DN:="cn=admin,dc=example,dc=org"}"
     : "${LDAP_USE_TLS:="False"}"
     : "${LDAP_HOST:="ldap://openldap:389"}"
     : "${LDAP_USERNAME_ATTRIBUTE:="cn"}"
-    : "${LDAP_USER_BASE:="dc=cornflow,dc=com"}"
+    : "${LDAP_USER_BASE:="ou=users,dc=example,dc=org"}"
     : "${LDAP_EMAIL_ATTRIBUTE:="mail"}"
     : "${LDAP_USER_OBJECT_CLASS:="inetOrgPerson"}"
+    : "${LDAP_GROUP_OBJECT_CLASS:="posixGroup"}"
+    : "${LDAP_GROUP_ATTRIBUTE:="cn"}"
+    : "${LDAP_GROUP_BASE:="ou=groups,dc=example,dc=org"}"
+    : "${LDAP_GROUP_TO_ROLE_SERVICE:="service"}"
+    : "${LDAP_GROUP_TO_ROLE_ADMIN:="administrators"}"
+    : "${LDAP_GROUP_TO_ROLE_VIEWER:="viewers"}"
+    : "${LDAP_GROUP_TO_ROLE_PLANNER:="planners"}"
   >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
 fi
 

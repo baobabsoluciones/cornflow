@@ -72,7 +72,7 @@ To activate the functionality that supports this type of access, it is necessary
     LDAP_USE_TLS - Secure connection to the LDAP server (to activate set value to "True")
     LDAP_HOST - LDAP server of your organization
     LDAP_USERNAME_ATTRIBUTE - Name for the object of the common name in LDAP (it´s usually like "cn")
-    LDAP_USER_BASE - The LDAP search base (for example "ou=users,dc=example,dc=com")
+    LDAP_USER_BASE - The LDAP search base (for example "ou=users,dc=example,dc=org")
     LDAP_EMAIL_ATTRIBUTE - Object name which contains email address of users
     LDAP_USER_OBJECT_CLASS - Standard object class schema element
 
