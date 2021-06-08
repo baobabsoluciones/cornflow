@@ -101,6 +101,9 @@ class UserModel(TraceAttributes):
     def is_service_user(self):
         return UserRoleModel.is_service_user(self.id)
 
+    def comes_from_ldap(self):
+        return self.password is None
+
     @staticmethod
     def __generate_hash(password):
         """

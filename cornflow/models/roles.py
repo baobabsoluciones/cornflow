@@ -108,6 +108,19 @@ class UserRoleModel(TraceAttributes):
         return UserRoleModel.query.filter_by(user_id=user_id).all()
 
     @staticmethod
+    def del_one_user(user_id):
+        """
+        Method to delete all the assigned roles to one user
+
+        :param int user_id: the ID of the user
+        :return: a list with all the deleted objects.
+        :rtype: list
+        """
+        return UserRoleModel.query.filter_by(user_id=user_id).delete(
+            synchronize_session=False
+        )
+
+    @staticmethod
     def get_all_objects():
         """
         Method to get all the role assignations to all the users

@@ -24,6 +24,7 @@ class Development(object):
     LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
     LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
     LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
+    LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS")
 
 
 class Testing(object):
@@ -74,6 +75,7 @@ class Production(object):
     LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
     LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
     LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
+    LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS")
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}

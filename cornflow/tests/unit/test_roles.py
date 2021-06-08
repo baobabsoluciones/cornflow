@@ -10,7 +10,7 @@ from cornflow.endpoints import (
     UserRoleDetailEndpoint,
 )
 from cornflow.models import RoleModel, UserRoleModel
-from cornflow.shared.const import ROLES_MAP, ADMIN_ROLE, VIEWER_ROLE
+from cornflow.shared.const import ROLES_MAP, ADMIN_ROLE, VIEWER_ROLE, ALL_DEFAULT_ROLES
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -69,6 +69,26 @@ class TestRolesListEndpoint(CustomTestCase):
                 self.create_new_row(
                     self.url, self.model, {}, expected_status=403, check_payload=False
                 )
+
+    def test_delete_all_user_roles(self):
+        # create some user:
+        data = {
+            "name": "testuser",
+            "email": "testemail" + "@test.org",
+            "password": "testpassword",
+        }
+        user_response = self.create_user(data)
+        user_id = user_response.json["id"]
+        # give it all roles:
+        for role in ROLES_MAP:
+            self.create_role(user_id, role)
+        all_roles = UserRoleModel.get_one_user(user_id)
+        diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
+        self.assertEqual(len(all_roles), len(ROLES_MAP))
+        self.assertEqual(len(diff), 0)
+        UserRoleModel.del_one_user(user_id)
+        all_roles = UserRoleModel.get_one_user(user_id)
+        self.assertEqual(all_roles, [])
 
 
 class TestRolesDetailEndpoint(CustomTestCase):
@@ -263,10 +283,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             response = self.client.get(
                 self.url + str(self.payload["id"]) + "/",
                 follow_redirects=True,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
-                },
+                headers=self.get_header_with_auth(self.token),
             )
             self.assertEqual(200, response.status_code)
             self.assertEqual(self.payload, response.json)
@@ -278,10 +295,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
                 response = self.client.get(
                     self.url + str(self.payload["id"]) + "/",
                     follow_redirects=True,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
-                    },
+                    headers=self.get_header_with_auth(self.token),
                 )
                 self.assertEqual(403, response.status_code)
 
@@ -291,12 +305,27 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             response = self.client.delete(
                 self.url + str(self.payload["id"]) + "/",
                 follow_redirects=True,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
-                },
+                headers=self.get_header_with_auth(self.token),
             )
             self.assertEqual(200, response.status_code)
+
+    def test_delete_and_create_user_role_authorized_user(self):
+        # TODO: this test should fail. But passes.
+        role = self.roles_with_access[0]
+        data = {
+            "name": "testuser" + str(role),
+            "email": "testemail" + str(role) + "@test.org",
+            "password": "testpassword",
+        }
+        user_response = self.create_user(data)
+        user_role = self.create_role(user_response.json["id"], role)
+        self.client.delete(
+            self.url + str(user_role.id) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.create_role(user_response.json["id"], role)
+        self.assertEqual(201, user_response.status_code)
 
     def test_delete_user_role_not_authorized_user(self):
         for role in ROLES_MAP:
@@ -305,9 +334,6 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
                 response = self.client.delete(
                     self.url + str(self.payload["id"]) + "/",
                     follow_redirects=True,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
-                    },
+                    headers=self.get_header_with_auth(self.token),
                 )
                 self.assertEqual(403, response.status_code)

@@ -231,6 +231,8 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        # TODO: maybe we should check if the user "is LDAP" [user_obj.comes_from_ldap()]
+        #  like in UserDetailsEndpoint.put
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(

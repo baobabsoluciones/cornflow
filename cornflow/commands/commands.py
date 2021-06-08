@@ -25,6 +25,26 @@ from cornflow.endpoints import resources
 from cornflow.shared.utils import db
 
 
+def create_user_with_role(email, password, name, role):
+    user = UserModel.get_one_user_by_email(email)
+    if user is None:
+        data = dict(name=name, email=email, password=password)
+        user = UserModel(data=data)
+        user.save()
+        user_role = UserRoleModel({"user_id": user.id, "role_id": role})
+        user_role.save()
+        print("{} is created and assigned service role".format(name))
+        return True
+    user_role = UserRoleModel.get_one_user(user.id)
+    if user_role is not None and RoleModel.get_one_object(role) in user_role:
+        print("{} exists and already has service role assigned".format(name))
+        return True
+    user_role = UserRoleModel({"user_id": user.id, "role_id": role})
+    user_role.save()
+    print("{} already exists and is assigned a service role".format(name))
+    return True
+
+
 class CreateServiceUser(Command):
     """
     Creates the initial super user that is used by airflow to write the results of the execution back
@@ -46,31 +66,7 @@ class CreateServiceUser(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        SERVICE_EMAIL = email
-        SERVICE_PASSWORD = password
-        service_user = UserModel.get_one_user_by_email(SERVICE_EMAIL)
-        if service_user is None:
-            user = UserModel(
-                data=dict(
-                    name="serviceuser", email=SERVICE_EMAIL, password=SERVICE_PASSWORD
-                )
-            )
-            user.save()
-            user_role = UserRoleModel({"user_id": user.id, "role_id": SERVICE_ROLE})
-            user_role.save()
-            return True
-        else:
-            user_role = UserRoleModel.get_one_user(service_user.id)
-
-            if (
-                user_role is None
-                or RoleModel.get_one_object(SERVICE_ROLE) not in user_role
-            ):
-                user_role = UserRoleModel(
-                    {"user_id": service_user.id, "role_id": SERVICE_ROLE}
-                )
-                user_role.save()
-                return True
+        return create_user_with_role(email, password, "serviceuser", SERVICE_ROLE)
 
 
 class CreateAdminUser(Command):
@@ -88,30 +84,7 @@ class CreateAdminUser(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        ADMIN_EMAIL = email
-        ADMIN_PASSWORD = password
-        admin_user = UserModel.get_one_user_by_email(ADMIN_EMAIL)
-        if admin_user is None:
-            user = UserModel(
-                data=dict(name="admin", email=ADMIN_EMAIL, password=ADMIN_PASSWORD)
-            )
-            user.save()
-            user_role = UserRoleModel({"user_id": user.id, "role_id": ADMIN_ROLE})
-            user_role.save()
-            return True
-        else:
-            user_role = UserRoleModel.get_one_user(admin_user.id)
-
-            if (
-                user_role is None
-                or RoleModel.get_one_object(ADMIN_ROLE) not in user_role
-            ):
-                user_role = UserRoleModel(
-                    {"user_id": admin_user.id, "role_id": SERVICE_ROLE}
-                )
-                user_role.save()
-                return True
-        return True
+        return create_user_with_role(email, password, "admin", ADMIN_ROLE)
 
 
 class CleanHistoricData(Command):
@@ -276,4 +249,5 @@ class AccessInitialization(Command):
         RegisterViews().run()
         RegisterRoles().run()
         BasePermissionAssignationRegistration().run()
+        print("Access initialization ran successfully")
         return True

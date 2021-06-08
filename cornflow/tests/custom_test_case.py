@@ -76,22 +76,29 @@ class CustomTestCase(TestCase):
     def get_header_with_auth(token):
         return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
 
+    def create_user(self, data):
+        return self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+    def create_role(self, id, role_id):
+        user_role = UserRoleModel({"user_id": id, "role_id": role_id})
+        user_role.save()
+        db.session.commit()
+        return user_role
+
     def create_user_with_role(self, role_id):
         data = {
             "name": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
             "password": "testpassword",
         }
-        response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(data),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-        user_role = UserRoleModel({"user_id": response.json["id"], "role_id": role_id})
-        user_role.save()
+        response = self.create_user(data)
+        self.create_role(response.json["id"], role_id)
 
-        db.session.commit()
         data.pop("name")
         return self.client.post(
             LOGIN_URL,

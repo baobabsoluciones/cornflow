@@ -5,6 +5,7 @@ Endpoints for the user profiles
 # Import from libraries
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+from flask import current_app
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -17,8 +18,13 @@ from ..schemas.user import (
 )
 
 from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE
-from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from ..shared.const import ADMIN_ROLE, AUTH_LDAP
+from ..shared.exceptions import (
+    InvalidUsage,
+    ObjectDoesNotExist,
+    NoPermission,
+    EndpointNotImplemented,
+)
 from ..shared.utils import db
 
 
@@ -79,7 +85,6 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     @doc(description="Delete a user", tags=["Users"])
     @Auth.auth_required
     def delete(self, user_id):
-        # TODO: what to do in case of LDAP?
         """
 
         :param int user_id: User id.
@@ -102,7 +107,6 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     @marshal_with(UserDetailsEndpointResponse)
     @use_kwargs(UserEditRequest, location="json")
     def put(self, user_id, **data):
-        # TODO: what to do in case of LDAP?
         """
         API method to edit an existing user.
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -118,6 +122,9 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
+        # in ldap-mode, users cannot be edited.
+        if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
+            raise EndpointNotImplemented("To edit a user, go to LDAP server")
         user_obj.update(data)
         user_obj.save()
         return user_obj, 200
