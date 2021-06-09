@@ -3,6 +3,8 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
+from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
 from flask_apispec.views import MethodResource
@@ -11,20 +13,24 @@ import logging as log
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import ExecutionModel, InstanceModel
-from ..schemas import ExecutionSchema
-from ..shared.authentication import Auth
-from ..shared.const import EXEC_STATE_CORRECT, EXECUTION_STATE_MESSAGE_DICT
 from ..schemas.execution import (
-    ExecutionDagRequest,
     ExecutionDagPostRequest,
+    ExecutionDagRequest,
     ExecutionDetailsEndpointResponse,
+    ExecutionSchema,
 )
-from ..shared.exceptions import ObjectDoesNotExist, InvalidUsage
-from cornflow_client.airflow.api import get_schema, validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
-from ..shared.const import EXEC_STATE_MANUAL
-from ..schemas.model_json import DataSchema
 
+from ..schemas.model_json import DataSchema
+from ..shared.authentication import Auth
+from ..shared.const import (
+    ADMIN_ROLE,
+    EXEC_STATE_CORRECT,
+    EXEC_STATE_MANUAL,
+    EXECUTION_STATE_MESSAGE_DICT,
+    SERVICE_ROLE,
+)
+
+from ..shared.exceptions import ObjectDoesNotExist
 
 execution_schema = ExecutionSchema()
 
@@ -34,8 +40,10 @@ class DAGEndpoint(MetaResource, MethodResource):
     Endpoint used for the DAG endpoint
     """
 
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
     @doc(description="Edit an execution", tags=["DAGs"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @use_kwargs(ExecutionDagRequest, location="json")
     def put(self, idx, **req_data):
         """
@@ -81,7 +89,7 @@ class DAGEndpoint(MetaResource, MethodResource):
         return {"message": "results successfully saved"}, 201
 
     @doc(description="Get input data and configuration for an execution", tags=["DAGs"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     def get(self, idx):
         """
         API method to get the data of the instance that is going to be executed
@@ -106,8 +114,12 @@ class DAGEndpoint(MetaResource, MethodResource):
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
+    """ """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
     @doc(description="Create an execution manually.", tags=["DAGs"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionDagPostRequest, location="json")
     def post(self, **kwargs):

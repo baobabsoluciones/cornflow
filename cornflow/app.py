@@ -1,17 +1,18 @@
 import os
 
-from flask import Flask
-from flask_cors import CORS
-from flask_restful import Api
-from flask_apispec.extension import FlaskApiSpec
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
+from flask import Flask
+from flask_apispec.extension import FlaskApiSpec
+from flask_cors import CORS
+from flask_restful import Api
+
 
 from .config import app_config
 from .endpoints import resources
+from .shared.compress import init_compress
 from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
-from .shared.compress import init_compress
 
 
 def create_app(env_name="development"):
@@ -27,6 +28,7 @@ def create_app(env_name="development"):
     if env_name == "development" or env_name == "testing":
         # TODO: not sure if we should keep this line and if so, here.
         CORS(app)
+
     bcrypt.init_app(app)
     db.init_app(app)
 

@@ -56,7 +56,7 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
 
     def test_get_instances_superadmin(self):
         self.get_rows(self.url, self.payloads)
-        token = self.create_super_admin()
+        token = self.create_service_user()
         rows = self.client.get(
             self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
@@ -157,7 +157,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
 
     def test_get_one_instance_superadmin(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        token = self.create_super_admin()
+        token = self.create_service_user()
         payload = {**self.payload, **dict(id=idx)}
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
 

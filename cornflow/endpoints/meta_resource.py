@@ -9,11 +9,14 @@ from functools import wraps
 
 # Import from internal modules
 from ..shared.authentication import Auth
+from ..shared.const import ALL_DEFAULT_ROLES
 from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class MetaResource(Resource):
     # method_decorators = [Auth.auth_required]
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+    DESCRIPTION = ""
 
     def __init__(self):
         super().__init__()
@@ -48,12 +51,12 @@ class MetaResource(Resource):
         """
         return self.get_user().is_admin()
 
-    def is_super_admin(self):
+    def is_service_user(self):
         """
         :return: if user is superadmin
         :rtype: bool
         """
-        return self.get_user().is_super_admin()
+        return self.get_user().is_service_user()
 
     @staticmethod
     def get_data_or_404(func):
@@ -72,15 +75,15 @@ class MetaResource(Resource):
 
         return decorated_func
 
-    def post_list(self, data):
+    def post_list(self, data, trace_field="user_id"):
         data = dict(data)
-        data["user_id"] = self.get_user_id()
+        data[trace_field] = self.get_user_id()
         item = self.model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
-                    raise NoPermission()
+                    raise ObjectDoesNotExist()
                 if not self.check_permissions(owner.user_id):
                     raise NoPermission()
         item.save()

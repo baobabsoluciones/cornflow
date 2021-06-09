@@ -284,8 +284,8 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
-    @use_kwargs(CaseCompareResponse, location="json")
     @inflate
+    @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
         response = self.patch_detail(kwargs, self.get_user(), idx)
         log.info("User {} patches case {}".format(self.get_user_id(), idx))
