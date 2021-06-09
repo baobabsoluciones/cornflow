@@ -285,11 +285,23 @@ class CornFlow(object):
 
     @log_call
     @ask_token
-    def get_all_instances(self):
+    def get_all_instances(self, params=None):
         response = requests.get(
             urljoin(self.url, "instance/"),
             headers={"Authorization": "access_token " + self.token},
             json={},
+            params=params,
+        )
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_all_executions(self, params=None):
+        response = requests.get(
+            urljoin(self.url, "execution/"),
+            headers={"Authorization": "access_token " + self.token},
+            json={},
+            params=params,
         )
         return response.json()
 

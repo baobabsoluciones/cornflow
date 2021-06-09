@@ -161,6 +161,8 @@ class TestSchemaManager(TestCase):
         dataframes = {k: pd.DataFrame.from_dict(v) for k, v in template.items()}
         self.assertEqual(dataframes["pairs"]["n1"][0], 1)
         self.assertEqual(dataframes["pairs"].shape, (1, 2))
+        self.assertEqual(dataframes["_README"].shape, (1, 2))
+        self.assertEqual(dataframes["_TYPES"].shape, (2, 3))
 
     def test_to_excel2(self):
         sm = SchemaManager.from_filepath(self.get_data_file("hk_data_schema.json"))
@@ -171,6 +173,8 @@ class TestSchemaManager(TestCase):
         self.assertEqual(dataframes["durations"].job[0], 1)
         self.assertEqual(dataframes["durations"].shape, (1, 3))
         self.assertEqual(dataframes["jobs"].shape, (1, 2))
+        self.assertEqual(dataframes["_README"].shape, (4, 2))
+        self.assertEqual(dataframes["_TYPES"].shape, (11, 3))
 
     def test_to_excel3(self):
         path = self.get_data_file("../../data/empty_schema.json")
@@ -191,6 +195,8 @@ class TestSchemaManager(TestCase):
         self.assertEqual(len(dataframes["configuration"]), 2)
         self.assertEqual(dataframes["configuration"].iloc[1, 1], "string")
         self.assertEqual(dataframes["configuration"].iloc[0, 1], 1)
+        self.assertEqual(dataframes["_README"].shape, (1, 2))
+        self.assertEqual(dataframes["_TYPES"].shape, (2, 3))
 
     # TODO: fix this test and uncomment
     # def test_list_of_lists(self):
