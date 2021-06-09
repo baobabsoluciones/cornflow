@@ -191,6 +191,7 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
+
         self.assertEqual(expected_status, response.status_code)
 
         if not check_payload:
@@ -201,7 +202,8 @@ class CustomTestCase(TestCase):
         )
 
         self.assertEqual(expected_status, row.status_code)
-        self.assertEqual(payload_to_check, row.json["data"])
+        self.assertEqual(payload_to_check["data"], row.json["data"])
+        self.assertEqual(payload_to_check["solution"], row.json["solution"])
 
     def delete_row(self, url):
 
