@@ -39,12 +39,12 @@ class SchemaEndpoint(MetaResource, MethodResource):
 
         af_client = Airflow(**airflow_conf)
         if not af_client.is_alive():
-            err = "Airflow is not accessible"
-            log.error(err)
-            raise AirflowError(error=err)
+            log.error("Airflow not accessible when getting schema {}".format(dag_name))
+            raise AirflowError(error="Airflow is not accessible")
 
         # try airflow and see if dag_name exists
         af_client.get_dag_info(dag_name)
 
+        log.debug("User gets schema {}".format(dag_name))
         # it exists: we try to get its schemas
         return af_client.get_schemas_for_dag_name(dag_name)
