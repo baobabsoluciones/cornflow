@@ -173,55 +173,79 @@ class SchemaManager:
 
         """
         master_table_name = "_README"
-        example = dict(integer=1, string="string")
-        tables = {master_table_name: []}
-        for key, value in self.jsonschema["properties"].items():
-            if key.startswith("$"):
-                continue
-            description = value.get("description", "")
-            # update the master table of tables:
-            tables[master_table_name].append(dict(name=key, description=description))
-            # several cases here:
-            if value["type"] == "object":
-                # two columns: key-value in two columns
-                properties = value["properties"]
-                tables[key] = [
-                    dict(key=k, value=example[v["type"]]) for k, v in properties.items()
+        type_table_name = "_TYPES"
+        tables = {master_table_name: [], type_table_name: []}
+        # we update the master table of tables:
+        real_props = [
+            (k, v)
+            for (k, v) in self.jsonschema["properties"].items()
+            if not k.startswith("$")
+        ]
+        for key, value in real_props:
+            tables[master_table_name].append(
+                dict(table=key, description=value.get("description", ""))
+            )
+        # then we get each table
+        for key, value in real_props:
+            tables[key] = self._get_table(value)
+            # then we get column types
+        example_inv = {1: "integer", "string": "string"}
+        for key, value in real_props:
+            rows = []
+            if len(tables[key]) > 1:
+                rows = [
+                    dict(table=key, column=v, type="string") for v in ["key", "value"]
                 ]
-                continue
-            # we're here, we're probably in an array
-            assert value["type"] == "array"
-            items = value["items"]
-            if items["type"] != "object":
-                # only one column with name
-                tables[key] = [example[items["type"]]]
-                continue
-            # here is a regular table:
-            props = items["properties"]
-            # if there are array of single values, we flatten them into one column:
-            p_arrays = {
-                k: v["items"]
-                for k, v in props.items()
-                if v["type"] == "array" and v["items"]["type"] != "object"
-            }
-            # if a column is an array of objects: we flatten the object into several columns
-            p_arrays_objects = {
-                "{}.{}".format(k, kk): vv["items"]
-                for k, v in props.items()
-                if v["type"] == "array" and v["items"]["type"] == "object"
-                for kk, vv in v["items"]["properties"].items()
-            }
-            # the rest of columns stay the same
-            p_no_array = {k: v for k, v in props.items() if v["type"] != "array"}
-            props = {**p_arrays, **p_no_array, **p_arrays_objects}
-            required = items["required"]
-            rm_keys = props.keys() - set(required)
-            # order is: first required in order, then the rest:
-            one_line = {k: example[props[k]["type"]] for k in required}
-            for k in rm_keys:
-                one_line[k] = example[props[k]["type"]]
-            tables[key] = [one_line]
+            if len(tables[key]) == 1:
+                row1 = tables[key][0]
+                rows = [
+                    dict(table=key, column=k, type=example_inv[v])
+                    for k, v in row1.items()
+                ]
+            tables[type_table_name].extend(rows)
         return tables
+
+    @staticmethod
+    def _get_table(contents):
+        example = dict(integer=1, string="string")
+        # several cases here:
+        if contents["type"] == "object":
+            # two columns: key-value in two columns
+            properties = contents["properties"]
+            return [
+                dict(key=k, value=example[v["type"]]) for k, v in properties.items()
+            ]
+        # we're here, we're probably in an array
+        assert contents["type"] == "array"
+        items = contents["items"]
+        if items["type"] != "object":
+            # only one column with name
+            return [example[items["type"]]]
+        # here is a regular table:
+        props = items["properties"]
+        # if there are array of single values, we flatten them into one column:
+        p_arrays = {
+            k: v["items"]
+            for k, v in props.items()
+            if v["type"] == "array" and v["items"]["type"] != "object"
+        }
+        # if a column is an array of objects: we flatten the object into several columns
+        p_arrays_objects = {
+            "{}.{}".format(k, kk): vv["items"]
+            for k, v in props.items()
+            if v["type"] == "array" and v["items"]["type"] == "object"
+            for kk, vv in v["items"]["properties"].items()
+        }
+        # the rest of columns stay the same
+        p_no_array = {k: v for k, v in props.items() if v["type"] != "array"}
+        props = {**p_arrays, **p_no_array, **p_arrays_objects}
+        required = items["required"]
+        rm_keys = props.keys() - set(required)
+        # order is: first required in order, then the rest:
+        one_line = {k: example[props[k]["type"]] for k in required}
+        for k in rm_keys:
+            one_line[k] = example[props[k]["type"]]
+        return [one_line]
 
     @staticmethod
     def load_json(path):
