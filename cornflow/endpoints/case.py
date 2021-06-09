@@ -28,7 +28,6 @@ from ..schemas.case import (
     CaseCompareResponse,
 )
 
-from ..schemas.common import JsonPatchSchema
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
@@ -262,7 +261,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @inflate
-    @use_kwargs(JsonPatchSchema, location="json")
+    @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
         return self.patch_detail(kwargs, self.get_user(), idx)
 

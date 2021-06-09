@@ -1,5 +1,5 @@
 {
-  "patch":
+  "data_patch":
   [
     {
       "op": "replace",

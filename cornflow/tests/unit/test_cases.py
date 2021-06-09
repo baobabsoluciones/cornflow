@@ -3,6 +3,8 @@ Unit test for the cases models and endpoints
 """
 
 # Import from libraries
+import copy
+
 from cornflow_client import get_pulp_jsonschema
 import json
 import jsonpatch
@@ -328,7 +330,7 @@ class TestCaseJsonPatch(CustomTestCase):
         self.items_to_check = ["name", "description", "path", "schema"]
         self.url = CASE_URL
         self.patch = {
-            "patch": jsonpatch.make_patch(
+            "data_patch": jsonpatch.make_patch(
                 self.payloads[0]["data"], self.payloads[1]["data"]
             ).patch
         }
@@ -338,14 +340,30 @@ class TestCaseJsonPatch(CustomTestCase):
         self.patch_row(
             self.url + str(self.case_id) + "/data/",
             self.patch,
-            self.payloads[1]["data"],
+            self.payloads[1],
+        )
+
+    def test_json_patch_complete(self):
+        original = self.load_file(FULL_CASE_LIST[0])
+        original["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
+        original["solution"] = get_pulp_jsonschema("../tests/data/gc_output.json")
+
+        modified = copy.deepcopy(original)
+        modify_data_solution(modified)
+
+        case_id = self.create_new_row(self.url, self.model, original)
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.patch_row(
+            self.url + str(case_id) + "/data/",
+            payload,
+            modified,
         )
 
     def test_json_patch_file(self):
         self.patch_row(
             self.url + str(self.case_id) + "/data/",
             self.patch_file,
-            self.payloads[1]["data"],
+            self.payloads[1],
         )
 
     def test_not_valid_json_patch(self):
@@ -400,18 +418,20 @@ class TestCaseJsonPatch(CustomTestCase):
         )
 
     def test_patch_created_properly(self):
-        self.assertEqual(len(self.patch_file["patch"]), len(self.patch["patch"]))
+        self.assertEqual(
+            len(self.patch_file["data_patch"]), len(self.patch["data_patch"])
+        )
 
     def test_patch_not_created_properly(self):
         # Compares the number of operations, not the operations themselves
         self.assertNotEqual(
-            len(self.patch_file["patch"]),
+            len(self.patch_file["data_patch"]),
             len(jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch),
         )
 
         # Compares the number of operations, not the operations themselves
         patch = self.load_file(JSON_PATCH_BAD_PATH)
-        self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))
+        self.assertNotEqual(len(patch["data_patch"]), len(self.patch["data_patch"]))
 
 
 class TestCaseDataEndpoint(CustomTestCase):
@@ -459,12 +479,8 @@ class TestCaseCompare(CustomTestCase):
         self.payloads[0]["solution"] = get_pulp_jsonschema(
             "../tests/data/gc_output.json"
         )
-        self.payloads[1]["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
-        self.payloads[1]["solution"] = get_pulp_jsonschema(
-            "../tests/data/gc_output.json"
-        )
-
-        self.payloads[1] = self.modify_data(self.payloads[1])
+        self.payloads[1] = copy.deepcopy(self.payloads[0])
+        modify_data_solution(self.payloads[1])
 
         self.url = CASE_URL
         self.model = CaseModel
@@ -472,23 +488,6 @@ class TestCaseCompare(CustomTestCase):
             self.create_new_row(self.url, self.model, p) for p in self.payloads
         ]
         self.items_to_check = ["name", "description", "path", "schema"]
-
-    @staticmethod
-    def modify_data(data):
-        data["data"]["pairs"][16]["n2"] = 10
-        data["data"]["pairs"][27]["n2"] = 3
-        data["data"]["pairs"][30]["n1"] = 6
-        data["data"]["pairs"][50]["n2"] = 14
-        data["data"]["pairs"][56]["n1"] = 11
-        data["data"]["pairs"][83]["n2"] = 37
-        data["data"]["pairs"][103]["n1"] = 26
-
-        data["solution"]["assignment"][4]["color"] = 3
-        data["solution"]["assignment"][7]["color"] = 2
-        data["solution"]["assignment"][24]["color"] = 1
-        data["solution"]["assignment"][42]["color"] = 3
-
-        return data
 
     def test_get_full_patch(self):
         response = self.client.get(
@@ -566,6 +565,25 @@ class TestCaseCompare(CustomTestCase):
 
         self.assertEqual(404, response.status_code)
 
+    def test_get_patch_and_apply(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        case_to_compare = self.client.get(
+            self.url + str(self.cases_id[1]) + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.patch_row(
+            self.url + str(self.cases_id[0]) + "/data/",
+            response.json,
+            case_to_compare.json,
+        )
+
     def test_case_compare_compression(self):
         headers = self.get_header_with_auth(self.token)
         headers["Accept-Encoding"] = "gzip"
@@ -580,3 +598,26 @@ class TestCaseCompare(CustomTestCase):
         response = json.loads(raw)
         payload = self.load_file(FULL_CASE_JSON_PATCH_1)
         self.assertEqual(payload, response)
+
+
+def modify_data(data):
+    data["pairs"][16]["n2"] = 10
+    data["pairs"][27]["n2"] = 3
+    data["pairs"][30]["n1"] = 6
+    data["pairs"][50]["n2"] = 14
+    data["pairs"][56]["n1"] = 11
+    data["pairs"][83]["n2"] = 37
+    data["pairs"][103]["n1"] = 26
+
+
+def modify_solution(solution):
+    solution["assignment"][4]["color"] = 3
+    solution["assignment"][7]["color"] = 2
+    solution["assignment"][24]["color"] = 1
+    solution["assignment"][42]["color"] = 3
+
+
+def modify_data_solution(data):
+    modify_data(data["data"])
+    modify_solution(data["solution"])
+    return data
