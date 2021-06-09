@@ -1,14 +1,31 @@
 {
   "definitions": {
-    "Case": {
+    "ActionsResponse": {
       "properties": {
         "id": {
           "type": "integer"
+        }, 
+        "name": {
+          "readOnly": true
         }
       }, 
-      "required": [
-        "id"
-      ], 
+      "type": "object"
+    }, 
+    "ApiViewResponse": {
+      "properties": {
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "integer"
+        }, 
+        "name": {
+          "readOnly": true
+        }, 
+        "url_rule": {
+          "type": "string"
+        }
+      }, 
       "type": "object"
     }, 
     "CaseBase": {
@@ -48,6 +65,37 @@
         }, 
         "updated_at": {
           "format": "date-time", 
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "CaseCompareResponse": {
+      "properties": {
+        "data_patch": {
+          "items": {
+            "$ref": "#/definitions/PatchOperation"
+          }, 
+          "type": "array"
+        }, 
+        "solution_patch": {
+          "items": {
+            "$ref": "#/definitions/PatchOperation"
+          }, 
+          "type": "array"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "CaseEditRequest": {
+      "properties": {
+        "description": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "schema": {
           "type": "string"
         }
       }, 
@@ -115,6 +163,21 @@
           "type": "string"
         }
       }, 
+      "type": "object"
+    }, 
+    "CaseToInstanceResponse": {
+      "properties": {
+        "id": {
+          "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "id", 
+        "schema"
+      ], 
       "type": "object"
     }, 
     "Config": {
@@ -596,6 +659,48 @@
       }, 
       "type": "object"
     }, 
+    "PatchOperation": {
+      "properties": {
+        "op": {
+          "type": "string"
+        }, 
+        "path": {
+          "type": "string"
+        }, 
+        "value": {}
+      }, 
+      "required": [
+        "op", 
+        "path"
+      ], 
+      "type": "object"
+    }, 
+    "PermissionViewRoleResponse": {
+      "properties": {
+        "action": {
+          "readOnly": true
+        }, 
+        "action_id": {
+          "type": "integer"
+        }, 
+        "api_view": {
+          "readOnly": true
+        }, 
+        "api_view_id": {
+          "type": "integer"
+        }, 
+        "id": {
+          "type": "integer"
+        }, 
+        "role": {
+          "readOnly": true
+        }, 
+        "role_id": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
     "Presolve": {
       "properties": {
         "cols": {
@@ -680,6 +785,25 @@
       }, 
       "type": "object"
     }, 
+    "RolesRequest": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "RolesResponse": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
     "UserDetailsEndpointResponse": {
       "properties": {
         "admin": {
@@ -713,9 +837,6 @@
     }, 
     "UserEndpointResponse": {
       "properties": {
-        "admin": {
-          "type": "boolean"
-        }, 
         "created_at": {
           "type": "string"
         }, 
@@ -727,9 +848,37 @@
         }, 
         "name": {
           "type": "string"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "UserRoleRequest": {
+      "properties": {
+        "role_id": {
+          "type": "integer"
         }, 
-        "super_admin": {
-          "type": "boolean"
+        "user_id": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "UserRoleResponse": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        }, 
+        "role": {
+          "readOnly": true
+        }, 
+        "role_id": {
+          "type": "integer"
+        }, 
+        "user": {
+          "readOnly": true
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -760,6 +909,46 @@
     "version": "v1"
   }, 
   "paths": {
+    "/action/": {
+      "get": {
+        "description": "Get all the actions", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ActionsResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Actions"
+        ]
+      }
+    }, 
+    "/apiview/": {
+      "get": {
+        "description": "Get all the api views", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ApiViewResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "ApiViews"
+        ]
+      }
+    }, 
     "/case/": {
       "get": {
         "description": "Get all cases", 
@@ -821,32 +1010,6 @@
         ]
       }
     }, 
-    "/case/copy/": {
-      "post": {
-        "description": "Copies a case to a new one", 
-        "parameters": [
-          {
-            "in": "body", 
-            "name": "body", 
-            "required": false, 
-            "schema": {
-              "$ref": "#/definitions/Case"
-            }
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/CaseListResponse"
-            }
-          }
-        }, 
-        "tags": [
-          "Cases"
-        ]
-      }
-    }, 
     "/case/instance/": {
       "post": {
         "description": "Create a new case from instance and execution", 
@@ -873,9 +1036,118 @@
         ]
       }
     }, 
+    "/case/{idx1}/{idx2}/": {
+      "get": {
+        "description": "Compares the data and / or solution of two given cases", 
+        "parameters": [
+          {
+            "in": "query", 
+            "name": "data", 
+            "required": false, 
+            "type": "boolean"
+          }, 
+          {
+            "in": "query", 
+            "name": "solution", 
+            "required": false, 
+            "type": "boolean"
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx2", 
+            "required": true, 
+            "type": "integer"
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx1", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseCompareResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
     "/case/{idx}/": {
+      "delete": {
+        "description": "Delete a case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
       "get": {
         "description": "Get one case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
+      "put": {
+        "description": "Edit a case", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/CaseEditRequest"
+            }
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/{idx}/copy/": {
+      "post": {
+        "description": "Copies a case to a new one", 
         "parameters": [
           {
             "format": "int32", 
@@ -899,6 +1171,22 @@
       }
     }, 
     "/case/{idx}/data/": {
+      "delete": {
+        "description": "Delete a case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
       "get": {
         "description": "Get data of a case", 
         "parameters": [
@@ -915,6 +1203,71 @@
             "description": "", 
             "schema": {
               "$ref": "#/definitions/CaseBase"
+            }
+          }
+        }, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
+      "patch": {
+        "description": "Patches the data of a given case", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }, 
+      "put": {
+        "description": "Edit a case", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/CaseEditRequest"
+            }
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Cases"
+        ]
+      }
+    }, 
+    "/case/{idx}/instance/": {
+      "post": {
+        "description": "Copies the information stored in a case into a new instance or instance and execution", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/CaseToInstanceResponse"
             }
           }
         }, 
@@ -1434,9 +1787,142 @@
         ]
       }
     }, 
+    "/permission/": {
+      "get": {
+        "description": "Get all the permissions assigned to the roles", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/PermissionViewRoleResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "PermissionViewRole"
+        ]
+      }, 
+      "post": {
+        "parameters": [], 
+        "responses": {}
+      }
+    }, 
+    "/roles/": {
+      "get": {
+        "description": "Gets all the roles", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/RolesResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Roles"
+        ]
+      }, 
+      "post": {
+        "description": "Creates a new role", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/RolesRequest"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Roles"
+        ]
+      }
+    }, 
+    "/roles/{idx}/": {
+      "delete": {
+        "description": "Deletes one role", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Roles"
+        ]
+      }, 
+      "get": {
+        "description": "Gets one role", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "Roles"
+        ]
+      }, 
+      "put": {
+        "description": "Modifies one role", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "Roles"
+        ]
+      }
+    }, 
     "/schema/{dag_name}/": {
       "get": {
-        "description": "Get one schema", 
+        "description": "Get instance, solution and config schema", 
         "parameters": [
           {
             "in": "path", 
@@ -1487,6 +1973,91 @@
         }, 
         "tags": [
           "Users"
+        ]
+      }
+    }, 
+    "/user/role/": {
+      "get": {
+        "description": "Gets all the user role assignments", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/UserRoleResponse"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "User roles"
+        ]
+      }, 
+      "post": {
+        "description": "Creates a new role assignment", 
+        "parameters": [
+          {
+            "in": "body", 
+            "name": "body", 
+            "required": false, 
+            "schema": {
+              "$ref": "#/definitions/UserRoleRequest"
+            }
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/UserRoleResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "User roles"
+        ]
+      }
+    }, 
+    "/user/role/{idx}/": {
+      "delete": {
+        "description": "Deletes one user role assignment", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {}, 
+        "tags": [
+          "User roles"
+        ]
+      }, 
+      "get": {
+        "description": "Gets one user role assignment", 
+        "parameters": [
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "idx", 
+            "required": true, 
+            "type": "integer"
+          }
+        ], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/UserRoleResponse"
+            }
+          }
+        }, 
+        "tags": [
+          "User roles"
         ]
       }
     }, 
