@@ -1,16 +1,20 @@
+"""
+Endpoints to get the schemas
+"""
+
 # Import from libraries
+from cornflow_client.airflow.api import Airflow
 from flask import current_app
-from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import doc
-
-from cornflow_client.airflow.api import Airflow
-from ..shared.exceptions import AirflowError
-
 import logging as log
 
+# Import from internal modules
+from .meta_resource import MetaResource
+from ..shared.exceptions import AirflowError
 
-class SchemaEndpoint(Resource, MethodResource):
+
+class SchemaEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to obtain schemas
     """

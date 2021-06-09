@@ -2,21 +2,26 @@
 External endpoint for the user to login to the cornflow webserver
 """
 # Import from libraries
-from flask_restful import Resource
-from flask_apispec.views import MethodResource
+from flask import g, current_app
 from flask_apispec import use_kwargs, doc
+from flask_apispec.views import MethodResource
+import logging as log
 
 # Import from internal modules
-from ..models import UserModel
+from .meta_resource import MetaResource
+from ..models import UserModel, UserRoleModel
 from ..schemas.user import UserSchema, LoginEndpointRequest
 from ..shared.authentication import Auth
+from ..shared.const import AUTH_DB, AUTH_LDAP
 from ..shared.exceptions import InvalidUsage, InvalidCredentials
+from ..shared.ldap import LDAP
+from ..shared.utils import db
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
 
 
-class LoginEndpoint(Resource, MethodResource):
+class LoginEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to do the login to the cornflow webserver
     """
@@ -32,13 +37,15 @@ class LoginEndpoint(Resource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
 
-        user = UserModel.get_one_user_by_email(kwargs.get("email"))
+        AUTH_TYPE = current_app.config["AUTH_TYPE"]
+        email, password = kwargs.get("email"), kwargs.get("password")
 
-        if not user:
-            raise InvalidCredentials()
-
-        if not user.check_hash(kwargs.get("password")):
-            raise InvalidCredentials()
+        if AUTH_TYPE == AUTH_DB:
+            user = self.auth_db_authenticate(email, password)
+        elif AUTH_TYPE == AUTH_LDAP:
+            user = self.auth_ldap_authenticate(email, password)
+        else:
+            raise InvalidUsage("No authentication method configured in server")
 
         try:
             token = Auth.generate_token(user.id)
@@ -48,3 +55,47 @@ class LoginEndpoint(Resource, MethodResource):
             )
 
         return {"token": token, "id": user.id}, 200
+
+    @staticmethod
+    def auth_db_authenticate(email, password):
+        user = UserModel.get_one_user_by_email(email)
+
+        if not user:
+            raise InvalidCredentials()
+
+        if not user.check_hash(password):
+            raise InvalidCredentials()
+
+        return user
+
+    @staticmethod
+    def auth_ldap_authenticate(username, password):
+        ldap_obj = LDAP(current_app.config, g)
+        if not ldap_obj.authenticate(username, password):
+            raise InvalidCredentials()
+        user = UserModel.get_one_user_by_username(username)
+
+        if not user:
+            log.info("LDAP username {} does not exist and is created".format(username))
+            email = ldap_obj.get_user_email(username)
+            if not email:
+                email = ""
+            data = {"name": username, "email": email}
+            user = UserModel(data=data)
+            user.save()
+        # regardless whether the user is new or not:
+        # we update the roles it has according to ldap
+        roles = ldap_obj.get_user_roles(username)
+        try:
+            # we first remove all roles for the user
+            UserRoleModel.del_one_user(user.id)
+            # then we create an assignment for each role it has access to
+            for role in roles:
+                user_role = UserRoleModel({"user_id": user.id, "role_id": role})
+                db.session.add(user_role)
+            # we only commit if everything went well
+            db.session.commit()
+        except:
+            # or we rollback
+            db.session.rollback()
+        return user
