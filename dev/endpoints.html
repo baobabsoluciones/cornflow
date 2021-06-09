@@ -188,6 +188,11 @@ This are the endpoints used by airflow in its communication with cornflow</p>
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.dag.</code><code class="sig-name descname">DAGEndpoint</code><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used for the DAG endpoint</p>
+<dl class="py attribute">
+<dt id="cornflow.endpoints.dag.DAGEndpoint.ROLES_WITH_ACCESS">
+<code class="sig-name descname">ROLES_WITH_ACCESS</code><em class="property"> = [3, 4]</em><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.ROLES_WITH_ACCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="cornflow.endpoints.dag.DAGEndpoint.put">
 <code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">req_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpoint.put" title="Permalink to this definition">¶</a></dt>
@@ -238,6 +243,11 @@ and <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dt id="cornflow.endpoints.dag.DAGEndpointManual">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.dag.</code><code class="sig-name descname">DAGEndpointManual</code><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpointManual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dl class="py attribute">
+<dt id="cornflow.endpoints.dag.DAGEndpointManual.ROLES_WITH_ACCESS">
+<code class="sig-name descname">ROLES_WITH_ACCESS</code><em class="property"> = [3, 4]</em><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpointManual.ROLES_WITH_ACCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="cornflow.endpoints.dag.DAGEndpointManual.post">
 <code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.dag.DAGEndpointManual.post" title="Permalink to this definition">¶</a></dt>
@@ -636,13 +646,17 @@ the data of the instance) and an integer with the HTTP status code.</p>
 <code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span></em>, <em class="sig-param"><span class="n">minimize</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.instance.InstanceFileEndpoint.post" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>file</strong> – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – </p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – </p></li>
+<li><p><strong>minimize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>a tuple with the created instance and a integer with the status code</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>, integer)</p>
+<dd class="field-odd"><p>Tuple(<code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceModel</span></code>, 201)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -666,7 +680,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.login.LoginEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.login.</code><code class="sig-name descname">LoginEndpoint</code><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to do the login to the cornflow webserver</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.login.LoginEndpoint.post">
@@ -683,6 +697,16 @@ and an integer with the HTTP status code</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="cornflow.endpoints.login.LoginEndpoint.auth_db_authenticate">
+<em class="property">static </em><code class="sig-name descname">auth_db_authenticate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint.auth_db_authenticate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="cornflow.endpoints.login.LoginEndpoint.auth_ldap_authenticate">
+<em class="property">static </em><code class="sig-name descname">auth_ldap_authenticate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint.auth_ldap_authenticate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt id="cornflow.endpoints.login.LoginEndpoint.methods">
 <code class="sig-name descname">methods</code><em class="property"> = {'POST'}</em><a class="headerlink" href="#cornflow.endpoints.login.LoginEndpoint.methods" title="Permalink to this definition">¶</a></dt>
@@ -697,7 +721,7 @@ and an integer with the HTTP status code</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.signup.SignUpEndpoint">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.signup.</code><code class="sig-name descname">SignUpEndpoint</code><a class="headerlink" href="#cornflow.endpoints.signup.SignUpEndpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint used to sign up to the cornflow web server.</p>
 <dl class="py method">
 <dt id="cornflow.endpoints.signup.SignUpEndpoint.post">
@@ -731,6 +755,11 @@ and an integer with the HTTP status code</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
 <p>Endpoint with a get method which gives back all the info related to the users.
 Including their instances and executions</p>
+<dl class="py attribute">
+<dt id="cornflow.endpoints.user.UserEndpoint.ROLES_WITH_ACCESS">
+<code class="sig-name descname">ROLES_WITH_ACCESS</code><em class="property"> = [3]</em><a class="headerlink" href="#cornflow.endpoints.user.UserEndpoint.ROLES_WITH_ACCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="cornflow.endpoints.user.UserEndpoint.get">
 <code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.user.UserEndpoint.get" title="Permalink to this definition">¶</a></dt>
@@ -821,7 +850,12 @@ a message) and an integer with the HTTP status code.</p>
 <dl class="py class">
 <dt id="cornflow.endpoints.user.ToggleUserAdmin">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow.endpoints.user.</code><code class="sig-name descname">ToggleUserAdmin</code><a class="headerlink" href="#cornflow.endpoints.user.ToggleUserAdmin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restful.Resource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dl class="py attribute">
+<dt id="cornflow.endpoints.user.ToggleUserAdmin.ROLES_WITH_ACCESS">
+<code class="sig-name descname">ROLES_WITH_ACCESS</code><em class="property"> = [3]</em><a class="headerlink" href="#cornflow.endpoints.user.ToggleUserAdmin.ROLES_WITH_ACCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="cornflow.endpoints.user.ToggleUserAdmin.put">
 <code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">make_admin</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.user.ToggleUserAdmin.put" title="Permalink to this definition">¶</a></dt>

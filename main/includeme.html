@@ -284,7 +284,9 @@
 <span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
 <span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">sqlite</span><span class="p">:</span><span class="o">///</span><span class="n">cornflow</span><span class="o">.</span><span class="n">db</span>
 <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">db</span> <span class="n">upgrade</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_super_user</span>  <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">airflow_test_password</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">access_init</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_service_user</span>  <span class="o">--</span><span class="n">email</span><span class="o">=</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">airflow_test_password</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_admin_user</span>  <span class="o">--</span><span class="n">email</span><span class="o">=</span><span class="n">cornflow_admin</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">cornflow_admin_password</span>
 </pre></div>
 </div>
 </div>
