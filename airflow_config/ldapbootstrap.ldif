@@ -4,9 +4,6 @@
 # Search Filter: (objectClass=*)
 
 
-version: 1
-
-
 #
 # LDAP Root
 #
