@@ -53,12 +53,13 @@ AUTH_LDAP_BIND_PASSWORD = os.environ.get('AIRFLOW_LDAP_BIND_PASSWORD')
 
 # a mapping from LDAP DN to a list of FAB roles
 AUTH_ROLES_MAPPING = {
-    "cn=administrators,ou=groups,dc=example,dc=org": ["Admin"],
-    "cn=services,ou=groups,dc=example,dc=org": ["Op"],
-    "cn=viewers,ou=groups,dc=example,dc=org": ["Public"],
-    "cn=planners,ou=groups,dc=example,dc=org": ["User"],
+    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_ADMIN'): ["Admin"],
+    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_OP'): ["Op"],
+    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC'): ["Public"],
+    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_VIEWER'): ["User"],
 }
 AUTH_ROLES_SYNC_AT_LOGIN = True
+
 # the LDAP user attribute which has their role DNs
-AUTH_LDAP_GROUP_FIELD = "memberUid"
+AUTH_LDAP_GROUP_FIELD = os.environ.get('AIRFLOW_LDAP_GROUP_FIELD')
 

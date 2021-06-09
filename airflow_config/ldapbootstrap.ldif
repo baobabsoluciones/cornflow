@@ -47,7 +47,7 @@ ou: users
 dn: cn=administrators,ou=groups,dc=example,dc=org
 cn: administrators
 gidnumber: 500
-memberuid: admin
+memberuid: administrator
 objectclass: posixGroup
 objectclass: top
 
@@ -71,7 +71,7 @@ objectclass: top
 dn: cn=services,ou=groups,dc=example,dc=org
 cn: services
 gidnumber: 503
-memberuid: service
+memberuid: cornflow
 objectclass: posixGroup
 objectclass: top
 
@@ -93,7 +93,7 @@ objectclass: top
 sn: administrator
 uid: administrator
 uidnumber: 1000
-userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+userpassword: administrator1234
 
 # Entry:
 dn: cn=viewer,ou=users,dc=example,dc=org
@@ -107,7 +107,7 @@ objectclass: top
 sn: viewer
 uid: viewer
 uidnumber: 1001
-userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+userpassword: viewer1234
 
 # Entry:
 dn: cn=planner,ou=users,dc=example,dc=org
@@ -121,18 +121,18 @@ objectclass: top
 sn: planner
 uid: planner
 uidnumber: 1002
-userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+userpassword: planner1234
 
 # Entry:
-dn: cn=service,ou=users,dc=example,dc=org
-cn:  service
+dn: cn=cornflow,ou=users,dc=example,dc=org
+cn:  cornflow
 gidnumber: 503
-homedirectory: /home/users/service
-mail: service@example.org
+homedirectory: /home/users/cornflow
+mail: cornflow@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top
-sn: service
-uid: service
+sn: cornflow
+uid: cornflow
 uidnumber: 1002
-userpassword: {MD5}KsnLfcArPACD63CJjlSbYw==
+userpassword: cornflow1234

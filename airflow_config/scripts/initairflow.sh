@@ -15,7 +15,7 @@
 : "${AIRFLOW_USER:="admin"}"
 : "${AIRFLOW_FIRSTNAME:="admin"}"
 : "${AIRFLOW_LASTNAME:="admin"}"
-: "${AIRFLOW_ROLE:="Op"}"
+: "${AIRFLOW_ROLE:="Admin"}"
 : "${AIRFLOW_PWD:="admin"}"
 : "${AIRFLOW_USER_EMAIL:="admin@example.com"}"
 : "${CORNFLOW_SERVICE_USER:="serviceuser@cornflow.com"}"
@@ -36,14 +36,7 @@ export \
 	AIRFLOW_USER_EMAIL \
   CORNFLOW_SERVICE_USER \
   CORNFLOW_SERVICE_PWD \
-  AIRFLOW_LDAP_ENABLE \
-  AIRFLOW_LDAP_URI \
-  AIRFLOW_LDAP_SEARCH \
-  AIRFLOW_LDAP_BIND_USER \
-  AIRFLOW_LDAP_BIND_PASSWORD \
-  AIRFLOW_LDAP_UID_FIELD \
-  AIRFLOW_LDAP_USE_TLS \
-  AIRFLOW_LDAP_TLS_CA_CERTIFICATE
+  AIRFLOW_LDAP_ENABLE
 
 # Install custom python package if requirements.txt is present
 if [ -e "/requirements.txt" ]; then
@@ -113,7 +106,10 @@ fi
     # Default values corresponding to the default compose files
     : "${CORNFLOW_HOST:="cornflow"}"
     : "${CORNFLOW_PORT:="5000"}"
-
+    export \
+    CORNFLOW_HOST \
+    CORNFLOW_PORT
+    # Make the uri connection to get back response from airflow
     AIRFLOW_CONN_CF_URI="cornflow://${CORNFLOW_SERVICE_USER}:${CORNFLOW_SERVICE_PWD}@${CORNFLOW_HOST}:${CORNFLOW_PORT}"
     export AIRFLOW_CONN_CF_URI
   fi
@@ -126,7 +122,25 @@ if [ "$AIRFLOW_LDAP_ENABLE" = "True" ]; then
     : "${AIRFLOW_LDAP_BIND_USER:="cn=admin,dc=example,dc=org"}"
     : "${AIRFLOW_LDAP_UID_FIELD:="cn"}"
     : "${AIRFLOW_LDAP_BIND_PASSWORD:="admin"}"
+    : "${AIRFLOW_LDAP_ROLE_MAPPING_ADMIN:="\"cn=administrators,ou=groups,dc=example,dc=org\""}"
+    : "${AIRFLOW_LDAP_ROLE_MAPPING_OP:="\"cn=services,ou=groups,dc=example,dc=org\""}"
+    : "${AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC:="\"cn=viewers,ou=groups,dc=example,dc=org\""}"
+    : "${AIRFLOW_LDAP_ROLE_MAPPING_VIEWER:="\"cn=planners,ou=groups,dc=example,dc=org\""}"
+    : "${AIRFLOW_LDAP_GROUP_FIELD:="memberUid"}"
     mv "$AIRFLOW_HOME"/webserver_ldap.py "$AIRFLOW_HOME"/webserver_config.py
+    export  \
+      AIRFLOW_LDAP_URI \
+      AIRFLOW_LDAP_SEARCH \
+      AIRFLOW_LDAP_BIND_USER \
+      AIRFLOW_LDAP_BIND_PASSWORD \
+      AIRFLOW_LDAP_UID_FIELD \
+      AIRFLOW_LDAP_ROLE_MAPPING_ADMIN \
+      AIRFLOW_LDAP_ROLE_MAPPING_OP \
+      AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC \
+      AIRFLOW_LDAP_ROLE_MAPPING_VIEWER \
+      AIRFLOW_LDAP_GROUP_FIELD \
+      AIRFLOW_LDAP_USE_TLS \
+      AIRFLOW_LDAP_TLS_CA_CERTIFICATE
   # Special condition for using TLS
   if [[ "$AIRFLOW_LDAP_USE_TLS" == "True" ]]; then
     [[ -z "$AIRFLOW_LDAP_TLS_CA_CERTIFICATE" ]] && >&2 printf '%s\n' "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
