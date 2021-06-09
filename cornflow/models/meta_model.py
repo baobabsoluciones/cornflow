@@ -12,7 +12,19 @@ from sqlalchemy.ext.declarative import declared_attr
 from ..shared.utils import db, hash_json_256
 
 
-class TraceAttributes(db.Model):
+class EmptyModel(db.Model):
+    __abstract__ = True
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class TraceAttributes(EmptyModel):
     """
     Abstract data model that defines the trace attributes of each model. This help trace when an object was created,
      updated and deleted
@@ -110,7 +122,7 @@ class BaseDataModel(TraceAttributes):
         """
         query = cls.query.filter(cls.deleted_at == None)
         # TODO: in airflow they use: query = session.query(ExecutionModel)
-        if not user.is_admin():
+        if not user.is_admin() and not user.is_service_user():
             query = query.filter(cls.user_id == user.id)
 
         if schema:
@@ -134,6 +146,6 @@ class BaseDataModel(TraceAttributes):
         :rtype: :class:`BaseDataModel`
         """
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin():
+        if not user.is_admin() and not user.is_service_user():
             query = query.filter_by(user_id=user.id)
         return query.first()

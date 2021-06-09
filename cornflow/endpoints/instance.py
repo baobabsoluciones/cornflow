@@ -189,23 +189,27 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
-@doc(
-    description="Create an instance from an mps file", tags=["Instances"], inherit=False
-)
 class InstanceFileEndpoint(MetaResource, MethodResource):
     """
     Endpoint to accept mps files to upload
     """
 
+    @doc(
+        description="Create an instance from an mps file",
+        tags=["Instances"],
+        inherit=False,
+    )
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceFileRequest, location="form", inherit=False)
     def post(self, name, description, minimize=1):
         """
 
-        :param file:
-        :return:
-        :rtype: Tuple(dict, integer)
+        :param str name:
+        :param str description:
+        :param int minimize:
+        :return: a tuple with the created instance and a integer with the status code
+        :rtype: Tuple(:class:`InstanceModel`, 201)
         """
         if "file" not in request.files:
             raise InvalidUsage(error="No file was provided")

@@ -9,8 +9,8 @@ class UserSchema(Schema):
     name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
-    admin = fields.Boolean(required=False, default=False, dump_only=True)
-    super_admin = fields.Boolean(required=False, dump_only=True, default=False)
+    # admin = fields.Boolean(required=False, default=False, dump_only=True)
+    # super_admin = fields.Boolean(required=False, dump_only=True, default=False)
     created_at = fields.DateTime(dump_only=True)
     modified_at = fields.DateTime(dump_only=True)
     instances = fields.Nested(InstanceSchema, many=True)
@@ -18,8 +18,8 @@ class UserSchema(Schema):
 
 class UserEndpointResponse(Schema):
     id = fields.Int()
-    admin = fields.Boolean(default=False)
-    super_admin = fields.Boolean(default=False)
+    # admin = fields.Boolean(default=False)
+    # super_admin = fields.Boolean(default=False)
     name = fields.Str()
     email = fields.Str()
     created_at = fields.Str()

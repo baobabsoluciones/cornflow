@@ -12,7 +12,7 @@ class ObjectDoesNotExist(InvalidUsage):
 
 
 class NoPermission(InvalidUsage):
-    status_code = 400
+    status_code = 403
     error = "You have no permission to access the required object"
 
 

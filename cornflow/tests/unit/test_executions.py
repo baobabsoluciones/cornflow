@@ -44,7 +44,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(404, response.status_code)
         self.assertTrue("error" in response.json)
 
     def test_get_executions(self):
@@ -55,7 +55,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
 
     def test_get_executions_superadmin(self):
         self.get_rows(self.url, self.payloads)
-        token = self.create_super_admin()
+        token = self.create_service_user()
         rows = self.client.get(
             self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
@@ -157,7 +157,7 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
-        token = self.create_super_admin()
+        token = self.create_service_user()
         self.get_one_row(EXECUTION_URL + idx + "/data/", payload, token=token)
 
 
@@ -177,7 +177,7 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
-        token = self.create_super_admin()
+        token = self.create_service_user()
         self.get_one_row(EXECUTION_URL + idx + "/log/", payload, token=token)
 
 
