@@ -4,18 +4,20 @@ or get only one.
 These endpoints have different access url, but manage the same data entities
 """
 # Import from libraries
+from cornflow_client.airflow.api import get_schema, validate_and_continue
 from flask import request, current_app
-from werkzeug.utils import secure_filename
-from marshmallow.exceptions import ValidationError
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec.views import MethodResource
+from flask_inflate import inflate
+from marshmallow.exceptions import ValidationError
 import os
 import pulp
+from werkzeug.utils import secure_filename
+
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import InstanceModel
-from ..schemas.model_json import DataSchema
 from ..schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
@@ -26,11 +28,12 @@ from ..schemas.instance import (
     InstanceFileRequest,
     QueryFiltersInstance,
 )
+
+from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage
-from cornflow_client.airflow.api import get_schema, validate_and_continue
 from ..shared.compress import compressed
-from flask_inflate import inflate
+from ..shared.exceptions import InvalidUsage
+
 
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {"mps", "lp"}

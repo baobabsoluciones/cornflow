@@ -1,0 +1,35 @@
+{
+  "patch":
+  [
+    {
+      "op": "replace",
+      "path": "/description",
+      "value": "Second test case from raw data"
+    },
+    {
+      "op": "replace",
+      "path": "/data/constraints/0/constant",
+      "value": -3
+    },
+    {
+      "op": "replace",
+      "path": "/data/constraints/0/coefficients/0/value",
+      "value": 2
+    },
+    {
+      "op": "replace",
+      "path": "/data/constraints/2/constant",
+      "value": -10
+    },
+    {
+      "op": "replace",
+      "path": "/data/objective/coefficients/0/value",
+      "value": 3
+    },
+    {
+      "op": "replace",
+      "path": "/name",
+      "value": "test_case_2"
+    }
+  ]
+}

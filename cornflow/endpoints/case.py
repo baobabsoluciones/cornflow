@@ -1,6 +1,6 @@
 """
-External endpoints to manage the instances: create new ones, or get all the instances created by the user,
-or get only one.
+External endpoints to manage the cases: create new cases from raw data, from an existing instance or execution
+or from an existing case, update the case info, patch its data, get all of them or one, move them and delete them.
 These endpoints have different access url, but manage the same data entities
 """
 
@@ -10,7 +10,8 @@ from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
 from flask_inflate import inflate
-from ..shared.compress import compressed
+import jsonpatch
+
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -19,15 +20,18 @@ from ..schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
     CaseRawRequest,
-    CaseSchema,
     CaseListResponse,
     CaseToInstanceResponse,
     CaseEditRequest,
     QueryFiltersCase,
+    QueryCaseCompare,
+    CaseCompareResponse,
 )
 
+from ..schemas.common import JsonPatchSchema
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
+from ..shared.compress import compressed
 from ..shared.exceptions import InvalidData, ObjectDoesNotExist
 
 
@@ -207,7 +211,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
-        API method to edit a case created vy the user and its basic related info (name, description and schema).
+        API method to edit a case created by the user and its basic related info (name, description and schema).
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
@@ -229,10 +233,14 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        self.delete_detail(self.get_user(), idx)
+        return self.delete_detail(self.get_user(), idx)
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
+    """
+    Endpoint used to get the data of a given case
+    """
+
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @marshal_with(CaseBase)
@@ -250,6 +258,13 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         return CaseModel.get_one_object_from_user(self.get_user(), idx)
+
+    @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
+    @Auth.auth_required
+    @use_kwargs(JsonPatchSchema, location="json")
+    @inflate
+    def patch(self, idx, **kwargs):
+        return self.patch_detail(kwargs, self.get_user(), idx)
 
 
 class CaseToInstance(MetaResource, MethodResource):
@@ -304,3 +319,63 @@ class CaseToInstance(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), payload["data"])
 
         return self.post_list(payload)
+
+
+class CaseCompare(MetaResource, MethodResource):
+    """
+    Endpoint used to generate the json patch of two given cases
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.model = CaseModel
+        self.query = CaseModel.get_all_objects
+        self.primary_key = "id"
+
+    @doc(
+        description="Compares the data and / or solution of two given cases",
+        tags=["Cases"],
+    )
+    @Auth.auth_required
+    @marshal_with(CaseCompareResponse)
+    @use_kwargs(QueryCaseCompare, location="query")
+    @compressed
+    def get(self, idx1, idx2, **kwargs):
+        """
+        API method to generate the json patch of two cases given by the user
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user
+
+        :param int idx1: ID of the base case for the comparison
+        :param int idx2: ID of the case that has to be compared
+        :return:an object with the instance or instance and execution ID that have been created and the status code
+        :rtype: Tuple (dict, integer)
+        """
+        if idx1 == idx2:
+            raise InvalidData("The case identifiers should be different", 400)
+        case_1 = self.model.get_one_object_from_user(self.get_user(), idx1)
+        case_2 = self.model.get_one_object_from_user(self.get_user(), idx2)
+
+        if case_1 is None:
+            raise ObjectDoesNotExist(
+                "You don't have access to the first case or it doesn't exist"
+            )
+        elif case_2 is None:
+            raise ObjectDoesNotExist(
+                "You don't have access to the second case or it doesn't exist"
+            )
+        elif case_1.schema != case_2.schema:
+            raise InvalidData("The cases asked to compare do not share the same schema")
+
+        data = kwargs.get("data", True)
+        solution = kwargs.get("solution", True)
+        payload = dict()
+
+        if data:
+            payload["data_patch"] = jsonpatch.make_patch(case_1.data, case_2.data).patch
+        if solution:
+            payload["solution_patch"] = jsonpatch.make_patch(
+                case_1.solution, case_2.solution
+            ).patch
+
+        return payload, 200

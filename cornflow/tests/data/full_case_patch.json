@@ -1,0 +1,61 @@
+{
+    "data_patch": [
+        {
+            "op": "replace",
+            "path": "/pairs/16/n2",
+            "value": 10
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/27/n2",
+            "value": 3
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/30/n1",
+            "value": 6
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/50/n2",
+            "value": 14
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/56/n1",
+            "value": 11
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/83/n2",
+            "value": 37
+        },
+        {
+            "op": "replace",
+            "path": "/pairs/103/n1",
+            "value": 26
+        }
+    ],
+    "solution_patch": [
+        {
+            "op": "replace",
+            "path": "/assignment/4/color",
+            "value": 3
+        },
+        {
+            "op": "replace",
+            "path": "/assignment/7/color",
+            "value": 2
+        },
+        {
+            "op": "replace",
+            "path": "/assignment/24/color",
+            "value": 1
+        },
+        {
+            "op": "replace",
+            "path": "/assignment/42/color",
+            "value": 3
+        }
+    ]
+}

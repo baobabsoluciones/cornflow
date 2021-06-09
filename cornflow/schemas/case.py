@@ -7,14 +7,14 @@ and to serialize the response data given by the same endpoints.
 from marshmallow import fields, Schema
 
 # Import from internal modules
-from .common import QueryFilters
+from .common import QueryFilters, PatchOperation
 
 
 class CaseRawRequest(Schema):
 
     name = fields.Str(required=True)
     description = fields.Str()
-    schema = fields.String(required=True)
+    schema = fields.Str(required=True)
     path = fields.Str(required=True)
     data = fields.Raw(required=True)
     solution = fields.Raw()
@@ -25,11 +25,11 @@ class CaseListResponse(Schema):
     path = fields.Str()
     name = fields.Str()
     description = fields.Str()
-    data_hash = fields.String()
-    solution_hash = fields.String()
+    data_hash = fields.Str()
+    solution_hash = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    schema = fields.String()
+    schema = fields.Str()
     dependents = fields.List(fields.Int())
 
 
@@ -70,10 +70,20 @@ class CaseToInstanceResponse(Schema):
 
 
 class CaseEditRequest(Schema):
-    name = fields.String()
-    description = fields.String()
-    schema = fields.String()
+    name = fields.Str()
+    description = fields.Str()
+    schema = fields.Str()
+
+
+class CaseCompareResponse(Schema):
+    data_patch = fields.Nested(PatchOperation, many=True)
+    solution_patch = fields.Nested(PatchOperation, many=True)
 
 
 class QueryFiltersCase(QueryFilters):
     pass
+
+
+class QueryCaseCompare(Schema):
+    data = fields.Boolean(required=False, default=1)
+    solution = fields.Boolean(required=False, default=1)

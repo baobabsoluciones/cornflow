@@ -1,9 +1,17 @@
+"""
+Unit test for the cases models and endpoints
+"""
+
+# Import from libraries
+from cornflow_client import get_pulp_jsonschema
 import json
+import jsonpatch
 import zlib
-import hashlib
+
+
+# Import from internal modules
+from cornflow.models import CaseModel, ExecutionModel, InstanceModel, UserModel
 from cornflow.shared.utils import hash_json_256
-from cornflow.models import InstanceModel, ExecutionModel
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
@@ -14,9 +22,12 @@ from cornflow.tests.const import (
     CASE_URL,
     CASE_PATH,
     CASES_LIST,
+    JSON_PATCH_GOOD_PATH,
+    JSON_PATCH_BAD_PATH,
+    FULL_CASE_LIST,
+    FULL_CASE_JSON_PATCH_1,
 )
-
-from cornflow.models import CaseModel, UserModel
+from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
 
 class TestCasesModels(CustomTestCase):
@@ -173,8 +184,6 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_case_without_solution(self):
-        # payload = dict(self.payload)
-        # payload.pop("solution")
         self.create_new_row(self.url, self.model, self.payload)
 
 
@@ -307,3 +316,267 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json["error"], "The object does not exist")
+
+
+class TestCaseJsonPatch(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.case_id = self.create_new_row(CASE_URL, self.model, self.payload)
+        self.payloads = [self.load_file(f) for f in CASES_LIST]
+        self.items_to_check = ["name", "description", "path", "schema"]
+        self.url = CASE_URL
+        self.patch = {
+            "patch": jsonpatch.make_patch(
+                self.payloads[0]["data"], self.payloads[1]["data"]
+            ).patch
+        }
+        self.patch_file = self.load_file(JSON_PATCH_GOOD_PATH)
+
+    def test_json_patch(self):
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            self.patch,
+            self.payloads[1]["data"],
+        )
+
+    def test_json_patch_file(self):
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            self.patch_file,
+            self.payloads[1]["data"],
+        )
+
+    def test_not_valid_json_patch(self):
+        payload = {"patch": "Not a valid patch"}
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            payload,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_not_valid_json_patch_2(self):
+        payload = {"some_key": "some_value"}
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            payload,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_not_valid_json_patch_3(self):
+        patch = {
+            "patch": jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch
+        }
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            patch,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_not_valid_json_patch_4(self):
+        patch = self.load_file(JSON_PATCH_BAD_PATH)
+        self.patch_row(
+            self.url + str(self.case_id) + "/data/",
+            patch,
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_patch_non_existing_case(self):
+        self.patch_row(
+            self.url + str(500) + "/data/",
+            self.patch,
+            {},
+            expected_status=404,
+            check_payload=False,
+        )
+
+    def test_patch_created_properly(self):
+        self.assertEqual(len(self.patch_file["patch"]), len(self.patch["patch"]))
+
+    def test_patch_not_created_properly(self):
+        # Compares the number of operations, not the operations themselves
+        self.assertNotEqual(
+            len(self.patch_file["patch"]),
+            len(jsonpatch.make_patch(self.payloads[0], self.payloads[1]).patch),
+        )
+
+        # Compares the number of operations, not the operations themselves
+        patch = self.load_file(JSON_PATCH_BAD_PATH)
+        self.assertNotEqual(len(patch["patch"]), len(self.patch["patch"]))
+
+
+class TestCaseDataEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payload = self.load_file(CASE_PATH)
+        self.model = CaseModel
+        self.payload["id"] = self.create_new_row(CASE_URL, self.model, self.payload)
+        self.url = CASE_URL
+        self.items_to_check = [
+            "name",
+            "description",
+            "path",
+            "schema",
+            "data",
+        ]
+
+    def test_get_data(self):
+        self.get_one_row(self.url + str(self.payload["id"]) + "/data/", self.payload)
+
+    def test_get_no_data(self):
+        self.get_one_row(
+            self.url + str(500) + "/data/", {}, expected_status=404, check_payload=False
+        )
+
+    def test_get_compressed_data(self):
+        headers = self.get_header_with_auth(self.token)
+        headers["Accept-Encoding"] = "gzip"
+
+        response = self.client.get(
+            self.url + str(self.payload["id"]) + "/data/", headers=headers
+        )
+        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+        raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
+        response = json.loads(raw)
+        for i in self.items_to_check:
+            self.assertEqual(self.payload[i], response[i])
+
+
+class TestCaseCompare(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.payloads = [self.load_file(f) for f in FULL_CASE_LIST]
+        self.payloads[0]["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
+        self.payloads[0]["solution"] = get_pulp_jsonschema(
+            "../tests/data/gc_output.json"
+        )
+        self.payloads[1]["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
+        self.payloads[1]["solution"] = get_pulp_jsonschema(
+            "../tests/data/gc_output.json"
+        )
+
+        self.payloads[1] = self.modify_data(self.payloads[1])
+
+        self.url = CASE_URL
+        self.model = CaseModel
+        self.cases_id = [
+            self.create_new_row(self.url, self.model, p) for p in self.payloads
+        ]
+        self.items_to_check = ["name", "description", "path", "schema"]
+
+    @staticmethod
+    def modify_data(data):
+        data["data"]["pairs"][16]["n2"] = 10
+        data["data"]["pairs"][27]["n2"] = 3
+        data["data"]["pairs"][30]["n1"] = 6
+        data["data"]["pairs"][50]["n2"] = 14
+        data["data"]["pairs"][56]["n1"] = 11
+        data["data"]["pairs"][83]["n2"] = 37
+        data["data"]["pairs"][103]["n1"] = 26
+
+        data["solution"]["assignment"][4]["color"] = 3
+        data["solution"]["assignment"][7]["color"] = 2
+        data["solution"]["assignment"][24]["color"] = 1
+        data["solution"]["assignment"][42]["color"] = 3
+
+        return data
+
+    def test_get_full_patch(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_same_case_error(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(400, response.status_code)
+
+    def test_get_only_data(self):
+        response = self.client.get(
+            self.url
+            + str(self.cases_id[0])
+            + "/"
+            + str(self.cases_id[1])
+            + "/?solution=0",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        payload.pop("solution_patch")
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_get_only_solution(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/?data=0",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        payload.pop("data_patch")
+        self.assertEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_patch_not_symmetric(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[1]) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertNotEqual(payload, response.json)
+        self.assertEqual(200, response.status_code)
+
+    def test_case_does_not_exist(self):
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(500) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(404, response.status_code)
+
+        response = self.client.get(
+            self.url + str(400) + "/" + str(self.cases_id[0]) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(404, response.status_code)
+
+    def test_case_compare_compression(self):
+        headers = self.get_header_with_auth(self.token)
+        headers["Accept-Encoding"] = "gzip"
+        response = self.client.get(
+            self.url + str(self.cases_id[0]) + "/" + str(self.cases_id[1]) + "/",
+            follow_redirects=True,
+            headers=headers,
+        )
+
+        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+        raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
+        response = json.loads(raw)
+        payload = self.load_file(FULL_CASE_JSON_PATCH_1)
+        self.assertEqual(payload, response)

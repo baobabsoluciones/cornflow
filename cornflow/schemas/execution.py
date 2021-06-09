@@ -6,7 +6,7 @@ from .common import QueryFilters
 
 class QueryFiltersExecution(QueryFilters):
     pass
-    # status = fields.Integer(required=False)
+    # status = fields.Int(required=False)
 
 
 class ConfigSchema(Schema):
@@ -14,14 +14,14 @@ class ConfigSchema(Schema):
     mip = fields.Boolean(required=False)
     msg = fields.Boolean(required=False)
     warmStart = fields.Boolean(required=False)
-    timeLimit = fields.Integer(required=False)
+    timeLimit = fields.Int(required=False)
     options = fields.List(fields.Str, required=False, many=True)
     keepFiles = fields.Boolean(required=False)
     gapRel = fields.Float(required=False)
     gapAbs = fields.Float(required=False)
-    maxMemory = fields.Integer(required=False)
-    maxNodes = fields.Integer(required=False)
-    threads = fields.Integer(required=False)
+    maxMemory = fields.Int(required=False)
+    maxNodes = fields.Int(required=False)
+    threads = fields.Int(required=False)
     logPath = fields.Str(required=False)
 
 
@@ -31,7 +31,7 @@ class ExecutionSchema(Schema):
     instance_id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
-    schema = fields.String(required=False)
+    schema = fields.Str(required=False)
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
@@ -52,15 +52,15 @@ class ExecutionSchema(Schema):
 
 class ExecutionRequest(Schema):
     config = fields.Nested(ConfigSchema, required=True)
-    name = fields.String(required=True)
-    description = fields.String(required=False)
-    instance_id = fields.String(required=True)
+    name = fields.Str(required=True)
+    description = fields.Str(required=False)
+    instance_id = fields.Str(required=True)
     schema = fields.Str(required=False)
 
 
 class ExecutionEditRequest(Schema):
-    name = fields.String()
-    description = fields.String()
+    name = fields.Str()
+    description = fields.Str()
 
 
 class ExecutionDagRequest(Schema):
@@ -69,7 +69,7 @@ class ExecutionDagRequest(Schema):
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
-    solution_schema = fields.String(required=False, allow_none=True)
+    solution_schema = fields.Str(required=False, allow_none=True)
 
 
 class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
@@ -77,34 +77,34 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
 
 
 class ExecutionDetailsEndpointResponse(Schema):
-    id = fields.String()
+    id = fields.Str()
     config = fields.Nested(ConfigSchema)
-    name = fields.String()
-    description = fields.String()
+    name = fields.Str()
+    description = fields.Str()
     created_at = fields.DateTime()
-    instance_id = fields.String()
+    instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
-    data_hash = fields.String(dump_only=True)
-    schema = fields.String(required=False)
+    data_hash = fields.Str(dump_only=True)
+    schema = fields.Str(required=False)
 
 
 class ExecutionStatusEndpointResponse(Schema):
-    id = fields.String()
+    id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
-    data_hash = fields.String(dump_only=True)
+    data_hash = fields.Str(dump_only=True)
 
 
 class ExecutionDataEndpointResponse(Schema):
-    id = fields.String()
-    name = fields.String()
+    id = fields.Str()
+    name = fields.Str()
     data = fields.Raw()
-    data_hash = fields.String(dump_only=True)
+    data_hash = fields.Str(dump_only=True)
 
 
 class ExecutionLogEndpointResponse(Schema):
-    id = fields.String()
-    name = fields.String()
+    id = fields.Str()
+    name = fields.Str()
     log = fields.Nested(LogSchema, attribute="log_json")
-    data_hash = fields.String(dump_only=True)
+    data_hash = fields.Str(dump_only=True)
