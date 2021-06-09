@@ -6,6 +6,7 @@ Endpoints for the user profiles
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask import current_app
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -100,6 +101,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if user_obj.is_service_user():
             raise NoPermission()
         user_obj.delete()
+        log.info("User {} was deleted by user {}".format(user_id, self.get_user_id()))
         return {"message": "The object has been deleted"}, 200
 
     @doc(description="Edit a user", tags=["Users"])
@@ -127,6 +129,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
         user_obj.update(data)
         user_obj.save()
+        log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
         return user_obj, 200
 
 

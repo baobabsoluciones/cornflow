@@ -4,6 +4,7 @@ External endpoint for the user to signup
 # Import from libraries
 from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -50,5 +51,5 @@ class SignUpEndpoint(MetaResource, MethodResource):
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400
             )
-
+        log.info("User {} was created".format(user.id))
         return {"token": token, "id": user.id}, 201
