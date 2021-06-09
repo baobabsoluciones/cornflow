@@ -5,6 +5,7 @@ External endpoint for the user to signup
 from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
+import logging as log
 
 # Import from internal modules
 from ..models import UserModel
@@ -12,8 +13,6 @@ from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.exceptions import (
     InvalidUsage,
-    ObjectDoesNotExist,
-    NoPermission,
     InvalidCredentials,
 )
 
@@ -48,5 +47,5 @@ class SignUpEndpoint(Resource, MethodResource):
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400
             )
-
+        log.info("User {} was created".format(user.id))
         return {"token": token, "id": user.id}, 201

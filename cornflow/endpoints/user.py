@@ -5,6 +5,7 @@ Endpoints for the user profiles
 from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+import logging as log
 
 # Import from internal modules
 from ..models import UserModel
@@ -87,6 +88,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if user_obj.super_admin and not self.is_super_admin():
             raise NoPermission()
         user_obj.delete()
+        log.info("User {} was deleted by user {}".format(user_id, self.get_user_id()))
         return {"message": "The object has been deleted"}, 200
 
     @doc(description="Edit a user", tags=["Users"])
@@ -111,6 +113,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise ObjectDoesNotExist()
         user_obj.update(data)
         user_obj.save()
+        log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
         return user_obj, 200
 
 

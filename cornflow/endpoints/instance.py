@@ -13,7 +13,7 @@ from marshmallow.exceptions import ValidationError
 import os
 import pulp
 from werkzeug.utils import secure_filename
-
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -96,7 +96,11 @@ class InstanceEndpoint(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # if we're here, we validated and the data seems to fit the schema
-        return self.post_list(kwargs)
+        response = self.post_list(kwargs)
+        log.info(
+            "User {} creates instance {}".format(self.get_user_id(), response[0].id)
+        )
+        return response
 
 
 class InstanceDetailsEndpointBase(MetaResource, MethodResource):
@@ -143,7 +147,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.put_detail(data, self.get_user(), idx)
+        response = self.put_detail(data, self.get_user(), idx)
+        log.info("User {} edits instance {}".format(self.get_user_id(), idx))
+        return response
 
     @doc(description="Delete an instance", tags=["Instances"])
     @Auth.auth_required
@@ -158,7 +164,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.delete_detail(self.get_user(), idx)
+        response = self.delete_detail(self.get_user(), idx)
+        log.info("User {} deletes instance {}".format(self.get_user_id(), idx))
+        return response
 
 
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
@@ -242,7 +250,11 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
 
         item = InstanceModel(data)
         item.save()
-
+        log.info(
+            "User {} creates instance {} from mps file".format(
+                self.get_user_id(), item.id
+            )
+        )
         return item, 201
 
 

@@ -6,6 +6,7 @@ This are the endpoints used by airflow in its communication with cornflow
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
 from flask_apispec.views import MethodResource
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -133,4 +134,7 @@ class DAGEndpointManual(MetaResource, MethodResource):
             kwargs_copy["execution_results"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
+        log.info(
+            "User {} manually edited execution {}".format(self.get_user_id(), item.id)
+        )
         return item, 201

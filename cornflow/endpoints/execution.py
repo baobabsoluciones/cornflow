@@ -161,6 +161,9 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
         execution.update_state(EXEC_STATE_RUNNING)
+        log.info(
+            "User {} creates execution {}".format(self.get_user_id(), execution.id)
+        )
         return execution, 201
 
 
@@ -207,6 +210,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info("User {} edits execution {}".format(self.get_user_id(), idx))
         return self.put_detail(data, self.get_user(), idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
@@ -222,6 +226,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info("User {} deleted execution {}".format(self.get_user_id(), idx))
         return self.delete_detail(self.get_user(), idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
@@ -245,6 +250,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
+        log.info("User {} stopped execution {}".format(self.get_user_id(), idx))
         return {"message": "The execution has been stopped"}, 200
 
 

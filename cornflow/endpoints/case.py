@@ -11,6 +11,7 @@ from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
 from flask_inflate import inflate
 import jsonpatch
+import logging as log
 
 
 # Import from internal modules
@@ -58,7 +59,9 @@ class CaseEndpoint(MetaResource, MethodResource):
         :return: a dictionary with a tree structure of the cases and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return CaseModel.get_all_objects(self.get_user(), **kwargs)
+        response = CaseModel.get_all_objects(self.get_user(), **kwargs)
+        log.debug("User {} gets case {}".format(self.get_user_id(), response.id))
+        return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
     @Auth.auth_required
@@ -67,7 +70,9 @@ class CaseEndpoint(MetaResource, MethodResource):
     @use_kwargs(CaseRawRequest, location="json")
     def post(self, **kwargs):
         """ """
-        return self.post_list(kwargs)
+        response = self.post_list(kwargs)
+        log.info("User {} creates case {}".format(self.get_user_id(), response[0].id))
+        return response
 
 
 class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
@@ -137,8 +142,13 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
             }
 
             data = {**data, **instance_data, **execution_data}
-
-        return self.post_list(data)
+        response = self.post_list(data)
+        log.info(
+            "User {} creates case {} from instance/execution".format(
+                self.get_user_id(), response[0].id
+            )
+        )
+        return response
 
 
 class CaseCopyEndpoint(MetaResource, MethodResource):
@@ -174,7 +184,14 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
                 payload[key] = data[key]
             if key in self.fields_to_modify:
                 payload[key] = "Copy_" + payload[key]
-        return self.post_list(payload)
+
+        response = self.post_list(payload)
+        log.info(
+            "User {} copied case {} into {}".format(
+                self.get_user_id(), idx, response[0].id
+            )
+        )
+        return response
 
 
 class CaseDetailsEndpoint(MetaResource, MethodResource):
@@ -203,7 +220,9 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return CaseModel.get_one_object_from_user(self.get_user(), idx)
+        response = CaseModel.get_one_object_from_user(self.get_user(), idx)
+        log.debug("User {} gets case {}".format(self.get_user_id(), idx))
+        return response
 
     @doc(description="Edit a case", tags=["Cases"])
     @Auth.auth_required
@@ -218,6 +237,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info("User {} edits case {}".format(self.get_user_id(), idx))
         return self.put_detail(kwargs, self.get_user(), idx)
 
     @doc(description="Delete a case", tags=["Cases"])
@@ -232,7 +252,9 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.delete_detail(self.get_user(), idx)
+        response = self.delete_detail(self.get_user(), idx)
+        log.info("User {} deletes case {}".format(self.get_user_id(), idx))
+        return response
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
@@ -256,14 +278,18 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return CaseModel.get_one_object_from_user(self.get_user(), idx)
+        response = CaseModel.get_one_object_from_user(self.get_user(), idx)
+        log.debug("User {} retrieved data for case {}".format(self.get_user_id(), idx))
+        return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
     @use_kwargs(CaseCompareResponse, location="json")
     @inflate
     def patch(self, idx, **kwargs):
-        return self.patch_detail(kwargs, self.get_user(), idx)
+        response = self.patch_detail(kwargs, self.get_user(), idx)
+        log.info("User {} patches case {}".format(self.get_user_id(), idx))
+        return response
 
 
 class CaseToInstance(MetaResource, MethodResource):
@@ -316,8 +342,13 @@ class CaseToInstance(MetaResource, MethodResource):
         config = current_app.config
         marshmallow_obj = get_schema(config, schema)
         validate_and_continue(marshmallow_obj(), payload["data"])
-
-        return self.post_list(payload)
+        response = self.post_list(payload)
+        log.info(
+            "User {} creates case {} from instance {}".format(
+                self.get_user_id(), response[0].id, idx
+            )
+        )
+        return response
 
 
 class CaseCompare(MetaResource, MethodResource):
@@ -376,5 +407,7 @@ class CaseCompare(MetaResource, MethodResource):
             payload["solution_patch"] = jsonpatch.make_patch(
                 case_1.solution, case_2.solution
             ).patch
-
+        log.debug(
+            "User {} compared cases {} and {}".format(self.get_user_id(), idx1, idx2)
+        )
         return payload, 200
