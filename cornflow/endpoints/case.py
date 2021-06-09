@@ -60,7 +60,7 @@ class CaseEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         response = CaseModel.get_all_objects(self.get_user(), **kwargs)
-        log.debug("User {} gets case {}".format(self.get_user_id(), response.id))
+        log.debug("User {} gets all cases".format(self.get_user_id()))
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
