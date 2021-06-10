@@ -2,6 +2,7 @@
 This file contains the different custom test classes used to generalize the unit testing of cornflow.
 """
 # Import from libraries
+from abc import ABC
 from datetime import datetime, timedelta
 from flask_testing import TestCase
 import json
@@ -426,3 +427,102 @@ class BaseTestCases:
                 expected_status=400,
                 check_payload=False,
             )
+
+
+class LoginTestCases:
+    class LoginEndpoint(TestCase):
+        def create_app(self):
+            app = create_app("testing")
+            return app
+
+        def setUp(self):
+            db.create_all()
+            self.data = None
+            self.response = None
+
+        def tearDown(self):
+            db.session.remove()
+            db.drop_all()
+
+        def test_successful_log_in(self):
+            payload = self.data
+
+            self.response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(200, self.response.status_code)
+            self.assertEqual(str, type(self.response.json["token"]))
+
+        def test_validation_error(self):
+            payload = self.data
+            payload["email"] = "test"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_missing_email(self):
+            payload = self.data
+            payload.pop("email", None)
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_missing_password(self):
+            payload = self.data
+            payload.pop("password", None)
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_invalid_email(self):
+            payload = self.data
+            payload["email"] = "test@test.org"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+            self.assertEqual("Invalid credentials", response.json["error"])
+
+        def test_invalid_password(self):
+            payload = self.data
+            payload["password"] = "testpassword_2"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+            self.assertEqual("Invalid credentials", response.json["error"])
