@@ -137,3 +137,12 @@ class TestCommands(TestCase):
                     )
 
                     self.assertEqual(True, permission)
+
+    def test_argument_parsing_correct(self):
+        command = RegisterRoles()
+        command.run(verbose="0")
+
+        roles = RoleModel.query.all()
+
+        for r in roles:
+            self.assertEqual(ROLES_MAP[r.id], r.name)

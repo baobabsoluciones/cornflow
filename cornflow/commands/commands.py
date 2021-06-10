@@ -67,8 +67,14 @@ class CreateServiceUser(Command):
 
     def get_options(self):
         return (
-            Option("-e", "--email", dest="email", help="Service user email"),
-            Option("-p", "--password", dest="password", help="Service user password"),
+            Option("-e", "--email", dest="email", help="Service user email", type=str),
+            Option(
+                "-p",
+                "--password",
+                dest="password",
+                help="Service user password",
+                type=str,
+            ),
             Option(
                 "-v",
                 "--verbose",
@@ -81,15 +87,15 @@ class CreateServiceUser(Command):
         """
         Method to run the command and create the service user
 
-        :param str email: the email for the admin user
-        :param str password: the password for the admin user
-        :param int verbose: verboseof the command
+        :param str email: the email for the service user
+        :param str password: the password for the service user
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
         if email is None or password is None:
             print("Missing required arguments")
-        verbose = int(verbose)
+            return False
         return create_user_with_role(
             email, password, "serviceuser", SERVICE_ROLE, verbose
         )
@@ -98,13 +104,26 @@ class CreateServiceUser(Command):
 class CreateAdminUser(Command):
     def get_options(self):
         return (
-            Option("-e", "--email", dest="email", help="Admin user email"),
-            Option("-p", "--password", dest="password", help="Admin user password"),
+            Option(
+                "-e",
+                "--email",
+                dest="email",
+                help="Admin user email",
+                type=str,
+            ),
+            Option(
+                "-p",
+                "--password",
+                dest="password",
+                help="Admin user password",
+                type=str,
+            ),
             Option(
                 "-v",
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -120,7 +139,7 @@ class CreateAdminUser(Command):
         """
         if email is None or password is None:
             print("Missing required arguments")
-        verbose = int(verbose)
+            return False
         return create_user_with_role(email, password, "admin", ADMIN_ROLE, verbose)
 
 
@@ -145,6 +164,7 @@ class RegisterActions(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -179,6 +199,7 @@ class RegisterViews(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -220,6 +241,7 @@ class UpdateViews(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -259,6 +281,7 @@ class RegisterRoles(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -294,6 +317,7 @@ class BasePermissionAssignationRegistration(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -359,6 +383,7 @@ class AccessInitialization(Command):
                 "--verbose",
                 dest="verbose",
                 help="Verbose for the command. 0 no verbose, 1 full verbose",
+                type=int,
             ),
         )
 
@@ -370,7 +395,6 @@ class AccessInitialization(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        verbose = int(verbose)
         RegisterActions().run(verbose)
         RegisterViews().run(verbose)
         RegisterRoles().run(verbose)

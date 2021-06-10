@@ -197,10 +197,7 @@ class UserRoleModel(TraceAttributes):
         :rtype: bool
         """
         user_role = UserRoleModel.get_one_user_role(user_id, role_id)
-        if user_role is None:
-            return False
-        else:
-            return True
+        return user_role is not None
 
     @staticmethod
     def check_if_role_assigned_disabled(user_id, role_id):
@@ -217,10 +214,7 @@ class UserRoleModel(TraceAttributes):
             UserRoleModel.role_id == role_id,
             UserRoleModel.deleted_at != None,
         ).first()
-        if user_role is None:
-            return False
-        else:
-            return True
+        return user_role is not None
 
     def __repr__(self):
         """
