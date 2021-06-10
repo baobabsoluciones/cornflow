@@ -1,3 +1,4 @@
+
 name: ldap-integration
 
 on: [push]
@@ -14,28 +15,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Set up ldap server
-      uses: virgilio21/openldap-action@v1.1
-      with:
-        adminPassword: 'admin'
-        domain: 'example.org'
-        prepopulate: 'airflow_config'
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        docker run --volume $GITHUB_WORKSPACE/airflow_config:/etc/ldap.dist/prepopulate \
+        -e SLAPD_DOMAIN=example.org \
+        -e SLAPD_PASSWORD=admin \
+        -d -p 389:389 dinkel/openldap
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
     - name: Run unit tests
-      run: |
-        sleep 5s
-        python -m unittest discover -s cornflow.tests.ldap
+      run: python -m unittest discover -s cornflow.tests.ldap
       env:
         FLASK_ENV: testing
         AUTH_TYPE: 2
-        LDAP_HOST: ldap://127.0.0.1:389
+        LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
 
 
