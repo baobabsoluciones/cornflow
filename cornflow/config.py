@@ -58,9 +58,9 @@ class Testing(object):
     LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD", "admin")
     LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
     LDAP_USE_TLS = False
-    LDAP_HOST = os.getenv("LDAP_HOST", "ldap://35.205.18.159:389")
+    LDAP_HOST = os.getenv("LDAP_HOST")
     LDAP_USERNAME_ATTRIBUTE = "cn"
-    LDAP_USER_BASE = "ou=user,dc=example,dc=org"
+    LDAP_USER_BASE = "ou=users,dc=example,dc=org"
     LDAP_EMAIL_ATTRIBUTE = "mail"
     LDAP_USER_OBJECT_CLASS = "inetOrgPerson"
 
