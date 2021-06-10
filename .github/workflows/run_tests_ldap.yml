@@ -24,7 +24,7 @@ jobs:
         docker run --volume $GITHUB_WORKSPACE/airflow_config:/etc/ldap.dist/prepopulate \
         -e SLAPD_DOMAIN=example.org \
         -e SLAPD_PASSWORD=admin \
-        -d -p 389:8080 dinkel/openldap
+        -d -p 389:389 dinkel/openldap
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
     - name: Run unit tests
@@ -32,7 +32,7 @@ jobs:
       env:
         FLASK_ENV: testing
         AUTH_TYPE: 2
-        LDAP_HOST: ldap://localhost:8080
+        LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
 
 
