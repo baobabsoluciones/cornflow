@@ -35,5 +35,18 @@ jobs:
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
         LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
+        LDAP_GROUP_OBJECT_CLASS: posixGroup
+        LDAP_PROTOCOL_VERSION: 3
+        LDAP_BIND_DN: cn=admin,dc=example,dc=org
+        LDAP_USE_TLS: False
+        LDAP_USERNAME_ATTRIBUTE: cn
+        LDAP_USER_BASE: ou=users,dc=example,dc=org
+        LDAP_EMAIL_ATTRIBUTE: mail
+        LDAP_USER_OBJECT_CLASS: inetOrgPerson
+        LDAP_GROUP_ATTRIBUTE: cn
+        LDAP_GROUP_TO_ROLE_SERVICE: service
+        LDAP_GROUP_TO_ROLE_ADMIN: administrators
+        LDAP_GROUP_TO_ROLE_VIEWER: viewers
+        LDAP_GROUP_TO_ROLE_PLANNER: planners
 
 
