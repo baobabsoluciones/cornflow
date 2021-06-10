@@ -1,6 +1,5 @@
-# VERSION 2.0.0
+# VERSION 2.0.2
 # AUTHOR: sistemas@baobabsoluciones.es
-# DESCRIPTION: Cornflow docker container build on docker-hub "docker pull baobabsoluciones/cornflow:latest"
 
 FROM python:3.8-slim-buster
 LABEL maintainer="sistemas@baobabsoluciones"
@@ -8,8 +7,6 @@ LABEL maintainer="sistemas@baobabsoluciones"
 # Never prompt the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
-
-# Cornflow vars
 
 # install dos2unix for initapp.sh
 RUN apt update -y && apt-get install -y --no-install-recommends \
