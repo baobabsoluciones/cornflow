@@ -37,7 +37,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         )
 
     def test_successful_log_in_admin(self):
-        self.data = {"email": "admin", "password": "admin1234"}
+        self.data = {"email": "administrator", "password": "admin1234"}
         super().test_successful_log_in()
         self.assertEqual(
             UserModel.get_one_user_by_username(self.data["email"]).id,
