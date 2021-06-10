@@ -15,7 +15,7 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL
 
 
 try:
@@ -526,3 +526,86 @@ class LoginTestCases:
             self.assertEqual(400, response.status_code)
             self.assertEqual(str, type(response.json["error"]))
             self.assertEqual("Invalid credentials", response.json["error"])
+
+        def test_old_token(self):
+            token = (
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
+                ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
+            )
+
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(
+                "Token expired, please login again", response.json["error"]
+            )
+
+        def test_bad_format_token(self):
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(self.data),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            token = response.json["token"]
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer" + token,
+                },
+            )
+            self.assertEqual(400, response.status_code)
+
+        def test_invalid_token(self):
+            token = (
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
+                ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
+            )
+
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(
+                "Invalid token, please try again with a new token",
+                response.json["error"],
+            )
