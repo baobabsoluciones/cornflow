@@ -71,10 +71,10 @@ In the `repository <https://raw.githubusercontent.com/baobabsoluciones/corn/mast
 
 With this docker template following users will be create in openldap server::
 
-    User ``administrator`` with password ``adminnistrator1234``
-    Service user ``cornflow`` with password ``cornflow1234``
-    Viewer user ``viewer`` with password ``viewer1234``
-    General user ``planner`` with password ``planner1234``
+    User "administrator" with password "adminnistrator1234"
+    Service user "cornflow" with password "cornflow1234"
+    Viewer user "viewer" with password "viewer1234"
+    General user "planner" with password "planner1234"
 
 Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
 
