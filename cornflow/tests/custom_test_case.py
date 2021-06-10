@@ -609,3 +609,7 @@ class LoginTestCases:
                 "Invalid token, please try again with a new token",
                 response.json["error"],
             )
+
+        def test_token(self):
+            # TODO: implement to check correct token creation
+            pass

@@ -33,7 +33,3 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def test_successful_log_in(self):
         super().test_successful_log_in()
         self.assertEqual(self.id, self.response.json["id"])
-
-    def test_token(self):
-        # TODO: implement to check correct token creation
-        pass
