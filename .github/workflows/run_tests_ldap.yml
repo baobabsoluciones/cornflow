@@ -34,5 +34,6 @@ jobs:
         AUTH_TYPE: 2
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
+        LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
 
 
