@@ -13,9 +13,9 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v1.1
+    - uses: actions/checkout@v1
     - name: Set up ldap server
-      uses: virgilio21/openldap-action@v1
+      uses: virgilio21/openldap-action@v1.1
       with:
         adminPassword: 'admin'
         domain: 'example.org'
