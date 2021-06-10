@@ -62,4 +62,24 @@ Flower has by default a `basic authentication <https://flower.readthedocs.io/en/
 LDAP Authentication
 **********************
 
-At the moment, cornflow does not support the integration of LDAP servers to manage the users of the application. Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
+Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
+To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.
+
+In the `repository <https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-ldap.yml>`_ we have an example of deployment with docker to configure access with LDAP protocol::
+
+    docker-compose -f docker-compose-cornflow-ldap.yml up -d
+
+With this docker template following users will be create in openldap server::
+
+    User ``administrator`` with password ``adminnistrator1234``
+    Service user ``cornflow`` with password ``cornflow1234``
+    Viewer user ``viewer`` with password ``viewer1234``
+    General user ``planner`` with password ``planner1234``
+
+Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this `page <https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap>`_.
+
+Airflow user
+****************
+
+It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow. 
+A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.
