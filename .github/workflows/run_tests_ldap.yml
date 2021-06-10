@@ -1,4 +1,4 @@
-name: build
+name: ldap-integration
 
 on: [push]
 
@@ -13,7 +13,7 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v1.1
     - name: Set up ldap server
       uses: virgilio21/openldap-action@v1
       with:
