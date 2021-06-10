@@ -63,7 +63,7 @@ class TestCommands(TestCase):
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
 
-    def test_register_permissions(self):
+    def test_register_actions(self):
         command = RegisterActions()
         command.run()
 

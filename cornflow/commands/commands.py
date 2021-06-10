@@ -25,7 +25,18 @@ from cornflow.endpoints import resources
 from cornflow.shared.utils import db
 
 
-def create_user_with_role(email, password, name, role):
+def create_user_with_role(email, password, name, role, verbose=0):
+    """
+    Method to create a user with a given email, password and name
+
+    :param str email: email for the new user
+    :param str password: password for the new user
+    :param str name: name for the new user
+    :param int role: role for the new user
+    :param int verbose: verbose of the function
+    :return: a boolean if the execution went right
+    :rtype: bool
+    """
     user = UserModel.get_one_user_by_email(email)
     if user is None:
         data = dict(name=name, email=email, password=password)
@@ -33,15 +44,18 @@ def create_user_with_role(email, password, name, role):
         user.save()
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
         user_role.save()
-        print("{} is created and assigned service role".format(name))
+        if verbose == 1:
+            print("{} is created and assigned service role".format(name))
         return True
     user_role = UserRoleModel.get_one_user(user.id)
     if user_role is not None and RoleModel.get_one_object(role) in user_role:
-        print("{} exists and already has service role assigned".format(name))
+        if verbose == 1:
+            print("{} exists and already has service role assigned".format(name))
         return True
     user_role = UserRoleModel({"user_id": user.id, "role_id": role})
     user_role.save()
-    print("{} already exists and is assigned a service role".format(name))
+    if verbose == 1:
+        print("{} already exists and is assigned a service role".format(name))
     return True
 
 
@@ -55,18 +69,30 @@ class CreateServiceUser(Command):
         return (
             Option("-e", "--email", dest="email", help="Service user email"),
             Option("-p", "--password", dest="password", help="Service user password"),
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
         )
 
-    def run(self, email, password):
+    def run(self, email=None, password=None, verbose=0):
         """
         Method to run the command and create the service user
 
         :param str email: the email for the admin user
         :param str password: the password for the admin user
+        :param int verbose: verboseof the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        return create_user_with_role(email, password, "serviceuser", SERVICE_ROLE)
+        if email is None or password is None:
+            print("Missing required arguments")
+        verbose = int(verbose)
+        return create_user_with_role(
+            email, password, "serviceuser", SERVICE_ROLE, verbose
+        )
 
 
 class CreateAdminUser(Command):
@@ -74,17 +100,28 @@ class CreateAdminUser(Command):
         return (
             Option("-e", "--email", dest="email", help="Admin user email"),
             Option("-p", "--password", dest="password", help="Admin user password"),
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
         )
 
-    def run(self, email, password):
+    def run(self, email=None, password=None, verbose=0):
         """
         Method to run and create the admin user
+
         :param str email: the email for the admin user
         :param str password: the password for the admin user
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        return create_user_with_role(email, password, "admin", ADMIN_ROLE)
+        if email is None or password is None:
+            print("Missing required arguments")
+        verbose = int(verbose)
+        return create_user_with_role(email, password, "admin", ADMIN_ROLE, verbose)
 
 
 class CleanHistoricData(Command):
@@ -101,10 +138,21 @@ class CleanHistoricData(Command):
 
 
 class RegisterActions(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
         """
         Method to register the actions on the database
 
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
@@ -117,14 +165,28 @@ class RegisterActions(Command):
         db.session.bulk_save_objects(actions_list)
         db.session.commit()
 
+        if verbose == 1:
+            print("Actions successfully registered")
+
         return True
 
 
 class RegisterViews(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
         """
         Method to register the endpoints in cornflow
 
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
@@ -144,11 +206,31 @@ class RegisterViews(Command):
         db.session.bulk_save_objects(views_list)
         db.session.commit()
 
+        if verbose == 1:
+            print("Endpoints successfully registered")
+
         return True
 
 
 class UpdateViews(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
+        """
+        Method to update the views that are registered on the database
+
+        :param int verbose: verbose of the command
+        :return: a boolean if the execution went right
+        :rtype: bool
+        """
         views_list = [
             ApiViewModel(
                 {
@@ -163,14 +245,28 @@ class UpdateViews(Command):
         db.session.bulk_save_objects(views_list)
         db.session.commit()
 
+        if verbose == 1:
+            print("Views successfully updated")
+
         return
 
 
 class RegisterRoles(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
         """
         Method to register the roles in cornflow
 
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
@@ -184,14 +280,28 @@ class RegisterRoles(Command):
         db.session.bulk_save_objects(role_list)
         db.session.commit()
 
+        if verbose == 1:
+            print("Roles successfully registered")
+
         return
 
 
 class BasePermissionAssignationRegistration(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
         """
         Method to register the base permissions
 
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
@@ -235,19 +345,36 @@ class BasePermissionAssignationRegistration(Command):
         db.session.bulk_save_objects(assign_list)
         db.session.commit()
 
+        if verbose == 1:
+            print("Base permissions successfully registered")
+
         return True
 
 
 class AccessInitialization(Command):
-    def run(self):
+    def get_options(self):
+        return (
+            Option(
+                "-v",
+                "--verbose",
+                dest="verbose",
+                help="Verbose for the command. 0 no verbose, 1 full verbose",
+            ),
+        )
+
+    def run(self, verbose=0):
         """
         Method to run all access commands together
+
+        :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        RegisterActions().run()
-        RegisterViews().run()
-        RegisterRoles().run()
-        BasePermissionAssignationRegistration().run()
-        print("Access initialization ran successfully")
+        verbose = int(verbose)
+        RegisterActions().run(verbose)
+        RegisterViews().run(verbose)
+        RegisterRoles().run(verbose)
+        BasePermissionAssignationRegistration().run(verbose)
+        if verbose == 1:
+            print("Access initialization ran successfully")
         return True

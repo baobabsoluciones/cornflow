@@ -19,7 +19,7 @@ from ..schemas.roles import (
 )
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import EndpointNotImplemented
+from ..shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
 
 
 class RolesListEndpoint(MetaResource, MethodResource):
@@ -148,7 +148,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = UserRoleModel
-        self.query = UserRoleModel.get_all_objects
+        self.query = UserRoleModel.get_one_user_role
         self.primary_key = "id"
 
     @doc(description="Gets all the user role assignments", tags=["User roles"])
@@ -189,7 +189,14 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be created in the directory."
             )
-        return self.post_list(kwargs, trace_field="admin_id")
+
+        # Check if the assignation is disabled, or it does exist
+        if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
+            return self.activate_item(**kwargs)
+        elif UserRoleModel.check_if_role_assigned(**kwargs):
+            raise ObjectAlreadyExists
+        else:
+            return self.post_list(kwargs, trace_field="admin_id")
 
 
 class UserRoleDetailEndpoint(MetaResource, MethodResource):

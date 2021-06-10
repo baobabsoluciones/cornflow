@@ -10,7 +10,12 @@ from cornflow.endpoints import (
     UserRoleDetailEndpoint,
 )
 from cornflow.models import RoleModel, UserRoleModel
-from cornflow.shared.const import ROLES_MAP, ADMIN_ROLE, VIEWER_ROLE, ALL_DEFAULT_ROLES
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    PLANNER_ROLE,
+    ROLES_MAP,
+    VIEWER_ROLE,
+)
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -84,8 +89,7 @@ class TestRolesListEndpoint(CustomTestCase):
             self.create_role(user_id, role)
         all_roles = UserRoleModel.get_one_user(user_id)
         diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
-        # TODO: this line gives an error (uncomment!)
-        # self.assertEqual(len(all_roles), len(ROLES_MAP))
+        self.assertEqual(len(all_roles), len(ROLES_MAP))
         self.assertEqual(len(diff), 0)
         UserRoleModel.del_one_user(user_id)
         all_roles = UserRoleModel.get_one_user(user_id)
@@ -260,6 +264,18 @@ class TestUserRolesListEndpoint(CustomTestCase):
                     self.url, self.model, {}, expected_status=403, check_payload=False
                 )
 
+    def test_post_already_assigned_role(self):
+        role = self.roles_with_access[0]
+        self.token = self.create_user_with_role(role)
+        self.create_new_row(self.url, self.model, self.new_user_role)
+        self.create_new_row(
+            self.url,
+            self.model,
+            self.new_user_role,
+            expected_status=400,
+            check_payload=False,
+        )
+
 
 class TestUserRolesDetailEndpoint(CustomTestCase):
     def setUp(self):
@@ -273,6 +289,14 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "role_id": 2,
             "user": "testname",
             "user_id": 1,
+        }
+
+        self.payload_2 = {
+            "id": 2,
+            "role": "planner",
+            "role_id": 2,
+            "user": "testuser3",
+            "user_id": 2,
         }
 
     def tearDown(self):
@@ -311,7 +335,6 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
 
     def test_delete_and_create_user_role_authorized_user(self):
-        # TODO: this test should fail. But passes.
         role = self.roles_with_access[0]
         data = {
             "name": "testuser" + str(role),
@@ -319,14 +342,25 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "password": "testpassword",
         }
         user_response = self.create_user(data)
-        user_role = self.create_role(user_response.json["id"], role)
-        self.client.delete(
-            self.url + str(user_role.id) + "/",
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
+        planner_role = UserRoleModel.query.filter_by(
+            user_id=user_response.json["id"]
+        ).first()
+
         self.create_role(user_response.json["id"], role)
+
+        self.client.delete(
+            self.url + str(planner_role.id) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(user_response.json["token"]),
+        )
+
+        role_response = self.create_role_endpoint(
+            user_response.json["id"], PLANNER_ROLE, user_response.json["token"]
+        )
+
         self.assertEqual(201, user_response.status_code)
+        self.assertEqual(200, role_response.status_code)
+        self.assertEqual(self.payload_2, role_response.json)
 
     def test_delete_user_role_not_authorized_user(self):
         for role in ROLES_MAP:

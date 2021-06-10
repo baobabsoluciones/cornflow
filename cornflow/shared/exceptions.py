@@ -11,6 +11,11 @@ class ObjectDoesNotExist(InvalidUsage):
     error = "The object does not exist"
 
 
+class ObjectAlreadyExists(InvalidUsage):
+    status_code = 400
+    error = "The object does exist already"
+
+
 class NoPermission(InvalidUsage):
     status_code = 403
     error = "You have no permission to access the required object"
