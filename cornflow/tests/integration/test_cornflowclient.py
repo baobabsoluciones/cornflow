@@ -245,27 +245,19 @@ class TestCornflowClient(TestCornflowClientBasic):
         self.assertEqual(af_status, STATUS_HEALTHY)
 
 
+# TODO: maybe we should have a test-suite for service_user
+
+
 class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
         user_data = dict(
             name="airflow_test@admin.com",
             email="airflow_test@admin.com",
-            password="airflow_test_password",
+            pwd="airflow_test_password",
         )
         # we guarantee that the admin is there for airflow
-        self.create_super_admin(user_data)
-        user_data["pwd"] = user_data["password"]
-        response = self.login_or_signup(user_data)
-        self.client.token = response["token"]
-
-    @staticmethod
-    def create_super_admin(data):
-        user = UserModel(data=data)
-        user.super_admin = True
-        user.save()
-        db.session.commit()
-        return
+        self.client.token = self.create_admin(user_data)
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()

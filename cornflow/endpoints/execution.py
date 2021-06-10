@@ -5,9 +5,12 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
+from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
+from cornflow_client.constants import INSTANCE_SCHEMA
 from flask import request, current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -22,8 +25,7 @@ from ..schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
 )
-from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA
+
 from ..shared.authentication import Auth
 from ..shared.const import (
     EXEC_STATE_RUNNING,
@@ -35,11 +37,10 @@ from ..shared.const import (
     AIRFLOW_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
 )
+
 from ..shared.exceptions import AirflowError, ObjectDoesNotExist
 from ..shared.compress import compressed
 
-
-import logging as log
 
 # Initialize the schema that all endpoints are going to use
 execution_schema = ExecutionSchema()
@@ -95,12 +96,14 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             user=config["AIRFLOW_USER"],
             pwd=config["AIRFLOW_PWD"],
         )
+
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
         execution, status_code = self.post_list(kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id
         )
+
         if instance is None:
             raise ObjectDoesNotExist(error="The instance to solve does not exist")
 
@@ -161,6 +164,9 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
         execution.update_state(EXEC_STATE_RUNNING)
+        log.info(
+            "User {} creates execution {}".format(self.get_user_id(), execution.id)
+        )
         return execution, 201
 
 
@@ -207,6 +213,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info("User {} edits execution {}".format(self.get_user_id(), idx))
         return self.put_detail(data, self.get_user(), idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
@@ -222,6 +229,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info("User {} deleted execution {}".format(self.get_user_id(), idx))
         return self.delete_detail(self.get_user(), idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
@@ -245,6 +253,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
+        log.info("User {} stopped execution {}".format(self.get_user_id(), idx))
         return {"message": "The execution has been stopped"}, 200
 
 

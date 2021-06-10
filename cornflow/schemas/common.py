@@ -16,7 +16,3 @@ class PatchOperation(Schema):
     op = fields.Str(required=True)
     path = fields.Str(required=True)
     value = fields.Raw()
-
-
-class JsonPatchSchema(Schema):
-    patch = fields.Nested(PatchOperation, many=True)

@@ -1,22 +1,33 @@
 """
 Endpoints for the user profiles
 """
+
 # Import from libraries
-from flask_restful import Resource
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
+from flask import current_app
+import logging as log
 
 # Import from internal modules
-from ..models import UserModel
+from .meta_resource import MetaResource
+from ..models import UserModel, UserRoleModel
 from ..schemas.user import (
     UserSchema,
     UserEndpointResponse,
     UserDetailsEndpointResponse,
     UserEditRequest,
 )
+
 from ..shared.authentication import Auth
-from ..shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
-from .meta_resource import MetaResource
+from ..shared.const import ADMIN_ROLE, AUTH_LDAP
+from ..shared.exceptions import (
+    InvalidUsage,
+    ObjectDoesNotExist,
+    NoPermission,
+    EndpointNotImplemented,
+)
+from ..shared.utils import db
+
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -28,8 +39,10 @@ class UserEndpoint(MetaResource, MethodResource):
     Including their instances and executions
     """
 
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
     @doc(description="Get all users", tags=["Users"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @marshal_with(UserEndpointResponse(many=True))
     def get(self):
         """
@@ -84,9 +97,11 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
-        if user_obj.super_admin and not self.is_super_admin():
+        # Service user can not be deleted
+        if user_obj.is_service_user():
             raise NoPermission()
         user_obj.delete()
+        log.info("User {} was deleted by user {}".format(user_id, self.get_user_id()))
         return {"message": "The object has been deleted"}, 200
 
     @doc(description="Edit a user", tags=["Users"])
@@ -109,14 +124,20 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
+        # in ldap-mode, users cannot be edited.
+        if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
+            raise EndpointNotImplemented("To edit a user, go to LDAP server")
         user_obj.update(data)
         user_obj.save()
+        log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
         return user_obj, 200
 
 
-class ToggleUserAdmin(Resource, MethodResource):
+class ToggleUserAdmin(MetaResource, MethodResource):
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
     @doc(description="Toggle user into admin", tags=["Users"])
-    @Auth.super_admin_required
+    @Auth.auth_required
     @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
         """
@@ -134,8 +155,9 @@ class ToggleUserAdmin(Resource, MethodResource):
         if user_obj is None:
             raise ObjectDoesNotExist()
         if make_admin:
-            user_obj.admin = 1
+            UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
         else:
-            user_obj.admin = 0
-        user_obj.save()
-        return user_obj, 201
+            UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
+            db.session.commit()
+
+        return user_obj, 200

@@ -1,16 +1,16 @@
 """
-
+Model for the cases
 """
 
-
 # Import from libraries
+import jsonpatch
 from sqlalchemy.dialects.postgresql import JSON
 
 # Import from internal modules
 from .meta_model import BaseDataModel
-from cornflow.shared.utils import db
+from ..shared.exceptions import InvalidPatch
+from ..shared.utils import db, hash_json_256
 
-from cornflow.shared.utils import hash_json_256
 
 # Originally inspired by this:
 # https://docs.sqlalchemy.org/en/13/_modules/examples/materialized_paths/materialized_paths.html
@@ -93,8 +93,45 @@ class CaseModel(BaseDataModel):
         self.solution = data.get("solution", None)
         self.solution_hash = hash_json_256(self.solution)
 
-    def __repr__(self):
-        return "<Case {}. Path: {}>".format(self.id, self.path)
+    def patch(self, data):
+        """
+        Method to patch the case
+
+        :param dict data: the patches to apply.
+        """
+        if "data_patch" in data:
+            self.data, self.data_hash = self.apply_patch(self.data, data["data_patch"])
+        if "solution_patch" in data:
+            self.solution, self.solution_hash = self.apply_patch(
+                self.solution, data["solution_patch"]
+            )
+
+        self.user_id = data.get("user_id")
+        super().update(data)
+
+    def delete(self):
+        children = [n for n in self.descendants]
+        for n in children:
+            n.delete()
+        super().delete()
+
+    @staticmethod
+    def apply_patch(original_data, data_patch):
+        """
+        Helper method to apply the patch and calculate the new hash
+
+        :param  dict original_data: the dict with the original data
+        :param list data_patch: the list with the patch operations to perform
+        :return: the patched data and the hash
+        :rtype: Tuple(dict, str)
+        """
+        try:
+            patched_data = jsonpatch.apply_patch(original_data, data_patch)
+        except jsonpatch.JsonPatchConflict:
+            raise InvalidPatch()
+        except jsonpatch.JsonPointerException:
+            raise InvalidPatch()
+        return patched_data, hash_json_256(patched_data)
 
     def move_to(self, new_parent):
         new_path = new_parent.path + str(new_parent.id) + SEPARATOR
@@ -102,8 +139,5 @@ class CaseModel(BaseDataModel):
             n.path = new_path + n.path[len(self.path) :]
         self.path = new_path
 
-    def delete(self):
-        children = [n for n in self.descendants]
-        for n in children:
-            n.delete()
-        super().delete()
+    def __repr__(self):
+        return "<Case {}. Path: {}>".format(self.id, self.path)

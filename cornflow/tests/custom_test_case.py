@@ -9,10 +9,12 @@ from unittest.mock import patch, Mock
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.models import UserModel
+from cornflow.commands import AccessInitialization
+from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
 
 
 try:
@@ -38,14 +40,22 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
+        AccessInitialization().run()
         data = {
             "name": "testname",
             "email": "test@test.com",
             "password": "testpassword",
         }
-        user = UserModel(data=data)
-        user.save()
-        db.session.commit()
+        # user = UserModel(data=data)
+        # user.save()
+        self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        # db.session.commit()
         data.pop("name")
 
         self.token = self.client.post(
@@ -60,22 +70,35 @@ class CustomTestCase(TestCase):
         self.model = None
         self.copied_items = set()
         self.items_to_check = []
+        self.roles_with_access = []
 
     @staticmethod
     def get_header_with_auth(token):
         return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
 
-    def create_super_admin(self):
-        data = {
-            "name": "airflow",
-            "email": "airflow@baobabsoluciones.es",
-            "password": "THISNEEDSTOBECHANGED",
-        }
+    def create_user(self, data):
+        return self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
 
-        user = UserModel(data=data)
-        user.super_admin = True
-        user.save()
+    def create_role(self, id, role_id):
+        user_role = UserRoleModel({"user_id": id, "role_id": role_id})
+        user_role.save()
         db.session.commit()
+        return user_role
+
+    def create_user_with_role(self, role_id):
+        data = {
+            "name": "testuser" + str(role_id),
+            "email": "testemail" + str(role_id) + "@test.org",
+            "password": "testpassword",
+        }
+        response = self.create_user(data)
+        self.create_role(response.json["id"], role_id)
+
         data.pop("name")
         return self.client.post(
             LOGIN_URL,
@@ -83,6 +106,12 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         ).json["token"]
+
+    def create_service_user(self):
+        return self.create_user_with_role(SERVICE_ROLE)
+
+    def create_admin(self):
+        return self.create_user_with_role(ADMIN_ROLE)
 
     def tearDown(self):
         db.session.remove()
@@ -191,6 +220,7 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
+
         self.assertEqual(expected_status, response.status_code)
 
         if not check_payload:
@@ -201,7 +231,8 @@ class CustomTestCase(TestCase):
         )
 
         self.assertEqual(expected_status, row.status_code)
-        self.assertEqual(payload_to_check, row.json["data"])
+        self.assertEqual(payload_to_check["data"], row.json["data"])
+        self.assertEqual(payload_to_check["solution"], row.json["solution"])
 
     def delete_row(self, url):
 
@@ -331,7 +362,7 @@ class BaseTestCases:
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
-            token = self.create_super_admin()
+            token = self.create_service_user()
             self.get_one_row(
                 self.url + str(idx) + "/", {**self.payload, **dict(id=idx)}, token=token
             )

@@ -3,6 +3,7 @@ from sqlalchemy.sql import expression
 
 # Imports from internal modules
 from .meta_model import TraceAttributes
+from .roles import UserRoleModel
 from ..shared.utils import bcrypt, db
 
 
@@ -35,7 +36,11 @@ class UserModel(TraceAttributes):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
+    # TODO: should be first_name
     name = db.Column(db.String(128), nullable=False)
+    last_name = db.Column(db.String(128), nullable=True)
+    # TODO: should be unique
+    username = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
     admin = db.Column(
@@ -45,22 +50,18 @@ class UserModel(TraceAttributes):
         db.Boolean(), server_default=expression.false(), default=False, nullable=False
     )
     instances = db.relationship("InstanceModel", backref="users", lazy=True)
+    # roles = db.relationship("RoleModel", secondary="UserRoleModel", backref="users")
 
     def __init__(self, data):
 
         super().__init__()
         self.name = data.get("name")
+        self.last_name = data.get("last_name")
+        self.username = data.get("username")
         self.email = data.get("email")
         self.password = self.__generate_hash(data.get("password"))
         self.admin = False
         self.super_admin = False
-
-    def save(self):
-        """
-        Saves the user to the database
-        """
-        db.session.add(self)
-        db.session.commit()
 
     def update(self, data):
         """
@@ -73,6 +74,7 @@ class UserModel(TraceAttributes):
                 new_password = self.__generate_hash(item)
                 setattr(self, key, new_password)
             elif key == "admin" or key == "super_admin":
+                # TODO: delete
                 continue
             else:
                 setattr(self, key, item)
@@ -94,10 +96,13 @@ class UserModel(TraceAttributes):
         db.session.commit()
 
     def is_admin(self):
-        return self.admin or self.super_admin
+        return UserRoleModel.is_admin(self.id)
 
-    def is_super_admin(self):
-        return self.super_admin
+    def is_service_user(self):
+        return UserRoleModel.is_service_user(self.id)
+
+    def comes_from_ldap(self):
+        return self.password is None
 
     @staticmethod
     def __generate_hash(password):
@@ -108,6 +113,8 @@ class UserModel(TraceAttributes):
         :return: The hashed password.
         :rtype: str
         """
+        if password is None:
+            return None
         return bcrypt.generate_password_hash(password, rounds=10).decode("utf8")
 
     def check_hash(self, password):
@@ -153,16 +160,15 @@ class UserModel(TraceAttributes):
         return UserModel.query.filter_by(email=em, deleted_at=None).first()
 
     @staticmethod
-    def get_user_info(idx):
+    def get_one_user_by_username(username):
         """
-        Query to get the permission levels of a user
 
-        :param int idx: The user id.
-        :return: A tuple with the values of admin adn super_admin for the given user
-        :rtype: tuple(bool, bool)
+        :param username:
+        :type username:
+        :return:
+        :rtype:
         """
-        user = UserModel.query.filter_by(id=idx, deleted_at=None).first()
-        return user.admin, user.super_admin
+        return UserModel.query.filter_by(name=username, deleted_at=None).first()
 
     def __repr__(self):
         """

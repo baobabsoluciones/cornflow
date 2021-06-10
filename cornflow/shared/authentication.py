@@ -1,11 +1,11 @@
 import datetime
-from functools import wraps
-
-import jwt
 from flask import request, g, current_app
-from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
+from functools import wraps
+import jwt
 
-from ..models.user import UserModel
+from ..models import ApiViewModel, UserModel, UserRoleModel, PermissionViewRoleModel
+from ..shared.const import PERMISSION_METHOD_MAP
+from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
 
 
 class Auth:
@@ -65,6 +65,10 @@ class Auth:
             )
 
     @staticmethod
+    def get_request_info(req):
+        return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
+
+    @staticmethod
     def get_user_obj_from_header(headers):
         """
         returns a user from the headers of the request
@@ -76,9 +80,29 @@ class Auth:
         data = Auth.decode_token(token)
         user_id = data["user_id"]
         user = UserModel.get_one_user(user_id)
-        if not user:
+        if user is None:
             raise ObjectDoesNotExist("User does not exist, invalid token")
         return user
+
+    @staticmethod
+    def get_permission_for_request(req, user_id):
+        method, url = Auth.get_request_info(req)
+        user_role = UserRoleModel.get_one_user(user_id=user_id)
+        if user_role is None:
+            raise NoPermission("You do not have permission to access this endpoint")
+
+        action_id = PERMISSION_METHOD_MAP[method]
+        view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
+
+        for role in user_role:
+            has_permission = PermissionViewRoleModel.get_permission(
+                role.role_id, view_id, action_id
+            )
+
+            if has_permission:
+                return True
+
+        raise NoPermission("You do not have permission to access this endpoint")
 
     # user decorator
     @staticmethod
@@ -92,32 +116,11 @@ class Auth:
         @wraps(func)
         def decorated_user(*args, **kwargs):
             user = Auth.get_user_obj_from_header(request.headers)
+            Auth.get_permission_for_request(request, user.id)
             g.user = {"id": user.id}
             return func(*args, **kwargs)
 
         return decorated_user
-
-    # super admin decorator
-    @staticmethod
-    def super_admin_required(func):
-        """
-        Auth decorator that checks if user is super_admin
-        :param func:
-        :return:
-        """
-
-        @wraps(func)
-        def decorated_super_admin(*args, **kwargs):
-            user = Auth.get_user_obj_from_header(request.headers)
-            if not user.super_admin:
-                raise NoPermission(
-                    error="You do not have permission to access this endpoint"
-                )
-
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
-
-        return decorated_super_admin
 
     @staticmethod
     def return_user_from_token(token):

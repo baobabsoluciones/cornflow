@@ -13,7 +13,7 @@ from marshmallow.exceptions import ValidationError
 import os
 import pulp
 from werkzeug.utils import secure_filename
-
+import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -96,7 +96,11 @@ class InstanceEndpoint(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # if we're here, we validated and the data seems to fit the schema
-        return self.post_list(kwargs)
+        response = self.post_list(kwargs)
+        log.info(
+            "User {} creates instance {}".format(self.get_user_id(), response[0].id)
+        )
+        return response
 
 
 class InstanceDetailsEndpointBase(MetaResource, MethodResource):
@@ -143,7 +147,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.put_detail(data, self.get_user(), idx)
+        response = self.put_detail(data, self.get_user(), idx)
+        log.info("User {} edits instance {}".format(self.get_user_id(), idx))
+        return response
 
     @doc(description="Delete an instance", tags=["Instances"])
     @Auth.auth_required
@@ -158,7 +164,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.delete_detail(self.get_user(), idx)
+        response = self.delete_detail(self.get_user(), idx)
+        log.info("User {} deletes instance {}".format(self.get_user_id(), idx))
+        return response
 
 
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
@@ -189,23 +197,27 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
-@doc(
-    description="Create an instance from an mps file", tags=["Instances"], inherit=False
-)
 class InstanceFileEndpoint(MetaResource, MethodResource):
     """
     Endpoint to accept mps files to upload
     """
 
+    @doc(
+        description="Create an instance from an mps file",
+        tags=["Instances"],
+        inherit=False,
+    )
     @Auth.auth_required
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceFileRequest, location="form", inherit=False)
     def post(self, name, description, minimize=1):
         """
 
-        :param file:
-        :return:
-        :rtype: Tuple(dict, integer)
+        :param str name:
+        :param str description:
+        :param int minimize:
+        :return: a tuple with the created instance and a integer with the status code
+        :rtype: Tuple(:class:`InstanceModel`, 201)
         """
         if "file" not in request.files:
             raise InvalidUsage(error="No file was provided")
@@ -242,7 +254,11 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
 
         item = InstanceModel(data)
         item.save()
-
+        log.info(
+            "User {} creates instance {} from mps file".format(
+                self.get_user_id(), item.id
+            )
+        )
         return item, 201
 
 

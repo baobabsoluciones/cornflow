@@ -3,18 +3,28 @@
 """
 # Import from libraries
 import datetime
-import jsonpatch
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
 # Import from internal modules
-from ..shared.exceptions import InvalidPatch
 from ..shared.utils import db, hash_json_256
 
 
-class TraceAttributes(db.Model):
+class EmptyModel(db.Model):
+    __abstract__ = True
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class TraceAttributes(EmptyModel):
     """
     Abstract data model that defines the trace attributes of each model. This help trace when an object was created,
      updated and deleted
@@ -81,23 +91,6 @@ class BaseDataModel(TraceAttributes):
             setattr(self, key, item)
         super().update(data)
 
-    def patch(self, data):
-        """
-
-        :param dict data:
-        :type data:
-        """
-        try:
-            self.data = jsonpatch.apply_patch(self.data, data.get("patch"))
-        except jsonpatch.JsonPatchConflict:
-            raise InvalidPatch()
-        except jsonpatch.JsonPointerException:
-            raise InvalidPatch()
-
-        self.data_hash = hash_json_256(self.data)
-        self.user_id = data.get("user_id")
-        super().update(data)
-
     def delete(self):
         """
         Deletes an object permanently from the data base
@@ -129,7 +122,7 @@ class BaseDataModel(TraceAttributes):
         """
         query = cls.query.filter(cls.deleted_at == None)
         # TODO: in airflow they use: query = session.query(ExecutionModel)
-        if not user.is_admin():
+        if not user.is_admin() and not user.is_service_user():
             query = query.filter(cls.user_id == user.id)
 
         if schema:
@@ -153,6 +146,6 @@ class BaseDataModel(TraceAttributes):
         :rtype: :class:`BaseDataModel`
         """
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin():
+        if not user.is_admin() and not user.is_service_user():
             query = query.filter_by(user_id=user.id)
         return query.first()
