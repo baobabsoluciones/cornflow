@@ -63,6 +63,7 @@ class Testing(object):
     LDAP_USER_BASE = "ou=users,dc=example,dc=org"
     LDAP_EMAIL_ATTRIBUTE = "mail"
     LDAP_USER_OBJECT_CLASS = "inetOrgPerson"
+    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE")
 
 
 class Production(MainEnvVars):
