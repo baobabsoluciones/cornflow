@@ -1,0 +1,39 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up ldap server
+      uses: virgilio21/openldap-action@v1
+      with:
+        adminPassword: 'admin'
+        domain: 'example.org'
+        prepopulate: 'airflow_config'
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Run unit tests
+      run: python -m unittest discover -s cornflow.tests.ldap
+      env:
+        FLASK_ENV: testing
+        AUTH_TYPE: 2
+        LDAP_HOST: ldap://localhost:389
+        LDAP_BIND_PASSWORD: admin
+
+
