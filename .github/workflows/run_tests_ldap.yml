@@ -29,11 +29,13 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
     - name: Run unit tests
-      run: python -m unittest discover -s cornflow.tests.ldap
+      run: |
+        sleep 5s
+        python -m unittest discover -s cornflow.tests.ldap
       env:
         FLASK_ENV: testing
         AUTH_TYPE: 2
-        LDAP_HOST: ldap://localhost:389
+        LDAP_HOST: ldap://127.0.0.1:389
         LDAP_BIND_PASSWORD: admin
 
 
