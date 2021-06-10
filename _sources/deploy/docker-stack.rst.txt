@@ -26,8 +26,10 @@ Environment variables
 
 Main cornflow environment variables::
 
-    ADMIN_USER - cornflow root admin user
-    ADMIN_PWD - cornflow root admin pwd
+    CORNFLOW_ADMIN_USER - cornflow root admin user
+    CORNFLOW_ADMIN_PWD - cornflow root admin pwd
+    CORNFLOW_SERVICE_USER - cornflow service user name
+    CORNFLOW_SERVICE_PWD - cornflow service user password
     AIRFLOW_USER - airflow admin user
     AIRFLOW_PWD - airflow admin pwd
     AIRFLOW_URL - airflow url service

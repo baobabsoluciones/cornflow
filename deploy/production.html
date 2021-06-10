@@ -102,6 +102,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#ssl">SSL</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#enforce-security">Enforce security</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ldap-authentication">LDAP Authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#airflow-user">Airflow user</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
@@ -239,7 +240,25 @@ If you are running docker services in production, it is also convenient to use t
 </div>
 <div class="section" id="ldap-authentication">
 <h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this headline">¶</a></h2>
-<p>At the moment, cornflow does not support the integration of LDAP servers to manage the users of the application. Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
+<p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
+To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
+<p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">ldap</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+</pre></div>
+</div>
+<p>With this docker template following users will be create in openldap server:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>User ``administrator`` with password ``adminnistrator1234``
+Service user ``cornflow`` with password ``cornflow1234``
+Viewer user ``viewer`` with password ``viewer1234``
+General user ``planner`` with password ``planner1234``
+</pre></div>
+</div>
+<p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
+</div>
+<div class="section" id="airflow-user">
+<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this headline">¶</a></h2>
+<p>It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow.
+A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.</p>
 </div>
 </div>
 
