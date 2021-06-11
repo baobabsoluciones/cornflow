@@ -82,7 +82,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         payload["name"] = "some_name"
         payload["id"] = self.response.json["id"]
         response = self.client.put(
-            USER_URL,
+            USER_URL + str(payload["id"]) + "/",
             data=json.dumps(payload),
             follow_redirects=True,
             headers={
