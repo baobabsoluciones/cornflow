@@ -31,11 +31,12 @@ class SignUpEndpoint(MetaResource, MethodResource):
           and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-		AUTH_TYPE = current_app.config["AUTH_TYPE"]
+        AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
                 "The user has to sing up on the active directory"
             )
+
         if UserModel.check_username_in_use(kwargs.get("username")):
             raise InvalidCredentials(
                 error="Username already in use, please supply another username"

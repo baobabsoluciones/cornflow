@@ -75,26 +75,6 @@ class TestRolesListEndpoint(CustomTestCase):
                     self.url, self.model, {}, expected_status=403, check_payload=False
                 )
 
-    def test_delete_all_user_roles(self):
-        # create some user:
-        data = {
-            "name": "testuser",
-            "email": "testemail" + "@test.org",
-            "password": "testpassword",
-        }
-        user_response = self.create_user(data)
-        user_id = user_response.json["id"]
-        # give it all roles:
-        for role in ROLES_MAP:
-            self.create_role(user_id, role)
-        all_roles = UserRoleModel.get_one_user(user_id)
-        diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
-        self.assertEqual(len(all_roles), len(ROLES_MAP))
-        self.assertEqual(len(diff), 0)
-        UserRoleModel.del_one_user(user_id)
-        all_roles = UserRoleModel.get_one_user(user_id)
-        self.assertEqual(all_roles, [])
-
 
 class TestRolesDetailEndpoint(CustomTestCase):
     def setUp(self):
@@ -349,7 +329,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
     def test_delete_and_create_user_role_authorized_user(self):
         role = self.roles_with_access[0]
         data = {
-            "name": "testuser" + str(role),
+            "username": "testuser" + str(role),
             "email": "testemail" + str(role) + "@test.org",
             "password": "testpassword",
         }
@@ -385,3 +365,23 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
                     headers=self.get_header_with_auth(self.token),
                 )
                 self.assertEqual(403, response.status_code)
+
+    def test_delete_all_user_roles(self):
+        # create some user:
+        data = {
+            "username": "testuser",
+            "email": "testemail" + "@test.org",
+            "password": "testpassword",
+        }
+        user_response = self.create_user(data)
+        user_id = user_response.json["id"]
+        # give it all roles:
+        for role in ROLES_MAP:
+            self.create_role(user_id, role)
+        all_roles = UserRoleModel.get_one_user(user_id)
+        diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
+        self.assertEqual(len(all_roles), len(ROLES_MAP))
+        self.assertEqual(len(diff), 0)
+        UserRoleModel.del_one_user(user_id)
+        all_roles = UserRoleModel.get_one_user(user_id)
+        self.assertEqual(all_roles, [])

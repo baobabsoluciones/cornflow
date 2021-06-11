@@ -45,12 +45,11 @@ class CustomTestCase(TestCase):
         db.create_all()
         AccessInitialization().run(verbose=0)
         data = {
-            "name": "testname",
+            "username": "testname",
             "email": "test@test.com",
             "password": "testpassword",
         }
-        # user = UserModel(data=data)
-        # user.save()
+
         self.client.post(
             SIGNUP_URL,
             data=json.dumps(data),
@@ -58,8 +57,7 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        # db.session.commit()
-        data.pop("name")
+        data.pop("email")
 
         self.token = self.client.post(
             LOGIN_URL,
@@ -108,14 +106,14 @@ class CustomTestCase(TestCase):
 
     def create_user_with_role(self, role_id):
         data = {
-            "name": "testuser" + str(role_id),
+            "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
             "password": "testpassword",
         }
         response = self.create_user(data)
         self.create_role(response.json["id"], role_id)
 
-        data.pop("name")
+        data.pop("email")
         return self.client.post(
             LOGIN_URL,
             data=json.dumps(data),
@@ -486,9 +484,9 @@ class LoginTestCases:
             self.assertEqual(400, response.status_code)
             self.assertEqual(str, type(response.json["error"]))
 
-        def test_missing_email(self):
+        def test_missing_username(self):
             payload = self.data
-            payload.pop("email", None)
+            payload.pop("username", None)
             response = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(payload),
@@ -512,9 +510,9 @@ class LoginTestCases:
             self.assertEqual(400, response.status_code)
             self.assertEqual(str, type(response.json["error"]))
 
-        def test_invalid_email(self):
+        def test_invalid_username(self):
             payload = self.data
-            payload["email"] = "test@test.org"
+            payload["username"] = "invalid_username"
 
             response = self.client.post(
                 LOGIN_URL,

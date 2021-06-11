@@ -184,4 +184,4 @@ class UserModel(TraceAttributes):
         :return: The representation of the class
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return "<Username {}>".format(self.username)
