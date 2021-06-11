@@ -15,7 +15,8 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		git \
 		python3-dev \
 		libffi-dev \
-		libpq-dev
+		libpq-dev \
+		logrotate
 		
 # set work directory
 WORKDIR /usr/src/app

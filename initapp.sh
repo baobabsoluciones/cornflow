@@ -33,6 +33,7 @@ export \
   DATABASE_URL \
   FLASK_APP \
   FLASK_ENV \
+  CORNFLOW_LOGGING \
   SECRET_KEY \
   AUTH_TYPE \
   LDAP_PROTOCOL_VERSION \
@@ -84,6 +85,20 @@ if [ "$AUTH_TYPE" = "2" ]; then
     : "${LDAP_GROUP_TO_ROLE_VIEWER:="viewers"}"
     : "${LDAP_GROUP_TO_ROLE_PLANNER:="planners"}"
   >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
+fi
+
+if [ "$CORNFLOW_LOGGING" == "file" ]; then
+  cat > /etc/logrotate.d/cornflow <<EOF
+   /usr/src/app/log/*.log {
+          rotate 30
+          daily
+          compress
+          size 20M
+          postrotate
+              kill -HUP \$(cat /usr/src/app/gunicorn.pid)
+          endscript
+  }
+EOF
 fi
 
 # make initdb and/or migrations
