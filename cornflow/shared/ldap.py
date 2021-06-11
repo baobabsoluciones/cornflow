@@ -1,8 +1,12 @@
 """
 
 """
+
+# Import from libraries
 from ldap3 import Server, Connection, ALL
-from cornflow.shared.const import ALL_DEFAULT_ROLES, ROLES_MAP
+
+# Import from internal modules
+from ..shared.const import ALL_DEFAULT_ROLES, ROLES_MAP
 
 
 class LDAP:
@@ -16,9 +20,10 @@ class LDAP:
 
     def get_bound_connection(self):
         """
+        Method to get the bound connection to ldap
 
-        :return:
-        :rtype:
+        :return: the connection to ldap
+        :rtype: :class:`Connection`
         """
         try:
             return self.g.ldap_connection
@@ -39,10 +44,11 @@ class LDAP:
 
     def get_dn_from_user(self, user):
         """
+        Method to get the dn string for a given user
 
-        :param str user:
-        :return:
-        :rtype:
+        :param str user: the user to get the dn from
+        :return: the dn string
+        :rtype: string
         """
         return "%s=%s,%s" % (
             self.config["LDAP_USERNAME_ATTRIBUTE"],
@@ -51,6 +57,14 @@ class LDAP:
         )
 
     def get_user_attribute(self, user, attribute):
+        """
+        Method to get one attribute from a user in ldap
+
+        :param str user: the user for the query
+        :param str attribute: the attribute for the query
+        :return: the value of the attribute or False
+        :rtype:
+        """
         conn = self.get_bound_connection()
         user_search = self.get_dn_from_user(user)
 
@@ -67,9 +81,10 @@ class LDAP:
 
     def get_user_email(self, user):
         """
+        Method to get the email of a user from ldap
 
-        :param str user:
-        :return:
+        :param str user: the user to get the email from
+        :return: the email of the user or False
         :rtype:
         """
         email_attribute = self.config.get("LDAP_EMAIL_ATTRIBUTE", False)
@@ -78,6 +93,13 @@ class LDAP:
         return self.get_user_attribute(user, email_attribute)
 
     def get_user_roles(self, user):
+        """
+        Method to get the roles assigned to the user in ldap
+
+        :param str user:
+        :return: the roles assigned to the user or an empty list
+        :rtype: list
+        """
         # Reference:
         # https://stackoverflow.com/questions/51341936/how-to-get-groups-of-a-user-in-ldap
         conn = self.get_bound_connection()
@@ -104,10 +126,11 @@ class LDAP:
 
     def authenticate(self, user, password):
         """
+        Method to authenticate a user against a ldap server
 
-        :param str user:
-        :param str password:
-        :return:
+        :param str user: the user to authenticate
+        :param str password: the password to authenticate the user
+        :return: if the user is authenticated
         :rtype:
         """
         self.get_bound_connection()
