@@ -6,8 +6,6 @@ from cornflow.tests.const import SCHEMA_URL
 from unittest.mock import patch, Mock
 from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
 from cornflow_client import get_pulp_jsonschema
-from cornflow.schemas.solution_log import LogSchema
-from airflow_config.dags.model_functions import solve as solve_model
 from marshmallow import ValidationError, Schema, fields
 
 
@@ -148,38 +146,6 @@ class SchemaGenerator(unittest.TestCase):
         func_error2 = lambda: oschema.load(bad2)
         self.assertRaises(ValidationError, func_error1)
         self.assertRaises(ValidationError, func_error2)
-
-
-class PuLPLogSchema(unittest.TestCase):
-    def solve_model(self, input_data, config):
-        return solve_model(input_data, config)
-
-    def dump_progress(self, log_dict):
-        LS = LogSchema()
-        return LS.load(log_dict)
-
-    def solve_test_progress(self):
-        with open("./cornflow/tests/data/gc_20_7.json", "r") as f:
-            data = json.load(f)
-
-        config = dict(solver="PULP_CBC_CMD", timeLimit=10)
-        solution, log, log_dict = self.solve_model(data, config)
-        loaded_data = self.dump_progress(log_dict)
-        self.assertEqual(loaded_data["solver"], "CBC")
-        self.assertEqual(loaded_data["version"], "2.9.0")
-        matrix_keys = {"nonzeros", "constraints", "variables"}
-        a = matrix_keys.symmetric_difference(loaded_data["matrix"].keys())
-        self.assertEqual(len(a), 0)
-
-    def test_progress2(self):
-        with open("./cornflow/tests/data/gc_50_3_log.json", "r") as f:
-            data = json.load(f)
-        loaded_data = self.dump_progress(data)
-        self.assertEqual(loaded_data["solver"], "CPLEX")
-        self.assertEqual(type(loaded_data["progress"]["Node"][0]), str)
-        self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)
-        self.assertEqual(type(loaded_data["cut_info"]["cuts"]["Clique"]), int)
-        self.assertEqual(type(loaded_data["nodes"]), int)
 
 
 class TestSchemaEndpoint(CustomTestCase):
