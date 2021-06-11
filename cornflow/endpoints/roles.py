@@ -187,7 +187,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The roles have to be created in the directory"
+                "The role assignments have to be created in the directory"
             )
 
         # Check if the assignation is disabled, or it does exist
