@@ -187,7 +187,7 @@ class RegisterRoles(Command):
         return
 
 
-class BasePermissionAssignationRegistration(Command):
+class RegisterBasePermissions(Command):
     def run(self):
         """
         Method to register the base permissions
@@ -248,6 +248,6 @@ class AccessInitialization(Command):
         RegisterActions().run()
         RegisterViews().run()
         RegisterRoles().run()
-        BasePermissionAssignationRegistration().run()
+        RegisterBasePermissions().run()
         print("Access initialization ran successfully")
         return True
