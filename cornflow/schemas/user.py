@@ -33,7 +33,7 @@ class UserDetailsEndpointResponse(Schema):
 
 
 class LoginEndpointRequest(Schema):
-    email = fields.Str(required=True)
+    username = fields.Str(required=True)
     password = fields.Str(required=True)
 
 
@@ -44,6 +44,6 @@ class UserEditRequest(Schema):
 
 
 class UserSignupRequest(Schema):
-    name = fields.Str(required=True)
+    username = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
