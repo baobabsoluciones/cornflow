@@ -36,6 +36,15 @@ Problem: Cornflow can´t reach postgres internal database
     
     Possible solution: See again the name given to CORNFLOW_DB_HOST environment variable in docker-compose file.
 
+Running cornflow
+^^^^^^^^^^^^^^^^^^^^^^
+
+Problem: Users were not created when cornflow started
+
+    Error: usage: manage.py [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} ...
+
+    Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of python mange.py create_admin_user/create_service_user.
+
 Flower 
 ^^^^^^^^^^
 

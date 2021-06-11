@@ -16,3 +16,4 @@ timeout = 300
 keepalive = 300
 graceful_timeout = 300
 log_level = "info"
+log_file = "/usr/src/app/log/gunicorn.log"
