@@ -15,7 +15,7 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL
 
 
 try:
@@ -41,7 +41,7 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        AccessInitialization().run(verbose=0)
         data = {
             "name": "testname",
             "email": "test@test.com",
@@ -85,11 +85,24 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-    def create_role(self, id, role_id):
-        user_role = UserRoleModel({"user_id": id, "role_id": role_id})
-        user_role.save()
-        db.session.commit()
+    def create_role(self, user_id, role_id):
+
+        if UserRoleModel.check_if_role_assigned(user_id, role_id):
+            user_role = UserRoleModel.query.filter_by(
+                user_id=user_id, role_id=role_id
+            ).first()
+        else:
+            user_role = UserRoleModel({"user_id": user_id, "role_id": role_id})
+            user_role.save()
         return user_role
+
+    def create_role_endpoint(self, user_id, role_id, token):
+        return self.client.post(
+            USER_ROLE_URL,
+            data=json.dumps({"user_id": user_id, "role_id": role_id}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(token),
+        )
 
     def create_user_with_role(self, role_id):
         data = {
