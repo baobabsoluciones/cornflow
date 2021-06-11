@@ -29,7 +29,7 @@ class UserDetailsEndpointResponse(Schema):
     id = fields.Int()
     name = fields.Str()
     email = fields.Str()
-    admin = fields.Boolean(default=False)
+    # admin = fields.Boolean(default=False)
 
 
 class LoginEndpointRequest(Schema):

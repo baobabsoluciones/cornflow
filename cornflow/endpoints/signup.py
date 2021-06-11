@@ -2,6 +2,7 @@
 External endpoint for the user to signup
 """
 # Import from libraries
+from flask import current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
 import logging as log
@@ -11,11 +12,8 @@ from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
-from ..shared.const import PLANNER_ROLE
-from ..shared.exceptions import (
-    InvalidUsage,
-    InvalidCredentials,
-)
+from ..shared.const import AUTH_LDAP, PLANNER_ROLE
+from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
 
 
 class SignUpEndpoint(MetaResource, MethodResource):
@@ -33,6 +31,12 @@ class SignUpEndpoint(MetaResource, MethodResource):
           and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        AUTH_TYPE = current_app.config["AUTH_TYPE"]
+        if AUTH_TYPE == AUTH_LDAP:
+            raise EndpointNotImplemented(
+                "The user has to sing up on the active directory"
+            )
+
         user_in_db = UserModel.get_one_user_by_email(kwargs.get("email"))
         if user_in_db:
             raise InvalidCredentials(

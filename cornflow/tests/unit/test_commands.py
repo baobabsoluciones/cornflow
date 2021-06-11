@@ -2,7 +2,7 @@ from flask_testing import TestCase
 
 from cornflow.app import create_app
 from cornflow.commands import (
-    BasePermissionAssignationRegistration,
+    RegisterBasePermissions,
     CreateAdminUser,
     CreateServiceUser,
     RegisterActions,
@@ -63,7 +63,7 @@ class TestCommands(TestCase):
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
 
-    def test_register_permissions(self):
+    def test_register_actions(self):
         command = RegisterActions()
         command.run()
 
@@ -123,7 +123,7 @@ class TestCommands(TestCase):
         command = RegisterRoles()
         command.run()
 
-        command = BasePermissionAssignationRegistration()
+        command = RegisterBasePermissions()
         command.run()
 
         for base in BASE_PERMISSION_ASSIGNATION:
@@ -137,3 +137,12 @@ class TestCommands(TestCase):
                     )
 
                     self.assertEqual(True, permission)
+
+    def test_argument_parsing_correct(self):
+        command = RegisterRoles()
+        command.run(verbose="0")
+
+        roles = RoleModel.query.all()
+
+        for r in roles:
+            self.assertEqual(ROLES_MAP[r.id], r.name)

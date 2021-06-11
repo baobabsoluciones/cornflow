@@ -50,6 +50,12 @@ class TraceAttributes(EmptyModel):
         db.session.add(self)
         db.session.commit()
 
+    def activate(self):
+        self.updated_at = datetime.datetime.utcnow()
+        self.deleted_at = None
+        db.session.add(self)
+        db.session.commit()
+
 
 class BaseDataModel(TraceAttributes):
     """ """

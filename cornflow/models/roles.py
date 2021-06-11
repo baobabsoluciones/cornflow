@@ -78,6 +78,7 @@ class RoleModel(TraceAttributes):
 class UserRoleModel(TraceAttributes):
     # TODO: Should have a user_id to store the user that defined the assignation?
     __tablename__ = "user_role"
+    __table_args__ = (db.UniqueConstraint("user_id", "role_id"),)
 
     id = db.Column(db.Integer, db.Sequence("user_roles_id_sq"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -142,6 +143,18 @@ class UserRoleModel(TraceAttributes):
         return UserRoleModel.query.get(idx)
 
     @staticmethod
+    def get_one_user_role(user_id, role_id):
+        """
+        Method to get one object from the user and role
+
+        :param int user_id: id of the specific user
+        :param int role_id: id of the specific role
+        :return: an instance of the user roles model
+        :rtype: :class:`UserRoleModel`
+        """
+        return UserRoleModel.query.filter_by(user_id=user_id, role_id=role_id).first()
+
+    @staticmethod
     def is_admin(user_id):
         """
         Method that checks if a given user has the admin role assigned
@@ -172,6 +185,36 @@ class UserRoleModel(TraceAttributes):
                 return True
 
         return False
+
+    @staticmethod
+    def check_if_role_assigned(user_id, role_id):
+        """
+        Method to check if a user has a given role assigned
+
+        :param int user_id: id of the specific user
+        :param int role_id: id of the specific role
+        :return: a boolean if the user has the role assigned
+        :rtype: bool
+        """
+        user_role = UserRoleModel.get_one_user_role(user_id, role_id)
+        return user_role is not None
+
+    @staticmethod
+    def check_if_role_assigned_disabled(user_id, role_id):
+        """
+        Method to check if a user has a given role assigned but disabled
+
+        :param user_id: id of the specific user
+        :param role_id: id of the specific role
+        :return: a boolean if the user has the role assigned but disabled
+        :rtype: bool
+        """
+        user_role = UserRoleModel.query.filter(
+            UserRoleModel.user_id == user_id,
+            UserRoleModel.role_id == role_id,
+            UserRoleModel.deleted_at != None,
+        ).first()
+        return user_role is not None
 
     def __repr__(self):
         """
