@@ -306,7 +306,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
             response = self.client.get(
-                self.url + str(self.payload["id"]) + "/",
+                self.url
+                + str(self.payload["user_id"])
+                + "/"
+                + str(self.payload["role_id"])
+                + "/",
                 follow_redirects=True,
                 headers=self.get_header_with_auth(self.token),
             )
@@ -318,7 +322,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
-                    self.url + str(self.payload["id"]) + "/",
+                    self.url
+                    + str(self.payload["user_id"])
+                    + "/"
+                    + str(self.payload["role_id"])
+                    + "/",
                     follow_redirects=True,
                     headers=self.get_header_with_auth(self.token),
                 )
@@ -328,7 +336,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
             response = self.client.delete(
-                self.url + str(self.payload["id"]) + "/",
+                self.url
+                + str(self.payload["user_id"])
+                + "/"
+                + str(self.payload["role_id"])
+                + "/",
                 follow_redirects=True,
                 headers=self.get_header_with_auth(self.token),
             )
@@ -342,14 +354,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "password": "testpassword",
         }
         user_response = self.create_user(data)
-        planner_role = UserRoleModel.query.filter_by(
-            user_id=user_response.json["id"]
-        ).first()
 
         self.create_role(user_response.json["id"], role)
 
         self.client.delete(
-            self.url + str(planner_role.id) + "/",
+            self.url + str(user_response.json["id"]) + "/" + str(PLANNER_ROLE) + "/",
             follow_redirects=True,
             headers=self.get_header_with_auth(user_response.json["token"]),
         )
@@ -367,7 +376,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.delete(
-                    self.url + str(self.payload["id"]) + "/",
+                    self.url
+                    + str(self.payload["user_id"])
+                    + "/"
+                    + str(self.payload["role_id"])
+                    + "/",
                     follow_redirects=True,
                     headers=self.get_header_with_auth(self.token),
                 )

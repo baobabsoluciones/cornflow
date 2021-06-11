@@ -24,6 +24,14 @@ from cornflow.shared.const import (
 from cornflow.endpoints import resources
 from cornflow.shared.utils import db
 
+verbose_option = Option(
+    "-v",
+    "--verbose",
+    dest="verbose",
+    help="Verbose for the command. 0 no verbose, 1 full verbose",
+    type=int,
+)
+
 
 def create_user_with_role(email, password, name, role, verbose=0):
     """
@@ -75,12 +83,7 @@ class CreateServiceUser(Command):
                 help="Service user password",
                 type=str,
             ),
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-            ),
+            verbose_option,
         )
 
     def run(self, email=None, password=None, verbose=0):
@@ -118,13 +121,7 @@ class CreateAdminUser(Command):
                 help="Admin user password",
                 type=str,
             ),
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
+            verbose_option,
         )
 
     def run(self, email=None, password=None, verbose=0):
@@ -158,15 +155,7 @@ class CleanHistoricData(Command):
 
 class RegisterActions(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
@@ -193,15 +182,7 @@ class RegisterActions(Command):
 
 class RegisterViews(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
@@ -235,15 +216,7 @@ class RegisterViews(Command):
 
 class UpdateViews(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
@@ -275,15 +248,7 @@ class UpdateViews(Command):
 
 class RegisterRoles(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
@@ -311,15 +276,7 @@ class RegisterRoles(Command):
 
 class BasePermissionAssignationRegistration(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
@@ -377,15 +334,7 @@ class BasePermissionAssignationRegistration(Command):
 
 class AccessInitialization(Command):
     def get_options(self):
-        return (
-            Option(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                help="Verbose for the command. 0 no verbose, 1 full verbose",
-                type=int,
-            ),
-        )
+        return (verbose_option,)
 
     def run(self, verbose=0):
         """
