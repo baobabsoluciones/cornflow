@@ -10,7 +10,7 @@ import json
 from cornflow.commands import RegisterRoles, AccessInitialization
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
-from cornflow.tests.const import USER_ROLE_URL, USER_URL
+from cornflow.tests.const import SIGNUP_URL, USER_ROLE_URL, USER_URL
 from cornflow.tests.custom_test_case import LoginTestCases
 
 
@@ -55,20 +55,18 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         )
 
     def test_user_table_registration(self):
-        print(UserModel.query.all())
+        user_table_before = UserModel.query.all()
         super().test_successful_log_in()
-        print(UserModel.query.all())
+        user_table_after = UserModel.query.all()
+        self.assertNotEqual(user_table_before, user_table_after)
+        self.assertNotEqual(len(user_table_before), len(user_table_after))
 
     def test_role_registration(self):
         RegisterRoles().run()
-        user_role_before = UserRoleModel.query.filter_by(
-            user_id=self.response.json["id"], role_id=PLANNER_ROLE
-        ).all()
+        user_role_before = UserRoleModel.query.all()
 
         super().test_successful_log_in()
-        user_role_after = UserRoleModel.query.filter_by(
-            user_id=self.response.json["id"], role_id=PLANNER_ROLE
-        ).all()
+        user_role_after = UserRoleModel.query.all()
 
         self.assertNotEqual(None, user_role_after)
         self.assertNotEqual(user_role_before, user_role_after)
@@ -102,6 +100,18 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
             },
         )
         self.assertEqual(501, response.status_code)
-        self.assertEqual(
-            "The roles have to be created in the directory", response.json["error"]
+
+    def test_deactivated_sign_up(self):
+        RegisterRoles().run()
+        payload = {
+            "name": "testuser",
+            "email": "testemail@example.org",
+            "password": "testpassword",
+        }
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
         )
+        self.assertEqual(503, response.status_code)
