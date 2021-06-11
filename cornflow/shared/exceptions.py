@@ -48,6 +48,8 @@ def _initialize_errorhandlers(app):
     @app.errorhandler(InvalidCredentials)
     @app.errorhandler(EndpointNotImplemented)
     @app.errorhandler(AirflowError)
+    @app.errorhandler(InvalidData)
+    @app.errorhandler(InvalidPatch)
     def handle_invalid_usage(error):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code

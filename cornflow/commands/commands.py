@@ -86,7 +86,7 @@ class CreateServiceUser(Command):
             verbose_option,
         )
 
-    def run(self, email=None, password=None, verbose=0):
+    def run(self, email, password, verbose=0):
         """
         Method to run the command and create the service user
 
@@ -124,7 +124,7 @@ class CreateAdminUser(Command):
             verbose_option,
         )
 
-    def run(self, email=None, password=None, verbose=0):
+    def run(self, email, password, verbose=0):
         """
         Method to run and create the admin user
 
@@ -274,7 +274,7 @@ class RegisterRoles(Command):
         return
 
 
-class BasePermissionAssignationRegistration(Command):
+class RegisterBasePermissions(Command):
     def get_options(self):
         return (verbose_option,)
 
@@ -347,7 +347,7 @@ class AccessInitialization(Command):
         RegisterActions().run(verbose)
         RegisterViews().run(verbose)
         RegisterRoles().run(verbose)
-        BasePermissionAssignationRegistration().run(verbose)
+        RegisterBasePermissions().run(verbose)
         if verbose == 1:
             print("Access initialization ran successfully")
         return True
