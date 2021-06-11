@@ -2,7 +2,7 @@ from flask_testing import TestCase
 
 from cornflow.app import create_app
 from cornflow.commands import (
-    BasePermissionAssignationRegistration,
+    RegisterBasePermissions,
     CreateAdminUser,
     CreateServiceUser,
     RegisterActions,
@@ -123,7 +123,7 @@ class TestCommands(TestCase):
         command = RegisterRoles()
         command.run()
 
-        command = BasePermissionAssignationRegistration()
+        command = RegisterBasePermissions()
         command.run()
 
         for base in BASE_PERMISSION_ASSIGNATION:
