@@ -19,7 +19,7 @@ manager.add_command("create_service_user", CreateServiceUser)
 
 # Access control commands
 manager.add_command("access_init", AccessInitialization)
-manager.add_command("register_base_assignations", BasePermissionAssignationRegistration)
+manager.add_command("register_base_assignations", RegisterBasePermissions)
 manager.add_command("register_actions", RegisterActions)
 manager.add_command("register_views", RegisterViews)
 manager.add_command("register_roles", RegisterRoles)
