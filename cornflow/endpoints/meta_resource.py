@@ -131,3 +131,8 @@ class MetaResource(Resource):
             return False
         else:
             return True
+
+    def activate_item(self, **kwargs):
+        item = self.query(**kwargs)
+        item.activate()
+        return item, 200

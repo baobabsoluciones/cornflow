@@ -19,7 +19,7 @@ from ..schemas.roles import (
 )
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import EndpointNotImplemented
+from ..shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
 
 
 class RolesListEndpoint(MetaResource, MethodResource):
@@ -148,7 +148,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = UserRoleModel
-        self.query = UserRoleModel.get_all_objects
+        self.query = UserRoleModel.get_one_user_role
         self.primary_key = "id"
 
     @doc(description="Gets all the user role assignments", tags=["User roles"])
@@ -189,7 +189,14 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be created in the directory."
             )
-        return self.post_list(kwargs, trace_field="admin_id")
+
+        # Check if the assignation is disabled, or it does exist
+        if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
+            return self.activate_item(**kwargs)
+        elif UserRoleModel.check_if_role_assigned(**kwargs):
+            raise ObjectAlreadyExists
+        else:
+            return self.post_list(kwargs, trace_field="admin_id")
 
 
 class UserRoleDetailEndpoint(MetaResource, MethodResource):
@@ -199,34 +206,36 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = UserRoleModel
-        self.query = UserRoleModel.get_one_object
+        self.query = UserRoleModel.get_one_user_role
         self.primary_key = "id"
 
     @doc(description="Gets one user role assignment", tags=["User roles"])
     @Auth.auth_required
     @marshal_with(UserRoleResponse)
-    def get(self, idx):
+    def get(self, user_id, role_id):
         """
         API method to get one specific role assignation of the application
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
-        :param int idx: ID of the requested role assignation
+        :param int user_id: ID of the requested user
+        :param int role_id: ID of the requested role
         :return: A dictionary with the response (data of the requested role assignation or an error message)
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return UserRoleModel.get_one_object(idx)
+        return UserRoleModel.get_one_user_role(user_id, role_id)
 
     @doc(description="Deletes one user role assignment", tags=["User roles"])
     @Auth.auth_required
-    def delete(self, idx):
+    def delete(self, user_id, role_id):
         """
         API method to delete a role assignation of the application
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
 
-        :param int idx: ID of the specific role assignation
+        :param int user_id: ID of the requested user
+        :param int role_id: ID of the requested role
         :return: A dictionary with the response (a successful or an error message)
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
@@ -238,4 +247,4 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be created in the directory."
             )
-        return self.delete_detail(idx)
+        return self.delete_detail(user_id, role_id)
