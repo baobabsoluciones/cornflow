@@ -39,7 +39,7 @@ class Development(MainEnvVars):
     TESTING = True
 
 
-class Testing(object):
+class Testing(MainEnvVars):
     """ """
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -51,27 +51,6 @@ class Testing(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"
     AIRFLOW_PWD = "admin"
-    AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
-
-    # LDAP configuration
-    LDAP_HOST = os.getenv("LDAP_HOST")
-    LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
-    LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
-    LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
-    LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
-    LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
-    LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS")
-
-    LDAP_GROUP_OBJECT_CLASS = os.getenv("LDAP_GROUP_OBJECT_CLASS")
-    LDAP_GROUP_ATTRIBUTE = os.getenv("LDAP_GROUP_ATTRIBUTE")
-    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE")
-    LDAP_GROUP_TO_ROLE_SERVICE = os.getenv("LDAP_GROUP_TO_ROLE_SERVICE")
-    LDAP_GROUP_TO_ROLE_ADMIN = os.getenv("LDAP_GROUP_TO_ROLE_ADMIN")
-    LDAP_GROUP_TO_ROLE_VIEWER = os.getenv("LDAP_GROUP_TO_ROLE_VIEWER")
-    LDAP_GROUP_TO_ROLE_PLANNER = os.getenv("LDAP_GROUP_TO_ROLE_PLANNER")
-
-    LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
-    LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
 
 
 class Production(MainEnvVars):

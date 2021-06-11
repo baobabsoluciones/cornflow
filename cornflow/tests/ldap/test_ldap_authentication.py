@@ -20,9 +20,6 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {"email": "planner", "password": "planner1234"}
 
-    def tearDown(self):
-        super().tearDown()
-
     def test_successful_log_in(self):
         super().test_successful_log_in()
         self.assertEqual(

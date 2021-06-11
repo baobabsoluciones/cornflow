@@ -1,11 +1,13 @@
 """
 This file contains the different custom test classes used to generalize the unit testing of cornflow.
 """
+
 # Import from libraries
-from abc import ABC
 from datetime import datetime, timedelta
+from flask import current_app
 from flask_testing import TestCase
 import json
+import jwt
 from unittest.mock import patch, Mock
 
 # Import from internal modules
@@ -624,5 +626,25 @@ class LoginTestCases:
             )
 
         def test_token(self):
-            # TODO: implement to check correct token creation
-            pass
+            payload = self.data
+
+            self.response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(200, self.response.status_code)
+            self.assertEqual(str, type(self.response.json["token"]))
+            decoded_token = jwt.decode(
+                self.response.json["token"],
+                current_app.config["SECRET_KEY"],
+                algorithms="HS256",
+            )
+
+            self.assertAlmostEqual(
+                datetime.utcnow(),
+                datetime.utcfromtimestamp(decoded_token["iat"]),
+                delta=timedelta(seconds=1),
+            )

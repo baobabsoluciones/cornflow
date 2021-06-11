@@ -27,9 +27,6 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data.pop("name")
         self.id = UserModel.query.filter_by(name="testname").first().id
 
-    def tearDown(self):
-        super().tearDown()
-
     def test_successful_log_in(self):
         super().test_successful_log_in()
         self.assertEqual(self.id, self.response.json["id"])

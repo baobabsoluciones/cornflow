@@ -86,7 +86,7 @@ class CreateServiceUser(Command):
             verbose_option,
         )
 
-    def run(self, email=None, password=None, verbose=0):
+    def run(self, email, password, verbose=0):
         """
         Method to run the command and create the service user
 
@@ -124,7 +124,7 @@ class CreateAdminUser(Command):
             verbose_option,
         )
 
-    def run(self, email=None, password=None, verbose=0):
+    def run(self, email, password, verbose=0):
         """
         Method to run and create the admin user
 
