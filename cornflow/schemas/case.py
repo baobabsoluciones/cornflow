@@ -15,7 +15,7 @@ class CaseRawRequest(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
     schema = fields.Str(required=True)
-    parent_id = fields.Int()
+    parent_id = fields.Int(allow_none=True)
     data = fields.Raw()
     solution = fields.Raw()
 
@@ -63,7 +63,7 @@ class CaseFromInstanceExecution(Schema):
     execution_id = fields.Str()
     name = fields.Str(required=True)
     description = fields.Str()
-    parent_id = fields.Int()
+    parent_id = fields.Int(allow_none=True)
 
 
 class CaseToInstanceResponse(Schema):
