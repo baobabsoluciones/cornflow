@@ -1,5 +1,5 @@
 """
-Modification to users table and added constraint to user_role table
+Modification to users table
 
 Revision ID: 4aac5e0c6e66
 Revises: c8a6c762e818
