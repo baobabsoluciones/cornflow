@@ -81,7 +81,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             email = ldap_obj.get_user_email(username)
             if not email:
                 email = ""
-            data = {"name": username, "email": email}
+            data = {"username": username, "email": email}
             user = UserModel(data=data)
             user.save()
         # regardless whether the user is new or not:
