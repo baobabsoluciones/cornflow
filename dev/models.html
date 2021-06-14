@@ -283,11 +283,11 @@ It inherits from <code class="xref py py-class docutils literal notranslate"><sp
 <p>The class <a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a> has the following fields:</p>
 <ul class="simple">
 <li><p><strong>id</strong>: int, the user id, primary key for the users.</p></li>
-<li><p><strong>name</strong>: str, the name of the user.</p></li>
+<li><p><strong>first_name</strong>: str, the name of the user.</p></li>
+<li><p><strong>last_name</strong>: str, the name of the user.</p></li>
+<li><p><strong>username</strong>: str, the username of the user used for the login.</p></li>
 <li><p><strong>email</strong>: str, the email of the user.</p></li>
 <li><p><strong>password</strong>: str, the hashed password of the user.</p></li>
-<li><p><strong>admin</strong>: bool, if the user is an admin.</p></li>
-<li><p><strong>super_admin</strong>: bool, if the user is a super_admin.</p></li>
 <li><p><strong>created_at</strong>: datetime, the datetime when the execution was created (in UTC).
 This datetime is generated automatically, the user does not need to provide it.</p></li>
 <li><p><strong>updated_at</strong>: datetime, the datetime when the execution was last updated (in UTC).
@@ -376,11 +376,11 @@ create a new user.</p>
 
 <dl class="py method">
 <dt id="cornflow.models.user.UserModel.get_one_user_by_email">
-<em class="property">static </em><code class="sig-name descname">get_one_user_by_email</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">em</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_email" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">get_one_user_by_email</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_email" title="Permalink to this definition">¶</a></dt>
 <dd><p>Query to get one user from the email</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>em</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – User email</p>
+<dd class="field-odd"><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – User email</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The user</p>
@@ -397,6 +397,38 @@ create a new user.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>username</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow.models.user.UserModel.check_username_in_use">
+<em class="property">static </em><code class="sig-name descname">check_username_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_username_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow.models.user.UserModel.check_email_in_use">
+<em class="property">static </em><code class="sig-name descname">check_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>

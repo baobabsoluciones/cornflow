@@ -632,16 +632,16 @@
     }, 
     "LoginEndpointRequest": {
       "properties": {
-        "email": {
+        "password": {
           "type": "string"
         }, 
-        "password": {
+        "username": {
           "type": "string"
         }
       }, 
       "required": [
-        "email", 
-        "password"
+        "password", 
+        "username"
       ], 
       "type": "object"
     }, 
@@ -806,16 +806,19 @@
     }, 
     "UserDetailsEndpointResponse": {
       "properties": {
-        "admin": {
-          "type": "boolean"
-        }, 
         "email": {
+          "type": "string"
+        }, 
+        "first_name": {
           "type": "string"
         }, 
         "id": {
           "type": "integer"
         }, 
-        "name": {
+        "last_name": {
+          "type": "string"
+        }, 
+        "username": {
           "type": "string"
         }
       }, 
@@ -826,10 +829,16 @@
         "email": {
           "type": "string"
         }, 
-        "name": {
+        "first_name": {
+          "type": "string"
+        }, 
+        "last_name": {
           "type": "string"
         }, 
         "password": {
+          "type": "string"
+        }, 
+        "username": {
           "type": "string"
         }
       }, 
@@ -843,10 +852,16 @@
         "email": {
           "type": "string"
         }, 
+        "first_name": {
+          "type": "string"
+        }, 
         "id": {
           "type": "integer"
         }, 
-        "name": {
+        "last_name": {
+          "type": "string"
+        }, 
+        "username": {
           "type": "string"
         }
       }, 
@@ -889,17 +904,23 @@
           "format": "email", 
           "type": "string"
         }, 
-        "name": {
+        "first_name": {
+          "type": "string"
+        }, 
+        "last_name": {
           "type": "string"
         }, 
         "password": {
+          "type": "string"
+        }, 
+        "username": {
           "type": "string"
         }
       }, 
       "required": [
         "email", 
-        "name", 
-        "password"
+        "password", 
+        "username"
       ], 
       "type": "object"
     }
@@ -1055,14 +1076,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx2", 
+            "name": "idx1", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx1", 
+            "name": "idx2", 
             "required": true, 
             "type": "integer"
           }
@@ -2020,14 +2041,21 @@
         ]
       }
     }, 
-    "/user/role/{idx}/": {
+    "/user/role/{user_id}/{role_id}/": {
       "delete": {
         "description": "Deletes one user role assignment", 
         "parameters": [
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx", 
+            "name": "role_id", 
+            "required": true, 
+            "type": "integer"
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }
@@ -2043,7 +2071,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx", 
+            "name": "role_id", 
+            "required": true, 
+            "type": "integer"
+          }, 
+          {
+            "format": "int32", 
+            "in": "path", 
+            "name": "user_id", 
             "required": true, 
             "type": "integer"
           }
