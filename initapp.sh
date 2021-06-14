@@ -6,28 +6,34 @@
 : "${AIRFLOW_PWD:="admin"}"
 : "${AIRFLOW_URL:="http://webserver:8080"}"
 : "${CORNFLOW_URL:="http://cornflow:5000"}"
+: "${AUTH_TYPE:="1"}"
 : "${FLASK_APP:="cornflow.app"}"
 : "${FLASK_ENV:="development"}"
 : "${SECRET_KEY=${FERNET_KEY:=$(python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)")}}"
 : "${DATABASE_URL=${CORNFLOW_DB_CONN}}"
-: "${CORNFLOW_ADMIN_USER:="user@cornflow.com"}"
-: "${CORNFLOW_ADMIN_PWD:="admincornflow1234"}"
-: "${CORNFLOW_SERVICE_USER:="serviceuser@cornflow.com"}"
-: "${CORNFLOW_SERVICE_PWD:="servicecornflow1234"}"
+: "${CORNFLOW_ADMIN_USER:="cornflow_admin"}"
+: "${CORNFLOW_ADMIN_EMAIL:="cornflow_admin@cornflow.com"}"
+: "${CORNFLOW_ADMIN_PWD:="cornflowadmin1234"}"
+: "${CORNFLOW_SERVICE_USER:="service_user"}"
+: "${CORNFLOW_SERVICE_EMAIL:="service_user@cornflow.com"}"
+: "${CORNFLOW_SERVICE_PWD:="serviceuser1234"}"
 
 export \
   AIRFLOW_USER \
   AIRFLOW_PWD \
   AIRFLOW_URL \
   CORNFLOW_ADMIN_USER \
+  CORNFLOW_ADMIN_EMAIL \
   CORNFLOW_ADMIN_PWD \
   CORNFLOW_SERVICE_USER \
+  CORNFLOW_SERVICE_EMAIL \
   CORNFLOW_SERVICE_PWD \
   CORNFLOW_DB_CONN \
   CORNFLOW_URL \
   DATABASE_URL \
   FLASK_APP \
   FLASK_ENV \
+  CORNFLOW_LOGGING \
   SECRET_KEY \
   AUTH_TYPE \
   LDAP_PROTOCOL_VERSION \
@@ -81,15 +87,32 @@ if [ "$AUTH_TYPE" = "2" ]; then
   >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
 fi
 
+if [ "$CORNFLOW_LOGGING" == "file" ]; then
+  cat > /etc/logrotate.d/cornflow <<EOF
+   /usr/src/app/log/*.log {
+          rotate 30
+          daily
+          compress
+          size 20M
+          postrotate
+              kill -HUP \$(cat /usr/src/app/gunicorn.pid)
+          endscript
+  }
+EOF
+fi
+
 # make initdb and/or migrations
 python manage.py db upgrade
 # make initdb access control
 python manage.py access_init
 
-# create cornflow admin user
-python manage.py create_admin_user --user="$CORNFLOW_ADMIN_USER" --password="$CORNFLOW_ADMIN_PWD"
-# create cornflow service user
-python manage.py create_service_user --user="$CORNFLOW_SERVICE_USER" --password="$CORNFLOW_SERVICE_PWD"
+# create user if auth type is db
+if [ "$AUTH_TYPE" = "1" ]; then
+  # create cornflow admin user
+  python manage.py create_admin_user --email="$CORNFLOW_ADMIN_EMAIL" --password="$CORNFLOW_ADMIN_PWD"
+  # create cornflow service user
+  python manage.py create_service_user --email="$CORNFLOW_SERVICE_EMAIL" --password="$CORNFLOW_SERVICE_PWD"
+fi
 
 # execute gunicorn with config file "gunicorn.py"
 /usr/local/bin/gunicorn -c cornflow/gunicorn.py "cornflow:create_app('$FLASK_ENV')"
