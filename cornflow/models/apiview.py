@@ -15,7 +15,7 @@ class ApiViewModel(EmptyModel):
     """
 
     __tablename__ = "api_view"
-    id = db.Column(db.Integer, db.Sequence("apiview_id_seq"), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
     url_rule = db.Column(db.String(128), nullable=False)
     description = db.Column(TEXT, nullable=True)

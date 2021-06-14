@@ -1,4 +1,5 @@
-"""empty message
+"""
+Added actions, apiviews, roles and permissions to database
 
 Revision ID: c8a6c762e818
 Revises: c2db9409cb5f

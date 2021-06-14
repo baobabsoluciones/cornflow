@@ -37,8 +37,12 @@ class SignUpEndpoint(MetaResource, MethodResource):
                 "The user has to sing up on the active directory"
             )
 
-        user_in_db = UserModel.get_one_user_by_email(kwargs.get("email"))
-        if user_in_db:
+        if UserModel.check_username_in_use(kwargs.get("username")):
+            raise InvalidCredentials(
+                error="Username already in use, please supply another username"
+            )
+
+        if UserModel.check_email_in_use(kwargs.get("email")):
             raise InvalidCredentials(
                 error="Email already in use, please supply another email address"
             )

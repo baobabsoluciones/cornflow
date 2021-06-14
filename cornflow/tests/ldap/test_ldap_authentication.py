@@ -18,36 +18,36 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def setUp(self):
         super().setUp()
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        self.data = {"email": "planner", "password": "planner1234"}
+        self.data = {"username": "planner", "password": "planner1234"}
 
     def test_successful_log_in(self):
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["username"]).id,
             self.response.json["id"],
         )
 
     def test_successful_log_in_viewer(self):
-        self.data = {"email": "viewer", "password": "viewer1234"}
+        self.data = {"username": "viewer", "password": "viewer1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["username"]).id,
             self.response.json["id"],
         )
 
     def test_successful_log_in_admin(self):
-        self.data = {"email": "administrator", "password": "administrator1234"}
+        self.data = {"username": "administrator", "password": "administrator1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["username"]).id,
             self.response.json["id"],
         )
 
     def test_successful_log_in_service(self):
-        self.data = {"email": "cornflow", "password": "cornflow1234"}
+        self.data = {"username": "cornflow", "password": "cornflow1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["username"]).id,
             self.response.json["id"],
         )
 
@@ -84,7 +84,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
 
     def test_deactivated_endpoint(self):
         AccessInitialization().run()
-        self.data = {"email": "administrator", "password": "administrator1234"}
+        self.data = {"username": "administrator", "password": "administrator1234"}
         super().test_successful_log_in()
         payload = {"user_id": self.response.json["id"], "role_id": PLANNER_ROLE}
         response = self.client.post(
@@ -101,7 +101,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def test_deactivated_sign_up(self):
         RegisterRoles().run()
         payload = {
-            "name": "testuser",
+            "username": "testuser",
             "email": "testemail@example.org",
             "password": "testpassword",
         }

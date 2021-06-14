@@ -254,7 +254,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
         user_data = dict(
-            name="airflow_test@admin.com",
+            username="airflow_test@admin.com",
             email="airflow_test@admin.com",
             pwd="airflow_test_password",
         )
