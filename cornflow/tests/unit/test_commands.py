@@ -46,7 +46,11 @@ class TestCommands(TestCase):
     def test_service_user_command(self):
         command = CreateServiceUser()
 
-        command.run(email=self.payload["email"], password=self.payload["password"])
+        command.run(
+            username="cornflow",
+            email=self.payload["email"],
+            password=self.payload["password"],
+        )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
 
@@ -56,7 +60,11 @@ class TestCommands(TestCase):
     def test_admin_user_command(self):
         command = CreateAdminUser()
 
-        command.run(email=self.payload["email"], password=self.payload["password"])
+        command.run(
+            username="administrator",
+            email=self.payload["email"],
+            password=self.payload["password"],
+        )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
 

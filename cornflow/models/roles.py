@@ -12,7 +12,7 @@ class RoleModel(TraceAttributes):
     # TODO: Should have a user_id to store the user that defined the role?
     __tablename__ = "roles"
 
-    id = db.Column(db.Integer, db.Sequence("roles_id_sq"), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
 
     def __init__(self, data):
@@ -80,7 +80,7 @@ class UserRoleModel(TraceAttributes):
     __tablename__ = "user_role"
     __table_args__ = (db.UniqueConstraint("user_id", "role_id"),)
 
-    id = db.Column(db.Integer, db.Sequence("user_roles_id_sq"), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     user = db.relationship("UserModel")
 

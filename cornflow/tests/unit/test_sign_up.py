@@ -1,7 +1,12 @@
+"""
+Unit test for the sign up endpoint
+"""
+
+# Import from libraries
+from flask_testing import TestCase
 import json
 
-from flask_testing import TestCase
-
+# Import from internal modules
 from cornflow.app import create_app
 from cornflow.commands import AccessInitialization
 from cornflow.models import UserModel, UserRoleModel
@@ -20,7 +25,7 @@ class TestSignUp(TestCase):
         db.create_all()
         AccessInitialization().run()
         self.data = {
-            "name": "testname",
+            "username": "testname",
             "email": "test@test.com",
             "password": "testpassword",
         }

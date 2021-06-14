@@ -15,11 +15,11 @@ class UserModel(TraceAttributes):
     The class :class:`UserModel` has the following fields:
 
     - **id**: int, the user id, primary key for the users.
-    - **name**: str, the name of the user.
+    - **first_name**: str, the name of the user.
+    - **last_name**: str, the name of the user.
+    - **username**: str, the username of the user used for the login.
     - **email**: str, the email of the user.
     - **password**: str, the hashed password of the user.
-    - **admin**: bool, if the user is an admin.
-    - **super_admin**: bool, if the user is a super_admin.
     - **created_at**: datetime, the datetime when the execution was created (in UTC).
       This datetime is generated automatically, the user does not need to provide it.
     - **updated_at**: datetime, the datetime when the execution was last updated (in UTC).
@@ -36,32 +36,21 @@ class UserModel(TraceAttributes):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    # TODO: should be first_name
-    name = db.Column(db.String(128), nullable=False)
+    first_name = db.Column(db.String(128), nullable=True)
     last_name = db.Column(db.String(128), nullable=True)
-    # TODO: should be unique
-    username = db.Column(db.String(128), nullable=True)
-    email = db.Column(db.String(128), nullable=False, unique=True)
+    username = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
-    admin = db.Column(
-        db.Boolean(), server_default=expression.false(), default=False, nullable=False
-    )
-    super_admin = db.Column(
-        db.Boolean(), server_default=expression.false(), default=False, nullable=False
-    )
+    email = db.Column(db.String(128), nullable=False, unique=True)
     instances = db.relationship("InstanceModel", backref="users", lazy=True)
-    # roles = db.relationship("RoleModel", secondary="UserRoleModel", backref="users")
 
     def __init__(self, data):
 
         super().__init__()
-        self.name = data.get("name")
+        self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
-        self.email = data.get("email")
         self.password = self.__generate_hash(data.get("password"))
-        self.admin = False
-        self.super_admin = False
+        self.email = data.get("email")
 
     def update(self, data):
         """
@@ -69,13 +58,11 @@ class UserModel(TraceAttributes):
 
         :param dict data: the data to update the user
         """
+        # TODO: try not to use setattr
         for key, item in data.items():
             if key == "password":
                 new_password = self.__generate_hash(item)
                 setattr(self, key, new_password)
-            elif key == "admin" or key == "super_admin":
-                # TODO: delete
-                continue
             else:
                 setattr(self, key, item)
 
@@ -149,15 +136,15 @@ class UserModel(TraceAttributes):
         return UserModel.query.filter_by(id=idx, deleted_at=None).first()
 
     @staticmethod
-    def get_one_user_by_email(em):
+    def get_one_user_by_email(email):
         """
         Query to get one user from the email
 
-        :param str em: User email
+        :param str email: User email
         :return: The user
         :rtype: :class:`UserModel`
         """
-        return UserModel.query.filter_by(email=em, deleted_at=None).first()
+        return UserModel.query.filter_by(email=email, deleted_at=None).first()
 
     @staticmethod
     def get_one_user_by_username(username):
@@ -168,7 +155,27 @@ class UserModel(TraceAttributes):
         :return:
         :rtype:
         """
-        return UserModel.query.filter_by(name=username, deleted_at=None).first()
+        return UserModel.query.filter_by(username=username, deleted_at=None).first()
+
+    @staticmethod
+    def check_username_in_use(username):
+        """
+
+        :param str username:
+        :return:
+        :rtype:
+        """
+        return UserModel.query.filter_by(username=username).first() is not None
+
+    @staticmethod
+    def check_email_in_use(email):
+        """
+
+        :param str email:
+        :return:
+        :rtype:
+        """
+        return UserModel.query.filter_by(email=email).first() is not None
 
     def __repr__(self):
         """
@@ -177,4 +184,4 @@ class UserModel(TraceAttributes):
         :return: The representation of the class
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return "<Username {}>".format(self.username)

@@ -24,6 +24,14 @@ from cornflow.shared.const import (
 from cornflow.endpoints import resources
 from cornflow.shared.utils import db
 
+username_option = Option(
+    "-u", "--username", dest="username", help="User username", type=str
+)
+email_option = Option("-e", "--email", dest="email", help="User email", type=str)
+password_option = Option(
+    "-p", "--password", dest="password", help="User password", type=str
+)
+
 verbose_option = Option(
     "-v",
     "--verbose",
@@ -33,10 +41,11 @@ verbose_option = Option(
 )
 
 
-def create_user_with_role(email, password, name, role, verbose=0):
+def create_user_with_role(username, email, password, name, role, verbose=0):
     """
     Method to create a user with a given email, password and name
 
+    :param str username: username for the new user
     :param str email: email for the new user
     :param str password: password for the new user
     :param str name: name for the new user
@@ -45,9 +54,10 @@ def create_user_with_role(email, password, name, role, verbose=0):
     :return: a boolean if the execution went right
     :rtype: bool
     """
-    user = UserModel.get_one_user_by_email(email)
+    user = UserModel.get_one_user_by_username(username)
+
     if user is None:
-        data = dict(name=name, email=email, password=password)
+        data = dict(username=username, email=email, password=password)
         user = UserModel(data=data)
         user.save()
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
@@ -55,11 +65,13 @@ def create_user_with_role(email, password, name, role, verbose=0):
         if verbose == 1:
             print("{} is created and assigned service role".format(name))
         return True
+
     user_role = UserRoleModel.get_one_user(user.id)
     if user_role is not None and RoleModel.get_one_object(role) in user_role:
         if verbose == 1:
             print("{} exists and already has service role assigned".format(name))
         return True
+
     user_role = UserRoleModel({"user_id": user.id, "role_id": role})
     user_role.save()
     if verbose == 1:
@@ -75,69 +87,57 @@ class CreateServiceUser(Command):
 
     def get_options(self):
         return (
-            Option("-e", "--email", dest="email", help="Service user email", type=str),
-            Option(
-                "-p",
-                "--password",
-                dest="password",
-                help="Service user password",
-                type=str,
-            ),
+            username_option,
+            email_option,
+            password_option,
             verbose_option,
         )
 
-    def run(self, email, password, verbose=0):
+    def run(self, username, email, password, verbose=0):
         """
         Method to run the command and create the service user
 
+        :param str username: the username for the service user
         :param str email: the email for the service user
         :param str password: the password for the service user
         :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        if email is None or password is None:
+        if username is None or email is None or password is None:
             print("Missing required arguments")
             return False
         return create_user_with_role(
-            email, password, "serviceuser", SERVICE_ROLE, verbose
+            username, email, password, "serviceuser", SERVICE_ROLE, verbose
         )
 
 
 class CreateAdminUser(Command):
     def get_options(self):
         return (
-            Option(
-                "-e",
-                "--email",
-                dest="email",
-                help="Admin user email",
-                type=str,
-            ),
-            Option(
-                "-p",
-                "--password",
-                dest="password",
-                help="Admin user password",
-                type=str,
-            ),
+            username_option,
+            email_option,
+            password_option,
             verbose_option,
         )
 
-    def run(self, email, password, verbose=0):
+    def run(self, username, email, password, verbose=0):
         """
         Method to run and create the admin user
 
+        :param str username: the username for the service user
         :param str email: the email for the admin user
         :param str password: the password for the admin user
         :param int verbose: verbose of the command
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        if email is None or password is None:
+        if username is None or email is None or password is None:
             print("Missing required arguments")
             return False
-        return create_user_with_role(email, password, "admin", ADMIN_ROLE, verbose)
+        return create_user_with_role(
+            username, email, password, "admin", ADMIN_ROLE, verbose
+        )
 
 
 class CleanHistoricData(Command):
