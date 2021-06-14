@@ -40,12 +40,6 @@ class CaseEndpoint(MetaResource, MethodResource):
     Endpoint used to create a new case or get all the cases and their related information
     """
 
-    def __init__(self):
-        super().__init__()
-        self.model = CaseModel
-        self.query = CaseModel.get_all_objects
-        self.primary_key = "id"
-
     @doc(description="Get all cases", tags=["Cases"])
     @Auth.auth_required
     @marshal_with(CaseListResponse(many=True))
@@ -70,23 +64,18 @@ class CaseEndpoint(MetaResource, MethodResource):
     @use_kwargs(CaseRawRequest, location="json")
     def post(self, **kwargs):
         """ """
-        response = self.post_list(kwargs)
-        log.info("User {} creates case {}".format(self.get_user_id(), response[0].id))
-        return response
+        data = dict(kwargs)
+        data["user_id"] = self.get_user_id()
+        item = CaseModel.from_parent_id(self.get_user(), data)
+        item.save()
+        log.info("User {} creates case {}".format(self.get_user_id(), item.id))
+        return item, 201
 
 
 class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
     """
     Endpoint used to create a new case from an already existing instance and execution
     """
-
-    def __init__(self):
-        super().__init__()
-        self.model = CaseModel
-        self.query = self.model.get_all_objects
-        self.primary_key = "id"
-        self.map_instance_fields = {"data": "data", "schema": "schema"}
-        self.map_execution_fields = {"solution": "data"}
 
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
     @Auth.auth_required
@@ -99,56 +88,46 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
         instance_id = kwargs.get("instance_id", None)
         execution_id = kwargs.get("execution_id", None)
 
-        data = {
-            "name": kwargs.get("name", ""),
-            "description": kwargs.get("description", ""),
-            "path": kwargs.get("path", ""),
-        }
+        data = {name: kwargs.get(name) for name in ["name", "description", "parent_id"]}
 
-        if instance_id is not None and execution_id is not None:
+        if (instance_id is not None and execution_id is not None) or (
+            instance_id is None and execution_id is None
+        ):
             raise InvalidData(
-                error="Send only instance or execution id", status_code=400
+                error="You must provide an instance_id OR an execution_id",
+                status_code=400,
             )
+        user = self.get_user()
 
-        elif instance_id is not None:
-            instance = InstanceModel.get_one_object_from_user(
-                self.get_user(), instance_id
-            )
+        def get_instance_data(instance_id):
+            instance = InstanceModel.get_one_object_from_user(user, instance_id)
+            if instance is None:
+                raise ObjectDoesNotExist("Instance does not exist")
+            return dict(data=instance.data, schema=instance.schema)
 
-            instance_data = {
-                key: getattr(instance, value)
-                for key, value in self.map_instance_fields.items()
-            }
+        def get_execution_data(execution_id):
+            execution = ExecutionModel.get_one_object_from_user(user, execution_id)
+            if execution is None:
+                raise ObjectDoesNotExist("Execution does not exist")
+            data = get_instance_data(execution.instance_id)
+            data["solution"] = execution.data
+            return data
 
-            data = {**data, **instance_data}
-
+        if instance_id is not None:
+            data = {**data, **get_instance_data(instance_id)}
         elif execution_id is not None:
-            execution = ExecutionModel.get_one_object_from_user(
-                self.get_user(), kwargs.get("execution_id", None)
-            )
+            data = {**data, **get_execution_data(execution_id)}
 
-            instance = InstanceModel.get_one_object_from_user(
-                self.get_user(), execution.instance_id
-            )
-
-            execution_data = {
-                key: getattr(execution, value)
-                for key, value in self.map_execution_fields.items()
-            }
-
-            instance_data = {
-                key: getattr(instance, value)
-                for key, value in self.map_instance_fields.items()
-            }
-
-            data = {**data, **instance_data, **execution_data}
-        response = self.post_list(data)
+        data = dict(data)
+        data["user_id"] = self.get_user_id()
+        item = CaseModel.from_parent_id(user, data)
+        item.save()
         log.info(
             "User {} creates case {} from instance/execution".format(
-                self.get_user_id(), response[0].id
+                self.get_user_id(), item.id
             )
         )
-        return response
+        return item, 201
 
 
 class CaseCopyEndpoint(MetaResource, MethodResource):
@@ -196,14 +175,8 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
 
 class CaseDetailsEndpoint(MetaResource, MethodResource):
     """
-    Endpoint used to get the information ofa single instance, edit it or delete it
+    Endpoint used to get the information of a single case, edit it or delete it
     """
-
-    def __init__(self):
-        super().__init__()
-        self.model = CaseModel
-        self.primary_key = "id"
-        self.query = CaseModel.get_one_object_from_user
 
     @doc(description="Get one case", tags=["Cases"], inherit=False)
     @Auth.auth_required
@@ -212,12 +185,9 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     def get(self, idx):
         """
         API method to get an case created by the user and its related info.
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user.
 
         :param str idx: ID of the case
-        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
-          the data of the instance) and an integer with the HTTP status code.
+        :return: A dictionary with a message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         response = CaseModel.get_one_object_from_user(self.get_user(), idx)
@@ -230,15 +200,15 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     def put(self, idx, **kwargs):
         """
         API method to edit a case created by the user and its basic related info (name, description and schema).
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user.
 
         :param int idx: ID of the case
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
         log.info("User {} edits case {}".format(self.get_user_id(), idx))
-        return self.put_detail(kwargs, self.get_user(), idx)
+        return self.put_detail(
+            kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
+        )
 
     @doc(description="Delete a case", tags=["Cases"])
     @Auth.auth_required
@@ -252,9 +222,12 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        response = self.delete_detail(self.get_user(), idx)
+        item = CaseModel.get_one_object_from_user(self.get_user(), idx)
+        if item is None:
+            raise ObjectDoesNotExist()
+        CaseModel.delete(item)
         log.info("User {} deletes case {}".format(self.get_user_id(), idx))
-        return response
+        return {"message": "The object has been deleted"}, 200
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
@@ -287,7 +260,9 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     @inflate
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
-        response = self.patch_detail(kwargs, self.get_user(), idx)
+        response = self.patch_detail(
+            kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
+        )
         log.info("User {} patches case {}".format(self.get_user_id(), idx))
         return response
 

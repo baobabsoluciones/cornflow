@@ -108,7 +108,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
 
         self.url = CASE_INSTANCE_URL
         self.model = CaseModel
-        self.items_to_check = ["name", "description", "path", "schema"]
+        self.items_to_check = ["name", "description", "schema"]
         self.response_items = [
             "name",
             "description",
@@ -118,7 +118,6 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "solution",
             "solution_hash",
             "user_id",
-            "path",
         ]
 
         self.payload = {
@@ -126,7 +125,6 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "description": "test case for unit tests",
             "instance_id": instance_id,
             "execution_id": execution_id,
-            "path": "",
         }
         self.user_object = UserModel.get_one_user(self.user)
         self.instance = InstanceModel.get_one_object_from_user(
@@ -180,7 +178,7 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.payload = self.load_file(CASE_PATH)
         self.url = CASE_URL
         self.model = CaseModel
-        self.items_to_check = ["name", "description", "path", "schema"]
+        self.items_to_check = ["name", "description", "schema"]
 
     def test_new_case(self):
         self.create_new_row(self.url, self.model, self.payload)
@@ -188,13 +186,44 @@ class TestCasesRawDataEndpoint(CustomTestCase):
     def test_new_case_without_solution(self):
         self.create_new_row(self.url, self.model, self.payload)
 
+    def test_case_with_parent(self):
+        payload = dict(self.payload)
+        payload.pop("data")
+        case_id = self.create_new_row(self.url, self.model, payload)
+        payload = dict(self.payload)
+        payload["parent_id"] = case_id
+        self.create_new_row(self.url, self.model, payload)
+        cases = self.client.get(
+            self.url,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        result = [(p["id"], p["path"]) for p in cases.json]
+        diff = {(2, "1/"), (1, "")}.symmetric_difference(result)
+        self.assertEqual(len(diff), 0)
+
+    def test_case_with_bad_parent(self):
+        payload = dict(self.payload)
+        payload["parent_id"] = 1
+        self.create_new_row(
+            self.url, self.model, payload, expected_status=404, check_payload=False
+        )
+
+    def test_case_with_case_parent(self):
+        case_id = self.create_new_row(self.url, self.model, self.payload)
+        payload = dict(self.payload)
+        payload["parent_id"] = case_id
+        self.create_new_row(
+            self.url, self.model, payload, expected_status=400, check_payload=False
+        )
+
 
 class TestCaseCopyEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         payload = self.load_file(CASE_PATH)
         self.model = CaseModel
-        self.items_to_check = ["name", "description", "path", "schema"]
+        self.items_to_check = ["name", "description", "schema"]
         self.case_id = self.create_new_row(CASE_URL, self.model, payload)
         self.payload = {"id": self.case_id}
         self.url = CASE_URL
@@ -255,7 +284,6 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
         self.items_to_check = [
             "name",
             "description",
-            "path",
             "schema",
             "data_hash",
             "solution_hash",
@@ -265,6 +293,7 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "name",
             "description",
             "path",
+            "is_dir",
             "schema",
             "data_hash",
             "solution_hash",
@@ -272,6 +301,21 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "updated_at",
         }
         self.url = CASE_URL
+
+    def test_delete_children(self):
+        payload = dict(self.payload)
+        payload.pop("data")
+        case_id = self.create_new_row(self.url, self.model, payload)
+        payload = dict(self.payload)
+        payload["parent_id"] = case_id
+        self.create_new_row(self.url, self.model, payload)
+        self.delete_row(self.url + str(case_id) + "/")
+        cases = self.client.get(
+            self.url,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(len(cases.json), 0)
 
 
 class TestCaseToInstanceEndpoint(CustomTestCase):
@@ -327,7 +371,7 @@ class TestCaseJsonPatch(CustomTestCase):
         self.model = CaseModel
         self.case_id = self.create_new_row(CASE_URL, self.model, self.payload)
         self.payloads = [self.load_file(f) for f in CASES_LIST]
-        self.items_to_check = ["name", "description", "path", "schema"]
+        self.items_to_check = ["name", "description", "schema"]
         self.url = CASE_URL
         self.patch = {
             "data_patch": jsonpatch.make_patch(
@@ -444,7 +488,6 @@ class TestCaseDataEndpoint(CustomTestCase):
         self.items_to_check = [
             "name",
             "description",
-            "path",
             "schema",
             "data",
         ]
@@ -487,7 +530,7 @@ class TestCaseCompare(CustomTestCase):
         self.cases_id = [
             self.create_new_row(self.url, self.model, p) for p in self.payloads
         ]
-        self.items_to_check = ["name", "description", "path", "schema"]
+        self.items_to_check = ["name", "description", "schema"]
 
     def test_get_full_patch(self):
         response = self.client.get(
