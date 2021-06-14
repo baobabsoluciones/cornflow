@@ -51,7 +51,7 @@ class CustomTestCaseLive(LiveServerTestCase):
     def create_user_with_role(self, role_id, data=None):
         if data is None:
             data = {
-                "name": "testuser" + str(role_id),
+                "username": "testuser" + str(role_id),
                 "email": "testemail" + str(role_id) + "@test.org",
                 "password": "testpassword",
             }
@@ -60,7 +60,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         user_role.save()
 
         db.session.commit()
-        data.pop("name")
+        data.pop("username")
 
         return self.login_or_signup(data)["token"]
 
