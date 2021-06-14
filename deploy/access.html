@@ -323,7 +323,8 @@ The user who operates airflow through cornflow may not be the same user who has 
 <h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Permalink to this headline">¶</a></h3>
 <p>Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
 Service user is a good solution for doing all the data interaction between applications. You have only to pay attention to one account for set permissions and key values on deployment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `serviceuser@cornflow.com`)
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
+CORNFLOW_SERVICE_MAIL - service user account email (default value `service_user@cornflow.com`)
 CORNFLOW_SERVICE_PWD - service user account password (default value `servicecornflow1234`)
 </pre></div>
 </div>
@@ -337,8 +338,9 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `servicecorn
 <div class="section" id="manage-cornflow-users">
 <h2>Manage cornflow users<a class="headerlink" href="#manage-cornflow-users" title="Permalink to this headline">¶</a></h2>
 <p>In the cornflow image, if no environment variables are set, an admin user is created with these credentials:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">-</span> <span class="n">user</span><span class="nd">@cornflow</span><span class="o">.</span><span class="n">com</span>
-<span class="n">password</span> <span class="o">-</span> <span class="n">cornflow1234</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow_admin</span>
+<span class="n">CORNFLOW_ADMIN_EMAIL</span> <span class="o">-</span> <span class="n">cornflow_admin</span><span class="nd">@cornflow</span><span class="o">.</span><span class="n">com</span>
+<span class="n">CORNFLOW_ADMIN_PWD</span> <span class="o">-</span> <span class="n">cornflowadmin1234</span>
 </pre></div>
 </div>
 <p>It is advisable to change the default admin user and keep the password in a safe place.</p>
@@ -347,8 +349,8 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `servicecorn
 <div class="section" id="manage-airflow-users">
 <h2>Manage airflow users<a class="headerlink" href="#manage-airflow-users" title="Permalink to this headline">¶</a></h2>
 <p>The default administrator user for airflow and flower will be:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">-</span> <span class="n">admin</span>
-<span class="n">password</span> <span class="o">-</span> <span class="n">admin</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">admin</span>
+<span class="n">AIRFLOW_PWD</span> <span class="o">-</span> <span class="n">admin</span>
 </pre></div>
 </div>
 <p>It is advisable to change the default admin user and keep the password in a safe place.

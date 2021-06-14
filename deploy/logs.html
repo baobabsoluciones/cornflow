@@ -192,10 +192,29 @@
 <h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="cornflow-logs">
 <h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this headline">¶</a></h2>
-<p>At the moment cornflow does not have a log storage folder. All application logs are written to console output. In this way we can visualize them by launching the following command:</p>
+<p>Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
 </pre></div>
 </div>
+<p>If you want to know about the possibilities offered by the docker log engine, you can visit the official documentation <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/logs/">here</a>.</p>
+<p>If you want to activate the persistent log storage in files, you must pass the value <code class="docutils literal notranslate"><span class="pre">file</span></code> to the environment variable <code class="docutils literal notranslate"><span class="pre">CORNFLOW_LOGGING</span></code> in the cornflow server deployment.
+Once the log storage is activated, these will be saved in the path <code class="docutils literal notranslate"><span class="pre">/usr/src/app/log</span></code> inside the cornflow container.
+To permanently store the logs even if the service is destroyed, you can mount a volume against the directory as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to_storage</span><span class="o">/</span><span class="n">cornflow</span><span class="o">/</span><span class="n">logs</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">log</span>
+</pre></div>
+</div>
+<p>The log files will rotate and be compressed following the configuration provided to the logrotate service:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">number</span> <span class="n">of</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">directory</span> <span class="o">-</span> <span class="mi">30</span>
+<span class="n">frequency</span> <span class="o">-</span> <span class="n">daily</span>
+<span class="n">log</span> <span class="n">file</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">20</span><span class="n">M</span>
+</pre></div>
+</div>
+<p>Two files will be created in log directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>info.log - record messages with access to the application with the default log level value ``info``
+error.log - here the application errors will be recorded
+</pre></div>
+</div>
+<p>The compressed logs will have this format: <code class="docutils literal notranslate"><span class="pre">info.log.1.gz</span></code></p>
 </div>
 <div class="section" id="airflow-logs">
 <h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this headline">¶</a></h2>

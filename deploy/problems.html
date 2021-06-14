@@ -163,7 +163,83 @@
             
   <div class="section" id="known-problems">
 <h1>Known problems<a class="headerlink" href="#known-problems" title="Permalink to this headline">¶</a></h1>
-<p>In progess.</p>
+<p>When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.</p>
+<div class="section" id="situations">
+<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="docker-build">
+<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this headline">¶</a></h3>
+<p>Problem: The volume airflow_config can´t be mounted.</p>
+<blockquote>
+<div><p>Error: Unable to prepare context: path “local_path_to_docker-compose.yml/airflow_config”</p>
+<p>Possible solution: Start docker-compose.yml from root path of cloned corn repository.</p>
+</div></blockquote>
+<p>Problem: The Dockerfile is not found by docker-compose.</p>
+<blockquote>
+<div><p>Error: Not found or failed to solve with frontend dockerfile.v0: failed to read dockerfile</p>
+<p>Possible solution: Start from the same path of Dockerfile or modify the location of it into the build section of docker-compose file.</p>
+</div></blockquote>
+<p>Problem: The image is not installing any linux pkg.</p>
+<blockquote>
+<div><p>Error: gcc exited code error 1</p>
+<p>Possible solution: Try to use docker platform argument “—platform linux/amd64” for build image with extended compatibility.</p>
+</div></blockquote>
+</div>
+<div class="section" id="cornflow-database">
+<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Cornflow can´t reach postgres internal database</p>
+<blockquote>
+<div><p>Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name “host_database” to address: Name or service not known</p>
+<p>Possible solution: See again the name given to CORNFLOW_DB_HOST environment variable in docker-compose file.</p>
+</div></blockquote>
+</div>
+<div class="section" id="running-cornflow">
+<h3>Running cornflow<a class="headerlink" href="#running-cornflow" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Users were not created when cornflow started</p>
+<blockquote>
+<div><p>Error: usage: manage.py [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
+<p>Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of python mange.py create_admin_user/create_service_user.</p>
+</div></blockquote>
+</div>
+<div class="section" id="flower">
+<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Can´t login to flower GUI</p>
+<blockquote>
+<div><p>Error: Access denied</p>
+<p>Possible solution: The admin user and password is the same than airflow.</p>
+</div></blockquote>
+</div>
+<div class="section" id="airflow">
+<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Can´t login to airflow GUI</p>
+<blockquote>
+<div><p>Error: Bad Request The CSRF session token is missing</p>
+<p>Possible solution: Delete cookies from web browser.</p>
+</div></blockquote>
+</div>
+<div class="section" id="ldap-docker">
+<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Can´t login to flower GUI</p>
+<blockquote>
+<div><p>Error: Access denied</p>
+<p>Possible solution: If airflow goes to ldap config, and you don´t give any values to AIRFLOW_USER and AIRFLOW_PWD, the default values are “admin/admin”</p>
+</div></blockquote>
+<p>Problem: Can´t login to airflow GUI</p>
+<blockquote>
+<div><p>Error: Access denied</p>
+<p>Possible solution: User is not same as normal deployment</p>
+</div></blockquote>
+<p>Problem: Openldap docker container don´t start</p>
+<blockquote>
+<div><p>Error: Can´t parse ldif entry on line 1</p>
+<p>Possible solution: Some entry on <a href="#id1"><span class="problematic" id="id2">*</span></a>.ldif file has not properly defined and slapd can´t start and populate the ldap server</p>
+</div></blockquote>
+<p>Problem: Openldap does not show entries from ldif file</p>
+<blockquote>
+<div><p>Error: failed: bash ls -l not ldif on path</p>
+<p>Possible solution: Try to mount openldap volume with full local path of ldif folder in your machine</p>
+</div></blockquote>
+</div>
+</div>
 </div>
 
 
