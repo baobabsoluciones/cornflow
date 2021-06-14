@@ -146,7 +146,8 @@ Airflow ⇒ Cornflow
 Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
 Service user is a good solution for doing all the data interaction between applications. You have only to pay attention to one account for set permissions and key values on deployment::
 
-    CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `serviceuser@cornflow.com`)
+    CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
+    CORNFLOW_SERVICE_MAIL - service user account email (default value `service_user@cornflow.com`)
     CORNFLOW_SERVICE_PWD - service user account password (default value `servicecornflow1234`)
 
 This connection is provided by::
@@ -160,8 +161,9 @@ Manage cornflow users
 
 In the cornflow image, if no environment variables are set, an admin user is created with these credentials::
 
-    name - user@cornflow.com
-    password - cornflow1234
+    CORNFLOW_ADMIN_USER - cornflow_admin
+    CORNFLOW_ADMIN_EMAIL - cornflow_admin@cornflow.com
+    CORNFLOW_ADMIN_PWD - cornflowadmin1234
 
 It is advisable to change the default admin user and keep the password in a safe place.
 
@@ -172,8 +174,8 @@ Manage airflow users
 
 The default administrator user for airflow and flower will be::
 
-    name - admin
-    password - admin
+    AIRFLOW_USER - admin
+    AIRFLOW_PWD - admin
 
 It is advisable to change the default admin user and keep the password in a safe place.
 `Access Control of Airflow Webserver UI <https://airflow.apache.org/docs/apache-airflow/stable/security/access-control.html>`_ is handled by Flask AppBuilder (FAB). Please read its related security document regarding its `security model <http://flask-appbuilder.readthedocs.io/en/latest/security.html>`_.

@@ -5,9 +5,30 @@ Logging and monitoring
 Cornflow logs
 ****************
 
-At the moment cornflow does not have a log storage folder. All application logs are written to console output. In this way we can visualize them by launching the following command::
+Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command::
 
     docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
+
+If you want to know about the possibilities offered by the docker log engine, you can visit the official documentation `here <https://docs.docker.com/engine/reference/commandline/logs/>`_.
+
+If you want to activate the persistent log storage in files, you must pass the value ``file`` to the environment variable ``CORNFLOW_LOGGING`` in the cornflow server deployment.
+Once the log storage is activated, these will be saved in the path ``/usr/src/app/log`` inside the cornflow container.
+To permanently store the logs even if the service is destroyed, you can mount a volume against the directory as follows::
+
+    --volume /local/path/to_storage/cornflow/logs:/usr/src/app/log
+
+The log files will rotate and be compressed following the configuration provided to the logrotate service::
+
+    number of files in directory - 30
+    frequency - daily
+    log file size - 20M
+
+Two files will be created in log directory::
+
+    info.log - record messages with access to the application with the default log level value ``info``
+    error.log - here the application errors will be recorded
+
+The compressed logs will have this format: ``info.log.1.gz``
 
 Airflow logs
 ****************

@@ -15,7 +15,8 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		git \
 		python3-dev \
 		libffi-dev \
-		libpq-dev
+		libpq-dev \
+		logrotate
 		
 # set work directory
 WORKDIR /usr/src/app
@@ -36,8 +37,9 @@ COPY migrations /usr/src/app/migrations
 COPY examples /usr/src/app/examples
 COPY initapp.sh /usr/src/app/
 COPY *.py /usr/src/app/
+RUN mkdir -p /usr/src/app/log
 
-# dos2unix for initapp.sh
+# dos2unix for a friendly entrypoint script
 RUN dos2unix initapp.sh
 RUN chmod +x initapp.sh
 
