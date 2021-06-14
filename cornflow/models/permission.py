@@ -6,9 +6,7 @@ class PermissionViewRoleModel(TraceAttributes):
     __tablename__ = "permission_view"
     __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
 
-    id = db.Column(
-        db.Integer, db.Sequence("permission_view_role_id_seq"), primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     action_id = db.Column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
     action = db.relationship("ActionModel")

@@ -2,7 +2,7 @@ from flask_testing import TestCase
 
 from cornflow.app import create_app
 from cornflow.commands import (
-    BasePermissionAssignationRegistration,
+    RegisterBasePermissions,
     CreateAdminUser,
     CreateServiceUser,
     RegisterActions,
@@ -46,7 +46,11 @@ class TestCommands(TestCase):
     def test_service_user_command(self):
         command = CreateServiceUser()
 
-        command.run(email=self.payload["email"], password=self.payload["password"])
+        command.run(
+            username="cornflow",
+            email=self.payload["email"],
+            password=self.payload["password"],
+        )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
 
@@ -56,14 +60,18 @@ class TestCommands(TestCase):
     def test_admin_user_command(self):
         command = CreateAdminUser()
 
-        command.run(email=self.payload["email"], password=self.payload["password"])
+        command.run(
+            username="administrator",
+            email=self.payload["email"],
+            password=self.payload["password"],
+        )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
 
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
 
-    def test_register_permissions(self):
+    def test_register_actions(self):
         command = RegisterActions()
         command.run()
 
@@ -123,7 +131,7 @@ class TestCommands(TestCase):
         command = RegisterRoles()
         command.run()
 
-        command = BasePermissionAssignationRegistration()
+        command = RegisterBasePermissions()
         command.run()
 
         for base in BASE_PERMISSION_ASSIGNATION:
@@ -137,3 +145,12 @@ class TestCommands(TestCase):
                     )
 
                     self.assertEqual(True, permission)
+
+    def test_argument_parsing_correct(self):
+        command = RegisterRoles()
+        command.run(verbose="0")
+
+        roles = RoleModel.query.all()
+
+        for r in roles:
+            self.assertEqual(ROLES_MAP[r.id], r.name)

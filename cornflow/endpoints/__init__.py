@@ -133,7 +133,7 @@ resources = [
     dict(resource=UserRoleListEndpoint, urls="/user/role/", endpoint="user-roles"),
     dict(
         resource=UserRoleDetailEndpoint,
-        urls="/user/role/<int:idx>/",
+        urls="/user/role/<int:user_id>/<int:role_id>/",
         endpoint="user-roles-detail",
     ),
 ]

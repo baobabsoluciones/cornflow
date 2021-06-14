@@ -1,6 +1,6 @@
-# VERSION 2.0.0
+# VERSION 2.x.x
 # AUTHOR: sistemas@baobabsoluciones.es
-# DESCRIPTION: Airflow 2.0 container based on puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_"
+# DESCRIPTION: Airflow 2.x.x image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
 
 FROM python:3.8-slim-buster
 LABEL maintainer="sistemas@baobabsoluciones"
@@ -12,7 +12,7 @@ ENV TERM linux
 # Airflow vars
 ARG AIRFLOW_VERSION=2.0.2
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
-ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.0.2/constraints-3.8.txt"
+ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.8.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
@@ -26,22 +26,28 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         ldap-utils \
         libffi6 \
         libffi-dev \
+        libldap2-dev \
 		libpq-dev \
         libsasl2-2 \
+        libsasl2-dev \
         libsasl2-modules \
         libssl1.1 \
+        libssl-dev \
         locales  \
         lsb-release \
 		python3-dev \
         sasl2-bin \
+        slapd \
         sqlite3 \
         unixodbc
 
 # install Airflow and extras: celery,postgres and redis
 RUN pip install "apache-airflow[celery,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+RUN pip install python-ldap
 
 # copy init script and config to container
 COPY scripts/initairflow.sh /initairflow.sh
+COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
 RUN chown -R airflow: /usr/local/airflow

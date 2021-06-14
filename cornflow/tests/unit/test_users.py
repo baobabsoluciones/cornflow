@@ -22,32 +22,42 @@ class TestUserEndpoint(TestCase):
         self.model = UserModel
 
         self.viewer = dict(
-            name="testviewer", email="viewer@test.com", password="testpassword"
+            username="testviewer", email="viewer@test.com", password="testpassword"
         )
 
         self.planner = dict(
-            name="testname", email="test@test.com", password="testpassword"
+            username="testname",
+            email="test@test.com",
+            password="testpassword",
+            first_name="first_planner",
+            last_name="last_planner",
         )
         self.planner_2 = dict(
-            name="testname2", email="test2@test.com", password="testpassword2"
+            username="testname2", email="test2@test.com", password="testpassword2"
         )
         self.admin = dict(
-            name="anAdminUser", email="admin@admin.com", password="testpassword"
+            username="anAdminUser", email="admin@admin.com", password="testpassword"
         )
 
         self.admin_2 = dict(
-            name="aSecondAdmin", email="admin2@admin2.com", password="testpassword2"
+            username="aSecondAdmin", email="admin2@admin2.com", password="testpassword2"
         )
 
         self.service_user = dict(
-            name="anAdminSuperUser",
+            username="anAdminSuperUser",
             email="service_user@test.com",
             password="tpass_service_user",
         )
 
-        self.login_keys = ["email", "password"]
-        self.items_to_check = ["email", "name", "id"]
-        self.modifiable_items = ["email", "name", "password"]
+        self.login_keys = ["username", "password"]
+        self.items_to_check = ["email", "username", "id"]
+        self.modifiable_items = [
+            "email",
+            "username",
+            "password",
+            "first_name",
+            "last_name",
+        ]
 
         self.payloads = [
             self.viewer,
@@ -240,25 +250,39 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(403, response.status_code)
 
     def test_edit_info(self):
-        payload = {"name": "newtestname", "email": "newtest@test.com"}
+        payload = {
+            "username": "newtestname",
+            "email": "newtest@test.com",
+            "first_name": "FirstName",
+            "last_name": "LastName",
+        }
+
         response = self.modify_info(self.planner, self.planner, payload)
         self.assertEqual(200, response.status_code)
+
         for item in self.modifiable_items:
             if item != "password":
                 self.assertEqual(response.json[item], payload[item])
                 self.assertNotEqual(response.json[item], self.planner[item])
 
     def test_admin_edit_info(self):
-        payload = {"name": "newtestname", "email": "newtest@test.com"}
+        payload = {
+            "username": "newtestname",
+            "email": "newtest@test.com",
+            "first_name": "FirstName",
+            "last_name": "LastName",
+        }
+
         response = self.modify_info(self.admin, self.planner, payload)
         self.assertEqual(200, response.status_code)
+
         for item in self.modifiable_items:
             if item != "password":
                 self.assertEqual(response.json[item], payload[item])
                 self.assertNotEqual(response.json[item], self.planner[item])
 
     def test_edit_other_user_info(self):
-        payload = {"name": "newtestname", "email": "newtest@test.com"}
+        payload = {"username": "newtestname", "email": "newtest@test.com"}
         response = self.modify_info(self.planner_2, self.planner, payload)
         self.assertEqual(403, response.status_code)
 

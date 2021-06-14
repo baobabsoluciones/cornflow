@@ -11,6 +11,11 @@ class ObjectDoesNotExist(InvalidUsage):
     error = "The object does not exist"
 
 
+class ObjectAlreadyExists(InvalidUsage):
+    status_code = 400
+    error = "The object does exist already"
+
+
 class NoPermission(InvalidUsage):
     status_code = 403
     error = "You have no permission to access the required object"
@@ -43,6 +48,8 @@ def _initialize_errorhandlers(app):
     @app.errorhandler(InvalidCredentials)
     @app.errorhandler(EndpointNotImplemented)
     @app.errorhandler(AirflowError)
+    @app.errorhandler(InvalidData)
+    @app.errorhandler(InvalidPatch)
     def handle_invalid_usage(error):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code

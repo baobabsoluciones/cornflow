@@ -1,6 +1,7 @@
 """
 External endpoint for the user to login to the cornflow webserver
 """
+
 # Import from libraries
 from flask import g, current_app
 from flask_apispec import use_kwargs, doc
@@ -38,12 +39,12 @@ class LoginEndpoint(MetaResource, MethodResource):
         """
 
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        email, password = kwargs.get("email"), kwargs.get("password")
+        username, password = kwargs.get("username"), kwargs.get("password")
 
         if AUTH_TYPE == AUTH_DB:
-            user = self.auth_db_authenticate(email, password)
+            user = self.auth_db_authenticate(username, password)
         elif AUTH_TYPE == AUTH_LDAP:
-            user = self.auth_ldap_authenticate(email, password)
+            user = self.auth_ldap_authenticate(username, password)
         else:
             raise InvalidUsage("No authentication method configured in server")
 
@@ -57,8 +58,8 @@ class LoginEndpoint(MetaResource, MethodResource):
         return {"token": token, "id": user.id}, 200
 
     @staticmethod
-    def auth_db_authenticate(email, password):
-        user = UserModel.get_one_user_by_email(email)
+    def auth_db_authenticate(username, password):
+        user = UserModel.get_one_user_by_username(username)
 
         if not user:
             raise InvalidCredentials()
@@ -80,7 +81,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             email = ldap_obj.get_user_email(username)
             if not email:
                 email = ""
-            data = {"name": username, "email": email}
+            data = {"username": username, "email": email}
             user = UserModel(data=data)
             user.save()
         # regardless whether the user is new or not:

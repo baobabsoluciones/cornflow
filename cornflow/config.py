@@ -39,7 +39,7 @@ class Development(MainEnvVars):
     TESTING = True
 
 
-class Testing(object):
+class Testing(MainEnvVars):
     """ """
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -51,18 +51,6 @@ class Testing(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"
     AIRFLOW_PWD = "admin"
-    AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
-
-    # LDAP configuration
-    LDAP_PROTOCOL_VERSION = 3
-    LDAP_BIND_PASSWORD = "adminldap"
-    LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
-    LDAP_USE_TLS = False
-    LDAP_HOST = "ldap://35.205.18.159:389"
-    LDAP_USERNAME_ATTRIBUTE = "cn"
-    LDAP_USER_BASE = "ou=user,dc=example,dc=org"
-    LDAP_EMAIL_ATTRIBUTE = "mail"
-    LDAP_USER_OBJECT_CLASS = "inetOrgPerson"
 
 
 class Production(MainEnvVars):

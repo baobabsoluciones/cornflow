@@ -77,8 +77,8 @@ Initialize the database::
     export DATABASE_URL=sqlite:///cornflow.db
     python manage.py db upgrade
     python manage.py access_init
-    python manage.py create_service_user  --email=airflow_test@admin.com --password=airflow_test_password
-    python manage.py create_admin_user  --email=cornflow_admin@admin.com --password=cornflow_admin_password
+    python manage.py create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
+    python manage.py create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
 
 Launch cornflow server
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,7 +110,7 @@ Create a virtual environment for airflow::
 
 Install airflow from pip::
 
-    AIRFLOW_VERSION=2.0.1
+    AIRFLOW_VERSION=2.0.2
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
     pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"

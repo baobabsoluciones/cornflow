@@ -1,220 +1,33 @@
-import json
+"""
+Unit test for the log in endpoint
+"""
+
+# Import from libraries
 from flask import current_app
-from flask_testing import TestCase
 
-from cornflow.app import create_app
+# Import from internal modules
 from cornflow.models import UserModel
-from cornflow.shared.const import AUTH_DB, AUTH_LDAP
 from cornflow.shared.utils import db
-from cornflow.tests.const import USER_URL, LOGIN_URL
+from cornflow.tests.custom_test_case import LoginTestCases
 
 
-class TestLogIn(TestCase):
-    def create_app(self):
-        app = create_app("testing")
-
-        return app
-
+class TestLogIn(LoginTestCases.LoginEndpoint):
     def setUp(self):
+        super().setUp()
         db.create_all()
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
-
-        if self.AUTH_TYPE == AUTH_DB:
-            self.data = {
-                "name": "testname",
-                "email": "test@test.com",
-                "password": "testpassword",
-            }
-            user = UserModel(data=self.data)
-            user.save()
-            db.session.commit()
-            # we take out the name, we do not need it to sign in
-            self.data.pop("name")
-            self.id = UserModel.query.filter_by(name="testname").first().id
-
-        elif self.AUTH_TYPE == AUTH_LDAP:
-            self.data = {"email": "testname", "password": "testpassword"}
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        self.data = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "testpassword",
+        }
+        user = UserModel(data=self.data)
+        user.save()
+        db.session.commit()
+        # we take out the email, we do not need it to log in
+        self.data.pop("email")
+        self.id = UserModel.query.filter_by(username="testname").first().id
 
     def test_successful_log_in(self):
-        payload = self.data
-
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(str, type(response.json["token"]))
-
-        if self.AUTH_TYPE == AUTH_DB:
-            self.assertEqual(self.id, response.json["id"])
-
-        elif self.AUTH_TYPE == AUTH_LDAP:
-            self.assertEqual(
-                UserModel.get_one_user_by_username(self.data["email"]).id,
-                response.json["id"],
-            )
-
-    def test_validation_error(self):
-        payload = self.data
-        payload["email"] = "test"
-
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(str, type(response.json["error"]))
-        # self.assertEqual('Not a valid email address.', response.json['error']['email'][0])
-
-    def test_missing_email(self):
-        payload = self.data
-        payload.pop("email", None)
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(str, type(response.json["error"]))
-
-    def test_missing_password(self):
-        payload = self.data
-        payload.pop("password", None)
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(str, type(response.json["error"]))
-
-    def test_invalid_email(self):
-        payload = self.data
-        payload["email"] = "test@test.org"
-
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(str, type(response.json["error"]))
-        self.assertEqual("Invalid credentials", response.json["error"])
-
-    def test_invalid_password(self):
-        payload = self.data
-        payload["password"] = "testpassword_2"
-
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(str, type(response.json["error"]))
-        self.assertEqual("Invalid credentials", response.json["error"])
-
-    def test_token(self):
-        # TODO: implement to check correct token creation
-        pass
-
-    def test_old_token(self):
-        token = (
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
-            ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
-        )
-
-        if self.AUTH_TYPE == AUTH_LDAP:
-            payload = self.data
-
-            response = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            )
-
-            self.id = response.json["id"]
-
-        response = self.client.get(
-            USER_URL + str(self.id) + "/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token,
-            },
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual("Token expired, please login again", response.json["error"])
-
-    def test_bad_format_token(self):
-        response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(self.data),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-        token = response.json["token"]
-
-        if self.AUTH_TYPE == AUTH_LDAP:
-            self.id = response.json["id"]
-
-        response = self.client.get(
-            USER_URL + str(self.id) + "/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer" + token,
-            },
-        )
-        self.assertEqual(400, response.status_code)
-
-    def test_invalid_token(self):
-        token = (
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
-            ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
-        )
-
-        if self.AUTH_TYPE == AUTH_LDAP:
-            payload = self.data
-
-            response = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            )
-            self.id = response.json["id"]
-
-        response = self.client.get(
-            USER_URL + str(self.id) + "/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token,
-            },
-        )
-
-        self.assertEqual(400, response.status_code)
-        self.assertEqual(
-            "Invalid token, please try again with a new token", response.json["error"]
-        )
+        super().test_successful_log_in()
+        self.assertEqual(self.id, self.response.json["id"])

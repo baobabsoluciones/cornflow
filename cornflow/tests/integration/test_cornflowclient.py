@@ -2,12 +2,12 @@ import json
 import pulp
 import logging as log
 import time
+import unittest
+
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
-from cornflow.shared.utils import db
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
-from cornflow.models import UserModel
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
@@ -15,6 +15,8 @@ from cornflow.shared.const import (
 )
 from cornflow.tests.const import INSTANCE_PATH
 from cornflow.shared.const import STATUS_HEALTHY
+from cornflow.schemas.solution_log import LogSchema
+from airflow_config.dags.model_functions import solve as solve_model
 
 
 def load_file(_file):
@@ -252,7 +254,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
         user_data = dict(
-            name="airflow_test@admin.com",
+            username="airflow_test@admin.com",
             email="airflow_test@admin.com",
             pwd="airflow_test_password",
         )
@@ -339,3 +341,35 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             api="dag/", id=execution.json()["id"], payload=payload
         )
         self.assertEqual(response.status_code, 201)
+
+
+class PuLPLogSchema(unittest.TestCase):
+    def solve_model(self, input_data, config):
+        return solve_model(input_data, config)
+
+    def dump_progress(self, log_dict):
+        LS = LogSchema()
+        return LS.load(log_dict)
+
+    def solve_test_progress(self):
+        with open("./cornflow/tests/data/gc_20_7.json", "r") as f:
+            data = json.load(f)
+
+        config = dict(solver="PULP_CBC_CMD", timeLimit=10)
+        solution, log, log_dict = self.solve_model(data, config)
+        loaded_data = self.dump_progress(log_dict)
+        self.assertEqual(loaded_data["solver"], "CBC")
+        self.assertEqual(loaded_data["version"], "2.9.0")
+        matrix_keys = {"nonzeros", "constraints", "variables"}
+        a = matrix_keys.symmetric_difference(loaded_data["matrix"].keys())
+        self.assertEqual(len(a), 0)
+
+    def test_progress2(self):
+        with open("./cornflow/tests/data/gc_50_3_log.json", "r") as f:
+            data = json.load(f)
+        loaded_data = self.dump_progress(data)
+        self.assertEqual(loaded_data["solver"], "CPLEX")
+        self.assertEqual(type(loaded_data["progress"]["Node"][0]), str)
+        self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)
+        self.assertEqual(type(loaded_data["cut_info"]["cuts"]["Clique"]), int)
+        self.assertEqual(type(loaded_data["nodes"]), int)

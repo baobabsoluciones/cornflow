@@ -1,10 +1,13 @@
 """
 This file contains the different custom test classes used to generalize the unit testing of cornflow.
 """
+
 # Import from libraries
 from datetime import datetime, timedelta
+from flask import current_app
 from flask_testing import TestCase
 import json
+import jwt
 from unittest.mock import patch, Mock
 
 # Import from internal modules
@@ -14,7 +17,7 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL
 
 
 try:
@@ -40,14 +43,13 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        AccessInitialization().run(verbose=0)
         data = {
-            "name": "testname",
+            "username": "testname",
             "email": "test@test.com",
             "password": "testpassword",
         }
-        # user = UserModel(data=data)
-        # user.save()
+
         self.client.post(
             SIGNUP_URL,
             data=json.dumps(data),
@@ -55,8 +57,7 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        # db.session.commit()
-        data.pop("name")
+        data.pop("email")
 
         self.token = self.client.post(
             LOGIN_URL,
@@ -84,22 +85,35 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-    def create_role(self, id, role_id):
-        user_role = UserRoleModel({"user_id": id, "role_id": role_id})
-        user_role.save()
-        db.session.commit()
+    def create_role(self, user_id, role_id):
+
+        if UserRoleModel.check_if_role_assigned(user_id, role_id):
+            user_role = UserRoleModel.query.filter_by(
+                user_id=user_id, role_id=role_id
+            ).first()
+        else:
+            user_role = UserRoleModel({"user_id": user_id, "role_id": role_id})
+            user_role.save()
         return user_role
+
+    def create_role_endpoint(self, user_id, role_id, token):
+        return self.client.post(
+            USER_ROLE_URL,
+            data=json.dumps({"user_id": user_id, "role_id": role_id}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(token),
+        )
 
     def create_user_with_role(self, role_id):
         data = {
-            "name": "testuser" + str(role_id),
+            "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
             "password": "testpassword",
         }
         response = self.create_user(data)
         self.create_role(response.json["id"], role_id)
 
-        data.pop("name")
+        data.pop("email")
         return self.client.post(
             LOGIN_URL,
             data=json.dumps(data),
@@ -425,4 +439,210 @@ class BaseTestCases:
                 payload,
                 expected_status=400,
                 check_payload=False,
+            )
+
+
+class LoginTestCases:
+    class LoginEndpoint(TestCase):
+        def create_app(self):
+            app = create_app("testing")
+            return app
+
+        def setUp(self):
+            db.create_all()
+            self.data = None
+            self.response = None
+
+        def tearDown(self):
+            db.session.remove()
+            db.drop_all()
+
+        def test_successful_log_in(self):
+            payload = self.data
+
+            self.response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(200, self.response.status_code)
+            self.assertEqual(str, type(self.response.json["token"]))
+
+        def test_validation_error(self):
+            payload = self.data
+            payload["email"] = "test"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_missing_username(self):
+            payload = self.data
+            payload.pop("username", None)
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_missing_password(self):
+            payload = self.data
+            payload.pop("password", None)
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+
+        def test_invalid_username(self):
+            payload = self.data
+            payload["username"] = "invalid_username"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+            self.assertEqual("Invalid credentials", response.json["error"])
+
+        def test_invalid_password(self):
+            payload = self.data
+            payload["password"] = "testpassword_2"
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(str, type(response.json["error"]))
+            self.assertEqual("Invalid credentials", response.json["error"])
+
+        def test_old_token(self):
+            token = (
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
+                ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
+            )
+
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(
+                "Token expired, please login again", response.json["error"]
+            )
+
+        def test_bad_format_token(self):
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(self.data),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            token = response.json["token"]
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer" + token,
+                },
+            )
+            self.assertEqual(400, response.status_code)
+
+        def test_invalid_token(self):
+            token = (
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
+                ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
+            )
+
+            payload = self.data
+
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+            self.id = response.json["id"]
+
+            response = self.client.get(
+                USER_URL + str(self.id) + "/",
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(400, response.status_code)
+            self.assertEqual(
+                "Invalid token, please try again with a new token",
+                response.json["error"],
+            )
+
+        def test_token(self):
+            payload = self.data
+
+            self.response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(200, self.response.status_code)
+            self.assertEqual(str, type(self.response.json["token"]))
+            decoded_token = jwt.decode(
+                self.response.json["token"],
+                current_app.config["SECRET_KEY"],
+                algorithms="HS256",
+            )
+
+            self.assertAlmostEqual(
+                datetime.utcnow(),
+                datetime.utcfromtimestamp(decoded_token["iat"]),
+                delta=timedelta(seconds=1),
             )

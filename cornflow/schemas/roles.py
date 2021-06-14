@@ -37,5 +37,5 @@ class UserRoleResponse(UserRoleRequest):
     """
 
     id = fields.Int()
-    user = fields.Function(lambda obj: obj.user.name)
+    user = fields.Function(lambda obj: obj.user.username)
     role = fields.Function(lambda obj: obj.role.name)
