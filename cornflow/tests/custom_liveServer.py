@@ -33,7 +33,7 @@ class CustomTestCaseLive(LiveServerTestCase):
             db.create_all()
         AccessInitialization().run()
         user_data = dict(
-            name="testname",
+            username="testname",
             email="test@test.com",
             pwd="testpassword",
         )
