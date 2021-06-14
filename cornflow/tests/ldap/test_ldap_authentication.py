@@ -23,7 +23,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def test_successful_log_in(self):
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["userame"]).id,
             self.response.json["id"],
         )
 
@@ -31,7 +31,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {"username": "viewer", "password": "viewer1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["userame"]).id,
             self.response.json["id"],
         )
 
@@ -39,7 +39,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {"username": "administrator", "password": "administrator1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["userame"]).id,
             self.response.json["id"],
         )
 
@@ -47,7 +47,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {"username": "cornflow", "password": "cornflow1234"}
         super().test_successful_log_in()
         self.assertEqual(
-            UserModel.get_one_user_by_username(self.data["email"]).id,
+            UserModel.get_one_user_by_username(self.data["userame"]).id,
             self.response.json["id"],
         )
 
