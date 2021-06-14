@@ -89,8 +89,10 @@ class MetaResource(Resource):
         item.save()
         return item, 201
 
-    def put_detail(self, data, *args):
-        item = self.query(*args)
+    def put_detail(self, data, *args, model=None):
+        if model is None:
+            model = self.query
+        item = model(*args)
         if item is None:
             raise ObjectDoesNotExist()
 
@@ -100,8 +102,11 @@ class MetaResource(Resource):
 
         return {"message": "Updated correctly"}, 200
 
-    def patch_detail(self, data, *args):
-        item = self.query(*args)
+    def patch_detail(self, data, *args, model=None):
+        if model is None:
+            model = self.query
+        item = model(*args)
+
         if item is None:
             raise ObjectDoesNotExist()
 

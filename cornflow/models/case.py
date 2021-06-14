@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import JSON
 
 # Import from internal modules
 from .meta_model import BaseDataModel
-from ..shared.exceptions import InvalidPatch
+from ..shared.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
 from ..shared.utils import db, hash_json_256
 
 
@@ -93,6 +93,19 @@ class CaseModel(BaseDataModel):
         self.solution = data.get("solution", None)
         self.solution_hash = hash_json_256(self.solution)
 
+    @classmethod
+    def from_parent_id(cls, user, data):
+        if data.get("parent_id") is None:
+            # we assume at root
+            return cls(data, parent=None)
+        # we look for the parent object
+        parent = cls.get_one_object_from_user(user, data["parent_id"])
+        if parent is None:
+            raise ObjectDoesNotExist("Parent does not exist")
+        if parent.data is not None:
+            raise InvalidData("Parent cannot be a case")
+        return cls(data, parent=parent)
+
     def patch(self, data):
         """
         Method to patch the case
@@ -110,10 +123,14 @@ class CaseModel(BaseDataModel):
         super().update(data)
 
     def delete(self):
-        children = [n for n in self.descendants]
-        for n in children:
-            n.delete()
-        super().delete()
+        try:
+            children = [n for n in self.descendants]
+            for n in children:
+                db.session.delete(n)
+            db.session.delete(self)
+            db.session.commit()
+        except:
+            db.session.rollback()
 
     @staticmethod
     def apply_patch(original_data, data_patch):

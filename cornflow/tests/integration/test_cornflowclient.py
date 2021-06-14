@@ -76,8 +76,8 @@ class TestCornflowClientBasic(CustomTestCaseLive):
 
     def create_new_case_payload(self, payload):
         response = self.client.create_case(**payload)
-        log.debug("Created case with id: {}".format(response["id"]))
         self.assertTrue("id" in response)
+        log.debug("Created case with id: {}".format(response["id"]))
         case = self.client.get_one_case(response["id"])
         log.debug("Case with id={} exists in server".format(case["id"]))
         self.assertEqual(case["id"], response["id"])
@@ -232,10 +232,18 @@ class TestCornflowClient(TestCornflowClientBasic):
         payload["schema"] = "solve_model_dag"
         self.create_new_instance_payload(payload)
 
-    def test_new_case_without_path(self):
+    def test_new_case_without_parent(self):
         payload = load_file(INSTANCE_PATH)
-        payload["path"] = ""
         self.create_new_case_payload(payload)
+
+    def test_new_case_with_parent(self):
+        payload = load_file(INSTANCE_PATH)
+        payload_dir = dict(payload)
+        payload_dir.pop("data")
+        response = self.client.create_case(**payload_dir)
+        payload["parent_id"] = response["id"]
+        case2 = self.create_new_case_payload(payload)
+        self.assertEqual(case2["path"], "{}/".format(response["id"]))
 
     def test_server_alive(self):
         data = self.client.is_alive()
