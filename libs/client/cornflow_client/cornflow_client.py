@@ -140,16 +140,22 @@ class CornFlow(object):
             )
         return response.json()
 
-    def create_case(self, name, schema, path, data, description="", solution=None):
+    def create_case(
+        self, name, schema, data=None, parent_id=None, description="", solution=None
+    ):
         payload = dict(
-            data=data,
             name=name,
             description=description,
             schema=schema,
-            path=path,
+            parent_id=parent_id,
         )
+        # Both data AND solution are optional.
+        # data is optional in directories.
+        # solutions in unsolved instances
+        if data is not None:
+            payload["data"] = data
         if solution is not None:
-            payload["solution"] = None
+            payload["solution"] = solution
         response = self.create_api("case/", json=payload)
         if response.status_code != 201:
             raise CornFlowApiError(
@@ -157,16 +163,6 @@ class CornFlow(object):
                     response.status_code, response.text
                 )
             )
-        return response.json()
-
-    @log_call
-    @ask_token
-    def get_all_cases(self):
-        response = requests.get(
-            urljoin(self.url, "case/"),
-            headers={"Authorization": "access_token " + self.token},
-            json={},
-        )
         return response.json()
 
     @ask_token
@@ -288,6 +284,17 @@ class CornFlow(object):
     def get_all_instances(self, params=None):
         response = requests.get(
             urljoin(self.url, "instance/"),
+            headers={"Authorization": "access_token " + self.token},
+            json={},
+            params=params,
+        )
+        return response.json()
+
+    @log_call
+    @ask_token
+    def get_all_cases(self, params=None):
+        response = requests.get(
+            urljoin(self.url, "case/"),
             headers={"Authorization": "access_token " + self.token},
             json={},
             params=params,
