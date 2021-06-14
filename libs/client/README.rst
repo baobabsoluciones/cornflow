@@ -13,7 +13,7 @@ Install cornflow-client
 
 To install the package do::
 
-    py -m pip install cornflow-client
+    python3 -m pip install cornflow-client
 
 Use cornflow-client
 ~~~~~~~~~~~~~~~~~~~~
@@ -25,8 +25,8 @@ To use, first you have to import the package::
 Then you have to start up the client and login or sing up::
 
     client = CornFlow(url="URL_TO_THE_WEB_SERVER")
-    client.sing_up(email, password, name)
-    client.login(email, password)
+    client.sign_up(username, email, password)
+    client.login(username, password)
 
 And then finally you can use the cornflow webserver and start solving problems::
 

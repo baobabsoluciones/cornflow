@@ -87,10 +87,10 @@ class CornFlow(object):
         )
 
     @log_call
-    def sign_up(self, email, pwd, name):
+    def sign_up(self, username, email, pwd):
         return requests.post(
             urljoin(self.url, "signup/"),
-            json={"email": email, "password": pwd, "name": name},
+            json={"username": username, "password": pwd, "email": email},
         )
 
     @log_call
@@ -104,9 +104,9 @@ class CornFlow(object):
             )
         )
 
-    def login(self, email, pwd):
+    def login(self, username, pwd):
         response = requests.post(
-            urljoin(self.url, "login/"), json={"email": email, "password": pwd}
+            urljoin(self.url, "login/"), json={"username": username, "password": pwd}
         )
         if response.status_code == 200:
             result = response.json()
