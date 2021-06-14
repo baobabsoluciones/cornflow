@@ -15,8 +15,8 @@ class CaseRawRequest(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
     schema = fields.Str(required=True)
-    path = fields.Str(required=True)
-    data = fields.Raw(required=True)
+    parent_id = fields.Int(allow_none=True)
+    data = fields.Raw()
     solution = fields.Raw()
 
 
@@ -31,6 +31,10 @@ class CaseListResponse(Schema):
     updated_at = fields.DateTime()
     schema = fields.Str()
     dependents = fields.List(fields.Int())
+    is_dir = fields.Function(
+        lambda obj: obj.data is None, deserialize=lambda v: bool(v)
+    )
+    # uppername = fields.Function(lambda obj: obj.name.upper())
 
 
 class CaseBase(CaseListResponse):
@@ -59,7 +63,7 @@ class CaseFromInstanceExecution(Schema):
     execution_id = fields.Str()
     name = fields.Str(required=True)
     description = fields.Str()
-    path = fields.Str(required=True)
+    parent_id = fields.Int(allow_none=True)
 
 
 class CaseToInstanceResponse(Schema):

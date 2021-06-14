@@ -1,6 +1,5 @@
 {
   "name": "test_case_gc",
   "description": "Test case from graph coloring raw data",
-  "schema": "gc",
-  "path": ""
+  "schema": "gc"
 }

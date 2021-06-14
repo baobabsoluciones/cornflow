@@ -2,7 +2,6 @@
     "name":  "test_case_2",
     "description":  "Second test case from raw data",
     "schema":  "solve_model_dag",
-    "path": "",
     "data": {
     "objective": {
         "name": "obj",
