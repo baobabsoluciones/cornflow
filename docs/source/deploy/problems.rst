@@ -6,6 +6,15 @@ When deploying cornflow through docker, you may run into one of the following pr
 Situations
 *************
 
+Development
+^^^^^^^^^^^^^^^
+
+Problem: Possible error with psycopg2
+
+    Error: Error pg_config executable not found.  
+    
+    Possible solution: The installation of the psycopg2 may generate an error because it does not find the pg_config file. One way to solve this problem is to previously install libpq-dev which installs pg_config ("sudo apt install libpq-dev")
+
 Docker build
 ^^^^^^^^^^^^^^^
 

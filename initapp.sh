@@ -35,17 +35,7 @@ export \
   FLASK_ENV \
   CORNFLOW_LOGGING \
   SECRET_KEY \
-  AUTH_TYPE \
-  LDAP_PROTOCOL_VERSION \
-  LDAP_BIND_PASSWORD \
-  LDAP_BIND_DN \
-  LDAP_USE_TLS \
-  LDAP_HOST \
-  LDAP_USERNAME_ATTRIBUTE \
-  LDAP_USER_BASE \
-  LDAP_EMAIL_ATTRIBUTE \
-  LDAP_USER_OBJECT_CLASS \
-  LDAP_GROUP_OBJECT_CLASS
+  AUTH_TYPE
 
 # check database param from docker env
 if [ -z "$CORNFLOW_DB_CONN" ];  then
@@ -85,6 +75,23 @@ if [ "$AUTH_TYPE" = "2" ]; then
     : "${LDAP_GROUP_TO_ROLE_VIEWER:="viewers"}"
     : "${LDAP_GROUP_TO_ROLE_PLANNER:="planners"}"
   >&2 printf '%s\n' "Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
+  export \
+    LDAP_PROTOCOL_VERSION \
+    LDAP_BIND_PASSWORD \
+    LDAP_BIND_DN \
+    LDAP_USE_TLS\
+    LDAP_HOST \
+    LDAP_USERNAME_ATTRIBUTE \
+    LDAP_USER_BASE \
+    LDAP_EMAIL_ATTRIBUTE \
+    LDAP_USER_OBJECT_CLASS \
+    LDAP_GROUP_OBJECT_CLASS \
+    LDAP_GROUP_ATTRIBUTE \
+    LDAP_GROUP_BASE \
+    LDAP_GROUP_TO_ROLE_SERVICE \
+    LDAP_GROUP_TO_ROLE_ADMIN \
+    LDAP_GROUP_TO_ROLE_VIEWER \
+    LDAP_GROUP_TO_ROLE_PLANNER
 fi
 
 if [ "$CORNFLOW_LOGGING" == "file" ]; then
@@ -109,9 +116,9 @@ python manage.py access_init
 # create user if auth type is db
 if [ "$AUTH_TYPE" = "1" ]; then
   # create cornflow admin user
-  python manage.py create_admin_user --email="$CORNFLOW_ADMIN_EMAIL" --password="$CORNFLOW_ADMIN_PWD"
+  python manage.py create_admin_user --username="$CORNFLOW_ADMIN_USER" --email="$CORNFLOW_ADMIN_EMAIL" --password="$CORNFLOW_ADMIN_PWD"
   # create cornflow service user
-  python manage.py create_service_user --email="$CORNFLOW_SERVICE_EMAIL" --password="$CORNFLOW_SERVICE_PWD"
+  python manage.py create_service_user --username="$CORNFLOW_SERVICE_USER" --email="$CORNFLOW_SERVICE_EMAIL" --password="$CORNFLOW_SERVICE_PWD"
 fi
 
 # execute gunicorn with config file "gunicorn.py"
