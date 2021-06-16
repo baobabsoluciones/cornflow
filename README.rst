@@ -339,14 +339,3 @@ If you have a database server and you only want to create the database or, for e
 
 `Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.0.2/index.html>`_
 
-Development known errors
----------------------------
-
-Possible error with psycopg2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The installation of the psycopg2 may generate an error because it does not find the pg_config file.
-
-One way to solve this problem is to previously install libpq-dev which installs pg_config::
-
-    sudo apt install libpq-dev
