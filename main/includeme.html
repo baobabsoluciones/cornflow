@@ -111,10 +111,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#help-me">Help me</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#development-known-errors">Development known errors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#possible-error-with-psycopg2">Possible error with psycopg2</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">Concepts</a></li>
@@ -238,11 +234,6 @@
 </ul>
 </li>
 <li><p><a class="reference internal" href="#help-me" id="id16">Help me</a></p></li>
-<li><p><a class="reference internal" href="#development-known-errors" id="id17">Development known errors</a></p>
-<ul>
-<li><p><a class="reference internal" href="#possible-error-with-psycopg2" id="id18">Possible error with psycopg2</a></p></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -538,17 +529,6 @@ By default, docker-airflow runs Airflow with SequentialExecutor:</p>
 <p><a class="reference external" href="https://baobabsoluciones.github.io/corn/main/includeme.html#install-cornflow">Cornflow complete install documentation</a></p>
 <p><a class="reference external" href="https://baobabsoluciones.github.io/corn/deploy/index.html">Deploy cornflow with docker</a></p>
 <p><a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/2.0.2/index.html">Airflow documentation</a></p>
-</div>
-<div class="section" id="development-known-errors">
-<h2><a class="toc-backref" href="#id17">Development known errors</a><a class="headerlink" href="#development-known-errors" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="possible-error-with-psycopg2">
-<h3><a class="toc-backref" href="#id18">Possible error with psycopg2</a><a class="headerlink" href="#possible-error-with-psycopg2" title="Permalink to this headline">¶</a></h3>
-<p>The installation of the psycopg2 may generate an error because it does not find the pg_config file.</p>
-<p>One way to solve this problem is to previously install libpq-dev which installs pg_config:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 

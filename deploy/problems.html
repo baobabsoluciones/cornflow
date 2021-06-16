@@ -166,6 +166,14 @@
 <p>When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.</p>
 <div class="section" id="situations">
 <h2>Situations<a class="headerlink" href="#situations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="development">
+<h3>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h3>
+<p>Problem: Possible error with psycopg2</p>
+<blockquote>
+<div><p>Error: Error pg_config executable not found.</p>
+<p>Possible solution: The installation of the psycopg2 may generate an error because it does not find the pg_config file. One way to solve this problem is to previously install libpq-dev which installs pg_config (“sudo apt install libpq-dev”)</p>
+</div></blockquote>
+</div>
 <div class="section" id="docker-build">
 <h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this headline">¶</a></h3>
 <p>Problem: The volume airflow_config can´t be mounted.</p>
