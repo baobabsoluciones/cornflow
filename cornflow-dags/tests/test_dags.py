@@ -1,59 +1,87 @@
 import os, sys
+
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
 import unittest
 from unittest.mock import patch, Mock
 
 try:
-    from DAG.update_all_schemas import get_all_apps
+    from DAG.update_all_schemas import _import_file
 except ImportError:
-    from update_all_schemas import get_all_apps
+    from update_all_schemas import _import_file
 from cornflow_client import SchemaManager
 from cornflow_client.airflow.dag_utilities import cf_solve
 
 
-class DAGTests(unittest.TestCase):
+class BaseDAGTests:
+    class SolvingTests(unittest.TestCase):
+        def setUp(self) -> None:
+            self.app = None
+            self.config = {}
 
-    def setUp(self) -> None:
-        self.apps = get_all_apps()
+        def test_schema_load(self):
+            self.assertIsInstance(self.app.instance, dict)
+            self.assertIsInstance(self.app.solution, dict)
 
-    def test_schema_load(self):
-        for app in self.apps:
-            with self.subTest(app=app.name):
-                self.assertIsInstance(app.instance, dict)
-                self.assertIsInstance(app.solution, dict)
-
-    def test_try_solving_testcase(self):
-        for app in self.apps:
+        def test_try_solving_testcase(self, config=None):
+            config = config or self.config
             try:
-                tests = app.test_cases()
+                tests = self.app.test_cases()
             except:
-                continue
+                return
             for pos, data in enumerate(tests):
-                with self.subTest(app=app.name, test=pos):
-                    marshm = SchemaManager(app.instance).jsonschema_to_flask()
-                    marshm().load(data)
-                    solution, log, log_dict = app.solve(data, {})
-                    marshm = SchemaManager(app.solution).jsonschema_to_flask()
-                    marshm().load(solution)
-                    marshm().validate(solution)
-                    self.assertTrue(len(solution) > 0)
+                marshm = SchemaManager(self.app.instance).jsonschema_to_flask()
+                marshm().load(data)
+                solution, log, log_dict = self.app.solve(data, config)
+                marshm = SchemaManager(self.app.solution).jsonschema_to_flask()
+                marshm().load(solution)
+                marshm().validate(solution)
+                self.assertTrue(len(solution) > 0)
 
-    @patch("cornflow_client.airflow.dag_utilities.get_arg")
-    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
-    def test_complete_solve(self, connectCornflow, getArg):
-        for app in self.apps:
+        @patch("cornflow_client.airflow.dag_utilities.get_arg")
+        @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+        def test_complete_solve(self, connectCornflow, getArg, config=None):
+            config = config or self.config
             try:
-                tests = app.test_cases()
+                tests = self.app.test_cases()
             except:
-                continue
+                return
             for pos, data in enumerate(tests):
-                with self.subTest(app=app.name, test=pos):
-                    mock = Mock()
-                    mock.get_data.return_value = dict(data=data, config={})
-                    connectCornflow.return_value = mock
-                    getArg.return_value = ""
-                    cf_solve(fun=app.solve, dag_name=app.name, secrets="")
-                    getArg.assert_called()
-                    mock.get_data.assert_called_once()
-                    mock.write_solution.assert_called_once()
+                mock = Mock()
+                mock.get_data.return_value = dict(data=data, config=config)
+                connectCornflow.return_value = mock
+                getArg.return_value = ""
+                cf_solve(fun=self.app.solve, dag_name=self.app.name, secrets="")
+                getArg.assert_called()
+                mock.get_data.assert_called_once()
+                mock.write_solution.assert_called_once()
+
+
+class Hackathon(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("hk_2020_dag")
+
+    def test_solve_ortools(self):
+        return self.test_try_solving_testcase(dict(solver="ortools"))
+
+
+class GraphColor(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("graph_coloring")
+
+
+class PedidoSugerido(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("pedido_sugerido")
+
+    def test_solve_other(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm1"))
+
+
+class PuLP(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("optim_dag")
