@@ -86,14 +86,8 @@ def connect_to_cornflow(secrets):
         url += ":{uri.port}".format(uri=conn)
     if conn.path:
         url += "{uri.path}/".format(uri=conn)
-    # TODO: delete this when migrated
-    url2 = "http://{}:{}{}/".format(conn.hostname, conn.port, conn.path)
-    try:
-        airflow_user = CornFlow(url=url)
-        airflow_user.login(username=conn.username, pwd=conn.password)
-    except:
-        airflow_user = CornFlow(url=url2)
-        airflow_user.login(username=conn.username, pwd=conn.password)
+    airflow_user = CornFlow(url=url)
+    airflow_user.login(username=conn.username, pwd=conn.password)
     return airflow_user
 
 
