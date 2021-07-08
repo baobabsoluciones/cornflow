@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow-client",
-    version="0.24.0",
+    version="0.26.0",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="Client to connect to a cornflow server",
@@ -21,9 +21,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 2 - Pre-Alpha"
+        "Development Status :: 2 - Pre-Alpha",
     ],
-    python_requires='>=3.6',
-    include_package_data = True,
-    install_requires=required
+    python_requires=">=3.6",
+    include_package_data=True,
+    install_requires=required,
 )
