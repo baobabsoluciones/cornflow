@@ -3,7 +3,14 @@ import os, sys
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
+
+# we mock everything that's airflow related:
+mymodule = MagicMock()
+sys.modules["airflow"] = mymodule
+sys.modules["airflow.operators.python"] = mymodule
+sys.modules["airflow.models"] = mymodule
+sys.modules["airflow.secrets.environment_variables"] = mymodule
 
 try:
     from DAG.update_all_schemas import _import_file
@@ -70,15 +77,6 @@ class GraphColor(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         self.app = _import_file("graph_coloring")
-
-
-class PedidoSugerido(BaseDAGTests.SolvingTests):
-    def setUp(self):
-        super().setUp()
-        self.app = _import_file("pedido_sugerido")
-
-    def test_solve_other(self):
-        return self.test_try_solving_testcase(dict(solver="algorithm1"))
 
 
 class PuLP(BaseDAGTests.SolvingTests):
