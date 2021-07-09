@@ -1,0 +1,31 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"routes": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"route": {
+						"type": "integer"
+					},
+					"node": {
+						"type": "integer"
+					},
+					"pos": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"route",
+					"node",
+					"pos"
+				]
+			}
+		}
+	},
+	"required": [
+		"routes"
+	]
+}

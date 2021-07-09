@@ -37,7 +37,7 @@ def _import_file(filename):
 
 def is_app(dag_module):
     filename, ext = os.path.splitext(dag_module)
-    if ext != ".py":
+    if ext not in [".py", ""]:
         return False
     try:
         _module = _import_file(filename)

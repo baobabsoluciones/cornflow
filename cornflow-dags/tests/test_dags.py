@@ -79,6 +79,18 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.app = _import_file("graph_coloring")
 
 
+class PedidoSugerido(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("pedido_sugerido")
+
+    def test_solve_other(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm1"))
+
+    def test_solve_other3(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm3"))
+
+
 class PuLP(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
