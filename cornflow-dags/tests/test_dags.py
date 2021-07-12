@@ -91,7 +91,7 @@ class Knapsack(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="Random"))
 
     def test_solve_other3(self):
-        return self.test_try_solving_testcase(dict(solver="algorithm3"))
+        return self.test_try_solving_testcase(dict(solver="Direct"))
 
 
 class PuLP(BaseDAGTests.SolvingTests):
