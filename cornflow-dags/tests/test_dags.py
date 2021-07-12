@@ -79,13 +79,16 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.app = _import_file("graph_coloring")
 
 
-class PedidoSugerido(BaseDAGTests.SolvingTests):
+class Knapsack(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
-        self.app = _import_file("pedido_sugerido")
+        self.app = _import_file("knapsack")
 
-    def test_solve_other(self):
-        return self.test_try_solving_testcase(dict(solver="algorithm1"))
+    def test_solve_dynamic(self):
+        return self.test_try_solving_testcase(dict(solver="Dynamic"))
+
+    def test_solve_random(self):
+        return self.test_try_solving_testcase(dict(solver="Random"))
 
     def test_solve_other3(self):
         return self.test_try_solving_testcase(dict(solver="algorithm3"))
