@@ -20,7 +20,10 @@ class Heuristic(Experiment):
         min_weight_obj = min(self.weights)
         self.log += "Inserting the objects one by one\n"
         i = 0
-        while i < len(self.weights) and min_weight_obj < self.instance.data["weight_capacity"] - total_weight:
+        while (
+            i < len(self.weights)
+            and min_weight_obj < self.instance.data["weight_capacity"] - total_weight
+        ):
             if self.weights[i] + total_weight <= self.instance.data["weight_capacity"]:
                 total_weight += self.weights[i]
                 self.solution.data["include"].append(dict(id=i))

@@ -12,3 +12,6 @@ class Solution:
     def to_json(self, path):
         with open(path, "w") as f:
             json.dump(self.to_dict(), f)
+
+    def copy(self):
+        return Solution(json.loads(json.dumps(self.data)))

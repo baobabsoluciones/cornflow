@@ -4,8 +4,8 @@
     "solver":{
       "type": "string"
     },
-    "timer":{
-      "type": "integer"
+    "timeLimit":{
+      "type": "number"
     }
   }
 }

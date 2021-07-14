@@ -1,6 +1,7 @@
 import cornflow_client.airflow.dag_utilities as utils
 from airflow.operators.python import PythonOperator
 from airflow import DAG
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 from timeit import default_timer as timer
 import os
 from .schemas import instance_schema, solution_schema, config_schema
@@ -55,8 +56,15 @@ def test_cases():
 
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 
+
+def run_solve(**kwargs):
+    return utils.cf_solve(
+        fun=solve, dag_name=name, secrets=EnvironmentVariablesBackend(), **kwargs
+    )
+
+
 knapsack = PythonOperator(
     task_id=name,
-    python_callable=solve,
+    python_callable=run_solve,
     dag=dag,
 )
