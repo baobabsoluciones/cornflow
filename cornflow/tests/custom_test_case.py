@@ -132,14 +132,15 @@ class CustomTestCase(TestCase):
         db.drop_all()
 
     def create_new_row(
-        self, url, model, payload, expected_status=201, check_payload=True
+        self, url, model, payload, expected_status=201, check_payload=True, token=None
     ):
+        token = token or self.token
 
         response = self.client.post(
             url,
             data=json.dumps(payload),
             follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
+            headers=self.get_header_with_auth(token),
         )
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
@@ -176,8 +177,7 @@ class CustomTestCase(TestCase):
     def get_one_row(
         self, url, payload, expected_status=200, check_payload=True, token=None
     ):
-        if token is None:
-            token = self.token
+        token = token or self.token
 
         row = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(token)
@@ -199,13 +199,21 @@ class CustomTestCase(TestCase):
         return rows.json
 
     def update_row(
-        self, url, change, payload_to_check, expected_status=200, check_payload=True
+        self,
+        url,
+        change,
+        payload_to_check,
+        expected_status=200,
+        check_payload=True,
+        token=None,
     ):
+        token = token or self.token
+
         response = self.client.put(
             url,
             data=json.dumps(change),
             follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
+            headers=self.get_header_with_auth(token),
         )
 
         self.assertEqual(expected_status, response.status_code)
@@ -214,7 +222,7 @@ class CustomTestCase(TestCase):
             return response.json
 
         row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+            url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
 
         self.assertEqual(200, row.status_code)

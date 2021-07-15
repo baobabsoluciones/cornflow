@@ -56,9 +56,10 @@ class DAGEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         solution_schema = req_data.pop("solution_schema", "pulp")
-
+        # TODO: the solution_schema maybe we should get it from the created execution_id?
+        #  at least, check they have the same schema-name
         # Check data format
-        data = req_data.get("execution_results")
+        data = req_data.get("data")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -74,7 +75,6 @@ class DAGEndpoint(MetaResource, MethodResource):
             raise ObjectDoesNotExist()
         state = req_data.get("state", EXEC_STATE_CORRECT)
         new_data = dict(
-            finished=True,
             state=state,
             state_message=EXECUTION_STATE_MESSAGE_DICT[state],
             # because we do not want to store airflow's user:
@@ -82,11 +82,11 @@ class DAGEndpoint(MetaResource, MethodResource):
         )
         # newly validated data from marshmallow
         if data is not None:
-            new_data["execution_results"] = data
+            new_data["data"] = data
         req_data.update(new_data)
         execution.update(req_data)
         execution.save()
-        return {"message": "results successfully saved"}, 201
+        return {"message": "results successfully saved"}, 200
 
     @doc(description="Get input data and configuration for an execution", tags=["DAGs"])
     @Auth.auth_required
@@ -126,7 +126,7 @@ class DAGEndpointManual(MetaResource, MethodResource):
         solution_schema = kwargs.pop("dag_name", None)
 
         # Check data format
-        data = kwargs.get("execution_results")
+        data = kwargs.get("data")
         # TODO: create a function to validate and replace data/ execution_results
         if data is None:
             # only check format if executions_results exist
@@ -143,10 +143,10 @@ class DAGEndpointManual(MetaResource, MethodResource):
         kwargs_copy["state"] = EXEC_STATE_MANUAL
         kwargs_copy["user_id"] = self.get_user_id()
         if data is not None:
-            kwargs_copy["execution_results"] = data
+            kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
         log.info(
             "User {} manually edited execution {}".format(self.get_user_id(), item.id)
         )
-        return item, 201
+        return item, 200
