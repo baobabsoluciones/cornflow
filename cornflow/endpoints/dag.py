@@ -149,4 +149,4 @@ class DAGEndpointManual(MetaResource, MethodResource):
         log.info(
             "User {} manually edited execution {}".format(self.get_user_id(), item.id)
         )
-        return item, 200
+        return item, 201

@@ -43,7 +43,8 @@ class Testing(MainEnvVars):
     """ """
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DEBUG = True
+    DEBUG = False
+    PROPAGATE_EXCEPTIONS = True
     TESTING = True
     SECRET_KEY = "TESTINGSECRETKEY"
     SQLALCHEMY_DATABASE_URI = "sqlite:///cornflow_test.db"
@@ -59,6 +60,9 @@ class Production(MainEnvVars):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
+    # needs to be on to avoid getting only 500 codes:
+    # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
+    PROPAGATE_EXCEPTIONS = True
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}

@@ -23,7 +23,7 @@ class CustomTestCaseLive(LiveServerTestCase):
 
     def login_or_signup(self, user_data):
         try:
-            response = self.client.login(user_data["email"], user_data["pwd"])
+            response = self.client.login(user_data["username"], user_data["pwd"])
         except cf.CornFlowApiError:
             response = self.client.sign_up(**user_data).json()
         return response
@@ -60,7 +60,6 @@ class CustomTestCaseLive(LiveServerTestCase):
         user_role.save()
 
         db.session.commit()
-        data.pop("username")
 
         return self.login_or_signup(data)["token"]
 
