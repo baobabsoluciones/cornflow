@@ -1,11 +1,17 @@
+"""
+Unit test for the instances endpoints
+"""
+
+# Import from libraries
+import hashlib
 import json
 import zlib
-import hashlib
-from cornflow.shared.utils import hash_json_256
 
+# Import from internal modules
 from cornflow.models import InstanceModel
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+from cornflow.shared.utils import hash_json_256
 from cornflow.tests.const import INSTANCE_URL, INSTANCES_LIST, INSTANCE_PATH
+from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
 
 class TestInstancesListEndpoint(BaseTestCases.ListFilters):
