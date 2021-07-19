@@ -117,7 +117,8 @@
           "type": "string"
         }, 
         "parent_id": {
-          "type": "integer"
+          "type": "integer", 
+          "x-nullable": true
         }
       }, 
       "required": [

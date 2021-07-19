@@ -10,8 +10,6 @@ from cornflow.tests.const import (
     INSTANCE_URL,
 )
 
-# TODO: tests of the dag endpoint (put, post)
-
 
 class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
     def setUp(self):

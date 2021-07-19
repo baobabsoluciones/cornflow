@@ -110,7 +110,7 @@ Create a virtual environment for airflow::
 
 Install airflow from pip::
 
-    AIRFLOW_VERSION=2.0.2
+    AIRFLOW_VERSION=2.1.0
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
     pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
@@ -337,5 +337,5 @@ If you have a database server and you only want to create the database or, for e
 
 `Deploy cornflow with docker <https://baobabsoluciones.github.io/corn/deploy/index.html>`_
 
-`Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.0.2/index.html>`_
+`Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.1.0/index.html>`_
 

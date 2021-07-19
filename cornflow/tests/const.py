@@ -7,6 +7,7 @@ EXECUTION_PATH = "./cornflow/tests/data/new_execution.json"
 EXECUTIONS_LIST = [EXECUTION_PATH, "./cornflow/tests/data/new_execution_2.json"]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
+DAG_URL = PREFIX + "/dag/"
 
 CASE_PATH = "./cornflow/tests/data/new_case_raw.json"
 CASES_LIST = [CASE_PATH, "./cornflow/tests/data/new_case_raw_2.json"]

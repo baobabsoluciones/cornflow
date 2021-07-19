@@ -261,13 +261,20 @@ class TestCornflowClient(TestCornflowClientBasic):
 class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
-        user_data = dict(
-            username="airflow_test@admin.com",
-            email="airflow_test@admin.com",
-            pwd="airflow_test_password",
+
+        # we create a service user:
+        self.create_service_user(
+            dict(username="airflow", pwd="airflow_test_password", email="af@cf.com")
         )
+        # we create an admin user
         # we guarantee that the admin is there for airflow
-        self.client.token = self.create_admin(user_data)
+        self.client.token = self.create_admin(
+            dict(
+                username="airflow_test@admin.com",
+                email="airflow_test@admin.com",
+                pwd="airflow_test_password",
+            )
+        )
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
@@ -348,7 +355,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         response = self.client.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
 
 class PuLPLogSchema(unittest.TestCase):
