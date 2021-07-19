@@ -6,7 +6,7 @@ Unit test for the DAG endpoints
 import json
 
 # Import from internal modules
-from cornflow.shared.const import EXEC_STATE_CORRECT
+from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.tests.const import (
     DAG_URL,
     EXECUTION_URL_NORUN,
@@ -22,15 +22,25 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
             payload = json.load(f)
         data = dict(
             data=payload["data"],
-            state=EXEC_STATE_CORRECT,
+            state=EXEC_STATE_MANUAL,
         )
         payload_to_send = {**self.payload, **data}
         token = self.create_service_user()
+
+        self.items_to_check = [
+            "config",
+            "name",
+            "description",
+            "schema",
+            "instance_id",
+            "state",
+        ]
+
         idx = self.create_new_row(
             url=DAG_URL,
             model=self.model,
             payload=payload_to_send,
-            check_payload=False,
+            check_payload=True,
             token=token,
         )
 
@@ -39,15 +49,25 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
             payload = json.load(f)
         data = dict(
             data=payload["data"],
-            state=EXEC_STATE_CORRECT,
+            state=EXEC_STATE_MANUAL,
         )
         payload_to_send = {**self.payload, **data}
         token = self.create_planner()
+
+        self.items_to_check = [
+            "config",
+            "name",
+            "description",
+            "schema",
+            "instance_id",
+            "state",
+        ]
+
         idx = self.create_new_row(
             url=DAG_URL,
             model=self.model,
             payload=payload_to_send,
-            check_payload=False,
+            check_payload=True,
             token=token,
         )
 
