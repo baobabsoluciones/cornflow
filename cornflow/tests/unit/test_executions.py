@@ -1,6 +1,12 @@
-from cornflow.models import ExecutionModel, InstanceModel
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+"""
+Unit test for the executions endpoints
+"""
+
+# Import from libraries
 import json
+
+# Import from internal modules
+from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
@@ -9,6 +15,7 @@ from cornflow.tests.const import (
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
 )
+from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
 
 class TestExecutionsListEndpoint(BaseTestCases.ListFilters):

@@ -15,7 +15,7 @@ from cornflow.app import create_app
 from cornflow.commands import AccessInitialization
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL
 
@@ -126,6 +126,9 @@ class CustomTestCase(TestCase):
 
     def create_admin(self):
         return self.create_user_with_role(ADMIN_ROLE)
+
+    def create_planner(self):
+        return self.create_user_with_role(PLANNER_ROLE)
 
     def tearDown(self):
         db.session.remove()
