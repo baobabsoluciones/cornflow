@@ -38,6 +38,7 @@ class TestCommands(TestCase):
             "password": "testpassword",
         }
         self.resources = resources
+        RegisterRoles().run(False)
 
     def tearDown(self):
         db.session.remove()
@@ -56,6 +57,31 @@ class TestCommands(TestCase):
 
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
+        return user
+
+    def test_service_user_existing_admin(self):
+        self.test_admin_user_command()
+        command = CreateServiceUser()
+
+        command.run(
+            username="administrator",
+            email=self.payload["email"],
+            password=self.payload["password"],
+        )
+
+        user = UserModel.get_one_user_by_email("testemail@test.org")
+
+        self.assertNotEqual(None, user)
+        self.assertEqual(self.payload["email"], user.email)
+        self.assertEqual("administrator", user.username)
+        # TODO: check the user has both roles
+
+    def test_service_user_existing_service(self):
+        self.test_service_user_command()
+        user = self.test_service_user_command()
+
+        self.assertEqual("cornflow", user.username)
+        # TODO: check the user has the role
 
     def test_admin_user_command(self):
         command = CreateAdminUser()
@@ -70,6 +96,7 @@ class TestCommands(TestCase):
 
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
+        return user
 
     def test_register_actions(self):
         command = RegisterActions()

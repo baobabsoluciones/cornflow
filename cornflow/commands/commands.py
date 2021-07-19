@@ -51,7 +51,7 @@ def create_user_with_role(username, email, password, name, role, verbose=0):
     :param str name: name for the new user
     :param int role: role for the new user
     :param int verbose: verbose of the function
-    :return: a boolean if the execution went right
+    :return: a boolean if the execution went well
     :rtype: bool
     """
     user = UserModel.get_one_user_by_username(username)
@@ -67,7 +67,8 @@ def create_user_with_role(username, email, password, name, role, verbose=0):
         return True
 
     user_role = UserRoleModel.get_one_user(user.id)
-    if user_role is not None and RoleModel.get_one_object(role) in user_role:
+    user_actual_roles = [ur.role for ur in user_role]
+    if user_role is not None and RoleModel.get_one_object(role) in user_actual_roles:
         if verbose == 1:
             print("{} exists and already has service role assigned".format(name))
         return True

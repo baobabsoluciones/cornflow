@@ -223,7 +223,7 @@ class UserRoleModel(TraceAttributes):
         :return: the representation
         :rtype: str
         """
-        return self.user.name + " has role " + self.role.name
+        return self.user.username + " has role " + self.role.name
 
     def __str__(self):
         """
@@ -232,4 +232,4 @@ class UserRoleModel(TraceAttributes):
         :return: the string representation
         :rtype: str
         """
-        return self.user.name + " has role " + self.role.name
+        return self.user.username + " has role " + self.role.name

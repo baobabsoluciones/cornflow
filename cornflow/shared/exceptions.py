@@ -5,6 +5,10 @@ from cornflow_client.constants import InvalidUsage, AirflowError
 from flask import jsonify
 from webargs.flaskparser import parser
 
+# from werkzeug.exceptions import BadRequest, Unauthorized, YUn
+
+# Taken from: https://flask.palletsprojects.com/en/2.0.x/errorhandling/#returning-api-errors-as-json
+
 
 class ObjectDoesNotExist(InvalidUsage):
     status_code = 404
