@@ -14,6 +14,11 @@ class DagUtilities(unittest.TestCase):
                 "http://devsm.cornflow.baobabsoluciones.app",
             ),
             (
+                "https://some_test_user:very_classified_password@devsm.cornflow.baobabsoluciones.app",
+                ("some_test_user", "very_classified_password"),
+                "https://devsm.cornflow.baobabsoluciones.app",
+            ),
+            (
                 "https://some_test_user:very_classified_password@devsm.cornflow.baobabsoluciones.app/some_dir",
                 ("some_test_user", "very_classified_password"),
                 "https://devsm.cornflow.baobabsoluciones.app/some_dir",
