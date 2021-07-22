@@ -7,7 +7,7 @@ When contributing to this repository, please first discuss the change you wish t
 1. Create a Fork of the project to your own repository.
 1. Create a Branch in your Fork.
 1. Do the changes in your Branch.
-1. Add a Test that checks the change you did. This is done by adding a test suite in the following folder: `cornflow/tests` (the function sinside the test suite have to start by `test_`). 
+1. Add a Test that checks the change you did. This is done by adding a test suite in the following folder: `cornflow/tests` (the function inside the test suite have to start by `test_`). 
 1. Create a Pull Request (PR) when you're done so we can review it.
 1. In case your contribution consists on new functionality, an update on the docs would also be appropriate.
 
