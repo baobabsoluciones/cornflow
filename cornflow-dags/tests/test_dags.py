@@ -79,6 +79,18 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.app = _import_file("graph_coloring")
 
 
+class Vrp(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        self.app = _import_file("vrp")
+
+    def test_solve_ortools(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm3"))
+
+    def test_solve_algorithm1(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm1"))
+
+
 class Knapsack(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()

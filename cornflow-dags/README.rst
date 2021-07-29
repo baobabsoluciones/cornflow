@@ -19,7 +19,7 @@ Create a virtual environment for airflow::
 
 Then we install it with pip::
 
-    AIRFLOW_VERSION=2.0.1
+    AIRFLOW_VERSION=2.1.0
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
     pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
@@ -116,7 +116,7 @@ For deployment with postgresql, some extra steps need to be done.
 
 Install the postgres plugin for airflow, as well as the postgres python package::
 
-    AIRFLOW_VERSION=2.0.1
+    AIRFLOW_VERSION=2.1.0
     PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
     CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
     pip install "apache-airflow-postgres==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
@@ -274,3 +274,4 @@ This function is used in the unittests to be sure the solver works as intended. 
     def test_cases():
         options = [('j10.mm.zip', 'j102_4.mm'), ('j10.mm.zip', 'j102_5.mm'), ('j10.mm.zip', 'j102_6.mm')]
         return [get_test_instance(*op).to_dict() for op in options]
+

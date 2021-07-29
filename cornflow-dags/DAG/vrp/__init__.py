@@ -11,7 +11,7 @@ from .model_ortools import Algorithm as ORT_Algorithm
 from .solution import Solution
 from .tools import load_json
 
-name = "pedido_sugerido"
+name = "vrp"
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 instance = Instance.get_schema()
 solution = Solution.get_schema()
@@ -49,6 +49,4 @@ def run_solve(**kwargs):
     )
 
 
-pedido_sugerido = PythonOperator(
-    task_id="pedido_sugerido_dag", python_callable=run_solve, dag=dag
-)
+vrp = PythonOperator(task_id=name, python_callable=run_solve, dag=dag)

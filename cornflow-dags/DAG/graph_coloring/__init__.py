@@ -9,7 +9,7 @@ import os
 from timeit import default_timer as timer
 
 
-name = 'graph_coloring'
+name = "graph_coloring"
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
 instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
 config = get_empty_schema()
@@ -25,25 +25,30 @@ def solve(data, config):
     start = timer()
     model = cp_model.CpModel()
     input_data = pt.SuperDict.from_dict(data)
-    pairs = input_data['pairs']
-    n1s = pt.TupList(pairs).vapply(lambda v: v['n1'])
-    n2s = pt.TupList(pairs).vapply(lambda v: v['n2'])
+    pairs = input_data["pairs"]
+    n1s = pt.TupList(pairs).vapply(lambda v: v["n1"])
+    n2s = pt.TupList(pairs).vapply(lambda v: v["n2"])
     nodes = (n1s + n2s).unique2()
     max_colors = len(nodes) - 1
 
     # variable declaration:
-    color = pt.SuperDict({node: model.NewIntVar(0, max_colors, 'color_{}'.format(node)) for node in nodes})
+    color = pt.SuperDict(
+        {
+            node: model.NewIntVar(0, max_colors, "color_{}".format(node))
+            for node in nodes
+        }
+    )
     for pair in pairs:
-        model.Add(color[pair['n1']] != color[pair['n2']])
+        model.Add(color[pair["n1"]] != color[pair["n2"]])
         # model.AddAllDifferent(color[n] for n in nodes)
 
     # TODO: identify maximum cliques and apply constraint on the cliques instead of on pairs
 
-    obj_var = model.NewIntVar(0, max_colors, 'total_colors')
+    obj_var = model.NewIntVar(0, max_colors, "total_colors")
     model.AddMaxEquality(obj_var, color.values())
     model.Minimize(obj_var)
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = config.get('timeLimit', 10)
+    solver.parameters.max_time_in_seconds = config.get("timeLimit", 10)
     status = solver.Solve(model)
     if status not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
         return status
@@ -53,7 +58,11 @@ def solve(data, config):
     solution = dict(assignment=assign_list)
     log = ""
     status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
-    log = dict(time=timer() - start, solver='ortools', status=status_conv.get(status, "Unknown"))
+    log = dict(
+        time=timer() - start,
+        solver="ortools",
+        status=status_conv.get(status, "Unknown"),
+    )
     return solution, "", log
 
 
@@ -62,28 +71,24 @@ def solve_hk(**kwargs):
 
 
 def test_cases():
-    file_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    file_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     files = os.listdir(file_dir)
-    test_files = pt.TupList(files).vfilter(lambda v: v.startswith('gc_'))
+    test_files = pt.TupList(files).vfilter(lambda v: v.startswith("gc_"))
     return [read_file(os.path.join(file_dir, fileName)) for fileName in test_files]
 
 
 def read_file(filePath):
-    with open(filePath, 'r') as f:
+    with open(filePath, "r") as f:
         contents = f.read().splitlines()
 
-    pairs = \
-        pt.TupList(contents[1:]).\
-        vapply(lambda v: v.split(' ')). \
-        vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
-        # vapply(lambda v: [int(v[0]), int(v[1])])
-    num_nodes, num_pairs = [int(a) for a in contents[0].split(' ')]
+    pairs = (
+        pt.TupList(contents[1:])
+        .vapply(lambda v: v.split(" "))
+        .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
+    )
+    # vapply(lambda v: [int(v[0]), int(v[1])])
+    num_nodes, num_pairs = [int(a) for a in contents[0].split(" ")]
     return dict(pairs=pairs)
 
 
-graph_coloring = PythonOperator(
-    task_id='graph_coloring',
-    python_callable=solve_hk,
-    dag=dag
-)
-
+graph_coloring = PythonOperator(task_id=name, python_callable=solve_hk, dag=dag)

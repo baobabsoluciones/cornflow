@@ -56,7 +56,7 @@ def test_schema_solution():
 
 
 def test_pedido_sugerido(solver="algorithm2"):
-    from DAG.pedido_sugerido import test_cases, solve
+    from DAG.vrp import test_cases, solve
 
     data = test_cases()[0]
     solution_dict, log_test, log_dict = solve(data, dict(solver=solver))
