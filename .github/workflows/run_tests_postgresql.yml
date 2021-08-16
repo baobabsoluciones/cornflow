@@ -41,6 +41,4 @@ jobs:
       run: python -m unittest discover -s cornflow.tests.unit
       env:
         FLASK_ENV: testing
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5432
         DATABASE_URL: postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
