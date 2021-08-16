@@ -1,36 +1,75 @@
-from cornflow.models import ExecutionModel, InstanceModel
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+"""
+Unit test for the DAG endpoints
+"""
+
+# Import from libraries
 import json
+
+# Import from internal modules
+from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.tests.const import (
-    INSTANCE_PATH,
     DAG_URL,
     EXECUTION_URL_NORUN,
     CASE_PATH,
     INSTANCE_URL,
 )
-from cornflow.shared.const import EXEC_STATE_CORRECT
 from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
 
 
-# TODO: this test should pass but fails
 class TestDagEndpoint(TestExecutionsDetailEndpointMock):
-    def test_manual_dag(self):
+    def test_manual_dag_service_user(self):
         with open(CASE_PATH) as f:
             payload = json.load(f)
         data = dict(
             data=payload["data"],
-            state=EXEC_STATE_CORRECT,
+            state=EXEC_STATE_MANUAL,
         )
         payload_to_send = {**self.payload, **data}
         token = self.create_service_user()
-        # idx = self.create_new_row(
-        #     url=DAG_URL,
-        #     model=self.model,
-        #     payload=payload_to_send,
-        #     check_payload=False,
-        #     token=token,
-        # )
-        # print(idx)
+
+        self.items_to_check = [
+            "config",
+            "name",
+            "description",
+            "schema",
+            "instance_id",
+            "state",
+        ]
+
+        idx = self.create_new_row(
+            url=DAG_URL,
+            model=self.model,
+            payload=payload_to_send,
+            check_payload=True,
+            token=token,
+        )
+
+    def test_manual_dag_planner_user(self):
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+        data = dict(
+            data=payload["data"],
+            state=EXEC_STATE_MANUAL,
+        )
+        payload_to_send = {**self.payload, **data}
+        token = self.create_planner()
+
+        self.items_to_check = [
+            "config",
+            "name",
+            "description",
+            "schema",
+            "instance_id",
+            "state",
+        ]
+
+        idx = self.create_new_row(
+            url=DAG_URL,
+            model=self.model,
+            payload=payload_to_send,
+            check_payload=True,
+            token=token,
+        )
 
 
 class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):

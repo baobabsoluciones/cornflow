@@ -62,7 +62,7 @@ class Testing(DefaultConfig):
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
     SECRET_KEY = "TESTINGSECRETKEY"
-    SQLALCHEMY_DATABASE_URI = "sqlite:///cornflow_test.db"
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = "http://localhost:8080"
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"

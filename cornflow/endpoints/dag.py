@@ -147,6 +147,8 @@ class DAGEndpointManual(MetaResource, MethodResource):
         item = ExecutionModel(kwargs_copy)
         item.save()
         log.info(
-            "User {} manually edited execution {}".format(self.get_user_id(), item.id)
+            "User {} manually created the execution {}".format(
+                self.get_user_id(), item.id
+            )
         )
         return item, 201

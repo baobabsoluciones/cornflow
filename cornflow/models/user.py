@@ -42,6 +42,7 @@ class UserModel(TraceAttributes):
     password = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
     instances = db.relationship("InstanceModel", backref="users", lazy=True)
+    user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
 
     def __init__(self, data):
 
