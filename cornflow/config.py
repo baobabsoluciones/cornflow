@@ -1,14 +1,20 @@
 import os
-from .shared.const import AUTH_DB, AUTH_LDAP
+from .shared.const import AUTH_DB
+from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
 
 
-class MainEnvVars(object):
+class DefaultConfig(object):
     SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    DEBUG = True
+    TESTING = True
 
     # LDAP configuration
     LDAP_HOST = os.getenv("LDAP_HOST")
@@ -30,22 +36,31 @@ class MainEnvVars(object):
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
 
+    # APISPEC:
+    APISPEC_SPEC = APISpec(
+        title="Cornflow API docs",
+        version="v1",
+        plugins=[MarshmallowPlugin()],
+        openapi_version="2.0.0",
+    )
+    APISPEC_SWAGGER_URL = "/swagger/"
+    APISPEC_SWAGGER_UI_URL = "/swagger-ui/"
 
-class Development(MainEnvVars):
+    # compress config
+    COMPRESS_REGISTER = False
+
+
+class Development(DefaultConfig):
     """ """
 
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-    DEBUG = True
-    TESTING = True
 
-
-class Testing(MainEnvVars):
+class Testing(DefaultConfig):
     """ """
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
-    PROPAGATE_EXCEPTIONS = True
     TESTING = True
+    PROPAGATE_EXCEPTIONS = True
     SECRET_KEY = "TESTINGSECRETKEY"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = "http://localhost:8080"
@@ -54,7 +69,7 @@ class Testing(MainEnvVars):
     AIRFLOW_PWD = "admin"
 
 
-class Production(MainEnvVars):
+class Production(DefaultConfig):
     """ """
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -1,7 +1,5 @@
 import os
 
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
 from flask import Flask
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
@@ -25,42 +23,19 @@ def create_app(env_name="development"):
 
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
-    if env_name == "development" or env_name == "testing":
-        # TODO: not sure if we should keep this line and if so, here.
-        CORS(app)
-
+    CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
-
     api = Api(app)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
-    # apispec config
-    app.config.update(
-        {
-            "APISPEC_SPEC": APISpec(
-                title="Cornflow API docs",
-                version="v1",
-                plugins=[MarshmallowPlugin()],
-                openapi_version="2.0.0",
-            ),
-            "APISPEC_SWAGGER_URL": "/swagger/",  # URI to access API Doc JSON
-            "APISPEC_SWAGGER_UI_URL": "/swagger-ui/",  # URI to access UI of API Doc
-        }
-    )
     docs = FlaskApiSpec(app)
     for res in resources:
         docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     _initialize_errorhandlers(app)
     init_compress(app)
-    # compress config
-    app.config.update(
-        {
-            "COMPRESS_REGISTER": False,
-        }
-    )
     return app
 
 
