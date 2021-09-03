@@ -19,6 +19,7 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 # install Airflow requirements
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		dos2unix \
+        g++ \
         gcc \
         git \
 		freetds-bin \
@@ -35,6 +36,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         libssl-dev \
         locales  \
         lsb-release \
+        pkg-config \
 		python3-dev \
         sasl2-bin \
         slapd \
@@ -42,11 +44,13 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         unixodbc
 
 # install Airflow and extras: celery,postgres and redis
-RUN pip install "apache-airflow[celery,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+RUN pip install "apache-airflow[celery,google,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 RUN pip install python-ldap
+RUN pip install GitPython
 
 # copy init script and config to container
 COPY scripts/initairflow.sh /initairflow.sh
+COPY scripts ${AIRFLOW_HOME}/scripts
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
@@ -59,5 +63,9 @@ EXPOSE 8080 5555 8793
 
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}
+
+# execute installation solvers script
+RUN python scripts/solver_installation.py
+
 ENTRYPOINT ["/initairflow.sh"]
 CMD ["webserver"]
