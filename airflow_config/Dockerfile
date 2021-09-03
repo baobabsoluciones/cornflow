@@ -18,6 +18,8 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
 # install Airflow requirements
 RUN apt update -y && apt-get install -y --no-install-recommends \
+        apt-utils \
+        cmake \
 		dos2unix \
         g++ \
         gcc \
@@ -29,6 +31,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         libffi-dev \
         libldap2-dev \
 		libpq-dev \
+        libprotobuf-dev \
         libsasl2-2 \
         libsasl2-dev \
         libsasl2-modules \
@@ -36,7 +39,9 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         libssl-dev \
         locales  \
         lsb-release \
+        make \
         pkg-config \
+        protobuf-compiler \
 		python3-dev \
         sasl2-bin \
         slapd \
@@ -53,6 +58,10 @@ COPY scripts/initairflow.sh /initairflow.sh
 COPY scripts ${AIRFLOW_HOME}/scripts
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
+# execute installation solvers script
+RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
+
+# user airflow on application
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
 RUN chown -R airflow: /usr/local/airflow
 
@@ -63,9 +72,6 @@ EXPOSE 8080 5555 8793
 
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}
-
-# execute installation solvers script
-RUN python scripts/solver_installation.py
 
 ENTRYPOINT ["/initairflow.sh"]
 CMD ["webserver"]

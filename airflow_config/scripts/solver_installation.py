@@ -1,5 +1,5 @@
 import os
-from solvers import get_cbc
+from solvers import get_cbc,get_glpk,get_highs
 
 # list of available solvers
     # * HiGHS: https://www.maths.ed.ac.uk/hall/HiGHS/
@@ -11,11 +11,15 @@ from solvers import get_cbc
 available_solver = ['HiGHS','CBC','SCIP','CHOCO','MIPCL','glpk']
 
 # list of solvers that will be installed
-solver_list = os.getenv('SOLVER_LIST','CBC').split(',')
+solver_list = os.getenv('SOLVER_LIST','CBC,glpk,HiGHS').split(',')
 
 def install(s):
     if s in 'CBC':
         get_cbc.install()
+    if s in 'glpk':
+        get_glpk.install()
+    if s in 'HiGHS':
+        get_highs.install()
 
 for solver in solver_list:
 
