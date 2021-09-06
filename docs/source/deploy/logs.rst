@@ -86,7 +86,7 @@ You can call the ``/health`` endpoint to obtain the status of the cornflow and a
       "cornflow_status": "healthy"
     }
 
-Check the `API docs <https://baobabsoluciones.github.io/corn/stable-rest-api-ref.html#tag/Health>`_ for more information.
+Check the `API docs <https://baobabsoluciones.github.io/cornflow-server/stable-rest-api-ref.html#tag/Health>`_ for more information.
 
 Airflow monitoring
 ^^^^^^^^^^^^^^^^^^^^^

@@ -167,7 +167,7 @@ In the cornflow image, if no environment variables are set, an admin user is cre
 
 It is advisable to change the default admin user and keep the password in a safe place.
 
-To create a user, you must interact with the cornflow application through an `endpoint of its API <https://baobabsoluciones.github.io/corn/dev/endpoints.html#module-cornflow.endpoints.user>`_. Check the API docs for the users `here <https://baobabsoluciones.github.io/corn/stable-rest-api-ref.html#tag/Users>`_. It is only possible to create new cornflow admin user using another one with those privileges.
+To create a user, you must interact with the cornflow application through an `endpoint of its API <https://baobabsoluciones.github.io/cornflow-server/dev/endpoints.html#module-cornflow.endpoints.user>`_. Check the API docs for the users `here <https://baobabsoluciones.github.io/corn/stable-rest-api-ref.html#tag/Users>`_. It is only possible to create new cornflow admin user using another one with those privileges.
 
 Manage airflow users
 ***********************
