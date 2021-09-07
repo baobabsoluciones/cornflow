@@ -7,11 +7,15 @@ from ortools.sat.python import cp_model
 import pytups as pt
 import os
 from timeit import default_timer as timer
+import json
 
 
 name = "graph_coloring"
 dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
-instance, solution = utils.get_schemas_from_file(os.path.dirname(__file__), name)
+with open(os.path.join(os.path.dirname(__file__), "input.json"), "r") as f:
+    instance = json.load(f)
+with open(os.path.join(os.path.dirname(__file__), "output.json"), "r") as f:
+    solution = json.load(f)
 config = get_empty_schema()
 config["properties"] = dict(timeLimit=dict(type="number"))
 
@@ -56,7 +60,6 @@ def solve(data, config):
 
     assign_list = color_sol.items_tl().vapply(lambda v: dict(node=v[0], color=v[1]))
     solution = dict(assignment=assign_list)
-    log = ""
     status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
     log = dict(
         time=timer() - start,
@@ -71,7 +74,7 @@ def solve_hk(**kwargs):
 
 
 def test_cases():
-    file_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    file_dir = os.path.join(os.path.dirname(__file__), "data")
     files = os.listdir(file_dir)
     test_files = pt.TupList(files).vfilter(lambda v: v.startswith("gc_"))
     return [read_file(os.path.join(file_dir, fileName)) for fileName in test_files]
@@ -86,8 +89,6 @@ def read_file(filePath):
         .vapply(lambda v: v.split(" "))
         .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
     )
-    # vapply(lambda v: [int(v[0]), int(v[1])])
-    num_nodes, num_pairs = [int(a) for a in contents[0].split(" ")]
     return dict(pairs=pairs)
 
 

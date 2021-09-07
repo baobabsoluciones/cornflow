@@ -49,10 +49,7 @@ class BaseDAGTests:
         @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
         def test_complete_solve(self, connectCornflow, getArg, config=None):
             config = config or self.config
-            try:
-                tests = self.app.test_cases()
-            except:
-                return
+            tests = self.app.test_cases()
             for pos, data in enumerate(tests):
                 mock = Mock()
                 mock.get_data.return_value = dict(data=data, config=config)
