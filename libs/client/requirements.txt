@@ -2,3 +2,4 @@ requests
 genson
 jsonschema
 marshmallow
+pytups

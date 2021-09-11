@@ -143,6 +143,10 @@ def get_schema(dag_name):
     return schema
 
 
+def cf_solve_app(app, secrets, **kwargs):
+    return cf_solve(app.solve, app.name, secrets, **kwargs)
+
+
 def cf_solve(fun, dag_name, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, solve the problem and write the solution in cornflow
@@ -175,17 +179,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     # we first need to validate the schema.
     # If it's not: we change the status to Invalid
     # and take out the server validation of the schema\
-    # TODO: not sure if this idea makes sense
     payload["data"] = solution
     print("A solution was found: we will first validate it")
-    # try:
-    #     schema = get_schema(dag_name)
-    #     marshmallow_obj = SchemaManager(schema).jsonschema_to_flask()
-    #     marshmallow_obj().load(solution)
-    # except Exception as e:
-    #     print("Validation failed! we will save it still. {}".format(e))
-    #     payload['log_json']['status'] = 'Invalid'
-    #     payload['solution_schema'] = None
 
     try_to_write_solution(client, exec_id, payload)
 
