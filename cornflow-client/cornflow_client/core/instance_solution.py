@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import json
 from typing import List
-from pytups import OrderSet, SuperDict
+from pytups import SuperDict
+from jsonschema import Draft7Validator
+from genson import SchemaBuilder
 
 
 class InstanceSolutionCore(ABC):
@@ -17,14 +19,14 @@ class InstanceSolutionCore(ABC):
         self._data = value
 
     @classmethod
-    def from_dict(cls, data: dict) -> "MetaInstanceSolution":
+    def from_dict(cls, data: dict) -> "InstanceSolutionCore":
         return cls(data)
 
     def to_dict(self) -> dict:
         return self.data
 
     @classmethod
-    def from_json(cls, path: str) -> "MetaInstanceSolution":
+    def from_json(cls, path: str) -> "InstanceSolutionCore":
         with open(path, "r") as f:
             data_json = json.load(f)
         return cls.from_dict(data_json)
@@ -39,8 +41,16 @@ class InstanceSolutionCore(ABC):
     def schema(self) -> dict:
         raise NotImplementedError()
 
-    def new_set(self, seq: List):
-        """
-        Returns a new ordered set
-        """
-        return OrderSet(seq)
+    def check_schema(self) -> List:
+        validator = Draft7Validator(self.schema)
+        data = self.to_dict()
+        if not validator.is_valid(data):
+            error_list = [e for e in validator.iter_errors(data)]
+            return error_list
+        return []
+
+    def generate_schema(self) -> dict:
+        builder = SchemaBuilder()
+        builder.add_schema({"type": "object", "properties": {}})
+        builder.add_object(self.to_dict())
+        return builder.to_schema()

@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from .instance import InstanceCore
 from .solution import SolutionCore
-from typing import Type, Union
-from cornflow_client.constants import STATUS_NOT_SOLVED, SOLUTION_STATUS_INFEASIBLE
+from typing import Union
 
 
 class ExperimentCore(ABC):
