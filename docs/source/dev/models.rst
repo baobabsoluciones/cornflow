@@ -2,7 +2,7 @@ Models
 ==========================
 
 Execution model
-''''''''''''''''''''''''''''
+------------------
 
 .. automodule:: cornflow.models.execution
    :members:
@@ -10,7 +10,7 @@ Execution model
    :member-order: bysource
 
 Instance model
-''''''''''''''''''''''''''''
+------------------
 
 .. automodule:: cornflow.models.instance
    :members:
@@ -18,7 +18,7 @@ Instance model
    :member-order: bysource
 
 User model
-''''''''''''''''''''''''''''
+------------------
 
 .. automodule:: cornflow.models.user
    :members:

@@ -6,7 +6,7 @@ Contents:
 .. toctree::
     :maxdepth: 3
 
-    Install <includeme>
+    install
     concepts
     architecture
     examples

@@ -1,5 +1,5 @@
-Code documentation
-----------------------------
+Cornflow-server documentation
+----------------------------------------------
 
 Contents:
 
