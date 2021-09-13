@@ -174,7 +174,7 @@ class CustomTestCase(TestCase):
 
     def get_keys_to_check(self, payload):
         if len(self.items_to_check):
-            return self.items_to_check & payload.keys()
+            return self.items_to_check
         return payload.keys()
 
     def get_one_row(

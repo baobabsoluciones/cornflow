@@ -181,10 +181,18 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.items_to_check = ["name", "description", "schema"]
 
     def test_new_case(self):
+        self.items_to_check = ["name", "description", "schema", "data", "solution"]
+        self.payload["solution"] = self.payload["data"]
         self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_case_without_solution(self):
-        self.create_new_row(self.url, self.model, self.payload)
+        self.payload.pop("solution")
+        self.items_to_check = ["name", "description", "schema", "data"]
+        _id = self.create_new_row(self.url, self.model, self.payload)
+        data = self.get_one_row(
+            self.url + "/" + str(_id) + "/data/", payload={}, check_payload=False
+        )
+        self.assertIsNone(data["solution"])
 
     def test_case_with_parent(self):
         payload = dict(self.payload)
