@@ -19,8 +19,8 @@ Once your dag is on the server, you can use the cornflow-client package to acces
 
     client = CornFlow("https://devsm.cornflow.baobabsoluciones.app")
     // Sign_up only the first time:
-    client.sign_up(“my-username”, “my.email@adress.com”, "my-password")
-    client.login(“my-username”, "my-password")
+    client.sign_up(YOUR_USER_NAME, YOUR_EMAIL, YOUR_PASSWORD)
+    client.login(YOUR_USER_NAME, YOUR_PASSWORD)
 
     instance = client.create_instance(data=data, name="test_my_project", schema="my_project")
     instance_id = instance["id"]

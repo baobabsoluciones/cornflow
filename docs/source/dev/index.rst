@@ -1,4 +1,4 @@
-Cornflow-server documentation
+Code documentation
 ----------------------------------------------
 
 Contents:
@@ -8,3 +8,4 @@ Contents:
 
     models
     endpoints
+    cornflow_client

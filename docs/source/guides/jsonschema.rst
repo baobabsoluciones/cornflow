@@ -1,14 +1,14 @@
 Write a json-schema
 =======================
 
-Basics
----------------
+Basics of schemas
+------------------------------
 
 The schemas are descriptions of the data accepted by the application.
 
 In particular, a schema must describe a dictionary of tables, each table described as a list of dictionaries whose keys are the name of the columns.
 
-Let's take an example of data with two tables `customers’ and ‘allowedTrailers’.
+Let's take an example of data with two tables ``customers`` and ``allowedTrailers``.
 
 **customers**:
 
@@ -81,6 +81,7 @@ The schema will look like this:
      ]
     }
 
+
 This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
 It is important to note three things:
 
@@ -109,7 +110,7 @@ In real problems, pure data is usually complemented by auxiliary information (su
 Exception for “simple objects”
 **********************************
 
-Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters `trailersCapacity’ and ‘timeHorizon’, we would add a property ‘parameters’ to our schema:
+Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters ``trailersCapacity`` and ``timeHorizon``, we would add a property ``parameters`` to our schema:
 
 .. code-block:: json
 
@@ -145,8 +146,8 @@ Example: TSP
 
 Let's take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.
 
-Instance
-**************
+Instance schema
+****************************
 
 An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs:
 
@@ -173,10 +174,11 @@ An instance of a TSP is a simple graph with positive weights in each arc. We wil
         "required": ["arcs"]
     }
 
-We are using `n1` and `n2` to call each the first and second node of each arc. We use `w` to call the weight of the arc.
 
-Solution
-**************
+We are using ``n1`` and ``n2`` to call each the first and second node of each arc. We use ``w`` to call the weight of the arc.
+
+Solution schema
+****************************
 
 A solution to a TSP, is the sequence in which nodes should be visited. We *could* use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.
 
@@ -202,7 +204,8 @@ A solution to a TSP, is the sequence in which nodes should be visited. We *could
         "required": ["route"]
     }
 
-`node` represents each node in the sequence. `pos` represents the position of each node in the sequence.
+
+``node`` represents each node in the sequence. ``pos`` represents the position of each node in the sequence.
 
 An alternative, still valid, schema would be:
 
@@ -227,6 +230,7 @@ An alternative, still valid, schema would be:
         "required": ["route"]
     }
 
+
 Here we assume the array is sorted and so we do not need the position of the node explicitly.
 
 
@@ -243,8 +247,16 @@ The configuration will depend on the application. We usually have some default c
         "type": "object",
         "properties": {
             "timeLimit": {"type": "float"},
-            "gapRel": {"type": "float"},
-            "seed": {"type": "integer"}
+            "seed": {"type": "integer"},
+            "gap": {"type": "float"},
+            "solver": {
+                "type": "string",
+                "enum": ["naive"],
+                "default": "naive"
+            }
+        }
     }
 
-`timeLimit` constraints the time the solution method can run. `gapRel` provides a tolerance measured in relative gap (to the best possible solution). `seed` provides a way to make the solution method deterministic.
+
+
+``timeLimit`` constraints the time the solution method can run. ``gapRel`` provides a tolerance measured in relative gap (to the best possible solution). ``seed`` provides a way to make the solution method deterministic. The ``solver`` property is mandatory for all solution methods and should always have this format (a string with an "enum" attribute).

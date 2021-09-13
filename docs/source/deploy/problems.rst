@@ -45,8 +45,8 @@ Problem: Cornflow can´t reach postgres internal database
     
     Possible solution: See again the name given to CORNFLOW_DB_HOST environment variable in docker-compose file.
 
-Running cornflow
-^^^^^^^^^^^^^^^^^^^^^^
+Running cornflow-server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Problem: Users were not created when cornflow started
 
@@ -89,9 +89,9 @@ Problem: Can´t login to airflow GUI
 
 Problem: Openldap docker container don´t start
 
-    Error: Can´t parse ldif entry on line 1
+    Error: Can't parse ldif entry on line 1
 
-    Possible solution: Some entry on *.ldif file has not properly defined and slapd can´t start and populate the ldap server
+    Possible solution: Some entry on ``*.ldif`` file has not properly defined and slapd can't start and populate the ldap server
 
 Problem: Openldap does not show entries from ldif file 
 
