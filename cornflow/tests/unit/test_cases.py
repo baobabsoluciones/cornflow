@@ -307,6 +307,7 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "solution_hash",
             "created_at",
             "updated_at",
+            "user_id",
         }
         self.url = CASE_URL
 
@@ -355,7 +356,16 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
-        self.items_to_check = ["id", "name", "data", "data_hash", "schema"]
+        self.items_to_check = [
+            "id",
+            "name",
+            "data",
+            "data_hash",
+            "schema",
+            "user_id",
+            "created_at",
+            "description",
+        ]
         self.response_items = set(self.items_to_check)
 
         result = self.get_one_row(INSTANCE_URL + payload["id"] + "/data/", payload)

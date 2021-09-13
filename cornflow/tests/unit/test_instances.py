@@ -137,8 +137,9 @@ class TestInstancesDetailEndpoint(
 class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "data", "data_hash", "schema"}
-        self.items_to_check = ["name", "data", "schema"]
+        self.response_items.add("data")
+        self.response_items.remove("executions")
+        self.items_to_check += ["data"]
 
     def test_get_one_instance(self):
         idx = self.create_new_row(self.url, self.model, self.payload)

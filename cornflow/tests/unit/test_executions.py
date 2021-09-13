@@ -85,6 +85,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "state",
             "config",
             "schema",
+            "user_id",
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]

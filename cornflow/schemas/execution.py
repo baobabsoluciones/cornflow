@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema, validate
 from .solution_log import LogSchema
 from ..shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
-from .common import QueryFilters
+from .common import QueryFilters, BaseDataEndpointResponse
 
 
 class QueryFiltersExecution(QueryFilters):
@@ -76,17 +76,11 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
     pass
 
 
-class ExecutionDetailsEndpointResponse(Schema):
-    id = fields.Str()
+class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
     config = fields.Nested(ConfigSchema)
-    name = fields.Str()
-    description = fields.Str()
-    created_at = fields.DateTime()
     instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
-    data_hash = fields.Str(dump_only=True)
-    schema = fields.Str(required=False)
 
 
 class ExecutionStatusEndpointResponse(Schema):
@@ -96,15 +90,9 @@ class ExecutionStatusEndpointResponse(Schema):
     data_hash = fields.Str(dump_only=True)
 
 
-class ExecutionDataEndpointResponse(Schema):
-    id = fields.Str()
-    name = fields.Str()
+class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
-    data_hash = fields.Str(dump_only=True)
 
 
-class ExecutionLogEndpointResponse(Schema):
-    id = fields.Str()
-    name = fields.Str()
+class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
-    data_hash = fields.Str(dump_only=True)
