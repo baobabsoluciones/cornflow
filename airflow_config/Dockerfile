@@ -19,7 +19,8 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 # install Airflow requirements
 RUN apt update -y && apt-get install -y --no-install-recommends \
         apt-utils \
-        cmake \
+        default-jre \
+        default-jdk \
 		dos2unix \
         g++ \
         gcc \
@@ -46,12 +47,14 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         sasl2-bin \
         slapd \
         sqlite3 \
-        unixodbc
+        unixodbc \
+        wget
 
 # install Airflow and extras: celery,postgres and redis
 RUN pip install "apache-airflow[celery,google,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 RUN pip install python-ldap
 RUN pip install GitPython
+RUN pip install cmake
 
 # copy init script and config to container
 COPY scripts/initairflow.sh /initairflow.sh
@@ -64,6 +67,9 @@ RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
 # user airflow on application
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
 RUN chown -R airflow: /usr/local/airflow
+RUN chown airflow: /usr/local/bin/mps_mipcl 
+RUN chown airflow: /usr/local/bin/choco.jar
+RUN chown airflow: /usr/local/bin/highs
 
 RUN dos2unix /initairflow.sh
 RUN chmod +x /initairflow.sh

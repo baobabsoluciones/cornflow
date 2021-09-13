@@ -1,5 +1,5 @@
 import os
-from solvers import get_cbc,get_glpk,get_highs
+from solvers import get_cbc,get_glpk,get_highs,get_scip,get_choco,get_mipcl
 
 # list of available solvers
     # * HiGHS: https://www.maths.ed.ac.uk/hall/HiGHS/
@@ -7,11 +7,11 @@ from solvers import get_cbc,get_glpk,get_highs
     # * SCIP: https://www.scipopt.org/
     # * CHOCO: https://github.com/chocoteam/choco-solver
     # * MIPCL: https://github.com/onebitbrain/MIPCL/blob/master/bin/mps_mipcl
-    # * glpk: https://www.gnu.org/software/glpk/
+    # * glpk: https://www.gnu.org/software/glpk/    
 available_solver = ['HiGHS','CBC','SCIP','CHOCO','MIPCL','glpk']
 
 # list of solvers that will be installed
-solver_list = os.getenv('SOLVER_LIST','CBC,glpk,HiGHS').split(',')
+solver_list = os.getenv('SOLVER_LIST','CBC,glpk,HiGHS,SCIP,CHOCO,MIPCL').split(',')
 
 def install(s):
     if s in 'CBC':
@@ -20,6 +20,12 @@ def install(s):
         get_glpk.install()
     if s in 'HiGHS':
         get_highs.install()
+    if s in 'SCIP':
+        get_scip.install()
+    if s in 'CHOCO':
+        get_choco.install()
+    if s in 'MIPCL':
+        get_mipcl.install()
 
 for solver in solver_list:
 
