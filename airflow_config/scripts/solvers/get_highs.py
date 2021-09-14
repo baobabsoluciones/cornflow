@@ -25,8 +25,8 @@ def install():
         os.chdir(HiGHS.working_dir+'/build')
         subprocess.check_output(['cmake ..'],shell=True)
         subprocess.check_output('make')
-        subprocess.check_output(['cp', 'highs', '/usr/local/bin/'])
-        subprocess.check_output(['chmod', '+x', 'highs'])
+        subprocess.check_output(['cp', 'bin/highs', '/usr/local/bin/highs'])
+        subprocess.check_output(['chmod', '+x', '/usr/local/bin/highs'])
 
     except(error):
 
