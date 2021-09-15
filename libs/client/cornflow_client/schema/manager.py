@@ -2,11 +2,11 @@
 Class to help create and manage data schema and to validate json files.
 """
 
-import json
 from jsonschema import Draft7Validator
 from copy import deepcopy
 from genson import SchemaBuilder
 from .dictSchema import DictSchema
+from cornflow_client.core.tools import load_json, save_json
 
 
 class SchemaManager:
@@ -256,14 +256,11 @@ class SchemaManager:
 
         return the json content.
         """
-        with open(path) as json_file:
-            file = json.load(json_file)
-        return file
+        return load_json(path)
 
     @staticmethod
     def save_json(data, path):
-        with open(path, "w") as outfile:
-            json.dump(data, outfile)
+        return save_json(data, path)
 
     """
     Aliases:
