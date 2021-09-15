@@ -3,4 +3,8 @@ from abc import ABC
 
 
 class InstanceCore(InstanceSolutionCore, ABC):
+    """
+    The instance template.
+    """
+
     pass
