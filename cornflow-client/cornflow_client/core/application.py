@@ -113,6 +113,8 @@ class ApplicationCore(ABC):
             STATUS_UNDEFINED: "Unknown",
             STATUS_NOT_SOLVED: "Not solved",
         }
+        if isinstance(output, int):
+            output = dict(status=output)
         status = output.get("status")
         status_sol = output.get("status_sol")
         log = dict(
@@ -130,7 +132,7 @@ class ApplicationCore(ABC):
         elif algo.solution is not None and len(algo.solution.data):
             log["sol_code"] = SOLUTION_STATUS_FEASIBLE
 
-        if log["sol_code"] in [SOLUTION_STATUS_FEASIBLE]:
+        if log["sol_code"] > 0:
             sol = algo.solution.to_dict()
         return sol, "", log
 
