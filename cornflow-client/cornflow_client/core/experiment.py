@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
 from .instance import InstanceCore
 from .solution import SolutionCore
-from typing import Union
+from typing import Union, Dict
 
 
 class ExperimentCore(ABC):
+    """
+    The solver template.
+    """
+
     def __init__(
         self,
         instance: InstanceCore,
@@ -16,10 +20,16 @@ class ExperimentCore(ABC):
 
     @property
     def instance(self) -> InstanceCore:
+        """
+        :return: the instance
+        """
         return self._instance
 
     @property
     def solution(self) -> SolutionCore:
+        """
+        :return: the solution
+        """
         return self._solution
 
     @solution.setter
@@ -28,12 +38,31 @@ class ExperimentCore(ABC):
 
     @abstractmethod
     def solve(self, options: dict) -> dict:
+        """
+        Mandatory method
+
+        :param options: configuration for solving the problem
+        :return: a dictionary with status codes and other information
+
+        This method produces and stores a solution
+        """
         pass
 
     @abstractmethod
     def get_objective(self) -> float:
+        """
+        Mandatory method
+
+        :return: the value of the current solution, represented by a number
+        """
         pass
 
     @abstractmethod
-    def check_solution(self, *args, **kwargs) -> dict:
+    def check_solution(self, *args, **kwargs) -> Dict[str, Dict]:
+        """
+        Mandatory method
+
+        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+        inside represents one error of that particular type.
+        """
         pass
