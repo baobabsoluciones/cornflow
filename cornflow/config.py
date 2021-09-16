@@ -6,7 +6,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 class DefaultConfig(object):
     SECRET_KEY = os.getenv("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")

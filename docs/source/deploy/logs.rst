@@ -53,7 +53,7 @@ The scheduler logs are named after the DAGs handled by the service. Navigate to 
 Worker logs
 ^^^^^^^^^^^^^^^^
 
-As in the rest of airflow services, the logs are stored in the logs folder within the ``$AIRFLOW_HOME``directory.
+As in the rest of airflow services, the logs are stored in the logs folder within the ``$AIRFLOW_HOME`` directory.
 The logs are divided into folders with the name of the DAGs and into subfolders with their execution dates.
 
 If we want to view logs with a command, here things get a bit complicated since we can have different workers deployed, with different DAGs. We must help ourselves with the linux bash commands to filter the search as much as possible. Let's say we want to review today logs of the DAG ``update_all_squemas`` in every worker::

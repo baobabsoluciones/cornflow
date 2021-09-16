@@ -1,5 +1,5 @@
-Architecture
-=============
+Cornflow-server architecture
+=======================================
 
 Components
 -------------
@@ -10,14 +10,14 @@ Components
 
    Components with the connections between them
 
-Cornflow
-***********
+Cornflow-server
+**********************
 
 The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.
 
 
-Airflow
-************
+Airflow service
+**********************
 
 Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.
 

@@ -16,7 +16,7 @@ We sometimes refer to this Decision Problem as an Abstract Problem or just Probl
 In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.
 
 Instance
------------------
+-------------
 
 An Instance represents all the data needed to completely formulate one case of a decision problem.
 
