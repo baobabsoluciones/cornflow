@@ -20,7 +20,7 @@ IdCustomer  Demand
 3               7
 ==========  ==========
 
-**allowedTrailes**:
+**allowedTrailers**:
 
 ==========  ==========
 IdCustomer  idTrailer
