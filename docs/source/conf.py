@@ -60,6 +60,7 @@ copyright = '2020-, cornflow documentation team.'
 #
 # The full version, including alpha/beta/rc tags.
 import cornflow
+import cornflow_client
 
 # release = pulp.VERSION
 release = '0.4'

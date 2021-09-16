@@ -20,185 +20,66 @@ Cornflow
 
 Cornflow is open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
 
-It supports generic MIP models via the pulp interface and thus connects to CPLEX, GUROBI, CBC, MOSEK, GLPK, XPRESS, MIPCL and others. In the future it will support a generic CP interface that will connect it to: ORTOOLS, CHOCO and CPO. Finally, it supports specific application "solvers" written in python (natively) or in any other language as long as they can be used from airflow.
+While most deployment servers are based on the solving technique (MIP, CP, NLP, etc.), Cornflow focuses on the optimization problems themselves. However, it does not impose any constraint on the type of problem and solution method to use.
 
-The aim of this project is to simplify the deployment of optimization-based applications by handling the following tasks:
+With Cornflow you can deploy a Traveling Salesman Problem solver next to a Knapsack solver or a Nurse Rostering Problem solver. As long as you describe the input and output data, you can upload any solution method for any problem and then use it with any data you want.
 
-* storage of users, instances, solutions and logs.
+Cornflow helps you formalize your problem by proposing development guidelines. It also provides a range of functionalities around your deployed solution method, namely:
+
+* storage of users, instances, solutions and solution logs.
 * deployment and maintenance of models, solvers and algorithms.
 * scheduling of executions in remote machines.
+* management of said executions: start, monitor, interrupt.
 * centralizing of commercial licenses.
+* scenario storage and comparison.
+* user management, roles and groups.
 
 
 .. contents:: **Table of Contents**
 
-
 Installation instructions
--------------------------
+-------------------------------
 
+Cornflow is tested with Ubuntu 20.04, python >= 3.5 and git.
 
-Requirements
-~~~~~~~~~~~~~~~~~~
+Download the Cornflow project and install requirements::
 
-* Linux or Windows with WSL
-* python >= 3.5
-* postgresql
-
-Install cornflow
-~~~~~~~~~~~~~~~~~~
-
-Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in the same machine.
-
-Download the Cornflow project::
-
-    git clone git@github.com:baobabsoluciones/corn.git
+    git clone git@github.com:baobabsoluciones/cornflow-server.git
     cd corn
     python3 -m venv cfvenv
     cfvenv/bin/pip3 install -r requirements-dev.txt
 
-activate the virtual environment::
-
-    source cfvenv/bin/activate
-
-or, in windows::
-
-    cfvenv/Scripts/activate
-
-
-Setup cornflow database
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This local example assumes sqlite as database engine. For an example of postgresql deployment, see the next section.
-
-Initialize the database::
+activate the virtual environment and run Cornflow::
 
     source cfvenv/bin/activate
     export FLASK_APP=cornflow.app
-    export DATABASE_URL=sqlite:///cornflow.db
-    python manage.py db upgrade
-    python manage.py access_init
-    python manage.py create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
-    python manage.py create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
-
-Launch cornflow server
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Each time you run the flask server, execute the following::
-
-    source cfvenv/bin/activate
-    export FLASK_APP=cornflow.app
-    export FLASK_ENV=development
-    export DATABASE_URL=sqlite:///cornflow.db
-    export SECRET_KEY=THISNEEDSTOBECHANGED
-    export AIRFLOW_URL=http://localhost:8080
-    export AIRFLOW_USER=admin
-    export AIRFLOW_PWD=admin
     flask run
 
-In windows use ``set`` instead of ``export``.
+**Cornflow needs a running installation of airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow-server/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
 
-Install and configure airflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here are the minimal instructions to install and configure airflow with the default dags in this project. The instructions assume Ubuntu.
-
-Create a virtual environment for airflow::
-
-    cd corn
-    python3 -m venv afvenv
-    source afvenv/bin/activate
-
-Install airflow from pip::
-
-    AIRFLOW_VERSION=2.1.0
-    PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-    CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-    pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-
-Install the default workers dependencies::
-
-    pip install orloge cornflow_client pulp
-
-Initialize the database and create an admin user::
-
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    airflow db init
-    airflow users create \
-          --username admin \
-          --firstname admin \
-          --lastname admin \
-          --role Admin \
-          --password admin \
-          --email admin@example.org
-
-Launch airflow server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Set the base config::
-
-    source afvenv/bin/activate
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    export AIRFLOW__CORE__LOAD_EXAMPLES=0
-    export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
-    export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
-    export AIRFLOW_CONN_CF_URI=http://airflow_test@admin.com:airflow_test_password@localhost:5000
-
-Start the web server::
-
-    airflow webserver -p 8080 &
-
-Also, start the scheduler::
-
-    airflow scheduler &
-
-airflow gui will be at::
-
-    http://localhost:8080
-
-Killing airflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Search for the code of the process in Linux::
-
-    ps aux | grep airflow
-
-Kill it::
-
-    kill -9 CODE
-
-If you're feeling lucky::
-
-    kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
-
-
-Using cornflow with the python client
+Using cornflow to solve a PuLP model
 ---------------------------------------
-
-Launch airflow (webserver and scheduler) and cornflow server (see sections above).
 
 We're going to test the cornflow server by using the `cornflow-client` and the `pulp` python package::
 
     pip install cornflow-client pulp
-
-A complete example is shown in `examples/basic_functions.py`. Below is an extract.
 
 Initialize the api client::
 
     from cornflow_client import CornFlow
     email = 'some_email@gmail.com'
     pwd = 'some_password'
-    name = 'some_name'
+    username = 'some_name'
     client = CornFlow(url="http://127.0.0.1:5000")
 
 Create a user::
 
-    config = dict(email=email, pwd=pwd, name=name)
+    config = dict(username=username, email=email, pwd=pwd)
     client.sign_up(**config)
 
 log in::
 
-    client.login(email, pwd)
+    client.login(username=username, pwd=pwd)
 
 Prepare an instance::
 
@@ -217,7 +98,7 @@ Prepare an instance::
 
 Send instance::
 
-    instance = client.create_instance(data, name=insName, description=description)
+    instance = client.create_instance(data, name=insName, description=description, schema="solve_model_dag",)
 
 Solve an instance::
 
@@ -226,12 +107,13 @@ Solve an instance::
         timeLimit = 10
     )
     execution = client.create_execution(
-        instance['id'], config, name='execution1', description='execution of a very small instance'
+        instance['id'], config, name='execution1', description='execution of a very small instance',
+        schema="solve_model_dag",
     )
 
 Check the status of an execution::
 
-    status = client.get_solution(execution['id'])
+    status = client.get_status(execution["id"])
     print(status['state'])
     # 1 means "finished correctly"
 
@@ -247,6 +129,45 @@ Retrieve the log of the solver::
     log = client.get_log(execution['id'])
     print(log['log'])
     # json format of the solver log
+
+Using cornflow to deploy a solution method
+---------------------------------------------
+
+To deploy a cornflow solution method, the following tasks need to be accomplished:
+
+#. Create I/O schemas for the new problem (e.g., “TSP format”).
+#. Create a solve function (e.g., a 2-opt heuristic).
+#. Do a PR to a compatible repo linked to a server instance (e.g., like `this one <https://github.com/baobabsoluciones/cornflow-dags-public>`_).
+
+For more details on each part, check the `deployment guide <https://baobabsoluciones.github.io/cornflow-server/guides/deploy_solver.html>`_.
+
+Using cornflow to solve a problem
+-------------------------------------------
+
+For this example we only need the cornflow_client package. We will test the graph-coloring demo defined `here <https://github.com/baobabsoluciones/cornflow-dags-public/tree/main/DAG/graph_coloring>`_. We will use the test server to solve it.
+
+Initialize the api client::
+
+    from cornflow_client import CornFlow
+    email = 'readme@gmail.com'
+    pwd = 'some_password'
+    username = 'some_name'
+    client = CornFlow(url="https://devsm.cornflow.baobabsoluciones.app/")
+    client.login(username=username, pwd=pwd)
+
+solve a graph coloring problem and get the solution::
+
+    data = dict(pairs=[dict(n1=0, n2=1), dict(n1=1, n2=2), dict(n1=1, n2=3)])
+    instance = client.create_instance(data, name='gc_4_1', description='very small gc problem', schema="graph_coloring")
+    config = dict()
+    execution = client.create_execution(
+        instance['id'], config, name='gc_4_1_exec', description='execution of very small gc problem',
+        schema="graph_coloring",
+    )
+    status = client.get_status(execution["id"])
+    print(status['state'])
+    solution = client.get_solution(execution["id"])
+    print(solution['data']['assignment'])
 
 
 Running tests and coverage
@@ -276,66 +197,4 @@ After if you want to check the coverage report you need to run::
 or to get the html reports::
 
     coverage html
-
-Install with docker
----------------------
-
-Pull
-~~~~~~~~
-
-Pull the image from the Docker repository.
-
-    docker pull baobabsoluciones/cornflow
-
-Build
-~~~~~~~~~~
-
-Build cornflow image::
-
-    docker build -t cornflow .
-
-Optionally install Airflow personalized image in folder `airflow_config` ::
-
-    cd airflow_config && docker build -t docker-airflow .
-
-Don't forget to update the images in the docker-compose files to baobabsoluciones/cornflow:latest and baobabsoluciones/docker-airflow:latest.
-
-Usage
-~~~~~~~~~~
-
-We have created several `docker-compose.yml` files so that you can use them and deploy the test environment:
-By default, docker-airflow runs Airflow with SequentialExecutor::
-
-    docker-compose up --build -d
-	
-For CeleryExecutor::
-
-    docker-compose -f docker-compose-cornflow-celery.yml up -d
-
-List containers::
-
-    docker-compose ps
-
-Interact with container::
-
-    docker exec -it `docker ps -q --filter ancestor=baobabsoluciones/cornflow` bash
-
-See the logs for a particular service (e.g., SERVICE=cornflow)::
-
-    docker-compose logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
-
-Stop the containers and clean volumes::
-    
-    docker-compose down --volumes --rmi all
-
-Help me
-----------
-
-If you have a database server and you only want to create the database or, for example, you already have an airflow environment, you can go to the following links to learn more about other types of cornflow deployment.
-
-`Cornflow complete install documentation <https://baobabsoluciones.github.io/cornflow-server/main/includeme.html#install-cornflow>`_
-
-`Deploy cornflow with docker <https://baobabsoluciones.github.io/cornflow-server/deploy/index.html>`_
-
-`Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.1.0/index.html>`_
 
