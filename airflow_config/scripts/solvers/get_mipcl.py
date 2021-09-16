@@ -19,15 +19,15 @@ def install():
 
     try:
 
-        MIPCL = git.Repo.clone_from('https://github.com/onebitbrain/MIPCL','MIPCL')
-        os.chdir(MIPCL.working_dir+'/bin')
-        subprocess.check_output(['cp', 'mps_mipcl', '/usr/local/bin/mps_mipcl'])
-        subprocess.check_output(['chmod', '+x', '/usr/local/bin/mps_mipcl'])
+        MIPCL = git.Repo.clone_from("https://github.com/onebitbrain/MIPCL", "MIPCL")
+        os.chdir(MIPCL.working_dir + "/bin")
+        subprocess.check_output(["cp", "mps_mipcl", "/usr/local/bin/mps_mipcl"])
+        subprocess.check_output(["chmod", "+x", "/usr/local/bin/mps_mipcl"])
 
-    except(error):
+    except (error):
 
         print(error)
 
     finally:
 
-        print('MIPCL solver installed')
+        print("MIPCL solver installed")
