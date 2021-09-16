@@ -8,6 +8,7 @@ from marshmallow import fields, Schema
 
 # Import from internal modules
 from .common import QueryFilters, PatchOperation
+from .common import BaseDataEndpointResponse
 
 
 class CaseRawRequest(Schema):
@@ -17,19 +18,14 @@ class CaseRawRequest(Schema):
     schema = fields.Str(required=True)
     parent_id = fields.Int(allow_none=True)
     data = fields.Raw()
-    solution = fields.Raw()
+    solution = fields.Raw(allow_none=True, default=None)
 
 
-class CaseListResponse(Schema):
+class CaseListResponse(BaseDataEndpointResponse):
     id = fields.Int()
-    path = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    data_hash = fields.Str()
     solution_hash = fields.Str()
-    created_at = fields.DateTime()
+    path = fields.Str()
     updated_at = fields.DateTime()
-    schema = fields.Str()
     dependents = fields.List(fields.Int())
     is_dir = fields.Function(
         lambda obj: obj.data is None, deserialize=lambda v: bool(v)

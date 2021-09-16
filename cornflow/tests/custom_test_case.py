@@ -152,7 +152,9 @@ class CustomTestCase(TestCase):
         self.assertEqual(row.id, response.json["id"])
 
         for key in self.get_keys_to_check(payload):
-            self.assertEqual(getattr(row, key), payload[key])
+            getattr(row, key)
+            if key in payload:
+                self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
     def get_rows(self, url, data):
@@ -169,12 +171,14 @@ class CustomTestCase(TestCase):
         for i in range(len(data)):
             self.assertEqual(rows_data[i]["id"], codes[i])
             for key in self.get_keys_to_check(data[i]):
-                self.assertEqual(rows_data[i][key], data[i][key])
+                self.assertIn(key, rows_data[i])
+                if key in data[i]:
+                    self.assertEqual(rows_data[i][key], data[i][key])
         return rows
 
     def get_keys_to_check(self, payload):
         if len(self.items_to_check):
-            return self.items_to_check & payload.keys()
+            return self.items_to_check
         return payload.keys()
 
     def get_one_row(
@@ -191,7 +195,9 @@ class CustomTestCase(TestCase):
             return row.json
         self.assertEqual(row.json["id"], payload["id"])
         for key in self.get_keys_to_check(payload):
-            self.assertEqual(row.json[key], payload[key])
+            self.assertIn(key, row.json)
+            if key in payload:
+                self.assertEqual(row.json[key], payload[key])
         return row.json
 
     def get_no_rows(self, url):
@@ -232,7 +238,9 @@ class CustomTestCase(TestCase):
         self.assertEqual(row.json["id"], payload_to_check["id"])
 
         for key in self.get_keys_to_check(payload_to_check):
-            self.assertEqual(row.json[key], payload_to_check[key])
+            self.assertIn(key, row.json)
+            if key in payload_to_check:
+                self.assertEqual(row.json[key], payload_to_check[key])
 
         return row.json
 

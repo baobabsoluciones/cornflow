@@ -181,10 +181,18 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.items_to_check = ["name", "description", "schema"]
 
     def test_new_case(self):
+        self.items_to_check = ["name", "description", "schema", "data", "solution"]
+        self.payload["solution"] = self.payload["data"]
         self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_case_without_solution(self):
-        self.create_new_row(self.url, self.model, self.payload)
+        self.payload.pop("solution")
+        self.items_to_check = ["name", "description", "schema", "data"]
+        _id = self.create_new_row(self.url, self.model, self.payload)
+        data = self.get_one_row(
+            self.url + "/" + str(_id) + "/data/", payload={}, check_payload=False
+        )
+        self.assertIsNone(data["solution"])
 
     def test_case_with_parent(self):
         payload = dict(self.payload)
@@ -299,6 +307,7 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "solution_hash",
             "created_at",
             "updated_at",
+            "user_id",
         }
         self.url = CASE_URL
 
@@ -347,7 +356,16 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
-        self.items_to_check = ["id", "name", "data", "data_hash", "schema"]
+        self.items_to_check = [
+            "id",
+            "name",
+            "data",
+            "data_hash",
+            "schema",
+            "user_id",
+            "created_at",
+            "description",
+        ]
         self.response_items = set(self.items_to_check)
 
         result = self.get_one_row(INSTANCE_URL + payload["id"] + "/data/", payload)

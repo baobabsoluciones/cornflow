@@ -16,3 +16,13 @@ class PatchOperation(Schema):
     op = fields.Str(required=True)
     path = fields.Str(required=True)
     value = fields.Raw()
+
+
+class BaseDataEndpointResponse(Schema):
+    id = fields.Str()
+    name = fields.Str()
+    description = fields.Str()
+    created_at = fields.DateTime()
+    user_id = fields.Int()
+    data_hash = fields.Str()
+    schema = fields.Str(required=False)

@@ -1,6 +1,6 @@
 from marshmallow import fields, Schema
 from .execution import ExecutionSchema, ExecutionDetailsEndpointResponse
-from .common import QueryFilters
+from .common import QueryFilters, BaseDataEndpointResponse
 
 
 class QueryFiltersInstance(QueryFilters):
@@ -41,30 +41,13 @@ class InstanceEditRequest(Schema):
     description = fields.Str()
 
 
-class InstanceEndpointResponse(Schema):
-    id = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    created_at = fields.DateTime()
-    user_id = fields.Int()
-    data_hash = fields.Str()
-    schema = fields.Str(required=False)
+class InstanceEndpointResponse(BaseDataEndpointResponse):
+    pass
 
 
-class InstanceDetailsEndpointResponse(Schema):
-    id = fields.Str()
-    name = fields.Str()
-    description = fields.Str()
-    created_at = fields.Str()
-    user_id = fields.Int()
+class InstanceDetailsEndpointResponse(InstanceEndpointResponse):
     executions = fields.List(fields.Nested(ExecutionDetailsEndpointResponse))
-    data_hash = fields.Str()
-    schema = fields.Str(required=False)
 
 
-class InstanceDataEndpointResponse(Schema):
-    id = fields.Str()
-    name = fields.Str()
+class InstanceDataEndpointResponse(InstanceEndpointResponse):
     data = fields.Raw(required=True)
-    data_hash = fields.Str()
-    schema = fields.Str(required=False)
