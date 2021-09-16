@@ -16,7 +16,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Cornflow" href="includeme.html" />
+    <link rel="next" title="Introduction" href="introduction.html" />
     <link rel="prev" title="Cornflow documentation" href="../index.html" /> 
 </head>
 
@@ -40,15 +40,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Main topics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html">Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#install-with-docker">Install with docker</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -82,26 +84,8 @@
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html">Install</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html#installation-instructions">Installation instructions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#requirements">Requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#install-cornflow">Install cornflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#setup-cornflow-database">Setup cornflow database</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#launch-cornflow-server">Launch cornflow server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#install-and-configure-airflow">Install and configure airflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#launch-airflow-server">Launch airflow server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#killing-airflow">Killing airflow</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html#using-cornflow-with-the-python-client">Using cornflow with the python client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html#running-tests-and-coverage">Running tests and coverage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html#install-with-docker">Install with docker</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#pull">Pull</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#build">Build</a></li>
-<li class="toctree-l3"><a class="reference internal" href="includeme.html#usage">Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="includeme.html#help-me">Help me</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#ways-it-can-be-used">Ways it can be used</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a><ul>
@@ -115,10 +99,10 @@
 <li class="toctree-l2"><a class="reference internal" href="concepts.html#execution">Execution</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Cornflow-server architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#components">Components</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="architecture.html#cornflow">Cornflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="architecture.html#airflow">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="architecture.html#cornflow-server">Cornflow-server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="architecture.html#airflow-service">Airflow service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="architecture.html#worker">Worker</a></li>
 <li class="toctree-l3"><a class="reference internal" href="architecture.html#client">Client</a></li>
 </ul>
@@ -126,9 +110,23 @@
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#data-flows">Data flows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#use-case-1">Use case 1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#use-case-2">Use case 2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation instructions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#install-cornflow">Install cornflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#setup-cornflow-database">Setup cornflow database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#launch-cornflow-server">Launch cornflow server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#install-and-configure-airflow">Install and configure airflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#launch-airflow-server">Launch airflow server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#killing-airflow">Killing airflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html#install-with-docker">Install with docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#pull">Pull</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#build">Build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#help-me">Help me</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -140,7 +138,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Cornflow documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="includeme.html" class="btn btn-neutral float-right" title="Cornflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

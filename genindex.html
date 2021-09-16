@@ -38,9 +38,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/index.html">User guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clients/index.html">Supported clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -76,24 +77,39 @@
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError">AirflowError</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.instance.allowed_file">allowed_file() (in module cornflow.endpoints.instance)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.api_for_id">api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore">ApplicationCore (class in cornflow_client.core.application)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.args">args (cornflow_client.constants.AirflowError attribute)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage.args">(cornflow_client.constants.InvalidUsage attribute)</a>
+</li>
+      </ul></li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginEndpoint.auth_db_authenticate">auth_db_authenticate() (cornflow.endpoints.login.LoginEndpoint static method)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginEndpoint.auth_ldap_authenticate">auth_ldap_authenticate() (cornflow.endpoints.login.LoginEndpoint static method)</a>
@@ -108,7 +124,13 @@
 </li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.check_hash">check_hash() (cornflow.models.user.UserModel method)</a>
 </li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema">check_schema() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.check_solution">check_solution() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.check_username_in_use">check_username_in_use() (cornflow.models.user.UserModel static method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow">CornFlow (class in cornflow_client.cornflow_client)</a>
 </li>
       <li>
     cornflow.endpoints.dag
@@ -138,8 +160,6 @@
         <li><a href="dev/endpoints.html#module-cornflow.endpoints.login">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cornflow.endpoints.signup
 
@@ -175,6 +195,87 @@
         <li><a href="dev/models.html#module-cornflow.models.user">module</a>
 </li>
       </ul></li>
+      <li>
+    cornflow_client.constants
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.constants">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE">cornflow_client.constants.SOLUTION_STATUS_FEASIBLE (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE">cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE">cornflow_client.constants.STATUS_INFEASIBLE (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT">cornflow_client.constants.STATUS_MEMORY_LIMIT (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT">cornflow_client.constants.STATUS_NODE_LIMIT (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED">cornflow_client.constants.STATUS_NOT_SOLVED (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL">cornflow_client.constants.STATUS_OPTIMAL (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT">cornflow_client.constants.STATUS_TIME_LIMIT (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED">cornflow_client.constants.STATUS_UNBOUNDED (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED">cornflow_client.constants.STATUS_UNDEFINED (in module cornflow_client.cornflow_client)</a>
+</li>
+      <li>
+    cornflow_client.core.application
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.application">module</a>
+</li>
+      </ul></li>
+      <li>
+    cornflow_client.core.experiment
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.experiment">module</a>
+</li>
+      </ul></li>
+      <li>
+    cornflow_client.core.instance
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.instance">module</a>
+</li>
+      </ul></li>
+      <li>
+    cornflow_client.core.instance_solution
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.instance_solution">module</a>
+</li>
+      </ul></li>
+      <li>
+    cornflow_client.core.solution
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.solution">module</a>
+</li>
+      </ul></li>
+      <li>
+    cornflow_client.cornflow_client
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.cornflow_client">module</a>
+</li>
+      </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlowApiError">CornFlowApiError</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.create_case">create_case() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.create_execution">create_execution() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.create_instance">create_instance() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.create_instance_file">create_instance_file() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -184,6 +285,8 @@
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpoint">DAGEndpoint (class in cornflow.endpoints.dag)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpointManual">DAGEndpointManual (class in cornflow.endpoints.dag)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.data">data() (cornflow_client.core.instance_solution.InstanceSolutionCore property)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDetailsEndpoint.delete">delete() (cornflow.endpoints.execution.ExecutionDetailsEndpoint method)</a>
 
@@ -197,6 +300,12 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.delete_api_for_id">delete_api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.delete_one_case">delete_one_case() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.delete_one_instance">delete_one_instance() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.disable">disable() (cornflow.models.user.UserModel method)</a>
 </li>
   </ul></td>
@@ -205,6 +314,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.error">error (cornflow_client.constants.AirflowError attribute)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage.error">(cornflow_client.constants.InvalidUsage attribute)</a>
+</li>
+      </ul></li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDataEndpoint">ExecutionDataEndpoint (class in cornflow.endpoints.execution)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDetailsEndpoint">ExecutionDetailsEndpoint (class in cornflow.endpoints.execution)</a>
@@ -221,12 +336,28 @@
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionStatusEndpoint">ExecutionStatusEndpoint (class in cornflow.endpoints.execution)</a>
 </li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore">ExperimentCore (class in cornflow_client.core.experiment)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict">from_dict() (cornflow_client.core.instance_solution.InstanceSolutionCore class method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json">from_json() (cornflow_client.core.instance_solution.InstanceSolutionCore class method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">generate_schema() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpoint.get">get() (cornflow.endpoints.dag.DAGEndpoint method)</a>
 
       <ul>
@@ -251,15 +382,55 @@
         <li><a href="dev/endpoints.html#cornflow.endpoints.user.UserEndpoint.get">(cornflow.endpoints.user.UserEndpoint method)</a>
 </li>
       </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_all_cases">get_all_cases() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_all_executions">get_all_executions() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_all_instances">get_all_instances() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_all_users">get_all_users() (cornflow.models.user.UserModel static method)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_all_users">(cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_all_users">get_all_users() (cornflow.models.user.UserModel static method)</a>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_api_for_id">get_api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_data">get_data() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.get_default_solver_name">get_default_solver_name() (cornflow_client.core.application.ApplicationCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_log">get_log() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.get_objective">get_objective() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_one_case">get_one_case() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_one_instance">get_one_instance() (cornflow_client.cornflow_client.CornFlow method)</a>
 </li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user">get_one_user() (cornflow.models.user.UserModel static method)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_one_user">(cornflow_client.cornflow_client.CornFlow method)</a>
 </li>
+      </ul></li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user_by_email">get_one_user_by_email() (cornflow.models.user.UserModel static method)</a>
 </li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user_by_username">get_one_user_by_username() (cornflow.models.user.UserModel static method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_results">get_results() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_schema">get_schema() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.get_schemas">get_schemas() (cornflow_client.core.application.ApplicationCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_solution">get_solution() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.get_solver">get_solver() (cornflow_client.core.application.ApplicationCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.get_status">get_status() (cornflow_client.cornflow_client.CornFlow method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -267,6 +438,14 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.instance">instance() (cornflow_client.core.application.ApplicationCore property)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.instance">(cornflow_client.core.experiment.ExperimentCore property)</a>
+</li>
+      </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore">InstanceCore (class in cornflow_client.core.instance)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.instance.InstanceDataEndpoint">InstanceDataEndpoint (class in cornflow.endpoints.instance)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.instance.InstanceDetailsEndpoint">InstanceDetailsEndpoint (class in cornflow.endpoints.instance)</a>
@@ -281,11 +460,21 @@
 </li>
       <li><a href="dev/models.html#cornflow.models.instance.InstanceModel">InstanceModel (class in cornflow.models.instance)</a>
 </li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore">InstanceSolutionCore (class in cornflow_client.core.instance_solution)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage">InvalidUsage</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.is_alive">is_alive() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.login">login() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginEndpoint">LoginEndpoint (class in cornflow.endpoints.login)</a>
 </li>
@@ -295,6 +484,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.manual_execution">manual_execution() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpoint.methods">methods (cornflow.endpoints.dag.DAGEndpoint attribute)</a>
 
       <ul>
@@ -355,13 +546,43 @@
 </li>
         <li><a href="dev/models.html#module-cornflow.models.user">cornflow.models.user</a>
 </li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.constants">cornflow_client.constants</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.application">cornflow_client.core.application</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.experiment">cornflow_client.core.experiment</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.instance">cornflow_client.core.instance</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.instance_solution">cornflow_client.core.instance_solution</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.core.solution">cornflow_client.core.solution</a>
+</li>
+        <li><a href="dev/cornflow_client.html#module-cornflow_client.cornflow_client">cornflow_client.cornflow_client</a>
+</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.name">name() (cornflow_client.core.application.ApplicationCore property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.NoSolverException">NoSolverException</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.patch_api_for_id">patch_api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.patch_one_case">patch_one_case() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpointManual.post">post() (cornflow.endpoints.dag.DAGEndpointManual method)</a>
 
       <ul>
@@ -380,6 +601,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.post_api_for_id">post_api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.dag.DAGEndpoint.put">put() (cornflow.endpoints.dag.DAGEndpoint method)</a>
 
       <ul>
@@ -392,6 +615,10 @@
         <li><a href="dev/endpoints.html#cornflow.endpoints.user.UserDetailsEndpoint.put">(cornflow.endpoints.user.UserDetailsEndpoint method)</a>
 </li>
       </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.put_api_for_id">put_api_for_id() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.put_one_case">put_one_case() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -414,7 +641,41 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.schema">schema() (cornflow_client.core.application.ApplicationCore property)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.schema">(cornflow_client.core.instance_solution.InstanceSolutionCore property)</a>
+</li>
+      </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.sign_up">sign_up() (cornflow_client.cornflow_client.CornFlow method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.signup.SignUpEndpoint">SignUpEndpoint (class in cornflow.endpoints.signup)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.solution">solution() (cornflow_client.core.application.ApplicationCore property)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.solution">(cornflow_client.core.experiment.ExperimentCore property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore">SolutionCore (class in cornflow_client.core.solution)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.solve">solve() (cornflow_client.core.application.ApplicationCore method)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.solve">(cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+      </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.solvers">solvers() (cornflow_client.core.application.ApplicationCore property)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.status_code">status_code (cornflow_client.constants.AirflowError attribute)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage.status_code">(cornflow_client.constants.InvalidUsage attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.stop_execution">stop_execution() (cornflow_client.cornflow_client.CornFlow method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -422,6 +683,20 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.test_cases">test_cases() (cornflow_client.core.application.ApplicationCore property)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.to_dict">to_dict() (cornflow_client.constants.AirflowError method)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage.to_dict">(cornflow_client.constants.InvalidUsage method)</a>
+</li>
+        <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict">(cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json">to_json() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.user.ToggleUserAdmin">ToggleUserAdmin (class in cornflow.endpoints.user)</a>
 </li>
   </ul></td>
@@ -441,6 +716,22 @@
       <li><a href="dev/endpoints.html#cornflow.endpoints.user.UserEndpoint">UserEndpoint (class in cornflow.endpoints.user)</a>
 </li>
       <li><a href="dev/models.html#cornflow.models.user.UserModel">UserModel (class in cornflow.models.user)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.with_traceback">with_traceback() (cornflow_client.constants.AirflowError method)</a>
+
+      <ul>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.InvalidUsage.with_traceback">(cornflow_client.constants.InvalidUsage method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.cornflow_client.CornFlow.write_solution">write_solution() (cornflow_client.cornflow_client.CornFlow method)</a>
 </li>
   </ul></td>
 </tr></table>

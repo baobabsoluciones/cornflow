@@ -15,7 +15,9 @@
         <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code documentation" href="../dev/index.html" />
+    <link rel="prev" title="Logging and monitoring" href="logs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,11 +38,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="index.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own Cornflow-server</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Known problems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#situations">Situations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#development">Development</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker-build">Docker build</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cornflow-database">Cornflow database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-cornflow-server">Running cornflow-server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flower">Flower</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#airflow">Airflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ldap-docker">Ldap docker</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -59,6 +85,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Deploy your own Cornflow-server</a> &raquo;</li>
       <li>Known problems</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/deploy/problems.rst.txt" rel="nofollow"> View page source</a>
@@ -108,8 +135,8 @@
 <p>Possible solution: See again the name given to CORNFLOW_DB_HOST environment variable in docker-compose file.</p>
 </div></blockquote>
 </div>
-<div class="section" id="running-cornflow">
-<h3>Running cornflow<a class="headerlink" href="#running-cornflow" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="running-cornflow-server">
+<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this headline">¶</a></h3>
 <p>Problem: Users were not created when cornflow started</p>
 <blockquote>
 <div><p>Error: usage: manage.py [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
@@ -146,8 +173,8 @@
 </div></blockquote>
 <p>Problem: Openldap docker container don´t start</p>
 <blockquote>
-<div><p>Error: Can´t parse ldif entry on line 1</p>
-<p>Possible solution: Some entry on <a href="#id1"><span class="problematic" id="id2">*</span></a>.ldif file has not properly defined and slapd can´t start and populate the ldap server</p>
+<div><p>Error: Can’t parse ldif entry on line 1</p>
+<p>Possible solution: Some entry on <code class="docutils literal notranslate"><span class="pre">*.ldif</span></code> file has not properly defined and slapd can’t start and populate the ldap server</p>
 </div></blockquote>
 <p>Problem: Openldap does not show entries from ldif file</p>
 <blockquote>
@@ -161,7 +188,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="logs.html" class="btn btn-neutral float-left" title="Logging and monitoring" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../dev/index.html" class="btn btn-neutral float-right" title="Code documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

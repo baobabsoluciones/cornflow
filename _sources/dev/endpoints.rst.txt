@@ -2,7 +2,7 @@ Endpoints
 ==========
 
 DAG endpoint
-''''''''''''''
+----------------
 
 .. automodule:: cornflow.endpoints.dag
    :members:
@@ -11,7 +11,7 @@ DAG endpoint
    :member-order: bysource
 
 Execution endpoints
-'''''''''''''''''''
+--------------------------------
 
 .. automodule:: cornflow.endpoints.execution
    :members:
@@ -20,7 +20,7 @@ Execution endpoints
    :member-order: bysource
 
 Instance endpoints
-''''''''''''''''''''
+--------------------------------
 
 .. automodule:: cornflow.endpoints.instance
    :members:
@@ -29,7 +29,7 @@ Instance endpoints
    :member-order: bysource
 
 Login endpoint
-''''''''''''''''''''
+--------------------------------
 
 .. automodule:: cornflow.endpoints.login
    :members:
@@ -38,7 +38,7 @@ Login endpoint
    :member-order: bysource
 
 Signup endpoint
-''''''''''''''''''''
+--------------------------------
 
 .. automodule:: cornflow.endpoints.signup
    :members:
@@ -47,7 +47,7 @@ Signup endpoint
    :member-order: bysource
 
 User endpoint
-''''''''''''''''''''
+--------------------------------
 
 .. automodule:: cornflow.endpoints.user
    :members:

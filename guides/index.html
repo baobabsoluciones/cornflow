@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guides and how-to &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>User guides and how-to &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,8 +16,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How to deploy a new solver" href="deploy_solver.html" />
-    <link rel="prev" title="Python API" href="../clients/python-api.html" /> 
+    <link rel="next" title="How to deploy a new solution method" href="deploy_solver.html" />
+    <link rel="prev" title="Installation instructions" href="../main/install.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,12 +40,18 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deployment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Guides and how-to</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solver</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html">Deploy a new solution method 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_with_airflow.html">Debug your solution method</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -64,7 +70,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Guides and how-to</li>
+      <li>User guides and how-to</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/guides/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -74,16 +80,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="guides-and-how-to">
-<h1>Guides and how-to<a class="headerlink" href="#guides-and-how-to" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="user-guides-and-how-to">
+<h1>User guides and how-to<a class="headerlink" href="#user-guides-and-how-to" title="Permalink to this headline">¶</a></h1>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="deploy_solver.html">Deploy a new solver</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver.html#the-solver">The solver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver.html#name">Name</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver.html#the-input-schema-and-output-schema">The input schema and output schema</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver.html#test-cases">Test cases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_solver_new.html">Deploy a new solution method 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#application">Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#instance-class">Instance class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#solution-class">Solution class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#solution-method-solvers-class">Solution method / solvers class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#test-cases-property">Test cases property</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#schema-property">Schema property</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#code-structure">Code structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html#complete-init-py-code-for-the-tsp">Complete __init__.py code for the TSP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jsonschema.html">Write a json-schema</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jsonschema.html#basics-of-schemas">Basics of schemas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#no-nested-list-types">No nested list types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#required-property">Required property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#exception-for-simple-objects">Exception for “simple objects”</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jsonschema.html#example-tsp">Example: TSP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#instance-schema">Instance schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#solution-schema">Solution schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jsonschema.html#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing_app.html">Test your solution method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html#basics-of-testing">Basics of testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html#test-locally">Test locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html#test-in-github">Test in github</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use_solver.html">Use your solution method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="use_solver.html#python-client">python client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debug_with_airflow.html">Debug your solution method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debug_with_airflow.html#common-errors">Common errors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debug_with_airflow.html#update-schemas-in-cornflow">Update schemas in Cornflow</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -94,8 +143,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../clients/python-api.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="deploy_solver.html" class="btn btn-neutral float-right" title="How to deploy a new solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../main/install.html" class="btn btn-neutral float-left" title="Installation instructions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deploy_solver.html" class="btn btn-neutral float-right" title="How to deploy a new solution method" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

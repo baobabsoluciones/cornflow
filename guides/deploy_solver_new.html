@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to deploy a new solution method (2.0) &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Write a json-schema" href="jsonschema.html" />
+    <link rel="prev" title="How to deploy a new solution method" href="deploy_solver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Cornflow
+          </a>
+              <div class="version">
+                0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Deploy a new solution method 2.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#application">Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#instance-class">Instance class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solution-class">Solution class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solution-method-solvers-class">Solution method / solvers class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-cases-property">Test cases property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#schema-property">Schema property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-structure">Code structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-init-py-code-for-the-tsp">Complete __init__.py code for the TSP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cornflow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">User guides and how-to</a> &raquo;</li>
+      <li>How to deploy a new solution method (2.0)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/deploy_solver_new.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="how-to-deploy-a-new-solution-method-2-0">
+<h1>How to deploy a new solution method (2.0)<a class="headerlink" href="#how-to-deploy-a-new-solution-method-2-0" title="Permalink to this headline">¶</a></h1>
+<p>The deployment of a solution method consists of sub-classing the class <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore" title="cornflow_client.core.application.ApplicationCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.application.ApplicationCore</span></code></a> from the package <code class="docutils literal notranslate"><span class="pre">cornflow_client</span></code>. <code class="docutils literal notranslate"><span class="pre">ApplicationCore</span></code> serves as a template for apps and requires certain properties and methods to be defined.</p>
+<p>We will use as example the TSP problem defined here. At the end of the document, the complete code with all imports is available.</p>
+<div class="section" id="application">
+<h2>Application<a class="headerlink" href="#application" title="Permalink to this headline">¶</a></h2>
+<p>First, we make a subclass of <cite>ApplicationCore</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TspApp</span><span class="p">(</span><span class="n">ApplicationCore</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;tsp&quot;</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span>
+    <span class="n">solvers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">naive</span><span class="o">=</span><span class="n">TSPNaive</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">test_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<p>As you can see, we have given the application a class name (and a name property). We also have passed several other properties: instance, solution, solvers and schema. Finally, we have created a <code class="docutils literal notranslate"><span class="pre">test_cases</span></code> property.</p>
+<p>We will go over each of the required properties.</p>
+</div>
+<div class="section" id="instance-class">
+<h2>Instance class<a class="headerlink" href="#instance-class" title="Permalink to this headline">¶</a></h2>
+<p>This is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance.InstanceCore</span></code></a>. There are many default methods that can be overwritten (<code class="docutils literal notranslate"><span class="pre">to_dict</span></code>, <code class="docutils literal notranslate"><span class="pre">from_dict</span></code>, etc.). The only required property is the <code class="docutils literal notranslate"><span class="pre">schema</span></code>. Here we have just imported a file with the corresponding json-schema. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="n">InstanceCore</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="solution-class">
+<h2>Solution class<a class="headerlink" href="#solution-class" title="Permalink to this headline">¶</a></h2>
+<p>Very similar to the Instance. The Solution is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.solution.SolutionCore</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">(</span><span class="n">SolutionCore</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="solution-method-solvers-class">
+<h2>Solution method / solvers class<a class="headerlink" href="#solution-method-solvers-class" title="Permalink to this headline">¶</a></h2>
+<p>The solution method is a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.experiment.ExperimentCore</span></code></a> and should define three methods: <code class="docutils literal notranslate"><span class="pre">solve</span></code>, <code class="docutils literal notranslate"><span class="pre">get_objective</span></code> and <code class="docutils literal notranslate"><span class="pre">check_solution</span></code>. Here is the implementation of a very very bad solution method for the TSP:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># we get a sorted list of nodes by position</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">sorted</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">vapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="p">{(</span><span class="n">el</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]):</span> <span class="n">el</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">]}</span>
+        <span class="c1"># we sum all arcs in the solution</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">sum</span><span class="p">([</span><span class="n">weight</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">]</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">route</span><span class="p">[</span><span class="mi">1</span><span class="p">:])])</span>
+            <span class="o">+</span> <span class="n">weight</span><span class="p">[</span><span class="n">route</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">route</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">nodes_in</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">nodes_out</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">missing_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nodes_in</span> <span class="o">-</span> <span class="n">nodes_out</span><span class="p">)}</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">missing_positions</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes_in</span><span class="p">)))</span> <span class="o">-</span> <span class="n">positions</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">SuperDict</span><span class="p">(</span>
+            <span class="n">missing_nodes</span><span class="o">=</span><span class="n">missing_nodes</span><span class="p">,</span> <span class="n">missing_positions</span><span class="o">=</span><span class="n">missing_positions</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p>More than one solution method can be defined. This is why they are given in a dictionary to the Application. We use them as a catalogue when deciding to solve a problem.</p>
+</div>
+<div class="section" id="test-cases-property">
+<h2>Test cases property<a class="headerlink" href="#test-cases-property" title="Permalink to this headline">¶</a></h2>
+<p>Test cases is a property that should return a list of datasets (in json-schema format). These tests are used to test the app in the unit-tests. More information on how to create the unit tests for your solution method in <a class="reference internal" href="testing_app.html#test-your-solution-method"><span class="std std-ref">Test your solution method</span></a>.</p>
+</div>
+<div class="section" id="schema-property">
+<h2>Schema property<a class="headerlink" href="#schema-property" title="Permalink to this headline">¶</a></h2>
+<p>The schema of an application is the configuration used to solve a problem. This schema needs to have at least the <cite>timeLimit</cite> and the <cite>solver</cite> properties. Besides that, it’s up to the developer to decide which configuration is needed. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
+</div>
+<div class="section" id="code-structure">
+<h2>Code structure<a class="headerlink" href="#code-structure" title="Permalink to this headline">¶</a></h2>
+<p>Each app is contained ideally inside a directory. Usually, the <code class="docutils literal notranslate"><span class="pre">Instance</span></code>, <code class="docutils literal notranslate"><span class="pre">Solution</span></code> and <code class="docutils literal notranslate"><span class="pre">Solution</span> <span class="pre">method</span></code> are located each one inside a separate file. The <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> needs to contain the Application class. Other files inside the folder include the schemas (better stored as json files).</p>
+<p>In this example we put everything inside the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> except the json-schema files because it was a small example.</p>
+</div>
+<div class="section" id="complete-init-py-code-for-the-tsp">
+<h2>Complete __init__.py code for the TSP<a class="headerlink" href="#complete-init-py-code-for-the-tsp" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cornflow_client</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApplicationCore</span><span class="p">,</span>
+    <span class="n">InstanceCore</span><span class="p">,</span>
+    <span class="n">SolutionCore</span><span class="p">,</span>
+    <span class="n">ExperimentCore</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pytups</span> <span class="kn">import</span> <span class="n">TupList</span><span class="p">,</span> <span class="n">SuperDict</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">DAG.tools</span> <span class="kn">import</span> <span class="n">load_json</span>
+
+
+<span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="n">InstanceCore</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Solution</span><span class="p">(</span><span class="n">SolutionCore</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># we get a sorted list of nodes by position</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">sorted</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">vapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="p">{(</span><span class="n">el</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s2">&quot;n2&quot;</span><span class="p">]):</span> <span class="n">el</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">]}</span>
+        <span class="c1"># we sum all arcs in the solution</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">sum</span><span class="p">([</span><span class="n">weight</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">]</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">route</span><span class="p">[</span><span class="mi">1</span><span class="p">:])])</span>
+            <span class="o">+</span> <span class="n">weight</span><span class="p">[</span><span class="n">route</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">route</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">nodes_in</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">nodes_out</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">missing_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nodes_in</span> <span class="o">-</span> <span class="n">nodes_out</span><span class="p">)}</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">TupList</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_set</span><span class="p">()</span>
+        <span class="n">missing_positions</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes_in</span><span class="p">)))</span> <span class="o">-</span> <span class="n">positions</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">SuperDict</span><span class="p">(</span>
+            <span class="n">missing_nodes</span><span class="o">=</span><span class="n">missing_nodes</span><span class="p">,</span> <span class="n">missing_positions</span><span class="o">=</span><span class="n">missing_positions</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TspApp</span><span class="p">(</span><span class="n">ApplicationCore</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;tsp&quot;</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span>
+    <span class="n">solvers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">naive</span><span class="o">=</span><span class="n">TSPNaive</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">test_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deploy_solver.html" class="btn btn-neutral float-left" title="How to deploy a new solution method" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jsonschema.html" class="btn btn-neutral float-right" title="Write a json-schema" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

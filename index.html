@@ -39,9 +39,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/index.html">User guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clients/index.html">Supported clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -72,17 +73,38 @@
              
   <div class="section" id="cornflow-documentation">
 <h1>Cornflow documentation<a class="headerlink" href="#cornflow-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+<p>Welcome to the Cornflow project documentation. There’s plenty to see. If you’re new, try the <a class="reference internal" href="main/introduction.html#introduction"><span class="std std-ref">Introduction</span></a> and the <a class="reference internal" href="main/concepts.html#concepts"><span class="std std-ref">Concepts</span></a> before you starting browsing the rest.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="main/index.html">Main topics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="main/includeme.html">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="main/architecture.html">Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="main/examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main/install.html">Installation instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main/install.html#install-with-docker">Install with docker</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deployment</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="guides/index.html">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/deploy_solver.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/deploy_solver_new.html">Deploy a new solution method 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples of solution methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/graph_coloring.html">Graph coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/vrp.html">Vehicle Routing Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/scheduling.html">Scheduling: hackathon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="clients/index.html">Supported clients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="clients/admin-spa.html">Web SPA client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clients/python-api.html">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy/index.html">Deploy your own Cornflow-server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="deploy/intro.html">Before you begin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy/docker-compose.yml.html">docker-compose.yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy/docker-stack.html">Docker stack</a></li>
@@ -91,20 +113,13 @@
 <li class="toctree-l2"><a class="reference internal" href="deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy/logs.html">Logging and monitoring</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="clients/index.html">Supported clients</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="clients/admin-spa.html">Web SPA client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clients/python-api.html">Python API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="guides/index.html">Guides and how-to</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/deploy_solver.html">Deploy a new solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy/problems.html">Known problems</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dev/index.html">Code documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dev/models.html">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dev/endpoints.html">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/cornflow_client.html">Cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stable-rest-api-ref.html">API reference</a></li>

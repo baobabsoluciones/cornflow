@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Cornflow-server architecture &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,7 +16,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="next" title="Installation instructions" href="install.html" />
     <link rel="prev" title="Concepts" href="concepts.html" /> 
 </head>
 
@@ -40,12 +40,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Main topics</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="includeme.html">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">Concepts</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Architecture</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cornflow-server architecture</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#components">Components</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cornflow">Cornflow</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#airflow">Airflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cornflow-server">Cornflow-server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#airflow-service">Airflow service</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#worker">Worker</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#client">Client</a></li>
 </ul>
@@ -53,12 +53,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#data-flows">Data flows</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#install-with-docker">Install with docker</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">Guides and how-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
@@ -78,7 +80,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="index.html">Main topics</a> &raquo;</li>
-      <li>Architecture</li>
+      <li>Cornflow-server architecture</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/main/architecture.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,20 +90,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="architecture">
-<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="cornflow-server-architecture">
+<h1>Cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="components">
 <h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
-<div class="figure align-default" id="id2">
-<span id="id1"></span><img alt="../_images/architecture.png" src="../_images/architecture.png" />
-<p class="caption"><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<div class="figure align-default" id="id1">
+<span id="architecture"></span><img alt="../_images/architecture.png" src="../_images/architecture.png" />
+<p class="caption"><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
-<div class="section" id="cornflow">
-<h3>Cornflow<a class="headerlink" href="#cornflow" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="cornflow-server">
+<h3>Cornflow-server<a class="headerlink" href="#cornflow-server" title="Permalink to this headline">¶</a></h3>
 <p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.</p>
 </div>
-<div class="section" id="airflow">
-<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="airflow-service">
+<h3>Airflow service<a class="headerlink" href="#airflow-service" title="Permalink to this headline">¶</a></h3>
 <p>Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.</p>
 <p>Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
 <p>A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.</p>
@@ -119,9 +121,9 @@
 </div>
 <div class="section" id="data-flows">
 <h2>Data flows<a class="headerlink" href="#data-flows" title="Permalink to this headline">¶</a></h2>
-<div class="figure align-default" id="id3">
+<div class="figure align-default" id="id2">
 <span id="my-figure"></span><img alt="../_images/data_flow.png" src="../_images/data_flow.png" />
-<p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <p>Create instance (data):</p>
 <ol class="arabic simple">
@@ -159,7 +161,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="concepts.html" class="btn btn-neutral float-left" title="Concepts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation instructions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

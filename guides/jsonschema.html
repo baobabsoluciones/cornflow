@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Write a json-schema &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Test your solution method" href="testing_app.html" />
+    <link rel="prev" title="How to deploy a new solution method (2.0)" href="deploy_solver_new.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Cornflow
+          </a>
+              <div class="version">
+                0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html">Deploy a new solution method 2.0</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Write a json-schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basics-of-schemas">Basics of schemas</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#no-nested-list-types">No nested list types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#required-property">Required property</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exception-for-simple-objects">Exception for “simple objects”</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#example-tsp">Example: TSP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instance-schema">Instance schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#solution-schema">Solution schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cornflow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">User guides and how-to</a> &raquo;</li>
+      <li>Write a json-schema</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/jsonschema.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="write-a-json-schema">
+<h1>Write a json-schema<a class="headerlink" href="#write-a-json-schema" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basics-of-schemas">
+<h2>Basics of schemas<a class="headerlink" href="#basics-of-schemas" title="Permalink to this headline">¶</a></h2>
+<p>The schemas are descriptions of the data accepted by the application.</p>
+<p>In particular, a schema must describe a dictionary of tables, each table described as a list of dictionaries whose keys are the name of the columns.</p>
+<p>Let’s take an example of data with two tables <code class="docutils literal notranslate"><span class="pre">customers</span></code> and <code class="docutils literal notranslate"><span class="pre">allowedTrailers</span></code>.</p>
+<p><strong>customers</strong>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>IdCustomer</p></th>
+<th class="head"><p>Demand</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>7</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>allowedTrailers</strong>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>IdCustomer</p></th>
+<th class="head"><p>idTrailer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>4</p></td>
+</tr>
+</tbody>
+</table>
+<p>The schema will look like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+ <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+ <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="nt">&quot;customers&quot;</span><span class="p">:</span> <span class="p">{</span>
+     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="nt">&quot;index&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+         <span class="p">},</span>
+         <span class="nt">&quot;Demand&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+         <span class="p">}</span>
+       <span class="p">},</span>
+       <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+         <span class="s2">&quot;index&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;Demand&quot;</span>
+       <span class="p">]</span>
+     <span class="p">}</span>
+   <span class="p">},</span>
+   <span class="nt">&quot;allowedTrailers&quot;</span><span class="p">:</span> <span class="p">{</span>
+     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="nt">&quot;idCustomer&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+         <span class="p">},</span>
+         <span class="nt">&quot;idTrailer&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+         <span class="p">}</span>
+       <span class="p">},</span>
+       <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+         <span class="s2">&quot;idCustomer&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;idTrailer&quot;</span>
+       <span class="p">]</span>
+     <span class="p">}</span>
+   <span class="p">}</span>
+ <span class="p">},</span>
+ <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+   <span class="s2">&quot;customers&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;allowedTrailers&quot;</span>
+ <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
+It is important to note three things:</p>
+<div class="section" id="no-nested-list-types">
+<h3>No nested list types<a class="headerlink" href="#no-nested-list-types" title="Permalink to this headline">¶</a></h3>
+<p>If your data previously looked like this:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 27%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>IdCustomer</p></th>
+<th class="head"><p>Demand</p></th>
+<th class="head"><p>idTrailer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>[7, 8]</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>5</p></td>
+<td><p>[9]</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>7</p></td>
+<td><p>[4]</p></td>
+</tr>
+</tbody>
+</table>
+<p>Then it should be converted into two tables like shown before. The cells of a table must only contain unidimensional values</p>
+</div>
+<div class="section" id="required-property">
+<h3>Required property<a class="headerlink" href="#required-property" title="Permalink to this headline">¶</a></h3>
+<p>The property “required” must be included for all objects that are needed to solve the problem.</p>
+<p>In real problems, pure data is usually complemented by auxiliary information (such as that used to display in screens: names, comments, coordinates, etc.). This information should not be included in the “required” property because it is not required to produce a solution for the problem (it is still useful to be defined so it can be validated by the schema).</p>
+</div>
+<div class="section" id="exception-for-simple-objects">
+<h3>Exception for “simple objects”<a class="headerlink" href="#exception-for-simple-objects" title="Permalink to this headline">¶</a></h3>
+<p>Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters <code class="docutils literal notranslate"><span class="pre">trailersCapacity</span></code> and <code class="docutils literal notranslate"><span class="pre">timeHorizon</span></code>, we would add a property <code class="docutils literal notranslate"><span class="pre">parameters</span></code> to our schema:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+ <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+ <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="nt">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">{</span>
+     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;trailersCapacity&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+       <span class="p">},</span>
+       <span class="nt">&quot;timeHorizon&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span>
+       <span class="p">}</span>
+     <span class="p">},</span>
+     <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;trailersCapacity&quot;</span><span class="p">,</span> <span class="s2">&quot;timeHorizon&quot;</span><span class="p">]</span>
+   <span class="p">},</span>
+   <span class="nt">&quot;customers&quot;</span><span class="p">:</span> <span class="p">{},</span>
+   <span class="nt">&quot;allowedTrailers&quot;</span><span class="p">:</span> <span class="p">{}</span>
+   <span class="p">},</span>
+ <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+   <span class="s2">&quot;customers&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;allowedTrailers&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;parameters&quot;</span>
+ <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="example-tsp">
+<h2>Example: TSP<a class="headerlink" href="#example-tsp" title="Permalink to this headline">¶</a></h2>
+<p>Let’s take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.</p>
+<div class="section" id="instance-schema">
+<h3>Instance schema<a class="headerlink" href="#instance-schema" title="Permalink to this headline">¶</a></h3>
+<p>An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;arcs&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Arc information between pairs of nodes&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;n1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+                    <span class="nt">&quot;n2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+                    <span class="nt">&quot;w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">,</span> <span class="s2">&quot;n2&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>We are using <code class="docutils literal notranslate"><span class="pre">n1</span></code> and <code class="docutils literal notranslate"><span class="pre">n2</span></code> to call each the first and second node of each arc. We use <code class="docutils literal notranslate"><span class="pre">w</span></code> to call the weight of the arc.</p>
+</div>
+<div class="section" id="solution-schema">
+<h3>Solution schema<a class="headerlink" href="#solution-schema" title="Permalink to this headline">¶</a></h3>
+<p>A solution to a TSP, is the sequence in which nodes should be visited. We <em>could</em> use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;route&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Order of nodes in each route&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;node&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+                    <span class="nt">&quot;pos&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">,</span><span class="s2">&quot;node&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">node</span></code> represents each node in the sequence. <code class="docutils literal notranslate"><span class="pre">pos</span></code> represents the position of each node in the sequence.</p>
+<p>An alternative, still valid, schema would be:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;route&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Order of nodes in each route&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;node&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Here we assume the array is sorted and so we do not need the position of the node explicitly.</p>
+</div>
+<div class="section" id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h3>
+<p>The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;timeLimit&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">},</span>
+        <span class="nt">&quot;seed&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+        <span class="nt">&quot;gap&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">},</span>
+        <span class="nt">&quot;solver&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;enum&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;naive&quot;</span><span class="p">],</span>
+            <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;naive&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">timeLimit</span></code> constraints the time the solution method can run. <code class="docutils literal notranslate"><span class="pre">gapRel</span></code> provides a tolerance measured in relative gap (to the best possible solution). <code class="docutils literal notranslate"><span class="pre">seed</span></code> provides a way to make the solution method deterministic. The <code class="docutils literal notranslate"><span class="pre">solver</span></code> property is mandatory for all solution methods and should always have this format (a string with an “enum” attribute).</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deploy_solver_new.html" class="btn btn-neutral float-left" title="How to deploy a new solution method (2.0)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="testing_app.html" class="btn btn-neutral float-right" title="Test your solution method" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
