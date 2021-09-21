@@ -96,8 +96,9 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyProject</span><span class="p">(</span><span class="n">BaseDAGTests</span><span class="o">.</span><span class="n">SolvingTests</span><span class="p">):</span>
    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
-       <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">_import_file</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">)</span>    <span class="c1"># The file we import is the DAG</span>
-                                                <span class="c1"># Will test the default solver</span>
+       <span class="kn">from</span> <span class="nn">DAG.MyProject</span> <span class="kn">import</span> <span class="n">MyApp</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="p">()</span>                   <span class="c1"># Will test the default solver</span>
+
 
    <span class="k">def</span> <span class="nf">test_solve_algo_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_try_solving_testcase</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s2">&quot;algorithm1&quot;</span><span class="p">))</span>
