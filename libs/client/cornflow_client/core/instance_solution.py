@@ -81,8 +81,7 @@ class InstanceSolutionCore(ABC):
         validator = Draft7Validator(self.schema)
         data = self.to_dict()
         if not validator.is_valid(data):
-            error_list = [e for e in validator.iter_errors(data)]
-            return error_list
+            return [e for e in validator.iter_errors(data)]
         return []
 
     def generate_schema(self) -> dict:
