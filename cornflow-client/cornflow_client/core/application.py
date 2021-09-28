@@ -1,5 +1,7 @@
 from typing import Type, Dict, List, Tuple, Union
 from timeit import default_timer as timer
+from jsonschema import Draft7Validator
+
 from .instance import InstanceCore
 from .solution import SolutionCore
 from .experiment import ExperimentCore
@@ -62,11 +64,13 @@ class ApplicationCore(ABC):
 
     @property
     @abstractmethod
-    def test_cases(self) -> List[Dict]:
+    def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
         """
         Mandatory property
 
         :return: a list of datasets following the json-schema.
+        if the list includes a tuple of two dictionaries,
+        it's because it's an instance and it's solution
         """
         raise NotImplementedError()
 
@@ -80,13 +84,23 @@ class ApplicationCore(ABC):
         """
         raise NotImplementedError()
 
-    def solve(self, data: dict, config: dict) -> Tuple[Dict, str, Dict]:
+    def solve(
+        self, data: dict, config: dict, solution_data: dict = None
+    ) -> Tuple[Dict, str, Dict]:
         """
         :param data: json for the problem
         :param config: execution configuration, including solver
+        :param solution_data: optional json with an initial solution
         :return: solution and log
         """
         print("Solving the model")
+        validator = Draft7Validator(self.schema)
+        if not validator.is_valid(config):
+            error_list = [e for e in validator.iter_errors(data)]
+            raise BadConfiguration(
+                "The configuration does not match the schema:\n{}".format(error_list)
+            )
+
         solver = config.get("solver")
         if solver is None:
             solver = self.get_default_solver_name()
@@ -94,7 +108,21 @@ class ApplicationCore(ABC):
         if solver_class is None:
             raise NoSolverException("Solver {} is not available".format(solver))
         inst = self.instance.from_dict(data)
-        algo = solver_class(inst, None)
+        inst_errors = inst.check_schema()
+        if inst_errors:
+            raise BadInstance(
+                "The instance does not match the schema:\n{}".format(inst_errors)
+            )
+        sol = None
+        if solution_data is not None:
+            sol = self.solution.from_dict(solution_data)
+            sol_errors = sol.check_schema()
+            if sol_errors:
+                raise BadSolution(
+                    "The solution does not match the schema:\n{}".format(sol_errors)
+                )
+
+        algo = solver_class(inst, sol)
         start = timer()
 
         try:
@@ -113,6 +141,7 @@ class ApplicationCore(ABC):
             STATUS_UNDEFINED: "Unknown",
             STATUS_NOT_SOLVED: "Not solved",
         }
+        # compatibility with previous format:
         if isinstance(output, int):
             output = dict(status=output)
         status = output.get("status")
@@ -162,4 +191,16 @@ class ApplicationCore(ABC):
 
 
 class NoSolverException(Exception):
+    pass
+
+
+class BadConfiguration(Exception):
+    pass
+
+
+class BadInstance(Exception):
+    pass
+
+
+class BadSolution(Exception):
     pass
