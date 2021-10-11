@@ -192,9 +192,7 @@ Help me
 
 If you have a database server and you only want to create the database or, for example, you already have an airflow environment, you can go to the following links to learn more about other types of cornflow deployment.
 
-`Cornflow complete install documentation <https://baobabsoluciones.github.io/corn/main/includeme.html#install-cornflow>`_
-
-`Deploy cornflow with docker <https://baobabsoluciones.github.io/corn/deploy/index.html>`_
+:ref:`Deploy cornflow with docker<Deploy your own Cornflow-server>`
 
 `Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.1.0/index.html>`_
 

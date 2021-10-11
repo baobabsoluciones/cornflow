@@ -141,8 +141,8 @@ Even though most properties of our schema object must be arrays, an exception is
 
 
 
-Example: TSP
------------------
+Example with TSP
+-------------------
 
 Let's take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.
 
@@ -234,8 +234,8 @@ An alternative, still valid, schema would be:
 Here we assume the array is sorted and so we do not need the position of the node explicitly.
 
 
-Configuration
-***************
+Configuration schema
+*********************
 
 The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal
 
