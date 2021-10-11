@@ -14,8 +14,9 @@ ornflow-dags/tests/test_dags.py``. In this file, you must add a class correspond
     class MyProject(BaseDAGTests.SolvingTests):
        def setUp(self):
            super().setUp()
-           self.app = _import_file("my_project")    # The file we import is the DAG
-                                                    # Will test the default solver
+           from DAG.MyProject import MyApp
+           self.app = MyApp()                   # Will test the default solver
+
 
        def test_solve_algo_1(self):
            return self.test_try_solving_testcase(dict(solver="algorithm1"))
