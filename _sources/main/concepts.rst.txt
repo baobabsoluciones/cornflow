@@ -15,6 +15,13 @@ We sometimes refer to this Decision Problem as an Abstract Problem or just Probl
 
 In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.
 
+.. _concepts1:
+
+.. figure:: ./../_static/concepts1.png
+
+   Main concepts in a Cornflow deployment of an Optimization Problem
+
+
 Instance
 -------------
 
@@ -51,14 +58,49 @@ A solution method (also called Algorithm) is a function that takes as input an I
 In Cornflow, A Solution Method is a subclass of Experiment.
 
 
-Solve Configuration
+Configuration
 ---------------------
 
-Each Solution Method has ways to configure certain characteristics. The Solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.
+Each Solution Method has ways to configure certain characteristics. The solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.
 
 
 Execution
 -------------
 
 Consists of: (1) an Instance with (2) a Solve Configuration and (3) a Solution Method. It is the actual solving of the Decision Problem. It returns a Solution.
+
+Implementation
+-------------------
+
+In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.
+
+.. _concepts2:
+
+.. figure:: ./../_static/concepts2.png
+
+   Implementation of main concepts
+
+
+An example with TSP
+------------------------
+
+Let's take the classical (and famous) problem of the TSP. We need to find the shortest path that joins all nodes in a graph and passes only once through each node. The input data is the distance matrix between each pair of nodes. The output data is an ordered list of nodes (to visit).
+
+Solution methods can be many: a MIP model, a CP model, a call to the `Concorde solver <https://www.math.uwaterloo.ca/tsp/concorde.html>`_, a 2-opt heuristic implementation among many others.
+
+.. _concepts_tsp:
+
+.. figure:: ./../_static/concepts_tsp.png
+
+   Implementation of concepts for a TSP
+
+The following figure shows the schemas and python code required to build the smallest possible TSP Optimization Problem. The solve method consists of returning the nodes in an arbitrary order. Although the solution complies with the schema, the quality of this solution will probable be very low.
+
+.. _concepts_tsp2:
+
+.. figure:: ./../_static/concepts_tsp2.png
+
+   Schemas and solve method for TSP implementation
+
+For more details on these schemas, check :ref:`the json-schema section<Write a json-schema>`. That section includes also the complete :ref:`TSP schemas in text form<Example with TSP>`.
 

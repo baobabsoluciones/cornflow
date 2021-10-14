@@ -103,7 +103,7 @@
 <dl class="py class">
 <dt id="cornflow_client.core.application.ApplicationCore">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">ApplicationCore</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The application template.</p>
 <dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.name">
@@ -158,6 +158,8 @@
 <dd class="field-odd"><p>a list of datasets following the json-schema.</p>
 </dd>
 </dl>
+<p>if the list includes a tuple of two dictionaries,
+it’s because it’s an instance and it’s solution</p>
 </dd></dl>
 
 <dl class="py method">
@@ -173,12 +175,13 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.solve">
-<code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em>, <em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Dict<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em>, <em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em>, <em class="sig-param"><span class="n">solution_data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Dict<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – json for the problem</p></li>
 <li><p><strong>config</strong> – execution configuration, including solver</p></li>
+<li><p><strong>solution_data</strong> – optional json with an initial solution</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -189,7 +192,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.get_solver">
-<code class="sig-name descname">get_solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'default'</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Type<span class="p">[</span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore">cornflow_client.core.experiment.ExperimentCore</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_solver" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span> <span class="o">=</span> <span class="default_value">'default'</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Type<span class="p">[</span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore">cornflow_client.core.experiment.ExperimentCore</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_solver" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>name</strong> – name of the solver to find</p>
@@ -202,7 +205,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.get_default_solver_name">
-<code class="sig-name descname">get_default_solver_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_default_solver_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the name of the default solver</p>
@@ -212,7 +215,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.get_schemas">
-<code class="sig-name descname">get_schemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_schemas" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_schemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_schemas" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dictionary with the three schemas that define the solution method</p>
@@ -225,7 +228,25 @@
 <dl class="py exception">
 <dt id="cornflow_client.core.application.NoSolverException">
 <em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">NoSolverException</code><a class="headerlink" href="#cornflow_client.core.application.NoSolverException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="cornflow_client.core.application.BadConfiguration">
+<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadConfiguration</code><a class="headerlink" href="#cornflow_client.core.application.BadConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="cornflow_client.core.application.BadInstance">
+<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadInstance</code><a class="headerlink" href="#cornflow_client.core.application.BadInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="cornflow_client.core.application.BadSolution">
+<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadSolution</code><a class="headerlink" href="#cornflow_client.core.application.BadSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -233,8 +254,8 @@
 <span id="instancecore"></span><h3>InstanceCore<a class="headerlink" href="#module-cornflow_client.core.instance" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="cornflow_client.core.instance.InstanceCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance.</code><code class="sig-name descname">InstanceCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance.</code><code class="sig-name descname">InstanceCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The instance template.</p>
 </dd></dl>
 
@@ -243,8 +264,8 @@
 <span id="solutioncore"></span><h3>SolutionCore<a class="headerlink" href="#module-cornflow_client.core.solution" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="cornflow_client.core.solution.SolutionCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.solution.</code><code class="sig-name descname">SolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.solution.</code><code class="sig-name descname">SolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The solution template.</p>
 </dd></dl>
 
@@ -253,8 +274,8 @@
 <span id="instancesolution"></span><h3>InstanceSolution<a class="headerlink" href="#module-cornflow_client.core.instance_solution" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance_solution.</code><code class="sig-name descname">InstanceSolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance_solution.</code><code class="sig-name descname">InstanceSolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>Common interface for the instance and solution templates</p>
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.data">
@@ -264,7 +285,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict">
-<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> – json-schema in a dictionary format</p>
@@ -277,7 +298,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dictionary with the json-schema representation</p>
@@ -287,7 +308,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_json">
-<em class="property">classmethod </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>path</strong> – path to json-schema json file</p>
@@ -300,7 +321,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_json">
-<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)">None</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>path</strong> – path to json-schema json file</p>
@@ -328,7 +349,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">
-<code class="sig-name descname">generate_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">generate_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dict json-schema based on the current data</p>
@@ -344,7 +365,7 @@
 <dl class="py class">
 <dt id="cornflow_client.core.experiment.ExperimentCore">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.experiment.</code><code class="sig-name descname">ExperimentCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore">cornflow_client.core.instance.InstanceCore</a></span></em>, <em class="sig-param"><span class="n">solution</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore">cornflow_client.core.solution.SolutionCore</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The solver template.</p>
 <dl class="py method">
 <dt id="cornflow_client.core.experiment.ExperimentCore.instance">
@@ -368,7 +389,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.experiment.ExperimentCore.solve">
-<em class="property">abstract </em><code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">options</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">options</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -383,7 +404,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.experiment.ExperimentCore.get_objective">
-<em class="property">abstract </em><code class="sig-name descname">get_objective</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">get_objective</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -394,7 +415,7 @@
 
 <dl class="py method">
 <dt id="cornflow_client.core.experiment.ExperimentCore.check_solution">
-<em class="property">abstract </em><code class="sig-name descname">check_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">check_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -413,7 +434,7 @@
 <dl class="py class">
 <dt id="cornflow_client.cornflow_client.CornFlow">
 <em class="property">class </em><code class="sig-prename descclassname">cornflow_client.cornflow_client.</code><code class="sig-name descname">CornFlow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span></em>, <em class="sig-param"><span class="n">token</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class to access cornflow-server</p>
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.api_for_id">
@@ -471,9 +492,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – username</p></li>
-<li><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – email</p></li>
-<li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – password</p></li>
+<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – username</p></li>
+<li><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – email</p></li>
+<li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – password</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -495,8 +516,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – username</p></li>
-<li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – password</p></li>
+<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – username</p></li>
+<li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – password</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -512,10 +533,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – data according to json-schema for the problem</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name for instance</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – description of the instance</p></li>
-<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of problem to solve</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data according to json-schema for the problem</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for instance</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the instance</p></li>
+<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of problem to solve</p></li>
 </ul>
 </dd>
 </dl>
@@ -528,12 +549,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – data according to json-schema for the problem</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name for case</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – description of case</p></li>
-<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of problem of case</p></li>
-<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id of the parent directory in the tree structure</p></li>
-<li><p><strong>solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – optional solution data to store inside case</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data according to json-schema for the problem</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for case</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of case</p></li>
+<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of problem of case</p></li>
+<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id of the parent directory in the tree structure</p></li>
+<li><p><strong>solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional solution data to store inside case</p></li>
 </ul>
 </dd>
 </dl>
@@ -546,9 +567,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to filename to upload</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name for instance</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – description of the instance</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to filename to upload</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for instance</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the instance</p></li>
 </ul>
 </dd>
 </dl>
@@ -561,11 +582,11 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>instance_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the instance</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name for the execution</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – description of the execution</p></li>
-<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – execution configuration</p></li>
-<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the problem to solve</p></li>
+<li><p><strong>instance_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for the execution</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the execution</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – execution configuration</p></li>
+<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the problem to solve</p></li>
 </ul>
 </dd>
 </dl>
@@ -577,7 +598,7 @@
 <dd><p>Downloads the data from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -589,7 +610,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
 <li><p><strong>kwargs</strong> – optional data to edit</p></li>
 </ul>
 </dd>
@@ -602,7 +623,7 @@
 <dd><p>Interrupts an ongoing execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -614,11 +635,11 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>instance_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the instance</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name for execution</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – description of the execution</p></li>
-<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – execution configuration</p></li>
-<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the problem to solve</p></li>
+<li><p><strong>instance_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for execution</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the execution</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – execution configuration</p></li>
+<li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the problem to solve</p></li>
 <li><p><strong>kwargs</strong> – contents of the solution (inside data)</p></li>
 </ul>
 </dd>
@@ -631,7 +652,7 @@
 <dd><p>Downloads results from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -642,7 +663,7 @@
 <dd><p>Downloads the current status of an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -653,7 +674,7 @@
 <dd><p>Downloads the log for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -664,7 +685,7 @@
 <dd><p>Downloads the solution data for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
 </dd>
 </dl>
 </dd></dl>
@@ -675,7 +696,7 @@
 <dd><p>Downloads all the user’s instances</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
 </dd>
 </dl>
 </dd></dl>
@@ -686,7 +707,7 @@
 <dd><p>Downloads all the user’s cases</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
 </dd>
 </dl>
 </dd></dl>
@@ -697,7 +718,7 @@
 <dd><p>Downloads all the user’s executions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
 </dd>
 </dl>
 </dd></dl>
@@ -714,7 +735,7 @@
 <dd><p>Downloads all information on a user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – user id</p>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – user id</p>
 </dd>
 </dl>
 </dd></dl>
@@ -725,7 +746,7 @@
 <dd><p>Downloads header of an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the instance</p>
+<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p>
 </dd>
 </dl>
 </dd></dl>
@@ -736,7 +757,7 @@
 <dd><p>Downloads header of a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the case</p>
+<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p>
 </dd>
 </dl>
 </dd></dl>
@@ -747,7 +768,7 @@
 <dd><p>Deletes a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the case</p>
+<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p>
 </dd>
 </dl>
 </dd></dl>
@@ -759,8 +780,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the case</p></li>
-<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – data to edit</p></li>
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
+<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data to edit</p></li>
 </ul>
 </dd>
 </dl>
@@ -773,8 +794,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the case</p></li>
-<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – data to edit</p></li>
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
+<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data to edit</p></li>
 </ul>
 </dd>
 </dl>
@@ -786,7 +807,7 @@
 <dd><p>Delete an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the instance</p>
+<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p>
 </dd>
 </dl>
 </dd></dl>
@@ -797,7 +818,7 @@
 <dd><p>Downloads schemas for a problem</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dag_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – id for the problem</p>
+<dd class="field-odd"><p><strong>dag_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the problem</p>
 </dd>
 </dl>
 </dd></dl>
@@ -807,7 +828,7 @@
 <dl class="py exception">
 <dt id="cornflow_client.cornflow_client.CornFlowApiError">
 <em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.cornflow_client.</code><code class="sig-name descname">CornFlowApiError</code><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlowApiError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>CornFlow returns an error</p>
 </dd></dl>
 
@@ -929,7 +950,7 @@
 <dl class="py exception">
 <dt id="cornflow_client.constants.InvalidUsage">
 <em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">InvalidUsage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">status_code</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">payload</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <dl class="py attribute">
 <dt id="cornflow_client.constants.InvalidUsage.error">
 <code class="sig-name descname">error</code><em class="property"> = 'Unknown error'</em><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.error" title="Permalink to this definition">¶</a></dt>

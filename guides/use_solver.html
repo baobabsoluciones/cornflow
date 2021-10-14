@@ -94,9 +94,9 @@
 <span class="kn">from</span> <span class="nn">instance</span> <span class="kn">import</span> <span class="n">Instance</span>
 
 
-<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;C:/Users/me/path/to/my/data-file.xml”</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;C:/Users/me/path/to/my/input-data-file.json”</span>
 <span class="o">//</span> <span class="n">Data</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">schema</span> <span class="nb">format</span><span class="p">:</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">Instance</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Instance</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">CornFlow</span><span class="p">(</span><span class="s2">&quot;https://devsm.cornflow.baobabsoluciones.app&quot;</span><span class="p">)</span>
 <span class="o">//</span> <span class="n">Sign_up</span> <span class="n">only</span> <span class="n">the</span> <span class="n">first</span> <span class="n">time</span><span class="p">:</span>

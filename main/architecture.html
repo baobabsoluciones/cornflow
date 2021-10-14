@@ -50,7 +50,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#client">Client</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#data-flows">Data flows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-data-flows">Main data flows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-flows">Secondary flows</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
@@ -94,9 +95,9 @@
 <h1>Cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="components">
 <h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
-<div class="figure align-default" id="id1">
+<div class="figure align-default" id="id2">
 <span id="architecture"></span><img alt="../_images/architecture.png" src="../_images/architecture.png" />
-<p class="caption"><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <div class="section" id="cornflow-server">
 <h3>Cornflow-server<a class="headerlink" href="#cornflow-server" title="Permalink to this headline">¶</a></h3>
@@ -119,11 +120,11 @@
 <p>The REST API is created with Open API standards (see <a class="reference internal" href="../stable-rest-api-ref.html#rest-api-reference"><span class="std std-ref">REST API</span></a>), so it should be fairly easy to build new apis.</p>
 </div>
 </div>
-<div class="section" id="data-flows">
-<h2>Data flows<a class="headerlink" href="#data-flows" title="Permalink to this headline">¶</a></h2>
-<div class="figure align-default" id="id2">
-<span id="my-figure"></span><img alt="../_images/data_flow.png" src="../_images/data_flow.png" />
-<p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<div class="section" id="main-data-flows">
+<h2>Main data flows<a class="headerlink" href="#main-data-flows" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id3">
+<span id="id1"></span><img alt="../_images/main_flows.png" src="../_images/main_flows.png" />
+<p class="caption"><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <p>Create instance (data):</p>
 <ol class="arabic simple">
@@ -142,16 +143,46 @@
 <li><p>The worker solves the problem.</p></li>
 <li><p>The worker sends Cornflow the results (solution and log) of the execution.</p></li>
 </ol>
+<p>Retrieve results (execution):</p>
+<ol class="arabic simple">
+<li><p>Client asks Cornflow for the results to an execution.</p></li>
+<li><p>Cornflow returns the execution solution and / or log.</p></li>
+</ol>
+</div>
+<div class="section" id="secondary-flows">
+<h2>Secondary flows<a class="headerlink" href="#secondary-flows" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id4">
+<img alt="../_images/secondary_flows.png" src="../_images/secondary_flows.png" />
+<p class="caption"><span class="caption-text">The secondary data flows between components</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>Interrupt execution (execution):</p>
+<ol class="arabic simple">
+<li><p>Client asks Cornflow to stop an execution.</p></li>
+<li><p>Cornflow checks the current status and asks Airflow to stop the execution.</p></li>
+<li><p>Airflow kills the process and worker by deleting the execution.</p></li>
+</ol>
 <p>Retrieve status (execution):</p>
 <ol class="arabic simple">
 <li><p>Client asks Cornflow for the results to an execution.</p></li>
 <li><p>If Cornflow does not know it: it asks Airflow for the status.</p></li>
 <li><p>Cornflow returns the status to the user.</p></li>
 </ol>
-<p>Retrieve results (execution):</p>
+<p>Retrieve schema:</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow for the results to an execution.</p></li>
-<li><p>Cornflow returns the execution solution and / or log.</p></li>
+<li><p>Client asks Cornflow for the schema to a problem.</p></li>
+<li><p>Cornflow asks Airflow for the schema of a problem.</p></li>
+<li><p>Airflow returns the schema if it exists.</p></li>
+</ol>
+<p>Get instance data:</p>
+<ol class="arabic simple">
+<li><p>Client asks Cornflow for the data of an instance.</p></li>
+<li><p>Cornflow returns the data of the instance if it exists.</p></li>
+</ol>
+<p>Save manual execution:</p>
+<ol class="arabic simple">
+<li><p>Client sends Cornflow a solved problem.</p></li>
+<li><p>Cornflow check the problem matches the schema.</p></li>
+<li><p>Cornflow saves the execution.</p></li>
 </ol>
 </div>
 </div>

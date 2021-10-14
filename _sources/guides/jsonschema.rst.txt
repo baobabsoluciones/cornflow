@@ -139,10 +139,71 @@ Even though most properties of our schema object must be arrays, an exception is
      ]
     }
 
+Naming conventions
+*********************
+
+When naming columns in a "master table", we refer to the unique id of each row as "id" (see the ``shifts`` property below. When an id is used as a foreign key in another table (see the ``resources_not_available`` property), we use id_shift to denote that is the id of the shift that we are using.
+
+.. code-block:: json
+
+    {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "shifts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "start_time": {
+                        "type": "string"
+                    },
+                    "end_time": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "start_time",
+                    "end_time"
+                ]
+            }
+        },
+        "resources_unavailable": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_resource": {
+                        "type": "string"
+                    },
+                    "id_shift": {
+                        "type": "string"
+                    },
+                    "start_date": {
+                        "type": "string"
+                    },
+                    "end_date": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id_resource",
+                    "id_shift",
+                    "start_date",
+                    "end_date"
+                ]
+            }
+        },
+        "required": ["shifts", "resources_unavailable"]
+    }
 
 
-Example: TSP
------------------
+Example with TSP
+-------------------
 
 Let's take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.
 
@@ -234,8 +295,8 @@ An alternative, still valid, schema would be:
 Here we assume the array is sorted and so we do not need the position of the node explicitly.
 
 
-Configuration
-***************
+Configuration schema
+*********************
 
 The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal
 

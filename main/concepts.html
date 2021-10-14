@@ -48,8 +48,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#solution">Solution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#experiment">Experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#solution-method">Solution Method</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#solve-configuration">Solve Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#execution">Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#an-example-with-tsp">An example with TSP</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html">Cornflow-server architecture</a></li>
@@ -101,6 +103,10 @@
 <p>In this guide, we do not make a clear difference between Decision problem and Optimization problem. In both cases we care on finding a solution (or the best solution) given a feasible solution space.</p>
 <p>We sometimes refer to this Decision Problem as an Abstract Problem or just Problem. Some Problems are quite famous, such as the  <a class="reference external" href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">Traveling Salesman Problem</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Knapsack_problem">Knapsack Problem</a>. Naming a Problem makes it possible to design Solution Methods that are tailored for that particular Problem.</p>
 <p>In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.</p>
+<div class="figure align-default" id="id1">
+<span id="concepts1"></span><img alt="../_images/concepts1.png" src="../_images/concepts1.png" />
+<p class="caption"><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
 </div>
 <div class="section" id="instance">
 <h2>Instance<a class="headerlink" href="#instance" title="Permalink to this headline">¶</a></h2>
@@ -125,13 +131,36 @@
 <p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).</p>
 <p>In Cornflow, A Solution Method is a subclass of Experiment.</p>
 </div>
-<div class="section" id="solve-configuration">
-<h2>Solve Configuration<a class="headerlink" href="#solve-configuration" title="Permalink to this headline">¶</a></h2>
-<p>Each Solution Method has ways to configure certain characteristics. The Solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.</p>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Each Solution Method has ways to configure certain characteristics. The solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.</p>
 </div>
 <div class="section" id="execution">
 <h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
 <p>Consists of: (1) an Instance with (2) a Solve Configuration and (3) a Solution Method. It is the actual solving of the Decision Problem. It returns a Solution.</p>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.</p>
+<div class="figure align-default" id="id2">
+<span id="concepts2"></span><img alt="../_images/concepts2.png" src="../_images/concepts2.png" />
+<p class="caption"><span class="caption-text">Implementation of main concepts</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="an-example-with-tsp">
+<h2>An example with TSP<a class="headerlink" href="#an-example-with-tsp" title="Permalink to this headline">¶</a></h2>
+<p>Let’s take the classical (and famous) problem of the TSP. We need to find the shortest path that joins all nodes in a graph and passes only once through each node. The input data is the distance matrix between each pair of nodes. The output data is an ordered list of nodes (to visit).</p>
+<p>Solution methods can be many: a MIP model, a CP model, a call to the <a class="reference external" href="https://www.math.uwaterloo.ca/tsp/concorde.html">Concorde solver</a>, a 2-opt heuristic implementation among many others.</p>
+<div class="figure align-default" id="id3">
+<span id="concepts-tsp"></span><img alt="../_images/concepts_tsp.png" src="../_images/concepts_tsp.png" />
+<p class="caption"><span class="caption-text">Implementation of concepts for a TSP</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>The following figure shows the schemas and python code required to build the smallest possible TSP Optimization Problem. The solve method consists of returning the nodes in an arbitrary order. Although the solution complies with the schema, the quality of this solution will probable be very low.</p>
+<div class="figure align-default" id="id4">
+<span id="concepts-tsp2"></span><img alt="../_images/concepts_tsp2.png" src="../_images/concepts_tsp2.png" />
+<p class="caption"><span class="caption-text">Schemas and solve method for TSP implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>For more details on these schemas, check <a class="reference internal" href="../guides/jsonschema.html#write-a-json-schema"><span class="std std-ref">the json-schema section</span></a>. That section includes also the complete <a class="reference internal" href="../guides/jsonschema.html#example-with-tsp"><span class="std std-ref">TSP schemas in text form</span></a>.</p>
 </div>
 </div>
 

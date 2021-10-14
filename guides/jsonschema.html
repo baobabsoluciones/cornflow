@@ -48,12 +48,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#no-nested-list-types">No nested list types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#required-property">Required property</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#exception-for-simple-objects">Exception for “simple objects”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#naming-conventions">Naming conventions</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#example-tsp">Example: TSP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-with-tsp">Example with TSP</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#instance-schema">Instance schema</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#solution-schema">Solution schema</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration-schema">Configuration schema</a></li>
 </ul>
 </li>
 </ul>
@@ -268,9 +269,69 @@ It is important to note three things:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="naming-conventions">
+<h3>Naming conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this headline">¶</a></h3>
+<p>When naming columns in a “master table”, we refer to the unique id of each row as “id” (see the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> property below. When an id is used as a foreign key in another table (see the <code class="docutils literal notranslate"><span class="pre">resources_not_available</span></code> property), we use id_shift to denote that is the id of the shift that we are using.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
+<span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;shifts&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;start_time&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;end_time&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;start_time&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;end_time&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;resources_unavailable&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;id_resource&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;id_shift&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;start_date&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;end_date&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;id_resource&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;id_shift&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;start_date&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;end_date&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;shifts&quot;</span><span class="p">,</span> <span class="s2">&quot;resources_unavailable&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
 </div>
-<div class="section" id="example-tsp">
-<h2>Example: TSP<a class="headerlink" href="#example-tsp" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="example-with-tsp">
+<h2>Example with TSP<a class="headerlink" href="#example-with-tsp" title="Permalink to this headline">¶</a></h2>
 <p>Let’s take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.</p>
 <div class="section" id="instance-schema">
 <h3>Instance schema<a class="headerlink" href="#instance-schema" title="Permalink to this headline">¶</a></h3>
@@ -347,8 +408,8 @@ It is important to note three things:</p>
 </div>
 <p>Here we assume the array is sorted and so we do not need the position of the node explicitly.</p>
 </div>
-<div class="section" id="configuration">
-<h3>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="configuration-schema">
+<h3>Configuration schema<a class="headerlink" href="#configuration-schema" title="Permalink to this headline">¶</a></h3>
 <p>The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>

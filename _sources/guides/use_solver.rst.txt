@@ -13,9 +13,9 @@ Once your dag is on the server, you can use the cornflow-client package to acces
     from instance import Instance
 
 
-    path = "C:/Users/me/path/to/my/data-file.xml”
+    path = "C:/Users/me/path/to/my/input-data-file.json”
     // Data in the schema format:
-    data = Instance.from_file(path).to_dict()
+    data = Instance.from_json(path).to_dict()
 
     client = CornFlow("https://devsm.cornflow.baobabsoluciones.app")
     // Sign_up only the first time:
