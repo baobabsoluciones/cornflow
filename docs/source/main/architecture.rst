@@ -41,12 +41,12 @@ Any library that uses the REST API to use Cornflow. There are two official clien
 The REST API is created with Open API standards (see :ref:`REST API <rest-api-reference>`), so it should be fairly easy to build new apis.
 
 
-Data flows
-------------
+Main data flows
+-----------------
 
-.. _my-figure:
+.. _main-data-flows:
 
-.. figure:: ./../_static/data_flow.png
+.. figure:: ./../_static/main_flows.png
 
    The main data flows between components
 
@@ -68,13 +68,46 @@ Solve instance (instance, config, dag):
 #. The worker solves the problem.
 #. The worker sends Cornflow the results (solution and log) of the execution.
 
+Retrieve results (execution):
+
+#. Client asks Cornflow for the results to an execution.
+#. Cornflow returns the execution solution and / or log.
+
+Secondary flows
+----------------
+
+.. secondary-data-flows:
+
+.. figure:: ./../_static/secondary_flows.png
+
+   The secondary data flows between components
+
+Interrupt execution (execution):
+
+#. Client asks Cornflow to stop an execution.
+#. Cornflow checks the current status and asks Airflow to stop the execution.
+#. Airflow kills the process and worker by deleting the execution.
+
 Retrieve status (execution):
 
 #. Client asks Cornflow for the results to an execution.
 #. If Cornflow does not know it: it asks Airflow for the status.
 #. Cornflow returns the status to the user.
 
-Retrieve results (execution):
+Retrieve schema:
 
-#. Client asks Cornflow for the results to an execution.
-#. Cornflow returns the execution solution and / or log.
+#. Client asks Cornflow for the schema to a problem.
+#. Cornflow asks Airflow for the schema of a problem.
+#. Airflow returns the schema if it exists.
+
+Get instance data:
+
+#. Client asks Cornflow for the data of an instance.
+#. Cornflow returns the data of the instance if it exists.
+
+Save manual execution:
+
+#. Client sends Cornflow a solved problem.
+#. Cornflow check the problem matches the schema.
+#. Cornflow saves the execution.
+

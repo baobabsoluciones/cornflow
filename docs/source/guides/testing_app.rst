@@ -7,7 +7,7 @@ Basics of testing
 The `cornflow-dags-public <https://github.com/baobabsoluciones/cornflow-dags-public>`_ project includes some unit tests that can be run to be sure the projects are “ready to be merged”. These unit tests use as input data the output of the function ``test_cases()`` defined in cornflow-dags/DAG/my_project/__init__.py. The tests themselves load the data, validate it with the schema, solve the problem, get a solution and validate it.
 
 In order for your dag to be tested along with the others, you should add it to the unit tests to be run. The file to modify is ``c
-ornflow-dags/tests/test_dags.py``. In this file, you must add a class corresponding to your project. It should look something like:
+ornflow-dags/tests/test_dags.py``. In this file, you must add a class corresponding to your project. It should look something like: 
 
 .. code-block:: python
 
