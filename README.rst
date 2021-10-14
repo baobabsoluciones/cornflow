@@ -1,14 +1,14 @@
 Cornflow
 =========
 
-.. image:: https://github.com/baobabsoluciones/corn/workflows/build/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/corn/actions
+.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/build/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow-server/actions
 
-.. image:: https://github.com/baobabsoluciones/corn/workflows/docs/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/corn/actions
+.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/docs/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow-server/actions
 
-.. image:: https://github.com/baobabsoluciones/corn/workflows/integration/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/corn/actions
+.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/integration/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow-server/actions
 
 .. image:: https://img.shields.io/pypi/v/cornflow-client.svg?style=svg
    :target: https://pypi.python.org/pypi/cornflow-client

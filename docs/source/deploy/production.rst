@@ -65,7 +65,7 @@ LDAP Authentication
 Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.
 
-In the `repository <https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-ldap.yml>`_ we have an example of deployment with docker to configure access with LDAP protocol::
+In the `repository <https://raw.githubusercontent.com/baobabsoluciones/cornflow-server/master/docker-compose-cornflow-ldap.yml>`_ we have an example of deployment with docker to configure access with LDAP protocol::
 
     docker-compose -f docker-compose-cornflow-ldap.yml up -d
 
