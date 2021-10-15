@@ -10,6 +10,10 @@ from cornflow_client.core.tools import load_json, save_json
 
 
 class SchemaManager:
+    """
+    A schema manager between json-schema, dict-schema and marshmallow
+    """
+
     def __init__(self, schema, validator=Draft7Validator):
         """
         Class to help create and manage data schema.

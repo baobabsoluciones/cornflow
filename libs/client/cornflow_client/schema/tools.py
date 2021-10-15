@@ -3,6 +3,9 @@ import os
 
 
 def get_pulp_jsonschema(filename="pulp_json_schema.json", path="data"):
+    """
+    returns the PuLP model schema
+    """
     filename = os.path.join(os.path.dirname(__file__), "..", path, filename)
     with open(filename, "r") as f:
         content = json.load(f)
