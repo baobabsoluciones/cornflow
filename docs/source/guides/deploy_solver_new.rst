@@ -105,6 +105,21 @@ Schema property
 
 The schema of an application is the configuration used to solve a problem. This schema needs to have at least the `timeLimit` and the `solver` properties. Besides that, it's up to the developer to decide which configuration is needed. If you want to know how to define a json-schema, check the section :ref:`Write a json-schema`.
 
+Conventions
+*****************
+
+We follow some common conventions in the configuration schema so most apps share most of the main properties. Below is a list of known properties and what the usually represent.
+
+#. **timeLimit**: float. It indicates the amount of seconds before the method should stop.
+#. **solver**: string. It indicates the solution method that should be used to solve the problem. It can support "nested solvers". For example: ``pulp.cbc`` should be parsed as "using the ``pulp`` solution method and, inside that solution method, use the ``cbc`` solver.
+#. **msg**: boolean. When ``true``, the solution method displays details of the progress.
+#. **warmStart**: boolean. When ``true``, the solution method will use the current solution (if any) to start the exploration of solutions.
+#. **fixSolution**: boolean. When ``true``, the solution method will fix the existing information in the solution when exploring the solution space.
+#. **gapAbs**: float. The maximum absolute gap allowed when considering a solution optimal.
+#. **gapRel**: float. The maximum relative gap allowed when considering a solution optimal.
+#. **threads**: integer. The number of cores that should be used in the solution method.
+
+Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn't make much sense to be creating a separated ``config.json`` schema file. For these cases, it's possible to use :py:func:`cornflow_client.schema.tools.get_empty_schema`.
 
 Code structure
 ------------------------------------
