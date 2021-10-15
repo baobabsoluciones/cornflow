@@ -171,7 +171,11 @@ class ApplicationCore(ABC):
 
         :return: the constructor for a solver matching the name
         """
-        return self.solvers.get(name)
+        if "." in name:
+            solver = name.split(".")[0]
+        else:
+            solver = name
+        return self.solvers.get(solver)
 
     def get_default_solver_name(self) -> str:
         """

@@ -4,6 +4,10 @@ from cornflow_client.constants import JSON_TYPES, DATASCHEMA
 
 
 class DictSchema:
+    """
+    A json-schema to dict-schema parser
+    """
+
     def __init__(self, jsonschema):
         """
         Class to manage internal dictionary schema

@@ -25,7 +25,15 @@ class TestABC(unittest.TestCase):
         self.assertRaises(TypeError, must_fail)
 
     def test_good_application(self):
-        GoodApp()
+        GoodApp().get_solver("default")
+
+    def test_good_application_solver(self):
+        solver = ConcatenatedSolver().get_solver("pulp")
+        self.assertIsNotNone(solver)
+
+    def test_good_application_solver_none(self):
+        solver = ConcatenatedSolver().get_solver("pulp1")
+        self.assertIsNone(solver)
 
     def test_bad_application(self):
         must_fail = lambda: BadApp()
@@ -75,7 +83,16 @@ class GoodApp(ApplicationCore):
     instance = GoodInstance
     solution = GoodSolution
     solvers = dict(default=GoodExperiment)
-    schema = dict()
+    schema = dict(default="pulp")
+    test_cases = [dict()]
+
+
+class ConcatenatedSolver(ApplicationCore):
+    name = "123"
+    instance = GoodInstance
+    solution = GoodSolution
+    solvers = dict(pulp=GoodExperiment)
+    schema = dict(pulp="default.cbc")
     test_cases = [dict()]
 
 
