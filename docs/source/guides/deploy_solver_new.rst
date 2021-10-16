@@ -121,6 +121,12 @@ We follow some common conventions in the configuration schema so most apps share
 
 Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn't make much sense to be creating a separated ``config.json`` schema file. For these cases, it's possible to use :py:func:`cornflow_client.schema.tools.get_empty_schema`.
 
+README
+--------------
+
+It is a good idea to have a description of the problem to be solved in text form. Even better if the text is accompanied by a mathematical formulation in LaTeX. This way, others can check the problem description and better understand the input data, output data and the solution methods.
+
+
 Code structure
 ------------------------------------
 
@@ -128,6 +134,7 @@ The following is the official structure to organize an application::
 
     my-project/
         __init__.py
+        README.md
         core/
             __init__.py
             instance.py
