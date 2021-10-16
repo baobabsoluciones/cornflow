@@ -124,13 +124,43 @@ Cornflow-client has some utility functions to help while making this configurati
 Code structure
 ------------------------------------
 
-Each app is contained ideally inside a directory. Usually, the ``Instance``, ``Solution`` and ``Solution method`` are located each one inside a separate file. The ``__init__.py`` needs to contain the Application class. Other files inside the folder include the schemas (better stored as json files).
+The following is the official structure to organize an application::
 
-In this example we put everything inside the ``__init__.py`` except the json-schema files because it was a small example.
+    my-project/
+        __init__.py
+        core/
+            __init__.py
+            instance.py
+            solution.py
+            experiment.py
+        schemas/
+            __init__.py
+            instance.json
+            solution.json
+            config.json
+        data/
+            data_file_1.json
+            data_file_2.json
+        solvers/
+            __init__.py
+            solver_1.py
+            solver_2.py
 
+Each app is contained ideally inside a directory.
+
+The ``Instance`` class is implemented in the ``my-project/core/instance.py`` file, the ``Solution`` class inside the ``my-project/core/solution.py``.
+
+Each ``Solution method`` is defined in the ``my-project/solvers`` directory: ``solver_1.py``, ``solver_2.py``, etc.
+
+The ``Application`` class is defined inside ``my-project/__init__.py``.
+
+Schemas are stored in the ``my-project/schemas`` folder. Finally, Test cases are stored in the ``my-project/data`` directory.
 
 Complete __init__.py code for the TSP
 ----------------------------------------
+
+In this example we put everything inside the ``__init__.py`` except the json-schema files because it was a small example.
+
 
 .. code-block:: python
 
@@ -200,3 +230,19 @@ Complete __init__.py code for the TSP
         @property
         def test_cases(self) -> List[Dict]:
             return []
+
+Requirements
+------------------
+
+The repository contains a file called requirements.txt. You will need to update this file with the name of the additional libraries that your code needs to run.
+
+
+Pull request
+-----------------
+
+Once that all the previous is done, that your code has been pushed to the remote repository, that none of the tests run by git fail (see :ref:`Test your solution method`), and your application seems complete, it is time to merge it into the main branch. Indeed, the dag won’t be running while your code is not on the main branch.
+
+In order to do so, you need to create a pull request on github’s web interface. Once the PR has been approved, your code will be on the main branch.
+
+From there, you will have to wait until the dag is running, which can take a few hours since the running dags are only updated once a day. To learn how to test your app, see :ref:`User your solution method`. To learn to debug your app in the airflow web interface, see :ref:`Debug your solution method`.
+

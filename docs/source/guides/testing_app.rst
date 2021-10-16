@@ -39,7 +39,6 @@ This should run all tests for all applications. If you only want to run tests fo
 
     python3 -m unittest tests.test_dags.MyProject
 
-
 Test in github
 -----------------
 
