@@ -10,7 +10,6 @@ ENV TERM linux
 
 # install dos2unix for initapp.sh
 RUN apt update -y && apt-get install -y --no-install-recommends \
-		dos2unix \
 		gcc \
 		git \
 		python3-dev \
@@ -35,15 +34,11 @@ COPY cornflow /usr/src/app/cornflow
 COPY docs /usr/src/app/docs
 COPY migrations /usr/src/app/migrations
 COPY examples /usr/src/app/examples
-COPY initapp.sh /usr/src/app/
 COPY *.py /usr/src/app/
 RUN mkdir -p /usr/src/app/log
-
-# dos2unix for a friendly entrypoint script
-RUN dos2unix initapp.sh
-RUN chmod +x initapp.sh
 
 EXPOSE 5000
 
 # execute script initapp.sh
-ENTRYPOINT ["./initapp.sh"]
+ENTRYPOINT [ "python" ]
+CMD ["/usr/src/app/initapp.py"]
