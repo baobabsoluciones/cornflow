@@ -5,8 +5,8 @@ The deployment of a solution method consists of sub-classing the class :py:class
 
 We will use as example the TSP problem defined here. At the end of the document, the complete code with all imports is available.
 
-Application
----------------
+Application class
+-------------------
 
 First, we make a subclass of `ApplicationCore`:
 
@@ -25,7 +25,7 @@ First, we make a subclass of `ApplicationCore`:
 
 As you can see, we have given the application a class name (and a name property). We also have passed several other properties: instance, solution, solvers and schema. Finally, we have created a ``test_cases`` property.
 
-We will go over each of the required properties.
+We will go over each of the required properties below.
 
 Instance class
 ---------------
@@ -48,24 +48,28 @@ Very similar to the Instance. The Solution is just a subclass of :py:class:`corn
     class Solution(SolutionCore):
         schema = load_json(os.path.dirname(__file__), "output.json")
 
+Experiment class
+-----------------
 
-Solution method / solvers class
-------------------------------------
+Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses :py:class:`cornflow_client.core.experiment.ExperimentCore`. This class takes as input an :ref:`Instance class` and a :ref:`Solution class`. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods ``get_objective`` and ``check_solution``.
 
-The solution method is a subclass of :py:class:`cornflow_client.core.experiment.ExperimentCore` and should define three methods: ``solve``, ``get_objective`` and ``check_solution``. Here is the implementation of a very very bad solution method for the TSP:
+``get_objective`` returns a scalar number that represents the objective function value of the solution.
+
+``check_solution`` returns a dictionary of dictionaries. Each key in the first dictionary represents a specific validation. Each key in the second dictionary represents the domain of a given validation where the solution violates its requirement. The value of the second dictionary represents the extent of the violation.
+
+In the example below for the TSP, a possible value for ``check_solution()`` could be:
 
 .. code-block:: python
 
-    class TSPNaive(ExperimentCore):
-        def solve(self, options: dict):
-            # we just get an arbitrary but complete list of nodes and we return it
-            nodes = (
-                TupList(v["n1"] for v in self.instance.data["arcs"])
-                .unique()
-                .kvapply(lambda k, v: dict(pos=k, node=v))
-            )
-            self.solution = Solution(dict(route=nodes))
-            return {}
+    {
+        "missing_nodes": {5: 1, 6: 1}
+    }
+
+Which implies that the node 5 and node 6 have not been visited in the solution. The value 1 in this case is not used.
+
+.. code-block:: python
+
+    class Experiment(ExperimentCore):
 
         def get_objective(self) -> float:
             # we get a sorted list of nodes by position
@@ -92,10 +96,29 @@ The solution method is a subclass of :py:class:`cornflow_client.core.experiment.
             )
 
 
-More than one solution method can be defined. This is why they are given in a dictionary to the Application. We use them as a catalogue when deciding to solve a problem.
+Solution method
+------------------
 
-Test cases property
-------------------------------------
+The solution method is a subclass of the :ref:`Experiment class` and should define one additional method: ``solve``. Here is the implementation of a very very bad solution method for the TSP:
+
+.. code-block:: python
+
+    class TSPNaive(Experiment):
+        def solve(self, options: dict):
+            # we just get an arbitrary but complete list of nodes and we return it
+            nodes = (
+                TupList(v["n1"] for v in self.instance.data["arcs"])
+                .unique()
+                .kvapply(lambda k, v: dict(pos=k, node=v))
+            )
+            self.solution = Solution(dict(route=nodes))
+            return {}
+
+
+More than one solution method can be defined. This is why they are given in a dictionary to the :ref:`Application class`. We use them as a catalogue when deciding to solve a problem.
+
+Test cases
+-------------
 
 Test cases is a property that should return a list of datasets (in json-schema format). These tests are used to test the app in the unit-tests. More information on how to create the unit tests for your solution method in :ref:`Test your solution method`.
 
@@ -120,6 +143,12 @@ We follow some common conventions in the configuration schema so most apps share
 #. **threads**: integer. The number of cores that should be used in the solution method.
 
 Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn't make much sense to be creating a separated ``config.json`` schema file. For these cases, it's possible to use :py:func:`cornflow_client.schema.tools.get_empty_schema`.
+
+Instance and solution schemas
+*******************************
+
+Instance and Solution classes also require their own schemas. See their own sections for more details on how to provide them: :ref:`Instance class` and :ref:`Solution class` respectively.
+
 
 README
 --------------
@@ -155,19 +184,18 @@ The following is the official structure to organize an application::
 
 Each app is contained ideally inside a directory.
 
-The ``Instance`` class is implemented in the ``my-project/core/instance.py`` file, the ``Solution`` class inside the ``my-project/core/solution.py``.
+The :ref:`Instance class` is implemented in the ``my-project/core/instance.py`` file, the :ref:`Solution class` inside the ``my-project/core/solution.py``.
 
-Each ``Solution method`` is defined in the ``my-project/solvers`` directory: ``solver_1.py``, ``solver_2.py``, etc.
+Each :ref:`Solution method` is defined in the ``my-project/solvers`` directory: ``solver_1.py``, ``solver_2.py``, etc.
 
-The ``Application`` class is defined inside ``my-project/__init__.py``.
+The :ref:`Application class` is defined inside ``my-project/__init__.py``.
 
-Schemas are stored in the ``my-project/schemas`` folder. Finally, Test cases are stored in the ``my-project/data`` directory.
+Schemas are stored in the ``my-project/schemas`` folder. Finally, :ref:`Test cases` are stored in the ``my-project/data`` directory.
 
 Complete __init__.py code for the TSP
 ----------------------------------------
 
-In this example we put everything inside the ``__init__.py`` except the json-schema files because it was a small example.
-
+In this example we put everything inside the ``__init__.py`` (except the json-schema files) for simplicity.
 
 .. code-block:: python
 
