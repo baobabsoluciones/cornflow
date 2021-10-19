@@ -150,8 +150,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         if config.get("msg", True):
             print("No solution found: we save what we have.")
         try_to_write_solution(client, exec_id, payload)
-        if config.get("msg", True):
-            return "Solution was not saved"
+        return "Solution was not saved"
     # There is a solution:
     # we first need to validate the schema.
     # If it's not: we change the status to Invalid
