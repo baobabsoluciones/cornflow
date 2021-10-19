@@ -82,7 +82,7 @@ The schema will look like this::
     }
 
 
-This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
+This basically means that our input data should be an object containing two tables (``customers`` and ``allowedTrailers``) represented as arrays of objects.
 It is important to note three things:
 
 No nested list types
@@ -140,7 +140,10 @@ Even though most properties of our schema object must be arrays, an exception is
 Naming conventions
 *********************
 
-When naming columns in a "master table", we refer to the unique id of each row as "id" (see the ``shifts`` property below. When an id is used as a foreign key in another table (see the ``resources_not_available`` property), we use id_shift to denote that is the id of the shift that we are using::
+When naming columns in a "master table", we refer to the unique id of each row
+as "id" (see the ``shifts`` property below. When an id is used as a foreign
+key in another table (see the ``resources_not_available`` property), we use
+"id_shift" to denote that is the id of the shift that we are using::
 
     {
     "$schema": "http://json-schema.org/schema#",
@@ -197,6 +200,7 @@ When naming columns in a "master table", we refer to the unique id of each row a
         "required": ["shifts", "resources_unavailable"]
     }
 
+As explained in the section beforehand, the parameters that are unidimensional should be on a table called ``parameters``.
 
 Example with TSP
 -------------------
