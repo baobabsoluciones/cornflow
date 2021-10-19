@@ -96,10 +96,10 @@ Which implies that the node 5 and node 6 have not been visited in the solution. 
             )
 
 
-Solution method
+Solver class
 ------------------
 
-The solution method is a subclass of the :ref:`Experiment class` and should define one additional method: ``solve``. Here is the implementation of a very very bad solution method for the TSP:
+Each solver is a subclass of the :ref:`Experiment class` and should define one additional method: ``solve``. Here is the implementation of a very very bad solver for the TSP:
 
 .. code-block:: python
 
@@ -159,9 +159,9 @@ It is a good idea to have a description of the problem to be solved in text form
 Code structure
 ------------------------------------
 
-The following is the official structure to organize an application::
+Assuming your solution is called ``my_project``, the following is the official structure to organize an application::
 
-    my-project/
+    my_project/
         __init__.py
         README.md
         core/
@@ -184,13 +184,13 @@ The following is the official structure to organize an application::
 
 Each app is contained ideally inside a directory.
 
-The :ref:`Instance class` is implemented in the ``my-project/core/instance.py`` file, the :ref:`Solution class` inside the ``my-project/core/solution.py``.
+The :ref:`Instance class` is implemented in the ``my_project/core/instance.py`` file, the :ref:`Solution class` inside the ``my_project/core/solution.py``.
 
-Each :ref:`Solution method` is defined in the ``my-project/solvers`` directory: ``solver_1.py``, ``solver_2.py``, etc.
+Each :ref:`Solver class` is defined in the ``my_project/solvers`` directory: ``solver_1.py``, ``solver_2.py``, etc.
 
-The :ref:`Application class` is defined inside ``my-project/__init__.py``.
+The :ref:`Application class` is defined inside ``my_project/__init__.py``.
 
-Schemas are stored in the ``my-project/schemas`` folder. Finally, :ref:`Test cases` are stored in the ``my-project/data`` directory.
+Schemas are stored in the ``my_project/schemas`` folder. Finally, :ref:`Test cases` are stored in the ``my_project/data`` directory.
 
 Complete __init__.py code for the TSP
 ----------------------------------------
