@@ -69,8 +69,10 @@ class ApplicationCore(ABC):
         Mandatory property
 
         :return: a list of datasets following the json-schema.
-        if the list includes a tuple of two dictionaries,
-        it's because it's an instance and it's solution
+          if each element in the list is:
+
+          * **dict**: each element is an instance
+          * **tuple**: the first part is the instance, the second its solution
         """
         raise NotImplementedError()
 
@@ -93,7 +95,8 @@ class ApplicationCore(ABC):
         :param solution_data: optional json with an initial solution
         :return: solution and log
         """
-        print("Solving the model")
+        if config.get("msg", True):
+            print("Solving the model")
         validator = Draft7Validator(self.schema)
         if not validator.is_valid(config):
             error_list = [e for e in validator.iter_errors(data)]
@@ -124,15 +127,7 @@ class ApplicationCore(ABC):
 
         algo = solver_class(inst, sol)
         start = timer()
-
-        try:
-            output = algo.solve(config)
-            print("ok")
-        except Exception as e:
-            print("problem was not solved")
-            print(e)
-            output = dict(status=0)
-
+        output = algo.solve(config)
         sol = None
         status_conv = {
             STATUS_OPTIMAL: "Optimal",
