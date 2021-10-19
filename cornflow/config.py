@@ -17,24 +17,24 @@ class DefaultConfig(object):
     TESTING = True
 
     # LDAP configuration
-    LDAP_HOST = os.getenv("LDAP_HOST")
-    LDAP_BIND_DN = os.getenv("LDAP_BIND_DN")
-    LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD")
-    LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE")
-    LDAP_USER_BASE = os.getenv("LDAP_USER_BASE")
-    LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE")
-    LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS")
+    LDAP_HOST = os.getenv("LDAP_HOST","ldap://openldap:389")
+    LDAP_BIND_DN = os.getenv("LDAP_BIND_DN","cn=admin,dc=example,dc=org")
+    LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD","admin")
+    LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE","cn")
+    LDAP_USER_BASE = os.getenv("LDAP_USER_BASE","ou=users,dc=example,dc=org")
+    LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE","mail")
+    LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS","inetOrgPerson")
 
-    LDAP_GROUP_OBJECT_CLASS = os.getenv("LDAP_GROUP_OBJECT_CLASS")
-    LDAP_GROUP_ATTRIBUTE = os.getenv("LDAP_GROUP_ATTRIBUTE")
-    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE")
-    LDAP_GROUP_TO_ROLE_SERVICE = os.getenv("LDAP_GROUP_TO_ROLE_SERVICE")
-    LDAP_GROUP_TO_ROLE_ADMIN = os.getenv("LDAP_GROUP_TO_ROLE_ADMIN")
-    LDAP_GROUP_TO_ROLE_VIEWER = os.getenv("LDAP_GROUP_TO_ROLE_VIEWER")
-    LDAP_GROUP_TO_ROLE_PLANNER = os.getenv("LDAP_GROUP_TO_ROLE_PLANNER")
+    LDAP_GROUP_OBJECT_CLASS = os.getenv("LDAP_GROUP_OBJECT_CLASS","posixGroup")
+    LDAP_GROUP_ATTRIBUTE = os.getenv("LDAP_GROUP_ATTRIBUTE","cn")
+    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE","ou=groups,dc=example,dc=org")
+    LDAP_GROUP_TO_ROLE_SERVICE = os.getenv("LDAP_GROUP_TO_ROLE_SERVICE","service")
+    LDAP_GROUP_TO_ROLE_ADMIN = os.getenv("LDAP_GROUP_TO_ROLE_ADMIN","administrators")
+    LDAP_GROUP_TO_ROLE_VIEWER = os.getenv("LDAP_GROUP_TO_ROLE_VIEWER","viewers")
+    LDAP_GROUP_TO_ROLE_PLANNER = os.getenv("LDAP_GROUP_TO_ROLE_PLANNER","planners")
 
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
-    LDAP_USE_TLS = os.getenv("LDAP_USE_TLS")
+    LDAP_USE_TLS = os.getenv("LDAP_USE_TLS","False")
 
     # APISPEC:
     APISPEC_SPEC = APISpec(
