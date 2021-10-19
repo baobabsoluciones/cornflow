@@ -41,4 +41,4 @@ EXPOSE 5000
 
 # execute script initapp.sh
 ENTRYPOINT [ "python" ]
-CMD ["/usr/src/app/initapp.py"]
+CMD ["/usr/src/app/init_cornflow_service.py"]
