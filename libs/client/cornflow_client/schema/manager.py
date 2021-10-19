@@ -86,8 +86,8 @@ class SchemaManager:
         :param path the file path
 
         :return: A list of validation errors.
-        For more details about the error format, see:
-        https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError
+          For more details about the error format, see:
+          https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError
         """
         data = self.load_json(path)
         return self.get_validation_errors(data)

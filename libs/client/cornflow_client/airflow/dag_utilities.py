@@ -41,17 +41,6 @@ def get_schemas_from_file(_dir, dag_name):
     return instance, solution
 
 
-def get_arg(arg, context):
-    """
-    Get an argument from the kwargs given to a task
-
-    :param arg: The name fo the argument (string)
-    :param context: The list of kwargs
-    :return: The argument value.
-    """
-    return context["dag_run"].conf[arg]
-
-
 def get_requirements(path):
     """
     Read requirements.txt from a project and return a list of packages.
@@ -92,24 +81,6 @@ def connect_to_cornflow(secrets):
     airflow_user = CornFlow(url=url)
     airflow_user.login(username=conn.username, pwd=conn.password)
     return airflow_user
-
-
-def cf_get_data(client, kwargs):
-    """
-    Connect to cornflow and ask for the input data corresponding to the execution id.
-
-    :param kwargs: kwargs passed to the dag task.
-    :return: A logged and connected Cornflow class instance, the input data, the input config.
-    """
-    exec_id = get_arg("exec_id", kwargs)
-
-    # login
-    # airflow_user = connect_to_cornflow()
-    print("starting to solve the model with execution %s" % exec_id)
-    # get data
-    execution_data = client.get_data(exec_id)
-
-    return execution_data["data"], execution_data["config"]
 
 
 def try_to_save_error(client, exec_id, state=-1):
@@ -156,31 +127,38 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    exec_id = get_arg("exec_id", kwargs)
     client = connect_to_cornflow(secrets)
-    data, config = cf_get_data(client, kwargs=kwargs)
+    exec_id = kwargs["dag_run"].conf["exec_id"]
+    execution_data = client.get_data(exec_id)
+    data = execution_data["data"]
+    config = execution_data["config"]
     try:
         solution, log, log_json = fun(data, config)
     except NoSolverException as e:
-        print("No solver found !")
+        if config.get("msg", True):
+            print("No solver found !")
         try_to_save_error(client, exec_id, -1)
         raise AirflowDagException(e)
     except Exception as e:
-        print("Some unknown error happened")
+        if config.get("msg", True):
+            print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         raise AirflowDagException("There was an error during the solving")
     payload = dict(state=1, log_json=log_json, log_text=log, solution_schema=dag_name)
     if not solution:
         # No solution found: we just send everything to cornflow.
-        print("No solution found: we save what we have.")
+        if config.get("msg", True):
+            print("No solution found: we save what we have.")
         try_to_write_solution(client, exec_id, payload)
-        return "Solution was not saved"
+        if config.get("msg", True):
+            return "Solution was not saved"
     # There is a solution:
     # we first need to validate the schema.
     # If it's not: we change the status to Invalid
     # and take out the server validation of the schema\
     payload["data"] = solution
-    print("A solution was found: we will first validate it")
+    if config.get("msg", True):
+        print("A solution was found: we will first validate it")
 
     try_to_write_solution(client, exec_id, payload)
 

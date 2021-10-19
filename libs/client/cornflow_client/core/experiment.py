@@ -63,6 +63,6 @@ class ExperimentCore(ABC):
         Mandatory method
 
         :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
-        inside represents one error of that particular type.
+          inside represents one error of that particular type.
         """
         pass
