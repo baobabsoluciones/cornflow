@@ -2,6 +2,7 @@
 from logging import error
 import subprocess
 import os
+import sys
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
@@ -70,7 +71,7 @@ if os.getenv("AUTH_TYPE") == 2:
 
 # check database param from docker env
 if os.getenv("DATABASE_URL") is None:
-    print("FATAL: you need to provide a postgres database for Cornflow")
+    sys.exit("FATAL: you need to provide a postgres database for Cornflow")
 
 # set logrotate config file
 if CORNFLOW_LOGGING == "file":
