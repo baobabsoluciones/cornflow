@@ -11,8 +11,6 @@ from cornflow.commands.commands import AccessInitialization, create_user_with_ro
 os.chdir("/usr/src/app")
 ENV = os.getenv("FLASK_ENV", "development")
 os.environ["FLASK_ENV"] = ENV
-app = create_app(ENV)
-migrate = Migrate(app=app, db=db)
 
 ###################################
 # Global defaults and back-compat #
@@ -95,7 +93,9 @@ if CORNFLOW_LOGGING == "file":
         print(error)
 
 # make initdb, access control and/or migrations
+app = create_app(ENV,CORNFLOW_DB_CONN)
 with app.app_context():
+    migrate = Migrate(app=app, db=db)
     upgrade()
     AccessInitialization.run(self=AccessInitialization, verbose=1)
     # create user if auth type is db
