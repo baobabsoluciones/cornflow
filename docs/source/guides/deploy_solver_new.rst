@@ -17,7 +17,7 @@ First, we make a subclass of `ApplicationCore`:
         instance = Instance
         solution = Solution
         solvers = dict(naive=TSPNaive)
-        schema = load_json(os.path.dirname(__file__), "config.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "config.json"))
 
         @property
         def test_cases(self) -> List[Dict]:
@@ -35,7 +35,7 @@ This is just a subclass of :py:class:`cornflow_client.core.instance.InstanceCore
 .. code-block:: python
 
     class Instance(InstanceCore):
-        schema = load_json(os.path.dirname(__file__), "input.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "input.json"))
 
 
 Solution class
@@ -46,7 +46,7 @@ Very similar to the Instance. The Solution is just a subclass of :py:class:`corn
 .. code-block:: python
 
     class Solution(SolutionCore):
-        schema = load_json(os.path.dirname(__file__), "output.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "output.json"))
 
 Experiment class
 -----------------
@@ -93,8 +93,8 @@ Example
 
 .. code-block:: python
 
-    class Experiment(ExperimentCore):
 
+    class Experiment(ExperimentCore):
         def get_objective(self) -> float:
             # we get a sorted list of nodes by position
             route = (
@@ -232,28 +232,18 @@ In this example we put everything inside the ``__init__.py`` (except the json-sc
     from pytups import TupList, SuperDict
     import os
     from typing import List, Dict
-    from DAG.tools import load_json
+    from cornflow_client.core.tools import load_json
 
 
     class Instance(InstanceCore):
-        schema = load_json(os.path.dirname(__file__), "input.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "input.json"))
 
 
     class Solution(SolutionCore):
-        schema = load_json(os.path.dirname(__file__), "output.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "output.json"))
 
 
-    class TSPNaive(ExperimentCore):
-        def solve(self, options: dict):
-            # we just get an arbitrary but complete list of nodes and we return it
-            nodes = (
-                TupList(v["n1"] for v in self.instance.data["arcs"])
-                .unique()
-                .kvapply(lambda k, v: dict(pos=k, node=v))
-            )
-            self.solution = Solution(dict(route=nodes))
-            return {}
-
+    class Experiment(ExperimentCore):
         def get_objective(self) -> float:
             # we get a sorted list of nodes by position
             route = (
@@ -279,16 +269,29 @@ In this example we put everything inside the ``__init__.py`` (except the json-sc
             )
 
 
+    class TSPNaive(Experiment):
+        def solve(self, options: dict):
+            # we just get an arbitrary but complete list of nodes and we return it
+            nodes = (
+                TupList(v["n1"] for v in self.instance.data["arcs"])
+                .unique()
+                .kvapply(lambda k, v: dict(pos=k, node=v))
+            )
+            self.solution = Solution(dict(route=nodes))
+            return {}
+
+
     class TspApp(ApplicationCore):
         name = "tsp"
         instance = Instance
         solution = Solution
         solvers = dict(naive=TSPNaive)
-        schema = load_json(os.path.dirname(__file__), "config.json")
+        schema = load_json(os.path.join(os.path.dirname(__file__), "config.json"))
 
         @property
         def test_cases(self) -> List[Dict]:
             return []
+
 
 Requirements
 ------------------

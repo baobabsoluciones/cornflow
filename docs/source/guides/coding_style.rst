@@ -100,7 +100,7 @@ In this case, the correct code would be the same but without ifs:
 Indentation
 ---------------
 
-original code::
+original code:
 
 .. code-block:: python
 
@@ -139,7 +139,7 @@ original code::
     if layover:
         total_cost += layover_cost
 
-In general, I do not like excessive indentation. One way to do that with an if inside a for is with something like this::
+In general, excessive indentation makes the code hard to review and understand. One way to do that with an if inside a for is with something like this::
 
 .. code-block:: python
 
@@ -150,7 +150,7 @@ In general, I do not like excessive indentation. One way to do that with an if i
                             previous_stop, current_stop
                         )
 
-On top of that, if you have all this indentation and long for loops you can just create a function called `_get_route_cost(stop)` and use it inside the function. Something like this::
+On top of that, if you have all this indentation and long for loops you can just create a function called `_get_route_cost(stop)` and use it inside the function. Something like this:
 
 .. code-block:: python
 
@@ -207,7 +207,7 @@ Of course, this can be greatly improved with more tweaks.
 No repetition
 -----------------
 
-original code::
+original code:
 
 .. code-block:: python
 
@@ -216,10 +216,30 @@ original code::
     data_dict["drivers"] = list(data_dict["drivers"].values())
     data_dict["sources"] = list(data_dict["sources"].values())
 
-better::
+better:
 
 .. code-block:: python
 
     for key in ["customers","trailers","drivers","sources"]:
         data_dict[key]= list(data_dict[key].values())
+
+
+Filtering lists or dictionaries
+----------------------------------
+
+Filtering lists with list comprehensions is the easiest way to filter one. With pytups, you make it a little shorter.
+
+For example, instead of:
+
+.. code-block:: python
+
+    for r in used_routes.copy():
+        if not keep.get(r, False):
+            del used_routes[r]
+
+if `used_routes` is a TupList:
+
+.. code-block:: python
+
+    used_routes = used_routes.vfilter(lambda r: keep.get(r, False))
 
