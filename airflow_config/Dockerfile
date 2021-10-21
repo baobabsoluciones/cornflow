@@ -56,7 +56,7 @@ RUN pip install GitPython
 RUN pip install cmake
 
 # copy init script and config to container
-COPY scripts/init_airflow_service.py /init_airflow_service.py
+COPY scripts/init_airflow_service.py ${AIRFLOW_HOME}/init_airflow_service.py
 COPY scripts ${AIRFLOW_HOME}/scripts
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
@@ -75,5 +75,5 @@ EXPOSE 8080 5555 8793
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}
 
-ENTRYPOINT ["python /init_airflow_service.py"]
+ENTRYPOINT ["python", "init_airflow_service.py"]
 CMD ["webserver"]
