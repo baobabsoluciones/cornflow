@@ -63,6 +63,7 @@ Both python and javascript can be very lax with type validations in arguments an
         }
       }
 
+
 In the example, we're checking for the existence of instance and solution when creating a new Experiment.
 
 In fact, these validations should not be done inside. Experiment is correct to assume that when it requires an instance and a solution, it should get one as arguments. If the arguments were optional, then they should appear with a default value in the method. In practice, we *want* Experiment to fail when there are incorrect (unexpected) arguments.
@@ -101,6 +102,8 @@ Indentation
 
 original code::
 
+.. code-block:: python
+
     driver = shift["driver"]
     time_cost = self.instance.get_driver_property(driver, "TimeCost")
     layover_cost = self.instance.get_driver_property(driver, "LayoverCost")
@@ -138,6 +141,8 @@ original code::
 
 In general, I do not like excessive indentation. One way to do that with an if inside a for is with something like this::
 
+.. code-block:: python
+
     if previous_stop is None:
         continue # the loop ends here
     # continue with the for-loop as it were an else clause.
@@ -146,6 +151,8 @@ In general, I do not like excessive indentation. One way to do that with an if i
                         )
 
 On top of that, if you have all this indentation and long for loops you can just create a function called `_get_route_cost(stop)` and use it inside the function. Something like this::
+
+.. code-block:: python
 
     def _get_route_cost(self, route, time_cost, layover_cost, dist_cost):
 
@@ -202,12 +209,16 @@ No repetition
 
 original code::
 
+.. code-block:: python
+
     data_dict["customers"] = list(data_dict["customers"].values())
     data_dict["trailers"] = list(data_dict["trailers"].values())
     data_dict["drivers"] = list(data_dict["drivers"].values())
     data_dict["sources"] = list(data_dict["sources"].values())
 
 better::
+
+.. code-block:: python
 
     for key in ["customers","trailers","drivers","sources"]:
         data_dict[key]= list(data_dict[key].values())
