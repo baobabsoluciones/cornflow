@@ -53,7 +53,14 @@ Experiment class
 
 Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses :py:class:`cornflow_client.core.experiment.ExperimentCore`. This class takes as input an :ref:`Instance class` and a :ref:`Solution class`. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods ``get_objective`` and ``check_solution``.
 
+get_objective
+*****************
+
 ``get_objective`` returns a scalar number that represents the objective function value of the solution.
+
+
+check_solution
+*****************
 
 ``check_solution`` returns a dictionary of dictionaries. Each key in the first dictionary represents a specific validation. Each key in the second dictionary represents the domain of a given validation where the solution violates its requirement. The value of the second dictionary represents the extent of the violation.
 
@@ -66,6 +73,23 @@ In the example below for the TSP, a possible value for ``check_solution()`` coul
     }
 
 Which implies that the node 5 and node 6 have not been visited in the solution. The value 1 in this case is not used.
+
+
+It's important that there should not be more than two dictionary indentation. For example, this would be invalid:
+
+.. code-block:: python
+
+    {
+        "missing_nodes": {
+            "missing_nodes_1": {5: 1, 6: 1}, 
+            "missing_nodes_2": {1: 1, 2: 2},
+        }
+    }
+
+
+
+Example
+*****************
 
 .. code-block:: python
 
