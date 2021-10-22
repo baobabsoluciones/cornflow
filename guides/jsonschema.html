@@ -200,7 +200,7 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
+<p>This basically means that our input data should be an object containing two tables (<code class="docutils literal notranslate"><span class="pre">customers</span></code> and <code class="docutils literal notranslate"><span class="pre">allowedTrailers</span></code>) represented as arrays of objects.
 It is important to note three things:</p>
 <div class="section" id="no-nested-list-types">
 <h3>No nested list types<a class="headerlink" href="#no-nested-list-types" title="Permalink to this headline">¶</a></h3>
@@ -271,7 +271,10 @@ It is important to note three things:</p>
 </div>
 <div class="section" id="naming-conventions">
 <h3>Naming conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this headline">¶</a></h3>
-<p>When naming columns in a “master table”, we refer to the unique id of each row as “id” (see the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> property below. When an id is used as a foreign key in another table (see the <code class="docutils literal notranslate"><span class="pre">resources_not_available</span></code> property), we use id_shift to denote that is the id of the shift that we are using.</p>
+<p>When naming columns in a “master table”, we refer to the unique id of each row
+as “id” (see the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> property below. When an id is used as a foreign
+key in another table (see the <code class="docutils literal notranslate"><span class="pre">resources_not_available</span></code> property), we use
+“id_shift” to denote that is the id of the shift that we are using:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
 <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
@@ -328,6 +331,7 @@ It is important to note three things:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>As explained in the section beforehand, the parameters that are unidimensional should be on a table called <code class="docutils literal notranslate"><span class="pre">parameters</span></code>.</p>
 </div>
 </div>
 <div class="section" id="example-with-tsp">
@@ -362,7 +366,7 @@ It is important to note three things:</p>
 </div>
 <div class="section" id="solution-schema">
 <h3>Solution schema<a class="headerlink" href="#solution-schema" title="Permalink to this headline">¶</a></h3>
-<p>A solution to a TSP, is the sequence in which nodes should be visited. We <em>could</em> use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.</p>
+<p>A solution to a TSP, is the sequence in which nodes should be visited. We <em>could</em> use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
@@ -410,7 +414,7 @@ It is important to note three things:</p>
 </div>
 <div class="section" id="configuration-schema">
 <h3>Configuration schema<a class="headerlink" href="#configuration-schema" title="Permalink to this headline">¶</a></h3>
-<p>The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal</p>
+<p>The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>

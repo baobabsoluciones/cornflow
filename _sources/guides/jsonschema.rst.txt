@@ -1,6 +1,8 @@
 Write a json-schema
 =======================
 
+.. highlight:: json
+
 Basics of schemas
 ------------------------------
 
@@ -31,9 +33,7 @@ IdCustomer  idTrailer
 3               4
 ==========  ==========
 
-The schema will look like this:
-
-.. code-block:: json
+The schema will look like this::
 
     { "$schema": "http://json-schema.org/schema#",
      "type": "object",
@@ -82,7 +82,7 @@ The schema will look like this:
     }
 
 
-This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
+This basically means that our input data should be an object containing two tables (``customers`` and ``allowedTrailers``) represented as arrays of objects.
 It is important to note three things:
 
 No nested list types
@@ -110,9 +110,7 @@ In real problems, pure data is usually complemented by auxiliary information (su
 Exception for “simple objects”
 **********************************
 
-Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters ``trailersCapacity`` and ``timeHorizon``, we would add a property ``parameters`` to our schema:
-
-.. code-block:: json
+Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters ``trailersCapacity`` and ``timeHorizon``, we would add a property ``parameters`` to our schema::
 
     { "$schema": "http://json-schema.org/schema#",
      "type": "object",
@@ -142,9 +140,10 @@ Even though most properties of our schema object must be arrays, an exception is
 Naming conventions
 *********************
 
-When naming columns in a "master table", we refer to the unique id of each row as "id" (see the ``shifts`` property below. When an id is used as a foreign key in another table (see the ``resources_not_available`` property), we use id_shift to denote that is the id of the shift that we are using.
-
-.. code-block:: json
+When naming columns in a "master table", we refer to the unique id of each row
+as "id" (see the ``shifts`` property below. When an id is used as a foreign
+key in another table (see the ``resources_not_available`` property), we use
+"id_shift" to denote that is the id of the shift that we are using::
 
     {
     "$schema": "http://json-schema.org/schema#",
@@ -201,6 +200,7 @@ When naming columns in a "master table", we refer to the unique id of each row a
         "required": ["shifts", "resources_unavailable"]
     }
 
+As explained in the section beforehand, the parameters that are unidimensional should be on a table called ``parameters``.
 
 Example with TSP
 -------------------
@@ -210,9 +210,7 @@ Let's take the well known TSP problem and generate an instance, a solution and a
 Instance schema
 ****************************
 
-An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs:
-
-.. code-block:: json
+An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs::
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -241,9 +239,7 @@ We are using ``n1`` and ``n2`` to call each the first and second node of each ar
 Solution schema
 ****************************
 
-A solution to a TSP, is the sequence in which nodes should be visited. We *could* use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.
-
-.. code-block:: json
+A solution to a TSP, is the sequence in which nodes should be visited. We *could* use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.::
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -268,9 +264,7 @@ A solution to a TSP, is the sequence in which nodes should be visited. We *could
 
 ``node`` represents each node in the sequence. ``pos`` represents the position of each node in the sequence.
 
-An alternative, still valid, schema would be:
-
-.. code-block:: json
+An alternative, still valid, schema would be::
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -298,10 +292,8 @@ Here we assume the array is sorted and so we do not need the position of the nod
 Configuration schema
 *********************
 
-The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal
+The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal::
 
-
-.. code-block:: json
 
     {
         "$schema": "http://json-schema.org/schema#",

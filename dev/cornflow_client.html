@@ -62,6 +62,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#solution-status">Solution status</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#schemas">Schemas</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-cornflow_client.schema.tools">Schema utility functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cornflow_client.schema.manager">Schema manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cornflow_client.schema.dictSchema">Dictionary schema</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1014,6 +1020,272 @@ set self.__traceback__ to tb and return self.</p>
 <dt id="cornflow_client.constants.AirflowError.status_code">
 <code class="sig-name descname">status_code</code><em class="property"> = 400</em><a class="headerlink" href="#cornflow_client.constants.AirflowError.status_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="schemas">
+<h2>Schemas<a class="headerlink" href="#schemas" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-cornflow_client.schema.tools">
+<span id="schema-utility-functions"></span><h3>Schema utility functions<a class="headerlink" href="#module-cornflow_client.schema.tools" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="cornflow_client.schema.tools.get_pulp_jsonschema">
+<code class="sig-prename descclassname">cornflow_client.schema.tools.</code><code class="sig-name descname">get_pulp_jsonschema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pulp_json_schema.json'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">'data'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_pulp_jsonschema" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the PuLP model schema</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="cornflow_client.schema.tools.get_empty_schema">
+<code class="sig-prename descclassname">cornflow_client.schema.tools.</code><code class="sig-name descname">get_empty_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">properties</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solvers</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_empty_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>assumes the first solver is the default</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cornflow_client.schema.manager">
+<span id="schema-manager"></span><h3>Schema manager<a class="headerlink" href="#module-cornflow_client.schema.manager" title="Permalink to this headline">¶</a></h3>
+<p>Class to help create and manage data schema and to validate json files.</p>
+<dl class="py class">
+<dt id="cornflow_client.schema.manager.SchemaManager">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.schema.manager.</code><code class="sig-name descname">SchemaManager</code><span class="sig-paren">(</span><em class="sig-param">schema</em>, <em class="sig-param">validator=&lt;class 'jsonschema.validators.Draft7Validator'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A schema manager between json-schema, dict-schema and marshmallow</p>
+<p>Class to help create and manage data schema.
+Once a schema is loaded, allow the validation of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>schema</strong> – a json schema</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.from_filepath">
+<em class="property">classmethod </em><code class="sig-name descname">from_filepath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.from_filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a json schema from a json file.</p>
+<p>:param path the file path</p>
+<p>return The SchemaManager instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.get_jsonschema">
+<code class="sig-name descname">get_jsonschema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_jsonschema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the stored jsonschema.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.get_validation_errors">
+<code class="sig-name descname">get_validation_errors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_validation_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate json data according to the loaded jsonschema and return a list of errors.
+Return an empty list if data is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data to validate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of validation errors.</p>
+</dd>
+</dl>
+<p>For more details about the error format, see:
+<a class="reference external" href="https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError">https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.validate_data">
+<code class="sig-name descname">validate_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">print_errors</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate json data according to the loaded jsonschema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – the data to validate.</p></li>
+<li><p><strong>print_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If true, will print the errors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if data format is valid, else False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.get_file_errors">
+<code class="sig-name descname">get_file_errors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_file_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get json file errors according to the loaded jsonschema.</p>
+<p>:param path the file path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of validation errors.
+For more details about the error format, see:
+<a class="reference external" href="https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError">https://python-jsonschema.readthedocs.io/en/latest/errors/#jsonschema.exceptions.ValidationError</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.validate_file">
+<code class="sig-name descname">validate_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">print_errors</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a json file according to the loaded jsonschema.</p>
+<p>:param path the file path
+:param print_errors: If true, will print the errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the data is valid and False if it is not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.to_dict_schema">
+<code class="sig-name descname">to_dict_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_dict_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a jsonschema into a dictionary format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The schema dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj">
+<code class="sig-name descname">to_schema_dict_obj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an DictSchema object equivalent of the jsonschema</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.to_marshmallow">
+<code class="sig-name descname">to_marshmallow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_marshmallow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create marshmallow schemas</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict containing the flask marshmallow schemas</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Schema()</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.export_schema_dict">
+<code class="sig-name descname">export_schema_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.export_schema_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the schema_dict in a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – the path where to save the dict.format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.draft_schema_from">
+<code class="sig-name descname">draft_schema_from</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.draft_schema_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a draft jsonschema from a json file of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path to the json file.</p></li>
+<li><p><strong>save_path</strong> – path where to save the generated schema.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the generated schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.to_template">
+<code class="sig-name descname">to_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function assumes certain structure for the jsonschema.
+For now, three types of tables exist: array of objects, arrays and objects.
+{
+table1: [{col1: a, col2: b}, {col1: aa, col2: bb}, …],
+table2: [1, 2, 3, ],
+table3: {config1: a, config2: b},
+}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.load_json">
+<em class="property">static </em><code class="sig-name descname">load_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a json file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – the path of the json file.json</p>
+</dd>
+</dl>
+<p>return the json content.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.dict_to_flask">
+<code class="sig-name descname">dict_to_flask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.dict_to_flask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create marshmallow schemas</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict containing the flask marshmallow schemas</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Schema()</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.load_schema">
+<em class="property">classmethod </em><code class="sig-name descname">load_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a json schema from a json file.</p>
+<p>:param path the file path</p>
+<p>return The SchemaManager instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask">
+<code class="sig-name descname">jsonschema_to_flask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create marshmallow schemas</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict containing the flask marshmallow schemas</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Schema()</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict">
+<code class="sig-name descname">jsonschema_to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a jsonschema into a dictionary format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The schema dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cornflow_client.schema.dictSchema">
+<span id="dictionary-schema"></span><h3>Dictionary schema<a class="headerlink" href="#module-cornflow_client.schema.dictSchema" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="cornflow_client.schema.dictSchema.DictSchema">
+<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.schema.dictSchema.</code><code class="sig-name descname">DictSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jsonschema</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A json-schema to dict-schema parser</p>
+<p>Class to manage internal dictionary schema</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>jsonschema</strong> – a json schema</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="cornflow_client.schema.dictSchema.DictSchema.get_empty_schema">
+<em class="property">static </em><code class="sig-name descname">get_empty_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create un empty schema dict</p>
+</dd></dl>
 
 </dd></dl>
 

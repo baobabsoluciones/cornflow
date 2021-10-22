@@ -43,14 +43,27 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Deploy a new solution method 2.0</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#application">Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#application-class">Application class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#instance-class">Instance class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#solution-class">Solution class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#solution-method-solvers-class">Solution method / solvers class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#test-cases-property">Test cases property</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#schema-property">Schema property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#experiment-class">Experiment class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#get-objective">get_objective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#check-solution">check_solution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#solver-class">Solver class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-cases">Test cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#schema-property">Schema property</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conventions">Conventions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instance-and-solution-schemas">Instance and solution schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#readme">README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#code-structure">Code structure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#complete-init-py-code-for-the-tsp">Complete __init__.py code for the TSP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pull-request">Pull request</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="jsonschema.html">Write a json-schema</a></li>
@@ -95,15 +108,15 @@
 <h1>How to deploy a new solution method (2.0)<a class="headerlink" href="#how-to-deploy-a-new-solution-method-2-0" title="Permalink to this headline">¶</a></h1>
 <p>The deployment of a solution method consists of sub-classing the class <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore" title="cornflow_client.core.application.ApplicationCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.application.ApplicationCore</span></code></a> from the package <code class="docutils literal notranslate"><span class="pre">cornflow_client</span></code>. <code class="docutils literal notranslate"><span class="pre">ApplicationCore</span></code> serves as a template for apps and requires certain properties and methods to be defined.</p>
 <p>We will use as example the TSP problem defined here. At the end of the document, the complete code with all imports is available.</p>
-<div class="section" id="application">
-<h2>Application<a class="headerlink" href="#application" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="application-class">
+<h2>Application class<a class="headerlink" href="#application-class" title="Permalink to this headline">¶</a></h2>
 <p>First, we make a subclass of <cite>ApplicationCore</cite>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TspApp</span><span class="p">(</span><span class="n">ApplicationCore</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;tsp&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span>
     <span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span>
     <span class="n">solvers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">naive</span><span class="o">=</span><span class="n">TSPNaive</span><span class="p">)</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">test_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -111,13 +124,13 @@
 </pre></div>
 </div>
 <p>As you can see, we have given the application a class name (and a name property). We also have passed several other properties: instance, solution, solvers and schema. Finally, we have created a <code class="docutils literal notranslate"><span class="pre">test_cases</span></code> property.</p>
-<p>We will go over each of the required properties.</p>
+<p>We will go over each of the required properties below.</p>
 </div>
 <div class="section" id="instance-class">
 <h2>Instance class<a class="headerlink" href="#instance-class" title="Permalink to this headline">¶</a></h2>
 <p>This is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance.InstanceCore</span></code></a>. There are many default methods that can be overwritten (<code class="docutils literal notranslate"><span class="pre">to_dict</span></code>, <code class="docutils literal notranslate"><span class="pre">from_dict</span></code>, etc.). The only required property is the <code class="docutils literal notranslate"><span class="pre">schema</span></code>. Here we have just imported a file with the corresponding json-schema. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="n">InstanceCore</span><span class="p">):</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -125,24 +138,40 @@
 <h2>Solution class<a class="headerlink" href="#solution-class" title="Permalink to this headline">¶</a></h2>
 <p>Very similar to the Instance. The Solution is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.solution.SolutionCore</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">(</span><span class="n">SolutionCore</span><span class="p">):</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="solution-method-solvers-class">
-<h2>Solution method / solvers class<a class="headerlink" href="#solution-method-solvers-class" title="Permalink to this headline">¶</a></h2>
-<p>The solution method is a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.experiment.ExperimentCore</span></code></a> and should define three methods: <code class="docutils literal notranslate"><span class="pre">solve</span></code>, <code class="docutils literal notranslate"><span class="pre">get_objective</span></code> and <code class="docutils literal notranslate"><span class="pre">check_solution</span></code>. Here is the implementation of a very very bad solution method for the TSP:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
-            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">{}</span>
-
+<div class="section" id="experiment-class">
+<h2>Experiment class<a class="headerlink" href="#experiment-class" title="Permalink to this headline">¶</a></h2>
+<p>Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.experiment.ExperimentCore</span></code></a>. This class takes as input an <a class="reference internal" href="#instance-class"><span class="std std-ref">Instance class</span></a> and a <a class="reference internal" href="#solution-class"><span class="std std-ref">Solution class</span></a>. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods <code class="docutils literal notranslate"><span class="pre">get_objective</span></code> and <code class="docutils literal notranslate"><span class="pre">check_solution</span></code>.</p>
+<div class="section" id="get-objective">
+<h3>get_objective<a class="headerlink" href="#get-objective" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">get_objective</span></code> returns a scalar number that represents the objective function value of the solution.</p>
+</div>
+<div class="section" id="check-solution">
+<h3>check_solution<a class="headerlink" href="#check-solution" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">check_solution</span></code> returns a dictionary of dictionaries. Each key in the first dictionary represents a specific validation. Each key in the second dictionary represents the domain of a given validation where the solution violates its requirement. The value of the second dictionary represents the extent of the violation.</p>
+<p>In the example below for the TSP, a possible value for <code class="docutils literal notranslate"><span class="pre">check_solution()</span></code> could be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;missing_nodes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">5</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Which implies that the node 5 and node 6 have not been visited in the solution. The value 1 in this case is not used.</p>
+<p>It’s important that there should not be more than two dictionary indentation. For example, this would be invalid:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;missing_nodes&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;missing_nodes_1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">5</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+        <span class="s2">&quot;missing_nodes_2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="c1"># we get a sorted list of nodes by position</span>
         <span class="n">route</span> <span class="o">=</span> <span class="p">(</span>
@@ -168,23 +197,90 @@
         <span class="p">)</span>
 </pre></div>
 </div>
-<p>More than one solution method can be defined. This is why they are given in a dictionary to the Application. We use them as a catalogue when deciding to solve a problem.</p>
 </div>
-<div class="section" id="test-cases-property">
-<h2>Test cases property<a class="headerlink" href="#test-cases-property" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="solver-class">
+<h2>Solver class<a class="headerlink" href="#solver-class" title="Permalink to this headline">¶</a></h2>
+<p>Each solver is a subclass of the <a class="reference internal" href="#experiment-class"><span class="std std-ref">Experiment class</span></a> and should define one additional method: <code class="docutils literal notranslate"><span class="pre">solve</span></code>. Here is the implementation of a very very bad solver for the TSP:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</pre></div>
+</div>
+<p>More than one solution method can be defined. This is why they are given in a dictionary to the <a class="reference internal" href="#application-class"><span class="std std-ref">Application class</span></a>. We use them as a catalogue when deciding to solve a problem.</p>
+</div>
+<div class="section" id="test-cases">
+<h2>Test cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>
 <p>Test cases is a property that should return a list of datasets (in json-schema format). These tests are used to test the app in the unit-tests. More information on how to create the unit tests for your solution method in <a class="reference internal" href="testing_app.html#test-your-solution-method"><span class="std std-ref">Test your solution method</span></a>.</p>
 </div>
 <div class="section" id="schema-property">
 <h2>Schema property<a class="headerlink" href="#schema-property" title="Permalink to this headline">¶</a></h2>
 <p>The schema of an application is the configuration used to solve a problem. This schema needs to have at least the <cite>timeLimit</cite> and the <cite>solver</cite> properties. Besides that, it’s up to the developer to decide which configuration is needed. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
+<div class="section" id="conventions">
+<h3>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h3>
+<p>We follow some common conventions in the configuration schema so most apps share most of the main properties. Below is a list of known properties and what the usually represent.</p>
+<ol class="arabic simple">
+<li><p><strong>timeLimit</strong>: float. It indicates the amount of seconds before the method should stop.</p></li>
+<li><p><strong>solver</strong>: string. It indicates the solution method that should be used to solve the problem. It can support “nested solvers”. For example: <code class="docutils literal notranslate"><span class="pre">pulp.cbc</span></code> should be parsed as “using the <code class="docutils literal notranslate"><span class="pre">pulp</span></code> solution method and, inside that solution method, use the <code class="docutils literal notranslate"><span class="pre">cbc</span></code> solver.</p></li>
+<li><p><strong>msg</strong>: boolean. When <code class="docutils literal notranslate"><span class="pre">true</span></code>, the solution method displays details of the progress.</p></li>
+<li><p><strong>warmStart</strong>: boolean. When <code class="docutils literal notranslate"><span class="pre">true</span></code>, the solution method will use the current solution (if any) to start the exploration of solutions.</p></li>
+<li><p><strong>fixSolution</strong>: boolean. When <code class="docutils literal notranslate"><span class="pre">true</span></code>, the solution method will fix the existing information in the solution when exploring the solution space.</p></li>
+<li><p><strong>gapAbs</strong>: float. The maximum absolute gap allowed when considering a solution optimal.</p></li>
+<li><p><strong>gapRel</strong>: float. The maximum relative gap allowed when considering a solution optimal.</p></li>
+<li><p><strong>threads</strong>: integer. The number of cores that should be used in the solution method.</p></li>
+</ol>
+<p>Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn’t make much sense to be creating a separated <code class="docutils literal notranslate"><span class="pre">config.json</span></code> schema file. For these cases, it’s possible to use <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.schema.tools.get_empty_schema" title="cornflow_client.schema.tools.get_empty_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">cornflow_client.schema.tools.get_empty_schema()</span></code></a>.</p>
+</div>
+<div class="section" id="instance-and-solution-schemas">
+<h3>Instance and solution schemas<a class="headerlink" href="#instance-and-solution-schemas" title="Permalink to this headline">¶</a></h3>
+<p>Instance and Solution classes also require their own schemas. See their own sections for more details on how to provide them: <a class="reference internal" href="#instance-class"><span class="std std-ref">Instance class</span></a> and <a class="reference internal" href="#solution-class"><span class="std std-ref">Solution class</span></a> respectively.</p>
+</div>
+</div>
+<div class="section" id="readme">
+<h2>README<a class="headerlink" href="#readme" title="Permalink to this headline">¶</a></h2>
+<p>It is a good idea to have a description of the problem to be solved in text form. Even better if the text is accompanied by a mathematical formulation in LaTeX. This way, others can check the problem description and better understand the input data, output data and the solution methods.</p>
 </div>
 <div class="section" id="code-structure">
 <h2>Code structure<a class="headerlink" href="#code-structure" title="Permalink to this headline">¶</a></h2>
-<p>Each app is contained ideally inside a directory. Usually, the <code class="docutils literal notranslate"><span class="pre">Instance</span></code>, <code class="docutils literal notranslate"><span class="pre">Solution</span></code> and <code class="docutils literal notranslate"><span class="pre">Solution</span> <span class="pre">method</span></code> are located each one inside a separate file. The <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> needs to contain the Application class. Other files inside the folder include the schemas (better stored as json files).</p>
-<p>In this example we put everything inside the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> except the json-schema files because it was a small example.</p>
+<p>Assuming your solution is called <code class="docutils literal notranslate"><span class="pre">my_project</span></code>, the following is the official structure to organize an application:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_project</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">README</span><span class="o">.</span><span class="n">md</span>
+    <span class="n">core</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">experiment</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">schemas</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">json</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">json</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">json</span>
+    <span class="n">data</span><span class="o">/</span>
+        <span class="n">data_file_1</span><span class="o">.</span><span class="n">json</span>
+        <span class="n">data_file_2</span><span class="o">.</span><span class="n">json</span>
+    <span class="n">solvers</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">solver_1</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">solver_2</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Each app is contained ideally inside a directory.</p>
+<p>The <a class="reference internal" href="#instance-class"><span class="std std-ref">Instance class</span></a> is implemented in the <code class="docutils literal notranslate"><span class="pre">my_project/core/instance.py</span></code> file, the <a class="reference internal" href="#solution-class"><span class="std std-ref">Solution class</span></a> inside the <code class="docutils literal notranslate"><span class="pre">my_project/core/solution.py</span></code>.</p>
+<p>Each <a class="reference internal" href="#solver-class"><span class="std std-ref">Solver class</span></a> is defined in the <code class="docutils literal notranslate"><span class="pre">my_project/solvers</span></code> directory: <code class="docutils literal notranslate"><span class="pre">solver_1.py</span></code>, <code class="docutils literal notranslate"><span class="pre">solver_2.py</span></code>, etc.</p>
+<p>The <a class="reference internal" href="#application-class"><span class="std std-ref">Application class</span></a> is defined inside <code class="docutils literal notranslate"><span class="pre">my_project/__init__.py</span></code>.</p>
+<p>Schemas are stored in the <code class="docutils literal notranslate"><span class="pre">my_project/schemas</span></code> folder. Finally, <a class="reference internal" href="#test-cases"><span class="std std-ref">Test cases</span></a> are stored in the <code class="docutils literal notranslate"><span class="pre">my_project/data</span></code> directory.</p>
 </div>
 <div class="section" id="complete-init-py-code-for-the-tsp">
 <h2>Complete __init__.py code for the TSP<a class="headerlink" href="#complete-init-py-code-for-the-tsp" title="Permalink to this headline">¶</a></h2>
+<p>In this example we put everything inside the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> (except the json-schema files) for simplicity.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cornflow_client</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ApplicationCore</span><span class="p">,</span>
     <span class="n">InstanceCore</span><span class="p">,</span>
@@ -194,28 +290,18 @@
 <span class="kn">from</span> <span class="nn">pytups</span> <span class="kn">import</span> <span class="n">TupList</span><span class="p">,</span> <span class="n">SuperDict</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
-<span class="kn">from</span> <span class="nn">DAG.tools</span> <span class="kn">import</span> <span class="n">load_json</span>
+<span class="kn">from</span> <span class="nn">cornflow_client.core.tools</span> <span class="kn">import</span> <span class="n">load_json</span>
 
 
 <span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="n">InstanceCore</span><span class="p">):</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">))</span>
 
 
 <span class="k">class</span> <span class="nc">Solution</span><span class="p">(</span><span class="n">SolutionCore</span><span class="p">):</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">))</span>
 
 
-<span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
-            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">{}</span>
-
+<span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="c1"># we get a sorted list of nodes by position</span>
         <span class="n">route</span> <span class="o">=</span> <span class="p">(</span>
@@ -241,18 +327,40 @@
         <span class="p">)</span>
 
 
+<span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># we just get an arbitrary but complete list of nodes and we return it</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TupList</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;n1&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;arcs&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">kvapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">v</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">route</span><span class="o">=</span><span class="n">nodes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+
 <span class="k">class</span> <span class="nc">TspApp</span><span class="p">(</span><span class="n">ApplicationCore</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;tsp&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span>
     <span class="n">solution</span> <span class="o">=</span> <span class="n">Solution</span>
     <span class="n">solvers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">naive</span><span class="o">=</span><span class="n">TSPNaive</span><span class="p">)</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">test_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>The repository contains a file called requirements.txt. You will need to update this file with the name of the additional libraries that your code needs to run.</p>
+</div>
+<div class="section" id="pull-request">
+<h2>Pull request<a class="headerlink" href="#pull-request" title="Permalink to this headline">¶</a></h2>
+<p>Once that all the previous is done, that your code has been pushed to the remote repository, that none of the tests run by git fail (see <a class="reference internal" href="testing_app.html#test-your-solution-method"><span class="std std-ref">Test your solution method</span></a>), and your application seems complete, it is time to merge it into the main branch. Indeed, the dag won’t be running while your code is not on the main branch.</p>
+<p>In order to do so, you need to create a pull request on github’s web interface. Once the PR has been approved, your code will be on the main branch.</p>
+<p>From there, you will have to wait until the dag is running, which can take a few hours since the running dags are only updated once a day. To learn how to test your app, see <a class="reference internal" href="use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a>. To learn to debug your app in the airflow web interface, see <a class="reference internal" href="debug_with_airflow.html#debug-your-solution-method"><span class="std std-ref">Debug your solution method</span></a>.</p>
 </div>
 </div>
 
