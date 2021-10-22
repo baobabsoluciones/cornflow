@@ -155,11 +155,15 @@
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a list of datasets following the json-schema.</p>
+<dd class="field-odd"><p><p>a list of datasets following the json-schema.
+if each element in the list is:</p>
+<ul class="simple">
+<li><p><strong>dict</strong>: each element is an instance</p></li>
+<li><p><strong>tuple</strong>: the first part is the instance, the second its solution</p></li>
+</ul>
+</p>
 </dd>
 </dl>
-<p>if the list includes a tuple of two dictionaries,
-it’s because it’s an instance and it’s solution</p>
 </dd></dl>
 
 <dl class="py method">
@@ -419,10 +423,10 @@ it’s because it’s an instance and it’s solution</p>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements</p>
+<dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+inside represents one error of that particular type.</p>
 </dd>
 </dl>
-<p>inside represents one error of that particular type.</p>
 </dd></dl>
 
 </dd></dl>
