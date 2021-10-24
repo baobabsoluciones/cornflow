@@ -176,6 +176,10 @@ class TestCornflowClient(TestCornflowClientBasic):
             content = response[sch]
             self.assertTrue("properties" in content)
 
+    def test_get_all_schemas(self):
+        response = self.client.get_all_schemas()
+        self.assertIn({"name": "solve_model_dag"}, response)
+
     def test_get_dag_schema_no_schema(self):
         response = self.client.get_schema("this_dag_does_not_exist")
         self.assertTrue("error" in response)

@@ -6,23 +6,45 @@ Endpoints to get the schemas
 from cornflow_client.airflow.api import Airflow
 from flask import current_app
 from flask_apispec.views import MethodResource
-from flask_apispec import doc
+from flask_apispec import marshal_with, use_kwargs, doc
 import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..shared.exceptions import AirflowError
+from ..schemas.schemas import SchemaOneApp, SchemaRequest, SchemaListApp
 
 
 class SchemaEndpoint(MetaResource, MethodResource):
     """
-    Endpoint used to obtain schemas
+    Endpoint used to obtain names of available apps
     """
 
-    def __init__(self):
-        super().__init__()
+    @doc(description="Get list of available apps", tags=["Schemas"])
+    @marshal_with(SchemaListApp(many=True))
+    def get(self):
+        """
+        API method to get a list of dag names
+
+        :return: A dictionary with a message and a integer with the HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        af_client = Airflow.from_config(current_app.config)
+        if not af_client.is_alive():
+            log.error("Airflow not accessible when getting schemas")
+            raise AirflowError(error="Airflow is not accessible")
+
+        log.debug("User gets list of schema")
+        return af_client.get_all_schemas()
+
+
+class SchemaDetailsEndpoint(MetaResource, MethodResource):
+    """
+    Endpoint used to obtain schemas for one app
+    """
 
     @doc(description="Get instance, solution and config schema", tags=["Schemas"])
+    @marshal_with(SchemaOneApp)
     def get(self, dag_name):
         """
         API method to get the input, output and config schemas for a given dag
@@ -30,14 +52,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        config = current_app.config
-        airflow_conf = dict(
-            url=config["AIRFLOW_URL"],
-            user=config["AIRFLOW_USER"],
-            pwd=config["AIRFLOW_PWD"],
-        )
-
-        af_client = Airflow(**airflow_conf)
+        af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
             log.error("Airflow not accessible when getting schema {}".format(dag_name))
             raise AirflowError(error="Airflow is not accessible")
