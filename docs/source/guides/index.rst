@@ -12,4 +12,5 @@ Contents:
     Test your solution method <testing_app>
     Use your solution method <use_solver>
     Debug your solution method <debug_with_airflow>
+    Solution method coding style <coding_style>
 

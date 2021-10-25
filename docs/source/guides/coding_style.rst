@@ -146,9 +146,7 @@ In general, excessive indentation makes the code hard to review and understand. 
     if previous_stop is None:
         continue # the loop ends here
     # continue with the for-loop as it were an else clause.
-    distance = self.instance.get_distance_between(
-                            previous_stop, current_stop
-                        )
+    distance = self.instance.get_distance_between(previous_stop, current_stop)
 
 On top of that, if you have all this indentation and long for loops you can just create a function called `_get_route_cost(stop)` and use it inside the function. Something like this:
 
