@@ -13,6 +13,15 @@ class Airflow(object):
         self.url = url + "/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
 
+    @classmethod
+    def from_config(cls, config):
+        data = dict(
+            url=config["AIRFLOW_URL"],
+            user=config["AIRFLOW_USER"],
+            pwd=config["AIRFLOW_PWD"],
+        )
+        return cls(**data)
+
     def is_alive(self):
         try:
             response = requests.get(self.url + "/health")
@@ -88,15 +97,25 @@ class Airflow(object):
 
     def get_one_variable(self, variable):
         url = "{}/variables/{}".format(self.url, variable)
-        response = self.request_headers_auth(method="GET", url=url)
-        return response.json()["value"]
+        return self.request_headers_auth(method="GET", url=url).json()
+
+    def get_all_variables(self):
+        return self.request_headers_auth(
+            method="GET", url="{}/variables".format(self.url)
+        ).json()
 
     def get_one_schema(self, dag_name, schema):
-        response = self.get_schemas_for_dag_name(dag_name)
-        return response[schema]
+        return self.get_schemas_for_dag_name(dag_name)[schema]
 
     def get_schemas_for_dag_name(self, dag_name):
-        return json.loads(self.get_one_variable(dag_name))
+        response = self.get_one_variable(dag_name)
+        result = json.loads(response["value"])
+        result["name"] = response["key"]
+        return result
+
+    def get_all_schemas(self):
+        response = self.get_all_variables()
+        return [dict(name=variable["key"]) for variable in response["variables"]]
 
 
 def get_schema(config, dag_name, schema="instance"):
@@ -105,12 +124,7 @@ def get_schema(config, dag_name, schema="instance"):
     We transform the jsonschema into a marshmallow class
 
     """
-    airflow_conf = dict(
-        url=config["AIRFLOW_URL"],
-        user=config["AIRFLOW_USER"],
-        pwd=config["AIRFLOW_PWD"],
-    )
-    af_client = Airflow(**airflow_conf)
+    af_client = Airflow.from_config(config)
     if not af_client.is_alive():
         raise AirflowError(error="Airflow is not accessible")
 
