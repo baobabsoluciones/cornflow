@@ -125,7 +125,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         one_instance = self.create_new_instance_payload(payload)
         payload = dict(
             instance_id=one_instance["id"],
-            config=dict(),
+            config=dict(timeLimit=seconds),
             name="timer_execution",
             description="timer_exec_description",
             schema="timer",

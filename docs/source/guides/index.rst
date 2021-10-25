@@ -6,7 +6,6 @@ Contents:
 .. toctree::
     :maxdepth: 3
 
-    Deploy a new solution method <deploy_solver>
     Deploy a new solution method 2.0 <deploy_solver_new>
     Write a json-schema <jsonschema>
     Test your solution method <testing_app>

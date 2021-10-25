@@ -1,7 +1,7 @@
 How to deploy a new solution method (2.0)
 ===================================================
 
-The deployment of a solution method consists of sub-classing the class :py:class:`cornflow_client.core.application.ApplicationCore` from the package ``cornflow_client``. ``ApplicationCore`` serves as a template for apps and requires certain properties and methods to be defined.
+The deployment of a solution method consists of sub-classing the class :py:class:`~cornflow_client.core.application.ApplicationCore` from the package ``cornflow_client``. ``ApplicationCore`` serves as a template for apps and requires certain properties and methods to be defined.
 
 We will use as example the TSP problem defined here. At the end of the document, the complete code with all imports is available.
 
@@ -30,7 +30,7 @@ We will go over each of the required properties below.
 Instance class
 ---------------
 
-This is just a subclass of :py:class:`cornflow_client.core.instance.InstanceCore`. There are many default methods that can be overwritten (``to_dict``, ``from_dict``, etc.). The only required property is the ``schema``. Here we have just imported a file with the corresponding json-schema. If you want to know how to define a json-schema, check the section :ref:`Write a json-schema`.
+This is just a subclass of :py:class:`~cornflow_client.core.instance.InstanceCore`. There are many default methods that can be overwritten (``to_dict``, ``from_dict``, etc.). The only required property is the ``schema``. Here we have just imported a file with the corresponding json-schema. If you want to know how to define a json-schema, check the section :ref:`Write a json-schema`.
 
 .. code-block:: python
 
@@ -41,7 +41,7 @@ This is just a subclass of :py:class:`cornflow_client.core.instance.InstanceCore
 Solution class
 ---------------
 
-Very similar to the Instance. The Solution is just a subclass of :py:class:`cornflow_client.core.solution.SolutionCore`.
+Very similar to the Instance. The Solution is just a subclass of :py:class:`~cornflow_client.core.solution.SolutionCore`.
 
 .. code-block:: python
 
@@ -51,7 +51,7 @@ Very similar to the Instance. The Solution is just a subclass of :py:class:`corn
 Experiment class
 -----------------
 
-Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses :py:class:`cornflow_client.core.experiment.ExperimentCore`. This class takes as input an :ref:`Instance class` and a :ref:`Solution class`. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods ``get_objective`` and ``check_solution``.
+Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses :py:class:`~cornflow_client.core.experiment.ExperimentCore`. This class takes as input an :ref:`Instance class` and a :ref:`Solution class`. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods ``get_objective`` and ``check_solution``.
 
 get_objective
 *****************
