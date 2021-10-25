@@ -69,6 +69,14 @@ class CornFlow(object):
             **kwargs
         )
 
+    def get_api(self, api, method="GET", **kwargs):
+        return requests.request(
+            method=method,
+            url=urljoin(self.url, api) + "/",
+            headers={"Authorization": "access_token " + self.token},
+            **kwargs
+        )
+
     @ask_token
     def get_api_for_id(self, api, id, post_url="", **kwargs):
         """
@@ -415,13 +423,7 @@ class CornFlow(object):
 
         :param dict params: optional filters
         """
-        response = requests.get(
-            urljoin(self.url, "instance/"),
-            headers={"Authorization": "access_token " + self.token},
-            json={},
-            params=params,
-        )
-        return response.json()
+        return self.get_api("instance", params=params).json()
 
     @log_call
     @ask_token
@@ -431,13 +433,7 @@ class CornFlow(object):
 
         :param dict params: optional filters
         """
-        response = requests.get(
-            urljoin(self.url, "case/"),
-            headers={"Authorization": "access_token " + self.token},
-            json={},
-            params=params,
-        )
-        return response.json()
+        return self.get_api("case", params=params).json()
 
     @log_call
     @ask_token
@@ -447,13 +443,7 @@ class CornFlow(object):
 
         :param dict params: optional filters
         """
-        response = requests.get(
-            urljoin(self.url, "execution/"),
-            headers={"Authorization": "access_token " + self.token},
-            json={},
-            params=params,
-        )
-        return response.json()
+        return self.get_api("execution", params=params).json()
 
     @log_call
     @ask_token
@@ -461,11 +451,7 @@ class CornFlow(object):
         """
         Downloads all the users in the server
         """
-        return requests.get(
-            urljoin(self.url, "user/"),
-            headers={"Authorization": "access_token " + self.token},
-            json={},
-        )
+        return self.get_api("user").json()
 
     @log_call
     @ask_token
@@ -554,6 +540,13 @@ class CornFlow(object):
         """
         response = self.get_api_for_id(api="schema", id=dag_name)
         return response.json()
+
+    @ask_token
+    def get_all_schemas(self):
+        """
+        Downloads all problems' (aka as app's) names
+        """
+        return self.get_api("schema").json()
 
 
 class CornFlowApiError(Exception):
