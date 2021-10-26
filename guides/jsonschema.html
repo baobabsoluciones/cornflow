@@ -41,7 +41,6 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="deploy_solver.html">Deploy a new solution method</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html">Deploy a new solution method 2.0</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Write a json-schema</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basics-of-schemas">Basics of schemas</a><ul>
@@ -57,6 +56,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#configuration-schema">Configuration schema</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-jsonschema-from-data">Generating jsonschema from data</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
@@ -432,6 +432,30 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">timeLimit</span></code> constraints the time the solution method can run. <code class="docutils literal notranslate"><span class="pre">gapRel</span></code> provides a tolerance measured in relative gap (to the best possible solution). <code class="docutils literal notranslate"><span class="pre">seed</span></code> provides a way to make the solution method deterministic. The <code class="docutils literal notranslate"><span class="pre">solver</span></code> property is mandatory for all solution methods and should always have this format (a string with an “enum” attribute).</p>
+</div>
+</div>
+<div class="section" id="generating-jsonschema-from-data">
+<h2>Generating jsonschema from data<a class="headerlink" href="#generating-jsonschema-from-data" title="Permalink to this headline">¶</a></h2>
+<p>Usually, the instance data is tedious to describe via json-schema format. At the same time, an example instance is <em>usually</em> available by default in some format (xml, Excel, csv, custom file).</p>
+<p>In this case, the first method of the Instance will be something along the lines of <code class="docutils literal notranslate"><span class="pre">from_xml</span></code> that will create an Instance from that file.</p>
+<p>Imagine the second and third methods are <code class="docutils literal notranslate"><span class="pre">to_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">from_dict</span></code>. With this, it’s already possible to generate an json with the right schema: both <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceCore</span></code></a> and <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolutionCore</span></code></a> have a method called <code class="docutils literal notranslate"><span class="pre">generate_schema</span></code> that will do just that. They return an schema that is compatible with the current object.</p>
+<p>An example code to do just that is available in the following <a class="reference external" href="https://github.com/baobabsoluciones/hackathonbaobab2021">https://github.com/baobabsoluciones/hackathonbaobab2021</a> project. Here is an excerpt:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">hackathonbaobab2021.core</span> <span class="kn">import</span> <span class="n">Instance</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="k">def</span> <span class="nf">generate_schema</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;../data/ITC2021_Test1.xml&quot;</span><span class="p">)</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">generate_schema</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">generate_schema</span><span class="p">()</span>
+</pre></div>
 </div>
 </div>
 </div>
