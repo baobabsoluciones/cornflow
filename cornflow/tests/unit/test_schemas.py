@@ -3,9 +3,9 @@ import json
 
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.const import SCHEMA_URL
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
-from cornflow_client import get_pulp_jsonschema
+from cornflow_client import get_pulp_jsonschema, get_empty_schema
 from marshmallow import ValidationError, Schema, fields
 
 
@@ -152,28 +152,50 @@ class TestSchemaEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.schema = get_pulp_jsonschema()
+        self.config = get_empty_schema(dict(timeLimit=1, solvers=["cbc"]))
         self.url = SCHEMA_URL
+        self.schema_name = "pulp"
 
-    # TODO: for some reason this does not work and we have to call the schemas.Airflow
-    #  @patch("cornflow_client.airflow.api.Airflow")
-    @patch("cornflow.endpoints.schemas.Airflow")
-    def test_get_schema(self, Airflow):
-        instance = Airflow.return_value
-        instance.is_alive.return_value = True
-        instance.get_dag_info.return_value = {}
-        instance.get_schemas_for_dag_name.return_value = dict(
-            instance=self.schema, solution=self.schema
+    def patch_af_client(self, Airflow_mock):
+        af_client = Airflow_mock.return_value
+        af_client.is_alive.return_value = True
+        af_client.get_dag_info.return_value = {}
+        af_client.get_schemas_for_dag_name.return_value = dict(
+            instance=self.schema,
+            solution=self.schema,
+            config=self.config,
+            name=self.schema_name,
         )
+        af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
+        return af_client
+
+    @patch("cornflow.endpoints.schemas.Airflow.from_config")
+    def test_get_schema(self, airflow_init):
+        af_client = self.patch_af_client(airflow_init)
         schemas = self.get_one_row(
-            self.url + "pulp/", {}, expected_status=200, check_payload=False
+            self.url + "{}/".format(self.schema_name),
+            {},
+            expected_status=200,
+            check_payload=False,
         )
         self.assertIn("instance", schemas)
         self.assertIn("solution", schemas)
         self.assertEqual(schemas["instance"], self.schema)
         self.assertEqual(schemas["solution"], self.schema)
-        instance.is_alive.assert_called_once()
-        instance.get_dag_info.assert_called_once()
-        instance.get_schemas_for_dag_name.assert_called_once()
+        self.assertEqual(schemas["config"], self.config)
+        af_client.is_alive.assert_called_once()
+        af_client.get_dag_info.assert_called_once()
+        af_client.get_schemas_for_dag_name.assert_called_once()
+
+    @patch("cornflow.endpoints.schemas.Airflow.from_config")
+    def test_get_all_schemas(self, airflow_init):
+        af_client = self.patch_af_client(airflow_init)
+        schemas = self.get_one_row(
+            self.url, {}, expected_status=200, check_payload=False
+        )
+        self.assertEqual(schemas[0]["name"], self.schema_name)
+        af_client.is_alive.assert_called_once()
+        af_client.get_all_schemas.assert_called_once()
 
 
 if __name__ == "__main__":
