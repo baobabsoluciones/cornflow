@@ -125,7 +125,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         one_instance = self.create_new_instance_payload(payload)
         payload = dict(
             instance_id=one_instance["id"],
-            config=dict(),
+            config=dict(timeLimit=seconds),
             name="timer_execution",
             description="timer_exec_description",
             schema="timer",
@@ -175,6 +175,10 @@ class TestCornflowClient(TestCornflowClientBasic):
         for sch in [INSTANCE_SCHEMA, SOLUTION_SCHEMA]:
             content = response[sch]
             self.assertTrue("properties" in content)
+
+    def test_get_all_schemas(self):
+        response = self.client.get_all_schemas()
+        self.assertIn({"name": "solve_model_dag"}, response)
 
     def test_get_dag_schema_no_schema(self):
         response = self.client.get_schema("this_dag_does_not_exist")

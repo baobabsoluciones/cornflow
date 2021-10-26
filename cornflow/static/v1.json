@@ -67,6 +67,9 @@
         "updated_at": {
           "format": "date-time", 
           "type": "string"
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -163,6 +166,9 @@
         "updated_at": {
           "format": "date-time", 
           "type": "string"
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -289,22 +295,6 @@
     }, 
     "ExecutionDataEndpointResponse": {
       "properties": {
-        "data": {}, 
-        "data_hash": {
-          "readOnly": true, 
-          "type": "string"
-        }, 
-        "id": {
-          "type": "string"
-        }, 
-        "name": {
-          "type": "string"
-        }
-      }, 
-      "type": "object"
-    }, 
-    "ExecutionDetailsEndpointResponse": {
-      "properties": {
         "config": {
           "$ref": "#/definitions/Config"
         }, 
@@ -312,8 +302,8 @@
           "format": "date-time", 
           "type": "string"
         }, 
+        "data": {}, 
         "data_hash": {
-          "readOnly": true, 
           "type": "string"
         }, 
         "description": {
@@ -336,6 +326,48 @@
         }, 
         "state": {
           "type": "integer"
+        }, 
+        "user_id": {
+          "type": "integer"
+        }
+      }, 
+      "type": "object"
+    }, 
+    "ExecutionDetailsEndpointResponse": {
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "created_at": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
+        "data_hash": {
+          "type": "string"
+        }, 
+        "description": {
+          "type": "string"
+        }, 
+        "id": {
+          "type": "string"
+        }, 
+        "instance_id": {
+          "type": "string"
+        }, 
+        "message": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
+        }, 
+        "state": {
+          "type": "integer"
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -353,18 +385,42 @@
     }, 
     "ExecutionLogEndpointResponse": {
       "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        }, 
+        "created_at": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
         "data_hash": {
-          "readOnly": true, 
+          "type": "string"
+        }, 
+        "description": {
           "type": "string"
         }, 
         "id": {
           "type": "string"
         }, 
+        "instance_id": {
+          "type": "string"
+        }, 
         "log": {
           "$ref": "#/definitions/Log"
         }, 
+        "message": {
+          "type": "string"
+        }, 
         "name": {
           "type": "string"
+        }, 
+        "schema": {
+          "type": "string"
+        }, 
+        "state": {
+          "type": "integer"
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "type": "object"
@@ -452,8 +508,15 @@
     }, 
     "InstanceDataEndpointResponse": {
       "properties": {
+        "created_at": {
+          "format": "date-time", 
+          "type": "string"
+        }, 
         "data": {}, 
         "data_hash": {
+          "type": "string"
+        }, 
+        "description": {
           "type": "string"
         }, 
         "id": {
@@ -464,6 +527,9 @@
         }, 
         "schema": {
           "type": "string"
+        }, 
+        "user_id": {
+          "type": "integer"
         }
       }, 
       "required": [
@@ -474,6 +540,7 @@
     "InstanceDetailsEndpointResponse": {
       "properties": {
         "created_at": {
+          "format": "date-time", 
           "type": "string"
         }, 
         "data_hash": {
@@ -806,6 +873,34 @@
       }, 
       "type": "object"
     }, 
+    "SchemaListApp": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }, 
+      "required": [
+        "name"
+      ], 
+      "type": "object"
+    }, 
+    "SchemaOneApp": {
+      "properties": {
+        "config": {}, 
+        "instance": {}, 
+        "name": {
+          "type": "string"
+        }, 
+        "solution": {}
+      }, 
+      "required": [
+        "config", 
+        "instance", 
+        "name", 
+        "solution"
+      ], 
+      "type": "object"
+    }, 
     "UserDetailsEndpointResponse": {
       "properties": {
         "email": {
@@ -1078,14 +1173,14 @@
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx1", 
+            "name": "idx2", 
             "required": true, 
             "type": "integer"
           }, 
           {
             "format": "int32", 
             "in": "path", 
-            "name": "idx2", 
+            "name": "idx1", 
             "required": true, 
             "type": "integer"
           }
@@ -1943,6 +2038,26 @@
         ]
       }
     }, 
+    "/schema/": {
+      "get": {
+        "description": "Get list of available apps", 
+        "parameters": [], 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/SchemaListApp"
+              }, 
+              "type": "array"
+            }
+          }
+        }, 
+        "tags": [
+          "Schemas"
+        ]
+      }
+    }, 
     "/schema/{dag_name}/": {
       "get": {
         "description": "Get instance, solution and config schema", 
@@ -1954,7 +2069,14 @@
             "type": "string"
           }
         ], 
-        "responses": {}, 
+        "responses": {
+          "default": {
+            "description": "", 
+            "schema": {
+              "$ref": "#/definitions/SchemaOneApp"
+            }
+          }
+        }, 
         "tags": [
           "Schemas"
         ]

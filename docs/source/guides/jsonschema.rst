@@ -313,3 +313,32 @@ The configuration will depend on the application. We usually have some default c
 
 
 ``timeLimit`` constraints the time the solution method can run. ``gapRel`` provides a tolerance measured in relative gap (to the best possible solution). ``seed`` provides a way to make the solution method deterministic. The ``solver`` property is mandatory for all solution methods and should always have this format (a string with an "enum" attribute).
+
+Generating jsonschema from data
+--------------------------------------
+
+Usually, the instance data is tedious to describe via json-schema format. At the same time, an example instance is *usually* available by default in some format (xml, Excel, csv, custom file).
+
+In this case, the first method of the Instance will be something along the lines of ``from_xml`` that will create an Instance from that file.
+
+Imagine the second and third methods are ``to_dict`` and ``from_dict``. With this, it's already possible to generate an json with the right schema: both :py:class:`~cornflow_client.core.instance.InstanceCore` and :py:class:`~cornflow_client.core.solution.SolutionCore` have a method called ``generate_schema`` that will do just that. They return an schema that is compatible with the current object.
+
+An example code to do just that is available in the following https://github.com/baobabsoluciones/hackathonbaobab2021 project. Here is an excerpt:
+
+.. code-block:: python
+
+    import json
+    from hackathonbaobab2021.core import Instance
+    import os
+
+
+    def generate_schema():
+        path = os.path.join(os.path.dirname(__file__), "../data/ITC2021_Test1.xml")
+        instance = Instance.from_xml(path)
+        schema = instance.generate_schema()
+        with open(path + ".json", "w") as f:
+            json.dump(schema, f, indent=4, sort_keys=True)
+
+
+    if __name__ == "__main__":
+        generate_schema()
