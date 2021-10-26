@@ -19,13 +19,7 @@ class HealthEndpoint(MetaResource, MethodResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
     def get(self):
-        config = current_app.config
-        airflow_conf = dict(
-            url=config["AIRFLOW_URL"],
-            user=config["AIRFLOW_USER"],
-            pwd=config["AIRFLOW_PWD"],
-        )
-        af_client = Airflow(**airflow_conf)
+        af_client = Airflow.from_config(current_app.config)
         airflow_status = STATUS_HEALTHY
         cornflow_status = STATUS_HEALTHY
         if not af_client.is_alive():

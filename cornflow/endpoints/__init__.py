@@ -42,7 +42,7 @@ from .roles import (
     UserRoleListEndpoint,
     UserRoleDetailEndpoint,
 )
-from .schemas import SchemaEndpoint
+from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
 
@@ -98,7 +98,12 @@ resources = [
     ),
     dict(resource=LoginEndpoint, urls="/login/", endpoint="login"),
     dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
-    dict(resource=SchemaEndpoint, urls="/schema/<string:dag_name>/", endpoint="schema"),
+    dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),
+    dict(
+        resource=SchemaDetailsEndpoint,
+        urls="/schema/<string:dag_name>/",
+        endpoint="schema-details",
+    ),
     dict(resource=HealthEndpoint, urls="/health/", endpoint="health"),
     dict(
         resource=CaseFromInstanceExecutionEndpoint,
