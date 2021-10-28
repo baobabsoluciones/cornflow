@@ -32,6 +32,8 @@ AIRFLOW_USER_EMAIL = os.getenv("AIRFLOW_USER_EMAIL", "admin@example.com")
 CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com")
 CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "servicecornflow1234")
 AIRFLOW_LDAP_ENABLE = os.getenv("AIRFLOW_LDAP_ENABLE", "False")
+CUSTOM_SSH_HOST = os.getenv("CUSTOM_SSH_HOST")
+
 # update os environ
 os.environ["AIRFLOW_HOME"] = AIRFLOW_HOME
 os.environ["AIRFLOW__CORE__EXECUTOR"] = AIRFLOW__CORE__EXECUTOR
@@ -40,7 +42,7 @@ os.environ[
     "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION"
 ] = AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
 os.environ["AIRFLOW__API__AUTH_BACKEND"] = AIRFLOW__API__AUTH_BACKEND
-os.environ["AIRFLOW__CORE__FERNET_KEY"] = AIRFLOW__CORE__FERNET_KEY
+os.environ["AIRFLOW_CORE__FERNET_KEY"] = AIRFLOW__CORE__FERNET_KEY
 os.environ["AIRFLOW_USER"] = AIRFLOW_USER
 os.environ["AIRFLOW_FIRSTNAME"] = AIRFLOW_FIRSTNAME
 os.environ["AIRFLOW_LASTNAME"] = AIRFLOW_LASTNAME
@@ -50,6 +52,17 @@ os.environ["AIRFLOW_USER_EMAIL"] = AIRFLOW_USER_EMAIL
 os.environ["CORNFLOW_SERVICE_USER"] = CORNFLOW_SERVICE_USER
 os.environ["CORNFLOW_SERVICE_PWD"] = CORNFLOW_SERVICE_PWD
 os.environ["AIRFLOW_LDAP_ENABLE"] = AIRFLOW_LDAP_ENABLE
+
+# Add ssh key for install packages
+if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not None :
+    ADD_KEY = "chmod 0600 /usr/local/airflow/.ssh/id_rsa && ssh-add /usr/local/airflow/.ssh/id_rsa"
+    ADD_HOST = "ssh-keyscan "+CUSTOM_SSH_HOST+" >> /usr/local/airflow/.ssh/known_hosts"
+    CONFIG_SSH_HOST = "echo Host "+CUSTOM_SSH_HOST+" > /usr/local/airflow/.ssh/config"
+    CONFIG_SSH_KEY = "echo \"    IdentityFile /usr/local/airflow/.ssh/id_rsa\" >> /usr/local/airflow/.ssh/config"
+    os.system(ADD_KEY)
+    os.system(ADD_HOST)
+    os.system(CONFIG_SSH_HOST)
+    os.system(CONFIG_SSH_KEY)
 
 # Install custom python package if requirements.txt is present
 if os.path.isfile("/requirements.txt"):
@@ -245,4 +258,5 @@ def airflowsvc(afsvc):
 
 
 if __name__ == "__main__":
-    airflowsvc(sys.argv[1])
+    #airflowsvc(sys.argv[1])
+    time.sleep(600)

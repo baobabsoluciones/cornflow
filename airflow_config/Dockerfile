@@ -46,6 +46,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         sasl2-bin \
         slapd \
         sqlite3 \
+        ssh \
         unixodbc \
         wget
 
@@ -59,6 +60,9 @@ RUN pip install cmake
 COPY scripts/init_airflow_service.py ${AIRFLOW_HOME}/init_airflow_service.py
 COPY scripts ${AIRFLOW_HOME}/scripts
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
+
+# create folder for custom ssh keys
+RUN mkdir ${AIRFLOW_USER_HOME}/.ssh
 
 # execute installation solvers script
 RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
