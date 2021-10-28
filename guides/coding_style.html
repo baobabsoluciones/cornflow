@@ -15,7 +15,9 @@
         <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Write a json-schema" href="jsonschema.html" />
+    <link rel="prev" title="How to deploy a new solution method (2.0)" href="deploy_solver_new.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,9 +38,24 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="index.html">User guides and how-to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="deploy_solver_new.html">Deploy a new solution method</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Solution method coding style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#commenting-out-code">Commenting out code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#argument-type-checking">Argument type checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#indentation">Indentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-repetition">No repetition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filtering-lists-or-dictionaries">Filtering lists or dictionaries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
@@ -60,6 +77,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">User guides and how-to</a> &raquo;</li>
       <li>Coding style and rules</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/guides/coding_style.rst.txt" rel="nofollow"> View page source</a>
@@ -202,13 +220,7 @@
 </dd>
 </dl>
 <p># continue with the for-loop as it were an else clause.
-distance = self.instance.get_distance_between(</p>
-<blockquote>
-<div><blockquote>
-<div><p>previous_stop, current_stop</p>
-</div></blockquote>
-<p>)</p>
-</div></blockquote>
+distance = self.instance.get_distance_between(previous_stop, current_stop)</p>
 </div></blockquote>
 <p>On top of that, if you have all this indentation and long for loops you can just create a function called <cite>_get_route_cost(stop)</cite> and use it inside the function. Something like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_get_route_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">):</span>
@@ -294,7 +306,10 @@ distance = self.instance.get_distance_between(</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deploy_solver_new.html" class="btn btn-neutral float-left" title="How to deploy a new solution method (2.0)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jsonschema.html" class="btn btn-neutral float-right" title="Write a json-schema" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
