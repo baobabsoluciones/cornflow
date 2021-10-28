@@ -236,6 +236,18 @@ An instance of a TSP is a simple graph with positive weights in each arc. We wil
 
 We are using ``n1`` and ``n2`` to call each the first and second node of each arc. We use ``w`` to call the weight of the arc.
 
+An example input dataset that follows this schema is the following::
+
+    {
+        "arcs": [
+            {"n1": 0, "n2": 0, "w": 0},
+            {"n1": 0, "n2": 1, "w": 633},
+            {"n1": 0, "n2": 2, "w": 257},
+            {"n1": 0, "n2": 3, "w": 91},
+            {"n1": 0, "n2": 4, "w": 412}
+        ]
+    }
+
 Solution schema
 ****************************
 
@@ -264,29 +276,19 @@ A solution to a TSP, is the sequence in which nodes should be visited. We *could
 
 ``node`` represents each node in the sequence. ``pos`` represents the position of each node in the sequence.
 
-An alternative, still valid, schema would be::
+An example output dataset that follows this schema is the following::
+
 
     {
-        "$schema": "http://json-schema.org/schema#",
-        "type": "object",
-        "properties": {
-            "route": {
-                "description": "Order of nodes in each route",
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "node": {"type": "integer"},
-                    },
-                    "required": ["node"]
-                }
-            }
-        },
-        "required": ["route"]
+        "route": [
+            {"pos": 0,"node": 0},
+            {"pos": 1,"node": 4},
+            {"pos": 2,"node": 2},
+            {"pos": 3,"node": 3},
+            {"pos": 4,"node": 1}
+        ]
     }
 
-
-Here we assume the array is sorted and so we do not need the position of the node explicitly.
 
 
 Configuration schema
@@ -342,3 +344,9 @@ An example code to do just that is available in the following https://github.com
 
     if __name__ == "__main__":
         generate_schema()
+
+Json-schema validations
+------------------------------
+
+The json-schema are validated through their parent classes (:py:class:`~cornflow_client.core.instance.InstanceCore`, :py:class:`~cornflow_client.core.instance.SolutionCore`, :py:class:`~cornflow_client.core.instance.ApplicationCore`). This is usually done before solving a problem (e.g., see :py:func:`~cornflow_client.core.instance.ApplicationCore.solve`). In any case, the app user can choose to take advantage of the schema to validate the input or output at any point in time by using :py:func:`~cornflow_client.core.instance.InstanceCore.check_schema` or :py:func:`~cornflow_client.core.instance.SolutionCore.check_schema`.
+
