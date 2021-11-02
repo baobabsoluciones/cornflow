@@ -12,9 +12,9 @@ import time
 # Get env config
 AIRFLOW_HOME = os.getenv("AIRFLOW_HOME", "/usr/local/airflow")
 if os.getenv("EXECUTOR") is None:
-    AIRFLOW__CORE__EXECUTOR = "SecuentialExecutor"
+    AIRFLOW__CORE__EXECUTOR = "Secuential"
 else:
-    AIRFLOW__CORE__EXECUTOR = os.getenv("EXECUTOR") + "Executor"
+    AIRFLOW__CORE__EXECUTOR = os.getenv("EXECUTOR")
 AIRFLOW__CORE__LOAD_EXAMPLES = os.getenv("AIRFLOW__CORE__LOAD_EXAMPLES", "0")
 AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION = os.getenv(
     "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"
@@ -36,7 +36,7 @@ CUSTOM_SSH_HOST = os.getenv("CUSTOM_SSH_HOST")
 
 # update os environ
 os.environ["AIRFLOW_HOME"] = AIRFLOW_HOME
-os.environ["AIRFLOW__CORE__EXECUTOR"] = AIRFLOW__CORE__EXECUTOR
+os.environ["AIRFLOW__CORE__EXECUTOR"] = f"{AIRFLOW__CORE__EXECUTOR}Executor"
 os.environ["AIRFLOW__CORE__LOAD_EXAMPLES"] = AIRFLOW__CORE__LOAD_EXAMPLES
 os.environ[
     "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION"
@@ -56,12 +56,8 @@ os.environ["AIRFLOW_LDAP_ENABLE"] = AIRFLOW_LDAP_ENABLE
 # Add ssh key for install packages
 if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not None:
     ADD_KEY = "chmod 0600 /usr/local/airflow/.ssh/id_rsa && ssh-add /usr/local/airflow/.ssh/id_rsa"
-    ADD_HOST = (
-        "ssh-keyscan " + CUSTOM_SSH_HOST + " >> /usr/local/airflow/.ssh/known_hosts"
-    )
-    CONFIG_SSH_HOST = (
-        "echo Host " + CUSTOM_SSH_HOST + " > /usr/local/airflow/.ssh/config"
-    )
+    ADD_HOST = f"ssh-keyscan {CUSTOM_SSH_HOST} >> /usr/local/airflow/.ssh/known_hosts"
+    CONFIG_SSH_HOST = f"echo Host {CUSTOM_SSH_HOST} > /usr/local/airflow/.ssh/config"
     CONFIG_SSH_KEY = 'echo "    IdentityFile /usr/local/airflow/.ssh/id_rsa" >> /usr/local/airflow/.ssh/config'
     os.system(ADD_KEY)
     os.system(ADD_HOST)
@@ -81,46 +77,16 @@ if os.getenv("AIRFLOW__CORE__SQL_ALCHEMY_CONN") is None:
     AIRFLOW_DB_PWD = os.getenv("AIRFLOW_DB_PWD", "airflow")
     AIRFLOW_DB = os.getenv("AIRFLOW_DB", "airflow")
 
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN = (
-        "postgresql+psycopg2://"
-        + AIRFLOW_DB_USER
-        + ":"
-        + AIRFLOW_DB_PWD
-        + "@"
-        + AIRFLOW_DB_HOST
-        + ":"
-        + AIRFLOW_DB_PORT
-        + "/"
-        + AIRFLOW_DB
-    )
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN = f"postgresql+psycopg2://{AIRFLOW_DB_USER}:{AIRFLOW_DB_PWD}@{AIRFLOW_DB_HOST}:{AIRFLOW_DB_PORT}/{AIRFLOW_DB}"
     os.environ["AIRFLOW__CORE__SQL_ALCHEMY_CONN"] = AIRFLOW__CORE__SQL_ALCHEMY_CONN
 
     # Check if the user has provided explicit Airflow configuration for the broker's connection to the database
-    if AIRFLOW__CORE__EXECUTOR == "CeleryExecutor":
-        AIRFLOW__CELERY__RESULT_BACKEND = (
-            "db+postgresql://"
-            + AIRFLOW_DB_USER
-            + ":"
-            + AIRFLOW_DB_PWD
-            + "@"
-            + AIRFLOW_DB_HOST
-            + ":"
-            + AIRFLOW_DB_PORT
-            + "/"
-            + AIRFLOW_DB
-        )
+    if os.getenv("AIRFLOW__CORE__EXECUTOR") == "CeleryExecutor":
+        AIRFLOW__CELERY__RESULT_BACKEND = f"db+postgresql://{AIRFLOW_DB_USER}:{AIRFLOW_DB_PWD}@{AIRFLOW_DB_HOST}:{AIRFLOW_DB_PORT}/{AIRFLOW_DB}"
         os.environ["AIRFLOW__CELERY__RESULT_BACKEND"] = AIRFLOW__CELERY__RESULT_BACKEND
-    else:
-        if (
-            AIRFLOW__CORE__EXECUTOR == "CeleryExecutor"
-            and os.getenv("AIRFLOW__CELERY__RESULT_BACKEND") is not None
-        ):
-            sys.exit(
-                "FATAL: if you set AIRFLOW__CORE__SQL_ALCHEMY_CONN manually with CeleryExecutor you must also set AIRFLOW__CELERY__RESULT_BACKEND"
-            )
 
 # CeleryExecutor drives the need for a Celery broker, here Redis is used
-if AIRFLOW__CORE__EXECUTOR == "CeleryExecutor":
+if os.getenv("AIRFLOW__CORE__EXECUTOR") == "CeleryExecutor":
     # Check if the user has provided explicit Airflow configuration concerning the broker
     if os.getenv("AIRFLOW__CELERY__BROKER_URL") is None:
         # Default values corresponding to the default compose files
@@ -132,12 +98,12 @@ if AIRFLOW__CORE__EXECUTOR == "CeleryExecutor":
 
     # When Redis is secured by basic auth, it does not handle the username part of basic auth, only a token
     if REDIS_PASSWORD is not None:
-        REDIS_PREFIX = ":" + REDIS_PASSWORD + "@"
+        REDIS_PREFIX = f":{REDIS_PASSWORD}@"
     else:
         REDIS_PREFIX = None
 
     AIRFLOW__CELERY__BROKER_URL = (
-        REDIS_PROTO + REDIS_PREFIX + REDIS_HOST + ":" + REDIS_PORT + "/" + REDIS_DBNUM
+        f"{REDIS_PROTO}{REDIS_PREFIX}{REDIS_HOST}:{REDIS_PORT}/{REDIS_DBNUM}"
     )
     os.environ["AIRFLOW__CELERY__BROKER_URL"] = AIRFLOW__CELERY__BROKER_URL
 
@@ -149,16 +115,7 @@ if os.getenv("AIRFLOW_CONN_CF_URI") is None:
     os.environ["CORNFLOW_HOST"] = CORNFLOW_HOST
     os.environ["CORNFLOW_PORT"] = CORNFLOW_PORT
     # Make the uri connection to get back response from airflow
-    AIRFLOW_CONN_CF_URI = (
-        "cornflow://"
-        + CORNFLOW_SERVICE_USER
-        + ":"
-        + CORNFLOW_SERVICE_PWD
-        + "@"
-        + CORNFLOW_HOST
-        + ":"
-        + CORNFLOW_PORT
-    )
+    AIRFLOW_CONN_CF_URI = f"cornflow://{CORNFLOW_SERVICE_USER}:{CORNFLOW_SERVICE_PWD}@{CORNFLOW_HOST}:{CORNFLOW_PORT}"
     os.environ["AIRFLOW_CONN_CF_URI"] = AIRFLOW_CONN_CF_URI
 
 # Check LDAP parameters for active directory
@@ -189,7 +146,7 @@ if os.getenv("AIRFLOW_LDAP_ENABLE") == "True":
     AIRFLOW_LDAP_TLS_CA_CERTIFICATE = os.getenv("AIRFLOW_LDAP_TLS_CA_CERTIFICATE")
     # Rename webserver config file for using LDAP
     os.rename(
-        AIRFLOW_HOME + "/webserver_ldap.py", AIRFLOW_HOME + "/webserver_config.py"
+        f"{AIRFLOW_HOME}/webserver_ldap.py", f"{AIRFLOW_HOME}/webserver_config.py"
     )
     # Update LDAP env values
     os.environ["AIRFLOW_LDAP_URI"] = AIRFLOW_LDAP_URI
@@ -215,48 +172,24 @@ def airflowsvc(afsvc):
         # Create user only if using AUTH_DB
         if os.getenv("AIRFLOW_LDAP_ENABLE") != "True":
             os.system(
-                "airflow users create \
-              --username "
-                + AIRFLOW_USER
-                + " \
-              --firstname "
-                + AIRFLOW_FIRSTNAME
-                + " \
-              --lastname "
-                + AIRFLOW_LASTNAME
-                + " \
-              --role "
-                + AIRFLOW_ROLE
-                + " \
-              --password "
-                + AIRFLOW_PWD
-                + " \
-              --email "
-                + AIRFLOW_USER_EMAIL
+                f"airflow users create --username {AIRFLOW_USER} --firstname {AIRFLOW_FIRSTNAME} --lastname {AIRFLOW_LASTNAME} --role {AIRFLOW_ROLE} --password {AIRFLOW_PWD} --email {AIRFLOW_USER_EMAIL}"
             )
         if (
-            AIRFLOW__CORE__EXECUTOR == "LocalExecutor"
-            or AIRFLOW__CORE__EXECUTOR == "SequentialExecutor"
+            os.getenv("AIRFLOW__CORE__EXECUTOR") == "LocalExecutor"
+            or os.getenv("AIRFLOW__CORE__EXECUTOR") == "SequentialExecutor"
         ):
             # With the "Local" and "Sequential" executors it should all run in one container.
             os.system["airflow scheduler &"]
         os.system("airflow webserver")
     if afsvc == "worker":
         time.sleep(10)
-        os.system("airflow celery " + afsvc)
+        os.system(f"airflow celery {afsvc}")
     if afsvc == "scheduler":
         time.sleep(10)
-        os.system("airflow " + afsvc)
+        os.system(f"airflow {afsvc}")
     if afsvc == "flower":
         time.sleep(10)
-        os.system(
-            "airflow celery "
-            + afsvc
-            + " --basic-auth="
-            + AIRFLOW_USER
-            + ":"
-            + AIRFLOW_PWD
-        )
+        os.system(f"airflow celery {afsvc} --basic-auth={AIRFLOW_USER}:{AIRFLOW_PWD}")
     else:
         os.system("airflow version")
 

@@ -33,19 +33,7 @@ CORNFLOW_DB_PORT = os.getenv("CORNFLOW_DB_PORT", "5432")
 CORNFLOW_DB_USER = os.getenv("CORNFLOW_DB_USER", "cornflow")
 CORNFLOW_DB_PASSWORD = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
 CORNFLOW_DB = os.getenv("CORNFLOW_DB", "cornflow")
-CORNFLOW_DB_CONN = os.getenv(
-    "CORNFLOW_DB_CONN",
-    "postgres://"
-    + CORNFLOW_DB_USER
-    + ":"
-    + CORNFLOW_DB_PASSWORD
-    + "@"
-    + CORNFLOW_DB_HOST
-    + ":"
-    + CORNFLOW_DB_PORT
-    + "/"
-    + CORNFLOW_DB,
-)
+CORNFLOW_DB_CONN = os.getenv("CORNFLOW_DB_CONN",f"postgres://{CORNFLOW_DB_USER}:{CORNFLOW_DB_PASSWORD}@{CORNFLOW_DB_HOST}:{CORNFLOW_DB_PORT}/{CORNFLOW_DB}")
 os.environ["DATABASE_URL"] = CORNFLOW_DB_CONN
 
 # Platform auth config and service users
@@ -85,7 +73,7 @@ if CORNFLOW_LOGGING == "file":
          kill -HUP \$(cat /usr/src/app/gunicorn.pid)\n \
         endscript}"
         logrotate = subprocess.run(
-            "cat > /etc/logrotate.d/cornflow <<EOF\n" + conf + "\nEOF", shell=True
+            f"cat > /etc/logrotate.d/cornflow <<EOF\n {conf} \nEOF", shell=True
         )
         out_logrotate = logrotate.stdout
         print(out_logrotate)

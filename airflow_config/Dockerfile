@@ -57,27 +57,23 @@ RUN pip install GitPython
 RUN pip install cmake
 
 # copy init script and config to container
-COPY scripts/init_airflow_service.py ${AIRFLOW_HOME}/init_airflow_service.py
 COPY scripts ${AIRFLOW_HOME}/scripts
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 # create folder for custom ssh keys
-RUN mkdir ${AIRFLOW_USER_HOME}/.ssh
+RUN mkdir ${AIRFLOW_HOME}/.ssh
+
+# user airflow on application
+RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow
+RUN chown -R airflow: ${AIRFLOW_HOME}
 
 # execute installation solvers script
 RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
 
-# user airflow on application
-RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
-RUN chown -R airflow: /usr/local/airflow
-RUN chown airflow: /usr/local/bin/mps_mipcl 
-RUN chown airflow: /usr/local/bin/choco.jar
-RUN chown airflow: /usr/local/bin/highs
-
 EXPOSE 8080 5555 8793
 
 USER airflow
-WORKDIR ${AIRFLOW_USER_HOME}
+WORKDIR ${AIRFLOW_HOME}
 
-ENTRYPOINT ["python", "init_airflow_service.py"]
+ENTRYPOINT ["python", "scripts/init_airflow_service.py"]
 CMD ["webserver"]
