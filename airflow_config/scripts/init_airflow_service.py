@@ -1,6 +1,7 @@
 # Airflow init script for Dockerfile ENTRYPOINT
 from logging import error
 import os
+import subprocess
 import sys
 from cryptography.fernet import Fernet
 import time
@@ -161,7 +162,7 @@ def airflowsvc(afsvc):
             or os.getenv("AIRFLOW__CORE__EXECUTOR") == "SequentialExecutor"
         ):
             # With the "Local" and "Sequential" executors it should all run in one container.
-            os.system["airflow scheduler &"]
+            subprocess.run("airflow scheduler &", shell=True)
         os.system("airflow webserver")
     if afsvc == "worker":
         time.sleep(10)
