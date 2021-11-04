@@ -19,7 +19,7 @@ global_env_vars = [
 ("AIRFLOW__CORE__FERNET_KEY", Fernet.generate_key().decode()),
 ("AIRFLOW_USER", "admin"),
 ("AIRFLOW_FIRSTNAME", "admin"),
-("AIRFLOW_LASTNAME", "admin")
+("AIRFLOW_LASTNAME", "admin"),
 ("AIRFLOW_ROLE", "Admin"),
 ("AIRFLOW_PWD", "admin"),
 ("AIRFLOW_USER_EMAIL", "admin@example.com"),
