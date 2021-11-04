@@ -10,50 +10,45 @@ import time
 ###################################
 # Airflow global default
 # Get env config
-AIRFLOW_HOME = os.getenv("AIRFLOW_HOME", "/usr/local/airflow")
-if os.getenv("EXECUTOR") is None:
-    AIRFLOW__CORE__EXECUTOR = "Secuential"
-else:
-    AIRFLOW__CORE__EXECUTOR = os.getenv("EXECUTOR")
-AIRFLOW__CORE__LOAD_EXAMPLES = os.getenv("AIRFLOW__CORE__LOAD_EXAMPLES", "0")
-AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION = os.getenv(
-    "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"
-)
-AIRFLOW__API__AUTH_BACKEND = os.getenv(
-    "AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"
-)
-AIRFLOW__CORE__FERNET_KEY = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
-AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
-AIRFLOW_FIRSTNAME = os.getenv("AIRFLOW_FIRSTNAME", "admin")
-AIRFLOW_LASTNAME = os.getenv("AIRFLOW_LASTNAME", "admin")
-AIRFLOW_ROLE = os.getenv("AIRFLOW_ROLE", "Admin")
-AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
-AIRFLOW_USER_EMAIL = os.getenv("AIRFLOW_USER_EMAIL", "admin@example.com")
-CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com")
-CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "servicecornflow1234")
-AIRFLOW_LDAP_ENABLE = os.getenv("AIRFLOW_LDAP_ENABLE", "False")
-CUSTOM_SSH_HOST = os.getenv("CUSTOM_SSH_HOST")
+global_env_vars = [
+("AIRFLOW_HOME", "/usr/local/airflow"), 
+("EXECUTOR", "Secuential"), 
+("AIRFLOW__CORE__LOAD_EXAMPLES", "0"),
+("AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"),
+("AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"),
+("AIRFLOW__CORE__FERNET_KEY", Fernet.generate_key().decode()),
+("AIRFLOW_USER", "admin"),
+("AIRFLOW_FIRSTNAME", "admin"),
+("AIRFLOW_LASTNAME", "admin")
+("AIRFLOW_ROLE", "Admin"),
+("AIRFLOW_PWD", "admin"),
+("AIRFLOW_USER_EMAIL", "admin@example.com"),
+("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com"),
+("CORNFLOW_SERVICE_PWD", "servicecornflow1234"),
+("AIRFLOW_LDAP_ENABLE", "False")
+]
+# update environ set
+for name, default in global_env_vars:
+    os.environ[name] = os.getenv(name, default)
 
-# update os environ
-os.environ["AIRFLOW_HOME"] = AIRFLOW_HOME
+# Set this local var for use later
+AIRFLOW_HOME = os.getenv("AIRFLOW_HOME")
+AIRFLOW_USER = os.getenv("AIRFLOW_USER")
+AIRFLOW_FIRSTNAME = os.getenv("AIRFLOW_FIRSTNAME")
+AIRFLOW_LASTNAME = os.getenv("AIRFLOW_LASTNAME")
+AIRFLOW_ROLE = os.getenv("AIRFLOW_ROLE")
+AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+AIRFLOW_USER_EMAIL = os.getenv("AIRFLOW_USER_EMAIL")
+CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER")
+CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD")
+AIRFLOW_LDAP_ENABLE = os.getenv("AIRFLOW_LDAP_ENABLE")
+
+# Config execution type for airflow
+AIRFLOW__CORE__EXECUTOR = os.getenv("EXECUTOR")
 os.environ["AIRFLOW__CORE__EXECUTOR"] = f"{AIRFLOW__CORE__EXECUTOR}Executor"
-os.environ["AIRFLOW__CORE__LOAD_EXAMPLES"] = AIRFLOW__CORE__LOAD_EXAMPLES
-os.environ[
-    "AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION"
-] = AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
-os.environ["AIRFLOW__API__AUTH_BACKEND"] = AIRFLOW__API__AUTH_BACKEND
-os.environ["AIRFLOW_CORE__FERNET_KEY"] = AIRFLOW__CORE__FERNET_KEY
-os.environ["AIRFLOW_USER"] = AIRFLOW_USER
-os.environ["AIRFLOW_FIRSTNAME"] = AIRFLOW_FIRSTNAME
-os.environ["AIRFLOW_LASTNAME"] = AIRFLOW_LASTNAME
-os.environ["AIRFLOW_ROLE"] = AIRFLOW_ROLE
-os.environ["AIRFLOW_PWD"] = AIRFLOW_PWD
-os.environ["AIRFLOW_USER_EMAIL"] = AIRFLOW_USER_EMAIL
-os.environ["CORNFLOW_SERVICE_USER"] = CORNFLOW_SERVICE_USER
-os.environ["CORNFLOW_SERVICE_PWD"] = CORNFLOW_SERVICE_PWD
-os.environ["AIRFLOW_LDAP_ENABLE"] = AIRFLOW_LDAP_ENABLE
 
-# Add ssh key for install packages
+# Add ssh key for install packages inside workers
+CUSTOM_SSH_HOST = os.getenv("CUSTOM_SSH_HOST")
 if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not None:
     ADD_KEY = "chmod 0600 /usr/local/airflow/.ssh/id_rsa && ssh-add /usr/local/airflow/.ssh/id_rsa"
     ADD_HOST = f"ssh-keyscan {CUSTOM_SSH_HOST} >> /usr/local/airflow/.ssh/known_hosts"
@@ -120,52 +115,39 @@ if os.getenv("AIRFLOW_CONN_CF_URI") is None:
 
 # Check LDAP parameters for active directory
 if os.getenv("AIRFLOW_LDAP_ENABLE") == "True":
-    # Default values corresponding to the default compose files
-    AIRFLOW_LDAP_URI = os.getenv("AIRFLOW_LDAP_URI", "ldap://openldap:389")
-    AIRFLOW_LDAP_SEARCH = os.getenv("AIRFLOW_LDAP_SEARCH", "ou=users,dc=example,dc=org")
-    AIRFLOW_LDAP_BIND_USER = os.getenv(
-        "AIRFLOW_LDAP_BIND_USER", "cn=admin,dc=example,dc=org"
-    )
-    AIRFLOW_LDAP_UID_FIELD = os.getenv("AIRFLOW_LDAP_UID_FIELD", "cn")
-    AIRFLOW_LDAP_BIND_PASSWORD = os.getenv("AIRFLOW_LDAP_BIND_PASSWORD", "admin")
-    AIRFLOW_LDAP_ROLE_MAPPING_ADMIN = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_ADMIN",
-        "cn=administrators,ou=groups,dc=example,dc=org",
-    )
-    AIRFLOW_LDAP_ROLE_MAPPING_OP = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_OP", "cn=services,ou=groups,dc=example,dc=org"
-    )
-    AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC", "cn=viewers,ou=groups,dc=example,dc=org"
-    )
-    AIRFLOW_LDAP_ROLE_MAPPING_VIEWER = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_VIEWER", "cn=planners,ou=groups,dc=example,dc=org"
-    )
-    AIRFLOW_LDAP_GROUP_FIELD = os.getenv("AIRFLOW_LDAP_GROUP_FIELD", "memberUid")
-    AIRFLOW_LDAP_USE_TLS = os.getenv("AIRFLOW_LDAP_USE_TLS")
-    AIRFLOW_LDAP_TLS_CA_CERTIFICATE = os.getenv("AIRFLOW_LDAP_TLS_CA_CERTIFICATE")
     # Rename webserver config file for using LDAP
     os.rename(
         f"{AIRFLOW_HOME}/webserver_ldap.py", f"{AIRFLOW_HOME}/webserver_config.py"
     )
     # Update LDAP env values
-    os.environ["AIRFLOW_LDAP_URI"] = AIRFLOW_LDAP_URI
-    os.environ["AIRFLOW_LDAP_SEARCH"] = AIRFLOW_LDAP_SEARCH
-    os.environ["AIRFLOW_LDAP_BIND_USER"] = AIRFLOW_LDAP_BIND_USER
-    os.environ["AIRFLOW_LDAP_BIND_PASSWORD"] = AIRFLOW_LDAP_BIND_PASSWORD
-    os.environ["AIRFLOW_LDAP_UID_FIELD"] = AIRFLOW_LDAP_UID_FIELD
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_ADMIN"] = AIRFLOW_LDAP_ROLE_MAPPING_ADMIN
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_OP"] = AIRFLOW_LDAP_ROLE_MAPPING_OP
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC"] = AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_VIEWER"] = AIRFLOW_LDAP_ROLE_MAPPING_VIEWER
-    os.environ["AIRFLOW_LDAP_GROUP_FIELD"] = AIRFLOW_LDAP_GROUP_FIELD
+    os.environ["AIRFLOW_LDAP_URI"] = os.getenv("AIRFLOW_LDAP_URI", "ldap://openldap:389")
+    os.environ["AIRFLOW_LDAP_SEARCH"] = os.getenv("AIRFLOW_LDAP_SEARCH", "ou=users,dc=example,dc=org")
+    os.environ["AIRFLOW_LDAP_BIND_USER"] = os.getenv(
+        "AIRFLOW_LDAP_BIND_USER", "cn=admin,dc=example,dc=org"
+    )
+    os.environ["AIRFLOW_LDAP_BIND_PASSWORD"] = os.getenv("AIRFLOW_LDAP_BIND_PASSWORD", "admin")
+    os.environ["AIRFLOW_LDAP_UID_FIELD"] = os.getenv("AIRFLOW_LDAP_UID_FIELD", "cn")
+    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_ADMIN"] = os.getenv(
+        "AIRFLOW_LDAP_ROLE_MAPPING_ADMIN",
+        "cn=administrators,ou=groups,dc=example,dc=org",
+    )
+    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_OP"] = os.getenv(
+        "AIRFLOW_LDAP_ROLE_MAPPING_OP", "cn=services,ou=groups,dc=example,dc=org"
+    )
+    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC"] = os.getenv(
+        "AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC", "cn=viewers,ou=groups,dc=example,dc=org"
+    )
+    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_VIEWER"] = os.getenv(
+        "AIRFLOW_LDAP_ROLE_MAPPING_VIEWER", "cn=planners,ou=groups,dc=example,dc=org"
+    )
+    os.environ["AIRFLOW_LDAP_GROUP_FIELD"] = os.getenv("AIRFLOW_LDAP_GROUP_FIELD", "memberUid")
     # Special condition for using TLS
-    if AIRFLOW_LDAP_USE_TLS == "True" and AIRFLOW_LDAP_TLS_CA_CERTIFICATE is None:
+    if os.getenv("AIRFLOW_LDAP_USE_TLS") == "True" and os.getenv("AIRFLOW_LDAP_TLS_CA_CERTIFICATE") is None:
         sys.exit(
             "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
         )
 
-
+# Entrypoint of airflow services depends on command given by arg       
 def airflowsvc(afsvc):
     if afsvc == "webserver":
         os.system("airflow db init")
