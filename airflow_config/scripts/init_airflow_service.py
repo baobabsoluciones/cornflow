@@ -12,21 +12,21 @@ import time
 # Airflow global default
 # Get env config
 global_env_vars = [
-("AIRFLOW_HOME", "/usr/local/airflow"), 
-("EXECUTOR", "Sequential"), 
-("AIRFLOW__CORE__LOAD_EXAMPLES", "0"),
-("AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"),
-("AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"),
-("AIRFLOW__CORE__FERNET_KEY", Fernet.generate_key().decode()),
-("AIRFLOW_USER", "admin"),
-("AIRFLOW_FIRSTNAME", "admin"),
-("AIRFLOW_LASTNAME", "admin"),
-("AIRFLOW_ROLE", "Admin"),
-("AIRFLOW_PWD", "admin"),
-("AIRFLOW_USER_EMAIL", "admin@example.com"),
-("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com"),
-("CORNFLOW_SERVICE_PWD", "servicecornflow1234"),
-("AIRFLOW_LDAP_ENABLE", "False")
+    ("AIRFLOW_HOME", "/usr/local/airflow"),
+    ("EXECUTOR", "Sequential"),
+    ("AIRFLOW__CORE__LOAD_EXAMPLES", "0"),
+    ("AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"),
+    ("AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"),
+    ("AIRFLOW__CORE__FERNET_KEY", Fernet.generate_key().decode()),
+    ("AIRFLOW_USER", "admin"),
+    ("AIRFLOW_FIRSTNAME", "admin"),
+    ("AIRFLOW_LASTNAME", "admin"),
+    ("AIRFLOW_ROLE", "Admin"),
+    ("AIRFLOW_PWD", "admin"),
+    ("AIRFLOW_USER_EMAIL", "admin@example.com"),
+    ("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com"),
+    ("CORNFLOW_SERVICE_PWD", "servicecornflow1234"),
+    ("AIRFLOW_LDAP_ENABLE", "False"),
 ]
 # update environ set
 for name, default in global_env_vars:
@@ -121,34 +121,33 @@ if os.getenv("AIRFLOW_LDAP_ENABLE") == "True":
         f"{AIRFLOW_HOME}/webserver_ldap.py", f"{AIRFLOW_HOME}/webserver_config.py"
     )
     # Update LDAP env values
-    os.environ["AIRFLOW_LDAP_URI"] = os.getenv("AIRFLOW_LDAP_URI", "ldap://openldap:389")
-    os.environ["AIRFLOW_LDAP_SEARCH"] = os.getenv("AIRFLOW_LDAP_SEARCH", "ou=users,dc=example,dc=org")
-    os.environ["AIRFLOW_LDAP_BIND_USER"] = os.getenv(
-        "AIRFLOW_LDAP_BIND_USER", "cn=admin,dc=example,dc=org"
-    )
-    os.environ["AIRFLOW_LDAP_BIND_PASSWORD"] = os.getenv("AIRFLOW_LDAP_BIND_PASSWORD", "admin")
-    os.environ["AIRFLOW_LDAP_UID_FIELD"] = os.getenv("AIRFLOW_LDAP_UID_FIELD", "cn")
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_ADMIN"] = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_ADMIN",
-        "cn=administrators,ou=groups,dc=example,dc=org",
-    )
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_OP"] = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_OP", "cn=services,ou=groups,dc=example,dc=org"
-    )
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC"] = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC", "cn=viewers,ou=groups,dc=example,dc=org"
-    )
-    os.environ["AIRFLOW_LDAP_ROLE_MAPPING_VIEWER"] = os.getenv(
-        "AIRFLOW_LDAP_ROLE_MAPPING_VIEWER", "cn=planners,ou=groups,dc=example,dc=org"
-    )
-    os.environ["AIRFLOW_LDAP_GROUP_FIELD"] = os.getenv("AIRFLOW_LDAP_GROUP_FIELD", "memberUid")
+    ldap_env_vars = [
+        ("AIRFLOW_LDAP_URI", "ldap://openldap:389"),
+        ("AIRFLOW_LDAP_SEARCH", "ou=users,dc=example,dc=org"),
+        ("AIRFLOW_LDAP_BIND_USER", "cn=admin,dc=example,dc=org"),
+        ("AIRFLOW_LDAP_BIND_PASSWORD", "admin"),
+        ("AIRFLOW_LDAP_UID_FIELD", "cn"),
+        (
+            "AIRFLOW_LDAP_ROLE_MAPPING_ADMIN",
+            "cn=administrators,ou=groups,dc=example,dc=org",
+        ),
+        ("AIRFLOW_LDAP_ROLE_MAPPING_OP", "cn=services,ou=groups,dc=example,dc=org"),
+        ("AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC", "cn=viewers,ou=groups,dc=example,dc=org"),
+        ("AIRFLOW_LDAP_ROLE_MAPPING_VIEWER", "cn=planners,ou=groups,dc=example,dc=org"),
+        ("AIRFLOW_LDAP_GROUP_FIELD", "memberUid"),
+    ]
+    for name, default in ldap_env_vars:
+        os.environ[name] = os.getenv(name, default)
     # Special condition for using TLS
-    if os.getenv("AIRFLOW_LDAP_USE_TLS") == "True" and os.getenv("AIRFLOW_LDAP_TLS_CA_CERTIFICATE") is None:
+    if (
+        os.getenv("AIRFLOW_LDAP_USE_TLS") == "True"
+        and os.getenv("AIRFLOW_LDAP_TLS_CA_CERTIFICATE") is None
+    ):
         sys.exit(
             "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
         )
 
-# Entrypoint of airflow services depends on command given by arg       
+# Entrypoint of airflow services depends on command given by arg
 def airflowsvc(afsvc):
     if afsvc == "webserver":
         os.system("airflow db init")
