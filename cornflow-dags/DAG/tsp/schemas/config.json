@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "timeLimit": {"type": "number"},
+        "threads": {"type": "integer"},
+        "seed": {"type": "integer"},
+        "gap": {"type": "number"},
+        "solver": {
+            "type": "string",
+            "enum": ["naive", "aco", "cpsat"],
+            "default": "naive"
+        }
+    }
+}
