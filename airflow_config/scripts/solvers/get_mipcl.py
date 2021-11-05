@@ -2,6 +2,8 @@ from logging import error
 import subprocess
 import git
 import os
+import pwd
+import grp
 
 
 def install():
@@ -20,9 +22,13 @@ def install():
     try:
 
         MIPCL = git.Repo.clone_from("https://github.com/onebitbrain/MIPCL", "MIPCL")
-        os.chdir(MIPCL.working_dir + "/bin")
+        os.chdir(f"{MIPCL.working_dir}/bin")
         subprocess.check_output(["cp", "mps_mipcl", "/usr/local/bin/mps_mipcl"])
         subprocess.check_output(["chmod", "+x", "/usr/local/bin/mps_mipcl"])
+        uid = pwd.getpwnam("airflow").pw_uid
+        gid = grp.getgrnam("root").gr_gid
+        mips_path = "/usr/local/bin/mps_mipcl"
+        os.chown(mips_path, uid, gid)
 
     except (error):
 
