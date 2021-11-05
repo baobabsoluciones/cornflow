@@ -13,7 +13,7 @@ from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
 
 
-def create_app(env_name="development"):
+def create_app(env_name="development",dataconn=None):
     """
 
     :param str env_name: 'testing' or 'development' or 'production'
@@ -23,6 +23,9 @@ def create_app(env_name="development"):
 
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
+    # initialization for init_cornflow_service.py
+    if dataconn is not None:
+        app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
     CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)

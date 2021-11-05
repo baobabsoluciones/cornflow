@@ -63,3 +63,15 @@ Before deploying Cornflow, set the required airflow environment variables. For e
 Then execute this::
 
     docker-compose -f docker-compose-cornflow-separate.yml --env-file .env.airflow up -d
+
+Using custom ssh keys
+******************************
+
+If you want to install packages that require a secure connection to a server, you can install your own private key file in the airflow service. To do this, you must mount a volume from its key file to the path ``/usr/local/airflow/.ssh/id_rsa`` ::
+
+    volume:
+        - ./your_ssh_priv_key:/usr/local/airflow/.ssh/id_rsa
+
+When you have included the key file in the airflow service, you must enter the server with which it will be used by means of an environment variable. For instance::
+
+    CUSTOM_SSH_HOST=github.com
