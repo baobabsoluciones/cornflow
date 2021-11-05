@@ -1,5 +1,4 @@
-from .experiment import Experiment
-from .solution import Solution
+from ..core import Experiment, Solution
 
 
 class Algorithm(Experiment):
@@ -12,4 +11,4 @@ class Algorithm(Experiment):
         input = self.instance.data
         solution = dict(routes={route: input["demand"].keys_l()})
         self.solution = Solution(solution)
-        return 2
+        return dict(status=2)

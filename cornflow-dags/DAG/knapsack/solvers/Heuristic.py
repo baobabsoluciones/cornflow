@@ -1,5 +1,5 @@
-from .core import Solution
-from .core import Experiment
+from ..core import Solution
+from ..core import Experiment
 import numpy as np
 
 

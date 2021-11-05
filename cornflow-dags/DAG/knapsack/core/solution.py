@@ -1,17 +1,13 @@
-import pytups as pt
-import json
+import pickle
+from ..schemas import solution_schema
+from cornflow_client import SolutionCore
 
 
-class Solution:
-    def __init__(self, data):
-        self.data = pt.SuperDict.from_dict(data)
-
-    def to_dict(self):
-        return dict(self.data)
-
-    def to_json(self, path):
-        with open(path, "w") as f:
-            json.dump(self.to_dict(), f)
+class Solution(SolutionCore):
+    schema = solution_schema
 
     def copy(self):
-        return Solution(json.loads(json.dumps(self.data)))
+        return Solution(pickle.loads(pickle.dumps(self.data, -1)))
+
+    def get_ids(self):
+        return [el["id"] for el in self.data["include"]]

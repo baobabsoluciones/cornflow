@@ -2,26 +2,31 @@
 	"$schema": "http://json-schema.org/schema#",
 	"type": "object",
 	"properties": {
-		"assignment": {
+		"routes": {
+			"description": "Order of nodes in each route",
 			"type": "array",
 			"items": {
 				"type": "object",
 				"properties": {
+					"route": {
+						"type": "integer"
+					},
 					"node": {
 						"type": "integer"
 					},
-					"color": {
+					"pos": {
 						"type": "integer"
 					}
 				},
 				"required": [
-					"color",
+					"route",
+					"pos",
 					"node"
 				]
 			}
 		}
 	},
 	"required": [
-		"assignment"
+		"routes"
 	]
 }

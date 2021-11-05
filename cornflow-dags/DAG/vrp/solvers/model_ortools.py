@@ -1,35 +1,11 @@
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
-
-from .experiment import Experiment
-from .solution import Solution
+from ..core import Experiment, Solution
 
 
 class Algorithm(Experiment):
     def __init__(self, instance, solution=None):
         super().__init__(instance, solution)
         return
-
-    @staticmethod
-    def get_objective_distance(solut, arcs_dict):
-        """
-        Returns value of Objective Function when it is computed using distance
-        :param solut: Solution of the resolution method
-        :param arcs_dict: Dictionary with arc distances
-        :return:
-        """
-
-        distance = 0
-        for i in solut.data["routes"]:
-
-            route = solut.data["routes"][i]
-            route_distance = 0
-
-            for j in range(len(route) - 1):
-                route_distance += arcs_dict[(route[j], route[j + 1])]
-
-            distance += route_distance
-
-        return distance
 
     @staticmethod
     def get_solution_ort(manager, routing, solution, nodes_list):
@@ -167,4 +143,4 @@ class Algorithm(Experiment):
         if solution:
             self.solution = self.get_solution_ort(manager, routing, solution, nodes)
 
-        return 2
+        return dict(status=2)

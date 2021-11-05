@@ -1,43 +1,37 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 import time
-from datetime import datetime, timedelta
 from cornflow_client import get_empty_schema
+from cornflow_client import ApplicationCore, InstanceCore, SolutionCore, ExperimentCore
+from cornflow_client.constants import SOLUTION_STATUS_FEASIBLE, STATUS_OPTIMAL
 
 
-# Following are defaults which can be overridden later on
-name = "timer"
-default_args = {
-    "owner": "baobab",
-    "depends_on_past": False,
-    "start_date": datetime(2020, 2, 1),
-    "email": [""],
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retry_delay": timedelta(minutes=1),
-    "schedule_interval": None,
-}
-dag = DAG(name, default_args=default_args, schedule_interval=None)
+class Instance(InstanceCore):
+    schema = get_empty_schema()
 
 
-def solve(**kwargs):
-    config = kwargs["dag_run"].conf
-    seconds = config.get("seconds", 60)
-    seconds = config.get("timeLimit", seconds)
-
-    print("sleep started for {} seconds".format(seconds))
-    time.sleep(seconds)
-    print("sleep finished")
-    return "True"
+class Solution(SolutionCore):
+    schema = get_empty_schema()
 
 
-config = solution = get_empty_schema()
-instance = get_empty_schema()
+class Solver(ExperimentCore):
+    def solve(self, options):
+        seconds = options.get("seconds", 60)
+        seconds = options.get("timeLimit", seconds)
+
+        print("sleep started for {} seconds".format(seconds))
+        time.sleep(seconds)
+        print("sleep finished")
+        self.solution = Solution({})
+        return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
 
 
-solve_task = PythonOperator(
-    task_id=name,
-    provide_context=True,
-    python_callable=solve,
-    dag=dag,
-)
+class Timer(ApplicationCore):
+    name = "timer"
+    schema = get_empty_schema(
+        dict(seconds=dict(type="number"), timeLimit=dict(type="number"))
+    )
+    instance = Instance
+    solution = Solution
+    solvers = [dict(default=Solver)]
+
+    def test_cases(self):
+        return []

@@ -1,10 +1,13 @@
-from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
+from airflow import DAG
+from airflow.utils.db import create_session
 
 from datetime import datetime, timedelta
 import importlib as il
-import os
+import os, sys
+from cornflow_client import ApplicationCore
+from typing import List, Dict
 
 
 default_args = {
@@ -23,29 +26,34 @@ default_args = {
 schemas = ["instance", "solution", "config"]
 
 
-def get_all_apps():
+def get_new_apps() -> List[ApplicationCore]:
+    # we need to run this to be sure to import modules
+    import_dags()
+    new_apps = ApplicationCore.__subclasses__()
+    return [app_class() for app_class in new_apps]
+
+
+def import_dags():
+    sys.path.append(os.path.dirname(__file__))
     _dir = os.path.dirname(__file__)
     print("looking for apps in dir={}".format(_dir))
-    print("Files are: {}".format(os.listdir(_dir)))
     files = os.listdir(_dir)
-    return [_import_file(os.path.splitext(f)[0]) for f in files if is_app(f)]
+    print("Files are: {}".format(files))
+    # we go file by file and try to import it if matches the filters
+    for dag_module in files:
+        filename, ext = os.path.splitext(dag_module)
+        if ext not in [".py", ""]:
+            continue
+        if filename in ["activate_apps"]:
+            continue
+        try:
+            _import_file(filename)
+        except Exception as e:
+            continue
 
 
 def _import_file(filename):
     return il.import_module(filename)
-
-
-def is_app(dag_module):
-    filename, ext = os.path.splitext(dag_module)
-    if ext not in [".py", ""]:
-        return False
-    try:
-        _module = _import_file(filename)
-        _module.name
-        _module.instance
-        return True
-    except Exception as e:
-        return False
 
 
 def get_schemas_dag_file(_module):
@@ -54,21 +62,28 @@ def get_schemas_dag_file(_module):
 
 
 def get_all_schemas():
-    apps = get_all_apps()
+    apps = get_new_apps()
     if len(apps):
         print("Found the following apps: {}".format([app.name for app in apps]))
     else:
         print("No apps were found to update")
-    schemas = [
-        (dag_module.name, get_schemas_dag_file(dag_module)) for dag_module in apps
-    ]
-    return schemas
+    schemas_new = {app.name: app.get_schemas() for app in apps}
+    print("Found the following new apps: {}".format([app.name for app in apps]))
+    return schemas_new
 
 
 def update_schemas(**kwargs):
     schemas = get_all_schemas()
-    for key, value in schemas:
+    # we update all schemas that we found:
+    for key, value in schemas.items():
         Variable.set(key=key, value=value, serialize_json=True)
+    # now we clean the variables that do not exist anymore:
+    with create_session() as session:
+        current_vars = set(var.key for var in session.query(Variable))
+        apps_to_delete = current_vars - schemas.keys()
+        print("About to delete old apps: {}".format(apps_to_delete))
+        for _var in apps_to_delete:
+            Variable.delete(_var, session)
 
 
 dag = DAG("update_all_schemas", default_args=default_args, catchup=False)

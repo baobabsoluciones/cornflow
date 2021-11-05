@@ -1,5 +1,4 @@
-from .experiment import Experiment
-from .solution import Solution
+from ..core import Experiment, Solution
 
 
 class Algorithm(Experiment):
@@ -52,4 +51,4 @@ class Algorithm(Experiment):
         # we close the last route:
         solution[route].append(depot)
         self.solution = Solution(dict(routes=solution))
-        return 2
+        return dict(status=2)

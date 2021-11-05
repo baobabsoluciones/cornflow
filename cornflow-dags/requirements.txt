@@ -6,4 +6,8 @@ hackathonbaobab2020[solvers] @ git+https://github.com/baobabsoluciones/hackathon
 marshmallow
 pytups
 ortools
-apache-airflow>=2.0.1
+xmltodict
+openpyxl
+pyomo
+acopy
+tsplib95

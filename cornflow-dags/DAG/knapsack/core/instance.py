@@ -1,10 +1,10 @@
-import pytups as pt
 import numpy as np
+from ..schemas import instance_schema
+from cornflow_client import InstanceCore
 
 
-class Instance(object):
-    def __init__(self, data):
-        self.data = pt.SuperDict.from_dict(data)
+class Instance(InstanceCore):
+    schema = instance_schema
 
     @classmethod
     def from_file(cls, path):
@@ -22,16 +22,12 @@ class Instance(object):
             values.append(int(line.replace("\n", "").split(" ")[0]))
             weights.append(int(line.replace("\n", "").split(" ")[1]))
 
-        values = np.array(values)
-        weights = np.array(weights)
-
         data = dict(
             values=values,
             weights=weights,
             weight_capacity=weight_capacity,
             nb_objects=nb_objects,
         )
-
         return cls(data)
 
     @classmethod
@@ -61,3 +57,21 @@ class Instance(object):
             data_dict["objects"].append(dict(weight=weight, value=value, id=i))
 
         return data_dict
+
+    def get_objects_values(self):
+        return {
+            self.data["ids"][i]: self.data["values"][i]
+            for i in range(self.get_number_objects())
+        }
+
+    def get_objects_weights(self):
+        return {
+            self.data["ids"][i]: self.data["weights"][i]
+            for i in range(self.get_number_objects())
+        }
+
+    def get_weight_capacity(self):
+        return self.data["weight_capacity"]
+
+    def get_number_objects(self):
+        return self.data["nb_objects"]

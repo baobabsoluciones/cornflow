@@ -1,5 +1,5 @@
 from .Heuristic import Heuristic
-from .core.experiment import Experiment
+from ..core import Experiment
 from timeit import default_timer as timer
 import numpy as np
 from random import shuffle
@@ -69,8 +69,8 @@ class RandomHeuristic(Heuristic):
             ]
 
             if (
-                Experiment.cls_objective_function(self.instance, best_res)
-                < self.objective_function()
+                Experiment(self.instance, best_res).get_objective()
+                < self.get_objective()
             ):
                 best_res = self.solution.copy()
 

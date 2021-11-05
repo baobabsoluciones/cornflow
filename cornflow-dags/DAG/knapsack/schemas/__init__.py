@@ -13,7 +13,6 @@ def load_schema(path):
 cwd = os.path.dirname(os.path.realpath(__file__))
 instance_schema = load_schema(os.path.join(cwd, "instance.json"))
 solution_schema = load_schema(os.path.join(cwd, "solution.json"))
-config_schema = load_schema(os.path.join(cwd, "config.json"))
 
 
 def check_schema(schema, data):
@@ -29,7 +28,3 @@ def check_instance(data):
 
 def check_solution(data):
     return check_schema(solution_schema, data)
-
-
-def check_config(data):
-    return check_config(config_schema)
