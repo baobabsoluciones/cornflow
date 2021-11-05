@@ -8,7 +8,7 @@ LABEL maintainer="sistemas@baobabsoluciones"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
-# install dos2unix for initapp.sh
+# install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		gcc \
 		git \
@@ -39,6 +39,6 @@ RUN mkdir -p /usr/src/app/log
 
 EXPOSE 5000
 
-# execute script initapp.sh
+# execute python init script
 ENTRYPOINT [ "python" ]
 CMD ["/usr/src/app/init_cornflow_service.py"]
