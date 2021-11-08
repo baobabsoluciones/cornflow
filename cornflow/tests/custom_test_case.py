@@ -45,8 +45,6 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        # self.profiler = cProfile.Profile()
-        # self.profiler.enable()
         AccessInitialization().run(verbose=0)
         data = {
             "username": "testname",
@@ -135,9 +133,6 @@ class CustomTestCase(TestCase):
         return self.create_user_with_role(PLANNER_ROLE)
 
     def tearDown(self):
-        # self.profiler.disable()
-        # stats = pstats.Stats(self.profiler)
-        # stats.dump_stats("times.prof")
         db.session.remove()
         db.drop_all()
 

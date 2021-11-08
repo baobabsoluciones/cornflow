@@ -22,19 +22,21 @@ class TestUserEndpoint(TestCase):
         self.model = UserModel
 
         self.viewer = dict(
-            username="testviewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="testpassword"
         )
 
         self.planner = dict(
-            username="testname",
+            username="aPlanner",
             email="test@test.com",
             password="testpassword",
             first_name="first_planner",
             last_name="last_planner",
         )
+
         self.planner_2 = dict(
-            username="testname2", email="test2@test.com", password="testpassword2"
+            username="aSecondPlanner", email="test2@test.com", password="testpassword2"
         )
+
         self.admin = dict(
             username="anAdminUser", email="admin@admin.com", password="testpassword"
         )
@@ -44,7 +46,7 @@ class TestUserEndpoint(TestCase):
         )
 
         self.service_user = dict(
-            username="anAdminSuperUser",
+            username="aServiceUser",
             email="service_user@test.com",
             password="tpass_service_user",
         )
@@ -69,6 +71,7 @@ class TestUserEndpoint(TestCase):
         ]
 
         for u_data in self.payloads:
+
             response = self.client.post(
                 SIGNUP_URL,
                 data=json.dumps(u_data),

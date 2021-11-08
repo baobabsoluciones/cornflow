@@ -61,11 +61,11 @@ class TestRolesListEndpoint(CustomTestCase):
                 )
                 self.assertEqual(403, response.status_code)
 
-    # def test_new_role_authorized_user(self):
-    #     for role in self.roles_with_access:
-    #         self.token = self.create_user_with_role(role)
-    #         self.payload["name"] += str(role)
-    #         self.create_new_row(self.url, self.model, self.payload)
+    def test_new_role_authorized_user(self):
+        for role in self.roles_with_access:
+            self.token = self.create_user_with_role(role)
+            self.payload["name"] += str(role)
+            self.create_new_row(self.url, self.model, self.payload)
 
     def test_new_role_not_authorized(self):
         for role in ROLES_MAP:
