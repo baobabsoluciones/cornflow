@@ -1,7 +1,12 @@
 from cornflow.models import InstanceModel
 from cornflow.tests.custom_test_case import CustomTestCase
 import pulp
-from cornflow.tests.const import INSTANCE_FILE_URL
+from cornflow.tests.const import (
+    INSTANCE_FILE_URL,
+    INSTANCE_MPS,
+    INSTANCE_GC_20,
+    INSTANCE_FILE_FAIL,
+)
 
 
 class TestInstances(CustomTestCase):
@@ -28,7 +33,7 @@ class TestInstances(CustomTestCase):
             )
 
     def test_new_instance(self):
-        file = "./cornflow/tests/data/test_mps.mps"
+        file = INSTANCE_MPS
         response = self.create_new_row_file(file)
         self.assertEqual(201, response.status_code)
         row = self.model.query.get(response.json["id"])
@@ -37,16 +42,16 @@ class TestInstances(CustomTestCase):
         self.assertEqual(row.data, payload)
 
     def test_new_instance_fail_ext(self):
-        file = "./cornflow/tests/data/test_mps.mps"
+        file = INSTANCE_MPS
         response = self.create_new_row_file(file, filename="test.json")
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext2(self):
-        file = "./cornflow/tests/data/gc_20_7.json"
+        file = INSTANCE_GC_20
         response = self.create_new_row_file(file)
         self.assertEqual(400, response.status_code)
 
     def test_new_instance_fail_ext3(self):
-        file = "./cornflow/tests/unit/test_instances.py"
+        file = INSTANCE_FILE_FAIL
         response = self.create_new_row_file(file, filename="test.mps")
         self.assertEqual(400, response.status_code)

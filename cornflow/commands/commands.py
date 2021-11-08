@@ -166,17 +166,27 @@ class RegisterActions(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        ActionModel.query.delete()
+
+        actions_registered = [ac.name for ac in ActionModel.get_all_objects()]
+
         db.session.commit()
 
-        actions_list = [
-            ActionModel(id=key, name=value) for key, value in ACTIONS_MAP.items()
+        actions_to_register = [
+            ActionModel(id=key, name=value)
+            for key, value in ACTIONS_MAP.items()
+            if value not in actions_registered
         ]
-        db.session.bulk_save_objects(actions_list)
+
+        if len(actions_to_register) > 0:
+            db.session.bulk_save_objects(actions_to_register)
+
         db.session.commit()
 
         if verbose == 1:
-            print("Actions successfully registered")
+            if len(actions_to_register) > 0:
+                print("Actions registered: ", actions_to_register)
+            else:
+                print("No new actions to be registered")
 
         return True
 
@@ -193,10 +203,11 @@ class RegisterViews(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
-        ApiViewModel.query.delete()
+        views_registered = [view.name for view in ApiViewModel.get_all_objects()]
+
         db.session.commit()
 
-        views_list = [
+        views_to_register = [
             ApiViewModel(
                 {
                     "name": view["endpoint"],
@@ -205,46 +216,20 @@ class RegisterViews(Command):
                 }
             )
             for view in resources
+            if view["endpoint"] not in views_registered
         ]
-        db.session.bulk_save_objects(views_list)
+
+        if len(views_to_register) > 0:
+            db.session.bulk_save_objects(views_to_register)
         db.session.commit()
 
         if verbose == 1:
-            print("Endpoints successfully registered")
+            if len(views_to_register) > 0:
+                print("Endpoints registered: ", views_to_register)
+            else:
+                print("No new endpoints to be registered")
 
         return True
-
-
-class UpdateViews(Command):
-    def get_options(self):
-        return (verbose_option,)
-
-    def run(self, verbose=0):
-        """
-        Method to update the views that are registered on the database
-
-        :param int verbose: verbose of the command
-        :return: a boolean if the execution went right
-        :rtype: bool
-        """
-        views_list = [
-            ApiViewModel(
-                {
-                    "name": view["endpoint"],
-                    "url_rule": view["urls"],
-                    "description": view["resource"].DESCRIPTION,
-                }
-            )
-            for view in resources
-            if ApiViewModel.get_one_by_name(view["endpoint"]) is None
-        ]
-        db.session.bulk_save_objects(views_list)
-        db.session.commit()
-
-        if verbose == 1:
-            print("Views successfully updated")
-
-        return
 
 
 class RegisterRoles(Command):
@@ -259,20 +244,28 @@ class RegisterRoles(Command):
         :return: a boolean if the execution went right
         :rtype: bool
         """
+        roles_registered = [role.name for role in RoleModel.get_all_objects()]
 
-        RoleModel.query.delete()
         db.session.commit()
 
-        role_list = [
-            RoleModel({"id": key, "name": value}) for key, value in ROLES_MAP.items()
+        roles_to_register = [
+            RoleModel({"id": key, "name": value})
+            for key, value in ROLES_MAP.items()
+            if value not in roles_registered
         ]
-        db.session.bulk_save_objects(role_list)
+
+        if len(roles_to_register) > 0:
+            db.session.bulk_save_objects(roles_to_register)
+
         db.session.commit()
 
         if verbose == 1:
-            print("Roles successfully registered")
+            if len(roles_to_register) > 0:
+                print("Roles registered: ", roles_to_register)
+            else:
+                print("No new roles to be registered")
 
-        return
+        return True
 
 
 class RegisterBasePermissions(Command):
@@ -288,47 +281,58 @@ class RegisterBasePermissions(Command):
         :rtype: bool
         """
 
-        PermissionViewRoleModel.query.delete()
+        permissions_registered = [
+            (perm.action_id, perm.api_view_id, perm.role_id)
+            for perm in PermissionViewRoleModel.get_all_objects()
+        ]
+
         db.session.commit()
+        views = {view.name: view.id for view in ApiViewModel.get_all_objects()}
 
         # Create base permissions
-        assign_list = [
+        permissions_to_register = [
             PermissionViewRoleModel(
                 {
                     "role_id": role,
                     "action_id": action,
-                    "api_view_id": ApiViewModel.query.filter_by(name=view["endpoint"])
-                    .first()
-                    .id,
+                    "api_view_id": views[view["endpoint"]],
                 }
             )
             for role, action in BASE_PERMISSION_ASSIGNATION
             for view in resources
             if role in view["resource"].ROLES_WITH_ACCESS
-        ]
-
-        db.session.bulk_save_objects(assign_list)
-        db.session.commit()
-
-        # Create extra permissions
-        assign_list = [
+            and (
+                action,
+                views[view["endpoint"]],
+                role,
+            )
+            not in permissions_registered
+        ] + [
             PermissionViewRoleModel(
                 {
                     "role_id": role,
                     "action_id": action,
-                    "api_view_id": ApiViewModel.query.filter_by(name=endpoint)
-                    .first()
-                    .id,
+                    "api_view_id": views[endpoint],
                 }
             )
             for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
+            if (
+                action,
+                views[endpoint],
+                role,
+            )
+            not in permissions_registered
         ]
 
-        db.session.bulk_save_objects(assign_list)
+        if len(permissions_to_register) > 0:
+            db.session.bulk_save_objects(permissions_to_register)
         db.session.commit()
 
         if verbose == 1:
-            print("Base permissions successfully registered")
+            if len(permissions_to_register) > 0:
+                print("Permissions registered: ", permissions_to_register)
+            else:
+                print("No new permissions to register")
 
         return True
 

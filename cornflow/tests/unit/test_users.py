@@ -177,7 +177,7 @@ class TestUserEndpoint(TestCase):
             },
         )
 
-    def test_get_all_users_superadmin(self):
+    def test_get_all_users_service_user(self):
         # the service role should not be able to get the users
         response = self.get_user(self.service_user)
         self.assertEqual(403, response.status_code)
@@ -235,7 +235,7 @@ class TestUserEndpoint(TestCase):
         response = self.delete_user(self.planner, self.admin)
         self.assertEqual(403, response.status_code)
 
-    def test_admin_deletes_sservice_user(self):
+    def test_admin_deletes_service_user(self):
         response = self.delete_user(self.admin, self.service_user)
         self.assertEqual(403, response.status_code)
 
@@ -245,7 +245,7 @@ class TestUserEndpoint(TestCase):
         response = self.get_user(self.admin, self.planner)
         self.assertEqual(404, response.status_code)
 
-    def test_superadmin_deletes_admin(self):
+    def test_service_user_deletes_admin(self):
         response = self.delete_user(self.service_user, self.admin)
         self.assertEqual(403, response.status_code)
 

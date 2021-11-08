@@ -11,6 +11,9 @@ PREFIX = ""
 INSTANCE_PATH = _get_file("./data/new_instance.json")
 INSTANCES_LIST = [INSTANCE_PATH, _get_file("./data/new_instance_2.json")]
 INSTANCE_URL = PREFIX + "/instance/"
+INSTANCE_MPS = _get_file("./data/test_mps.mps")
+INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
+INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
 EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
@@ -35,7 +38,6 @@ SIGNUP_URL = PREFIX + "/signup/"
 USER_URL = PREFIX + "/user/"
 
 SCHEMA_URL = PREFIX + "/schema/"
-
 
 INSTANCE_FILE_URL = PREFIX + "/instancefile/"
 
