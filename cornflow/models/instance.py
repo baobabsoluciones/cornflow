@@ -45,6 +45,7 @@ class InstanceModel(BaseDataModel):
         lazy=True,
         primaryjoin="and_(InstanceModel.id==ExecutionModel.instance_id, "
         "ExecutionModel.deleted_at==None)",
+        cascade="all,delete",
     )
 
     def __init__(self, data):

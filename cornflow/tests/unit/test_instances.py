@@ -8,9 +8,15 @@ import json
 import zlib
 
 # Import from internal modules
-from cornflow.models import InstanceModel
+from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.shared.utils import hash_json_256
-from cornflow.tests.const import INSTANCE_URL, INSTANCES_LIST, INSTANCE_PATH
+from cornflow.tests.const import (
+    EXECUTION_URL_NORUN,
+    EXECUTION_PATH,
+    INSTANCE_URL,
+    INSTANCES_LIST,
+    INSTANCE_PATH,
+)
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
 
@@ -176,6 +182,20 @@ class TestInstanceModelMethods(CustomTestCase):
         self.model = InstanceModel
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
+
+    def test_execution_cascade_deletion(self):
+        with open(EXECUTION_PATH) as f:
+            payload = json.load(f)
+
+        self.cascade_delete(
+            self.url,
+            self.model,
+            self.payload,
+            EXECUTION_URL_NORUN,
+            ExecutionModel,
+            payload,
+            "instance_id",
+        )
 
     def test_repr_method(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
