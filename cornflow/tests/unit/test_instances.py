@@ -183,7 +183,7 @@ class TestInstanceModelMethods(CustomTestCase):
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
 
-    def test_execution_cascade_deletion(self):
+    def test_execution_delete_cascade(self):
         with open(EXECUTION_PATH) as f:
             payload = json.load(f)
 

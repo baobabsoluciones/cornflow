@@ -394,7 +394,7 @@ class TestRolesModelMethods(CustomTestCase):
         self.model = RoleModel
         self.payload = {"name": "test_role"}
 
-    def test_user_role_cascade_deletion(self):
+    def test_user_role_delete_cascade(self):
         payload = {"user_id": self.user}
         self.token = self.create_user_with_role(ADMIN_ROLE)
         self.cascade_delete(
@@ -407,7 +407,7 @@ class TestRolesModelMethods(CustomTestCase):
             "role_id",
         )
 
-    def test_permission_cascade_deletion(self):
+    def test_permission_delete_cascade(self):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
