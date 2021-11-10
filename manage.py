@@ -23,7 +23,6 @@ manager.add_command("register_base_assignations", RegisterBasePermissions)
 manager.add_command("register_actions", RegisterActions)
 manager.add_command("register_views", RegisterViews)
 manager.add_command("register_roles", RegisterRoles)
-manager.add_command("update_views", UpdateViews)
 
 # Other commands
 manager.add_command("clean_historic_data", CleanHistoricData)

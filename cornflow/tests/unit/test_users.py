@@ -22,19 +22,21 @@ class TestUserEndpoint(TestCase):
         self.model = UserModel
 
         self.viewer = dict(
-            username="testviewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="testpassword"
         )
 
         self.planner = dict(
-            username="testname",
+            username="aPlanner",
             email="test@test.com",
             password="testpassword",
             first_name="first_planner",
             last_name="last_planner",
         )
+
         self.planner_2 = dict(
-            username="testname2", email="test2@test.com", password="testpassword2"
+            username="aSecondPlanner", email="test2@test.com", password="testpassword2"
         )
+
         self.admin = dict(
             username="anAdminUser", email="admin@admin.com", password="testpassword"
         )
@@ -44,7 +46,7 @@ class TestUserEndpoint(TestCase):
         )
 
         self.service_user = dict(
-            username="anAdminSuperUser",
+            username="aServiceUser",
             email="service_user@test.com",
             password="tpass_service_user",
         )
@@ -69,6 +71,7 @@ class TestUserEndpoint(TestCase):
         ]
 
         for u_data in self.payloads:
+
             response = self.client.post(
                 SIGNUP_URL,
                 data=json.dumps(u_data),
@@ -177,7 +180,7 @@ class TestUserEndpoint(TestCase):
             },
         )
 
-    def test_get_all_users_superadmin(self):
+    def test_get_all_users_service_user(self):
         # the service role should not be able to get the users
         response = self.get_user(self.service_user)
         self.assertEqual(403, response.status_code)
@@ -235,7 +238,7 @@ class TestUserEndpoint(TestCase):
         response = self.delete_user(self.planner, self.admin)
         self.assertEqual(403, response.status_code)
 
-    def test_admin_deletes_sservice_user(self):
+    def test_admin_deletes_service_user(self):
         response = self.delete_user(self.admin, self.service_user)
         self.assertEqual(403, response.status_code)
 
@@ -245,7 +248,7 @@ class TestUserEndpoint(TestCase):
         response = self.get_user(self.admin, self.planner)
         self.assertEqual(404, response.status_code)
 
-    def test_superadmin_deletes_admin(self):
+    def test_service_user_deletes_admin(self):
         response = self.delete_user(self.service_user, self.admin)
         self.assertEqual(403, response.status_code)
 

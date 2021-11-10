@@ -9,6 +9,8 @@ from flask_testing import TestCase
 import json
 import jwt
 from unittest.mock import patch, Mock
+import cProfile
+import pstats
 
 # Import from internal modules
 from cornflow.app import create_app

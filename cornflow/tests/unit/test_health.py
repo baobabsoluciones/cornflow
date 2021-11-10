@@ -6,7 +6,7 @@ from cornflow.tests.const import HEALTH_URL
 from cornflow.shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
 
 
-class TestLogIn(TestCase):
+class TestHealth(TestCase):
     def create_app(self):
         app = create_app("testing")
         return app
