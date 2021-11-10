@@ -1,6 +1,8 @@
 Write a json-schema
 =======================
 
+.. highlight:: json
+
 Basics of schemas
 ------------------------------
 
@@ -31,9 +33,7 @@ IdCustomer  idTrailer
 3               4
 ==========  ==========
 
-The schema will look like this:
-
-.. code-block:: json
+The schema will look like this::
 
     { "$schema": "http://json-schema.org/schema#",
      "type": "object",
@@ -82,7 +82,7 @@ The schema will look like this:
     }
 
 
-This basically means that our input data should be an object containing two tables (‘customers’ and ‘allowedTrailers’) represented as arrays of objects.
+This basically means that our input data should be an object containing two tables (``customers`` and ``allowedTrailers``) represented as arrays of objects.
 It is important to note three things:
 
 No nested list types
@@ -110,9 +110,7 @@ In real problems, pure data is usually complemented by auxiliary information (su
 Exception for “simple objects”
 **********************************
 
-Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters ``trailersCapacity`` and ``timeHorizon``, we would add a property ``parameters`` to our schema:
-
-.. code-block:: json
+Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters ``trailersCapacity`` and ``timeHorizon``, we would add a property ``parameters`` to our schema::
 
     { "$schema": "http://json-schema.org/schema#",
      "type": "object",
@@ -142,9 +140,10 @@ Even though most properties of our schema object must be arrays, an exception is
 Naming conventions
 *********************
 
-When naming columns in a "master table", we refer to the unique id of each row as "id" (see the ``shifts`` property below. When an id is used as a foreign key in another table (see the ``resources_not_available`` property), we use id_shift to denote that is the id of the shift that we are using.
-
-.. code-block:: json
+When naming columns in a "master table", we refer to the unique id of each row
+as "id" (see the ``shifts`` property below. When an id is used as a foreign
+key in another table (see the ``resources_not_available`` property), we use
+"id_shift" to denote that is the id of the shift that we are using::
 
     {
     "$schema": "http://json-schema.org/schema#",
@@ -201,6 +200,7 @@ When naming columns in a "master table", we refer to the unique id of each row a
         "required": ["shifts", "resources_unavailable"]
     }
 
+As explained in the section beforehand, the parameters that are unidimensional should be on a table called ``parameters``.
 
 Example with TSP
 -------------------
@@ -210,9 +210,7 @@ Let's take the well known TSP problem and generate an instance, a solution and a
 Instance schema
 ****************************
 
-An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs:
-
-.. code-block:: json
+An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs::
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -238,12 +236,22 @@ An instance of a TSP is a simple graph with positive weights in each arc. We wil
 
 We are using ``n1`` and ``n2`` to call each the first and second node of each arc. We use ``w`` to call the weight of the arc.
 
+An example input dataset that follows this schema is the following::
+
+    {
+        "arcs": [
+            {"n1": 0, "n2": 0, "w": 0},
+            {"n1": 0, "n2": 1, "w": 633},
+            {"n1": 0, "n2": 2, "w": 257},
+            {"n1": 0, "n2": 3, "w": 91},
+            {"n1": 0, "n2": 4, "w": 412}
+        ]
+    }
+
 Solution schema
 ****************************
 
-A solution to a TSP, is the sequence in which nodes should be visited. We *could* use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.
-
-.. code-block:: json
+A solution to a TSP, is the sequence in which nodes should be visited. We *could* use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.::
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -268,40 +276,26 @@ A solution to a TSP, is the sequence in which nodes should be visited. We *could
 
 ``node`` represents each node in the sequence. ``pos`` represents the position of each node in the sequence.
 
-An alternative, still valid, schema would be:
+An example output dataset that follows this schema is the following::
 
-.. code-block:: json
 
     {
-        "$schema": "http://json-schema.org/schema#",
-        "type": "object",
-        "properties": {
-            "route": {
-                "description": "Order of nodes in each route",
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "node": {"type": "integer"},
-                    },
-                    "required": ["node"]
-                }
-            }
-        },
-        "required": ["route"]
+        "route": [
+            {"pos": 0,"node": 0},
+            {"pos": 1,"node": 4},
+            {"pos": 2,"node": 2},
+            {"pos": 3,"node": 3},
+            {"pos": 4,"node": 1}
+        ]
     }
 
-
-Here we assume the array is sorted and so we do not need the position of the node explicitly.
 
 
 Configuration schema
 *********************
 
-The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal
+The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal::
 
-
-.. code-block:: json
 
     {
         "$schema": "http://json-schema.org/schema#",
@@ -321,3 +315,38 @@ The configuration will depend on the application. We usually have some default c
 
 
 ``timeLimit`` constraints the time the solution method can run. ``gapRel`` provides a tolerance measured in relative gap (to the best possible solution). ``seed`` provides a way to make the solution method deterministic. The ``solver`` property is mandatory for all solution methods and should always have this format (a string with an "enum" attribute).
+
+Generating jsonschema from data
+--------------------------------------
+
+Usually, the instance data is tedious to describe via json-schema format. At the same time, an example instance is *usually* available by default in some format (xml, Excel, csv, custom file).
+
+In this case, the first method of the Instance will be something along the lines of ``from_xml`` that will create an Instance from that file.
+
+Imagine the second and third methods are ``to_dict`` and ``from_dict``. With this, it's already possible to generate an json with the right schema: both :py:class:`~cornflow_client.core.instance.InstanceCore` and :py:class:`~cornflow_client.core.solution.SolutionCore` have a method called ``generate_schema`` that will do just that. They return an schema that is compatible with the current object.
+
+An example code to do just that is available in the following https://github.com/baobabsoluciones/hackathonbaobab2021 project. Here is an excerpt:
+
+.. code-block:: python
+
+    import json
+    from hackathonbaobab2021.core import Instance
+    import os
+
+
+    def generate_schema():
+        path = os.path.join(os.path.dirname(__file__), "../data/ITC2021_Test1.xml")
+        instance = Instance.from_xml(path)
+        schema = instance.generate_schema()
+        with open(path + ".json", "w") as f:
+            json.dump(schema, f, indent=4, sort_keys=True)
+
+
+    if __name__ == "__main__":
+        generate_schema()
+
+Json-schema validations
+------------------------------
+
+The json-schema are validated through their parent classes (:py:class:`~cornflow_client.core.instance.InstanceCore`, :py:class:`~cornflow_client.core.instance.SolutionCore`, :py:class:`~cornflow_client.core.instance.ApplicationCore`). This is usually done before solving a problem (e.g., see :py:func:`~cornflow_client.core.instance.ApplicationCore.solve`). In any case, the app user can choose to take advantage of the schema to validate the input or output at any point in time by using :py:func:`~cornflow_client.core.instance.InstanceCore.check_schema` or :py:func:`~cornflow_client.core.instance.SolutionCore.check_schema`.
+

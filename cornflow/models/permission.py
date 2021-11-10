@@ -40,11 +40,4 @@ class PermissionViewRoleModel(TraceAttributes):
         return PermissionViewRoleModel.query.all()
 
     def __repr__(self):
-        representation = (
-            self.role.name
-            + " "
-            + self.action_id.name.replace("_", " ")
-            + " on "
-            + self.api_view.name
-        )
-        return representation
+        return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)

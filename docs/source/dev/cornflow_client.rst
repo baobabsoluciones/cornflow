@@ -105,3 +105,30 @@ Constant                                                       Value
    :show-inheritance:
    :member-order: bysource
 
+Schemas
+------------------
+
+Schema utility functions
+***************************
+
+
+.. automodule:: cornflow_client.schema.tools
+   :members:
+   :show-inheritance:
+   :member-order: bysource
+
+Schema manager
+*********************
+
+.. automodule:: cornflow_client.schema.manager
+   :members:
+   :show-inheritance:
+   :member-order: bysource
+
+Dictionary schema
+*********************
+
+.. automodule:: cornflow_client.schema.dictSchema
+   :members:
+   :show-inheritance:
+   :member-order: bysource

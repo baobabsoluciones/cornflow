@@ -91,11 +91,6 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         # TODO: should validation should be done even if the execution is not going to be run?
         # TODO: should the schema field be cross valdiated with the instance schema field?
         config = current_app.config
-        airflow_conf = dict(
-            url=config["AIRFLOW_URL"],
-            user=config["AIRFLOW_USER"],
-            pwd=config["AIRFLOW_PWD"],
-        )
 
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
@@ -113,7 +108,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             return execution, 201
 
         # We now try to launch the task in airflow
-        af_client = Airflow(**airflow_conf)
+        af_client = Airflow.from_config(config)
         if not af_client.is_alive():
             err = "Airflow is not accessible"
             log.error(err)
@@ -235,18 +230,12 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @Auth.auth_required
     def post(self, idx):
-        config = current_app.config
-        airflow_conf = dict(
-            url=config["AIRFLOW_URL"],
-            user=config["AIRFLOW_USER"],
-            pwd=config["AIRFLOW_PWD"],
-        )
         execution = ExecutionModel.get_one_object_from_user(
             user=self.get_user(), idx=idx
         )
         if execution is None:
             raise ObjectDoesNotExist()
-        af_client = Airflow(**airflow_conf)
+        af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
             raise AirflowError(error="Airflow is not accessible")
         response = af_client.set_dag_run_to_fail(
@@ -276,12 +265,6 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
             and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        airflow_conf = dict(
-            url=current_app.config["AIRFLOW_URL"],
-            user=current_app.config["AIRFLOW_USER"],
-            pwd=current_app.config["AIRFLOW_PWD"],
-        )
-
         execution = ExecutionModel.get_one_object_from_user(
             user=self.get_user(), idx=idx
         )
@@ -305,7 +288,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
                 error="The execution has no dag_run associated",
             )
 
-        af_client = Airflow(**airflow_conf)
+        af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
             _raise_af_error(execution, "Airflow is not accessible")
 

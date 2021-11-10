@@ -11,5 +11,4 @@ from .commands import (
     RegisterActions,
     RegisterRoles,
     RegisterViews,
-    UpdateViews,
 )

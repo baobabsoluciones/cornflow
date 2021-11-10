@@ -8,7 +8,6 @@ from cornflow.commands import (
     RegisterActions,
     RegisterRoles,
     RegisterViews,
-    UpdateViews,
 )
 from cornflow.endpoints import resources
 from cornflow.models import (
@@ -38,7 +37,7 @@ class TestCommands(TestCase):
             "password": "testpassword",
         }
         self.resources = resources
-        RegisterRoles().run(False)
+        RegisterRoles().run(0)
 
     def tearDown(self):
         db.session.remove()
@@ -117,26 +116,6 @@ class TestCommands(TestCase):
             self.resources[i]["endpoint"] for i in range(len(self.resources))
         ]
 
-        self.assertCountEqual(views_list, resources_list)
-
-    def test_update_views(self):
-        command = RegisterViews()
-        command.run()
-
-        view = ApiViewModel.query.first()
-        view.delete()
-
-        num_views = len(ApiViewModel.query.all())
-
-        command = UpdateViews()
-        command.run()
-        views = ApiViewModel.query.all()
-        views_list = [v.name for v in views]
-        resources_list = [
-            self.resources[i]["endpoint"] for i in range(len(self.resources))
-        ]
-
-        self.assertEqual(num_views + 1, len(views_list))
         self.assertCountEqual(views_list, resources_list)
 
     def test_register_roles(self):
