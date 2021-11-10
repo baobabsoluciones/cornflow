@@ -1,6 +1,8 @@
 name: ldap-integration
 
-on: pull_request
+on:
+  pull_request:
+    types: [ opened, edited, synchronize, reopened ]
 
 jobs:
   ldap_integration:
