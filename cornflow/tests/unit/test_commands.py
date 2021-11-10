@@ -37,7 +37,7 @@ class TestCommands(TestCase):
             "password": "testpassword",
         }
         self.resources = resources
-        RegisterRoles().run(False)
+        RegisterRoles().run(0)
 
     def tearDown(self):
         db.session.remove()
