@@ -1,10 +1,9 @@
-
 name: ldap-integration
 
 on: pull_request
 
 jobs:
-  build:
+  ldap_integration:
 
     runs-on: ${{ matrix.os }}
     strategy:

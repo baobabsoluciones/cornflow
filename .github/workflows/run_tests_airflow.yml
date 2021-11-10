@@ -3,7 +3,7 @@ name: integration
 on: pull_request
 
 jobs:
-  build:
+  integration:
 
     runs-on: ${{ matrix.os }}
     strategy:
