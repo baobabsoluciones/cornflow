@@ -29,7 +29,6 @@ ldap3==2.9
 Mako==1.1.2
 MarkupSafe==1.1.1
 marshmallow==3.6.0
-pulp==2.4
 psycopg2==2.8.5
 pyasn1==0.4.8
 pycparser==2.20
