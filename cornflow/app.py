@@ -13,7 +13,7 @@ from .shared.exceptions import _initialize_errorhandlers
 from .shared.utils import db, bcrypt
 
 
-def create_app(env_name="development",dataconn=None):
+def create_app(env_name="development", dataconn=None):
     """
 
     :param str env_name: 'testing' or 'development' or 'production'
@@ -29,6 +29,17 @@ def create_app(env_name="development",dataconn=None):
     CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
+
+    if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
+
+        def _fk_pragma_on_connect(dbapi_con, con_record):
+            dbapi_con.execute("pragma foreign_keys=ON")
+
+        with app.app_context():
+            from sqlalchemy import event
+
+            event.listen(db.engine, "connect", _fk_pragma_on_connect)
+
     api = Api(app)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
