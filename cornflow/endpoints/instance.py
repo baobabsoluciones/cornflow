@@ -171,7 +171,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     """
-    Endpoint used to get the information ofa single instance, edit it or delete it
+    Endpoint used to get the information o fa single instance, edit it or delete it
     """
 
     def __init__(self):

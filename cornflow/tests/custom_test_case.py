@@ -305,6 +305,25 @@ class CustomTestCase(TestCase):
         row = self.model.query.get(idx)
         self.assertEqual(str(row), string)
 
+    def cascade_delete(
+        self, url, model, payload, url_2, model_2, payload_2, parent_key
+    ):
+        parent_object_idx = self.create_new_row(url, model, payload)
+        payload_2[parent_key] = parent_object_idx
+        child_object_idx = self.create_new_row(url_2, model_2, payload_2)
+
+        parent_object = model.query.get(parent_object_idx)
+        child_object = model_2.query.get(child_object_idx)
+        self.assertIsNotNone(parent_object)
+        self.assertIsNotNone(child_object)
+
+        parent_object.delete()
+
+        parent_object = model.query.get(parent_object_idx)
+        child_object = model_2.query.get(child_object_idx)
+        self.assertIsNone(parent_object)
+        self.assertIsNone(child_object)
+
 
 class BaseTestCases:
     class ListFilters(CustomTestCase):
