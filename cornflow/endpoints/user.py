@@ -57,8 +57,6 @@ class UserEndpoint(MetaResource, MethodResource):
         return users, 200
 
 
-# TODO: the PUT method here could be used to change the password of the user.
-#   These endpoints could be used mainly by the cornflow webserver UI.
 class UserDetailsEndpoint(MetaResource, MethodResource):
     """
     Endpoint use to get the information of one single user

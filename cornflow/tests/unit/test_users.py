@@ -3,10 +3,26 @@ import json
 from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.commands import AccessInitialization
-from cornflow.models import UserModel, UserRoleModel
+from cornflow.models import (
+    CaseModel,
+    ExecutionModel,
+    InstanceModel,
+    UserModel,
+    UserRoleModel,
+)
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL
+from cornflow.tests.const import (
+    CASE_PATH,
+    CASE_URL,
+    EXECUTION_PATH,
+    EXECUTION_URL_NORUN,
+    INSTANCE_PATH,
+    INSTANCE_URL,
+    LOGIN_URL,
+    SIGNUP_URL,
+    USER_URL,
+)
 
 
 class TestUserEndpoint(TestCase):
@@ -325,3 +341,191 @@ class TestUserEndpoint(TestCase):
         response = self.log_in(self.viewer)
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])
+
+
+class TestUserModel(TestCase):
+    def create_app(self):
+        app = create_app("testing")
+        return app
+
+    def setUp(self):
+        db.create_all()
+        AccessInitialization().run()
+
+        self.url = USER_URL
+        self.model = UserModel
+
+        self.admin = dict(
+            username="anAdminUser", email="admin@admin.com", password="testpassword"
+        )
+
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(self.admin),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.admin["id"] = response.json["id"]
+
+        user_role = UserRoleModel({"user_id": self.admin["id"], "role_id": ADMIN_ROLE})
+        user_role.save()
+        db.session.commit()
+
+        self.login_keys = ["username", "password"]
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def log_in(self, user):
+        data = {k: user[k] for k in self.login_keys}
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+    def test_instance_delete_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+        instance_id = response.json["id"]
+
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+
+        instance = InstanceModel.query.get(instance_id)
+        self.assertIsNone(instance)
+
+    def test_instance_execution_delete_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+        instance_id = response.json["id"]
+
+        with open(EXECUTION_PATH) as f:
+            payload = json.load(f)
+
+        payload["instance_id"] = instance_id
+        response = self.client.post(
+            EXECUTION_URL_NORUN,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+        self.assertEqual(201, response.status_code)
+        execution_id = response.json["id"]
+
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+
+        instance = InstanceModel.query.get(instance_id)
+        execution = ExecutionModel.query.get(execution_id)
+        self.assertIsNone(instance)
+        self.assertIsNone(execution)
+
+    def test_case_delete_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+
+        response = self.client.post(
+            CASE_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+        case_id = response.json["id"]
+
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+
+        case = CaseModel.query.get(case_id)
+        self.assertIsNone(case)
+
+    def test_user_role_delete_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+
+        user_role = UserRoleModel.query.filter_by(user_id=user_id).first()
+
+        self.assertIsNotNone(user_role)
+
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+
+        user_role = UserRoleModel.query.filter_by(user_id=user_id).first()
+        self.assertIsNone(user_role)

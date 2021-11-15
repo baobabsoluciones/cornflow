@@ -14,6 +14,22 @@ class RoleModel(TraceAttributes):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
+    user_roles = db.relationship(
+        "UserRoleModel",
+        backref="roles",
+        lazy=True,
+        primaryjoin="and_(RoleModel.id==UserRoleModel.role_id, "
+        "UserRoleModel.deleted_at==None)",
+        cascade="all,delete",
+    )
+    permissions = db.relationship(
+        "PermissionViewRoleModel",
+        backref="roles",
+        lazy=True,
+        primaryjoin="and_(RoleModel.id==PermissionViewRoleModel.role_id, "
+        "PermissionViewRoleModel.deleted_at==None)",
+        cascade="all,delete",
+    )
 
     def __init__(self, data):
         """
