@@ -10,13 +10,13 @@ Presentation
 
 This is the **contributors's quick start guide** for the **Cornflow** project. This project is divided into four directories: `Cornflow-Server <https://github.com/baobabsoluciones/cornflow-server>`_, `Cornflow-client <https://github.com/baobabsoluciones/cornflow-client>`_, `Cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_, and `Cornflow-app <https://github.com/baobabsoluciones/cornflow-app>`_. 
 
-Cornflow-server allows you to run a local server on your computer, that will manage the instances of your problems, the created executions, and the communication with AirFlow.
+**Cornflow-server** allows you to run a local server on your computer, that will manage the instances of your problems, the created executions, and the communication with Airflow.
 
-Cornflow-dags allows you to formalize the problems you are trying to develop a solution to.
+**Cornflow-dags** allows you to formalize the problems you are trying to develop a solution to.
 
-Cornflow-client provides a communication interface between your computer and cornflow-server.
+**Cornflow-client** provides a communication interface between your computer and cornflow-server.
 
-Cornflow-app provides a graphic interface that can be customized and adapted to the solvers you deploy on cornflow-dags.
+**Cornflow-app** provides a graphic interface that can be customized and adapted to the solvers you deploy on cornflow-dags.
 
 -----------
 First steps
@@ -40,7 +40,7 @@ Common
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>Python >= 3.6 and virtual environment</summary>
     
 | We recommend using a version of `Python ≥ 3.6 <https://www.python.org/downloads/>`_, along with the `Pycharm editor <https://www.jetbrains.com/fr-fr/pycharm/>`_. Please use `black code formatter <https://github.com/psf/black>`_ to format your python files. See `here <https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea>`_ to integrate **black** to your development environment and make it format automatically your files. 
@@ -48,7 +48,7 @@ Common
 
 .. code-block:: console
 
-    python3 -m venv cfvenv
+    python -m venv cfvenv
     cfvenv/Scripts/activate
     
 if you are working on Windows, 
@@ -56,7 +56,7 @@ or:
 
 .. code-block:: shell
 
-    python3 -m venv cfvenv
+    python -m venv cfvenv
     source cfvenv/bin/activate
 
 in Linux.
@@ -67,20 +67,20 @@ in Linux.
   
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>Packages</summary>
     
 | From then, you can install the **cornflow-client** package, required to use cornflow-server and cornflow-dags, with:
 
 .. code-block:: console
   
-    python3 -m pip install cornflow-client
+    python -m pip install cornflow-client
     
 For cornflow-server, you will also need the dependencies in requirements.txt:
 
 .. code-block:: console
 
-    python3 -m pip install -r cornflow-server/requirements-dev.txt
+    python -m pip install -r cornflow-server/requirements-dev.txt
 
 .. raw:: html
 
@@ -93,7 +93,7 @@ To run cornflow-server, you need Linux or Windows with WSL installed.
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>Apache-Airflow</summary>
 
 Cornflow-server needs a running airflow server to operate. Once your virtual environment is activated, you can install airflow with pip: 
@@ -133,7 +133,7 @@ For cornflow-app
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>NodeJs</summary>
 
 | In order to develop your graphic interface with cornflow-app, you will need to have `Node v12.22 <https://nodejs.org/en/>`_ installed on your computer. The application is mainly developed in JavaScript and Vue.Js. We also recommend using `Visual Studio Code <https://code.visualstudio.com/>`_ as your IDE to code in js and vueJs.
@@ -159,7 +159,7 @@ Cornflow-server
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>Server</summary>
 
 
@@ -176,11 +176,10 @@ If it is the first time you use cornflow-server, you will then need to setup cor
   python manage.py create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
   python manage.py create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
     
-From there, you can launch cornflow-server by running:
+From there, you can launch cornflow-server by navigating to the cornflow-server repository and running:
 
 .. code-block:: shell
-  
-  source cfvenv/bin/activate
+
   export FLASK_APP=cornflow.app
   export FLASK_ENV=development
   export DATABASE_URL=sqlite:///cornflow.db
@@ -202,7 +201,7 @@ Cornflow-dags
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>DAGs</summary>
 
 When you start developing your solver, you will need to deploy it as a DAG, similar to the ones you can find on `cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_. 
@@ -276,7 +275,7 @@ Cornflow-app
 
 .. raw:: html
 
-  <details>
+  <details open>
     <summary>Graphic interface</summary>
 
 In order to visualize your data with cornflow-app, you will need to add views corresponding to your problem in the code of your the application.
