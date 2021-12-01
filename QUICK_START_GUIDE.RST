@@ -102,7 +102,7 @@ Cornflow-server needs a running airflow server to operate. Once your virtual env
 
   pip install "apache-airflow==2.1.0" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.1.0/constraints-${YOUR_PYTHON_VERSION}.txt"
 
-You will then need to install the defaults workers dependencies, to initialize the database and to create an admin user:
+You will then need to install the defaults workers dependencies, to initialize the database and to create an admin user. From the :code:`/cornflow-server` repository, run:
 
 .. code-block:: shell
 
@@ -163,12 +163,27 @@ Cornflow-server
     <summary>Server</summary>
 
 
-To launch cornflow-server, you first need to launch airflow-server. To do so, navigate to the :code:`/cornflow-dags` directory and execute the file :code:`utils/launchAirflow.sh`. 
-If it is the first time you use cornflow-server, you will then need to setup cornflow's database.
+To launch cornflow-server, you first need to launch airflow-server. To do so, navigate to :code:`/cornflow-project` and run:
+
+.. code-block:: shell
+  
+  source afvenv/bin/activate
+  export AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT=0
+  export AIRFLOW__CORE__LOAD_EXAMPLES=0
+  export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+  export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+  export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+  export AIRFLOW_CONN_CF_URI=http://airflow:airflow_test_password@localhost:5000/ 
+  export AIRFLOW_HOME="$PWD/cornflow-server/airflow_config"
+  export AIRFLOW__CORE__DAGS_FOLDER="$PWD/cornflow-dags/DAG"
+  airflow webserver -p 8080 &
+  airflow scheduler &
+
+| You can now access Airflow at `http://localhost:8080 <http://localhost:8080>`_ with the username :code:`admin` and the password :code:`admin` .
+| If it is the first time you use cornflow-server, you will then need to setup cornflow's database.
     
 .. code-block:: shell
 
-  source cfvenv/bin/activate
   export FLASK_APP=cornflow.app
   export DATABASE_URL=sqlite:///cornflow.db
   python manage.py db upgrade
@@ -301,11 +316,11 @@ Those three files have the same objectives than the :code:`instance.py`, :code:`
 Views
 -----
 In the directory :code:`/src/views/apps`, you will need to add your views, computed from the data contained in your Instance, Solution and Experiment classes.
-To do so, you must create a directory with the name of your project, and put your files in that directory.
+To do so, you must create a directory with the name of your project, and place your files in that directory.
 
 Unitary tests
 -------------
-In the directory :code:`/tests/unit`, you should define a new directory :code:`my_project`. In this directory, you should define unitary tests that will test that your application works correctly. You can follow the example of the unitary tests of the other projects. The data needed to execute the tests should be put in the directory :code:`/tests/data`.
+In the directory :code:`/tests/unit`, you should define a new directory :code:`my_project`. In this directory, you should define unitary tests that will test that your application works correctly. You can follow the example of the unitary tests of the other projects. The data needed to execute the tests should be placed in the directory :code:`/tests/data`.
 
 .. raw:: html
 
@@ -316,8 +331,8 @@ Contributions
 -------------
 Contribute
 ==========
-| If you wish to contribute to the project, you can open a pull request to propose your changes.
-| In that case, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter.
+| If you wish to contribute to the project, you can open a pull request to propose your changes. 
+| In that case, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
 
 
 
