@@ -174,8 +174,8 @@ To launch cornflow-server, you first need to launch airflow-server. To do so, na
   export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
   export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
   export AIRFLOW_CONN_CF_URI=http://airflow:airflow_test_password@localhost:5000/ 
-  export AIRFLOW_HOME="$PWD/cornflow-server/airflow_config"
-  export AIRFLOW__CORE__DAGS_FOLDER="$PWD/cornflow-dags/DAG"
+  export AIRFLOW_HOME="$PWD/cornflow-server/airflow_config"                   # path to "/airflow_config"
+  export AIRFLOW__CORE__DAGS_FOLDER="$PWD/cornflow-dags/DAG"                  # path to your dag repository
   airflow webserver -p 8080 &
   airflow scheduler &
 
@@ -331,8 +331,8 @@ Contributions
 -------------
 Contribute
 ==========
-| If you wish to contribute to the project, you can open a pull request to propose your changes. 
-| In that case, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
+|  Please check the `contributor's guide <https://github.com/baobabsoluciones/cornflow-server/blob/master/CONTRIBUTING.md>`_ to know how to contribute to the project.
+| If you create a Pull Request to contribute, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Please make sure as well that your code respects rules of syntax, spelling, etc. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
 
 
 
