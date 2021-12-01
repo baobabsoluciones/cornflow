@@ -43,8 +43,9 @@ Common
   <details open>
     <summary>Python >= 3.6 and virtual environment</summary>
     
-| We recommend using a version of `Python ≥ 3.6 <https://www.python.org/downloads/>`_, along with the `Pycharm editor <https://www.jetbrains.com/fr-fr/pycharm/>`_. Please use `black code formatter <https://github.com/psf/black>`_ to format your python files. See `here <https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea>`_ to integrate **black** to your development environment and make it format automatically your files. 
-| Once python is installed, you will need to create a virtual environment for the project: from the :code:`/cornflow-dags` directory, run: 
+We recommend using a version of `Python ≥ 3.6 <https://www.python.org/downloads/>`_, along with the `Pycharm editor <https://www.jetbrains.com/pycharm/>`_. Please use `black code formatter <https://github.com/psf/black>`_ to format your python files. See `here <https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea>`_ to integrate **black** to your development environment and make it format automatically your files.
+
+Once python is installed, you will need to create a virtual environment for the project: from the :code:`/cornflow-dags` directory, run:
 
 .. code-block:: console
 
@@ -70,7 +71,7 @@ in Linux.
   <details open>
     <summary>Packages</summary>
     
-| From then, you can install the **cornflow-client** package, required to use cornflow-server and cornflow-dags, with:
+From then, you can install the **cornflow-client** package, required to use cornflow-server and cornflow-dags, with:
 
 .. code-block:: console
   
@@ -123,9 +124,11 @@ You will then need to install the defaults workers dependencies, to initialize t
  
 
 ..
-  Docker
-  ------
-  You will also need to install `Docker Community Edition <https://docs.docker.com/engine/install/>`_ and `Docker Compose <https://docs.docker.com/compose/install/>`_. See `here   <https://baobabsoluciones.github.io/cornflow-server/deploy/index.html>`_ how to deploy your own cornflow server.
+
+Docker
+------
+
+You will also need to install `Docker Community Edition <https://docs.docker.com/engine/install/>`_ and `Docker Compose <https://docs.docker.com/compose/install/>`_. See `here   <https://baobabsoluciones.github.io/cornflow-server/deploy/index.html>`_ how to deploy your own cornflow server.
 
    
 For cornflow-app
@@ -136,8 +139,9 @@ For cornflow-app
   <details open>
     <summary>NodeJs</summary>
 
-| In order to develop your graphic interface with cornflow-app, you will need to have `Node v12.22 <https://nodejs.org/en/>`_ installed on your computer. The application is mainly developed in JavaScript and Vue.Js. We also recommend using `Visual Studio Code <https://code.visualstudio.com/>`_ as your IDE to code in js and vueJs.
-| Once NodeJs is installed, open the terminal and navigate to the cornflow-app repository. From there, run :code:`npm install` to install the dependencies necessary to run the project. 
+In order to develop your graphic interface with cornflow-app, you will need to have `Node v12.22 <https://nodejs.org/en/>`_ installed on your computer. The application is mainly developed in JavaScript and Vue.Js. We also recommend using `Visual Studio Code <https://code.visualstudio.com/>`_ as your IDE to code in js and vueJs.
+
+Once NodeJs is installed, open the terminal and navigate to the cornflow-app repository. From there, run :code:`npm install` to install the dependencies necessary to run the project.
 
 .. raw:: html
 
@@ -179,8 +183,9 @@ To launch cornflow-server, you first need to launch airflow-server. To do so, na
   airflow webserver -p 8080 &
   airflow scheduler &
 
-| You can now access Airflow at `http://localhost:8080 <http://localhost:8080>`_ with the username :code:`admin` and the password :code:`admin` .
-| If it is the first time you use cornflow-server, you will then need to setup cornflow's database.
+You can now access Airflow at `http://localhost:8080 <http://localhost:8080>`_ with the username :code:`admin` and the password :code:`admin` .
+
+If it is the first time you use cornflow-server, you will then need to setup cornflow's database.
     
 .. code-block:: shell
 
@@ -254,26 +259,26 @@ To do so, you need to clone the repository and create a new folder with the name
   - :code:`__init__.py`: contains a class that subclasses :code`ApplicationCore` from the library `cornflow-client`.
   - :code:`README.RST`: contains a description of the problem, of the input data and the output.
 
-| See the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/deploy_solver_new.html>`_ for a more specific description of the requisites for each class, and feel free to check out the deployed on `cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_ for a better understanding of the structure of a dag.
+See the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/deploy_solver_new.html>`_ for a more specific description of the requisites for each class, and feel free to check out the deployed on `cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_ for a better understanding of the structure of a dag.
 
-Unitary tests
+Unit  tests
 -------------
 
-| When you finish developping your solver, you will need to add unit tests to validate that your solver works properly. The unit tests for your DAG should be added in the file :code:`tests/test_dags.py`, by creating a class with your project's name and following the model of the existing ones. Run :
+When you finish developing your solver, you will need to add unit tests to validate that your solver works properly. The unit tests for your DAG should be added in the file :code:`tests/test_dags.py`, by creating a class with your project's name and following the model of the existing ones. Run :
 
 .. code-block:: console
 
   python -m unittest tests.test_dags.py
 
-to run all of the unitary tests, or, assuming that your project is name 'MyProject':
+to run all of the unit tests, or, assuming that your project is name 'MyProject':
 
 .. code-block:: console
 
   python -m unittest tests.test_dags.MyProject
   
-to run the unitary tests of your project only.
+to run the unit tests of your project only.
 
-Please refer to the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/testing_app.html>`_ for more details on the unitary tests. 
+Please refer to the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/testing_app.html>`_ for more details on the unit tests.
 
 .. raw:: html
 
@@ -331,13 +336,16 @@ Contributions
 -------------
 Contribute
 ==========
-|  Please check the `contributor's guide <https://github.com/baobabsoluciones/cornflow-server/blob/master/CONTRIBUTING.md>`_ to know how to contribute to the project.
-| If you create a Pull Request to contribute, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Please make sure as well that your code respects rules of syntax, spelling, etc. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
+
+Please check the `contributor's guide <https://github.com/baobabsoluciones/cornflow-server/blob/master/CONTRIBUTING.md>`_ to know how to contribute to the project.
+
+If you create a Pull Request to contribute, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Please make sure as well that your code respects rules of syntax, spelling, etc. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
 
 
 
 Report bugs
 ===========
+
 Report bugs through `GitHub <https://github.com/baobabsoluciones/cornflow-server/issues>`_. Please check that the issues has not been reported before, and, if it has not, please report only relevant issues and try to join code that produces those bugs.
 
 
