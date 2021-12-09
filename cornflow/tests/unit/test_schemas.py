@@ -13,20 +13,20 @@ class SchemaGenerator(unittest.TestCase):
     data1 = [
         {
             "name": "filename",
-            "description": "Should be a filename",
             "required": True,
             "type": "String",
             "valid_values": ["hello.txt", "foo.py", "bar.png"],
+            "metadata": {"description": "Should be a filename"},
         },
         {
             "name": "SomeBool",
-            "description": "Just a bool",
+            "metadata": {"description": "Just a bool"},
             "required": True,
             "type": "Boolean",
         },
         {
             "name": "NotRequiredBool",
-            "description": "Another bool that's not required",
+            "metadata": {"description": "Another bool that's not required"},
             "required": False,
             "type": "Boolean",
         },
