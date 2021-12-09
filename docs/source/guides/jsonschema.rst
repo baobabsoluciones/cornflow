@@ -359,4 +359,4 @@ The main properties used are: ``title``, ``description`` and ``$comment``:
 
 - We use the ``title`` property to set up a meaningful name for the table columns on the data tables.
 - We use the ``description`` property to give a description of the table or fields of the data tables.
-- We use the ``$comment`` property to set up additional information of the type of the property, mainly if the field is a data field and should erated as such for validation.
+- We use the ``$comment`` property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.
