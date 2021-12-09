@@ -18,7 +18,7 @@ class CaseRawRequest(Schema):
     schema = fields.Str(required=True)
     parent_id = fields.Int(allow_none=True)
     data = fields.Raw()
-    solution = fields.Raw(allow_none=True, default=None)
+    solution = fields.Raw(allow_none=True, dump_default=None)
 
 
 class CaseListResponse(BaseDataEndpointResponse):
@@ -85,5 +85,5 @@ class QueryFiltersCase(QueryFilters):
 
 
 class QueryCaseCompare(Schema):
-    data = fields.Boolean(required=False, default=1)
-    solution = fields.Boolean(required=False, default=1)
+    data = fields.Boolean(required=False, dump_default=1)
+    solution = fields.Boolean(required=False, dump_default=1)
