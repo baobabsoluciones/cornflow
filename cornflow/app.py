@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
+from flask_migrate import Migrate
 from flask_restful import Api
 
 
@@ -29,6 +30,7 @@ def create_app(env_name="development", dataconn=None):
     CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
+    migrate = Migrate(app=app, db=db)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 

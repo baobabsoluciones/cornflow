@@ -14,7 +14,7 @@ import pstats
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
+from cornflow.commands import access_initialization_command
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
@@ -45,7 +45,7 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run(verbose=0)
+        access_initialization_command(verbose=0)
         data = {
             "username": "testname",
             "email": "test@test.com",
