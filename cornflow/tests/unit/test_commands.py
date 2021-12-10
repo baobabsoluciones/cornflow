@@ -1,14 +1,15 @@
 from flask_testing import TestCase
 
-from cornflow.app import create_app
-from cornflow.commands import (
-    RegisterBasePermissions,
-    CreateAdminUser,
-    CreateServiceUser,
-    RegisterActions,
-    RegisterRoles,
-    RegisterViews,
+from cornflow.app import (
+    create_app,
+    create_service_user,
+    create_admin_user,
+    register_actions,
+    register_base_assignations,
+    register_roles,
+    register_views,
 )
+
 from cornflow.endpoints import resources
 from cornflow.models import (
     ActionModel,
@@ -37,19 +38,24 @@ class TestCommands(TestCase):
             "password": "testpassword",
         }
         self.resources = resources
-        RegisterRoles().run(0)
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles, ["-v", 1])
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
 
     def test_service_user_command(self):
-        command = CreateServiceUser()
-
-        command.run(
-            username="cornflow",
-            email=self.payload["email"],
-            password=self.payload["password"],
+        self.runner.invoke(
+            create_service_user,
+            [
+                "-u",
+                "cornflow",
+                "-e",
+                self.payload["email"],
+                "-p",
+                self.payload["password"],
+            ],
         )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
@@ -60,12 +66,16 @@ class TestCommands(TestCase):
 
     def test_service_user_existing_admin(self):
         self.test_admin_user_command()
-        command = CreateServiceUser()
-
-        command.run(
-            username="administrator",
-            email=self.payload["email"],
-            password=self.payload["password"],
+        self.runner.invoke(
+            create_service_user,
+            [
+                "-u",
+                "administrator",
+                "-e",
+                self.payload["email"],
+                "-p",
+                self.payload["password"],
+            ],
         )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
@@ -82,13 +92,18 @@ class TestCommands(TestCase):
         self.assertEqual("cornflow", user.username)
         # TODO: check the user has the role
 
+    #
     def test_admin_user_command(self):
-        command = CreateAdminUser()
-
-        command.run(
-            username="administrator",
-            email=self.payload["email"],
-            password=self.payload["password"],
+        self.runner.invoke(
+            create_admin_user,
+            [
+                "-u",
+                "administrator",
+                "-e",
+                self.payload["email"],
+                "-p",
+                self.payload["password"],
+            ],
         )
 
         user = UserModel.get_one_user_by_email("testemail@test.org")
@@ -98,8 +113,7 @@ class TestCommands(TestCase):
         return user
 
     def test_register_actions(self):
-        command = RegisterActions()
-        command.run()
+        self.runner.invoke(register_actions)
 
         actions = ActionModel.query.all()
 
@@ -107,8 +121,7 @@ class TestCommands(TestCase):
             self.assertEqual(ACTIONS_MAP[a.id], a.name)
 
     def test_register_views(self):
-        command = RegisterViews()
-        command.run()
+        self.runner.invoke(register_views)
 
         views = ApiViewModel.query.all()
         views_list = [v.name for v in views]
@@ -119,26 +132,14 @@ class TestCommands(TestCase):
         self.assertCountEqual(views_list, resources_list)
 
     def test_register_roles(self):
-        command = RegisterRoles()
-        command.run()
-
         roles = RoleModel.query.all()
-
         for r in roles:
             self.assertEqual(ROLES_MAP[r.id], r.name)
 
     def test_base_permissions_assignation(self):
-        command = RegisterActions()
-        command.run()
-
-        command = RegisterViews()
-        command.run()
-
-        command = RegisterRoles()
-        command.run()
-
-        command = RegisterBasePermissions()
-        command.run()
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
 
         for base in BASE_PERMISSION_ASSIGNATION:
             for view in self.resources:
@@ -152,11 +153,11 @@ class TestCommands(TestCase):
 
                     self.assertEqual(True, permission)
 
-    def test_argument_parsing_correct(self):
-        command = RegisterRoles()
-        command.run(verbose="0")
-
-        roles = RoleModel.query.all()
-
-        for r in roles:
-            self.assertEqual(ROLES_MAP[r.id], r.name)
+    # def test_argument_parsing_correct(self):
+    #     command = RegisterRoles()
+    #     command.run(verbose="0")
+    #
+    #     roles = RoleModel.query.all()
+    #
+    #     for r in roles:
+    #         self.assertEqual(ROLES_MAP[r.id], r.name)
