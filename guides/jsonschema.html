@@ -59,6 +59,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#generating-jsonschema-from-data">Generating jsonschema from data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#json-schema-validations">Json-schema validations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-jsonschema-properties">Other jsonschema properties</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="testing_app.html">Test your solution method</a></li>
@@ -465,6 +466,16 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 <div class="section" id="json-schema-validations">
 <h2>Json-schema validations<a class="headerlink" href="#json-schema-validations" title="Permalink to this headline">¶</a></h2>
 <p>The json-schema are validated through their parent classes (<a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">SolutionCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ApplicationCore</span></code>). This is usually done before solving a problem (e.g., see <code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code>). In any case, the app user can choose to take advantage of the schema to validate the input or output at any point in time by using <code class="xref py py-func docutils literal notranslate"><span class="pre">check_schema()</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">check_schema()</span></code>.</p>
+</div>
+<div class="section" id="other-jsonschema-properties">
+<h2>Other jsonschema properties<a class="headerlink" href="#other-jsonschema-properties" title="Permalink to this headline">¶</a></h2>
+<p>In order to visualize more information on the user interface on <code class="docutils literal notranslate"><span class="pre">cornflow-app</span></code> we can use some other properties of the <code class="docutils literal notranslate"><span class="pre">jsonschema</span></code> in order to convey more information about our data structure.</p>
+<p>The main properties used are: <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code> and <code class="docutils literal notranslate"><span class="pre">$comment</span></code>:</p>
+<ul class="simple">
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">title</span></code> property to set up a meaningful name for the table columns on the data tables.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">description</span></code> property to give a description of the table or fields of the data tables.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">$comment</span></code> property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.</p></li>
+</ul>
 </div>
 </div>
 

@@ -48,6 +48,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#indentation">Indentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#no-repetition">No repetition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#filtering-lists-or-dictionaries">Filtering lists or dictionaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-superdicts">Working with SuperDicts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accessing-properties">Accessing properties</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="jsonschema.html">Write a json-schema</a></li>
@@ -211,17 +215,12 @@
 </pre></div>
 </div>
 <p>In general, excessive indentation makes the code hard to review and understand. One way to do that with an if inside a for is with something like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">python</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">previous_stop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">continue</span> <span class="c1"># the loop ends here</span>
+<span class="c1"># continue with the for-loop as it were an else clause.</span>
+<span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_distance_between</span><span class="p">(</span><span class="n">previous_stop</span><span class="p">,</span> <span class="n">current_stop</span><span class="p">)</span>
 </pre></div>
 </div>
-<blockquote>
-<div><dl class="simple">
-<dt>if previous_stop is None:</dt><dd><p>continue # the loop ends here</p>
-</dd>
-</dl>
-<p># continue with the for-loop as it were an else clause.
-distance = self.instance.get_distance_between(previous_stop, current_stop)</p>
-</div></blockquote>
 <p>On top of that, if you have all this indentation and long for loops you can just create a function called <cite>_get_route_cost(stop)</cite> and use it inside the function. Something like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_get_route_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">):</span>
 
@@ -289,7 +288,7 @@ distance = self.instance.get_distance_between(previous_stop, current_stop)</p>
 </div>
 <div class="section" id="filtering-lists-or-dictionaries">
 <h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this headline">¶</a></h2>
-<p>Filtering lists with list comprehensions is the easiest way to filter one. With pytups, you make it a little shorter.</p>
+<p>Filtering lists with list comprehensions is the easiest way to filter one. With <cite>pytups</cite>, you make it a little shorter.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
@@ -299,6 +298,33 @@ distance = self.instance.get_distance_between(previous_stop, current_stop)</p>
 <p>if <cite>used_routes</cite> is a TupList:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">used_routes</span> <span class="o">=</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">vfilter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">keep</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="working-with-superdicts">
+<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="accessing-properties">
+<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this headline">¶</a></h3>
+<p>If we have our data in <cite>SuperDicts</cite> there is a set of operations that can be done in a much simplier way.</p>
+<p>For example, instead of:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">SuperDict</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">):</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">),</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;production_scheduling&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Where we are taking one of the keys of a nested dictionary can be done:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;production_scheduling&quot;</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">vapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>And if we set up a method to access the properties as we have in some <cite>Instances</cite> (<cite>_get_property</cite>), we can have:</p>
 </div>
 </div>
 </div>
