@@ -24,7 +24,7 @@ def install():
         output_glpk = glpk_install.stdout
         print(output_glpk)
 
-    except (error):
+    except error:
 
         print(error)
 

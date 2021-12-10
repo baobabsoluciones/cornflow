@@ -16,7 +16,6 @@ flask-cors
 Flask-Migrate
 flask-inflate
 Flask-RESTful
-Flask-Script
 Flask-SQLAlchemy
 gevent
 greenlet

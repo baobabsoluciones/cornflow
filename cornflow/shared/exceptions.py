@@ -45,7 +45,7 @@ class InvalidPatch(InvalidUsage):
     error = "The json patch sent is not valid"
 
 
-def _initialize_errorhandlers(app):
+def initialize_errorhandlers(app):
     @app.errorhandler(InvalidUsage)
     @app.errorhandler(ObjectDoesNotExist)
     @app.errorhandler(NoPermission)

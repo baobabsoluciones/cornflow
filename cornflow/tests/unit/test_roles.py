@@ -16,7 +16,7 @@ from cornflow.shared.const import (
     ROLES_MAP,
     VIEWER_ROLE,
 )
-from cornflow.tests.const import PERMISSION_URL, ROLES_URL, USER_ROLE_URL
+from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 

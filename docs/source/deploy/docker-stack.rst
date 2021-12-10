@@ -92,3 +92,4 @@ The postgresql environment variables included in ``docker-compose.yml`` are::
 The postgresql deployment requires mounting one volume linked to the directory created on the host::
 
     postgres_cf_data:/var/lib/postgresql/data/ - This volume stores the database files
+

@@ -1,6 +1,3 @@
-# Imports from sqlalchemy
-from sqlalchemy.sql import expression
-
 # Imports from internal modules
 from .meta_model import TraceAttributes
 from .roles import UserRoleModel

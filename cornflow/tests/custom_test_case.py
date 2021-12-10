@@ -9,8 +9,6 @@ from flask_testing import TestCase
 import json
 import jwt
 from unittest.mock import patch, Mock
-import cProfile
-import pstats
 
 # Import from internal modules
 from cornflow.app import (
@@ -20,7 +18,7 @@ from cornflow.app import (
     register_roles,
     register_views,
 )
-from cornflow.models import UserModel, UserRoleModel
+from cornflow.models import UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
@@ -96,7 +94,8 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-    def create_role(self, user_id, role_id):
+    @staticmethod
+    def create_role(user_id, role_id):
 
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(

@@ -363,10 +363,12 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
 
 class PuLPLogSchema(unittest.TestCase):
-    def solve_model(self, input_data, config):
+    @staticmethod
+    def solve_model(input_data, config):
         return solve_model(input_data, config)
 
-    def dump_progress(self, log_dict):
+    @staticmethod
+    def dump_progress(log_dict):
         LS = LogSchema()
         return LS.load(log_dict)
 
@@ -376,7 +378,7 @@ class PuLPLogSchema(unittest.TestCase):
 
         config = dict(solver="PULP_CBC_CMD", timeLimit=10)
         solution, log, log_dict = self.solve_model(data, config)
-        loaded_data = self.dump_progress(log_dict)
+        loaded_data = self.dump_progress()
         self.assertEqual(loaded_data["solver"], "CBC")
         self.assertEqual(loaded_data["version"], "2.9.0")
         matrix_keys = {"nonzeros", "constraints", "variables"}
@@ -386,7 +388,7 @@ class PuLPLogSchema(unittest.TestCase):
     def test_progress2(self):
         with open("./cornflow/tests/data/gc_50_3_log.json", "r") as f:
             data = json.load(f)
-        loaded_data = self.dump_progress(data)
+        loaded_data = self.dump_progress()
         self.assertEqual(loaded_data["solver"], "CPLEX")
         self.assertEqual(type(loaded_data["progress"]["Node"][0]), str)
         self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)

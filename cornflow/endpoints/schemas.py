@@ -6,13 +6,13 @@ Endpoints to get the schemas
 from cornflow_client.airflow.api import Airflow
 from flask import current_app
 from flask_apispec.views import MethodResource
-from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec import marshal_with, doc
 import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..shared.exceptions import AirflowError
-from ..schemas.schemas import SchemaOneApp, SchemaRequest, SchemaListApp
+from ..schemas.schemas import SchemaOneApp, SchemaListApp
 
 
 class SchemaEndpoint(MetaResource, MethodResource):

@@ -98,10 +98,10 @@ class UserRoleModel(TraceAttributes):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user = db.relationship("UserModel")
+    user = db.relationship("UserModel", viewonly=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleModel")
+    role = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
         """

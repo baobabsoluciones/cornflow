@@ -1,15 +1,21 @@
-from flask_testing import LiveServerTestCase
+# Full imports
 import cornflow_client as cf
-import json
 
-from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
+# External libraries
+from flask_testing import LiveServerTestCase
+
+# Internal modules
+from cornflow.app import (
+    create_app,
+    register_actions,
+    register_base_assignations,
+    register_roles,
+    register_views,
+)
+from cornflow.models import UserRoleModel
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import PREFIX
-
-from cornflow.models import UserModel, UserRoleModel
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL
 
 
 class CustomTestCaseLive(LiveServerTestCase):
@@ -31,7 +37,11 @@ class CustomTestCaseLive(LiveServerTestCase):
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
-        AccessInitialization().run()
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
         user_data = dict(
             username="testname",
             email="test@test.com",
