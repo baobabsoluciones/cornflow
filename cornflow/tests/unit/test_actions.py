@@ -7,6 +7,7 @@ from cornflow.endpoints import ActionListEndpoint
 from cornflow.shared.const import ACTIONS_MAP, ROLES_MAP
 from cornflow.tests.const import ACTIONS_URL
 from cornflow.tests.custom_test_case import CustomTestCase
+import os
 
 
 class TestActionsListEndpoint(CustomTestCase):
@@ -22,6 +23,9 @@ class TestActionsListEndpoint(CustomTestCase):
         super().tearDown()
 
     def test_get_actions_authorized(self):
+        print(os.getenv("FLASK_ENV"))
+        print(os.getenv("FLAS_APP"))
+        print(os.getenv("SQLALCHEMY_DATABASE_URI"))
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
             response = self.client.get(
