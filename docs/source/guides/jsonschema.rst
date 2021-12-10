@@ -350,3 +350,13 @@ Json-schema validations
 
 The json-schema are validated through their parent classes (:py:class:`~cornflow_client.core.instance.InstanceCore`, :py:class:`~cornflow_client.core.instance.SolutionCore`, :py:class:`~cornflow_client.core.instance.ApplicationCore`). This is usually done before solving a problem (e.g., see :py:func:`~cornflow_client.core.instance.ApplicationCore.solve`). In any case, the app user can choose to take advantage of the schema to validate the input or output at any point in time by using :py:func:`~cornflow_client.core.instance.InstanceCore.check_schema` or :py:func:`~cornflow_client.core.instance.SolutionCore.check_schema`.
 
+Other jsonschema properties
+----------------------------
+
+In order to visualize more information on the user interface on ``cornflow-app`` we can use some other properties of the ``jsonschema`` in order to convey more information about our data structure.
+
+The main properties used are: ``title``, ``description`` and ``$comment``:
+
+- We use the ``title`` property to set up a meaningful name for the table columns on the data tables.
+- We use the ``description`` property to give a description of the table or fields of the data tables.
+- We use the ``$comment`` property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.
