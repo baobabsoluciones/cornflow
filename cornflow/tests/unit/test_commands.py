@@ -5,7 +5,7 @@ from cornflow.app import (
     create_service_user,
     create_admin_user,
     register_actions,
-    register_base_assignations,
+    access_init,
     register_roles,
     register_views,
 )
@@ -137,9 +137,7 @@ class TestCommands(TestCase):
             self.assertEqual(ROLES_MAP[r.id], r.name)
 
     def test_base_permissions_assignation(self):
-        self.runner.invoke(register_actions)
-        self.runner.invoke(register_views)
-        self.runner.invoke(register_base_assignations)
+        self.runner.invoke(access_init)
 
         for base in BASE_PERMISSION_ASSIGNATION:
             for view in self.resources:

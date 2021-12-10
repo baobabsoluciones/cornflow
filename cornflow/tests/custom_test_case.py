@@ -11,13 +11,7 @@ import jwt
 from unittest.mock import patch, Mock
 
 # Import from internal modules
-from cornflow.app import (
-    create_app,
-    register_actions,
-    register_base_assignations,
-    register_roles,
-    register_views,
-)
+from cornflow.app import create_app, access_init
 from cornflow.models import UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
@@ -49,10 +43,7 @@ class CustomTestCase(TestCase):
     def setUp(self):
         db.create_all()
         self.runner = create_app().test_cli_runner()
-        self.runner.invoke(register_roles)
-        self.runner.invoke(register_actions)
-        self.runner.invoke(register_views)
-        self.runner.invoke(register_base_assignations)
+        self.runner.invoke(access_init)
         data = {
             "username": "testname",
             "email": "test@test.com",

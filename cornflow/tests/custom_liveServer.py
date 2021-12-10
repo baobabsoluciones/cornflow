@@ -5,13 +5,7 @@ import cornflow_client as cf
 from flask_testing import LiveServerTestCase
 
 # Internal modules
-from cornflow.app import (
-    create_app,
-    register_actions,
-    register_base_assignations,
-    register_roles,
-    register_views,
-)
+from cornflow.app import create_app, access_init
 from cornflow.models import UserRoleModel
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
@@ -38,10 +32,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         if create_all:
             db.create_all()
         self.runner = create_app().test_cli_runner()
-        self.runner.invoke(register_roles)
-        self.runner.invoke(register_actions)
-        self.runner.invoke(register_views)
-        self.runner.invoke(register_base_assignations)
+        self.runner.invoke(access_init)
         user_data = dict(
             username="testname",
             email="test@test.com",
