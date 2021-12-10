@@ -139,7 +139,7 @@ original code:
     if layover:
         total_cost += layover_cost
 
-In general, excessive indentation makes the code hard to review and understand. One way to do that with an if inside a for is with something like this::
+In general, excessive indentation makes the code hard to review and understand. One way to do that with an if inside a for is with something like this:
 
 .. code-block:: python
 
@@ -225,7 +225,7 @@ better:
 Filtering lists or dictionaries
 ----------------------------------
 
-Filtering lists with list comprehensions is the easiest way to filter one. With pytups, you make it a little shorter.
+Filtering lists with list comprehensions is the easiest way to filter one. With `pytups`, you make it a little shorter.
 
 For example, instead of:
 
@@ -241,3 +241,39 @@ if `used_routes` is a TupList:
 
     used_routes = used_routes.vfilter(lambda r: keep.get(r, False))
 
+Working with SuperDicts
+------------------------
+
+Accessing properties
+.......................
+
+If we have our data in `SuperDicts` there is a set of operations that can be done in a much simplier way.
+
+For example, instead of:
+
+.. code-block:: python
+
+    def get_real_end_timeslot(self) -> SuperDict:
+        return SuperDict(
+            {
+                (k1, k2): get_date_time_from_string(v["end_timeslot"])
+                for (k1, k2), v in self.data["production_scheduling"].items()
+            }
+        )
+Where we are taking one of the keys of a nested dictionary can be done:
+
+.. code-block:: python
+
+    def get_real_end_timeslot(self) -> SuperDict:
+        return (
+            self.data["production_scheduling"]
+            .get_property("end_timeslot")
+            .vapply(lambda v: get_date_time_from_string(v))
+        )
+And if we set up a method to access the properties as we have in some `Instances` (`_get_property`), we can have:
+
+.. code-block:: python
+    def get_real_end_timeslot(self) -> SuperDict:
+        return self._get_property("production_scheduling", "end_timeslot").vapply(
+            lambda v: get_date_time_from_string(v)
+        )
