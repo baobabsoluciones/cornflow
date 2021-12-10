@@ -1,8 +1,13 @@
 import json
 
 from flask_testing import TestCase
-from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
+from cornflow.app import (
+    create_app,
+    register_actions,
+    register_base_assignations,
+    register_roles,
+    register_views,
+)
 from cornflow.models import (
     CaseModel,
     ExecutionModel,
@@ -32,7 +37,11 @@ class TestUserEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
 
         self.url = USER_URL
         self.model = UserModel
@@ -350,7 +359,11 @@ class TestUserModel(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
 
         self.url = USER_URL
         self.model = UserModel

@@ -7,8 +7,13 @@ from flask_testing import TestCase
 import json
 
 # Import from internal modules
-from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
+from cornflow.app import (
+    create_app,
+    register_actions,
+    register_base_assignations,
+    register_roles,
+    register_views,
+)
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow.shared.utils import db
@@ -23,7 +28,11 @@ class TestSignUp(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
         self.data = {
             "username": "testname",
             "email": "test@test.com",

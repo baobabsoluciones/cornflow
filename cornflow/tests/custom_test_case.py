@@ -13,8 +13,13 @@ import cProfile
 import pstats
 
 # Import from internal modules
-from cornflow.app import create_app
-from cornflow.commands import access_initialization_command
+from cornflow.app import (
+    create_app,
+    register_actions,
+    register_base_assignations,
+    register_roles,
+    register_views,
+)
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
@@ -45,7 +50,11 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_initialization_command(verbose=0)
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
+        self.runner.invoke(register_actions)
+        self.runner.invoke(register_views)
+        self.runner.invoke(register_base_assignations)
         data = {
             "username": "testname",
             "email": "test@test.com",
