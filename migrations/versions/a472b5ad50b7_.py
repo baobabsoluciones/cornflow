@@ -9,7 +9,7 @@ Create Date: 2021-01-21 13:25:45.815775
 import sqlalchemy as sa
 from alembic import op
 
-from cornflow.shared.const import DEFAULT_EXECUTION_CODE
+# TODO: import DEFAULT EXECUTION CODE HERE
 
 # revision identifiers, used by Alembic.
 revision = "a472b5ad50b7"
@@ -26,7 +26,7 @@ def upgrade():
             "state",
             sa.SmallInteger(),
             nullable=False,
-            server_default=sa.text(str(DEFAULT_EXECUTION_CODE)),
+            server_default=sa.text(str(0)),
         ),
     )
 
