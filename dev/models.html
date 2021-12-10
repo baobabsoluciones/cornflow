@@ -236,15 +236,33 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="cornflow.models.user.UserModel.is_admin">
+<code class="sig-name descname">is_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean if a user is an admin or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow.models.user.UserModel.is_service_user">
+<code class="sig-name descname">is_service_user</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_service_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean if a user is a super user or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow.models.user.UserModel.comes_from_ldap">
+<code class="sig-name descname">comes_from_ldap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.comes_from_ldap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean if the user comes from ldap or not</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="cornflow.models.user.UserModel.check_hash">
 <code class="sig-name descname">check_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_hash" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to check if the hash stored in the database is the same as the password given by the user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The password given by the user.</p>
+<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the password given by the user.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>If the password is the same or not.</p>
+<dd class="field-even"><p>if the password is the same or not.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
@@ -258,7 +276,7 @@ create a new user.</p>
 <dd><p>Query to get all users</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A list with all the users.</p>
+<dd class="field-odd"><p>a list with all the users.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>list(<a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a>)</p>
@@ -275,7 +293,7 @@ create a new user.</p>
 <dd class="field-odd"><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – ID of the user</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The user</p>
+<dd class="field-even"><p>the user object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
@@ -292,7 +310,7 @@ create a new user.</p>
 <dd class="field-odd"><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – User email</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The user</p>
+<dd class="field-even"><p>the user object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
@@ -303,49 +321,28 @@ create a new user.</p>
 <dl class="py method">
 <dt id="cornflow.models.user.UserModel.get_one_user_by_username">
 <em class="property">static </em><code class="sig-name descname">get_one_user_by_username</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_username" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>username</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
+<dd><p>Returns one user (object) given a username
+:param str username: the user username that we are quering with
+:return: the user object
+:rtype: <a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow.models.user.UserModel.check_username_in_use">
 <em class="property">static </em><code class="sig-name descname">check_username_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_username_in_use" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
+<dd><p>Checks if a username is already in use
+:param str username: the username to check
+:return: a boolean if the username is in use
+:rtype: bool</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow.models.user.UserModel.check_email_in_use">
 <em class="property">static </em><code class="sig-name descname">check_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_in_use" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
+<dd><p>Checks if a email is already in use
+:param str email: the email to check
+:return: a boolean if the username is in use
+:rtype: bool</p>
 </dd></dl>
 
 </dd></dl>
