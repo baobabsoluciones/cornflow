@@ -87,16 +87,16 @@ class Auth:
     @staticmethod
     def get_permission_for_request(req, user_id):
         method, url = Auth.get_request_info(req)
-        user_role = UserRoleModel.get_one_user(user_id=user_id)
-        if user_role is None:
+        user_roles = UserModel.get_one_user(user_id).roles
+        if user_roles is None or user_roles == {}:
             raise NoPermission("You do not have permission to access this endpoint")
 
         action_id = PERMISSION_METHOD_MAP[method]
         view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
 
-        for role in user_role:
+        for role in user_roles:
             has_permission = PermissionViewRoleModel.get_permission(
-                role.role_id, view_id, action_id
+                role, view_id, action_id
             )
 
             if has_permission:
