@@ -43,4 +43,4 @@ jobs:
       run: python -m unittest discover -s cornflow.tests.unit
       env:
         FLASK_ENV: testing
-        DATABASE_URL: postgres://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
+        DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
