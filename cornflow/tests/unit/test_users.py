@@ -375,6 +375,19 @@ class TestUserModel(TestCase):
 
         self.login_keys = ["username", "password"]
 
+        self.viewer = dict(
+            username="aViewer", email="viewer@test.com", password="testpassword"
+        )
+
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(self.viewer),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.viewer["id"] = response.json["id"]
+
     def tearDown(self):
         db.session.remove()
         db.drop_all()
@@ -530,3 +543,14 @@ class TestUserModel(TestCase):
 
         user_role = UserRoleModel.query.filter_by(user_id=user_id).first()
         self.assertIsNone(user_role)
+
+    def test_user_roles(self):
+        response = self.log_in(self.admin)
+        user_id = response.json["id"]
+        user = UserModel.query.get(user_id)
+        self.assertEqual(user.roles, {2: "planner", 3: "admin"})
+
+    def test_user_no_roles(self):
+        role = UserRoleModel.query.filter_by(user_id=self.viewer["id"]).delete()
+        user = UserModel.query.get(self.viewer["id"])
+        self.assertEqual(user.roles, {})

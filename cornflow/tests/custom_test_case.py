@@ -683,5 +683,5 @@ class LoginTestCases:
             self.assertAlmostEqual(
                 datetime.utcnow(),
                 datetime.utcfromtimestamp(decoded_token["iat"]),
-                delta=timedelta(seconds=1),
+                delta=timedelta(seconds=2),
             )
