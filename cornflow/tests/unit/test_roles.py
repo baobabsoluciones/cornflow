@@ -335,7 +335,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         }
         user_response = self.create_user(data)
 
-        self.create_role(user_response.json["id"], role)
+        self.assign_role(user_response.json["id"], role)
 
         self.client.delete(
             self.url + str(user_response.json["id"]) + "/" + str(PLANNER_ROLE) + "/",
