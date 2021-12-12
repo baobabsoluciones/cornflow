@@ -10,7 +10,7 @@ import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import UserModel, UserRoleModel
+from ..models import UserModel, UserRoleModel, RoleModel
 from ..schemas.user import UserSchema, LoginEndpointRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_DB, AUTH_LDAP
@@ -87,6 +87,9 @@ class LoginEndpoint(MetaResource, MethodResource):
         # regardless whether the user is new or not:
         # we update the roles it has according to ldap
         roles = ldap_obj.get_user_roles(username)
+        print(UserModel.query.all())
+        print(RoleModel.query.all())
+
         try:
             # we first remove all roles for the user
             UserRoleModel.del_one_user(user.id)
