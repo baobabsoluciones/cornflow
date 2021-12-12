@@ -87,7 +87,6 @@ class LoginEndpoint(MetaResource, MethodResource):
         # regardless whether the user is new or not:
         # we update the roles it has according to ldap
         roles = ldap_obj.get_user_roles(username)
-        print(roles)
         try:
             # we first remove all roles for the user
             UserRoleModel.del_one_user(user.id)
@@ -98,7 +97,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             # we only commit if everything went well
             db.session.commit()
         except Exception as e:
-            print(e)
+            print(type(e))
             # or we rollback
             db.session.rollback()
         return user

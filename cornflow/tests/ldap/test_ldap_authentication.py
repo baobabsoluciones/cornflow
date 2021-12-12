@@ -22,6 +22,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def setUp(self):
         super().setUp()
         self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles)
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {"username": "planner", "password": "planner1234"}
 
@@ -64,7 +65,6 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertNotEqual(len(user_table_before), len(user_table_after))
 
     def test_role_registration(self):
-        self.runner.invoke(register_roles)
         user_role_before = UserRoleModel.query.all()
 
         super().test_successful_log_in()
