@@ -17,11 +17,11 @@ def register_roles_command(verbose):
 
     db.session.commit()
 
-    # if "postgres" in str(db.session.get_bind()):
-    #     db.engine.execute(
-    #         "SELECT setval(pg_get_serial_sequence('roles', 'id'), MAX(id)) FROM roles;"
-    #     )
-    #     db.session.commit()
+    if "postgres" in str(db.session.get_bind()):
+        db.engine.execute(
+            "SELECT setval(pg_get_serial_sequence('roles', 'id'), MAX(id)) FROM roles;"
+        )
+        db.session.commit()
 
     if verbose:
         if len(roles_to_register) > 0:

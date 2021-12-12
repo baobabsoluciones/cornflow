@@ -24,11 +24,11 @@ def register_views_command(verbose):
 
     db.session.commit()
 
-    # if "postgres" in str(db.session.get_bind()):
-    #     db.engine.execute(
-    #         "SELECT setval(pg_get_serial_sequence('api_view', 'id'), MAX(id)) FROM api_view;"
-    #     )
-    #     db.session.commit()
+    if "postgres" in str(db.session.get_bind()):
+        db.engine.execute(
+            "SELECT setval(pg_get_serial_sequence('api_view', 'id'), MAX(id)) FROM api_view;"
+        )
+        db.session.commit()
 
     if verbose == 1:
         if len(views_to_register) > 0:

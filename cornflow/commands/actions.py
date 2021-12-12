@@ -18,11 +18,11 @@ def register_actions_command(verbose):
 
     db.session.commit()
 
-    # if "postgres" in str(db.session.get_bind()):
-    #     db.engine.execute(
-    #         "SELECT setval(pg_get_serial_sequence('actions', 'id'), MAX(id)) FROM actions;"
-    #     )
-    #     db.session.commit()
+    if "postgres" in str(db.session.get_bind()):
+        db.engine.execute(
+            "SELECT setval(pg_get_serial_sequence('actions', 'id'), MAX(id)) FROM actions;"
+        )
+        db.session.commit()
 
     if verbose == 1:
         if len(actions_to_register) > 0:

@@ -86,7 +86,7 @@ class CustomTestCase(TestCase):
         )
 
     @staticmethod
-    def create_role(user_id, role_id):
+    def assign_role(user_id, role_id):
 
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(
@@ -112,7 +112,7 @@ class CustomTestCase(TestCase):
             "password": "testpassword",
         }
         response = self.create_user(data)
-        self.create_role(response.json["id"], role_id)
+        self.assign_role(response.json["id"], role_id)
 
         data.pop("email")
         return self.client.post(
