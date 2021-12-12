@@ -91,13 +91,16 @@ class LoginEndpoint(MetaResource, MethodResource):
             # we first remove all roles for the user
             UserRoleModel.del_one_user(user.id)
             # then we create an assignment for each role it has access to
+            print(roles)
             for role in roles:
                 user_role = UserRoleModel({"user_id": user.id, "role_id": role})
+                print(user_role)
                 db.session.add(user_role)
             # we only commit if everything went well
             db.session.commit()
         except Exception as e:
             print(type(e))
+            print(e)
             # or we rollback
             db.session.rollback()
         return user

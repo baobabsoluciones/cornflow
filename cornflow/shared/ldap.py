@@ -115,17 +115,12 @@ class LDAP:
         # first element is the cn string, the second is the USER_BASE
         # we only want the cn string
         roles = [el.cn[0] for el in conn.entries]
-        print("ROLES:", roles)
         env_to_role = {
             "LDAP_GROUP_TO_ROLE_" + str.upper(ROLES_MAP[k]): k
             for k in ALL_DEFAULT_ROLES
         }
-        print("ENV_TO_ROLE:", env_to_role)
         group_to_role = {self.config.get(k, ""): v for k, v in env_to_role.items()}
-        print("GROUP_TO_ROLE:", group_to_role)
         relevant_groups = group_to_role.keys() & set(roles)
-        print("RELEVANT_GROUPS:", relevant_groups)
-        print("RETURN:", [group_to_role[k] for k in relevant_groups])
         return [group_to_role[k] for k in relevant_groups]
 
     def authenticate(self, user, password):

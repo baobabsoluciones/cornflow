@@ -45,7 +45,7 @@ jobs:
         LDAP_EMAIL_ATTRIBUTE: mail
         LDAP_USER_OBJECT_CLASS: inetOrgPerson
         LDAP_GROUP_ATTRIBUTE: cn
-        LDAP_GROUP_TO_ROLE_SERVICE: service
+        LDAP_GROUP_TO_ROLE_SERVICE: services
         LDAP_GROUP_TO_ROLE_ADMIN: administrators
         LDAP_GROUP_TO_ROLE_VIEWER: viewers
         LDAP_GROUP_TO_ROLE_PLANNER: planners
