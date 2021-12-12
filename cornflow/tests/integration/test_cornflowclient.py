@@ -144,10 +144,12 @@ class TestCornflowClient(TestCornflowClientBasic):
     def test_new_instance(self):
         return self.create_new_instance("./cornflow/tests/data/test_mps.mps")
 
-    def test_get_instance__data(self):
-        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
-        response = self.client.get_api_for_id("instance", instance["id"], "data")
-        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+    # TODO: reactivate test with new version of cornflow client which allows to pass
+    #  optional arguments for the headers of the request
+    # def test_get_instance__data(self):
+    #     instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+    #     response = self.client.get_api_for_id("instance", instance["id"], "data")
+    #     self.assertEqual(response.headers["Content-Encoding"], "gzip")
 
     def test_delete_instance(self):
         instance = self.test_new_instance()
@@ -378,7 +380,7 @@ class PuLPLogSchema(unittest.TestCase):
 
         config = dict(solver="PULP_CBC_CMD", timeLimit=10)
         solution, log, log_dict = self.solve_model(data, config)
-        loaded_data = self.dump_progress()
+        loaded_data = self.dump_progress(log_dict)
         self.assertEqual(loaded_data["solver"], "CBC")
         self.assertEqual(loaded_data["version"], "2.9.0")
         matrix_keys = {"nonzeros", "constraints", "variables"}
@@ -388,7 +390,7 @@ class PuLPLogSchema(unittest.TestCase):
     def test_progress2(self):
         with open("./cornflow/tests/data/gc_50_3_log.json", "r") as f:
             data = json.load(f)
-        loaded_data = self.dump_progress()
+        loaded_data = self.dump_progress(data)
         self.assertEqual(loaded_data["solver"], "CPLEX")
         self.assertEqual(type(loaded_data["progress"]["Node"][0]), str)
         self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)
