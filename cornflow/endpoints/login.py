@@ -97,8 +97,8 @@ class LoginEndpoint(MetaResource, MethodResource):
                 db.session.add(user_role)
             # we only commit if everything went well
             db.session.commit()
-        except:
+        except Exception as e:
+            print(e)
             # or we rollback
-            print("THERE IS A ROLLBACK")
             db.session.rollback()
         return user
