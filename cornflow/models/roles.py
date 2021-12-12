@@ -239,7 +239,12 @@ class UserRoleModel(TraceAttributes):
         :return: the representation
         :rtype: str
         """
-        return self.user.username + " has role " + self.role.name
+        try:
+            assignation = self.user.username + " has role " + self.role.name
+            return assignation
+        except AttributeError:
+            assignation = self.user_id + "has role" + self.role_id
+            return assignation
 
     def __str__(self):
         """
@@ -248,4 +253,9 @@ class UserRoleModel(TraceAttributes):
         :return: the string representation
         :rtype: str
         """
-        return self.user.username + " has role " + self.role.name
+        try:
+            assignation = self.user.username + " has role " + self.role.name
+            return assignation
+        except AttributeError:
+            assignation = self.user_id + "has role" + self.role_id
+            return assignation
