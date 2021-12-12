@@ -22,7 +22,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
     def setUp(self):
         super().setUp()
         self.runner = create_app().test_cli_runner()
-        self.runner.invoke(register_roles)
+        self.runner.invoke(register_roles, ["-v", 1])
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {"username": "planner", "password": "planner1234"}
 
