@@ -243,7 +243,7 @@ class UserRoleModel(TraceAttributes):
             assignation = self.user.username + " has role " + self.role.name
             return assignation
         except AttributeError:
-            assignation = self.user_id + "has role" + self.role_id
+            assignation = str(self.user_id) + "has role" + str(self.role_id)
             return assignation
 
     def __str__(self):
@@ -257,5 +257,5 @@ class UserRoleModel(TraceAttributes):
             assignation = self.user.username + " has role " + self.role.name
             return assignation
         except AttributeError:
-            assignation = self.user_id + "has role" + self.role_id
+            assignation = str(self.user_id) + "has role" + str(self.role_id)
             return assignation
