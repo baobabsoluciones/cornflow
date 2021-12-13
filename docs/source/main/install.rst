@@ -16,16 +16,16 @@ Download the Cornflow project::
 
     git clone git@github.com:baobabsoluciones/cornflow-server.git
     cd corn
-    python3 -m venv cfvenv
-    cfvenv/bin/pip3 install -r requirements-dev.txt
+    python3 -m venv venv
+    venv/bin/pip3 install -r requirements-dev.txt
 
 activate the virtual environment::
 
-    source cfvenv/bin/activate
+    source venv/bin/activate
 
 or, in windows::
 
-    cfvenv/Scripts/activate
+    venv/Scripts/activate
 
 
 Setup cornflow database
@@ -35,20 +35,20 @@ This local example assumes sqlite as database engine. For an example of postgres
 
 Initialize the database::
 
-    source cfvenv/bin/activate
+    source venv/bin/activate
     export FLASK_APP=cornflow.app
     export DATABASE_URL=sqlite:///cornflow.db
-    python manage.py db upgrade
-    python manage.py access_init
-    python manage.py create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
-    python manage.py create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
+    flask db upgrade
+    flask access_init -v 0
+    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password -v 0
+    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password -v 0
 
 Launch cornflow server
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Each time you run the flask server, execute the following::
 
-    source cfvenv/bin/activate
+    source venv/bin/activate
     export FLASK_APP=cornflow.app
     export FLASK_ENV=development
     export DATABASE_URL=sqlite:///cornflow.db
