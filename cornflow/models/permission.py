@@ -41,3 +41,6 @@ class PermissionViewRoleModel(TraceAttributes):
 
     def __repr__(self):
         return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
+
+
+# TODO: add permissions for DAGs

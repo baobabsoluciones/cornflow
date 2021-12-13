@@ -84,6 +84,7 @@ class Auth:
 
     @staticmethod
     def get_permission_for_request(req, user_id):
+        # TODO: check DAG permission as well
         method, url = Auth.get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
