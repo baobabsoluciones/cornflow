@@ -4,6 +4,7 @@ import subprocess
 import os
 import sys
 from cryptography.fernet import Fernet
+from flask import current_app
 from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
@@ -111,6 +112,7 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
+        print(current_app.config)
 
 # execute gunicorn application
 os.system(
