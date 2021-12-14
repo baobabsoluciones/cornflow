@@ -45,12 +45,15 @@ def register_deployed_dags_command(verbose):
     ]
     processed_dags = [DeployedDAG({"id": dag, "description": None}) for dag in dag_list]
 
-    if len(processed_dags) > 0:
-        db.session.bulk_save_objects(processed_dags)
+    print(processed_dags)
+
+    # if len(processed_dags) > 0:
+    #     db.session.bulk_save_objects(processed_dags)
 
     try:
         db.session.commit()
     except IntegrityError as e:
+        db.session.rollback()
         print("INTEGRITY ERROR")
         print(e)
         print(processed_dags)

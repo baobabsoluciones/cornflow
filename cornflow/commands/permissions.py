@@ -1,4 +1,6 @@
 def register_base_permissions_command(verbose):
+    from sqlalchemy.exc import IntegrityError
+
     from ..endpoints import resources
     from ..models import ApiViewModel, PermissionViewRoleModel
     from ..shared.const import BASE_PERMISSION_ASSIGNATION, EXTRA_PERMISSION_ASSIGNATION
@@ -50,7 +52,10 @@ def register_base_permissions_command(verbose):
     if len(permissions_to_register) > 0:
         db.session.bulk_save_objects(permissions_to_register)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.commit()
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(

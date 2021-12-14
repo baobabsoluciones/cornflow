@@ -1,4 +1,6 @@
 def register_actions_command(verbose):
+    from sqlalchemy.exc import IntegrityError
+
     from ..models import ActionModel
     from ..shared.const import ACTIONS_MAP
     from ..shared.utils import db
@@ -16,7 +18,10 @@ def register_actions_command(verbose):
     if len(actions_to_register) > 0:
         db.session.bulk_save_objects(actions_to_register)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.commit()
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(

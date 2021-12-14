@@ -4,7 +4,6 @@ import subprocess
 import os
 import sys
 from cryptography.fernet import Fernet
-from flask import current_app
 from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
