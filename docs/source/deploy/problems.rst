@@ -50,9 +50,9 @@ Running cornflow-server
 
 Problem: Users were not created when cornflow started
 
-    Error: usage: manage.py [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} ...
+    Error: usage: flask [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} ...
 
-    Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of python mange.py create_admin_user/create_service_user.
+    Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of flask create_admin_user/create_service_user.
 
 Flower 
 ^^^^^^^^^^

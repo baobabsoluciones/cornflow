@@ -9,13 +9,13 @@ class PermissionViewRoleModel(TraceAttributes):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     action_id = db.Column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
-    action = db.relationship("ActionModel")
+    action = db.relationship("ActionModel", viewonly=True)
 
     api_view_id = db.Column(db.Integer, db.ForeignKey("api_view.id"), nullable=True)
-    api_view = db.relationship("ApiViewModel")
+    api_view = db.relationship("ApiViewModel", viewonly=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleModel")
+    role = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
         super().__init__()

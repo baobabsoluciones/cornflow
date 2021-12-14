@@ -1,5 +1,4 @@
 import unittest
-import json
 
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.const import SCHEMA_URL

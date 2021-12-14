@@ -7,7 +7,8 @@ from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
-from cornflow.commands.commands import AccessInitialization, create_user_with_role
+from cornflow.commands.access import access_init_command
+from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
 ENV = os.getenv("FLASK_ENV", "development")
@@ -33,7 +34,10 @@ CORNFLOW_DB_PORT = os.getenv("CORNFLOW_DB_PORT", "5432")
 CORNFLOW_DB_USER = os.getenv("CORNFLOW_DB_USER", "cornflow")
 CORNFLOW_DB_PASSWORD = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
 CORNFLOW_DB = os.getenv("CORNFLOW_DB", "cornflow")
-CORNFLOW_DB_CONN = os.getenv("CORNFLOW_DB_CONN",f"postgres://{CORNFLOW_DB_USER}:{CORNFLOW_DB_PASSWORD}@{CORNFLOW_DB_HOST}:{CORNFLOW_DB_PORT}/{CORNFLOW_DB}")
+CORNFLOW_DB_CONN = os.getenv(
+    "CORNFLOW_DB_CONN",
+    f"postgresql://{CORNFLOW_DB_USER}:{CORNFLOW_DB_PASSWORD}@{CORNFLOW_DB_HOST}:{CORNFLOW_DB_PORT}/{CORNFLOW_DB}",
+)
 os.environ["DATABASE_URL"] = CORNFLOW_DB_CONN
 
 # Platform auth config and service users
@@ -78,7 +82,7 @@ if CORNFLOW_LOGGING == "file":
         out_logrotate = logrotate.stdout
         print(out_logrotate)
 
-    except (error):
+    except error:
         print(error)
 
 # make initdb, access control and/or migrations
@@ -86,7 +90,7 @@ app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
     migrate = Migrate(app=app, db=db)
     upgrade()
-    AccessInitialization.run(self=AccessInitialization, verbose=1)
+    access_init_command(0)
     # create user if auth type is db
     if AUTH == 1:
         # create cornflow admin user

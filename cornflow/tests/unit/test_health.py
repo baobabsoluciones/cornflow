@@ -3,7 +3,7 @@ from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.shared.utils import db
 from cornflow.tests.const import HEALTH_URL
-from cornflow.shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
+from cornflow.shared.const import STATUS_HEALTHY
 
 
 class TestHealth(TestCase):

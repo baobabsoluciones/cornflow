@@ -3,10 +3,12 @@ External endpoint for the user to login to the cornflow webserver
 """
 
 # Import from libraries
+import logging as log
+
 from flask import g, current_app
 from flask_apispec import use_kwargs, doc
 from flask_apispec.views import MethodResource
-import logging as log
+from sqlalchemy.exc import IntegrityError
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -87,6 +89,7 @@ class LoginEndpoint(MetaResource, MethodResource):
         # regardless whether the user is new or not:
         # we update the roles it has according to ldap
         roles = ldap_obj.get_user_roles(username)
+
         try:
             # we first remove all roles for the user
             UserRoleModel.del_one_user(user.id)
@@ -96,7 +99,9 @@ class LoginEndpoint(MetaResource, MethodResource):
                 db.session.add(user_role)
             # we only commit if everything went well
             db.session.commit()
-        except:
+        except IntegrityError as e:
+            log.error("Foreign keys error")
+            log.error(e)
             # or we rollback
             db.session.rollback()
         return user

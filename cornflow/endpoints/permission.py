@@ -3,7 +3,7 @@
 """
 
 # Import from libraries
-from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec import marshal_with, doc
 from flask_apispec.views import MethodResource
 
 # Import from internal modules
@@ -40,6 +40,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
         """
         return PermissionViewRoleModel.get_all_objects()
 
+    @staticmethod
     def post(self):
         return EndpointNotImplemented()
 
