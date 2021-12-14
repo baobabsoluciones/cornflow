@@ -112,6 +112,8 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
+        os.environ["AIRFLOW_URL"] = AIRFLOW_URL
+        print("CURRENT CONFIG:")
         print(current_app.config)
 
 # execute gunicorn application
