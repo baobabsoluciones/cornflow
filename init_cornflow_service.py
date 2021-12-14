@@ -9,6 +9,7 @@ from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
 from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command
 from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
@@ -112,6 +113,7 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
+    register_deployed_dags_command(1)
 
 # execute gunicorn application
 os.system(
