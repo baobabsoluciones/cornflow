@@ -10,7 +10,9 @@ class QueryFiltersExecution(QueryFilters):
 
 
 class ConfigSchema(Schema):
-    solver = fields.Str(default="PULP_CBC_CMD", required=False)
+    solver = fields.Str(
+        dump_default="PULP_CBC_CMD", load_default="PULP_CBC_CMD", required=False
+    )
     mip = fields.Boolean(required=False)
     msg = fields.Boolean(required=False)
     warmStart = fields.Boolean(required=False)

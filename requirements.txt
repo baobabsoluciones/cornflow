@@ -1,6 +1,6 @@
 alembic==1.4.2
 aniso8601==8.0.0
-apispec==4.4.2
+apispec
 bcrypt==3.1.7
 certifi==2020.6.20
 cffi==1.14.0
@@ -9,7 +9,7 @@ click==7.1.2
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow-client@master
 cryptography>=3.3.2
 Flask==1.1.2
-flask-apispec==0.11.0
+flask-apispec
 Flask-Bcrypt==0.7.1
 flask-compress==1.9.0
 flask-cors==3.0.10
@@ -28,7 +28,7 @@ jsonpatch==1.32
 ldap3==2.9
 Mako==1.1.2
 MarkupSafe==1.1.1
-marshmallow==3.6.0
+marshmallow
 psycopg2==2.8.5
 PuLP
 pyasn1==0.4.8

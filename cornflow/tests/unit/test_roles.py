@@ -9,14 +9,14 @@ from cornflow.endpoints import (
     UserRoleListEndpoint,
     UserRoleDetailEndpoint,
 )
-from cornflow.models import RoleModel, UserRoleModel
+from cornflow.models import PermissionViewRoleModel, RoleModel, UserModel, UserRoleModel
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
     ROLES_MAP,
     VIEWER_ROLE,
 )
-from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
+from cornflow.tests.const import PERMISSION_URL, ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
@@ -378,10 +378,61 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         # give it all roles:
         for role in ROLES_MAP:
             self.create_role(user_id, role)
-        all_roles = UserRoleModel.get_one_user(user_id)
-        diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
+        all_roles = UserModel.get_one_user(user_id).roles
+        diff = set(r for r in all_roles).symmetric_difference(ROLES_MAP.keys())
         self.assertEqual(len(all_roles), len(ROLES_MAP))
         self.assertEqual(len(diff), 0)
         UserRoleModel.del_one_user(user_id)
-        all_roles = UserRoleModel.get_one_user(user_id)
-        self.assertEqual(all_roles, [])
+        all_roles = UserModel.get_one_user(user_id).roles
+        self.assertEqual(all_roles, {})
+
+
+class TestRolesModelMethods(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.url = ROLES_URL
+        self.model = RoleModel
+        self.payload = {"name": "test_role"}
+
+    def test_user_role_delete_cascade(self):
+        payload = {"user_id": self.user}
+        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.cascade_delete(
+            self.url,
+            self.model,
+            self.payload,
+            USER_ROLE_URL,
+            UserRoleModel,
+            payload,
+            "role_id",
+        )
+
+    def test_permission_delete_cascade(self):
+        self.token = self.create_user_with_role(ADMIN_ROLE)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
+        PermissionViewRoleModel(payload).save()
+
+        role = self.model.query.get(idx)
+        permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
+
+        self.assertIsNotNone(role)
+        self.assertIsNotNone(permission)
+
+        role.delete()
+
+        role = self.model.query.get(idx)
+        permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
+
+        self.assertIsNone(role)
+        self.assertIsNone(permission)
+
+    def test_repr_method(self):
+        self.token = self.create_user_with_role(ADMIN_ROLE)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.repr_method(idx, "test_role")
+
+    def test_str_method(self):
+        self.token = self.create_user_with_role(ADMIN_ROLE)
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        self.str_method(idx, "test_role")

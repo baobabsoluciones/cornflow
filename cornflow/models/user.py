@@ -41,8 +41,29 @@ class UserModel(TraceAttributes):
     username = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
-    instances = db.relationship("InstanceModel", backref="users", lazy=True)
+
+    instances = db.relationship(
+        "InstanceModel",
+        backref="users",
+        lazy=True,
+        primaryjoin="and_(UserModel.id==InstanceModel.user_id, "
+        "InstanceModel.deleted_at==None)",
+        cascade="all,delete",
+    )
+
+    cases = db.relationship(
+        "CaseModel",
+        backref="users",
+        lazy=True,
+        primaryjoin="and_(UserModel.id==CaseModel.user_id, CaseModel.deleted_at==None)",
+        cascade="all,delete",
+    )
+
     user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
+
+    @property
+    def roles(self):
+        return {r.role.id: r.role.name for r in self.user_roles}
 
     def __init__(self, data):
 
@@ -84,12 +105,21 @@ class UserModel(TraceAttributes):
         db.session.commit()
 
     def is_admin(self):
+        """
+        Returns a boolean if a user is an admin or not
+        """
         return UserRoleModel.is_admin(self.id)
 
     def is_service_user(self):
+        """
+        Returns a boolean if a user is a super user or not
+        """
         return UserRoleModel.is_service_user(self.id)
 
     def comes_from_ldap(self):
+        """
+        Returns a boolean if the user comes from ldap or not
+        """
         return self.password is None
 
     @staticmethod
@@ -97,8 +127,8 @@ class UserModel(TraceAttributes):
         """
         Method to generate the hash from the password.
 
-        :param str password: The password given by the user .
-        :return: The hashed password.
+        :param str password: the password given by the user .
+        :return: the hashed password.
         :rtype: str
         """
         if password is None:
@@ -109,8 +139,8 @@ class UserModel(TraceAttributes):
         """
         Method to check if the hash stored in the database is the same as the password given by the user
 
-        :param str password: The password given by the user.
-        :return: If the password is the same or not.
+        :param str password: the password given by the user.
+        :return: if the password is the same or not.
         :rtype: bool
         """
         return bcrypt.check_password_hash(self.password, password)
@@ -120,7 +150,7 @@ class UserModel(TraceAttributes):
         """
         Query to get all users
 
-        :return: A list with all the users.
+        :return: a list with all the users.
         :rtype: list(:class:`UserModel`)
         """
         return UserModel.query.filter_by(deleted_at=None)
@@ -131,7 +161,7 @@ class UserModel(TraceAttributes):
         Query to get the information of one user
 
         :param int idx: ID of the user
-        :return: The user
+        :return: the user object
         :rtype: :class:`UserModel`
         """
         return UserModel.query.filter_by(id=idx, deleted_at=None).first()
@@ -142,7 +172,7 @@ class UserModel(TraceAttributes):
         Query to get one user from the email
 
         :param str email: User email
-        :return: The user
+        :return: the user object
         :rtype: :class:`UserModel`
         """
         return UserModel.query.filter_by(email=email, deleted_at=None).first()
@@ -150,31 +180,30 @@ class UserModel(TraceAttributes):
     @staticmethod
     def get_one_user_by_username(username):
         """
-
-        :param username:
-        :type username:
-        :return:
-        :rtype:
+        Returns one user (object) given a username
+        :param str username: the user username that we are quering with
+        :return: the user object
+        :rtype: :class:`UserModel`
         """
         return UserModel.query.filter_by(username=username, deleted_at=None).first()
 
     @staticmethod
     def check_username_in_use(username):
         """
-
-        :param str username:
-        :return:
-        :rtype:
+        Checks if a username is already in use
+        :param str username: the username to check
+        :return: a boolean if the username is in use
+        :rtype: bool
         """
         return UserModel.query.filter_by(username=username).first() is not None
 
     @staticmethod
     def check_email_in_use(email):
         """
-
-        :param str email:
-        :return:
-        :rtype:
+        Checks if a email is already in use
+        :param str email: the email to check
+        :return: a boolean if the username is in use
+        :rtype: bool
         """
         return UserModel.query.filter_by(email=email).first() is not None
 
@@ -182,7 +211,7 @@ class UserModel(TraceAttributes):
         """
         Representation method of the class
 
-        :return: The representation of the class
+        :return: the representation of the class
         :rtype: str
         """
         return "<Username {}>".format(self.username)
