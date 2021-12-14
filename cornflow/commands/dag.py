@@ -47,8 +47,8 @@ def register_deployed_dags_command(verbose):
 
     print(processed_dags)
 
-    # if len(processed_dags) > 0:
-    #     db.session.bulk_save_objects(processed_dags)
+    if len(processed_dags) > 0:
+        db.session.bulk_save_objects(processed_dags)
 
     try:
         db.session.commit()

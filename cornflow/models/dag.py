@@ -20,7 +20,7 @@ class DeployedDAG(TraceAttributes):
 
     def __init__(self, data):
         super().__init__()
-        self.id = data.get("dag_id")
+        self.id = data.get("id")
         self.description = data.get("description", None)
 
     def __repr__(self):
