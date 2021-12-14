@@ -27,7 +27,7 @@ If you are running cornflow with multiple workers, there are additional resource
 New environment variables must also be taken into account for services running in Celery mode::
 
     EXECUTOR - Airflow execution mode. In this case the value it should have is Celery.
-    FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
+    AIRFLOW__CORE__FERNET_KEY - A fernet key is used to encrypt and decrypt tokens managed by aiflow. All airflow related services must have the same key value.
     AIRFLOW__CELERY__BROKER_URL - CeleryExecutor drives the need for a Celery broker, here Redis is used.
 
 For running with CeleryExecutor execute this command::
