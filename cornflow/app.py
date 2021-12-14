@@ -30,6 +30,7 @@ def create_app(env_name="development", dataconn=None):
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
+
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
     # initialization for init_cornflow_service.py

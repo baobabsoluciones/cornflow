@@ -42,7 +42,7 @@ Main cornflow environment variables::
 Entrypoint
 *************
 
-If you are using the default entrypoint of the production image, it will execute the ``initapp.sh`` script which uses and initializes environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
+If you are using the default entrypoint of the production image, it will execute the ``init_cornflow_service.py`` script which uses and initializes environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
 The image entrypoint works as follows:
 
 #. A new fernet secret key will be generated.
