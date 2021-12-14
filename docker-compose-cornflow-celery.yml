@@ -45,7 +45,7 @@ services:
       - AIRFLOW_DB_USER=airflow
       - AIRFLOW_DB_PASSWORD=airflow
       - AIRFLOW_DB=airflow
-      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
     ports:
       - 8080:8080
@@ -77,7 +77,7 @@ services:
       - AIRFLOW_DB_USER=airflow
       - AIRFLOW_DB_PASSWORD=airflow
       - AIRFLOW_DB=airflow
-      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
     command: scheduler
 
@@ -123,7 +123,7 @@ services:
       - AIRFLOW_DB_HOST=airflow_db
       - AIRFLOW_DB_USER=airflow
       - AIRFLOW_DB_PASSWORD=airflow
-      - FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
+      - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
     command: worker
 
