@@ -132,7 +132,7 @@ There is no docker volumes attached to deployment for cornflow app.</p>
 </div>
 <div class="section" id="entrypoint">
 <h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this headline">¶</a></h2>
-<p>If you are using the default entrypoint of the production image, it will execute the <code class="docutils literal notranslate"><span class="pre">initapp.sh</span></code> script which uses and initializes environment variables to work with postgresql and airflow defined in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>.
+<p>If you are using the default entrypoint of the production image, it will execute the <code class="docutils literal notranslate"><span class="pre">init_cornflow_service.py</span></code> script which uses and initializes environment variables to work with postgresql and airflow defined in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>.
 The image entrypoint works as follows:</p>
 <ol class="arabic simple">
 <li><p>A new fernet secret key will be generated.</p></li>
