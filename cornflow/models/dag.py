@@ -25,3 +25,7 @@ class DeployedDAG(TraceAttributes):
 
     def __repr__(self):
         return self.id
+
+    @staticmethod
+    def get_all_objects():
+        return DeployedDAG.query.all()
