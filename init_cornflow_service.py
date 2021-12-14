@@ -93,6 +93,7 @@ with app.app_context():
     migrate = Migrate(app=app, db=db)
     upgrade()
     access_init_command(0)
+    register_deployed_dags_command(1)
     # create user if auth type is db
     if AUTH == 1:
         # create cornflow admin user
@@ -113,7 +114,6 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
-    register_deployed_dags_command(1)
 
 # execute gunicorn application
 os.system(
