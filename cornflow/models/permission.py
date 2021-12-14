@@ -43,4 +43,22 @@ class PermissionViewRoleModel(TraceAttributes):
         return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
 
 
-# TODO: add permissions for DAGs
+class PermissionsDAG(TraceAttributes):
+    __tablename__ = "permission_dag"
+    __table_args__ = (db.UniqueConstraint("dag_id", "user_id"),)
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    dag_id = db.Column(
+        db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("UserModel", viewonly=True)
+
+    def __init__(self, data):
+        super().__init__()
+        self.dag_id = data.get("dag_id")
+        self.user_id = data.get("user_id")
+
+    def __repr__(self):
+        return f"User {self.user_id} can access {self.dag_id}"
