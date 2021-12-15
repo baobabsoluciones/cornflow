@@ -331,7 +331,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser" + str(role),
             "email": "testemail" + str(role) + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user_response = self.create_user(data)
 
@@ -371,7 +371,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser",
             "email": "testemail" + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user_response = self.create_user(data)
         user_id = user_response.json["id"]

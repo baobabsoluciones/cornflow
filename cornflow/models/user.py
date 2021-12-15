@@ -1,6 +1,9 @@
 # Imports from sqlalchemy
 from sqlalchemy.sql import expression
 
+# Imports from libraries
+import re
+
 # Imports from internal modules
 from .meta_model import TraceAttributes
 from .roles import UserRoleModel
@@ -206,6 +209,41 @@ class UserModel(TraceAttributes):
         :rtype: bool
         """
         return UserModel.query.filter_by(email=email).first() is not None
+
+    @staticmethod
+    def check_password_pattern(password: str):
+        """
+        Checks if a password is valid
+        :param password: the password to check
+        :return: a dictionary containing: a boolean indicating if the password is valid, and a message
+        :rtype: dict
+        """
+        if len(password) < 5:
+            return {"valid": False, "message": "Password must contain at least 5. characters"}
+        if password.islower() or password.isupper():
+            return {"valid": False, "message": "Password must contain uppercase and lowercase letters"}
+        if len(list(filter(str.isdigit, password))) == 0:
+            return {"valid": False, "message": "Password must contain at least one number and one special character"}
+
+        def is_special_character(character):
+            return character in [char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"]
+
+        if len(list(filter(is_special_character, password))) == 0:
+            return {"valid": False, "message": "Password must contain at least one number and one special character"}
+        return {"valid": True, "message": ""}
+
+    @staticmethod
+    def check_email_pattern(email: str):
+        """
+        Checks if an email address is valid
+        :param email: The email to validate
+        :return: A dictionary containing: a boolean indicating if the email address is valid, and a message
+        :rtype: dict
+        """
+        email_pattern = r'\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if re.match(email_pattern, email) is None:
+            return {"valid": False, "message": "Invalid email address"}
+        return {"valid": True, "message": ""}
 
     def __repr__(self):
         """

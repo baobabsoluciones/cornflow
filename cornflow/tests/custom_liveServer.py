@@ -35,7 +35,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         user_data = dict(
             username="testname",
             email="test@test.com",
-            pwd="testpassword",
+            pwd="Testpassword1!",
         )
         self.set_client(self.get_server_url())
         response = self.login_or_signup(user_data)
@@ -53,7 +53,7 @@ class CustomTestCaseLive(LiveServerTestCase):
             data = {
                 "username": "testuser" + str(role_id),
                 "email": "testemail" + str(role_id) + "@test.org",
-                "password": "testpassword",
+                "password": "Testpassword1!",
             }
         response = self.login_or_signup(data)
         user_role = UserRoleModel({"user_id": response["id"], "role_id": role_id})

@@ -19,7 +19,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user = UserModel(data=self.data)
         user.save()

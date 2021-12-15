@@ -27,7 +27,7 @@ class TestSignUp(TestCase):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
 
     def tearDown(self):
