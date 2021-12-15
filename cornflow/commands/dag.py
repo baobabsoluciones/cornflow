@@ -23,7 +23,7 @@ def register_deployed_dags_command(verbose):
     #         print("Airflow is not reachable")
     #     return False
 
-    # dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
+    dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
 
     # response = af_client.get_model_dags()
     # dag_list = response.json["dags"]
@@ -43,7 +43,11 @@ def register_deployed_dags_command(verbose):
         "university_exams",
         "vrp",
     ]
-    processed_dags = [DeployedDAG({"id": dag, "description": None}) for dag in dag_list]
+    processed_dags = [
+        DeployedDAG({"id": dag, "description": None})
+        for dag in dag_list
+        if dag not in dags_registered
+    ]
 
     print(processed_dags)
 
