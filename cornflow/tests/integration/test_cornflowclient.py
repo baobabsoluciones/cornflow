@@ -276,7 +276,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             dict(
                 username="airflow_test@admin.com",
                 email="airflow_test@admin.com",
-                pwd="airflow_test_password",
+                pwd="Airflow_test_password1",
             )
         )
 
