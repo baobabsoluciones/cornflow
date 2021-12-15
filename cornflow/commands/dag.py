@@ -10,7 +10,7 @@ def register_deployed_dags_command(url, user, pwd, verbose):
     from ..models import DeployedDAG
     from ..shared.utils import db
 
-    DeployedDAG.query.all().delete()
+    DeployedDAG.query.delete()
     db.session.commit()
 
     af_client = Airflow(url, user, pwd)
