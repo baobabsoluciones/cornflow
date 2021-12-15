@@ -72,9 +72,49 @@ def register_base_permissions_command(verbose):
     return True
 
 
-def register_base_dag_permissions_command(verbose):
+def register_base_dag_permissions_command(open_deployment, verbose):
     from sqlalchemy.exc import IntegrityError
 
-    from ..models import DeployedDAG, PermissionsDAG
+    from ..models import DeployedDAG, PermissionsDAG, UserModel
+    from ..shared.utils import db
+
+    existing_permissions = [
+        (permission.dag_id, permission.user_id)
+        for permission in PermissionsDAG.get_all_objects()
+    ]
+
+    db.session.commit()
+    all_users = UserModel.get_all_users()
+    all_dags = DeployedDAG.get_all_objects()
+
+    if open_deployment:
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
+            for user in all_users
+            for dag in all_dags
+            if (dag.id, user.id) not in existing_permissions
+        ]
+
+    else:
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
+            for user in all_users
+            for dag in all_dags
+            if (dag.id, user.id) not in existing_permissions and user.is_service_user()
+        ]
+
+    if len(permissions) > 1:
+        db.session.bulk_save_objects(permissions)
+
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+
+    if verbose == 1:
+        if len(permissions) > 1:
+            print(f"DAG permissions registered: {permissions}")
+        else:
+            print("No new DAG permissions")
 
     pass

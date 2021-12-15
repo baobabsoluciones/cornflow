@@ -9,6 +9,7 @@ from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command
+from cornflow.commands.permissions import register_base_dag_permissions_command
 from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
@@ -56,6 +57,9 @@ CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "serviceuser1234")
 CORNFLOW_LOGGING = os.getenv("CORNFLOW_LOGGING", "console")
 os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
 
+OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", True)
+os.environ["OPEN_DEPLOYMENT"] = OPEN_DEPLOYMENT
+
 # Check LDAP parameters for active directory and show message
 if os.getenv("AUTH_TYPE") == 2:
     print(
@@ -89,11 +93,9 @@ if CORNFLOW_LOGGING == "file":
 # make initdb, access control and/or migrations
 app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
-    print(app.config)
     migrate = Migrate(app=app, db=db)
     upgrade()
     access_init_command(0)
-    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
     # create user if auth type is db
     if AUTH == 1:
         # create cornflow admin user
@@ -114,9 +116,9 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
+    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+    register_base_dag_permissions_command(OPEN_DEPLOYMENT, 1)
 
-print("ENV: ", os.environ["FLASK_ENV"])
-print("AIRFLOW URL:", os.environ["AIRFLOW_URL"])
 # execute gunicorn application
 os.system(
     "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""

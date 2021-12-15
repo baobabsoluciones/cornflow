@@ -10,17 +10,14 @@ def register_deployed_dags_command(url, user, pwd, verbose):
     from ..models import DeployedDAG
     from ..shared.utils import db
 
-    DeployedDAG.query.delete()
-    db.session.commit()
-
     af_client = Airflow(url, user, pwd)
-    max_attempts = 600
+    max_attempts = 20
     attempts = 0
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
             print(f"Airflow is not reachable (attempt {attempts})")
-        time.sleep(10)
+        time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
@@ -30,7 +27,6 @@ def register_deployed_dags_command(url, user, pwd, verbose):
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
 
     response = af_client.get_model_dags()
-    print(response.json())
     dag_list = response.json()["dags"]
 
     processed_dags = [
@@ -46,9 +42,6 @@ def register_deployed_dags_command(url, user, pwd, verbose):
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        print("INTEGRITY ERROR")
-        print(e)
-        print(processed_dags)
 
     if verbose == 1:
         if len(processed_dags) > 0:

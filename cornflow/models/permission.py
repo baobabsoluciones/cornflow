@@ -62,3 +62,7 @@ class PermissionsDAG(TraceAttributes):
 
     def __repr__(self):
         return f"User {self.user_id} can access {self.dag_id}"
+
+    @staticmethod
+    def get_all_objects():
+        return PermissionsDAG.query.all()
