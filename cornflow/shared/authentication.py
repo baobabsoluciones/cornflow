@@ -103,7 +103,6 @@ class Auth:
 
         raise NoPermission("You do not have permission to access this endpoint")
 
-    # user decorator
     @staticmethod
     def auth_required(func):
         """
@@ -120,6 +119,25 @@ class Auth:
             return func(*args, **kwargs)
 
         return decorated_user
+
+    @staticmethod
+    def dag_permission_required(func):
+        """
+        DAG permission decorator
+        :param func:
+        :return:
+        """
+
+        @wraps(func)
+        def dag_decorator(*args, **kwargs):
+            if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+                user = Auth.get_user_obj_from_header(request.headers)
+                print(request.__dict__)
+                print(user)
+
+            return func(*args, **kwargs)
+
+        return dag_decorator
 
     @staticmethod
     def return_user_from_token(token):
