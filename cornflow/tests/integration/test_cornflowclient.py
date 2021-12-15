@@ -285,7 +285,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(30)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
-        print(results.json())
+        print(results)
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
