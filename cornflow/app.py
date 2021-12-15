@@ -69,7 +69,7 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_views)
     app.cli.add_command(register_base_assignations)
     app.cli.add_command(access_init)
-    app.cli.add_command(register_deployed_dags)
+    # app.cli.add_command(register_deployed_dags)
 
     return app
 
@@ -129,11 +129,11 @@ def access_init(verbose):
     access_init_command(verbose)
 
 
-@click.command("register_deployed_dags")
-@click.option("-v", "--verbose", default=0)
-@with_appcontext
-def register_deployed_dags(verbose):
-    register_deployed_dags_command(verbose)
+# @click.command("register_deployed_dags")
+# @click.option("-v", "--verbose", default=0)
+# @with_appcontext
+# def register_deployed_dags(verbose):
+#     register_deployed_dags_command(verbose)
 
 
 if __name__ == "__main__":
