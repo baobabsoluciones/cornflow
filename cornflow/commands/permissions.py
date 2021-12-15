@@ -70,3 +70,11 @@ def register_base_permissions_command(verbose):
             print("No new permissions to register")
 
     return True
+
+
+def register_base_dag_permissions_command(verbose):
+    from sqlalchemy.exc import IntegrityError
+
+    from ..models import DeployedDAG, PermissionsDAG
+
+    pass

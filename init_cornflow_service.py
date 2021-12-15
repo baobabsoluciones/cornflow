@@ -89,6 +89,7 @@ if CORNFLOW_LOGGING == "file":
 # make initdb, access control and/or migrations
 app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
+    print(app.config)
     migrate = Migrate(app=app, db=db)
     upgrade()
     access_init_command(0)
