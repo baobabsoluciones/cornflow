@@ -74,5 +74,6 @@ class PermissionsDAG(TraceAttributes):
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
         ]
+        print(permissions)
         for permission in permissions:
             permission.save()
