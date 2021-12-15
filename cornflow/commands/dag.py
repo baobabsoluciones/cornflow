@@ -30,7 +30,8 @@ def register_deployed_dags_command(url, user, pwd, verbose):
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
 
     response = af_client.get_model_dags()
-    dag_list = response.json["dags"]
+    print(response.json())
+    dag_list = response.json()["dags"]
 
     processed_dags = [
         DeployedDAG({"id": dag["dag_id"], "description": dag["description"]})
