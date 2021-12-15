@@ -2,8 +2,10 @@
 import os
 from multiprocessing import cpu_count
 
+
 def max_workers():
     return cpu_count()
+
 
 pidfile = "/usr/src/app/gunicorn.pid"
 chdir = "/usr/src/app"

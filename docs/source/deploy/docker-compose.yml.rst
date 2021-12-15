@@ -38,3 +38,4 @@ Stop and clean docker environment
 Stop the docker services and remove all volumes::
 
     docker-compose down --volumes --rmi all
+

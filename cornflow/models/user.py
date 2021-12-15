@@ -1,6 +1,3 @@
-# Imports from sqlalchemy
-from sqlalchemy.sql import expression
-
 # Imports from libraries
 import re
 

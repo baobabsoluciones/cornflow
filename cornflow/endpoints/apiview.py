@@ -10,7 +10,7 @@ from .meta_resource import MetaResource
 from ..models import ApiViewModel
 from ..schemas.apiview import ApiViewResponse
 from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
+from ..shared.const import ADMIN_ROLE
 
 
 class ApiViewListEndpoint(MetaResource, MethodResource):

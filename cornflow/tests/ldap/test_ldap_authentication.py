@@ -7,7 +7,7 @@ from flask import current_app
 import json
 
 # Import from internal modules
-from cornflow.commands import RegisterRoles, AccessInitialization
+from cornflow.app import create_app, register_roles, access_init
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow.tests.const import SIGNUP_URL, USER_ROLE_URL, USER_URL
@@ -15,8 +15,14 @@ from cornflow.tests.custom_test_case import LoginTestCases
 
 
 class TestLogIn(LoginTestCases.LoginEndpoint):
+    def create_app(self):
+        app = create_app("testing")
+        return app
+
     def setUp(self):
         super().setUp()
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(register_roles, ["-v", 1])
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {"username": "planner", "password": "planner1234"}
 
@@ -59,7 +65,6 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertNotEqual(len(user_table_before), len(user_table_after))
 
     def test_role_registration(self):
-        RegisterRoles().run()
         user_role_before = UserRoleModel.query.all()
 
         super().test_successful_log_in()
@@ -70,7 +75,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertNotEqual(len(user_role_before), len(user_role_after))
 
     def test_restricted_access(self):
-        AccessInitialization().run()
+        self.runner.invoke(access_init)
         super().test_successful_log_in()
         response = self.client.get(
             USER_URL,
@@ -83,7 +88,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertEqual(403, response.status_code)
 
     def test_deactivated_endpoint(self):
-        AccessInitialization().run()
+        self.runner.invoke(access_init)
         self.data = {"username": "administrator", "password": "administrator1234"}
         super().test_successful_log_in()
         payload = {"user_id": self.response.json["id"], "role_id": PLANNER_ROLE}
@@ -99,7 +104,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertEqual(501, response.status_code)
 
     def test_deactivated_sign_up(self):
-        RegisterRoles().run()
+        self.runner.invoke(register_roles)
         payload = {
             "username": "testuser",
             "email": "testemail@example.org",

@@ -9,13 +9,10 @@ from flask_testing import TestCase
 import json
 import jwt
 from unittest.mock import patch, Mock
-import cProfile
-import pstats
 
 # Import from internal modules
-from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
-from cornflow.models import UserModel, UserRoleModel
+from cornflow.app import create_app, access_init
+from cornflow.models import UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
@@ -45,7 +42,8 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run(verbose=0)
+        self.runner = create_app().test_cli_runner()
+        self.runner.invoke(access_init)
         data = {
             "username": "testname",
             "email": "test@test.com",
@@ -87,7 +85,8 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-    def create_role(self, user_id, role_id):
+    @staticmethod
+    def assign_role(user_id, role_id):
 
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(
@@ -113,7 +112,7 @@ class CustomTestCase(TestCase):
             "password": "Testpassword1!",
         }
         response = self.create_user(data)
-        self.create_role(response.json["id"], role_id)
+        self.assign_role(response.json["id"], role_id)
 
         data.pop("email")
         return self.client.post(

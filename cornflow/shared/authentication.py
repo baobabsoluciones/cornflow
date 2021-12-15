@@ -22,9 +22,7 @@ class Auth:
             "sub": user_id,
         }
 
-        return jwt.encode(payload, current_app.config["SECRET_KEY"], "HS256").decode(
-            "utf8"
-        )
+        return jwt.encode(payload, current_app.config["SECRET_KEY"], "HS256")
 
     @staticmethod
     def decode_token(token):
