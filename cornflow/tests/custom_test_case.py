@@ -19,7 +19,7 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL, TOKEN_URL
 
 
 try:
@@ -482,6 +482,44 @@ class BaseTestCases:
             )
 
 
+class CheckTokenTestCase:
+    class TokenEndpoint(TestCase):
+        def create_app(self):
+            app = create_app("testing")
+            return app
+
+        def setUp(self):
+            db.create_all()
+            self.data = None
+            self.response = None
+
+        def tearDown(self):
+            db.session.remove()
+            db.drop_all()
+
+        def test_get_token(self):
+            payload = self.data
+
+            token = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            ).json["token"]
+
+            response = self.client.get(
+                TOKEN_URL,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(1, response.json["valid"])
+
+
 class LoginTestCases:
     class LoginEndpoint(TestCase):
         def create_app(self):
@@ -509,28 +547,6 @@ class LoginTestCases:
 
             self.assertEqual(200, self.response.status_code)
             self.assertEqual(str, type(self.response.json["token"]))
-
-        def test_get_token(self):
-            payload = self.data
-
-            token = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            ).json["token"]
-
-            response = self.client.get(
-                LOGIN_URL,
-                follow_redirects=True,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token,
-                },
-            )
-
-            self.assertEqual(200, response.status_code)
-            self.assertEqual(1, response.json["valid"])
 
         def test_validation_error(self):
             payload = self.data

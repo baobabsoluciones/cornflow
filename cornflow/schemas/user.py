@@ -38,7 +38,7 @@ class LoginEndpointRequest(Schema):
     password = fields.Str(required=True)
 
 
-class CheckTokenEndpointResponse(Schema):
+class TokenEndpointResponse(Schema):
     valid = fields.Int()
 
 

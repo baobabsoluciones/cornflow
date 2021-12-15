@@ -3,18 +3,18 @@ External endpoint for the user to login to the cornflow webserver
 """
 
 # Import from libraries
-from flask import g, current_app, request
-from flask_apispec import use_kwargs, marshal_with, doc
+from flask import g, current_app
+from flask_apispec import use_kwargs, doc
 from flask_apispec.views import MethodResource
 import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
-from ..schemas.user import UserSchema, LoginEndpointRequest, CheckTokenEndpointResponse
+from ..schemas.user import UserSchema, LoginEndpointRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_DB, AUTH_LDAP
-from ..shared.exceptions import InvalidUsage, InvalidCredentials, ObjectDoesNotExist
+from ..shared.exceptions import InvalidUsage, InvalidCredentials
 from ..shared.ldap import LDAP
 from ..shared.utils import db
 
@@ -56,23 +56,6 @@ class LoginEndpoint(MetaResource, MethodResource):
             )
 
         return {"token": token, "id": user.id}, 200
-
-    @doc(description="Check token", tags=["Users"])
-    @marshal_with(CheckTokenEndpointResponse)
-    def get(self):
-        """
-        API method to check if a token is valid.
-
-        :param str token: ID of the instance
-        :return: A dictionary (containing a boolean 'valid') and an integer with the HTTP status code.
-        :rtype: Tuple(dict, integer)
-        """
-        token = Auth.get_token_from_header(request.headers)
-        try:
-            Auth.get_user_obj_from_header(request.headers)
-        except (InvalidCredentials, ObjectDoesNotExist):
-            return {"token": token, "valid": 0}, 200
-        return {"token": token, "valid": 1}, 200
 
     @staticmethod
     def auth_db_authenticate(username, password):
