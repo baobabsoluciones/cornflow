@@ -216,17 +216,31 @@ class UserModel(TraceAttributes):
         :rtype: dict
         """
         if len(password) < 5:
-            return {"valid": False, "message": "Password must contain at least 5. characters"}
+            return {
+                "valid": False,
+                "message": "Password must contain at least 5. characters",
+            }
         if password.islower() or password.isupper():
-            return {"valid": False, "message": "Password must contain uppercase and lowercase letters"}
+            return {
+                "valid": False,
+                "message": "Password must contain uppercase and lowercase letters",
+            }
         if len(list(filter(str.isdigit, password))) == 0:
-            return {"valid": False, "message": "Password must contain at least one number and one special character"}
+            return {
+                "valid": False,
+                "message": "Password must contain at least one number and one special character",
+            }
 
         def is_special_character(character):
-            return character in [char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"]
+            return character in [
+                char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"
+            ]
 
         if len(list(filter(is_special_character, password))) == 0:
-            return {"valid": False, "message": "Password must contain at least one number and one special character"}
+            return {
+                "valid": False,
+                "message": "Password must contain at least one number and one special character",
+            }
         return {"valid": True, "message": ""}
 
     @staticmethod
@@ -237,7 +251,7 @@ class UserModel(TraceAttributes):
         :return: A dictionary containing: a boolean indicating if the email address is valid, and a message
         :rtype: dict
         """
-        email_pattern = r'\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        email_pattern = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         if re.match(email_pattern, email) is None:
             return {"valid": False, "message": "Invalid email address"}
         return {"valid": True, "message": ""}
