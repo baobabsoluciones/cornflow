@@ -282,9 +282,10 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
-        time.sleep(15)
+        time.sleep(30)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
+        print(results.json())
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
