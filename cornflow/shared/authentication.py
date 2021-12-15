@@ -132,8 +132,7 @@ class Auth:
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
                 user = Auth.get_user_obj_from_header(request.headers)
-                print(request.__dict__)
-                print(user)
+                print(request.json)
 
             return func(*args, **kwargs)
 

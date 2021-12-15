@@ -57,6 +57,12 @@ class UserModel(TraceAttributes):
     )
 
     user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
+    dag_permissions = db.relationship(
+        "PermissionsDAG",
+        cascade="all,delete",
+        backref="users",
+        primaryjoin="and_(UserModel.id==PermissionsDAG.user_id)",
+    )
 
     @property
     def roles(self):
