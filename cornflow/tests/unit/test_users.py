@@ -38,33 +38,33 @@ class TestUserEndpoint(TestCase):
         self.model = UserModel
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="Testpassword1!"
         )
 
         self.planner = dict(
             username="aPlanner",
             email="test@test.com",
-            password="testpassword",
+            password="Testpassword1!",
             first_name="first_planner",
             last_name="last_planner",
         )
 
         self.planner_2 = dict(
-            username="aSecondPlanner", email="test2@test.com", password="testpassword2"
+            username="aSecondPlanner", email="test2@test.com", password="Testpassword2!"
         )
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="testpassword"
+            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
 
         self.admin_2 = dict(
-            username="aSecondAdmin", email="admin2@admin2.com", password="testpassword2"
+            username="aSecondAdmin", email="admin2@admin2.com", password="Testpassword2!"
         )
 
         self.service_user = dict(
             username="aServiceUser",
             email="service_user@test.com",
-            password="tpass_service_user",
+            password="Tpass_service_user1",
         )
 
         self.login_keys = ["username", "password"]
@@ -356,7 +356,7 @@ class TestUserModel(TestCase):
         self.model = UserModel
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="testpassword"
+            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
 
         response = self.client.post(
@@ -375,7 +375,7 @@ class TestUserModel(TestCase):
         self.login_keys = ["username", "password"]
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="Testpassword1!"
         )
 
         response = self.client.post(
