@@ -38,6 +38,10 @@ class LoginEndpointRequest(Schema):
     password = fields.Str(required=True)
 
 
+class CheckTokenEndpointResponse(Schema):
+    valid = fields.Int()
+
+
 class UserEditRequest(Schema):
     username = fields.Str(required=False)
     first_name = fields.Str(required=False)

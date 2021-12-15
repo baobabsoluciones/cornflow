@@ -510,6 +510,28 @@ class LoginTestCases:
             self.assertEqual(200, self.response.status_code)
             self.assertEqual(str, type(self.response.json["token"]))
 
+        def test_get_token(self):
+            payload = self.data
+
+            token = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            ).json["token"]
+
+            response = self.client.get(
+                LOGIN_URL,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
+                },
+            )
+
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(1, response.json["valid"])
+
         def test_validation_error(self):
             payload = self.data
             payload["email"] = "test"
