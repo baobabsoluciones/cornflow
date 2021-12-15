@@ -9,7 +9,7 @@ import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import UserModel, UserRoleModel
+from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_LDAP, PLANNER_ROLE
@@ -52,6 +52,9 @@ class SignUpEndpoint(MetaResource, MethodResource):
 
         user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
         user_role.save()
+
+        if current_app.config["OPEN_DEPLOYMENT"]:
+            PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
             token = Auth.generate_token(user.id)

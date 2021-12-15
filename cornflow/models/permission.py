@@ -1,4 +1,5 @@
 from .meta_model import TraceAttributes
+from .dag import DeployedDAG
 from ..shared.utils import db
 
 
@@ -66,3 +67,12 @@ class PermissionsDAG(TraceAttributes):
     @staticmethod
     def get_all_objects():
         return PermissionsDAG.query.all()
+
+    @staticmethod
+    def add_all_permissions_to_user(user_id):
+        dags = DeployedDAG.get_all_objects()
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
+        ]
+        for permission in permissions:
+            permission.save()
