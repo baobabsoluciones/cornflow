@@ -57,7 +57,7 @@ CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "serviceuser1234")
 CORNFLOW_LOGGING = os.getenv("CORNFLOW_LOGGING", "console")
 os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
 
-OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", True)
+OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 os.environ["OPEN_DEPLOYMENT"] = OPEN_DEPLOYMENT
 
 # Check LDAP parameters for active directory and show message

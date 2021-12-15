@@ -87,7 +87,7 @@ def register_base_dag_permissions_command(open_deployment, verbose):
     all_users = UserModel.get_all_users()
     all_dags = DeployedDAG.get_all_objects()
 
-    if open_deployment:
+    if open_deployment == 1:
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users

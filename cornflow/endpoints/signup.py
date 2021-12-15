@@ -53,7 +53,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
         user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
         user_role.save()
 
-        if current_app.config["OPEN_DEPLOYMENT"]:
+        if current_app.config["OPEN_DEPLOYMENT"] == 1:
             PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
