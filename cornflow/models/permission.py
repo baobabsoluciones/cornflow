@@ -77,3 +77,8 @@ class PermissionsDAG(TraceAttributes):
         print(permissions)
         for permission in permissions:
             permission.save()
+
+    @staticmethod
+    def check_if_has_permissions(user_id, dag_id):
+        permission = PermissionsDAG.query.filter(user_id=user_id, dag_id=dag_id)
+        return permission is not None

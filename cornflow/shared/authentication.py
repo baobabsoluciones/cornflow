@@ -3,7 +3,7 @@ from flask import request, g, current_app
 from functools import wraps
 import jwt
 
-from ..models import ApiViewModel, UserModel, UserRoleModel, PermissionViewRoleModel
+from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
 from ..shared.const import PERMISSION_METHOD_MAP
 from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
 
@@ -131,8 +131,15 @@ class Auth:
         @wraps(func)
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-                user = Auth.get_user_obj_from_header(request.headers)
-                print(request.json)
+                user_id = Auth.get_user_obj_from_header(request.headers).id
+                dag_id = request.json.get("schema", None)
+                if dag_id is None:
+                    return True
+                else:
+                    if PermissionsDAG.check_if_has_permissions(user_id, dag_id):
+                        return True
+                    else:
+                        raise NoPermission("You do not ahve permission to use this DAG")
 
             return func(*args, **kwargs)
 
