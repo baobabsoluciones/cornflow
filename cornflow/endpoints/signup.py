@@ -47,6 +47,18 @@ class SignUpEndpoint(MetaResource, MethodResource):
                 error="Email already in use, please supply another email address"
             )
 
+        check_pwd = UserModel.check_password_pattern(kwargs.get('password'))
+        if not check_pwd["valid"]:
+            raise InvalidCredentials(
+                error=check_pwd["message"]
+            )
+
+        check_email = UserModel.check_email_pattern(kwargs.get("email"))
+        if not check_email["valid"]:
+            raise InvalidCredentials(
+                error=check_email["message"]
+            )
+
         user = UserModel(kwargs)
         user.save()
 

@@ -47,7 +47,7 @@ class CustomTestCase(TestCase):
         data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
 
         self.client.post(
@@ -109,7 +109,7 @@ class CustomTestCase(TestCase):
         data = {
             "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         response = self.create_user(data)
         self.assign_role(response.json["id"], role_id)
