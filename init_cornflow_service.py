@@ -115,6 +115,8 @@ with app.app_context():
             verbose=1,
         )
 
+print("ENV: ", os.environ["FLASK_ENV"])
+print("AIRFLOW URL:", os.environ["AIRFLOW_URL"])
 # execute gunicorn application
 os.system(
     "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
