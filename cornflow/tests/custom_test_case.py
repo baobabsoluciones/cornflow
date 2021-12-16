@@ -15,7 +15,7 @@ from cornflow.app import create_app
 from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.commands.permissions import register_base_dag_permissions_command
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
@@ -45,8 +45,6 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        # self.runner = create_app().test_cli_runner()
-        # self.runner.invoke(access_init)
         access_init_command(0)
         register_deployed_dags_command_test(verbose=0)
         data = {
@@ -62,7 +60,7 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        register_base_dag_permissions_command(open_deployment=1, verbose=0)
+        register_dag_permissions_command(open_deployment=1, verbose=0)
 
         data.pop("email")
 

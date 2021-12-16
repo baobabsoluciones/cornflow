@@ -4,7 +4,7 @@ from flask_testing import TestCase
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.commands.permissions import register_base_dag_permissions_command
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.models import (
     CaseModel,
     ExecutionModel,
@@ -61,7 +61,9 @@ class TestUserEndpoint(TestCase):
         )
 
         self.admin_2 = dict(
-            username="aSecondAdmin", email="admin2@admin2.com", password="Testpassword2!"
+            username="aSecondAdmin",
+            email="admin2@admin2.com",
+            password="Testpassword2!",
         )
 
         self.service_user = dict(
@@ -124,7 +126,7 @@ class TestUserEndpoint(TestCase):
                 user_role.save()
 
         db.session.commit()
-        register_base_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()
@@ -391,7 +393,7 @@ class TestUserModel(TestCase):
         )
 
         self.viewer["id"] = response.json["id"]
-        register_base_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()

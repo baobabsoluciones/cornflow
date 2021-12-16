@@ -9,7 +9,7 @@ from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command
-from cornflow.commands.permissions import register_base_dag_permissions_command
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.commands.schemas import update_schemas_command
 from cornflow.commands.users import create_user_with_role
 
@@ -118,7 +118,7 @@ with app.app_context():
             verbose=1,
         )
     register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-    register_base_dag_permissions_command(OPEN_DEPLOYMENT, 1)
+    register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
     update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
 # execute gunicorn application
