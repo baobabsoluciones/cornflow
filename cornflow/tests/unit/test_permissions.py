@@ -5,7 +5,10 @@ Unit test for the permissions table
 import json
 
 # Import from internal modules
-from cornflow.endpoints import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
+from cornflow.endpoints import (
+    PermissionsViewRoleEndpoint,
+    PermissionsViewRoleDetailEndpoint,
+)
 from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
@@ -54,14 +57,19 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
     def test_new_permission_authorized_user(self):
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
-            self.create_new_row(PERMISSION_URL, self.model, self.payload)
+            payload = {"role_id": role, "permission_id": 1, "api_view_id": 1}
+            self.create_new_row(PERMISSION_URL, self.model, payload)
 
     def test_new_role_not_authorized(self):
         for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 self.create_new_row(
-                    PERMISSION_URL, self.model, {}, expected_status=403, check_payload=False
+                    PERMISSION_URL,
+                    self.model,
+                    {},
+                    expected_status=403,
+                    check_payload=False,
                 )
 
 
@@ -74,41 +82,33 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
         self.updated_payload = {"role_id": 2, "action_id": 2}
         self.items_to_check = []
 
-    def test_modify_permission_authorized_user(self):
-        for role in self.roles_with_access:
-            self.token = self.create_user_with_role(role)
-            id = self.client.post(
-                PERMISSION_URL,
-                follow_redirects=True,
-                data=json.dumps(self.payload),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
-                }
-            ).json["id"]
-
-            self.update_row(
-                PERMISSION_URL + str(id) + "/",
-                self.updated_payload,
-                {"role_id": 2, "permission_id": 2, "api_view_id": 1},
-            )
-
-    def test_modify_permission_not_authorized(self):
         authorized_user = self.roles_with_access[0]
         self.token = self.create_user_with_role(authorized_user)
-        id = self.client.post(
+        self.id = self.client.post(
             PERMISSION_URL,
             follow_redirects=True,
             data=json.dumps(self.payload),
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.token,
-            }
+            },
         ).json["id"]
 
+    def test_modify_permission_authorized_user(self):
+        for role in self.roles_with_access:
+            self.token = self.create_user_with_role(role)
+            self.updated_payload = {"role_id": role, "action_id": 2}
+            self.update_row(
+                PERMISSION_URL + str(self.id) + "/",
+                self.updated_payload,
+                {"role_id": role, "action_id": 2, "api_view_id": 1},
+            )
+
+    def test_modify_permission_not_authorized(self):
         for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
+                self.updated_payload = {"role_id": role, "action_id": 2}
                 self.update_row(
                     PERMISSION_URL + str(id) + "/",
                     self.updated_payload,
@@ -127,7 +127,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + self.token,
-                }
+                },
             ).json["id"]
 
             response = self.client.delete(
@@ -151,7 +151,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.token,
-            }
+            },
         ).json["id"]
 
         for role in ROLES_MAP:
