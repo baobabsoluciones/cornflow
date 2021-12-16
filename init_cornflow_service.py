@@ -118,6 +118,8 @@ with app.app_context():
         )
     register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
     register_base_dag_permissions_command(OPEN_DEPLOYMENT, 1)
+    # TODO: as now we are sure we have access to airflow (one command needs it)
+    #  we could launch the update_all_schemas DAG
 
 # execute gunicorn application
 os.system(
