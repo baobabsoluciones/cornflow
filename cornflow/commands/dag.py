@@ -1,6 +1,8 @@
 # TODO: add command to register if there is new DAGs.
 #  This should be executed on each deployment.
-def register_deployed_dags_command(url, user, pwd, verbose):
+def register_deployed_dags_command(
+    url: str = None, user: str = None, pwd: str = None, verbose: int = 0
+):
     import time
 
     #
@@ -49,3 +51,17 @@ def register_deployed_dags_command(url, user, pwd, verbose):
         else:
             print("No new DAGs")
     return True
+
+
+def register_deployed_dags_command_test(dags: list = None, verbose=0):
+    from ..models import DeployedDAG
+
+    if dags is None:
+        dags = ["solve_model_dag", "gc", "timer"]
+
+    deployed_dag = [DeployedDAG({"id": dag, "description": None}) for dag in dags]
+    for dag in deployed_dag:
+        dag.save()
+
+    if verbose == 1:
+        print("Registered DAGs")

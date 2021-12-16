@@ -1,7 +1,10 @@
 import json
 
 from flask_testing import TestCase
-from cornflow.app import create_app, access_init
+from cornflow.app import create_app
+from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
+from cornflow.commands.permissions import register_base_dag_permissions_command
 from cornflow.models import (
     CaseModel,
     ExecutionModel,
@@ -31,8 +34,8 @@ class TestUserEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.runner = create_app().test_cli_runner()
-        self.runner.invoke(access_init)
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
 
         self.url = USER_URL
         self.model = UserModel
@@ -121,6 +124,7 @@ class TestUserEndpoint(TestCase):
                 user_role.save()
 
         db.session.commit()
+        register_base_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()
@@ -350,8 +354,8 @@ class TestUserModel(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.runner = create_app().test_cli_runner()
-        self.runner.invoke(access_init)
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
 
         self.url = USER_URL
         self.model = UserModel
@@ -387,6 +391,7 @@ class TestUserModel(TestCase):
         )
 
         self.viewer["id"] = response.json["id"]
+        register_base_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()

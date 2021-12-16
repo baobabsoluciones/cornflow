@@ -76,6 +76,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
 
     @doc(description="Create an execution", tags=["Executions"])
     @Auth.auth_required
+    @Auth.dag_permission_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location="json")
     def post(self, **kwargs):
@@ -198,6 +199,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
     @Auth.auth_required
+    @Auth.dag_permission_required
     @use_kwargs(ExecutionEditRequest, location="json")
     def put(self, idx, **data):
         """
@@ -229,6 +231,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @Auth.auth_required
+    @Auth.dag_permission_required
     def post(self, idx):
         execution = ExecutionModel.get_one_object_from_user(
             user=self.get_user(), idx=idx

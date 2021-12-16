@@ -74,7 +74,6 @@ class PermissionsDAG(TraceAttributes):
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
         ]
-        print(permissions)
         for permission in permissions:
             permission.save()
 
@@ -83,7 +82,6 @@ class PermissionsDAG(TraceAttributes):
         permission = PermissionsDAG.query.filter_by(
             user_id=user_id, dag_id=dag_id
         ).first()
-        print(permission)
-        if permission is None or permission == []:
+        if permission is None:
             return False
         return True

@@ -72,7 +72,8 @@ def register_base_permissions_command(verbose):
     return True
 
 
-def register_base_dag_permissions_command(open_deployment, verbose):
+def register_base_dag_permissions_command(open_deployment: int = 1, verbose: int = 0):
+
     from sqlalchemy.exc import IntegrityError
 
     from ..models import DeployedDAG, PermissionsDAG, UserModel

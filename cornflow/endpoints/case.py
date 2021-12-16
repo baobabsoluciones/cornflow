@@ -59,6 +59,7 @@ class CaseEndpoint(MetaResource, MethodResource):
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
     @Auth.auth_required
+    @Auth.dag_permission_required
     @inflate
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseRawRequest, location="json")
@@ -79,6 +80,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
 
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
     @Auth.auth_required
+    @Auth.dag_permission_required
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseFromInstanceExecution, location="json")
     def post(self, **kwargs):
@@ -196,6 +198,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
 
     @doc(description="Edit a case", tags=["Cases"])
     @Auth.auth_required
+    @Auth.dag_permission_required
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
@@ -257,6 +260,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
+    @Auth.dag_permission_required
     @inflate
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
@@ -382,6 +386,8 @@ class CaseCompare(MetaResource, MethodResource):
             payload["solution_patch"] = jsonpatch.make_patch(
                 case_1.solution, case_2.solution
             ).patch
+
+        payload["schema"] = case_1.schema
         log.debug(
             "User {} compared cases {} and {}".format(self.get_user_id(), idx1, idx2)
         )

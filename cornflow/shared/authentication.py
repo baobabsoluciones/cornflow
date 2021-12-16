@@ -144,8 +144,8 @@ class Auth:
                 user_id = Auth.get_user_obj_from_header(request.headers).id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
-                    return InvalidData(
-                        error="The request does not specify a problem to solve",
+                    raise InvalidData(
+                        error="The request does not specify a schema to use",
                         status_code=400,
                     )
                 else:

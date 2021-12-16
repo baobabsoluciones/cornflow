@@ -10,6 +10,7 @@ from cornflow.app import create_app, db
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command
 from cornflow.commands.permissions import register_base_dag_permissions_command
+from cornflow.commands.schemas import update_schemas_command
 from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
@@ -118,8 +119,7 @@ with app.app_context():
         )
     register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
     register_base_dag_permissions_command(OPEN_DEPLOYMENT, 1)
-    # TODO: as now we are sure we have access to airflow (one command needs it)
-    #  we could launch the update_all_schemas DAG
+    update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
 # execute gunicorn application
 os.system(

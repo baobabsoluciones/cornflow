@@ -137,6 +137,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
     @doc(description="Edit an instance", tags=["Instances"])
     @Auth.auth_required
+    @Auth.dag_permission_required
     @use_kwargs(InstanceEditRequest, location="json")
     def put(self, idx, **data):
         """
