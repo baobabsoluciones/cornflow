@@ -77,7 +77,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = PermissionViewRoleModel
-        self.query = PermissionViewRoleModel.get_all_objects
+        self.query = PermissionViewRoleModel.get_one_object
         self.primary_key = "id"
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])

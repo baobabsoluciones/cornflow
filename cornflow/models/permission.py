@@ -36,6 +36,17 @@ class PermissionViewRoleModel(TraceAttributes):
             return True
 
     @staticmethod
+    def get_one_object(idx):
+        """
+        Method to get one permission by its id
+
+        :param int idx: ID of the permission
+        :return: an instance of object :class:`PermissionViewRoleModel`
+        :rtype: :class:`PermissionViewRoleModel`
+        """
+        return PermissionViewRoleModel.query.get(idx)
+
+    @staticmethod
     def get_all_objects():
         return PermissionViewRoleModel.query.all()
 

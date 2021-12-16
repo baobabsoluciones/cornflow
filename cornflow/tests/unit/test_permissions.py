@@ -9,6 +9,9 @@ from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,
 )
+from cornflow.models import (
+    PermissionViewRoleModel
+)
 from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
@@ -17,7 +20,7 @@ from cornflow.tests.custom_test_case import CustomTestCase
 class TestPermissionsViewRoleEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.model = PermissionsViewRoleEndpoint
+        self.model = PermissionViewRoleModel
         self.roles_with_access = PermissionsViewRoleEndpoint.ROLES_WITH_ACCESS
         self.payload = {"role_id": 1, "permission_id": 1, "api_view_id": 1}
 
@@ -78,7 +81,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
 class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.model = PermissionsViewRoleDetailEndpoint
+        self.model = PermissionViewRoleModel
         self.roles_with_access = PermissionsViewRoleDetailEndpoint.ROLES_WITH_ACCESS
         self.payload = {"role_id": 1, "action_id": 3, "api_view_id": 1}
         self.items_to_check = []
