@@ -58,7 +58,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
         api_view = 1
         for role in self.roles_with_access:
             self.token = self.create_user_with_role(role)
-            payload = {"role_id": 1, "permission_id": 3, "api_view_id": api_view}
+            payload = {"role_id": 1, "action_id": 3, "api_view_id": api_view}
             self.create_new_row(PERMISSION_URL, self.model, payload)
             api_view += 1
 
@@ -80,8 +80,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
         super().setUp()
         self.model = PermissionsViewRoleDetailEndpoint
         self.roles_with_access = PermissionsViewRoleDetailEndpoint.ROLES_WITH_ACCESS
-        self.payload = {"role_id": 1, "action_id": 1, "api_view_id": 1}
-        self.updated_payload = {"role_id": 2, "action_id": 2}
+        self.payload = {"role_id": 1, "action_id": 3, "api_view_id": 1}
         self.items_to_check = []
 
     def test_modify_permission_authorized_user(self):
