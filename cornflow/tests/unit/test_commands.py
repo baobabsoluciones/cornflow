@@ -35,7 +35,7 @@ class TestCommands(TestCase):
         db.create_all()
         self.payload = {
             "email": "testemail@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         self.resources = resources
         self.runner = create_app().test_cli_runner()
