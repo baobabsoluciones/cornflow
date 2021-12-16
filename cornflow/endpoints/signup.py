@@ -34,7 +34,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The user has to sing up on the active directory"
+                "The user has to sign up on the active directory"
             )
 
         if UserModel.check_username_in_use(kwargs.get("username")):
