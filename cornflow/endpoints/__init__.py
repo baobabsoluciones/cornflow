@@ -132,7 +132,7 @@ resources = [
     ),
     dict(
         resource=PermissionsViewRoleDetailEndpoint,
-        urls="/permission/<int:idx>",
+        urls="/permission/<int:idx>/",
         endpoint="permission-detail"
     ),
     dict(resource=RolesListEndpoint, urls="/roles/", endpoint="roles"),

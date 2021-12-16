@@ -154,8 +154,8 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                     "Authorization": "Bearer " + self.token,
                 },
             )
-
-            self.assertEqual(501, response.status_code)
+            print(response)
+            self.assertEqual(200, response.status_code)
 
     def test_delete_permission_not_authorized(self):
         authorized_user = self.roles_with_access[0]
@@ -181,4 +181,5 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                         "Authorization": "Bearer " + self.token,
                     },
                 )
+                print(response)
                 self.assertEqual(403, response.status_code)
