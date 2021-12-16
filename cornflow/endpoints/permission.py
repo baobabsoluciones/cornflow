@@ -80,16 +80,33 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
         self.query = PermissionViewRoleModel.get_one_object
         self.primary_key = "id"
 
+    @doc(description="Get one permission", tags=["PermissionViewRole"])
+    @Auth.auth_required
+    @marshal_with(PermissionViewRoleResponse)
+    @MetaResource.get_data_or_404
+    def get(self, idx):
+        """
+        API method to get one specific permission of the application
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+
+        :param int idx: ID of the requested permission
+        :return: A dictionary with the response (data of the requested permisssion or an error message)
+        and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        return PermissionViewRoleModel.query.get(idx)
+
     @doc(description="Edit a permission", tags=["PermissionViewRole"])
     @Auth.auth_required
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
-    def put(self, idx, **data):
+    def put(self, idx, **kwargs):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
                 "The permissions have to be modified in the directory."
             )
-        response = self.put_detail(data, idx)
+        response = self.put_detail(kwargs, idx)
         log.info("User {} edits permission {}".format(self.get_user_id(), idx))
         return response
 

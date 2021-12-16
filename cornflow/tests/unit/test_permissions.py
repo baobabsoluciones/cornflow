@@ -136,7 +136,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
     def test_delete_permission_authorized(self):
         for authorized_user in self.roles_with_access:
             self.token = self.create_user_with_role(authorized_user)
-            id = self.client.post(
+            idx = self.client.post(
                 PERMISSION_URL,
                 follow_redirects=True,
                 data=json.dumps(self.payload),
@@ -147,7 +147,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             ).json["id"]
 
             response = self.client.delete(
-                PERMISSION_URL + str(id) + "/",
+                PERMISSION_URL + str(idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -159,7 +159,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
     def test_delete_permission_not_authorized(self):
         authorized_user = self.roles_with_access[0]
         self.token = self.create_user_with_role(authorized_user)
-        id = self.client.post(
+        idx = self.client.post(
             PERMISSION_URL,
             follow_redirects=True,
             data=json.dumps(self.payload),
@@ -173,7 +173,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.delete(
-                    PERMISSION_URL + str(id) + "/",
+                    PERMISSION_URL + str(idx) + "/",
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
