@@ -90,7 +90,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
         authorized_user = self.roles_with_access[0]
         self.token = self.create_user_with_role(authorized_user)
 
-        self.id = self.client.post(
+        idx = self.client.post(
             PERMISSION_URL,
             follow_redirects=True,
             data=json.dumps(self.payload),
@@ -104,7 +104,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 self.token = self.create_user_with_role(role)
             self.updated_payload = {"role_id": role, "action_id": 2}
             self.update_row(
-                PERMISSION_URL + str(self.id) + "/",
+                PERMISSION_URL + str(idx) + "/",
                 self.updated_payload,
                 {"role_id": role, "action_id": 2, "api_view_id": 1},
             )
@@ -112,7 +112,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
     def test_modify_permission_not_authorized(self):
         authorized_user = self.roles_with_access[0]
         self.token = self.create_user_with_role(authorized_user)
-        self.id = self.client.post(
+        idx = self.client.post(
             PERMISSION_URL,
             follow_redirects=True,
             data=json.dumps(self.payload),
@@ -126,7 +126,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 self.token = self.create_user_with_role(role)
                 self.updated_payload = {"role_id": role, "action_id": 2}
                 self.update_row(
-                    PERMISSION_URL + str(id) + "/",
+                    PERMISSION_URL + str(idx) + "/",
                     self.updated_payload,
                     {},
                     expected_status=403,
@@ -154,7 +154,6 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                     "Authorization": "Bearer " + self.token,
                 },
             )
-            print(response)
             self.assertEqual(200, response.status_code)
 
     def test_delete_permission_not_authorized(self):
@@ -181,5 +180,4 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                         "Authorization": "Bearer " + self.token,
                     },
                 )
-                print(response)
                 self.assertEqual(403, response.status_code)
