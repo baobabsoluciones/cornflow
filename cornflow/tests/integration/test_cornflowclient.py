@@ -357,6 +357,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             name="bla", config=dict(solver="CBC"), instance_id=one_instance["id"]
         )
         execution = self.client.create_api("execution/?run=0", json=payload)
+        print(execution.json())
         payload = dict(log_text="")
         response = self.client.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
