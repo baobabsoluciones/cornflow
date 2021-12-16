@@ -89,7 +89,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The permissions have to be modified in the directory."
             )
-        response = self.put_detail(data, self.get_user(), idx)
+        response = self.put_detail(data, idx)
         log.info("User {} edits permission {}".format(self.get_user_id(), idx))
         return response
 
@@ -101,6 +101,6 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The permissions have to be deleted in the directory."
             )
-        response = self.delete_detail(self.get_user(), idx)
+        response = self.delete_detail(idx)
         log.info("User {} deletes permission {}".format(self.get_user_id(), idx))
         return response
