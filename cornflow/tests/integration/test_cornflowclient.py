@@ -56,7 +56,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         description = "description123"
         data = pulp.LpProblem.fromMPS(mps_file, sense=1)[1].toDict()
         schema = "solve_model_dag"
-        payload = dict(data=data, name=name, description=description)
+        payload = dict(data=data, name=name, description=description, schema=schema)
         return self.create_new_instance_payload(payload)
 
     def create_new_instance_payload(self, payload):
@@ -354,7 +354,10 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_edit_one_execution(self):
         one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
         payload = dict(
-            name="bla", config=dict(solver="CBC"), instance_id=one_instance["id"]
+            name="bla",
+            config=dict(solver="CBC"),
+            instance_id=one_instance["id"],
+            schema="solve_model_dag",
         )
         execution = self.client.create_api("execution/?run=0", json=payload)
         print(execution.json())
