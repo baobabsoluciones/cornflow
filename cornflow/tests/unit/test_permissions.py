@@ -106,7 +106,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             self.update_row(
                 PERMISSION_URL + str(idx) + "/",
                 self.updated_payload,
-                {"role_id": role, "action_id": 2, "api_view_id": 1},
+                {"role_id": role, "action_id": 2, "api_view_id": 1, "id": idx},
             )
 
     def test_modify_permission_not_authorized(self):
