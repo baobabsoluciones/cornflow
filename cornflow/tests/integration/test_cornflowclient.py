@@ -290,19 +290,19 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     #     self.assertEqual(status["state"], EXEC_STATE_CORRECT)
     #     self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
-    def test_interrupt(self):
-        execution = self.create_timer_instance_and_execution(5)
-        self.client.stop_execution(execution_id=execution["id"])
-        time.sleep(2)
-        status = self.client.get_status(execution["id"])
-        results = self.client.get_results(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
-        self.assertEqual(results["state"], EXEC_STATE_STOPPED)
-
-    def test_status_solving(self):
-        execution = self.create_timer_instance_and_execution(5)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+    # def test_interrupt(self):
+    #     execution = self.create_timer_instance_and_execution(5)
+    #     self.client.stop_execution(execution_id=execution["id"])
+    #     time.sleep(2)
+    #     status = self.client.get_status(execution["id"])
+    #     results = self.client.get_results(execution["id"])
+    #     self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+    #     self.assertEqual(results["state"], EXEC_STATE_STOPPED)
+    #
+    # def test_status_solving(self):
+    #     execution = self.create_timer_instance_and_execution(5)
+    #     status = self.client.get_status(execution["id"])
+    #     self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
 
