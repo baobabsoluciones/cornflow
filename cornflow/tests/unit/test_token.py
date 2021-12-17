@@ -42,8 +42,8 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.assertEqual(1, self.response.json["valid"])
 
     def test_get_invalid_token(self):
-        self.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk4MjAwNzMsImlhdCI6MTYzOTczMzY3Mywic3ViIjoxfQ'
-        self.token += '.KzAYFDSrAJoCrnxGqKL2v6fE3oxT2muBgYztF1wcuN8'
+        self.token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk4MjAwNzMsImlhdCI6MTYzOTczMzY3Mywic3ViIjoxfQ"
+        self.token += ".KzAYFDSrAJoCrnxGqKL2v6fE3oxT2muBgYztF1wcuN8"
 
         self.get_check_token()
 
@@ -54,3 +54,13 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.get_check_token()
 
         self.assertEqual(400, self.response.status_code)
+
+    def test_old_token(self):
+        self.token = (
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
+            ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
+        )
+
+        self.get_check_token()
+        self.assertEqual(200, self.response.status_code)
+        self.assertEqual(0, self.response.json["valid"])
