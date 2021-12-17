@@ -491,22 +491,12 @@ class CheckTokenTestCase:
         def setUp(self):
             db.create_all()
             self.data = None
-            self.response = None
 
         def tearDown(self):
             db.session.remove()
             db.drop_all()
 
-        def test_get_token(self):
-            payload = self.data
-
-            token = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            ).json["token"]
-
+        def test_get_token(self, token, expected_status=200, check_valid=1):
             response = self.client.get(
                 TOKEN_URL,
                 follow_redirects=True,
@@ -516,8 +506,8 @@ class CheckTokenTestCase:
                 },
             )
 
-            self.assertEqual(200, response.status_code)
-            self.assertEqual(1, response.json["valid"])
+            self.assertEqual(expected_status, response.status_code)
+            self.assertEqual(check_valid, response.json["valid"])
 
 
 class LoginTestCases:
