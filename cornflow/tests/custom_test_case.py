@@ -19,7 +19,13 @@ from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, USER_ROLE_URL
+from cornflow.tests.const import (
+    LOGIN_URL,
+    SIGNUP_URL,
+    USER_URL,
+    USER_ROLE_URL,
+    TOKEN_URL,
+)
 
 
 try:
@@ -489,6 +495,42 @@ class BaseTestCases:
                 expected_status=400,
                 check_payload=False,
             )
+
+
+class CheckTokenTestCase:
+    class TokenEndpoint(TestCase):
+        def create_app(self):
+            app = create_app("testing")
+            return app
+
+        def setUp(self):
+            db.create_all()
+            self.data = None
+            self.token = None
+            self.response = None
+
+        def tearDown(self):
+            db.session.remove()
+            db.drop_all()
+
+        def get_check_token(self):
+            if self.token:
+                self.response = self.client.get(
+                    TOKEN_URL,
+                    follow_redirects=True,
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + self.token,
+                    },
+                )
+            else:
+                self.response = self.client.get(
+                    TOKEN_URL,
+                    follow_redirects=True,
+                    headers={
+                        "Content-Type": "application/json",
+                    },
+                )
 
 
 class LoginTestCases:
