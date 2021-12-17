@@ -99,15 +99,17 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 "Authorization": "Bearer " + self.token,
             },
         ).json["id"]
+        view_id = 2
         for role in self.roles_with_access:
             if role != self.roles_with_access[0]:
                 self.token = self.create_user_with_role(role)
-            self.updated_payload = {"role_id": role, "action_id": 2}
+            updated_payload = {"action_id": 2, "api_view_id": view_id}
             self.update_row(
                 PERMISSION_URL + str(idx) + "/",
-                self.updated_payload,
-                {"role_id": role, "action_id": 2, "api_view_id": 1, "id": idx},
+                updated_payload,
+                {"action_id": 2, "api_view_id": view_id, "id": idx},
             )
+            view_id += 1
 
     def test_modify_permission_not_authorized(self):
         authorized_user = self.roles_with_access[0]
@@ -124,10 +126,10 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
         for role in ROLES_MAP:
             if role not in self.roles_with_access:
                 self.token = self.create_user_with_role(role)
-                self.updated_payload = {"role_id": role, "action_id": 2}
+                updated_payload = {"role_id": role, "action_id": 2}
                 self.update_row(
                     PERMISSION_URL + str(idx) + "/",
-                    self.updated_payload,
+                    updated_payload,
                     {},
                     expected_status=403,
                     check_payload=False,
