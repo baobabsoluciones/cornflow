@@ -35,6 +35,7 @@ FULL_CASE_JSON_PATCH_1 = _get_file("./data/full_case_patch.json")
 
 LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"
+TOKEN_URL = PREFIX + "/token/"
 USER_URL = PREFIX + "/user/"
 
 SCHEMA_URL = PREFIX + "/schema/"

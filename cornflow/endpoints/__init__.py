@@ -26,6 +26,7 @@ from .execution import (
 )
 
 from .health import HealthEndpoint
+from .token import TokenEndpoint
 
 from .instance import (
     InstanceEndpoint,
@@ -98,6 +99,7 @@ resources = [
     ),
     dict(resource=LoginEndpoint, urls="/login/", endpoint="login"),
     dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
+    dict(resource=TokenEndpoint, urls="/token/", endpoint="token"),
     dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),
     dict(
         resource=SchemaDetailsEndpoint,
