@@ -16,6 +16,7 @@ from ..schemas.user import (
     UserEndpointResponse,
     UserDetailsEndpointResponse,
     UserEditRequest,
+    RecoverPasswordRequest
 )
 
 from ..shared.authentication import Auth
@@ -25,8 +26,10 @@ from ..shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
     EndpointNotImplemented,
+    InvalidCredentials
 )
 from ..shared.utils import db
+from ..shared.email import get_pwd_email, send_email_to
 
 
 # Initialize the schema that the endpoint uses
@@ -159,3 +162,32 @@ class ToggleUserAdmin(MetaResource, MethodResource):
             db.session.commit()
 
         return user_obj, 200
+
+
+class RecoverPassword(MetaResource, MethodResource):
+
+    @doc(description="Send email to create new password", tags=["Users"])
+    @use_kwargs(RecoverPasswordRequest)
+    def put(self, **kwargs):
+        """
+        API method to send an email to the user if they forgot to password.
+        Sends a temporary password and updates the database.
+        :param kwargs: a dictionary containing the email address
+        :return: A dictionary with a message (error if the email address is not in the database) and an integer with
+            the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        email = kwargs.get('email')
+        if not UserModel.check_email_in_use(email):
+            raise InvalidCredentials("The email address doesn't correspond to any user")
+        new_password = UserModel.generate_password()
+        text_email = get_pwd_email(new_password)
+        send_email_to(text_email, email)
+
+        data = {'password': new_password}
+        user_obj = UserModel.get_one_user_by_email(email)
+        user_obj.update(data)
+        user_obj.save()
+
+        log.info(f"A new password was generated for user with email: {email}")
+        return {'message': f'A temporary password was sent to email {email}'}, 200

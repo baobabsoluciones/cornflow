@@ -42,6 +42,10 @@ class TokenEndpointResponse(Schema):
     valid = fields.Int()
 
 
+class RecoverPasswordRequest(Schema):
+    email = fields.Str(required=True)
+
+
 class UserEditRequest(Schema):
     username = fields.Str(required=False)
     first_name = fields.Str(required=False)
