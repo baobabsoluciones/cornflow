@@ -235,9 +235,9 @@ class CustomTestCase(TestCase):
         row = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
-        print(change)
-        print(row)
-        print(payload_to_check)
+        print('Change: ', change)
+        print('Row: ', row.json)
+        print('Payload_to_check: ', payload_to_check)
 
         self.assertEqual(200, row.status_code)
         self.assertEqual(row.json["id"], payload_to_check["id"])
