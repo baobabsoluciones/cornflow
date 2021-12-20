@@ -17,8 +17,6 @@ def get_pwd_email(pwd):
         """
 
 
-
-
 def send_email_to(email_text, email_receiver):
     port = 465
     smtp_server = "smtp.gmail.com"
@@ -31,8 +29,10 @@ def send_email_to(email_text, email_receiver):
         try:
             server.login(email_sender, password)
         except smtplib.SMTPAuthenticationError:
-            raise InvalidUsage("This functionality is not available. "
-                               + "Check that cornflow's email is correctly configured")
+            raise InvalidUsage(
+                "This functionality is not available. "
+                + "Check that cornflow's email is correctly configured"
+            )
         try:
             server.sendmail(email_sender, email_receiver, email_text)
         except smtplib.SMTPRecipientsRefused:
