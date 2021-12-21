@@ -112,7 +112,6 @@ class Auth:
             error="You do not have permission to access this endpoint", status_code=403
         )
 
-    # user decorator
     @staticmethod
     def auth_required(func):
         """

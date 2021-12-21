@@ -5,7 +5,7 @@ from cornflow.commands.dag import register_deployed_dags_command
 
 
 class TestCornflowCommands(CustomTestCaseLive):
-    def setUp(self, create_all=False):
+    def setUp(self, create_all=True):
         super().setUp()
 
     def test_dag_command(self):
