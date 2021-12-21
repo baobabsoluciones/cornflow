@@ -89,7 +89,6 @@ class Auth:
 
     @staticmethod
     def get_permission_for_request(req, user_id):
-        # TODO: check DAG permission as well
         method, url = Auth.get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
@@ -113,6 +112,7 @@ class Auth:
             error="You do not have permission to access this endpoint", status_code=403
         )
 
+    # user decorator
     @staticmethod
     def auth_required(func):
         """
@@ -157,6 +157,8 @@ class Auth:
                             error="You do not have permission to use this DAG",
                             status_code=403,
                         )
+            else:
+                return func(*args, **kwargs)
 
         return dag_decorator
 
