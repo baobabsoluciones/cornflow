@@ -20,6 +20,5 @@
       "path": "/constraints/2/constant",
       "value": -10
     }
-  ],
-  "schema": "solve_model_dag"
+  ]
 }

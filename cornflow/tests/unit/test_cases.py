@@ -392,12 +392,11 @@ class TestCaseJsonPatch(CustomTestCase):
         self.payloads = [self.load_file(f) for f in CASES_LIST]
         self.items_to_check = ["name", "description", "schema"]
         self.url = CASE_URL
-        self.patch = {
-            "data_patch": jsonpatch.make_patch(
+        self.patch = dict(
+            data_patch=jsonpatch.make_patch(
                 self.payloads[0]["data"], self.payloads[1]["data"]
-            ).patch,
-            "schema": self.payload["schema"],
-        }
+            ).patch
+        )
         self.patch_file = self.load_file(JSON_PATCH_GOOD_PATH)
 
     def test_json_patch(self):

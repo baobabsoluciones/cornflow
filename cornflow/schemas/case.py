@@ -73,13 +73,11 @@ class CaseToInstanceResponse(Schema):
 class CaseEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
-    schema = fields.Str()
 
 
 class CaseCompareResponse(Schema):
     data_patch = fields.Nested(PatchOperation, many=True)
     solution_patch = fields.Nested(PatchOperation, many=True)
-    schema = fields.Str(required=True)
 
 
 class QueryFiltersCase(QueryFilters):

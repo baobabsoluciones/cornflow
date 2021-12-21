@@ -199,7 +199,6 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
     @Auth.auth_required
-    @Auth.dag_permission_required
     @use_kwargs(ExecutionEditRequest, location="json")
     def put(self, idx, **data):
         """

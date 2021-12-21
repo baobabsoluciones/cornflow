@@ -444,7 +444,7 @@ class BaseTestCases:
             payload = {**self.payload, **dict(id=idx, name="new_name")}
             self.update_row(
                 self.url + str(idx) + "/",
-                dict(name="new_name", schema=payload["schema"]),
+                dict(name="new_name"),
                 payload,
             )
 

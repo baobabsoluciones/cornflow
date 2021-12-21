@@ -39,7 +39,6 @@ class InstanceFileRequest(Schema):
 class InstanceEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
-    schema = fields.Str(required=True)
 
 
 class InstanceEndpointResponse(BaseDataEndpointResponse):
