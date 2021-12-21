@@ -29,6 +29,5 @@ def update_schemas_command(url, user, pwd, verbose):
     else:
         if verbose == 1:
             print("The DAGs schemas were not updated properly")
-            print(response.json())
 
     return True

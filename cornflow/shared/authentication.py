@@ -140,7 +140,7 @@ class Auth:
 
         @wraps(func)
         def dag_decorator(*args, **kwargs):
-            if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+            if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
                 user_id = Auth.get_user_obj_from_header(request.headers).id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
