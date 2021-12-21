@@ -646,10 +646,10 @@ class LoginTestCases:
                 headers={"Content-Type": "application/json"},
             )
 
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -671,10 +671,10 @@ class LoginTestCases:
             )
 
             token = response.json["token"]
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -697,10 +697,10 @@ class LoginTestCases:
                 follow_redirects=True,
                 headers={"Content-Type": "application/json"},
             )
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
