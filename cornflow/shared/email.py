@@ -17,15 +17,23 @@ def get_pwd_email(pwd, receiver_email):
     message["From"] = sender_email
     message["To"] = receiver_email
 
-    text = f"""\
-        Hi,
-        Here is your temporary password to access cornflow: {pwd}.
-        You can use it to login and then change your password. Please change your password as soon as you can. 
+    html = f"""
+    <html>
+        <body> 
+            <p>
+                <p> Hi, </p>
+                Here is your temporary password to access cornflow: <big><b>{pwd}</b></big>.<br>
+                You can use it to login and then change your password. Please change your password as soon as you can.
+            </p>
+            <p>Conflow</p>
+        </body>
+    </html>
+    """
 
-        Cornflow
-        """
+    t = MIMEText(html, "html")
 
-    t = MIMEText(text, "plain")
+    message.attach(t)
+
     message.attach(t)
 
     return message.as_string()
