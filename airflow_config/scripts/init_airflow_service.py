@@ -171,7 +171,7 @@ def airflowsvc(afsvc):
         os.system(f"airflow {afsvc}")
     if afsvc == "flower":
         time.sleep(10)
-        os.system(f"airflow celery {afsvc} --basic-auth={AIRFLOW_USER}:{AIRFLOW_PWD}")
+        os.system(f"airflow celery {afsvc} --basic-auth={AIRFLOW_USER}:\"{AIRFLOW_PWD}\"")
     else:
         os.system("airflow version")
 
