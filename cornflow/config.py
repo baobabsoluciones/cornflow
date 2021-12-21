@@ -56,8 +56,6 @@ class DefaultConfig(object):
 
 class Development(DefaultConfig):
     """ """
-    CORNFLOW_EMAIL_ADDRESS = 'cornflow.server.test@gmail.com'
-    CORNFLOW_EMAIL_PASSWORD = 'Hjk4qVN9.a'
 
 
 class Testing(DefaultConfig):
@@ -73,9 +71,6 @@ class Testing(DefaultConfig):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = "admin"
     AIRFLOW_PWD = "admin"
-
-    CORNFLOW_EMAIL_ADDRESS = 'cornflow.server.test@gmail.com'
-    CORNFLOW_EMAIL_PASSWORD = 'Hjk4qVN9.a'
 
 
 class Production(DefaultConfig):
