@@ -8,12 +8,16 @@ from cornflow.app import (
     access_init,
     register_roles,
     register_views,
+    register_deployed_dags,
 )
+
+from cornflow.commands.dag import register_deployed_dags_command_test
 
 from cornflow.endpoints import resources
 from cornflow.models import (
     ActionModel,
     ApiViewModel,
+    DeployedDAG,
     PermissionViewRoleModel,
     RoleModel,
     UserModel,
@@ -150,6 +154,12 @@ class TestCommands(TestCase):
                     )
 
                     self.assertEqual(True, permission)
+
+    def test_deployed_dags_test_command(self):
+        register_deployed_dags_command_test()
+        dags = DeployedDAG.get_all_objects()
+        for dag in ["solve_model_dag", "gc", "timer"]:
+            self.assertIn(dag, [d.id for d in dags])
 
     # def test_argument_parsing_correct(self):
     #     command = RegisterRoles()
