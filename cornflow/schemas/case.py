@@ -60,6 +60,7 @@ class CaseFromInstanceExecution(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
     parent_id = fields.Int(allow_none=True)
+    schema = fields.Str(required=True)
 
 
 class CaseToInstanceResponse(Schema):
@@ -78,6 +79,7 @@ class CaseEditRequest(Schema):
 class CaseCompareResponse(Schema):
     data_patch = fields.Nested(PatchOperation, many=True)
     solution_patch = fields.Nested(PatchOperation, many=True)
+    schema = fields.Str(required=True)
 
 
 class QueryFiltersCase(QueryFilters):

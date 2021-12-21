@@ -3,9 +3,14 @@ from flask import request, g, current_app
 from functools import wraps
 import jwt
 
-from ..models import ApiViewModel, UserModel, UserRoleModel, PermissionViewRoleModel
+from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
 from ..shared.const import PERMISSION_METHOD_MAP
-from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist, NoPermission
+from ..shared.exceptions import (
+    InvalidCredentials,
+    InvalidData,
+    NoPermission,
+    ObjectDoesNotExist,
+)
 
 
 class Auth:
@@ -87,7 +92,10 @@ class Auth:
         method, url = Auth.get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
-            raise NoPermission("You do not have permission to access this endpoint")
+            raise NoPermission(
+                error="You do not have permission to access this endpoint",
+                status_code=403,
+            )
 
         action_id = PERMISSION_METHOD_MAP[method]
         view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
@@ -100,9 +108,10 @@ class Auth:
             if has_permission:
                 return True
 
-        raise NoPermission("You do not have permission to access this endpoint")
+        raise NoPermission(
+            error="You do not have permission to access this endpoint", status_code=403
+        )
 
-    # user decorator
     @staticmethod
     def auth_required(func):
         """
@@ -119,6 +128,38 @@ class Auth:
             return func(*args, **kwargs)
 
         return decorated_user
+
+    @staticmethod
+    def dag_permission_required(func):
+        """
+        DAG permission decorator
+        :param func:
+        :return:
+        """
+
+        @wraps(func)
+        def dag_decorator(*args, **kwargs):
+            if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
+                user_id = Auth.get_user_obj_from_header(request.headers).id
+                dag_id = request.json.get("schema", None)
+                if dag_id is None:
+                    raise InvalidData(
+                        error="The request does not specify a schema to use",
+                        status_code=400,
+                    )
+                else:
+                    if PermissionsDAG.check_if_has_permissions(user_id, dag_id):
+                        # We have permissions
+                        return func(*args, **kwargs)
+                    else:
+                        raise NoPermission(
+                            error="You do not have permission to use this DAG",
+                            status_code=403,
+                        )
+            else:
+                return func(*args, **kwargs)
+
+        return dag_decorator
 
     @staticmethod
     def return_user_from_token(token):

@@ -1,4 +1,5 @@
 from .meta_model import TraceAttributes
+from .dag import DeployedDAG
 from ..shared.utils import db
 
 
@@ -41,3 +42,46 @@ class PermissionViewRoleModel(TraceAttributes):
 
     def __repr__(self):
         return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
+
+
+class PermissionsDAG(TraceAttributes):
+    __tablename__ = "permission_dag"
+    __table_args__ = (db.UniqueConstraint("dag_id", "user_id"),)
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    dag_id = db.Column(
+        db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("UserModel", viewonly=True)
+
+    def __init__(self, data):
+        super().__init__()
+        self.dag_id = data.get("dag_id")
+        self.user_id = data.get("user_id")
+
+    def __repr__(self):
+        return f"User {self.user_id} can access {self.dag_id}"
+
+    @staticmethod
+    def get_all_objects():
+        return PermissionsDAG.query.all()
+
+    @staticmethod
+    def add_all_permissions_to_user(user_id):
+        dags = DeployedDAG.get_all_objects()
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
+        ]
+        for permission in permissions:
+            permission.save()
+
+    @staticmethod
+    def check_if_has_permissions(user_id, dag_id):
+        permission = PermissionsDAG.query.filter_by(
+            user_id=user_id, dag_id=dag_id
+        ).first()
+        if permission is None:
+            return False
+        return True

@@ -63,6 +63,7 @@ class ExecutionRequest(Schema):
 class ExecutionEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
+    schema = fields.Str(required=True)
 
 
 class ExecutionDagRequest(Schema):

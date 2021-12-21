@@ -13,15 +13,12 @@ from sqlalchemy.exc import IntegrityError
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
-from ..schemas.user import UserSchema, LoginEndpointRequest
+from ..schemas.user import LoginEndpointRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_DB, AUTH_LDAP
 from ..shared.exceptions import InvalidUsage, InvalidCredentials
 from ..shared.ldap import LDAP
 from ..shared.utils import db
-
-# Initialize the schema that the endpoint uses
-user_schema = UserSchema()
 
 
 class LoginEndpoint(MetaResource, MethodResource):

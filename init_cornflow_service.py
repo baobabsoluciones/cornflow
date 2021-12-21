@@ -8,6 +8,9 @@ from flask_migrate import Migrate, upgrade
 from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cornflow.app import create_app, db
 from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command
+from cornflow.commands.permissions import register_dag_permissions_command
+from cornflow.commands.schemas import update_schemas_command
 from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
@@ -54,6 +57,9 @@ CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "serviceuser1234")
 # Cornflow logging and storage config
 CORNFLOW_LOGGING = os.getenv("CORNFLOW_LOGGING", "console")
 os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
+
+OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
+os.environ["OPEN_DEPLOYMENT"] = str(OPEN_DEPLOYMENT)
 
 # Check LDAP parameters for active directory and show message
 if os.getenv("AUTH_TYPE") == 2:
@@ -111,6 +117,9 @@ with app.app_context():
             SERVICE_ROLE,
             verbose=1,
         )
+    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+    register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
+    update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
 # execute gunicorn application
 os.system(

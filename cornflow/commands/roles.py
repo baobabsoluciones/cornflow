@@ -1,4 +1,6 @@
 def register_roles_command(verbose):
+    from sqlalchemy.exc import IntegrityError
+
     from ..models import RoleModel
     from ..shared.const import ROLES_MAP
     from ..shared.utils import db
@@ -15,7 +17,10 @@ def register_roles_command(verbose):
     if len(roles_to_register) > 0:
         db.session.bulk_save_objects(roles_to_register)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(

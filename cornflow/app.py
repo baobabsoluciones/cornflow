@@ -10,6 +10,7 @@ from flask_restful import Api
 
 from .commands.access import access_init_command
 from .commands.actions import register_actions_command
+from .commands.dag import register_deployed_dags_command
 from .commands.permissions import register_base_permissions_command
 from .commands.roles import register_roles_command
 from .commands.users import create_admin_user_command, create_service_user_command
@@ -29,6 +30,7 @@ def create_app(env_name="development", dataconn=None):
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
+
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])
     # initialization for init_cornflow_service.py
@@ -67,6 +69,7 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_views)
     app.cli.add_command(register_base_assignations)
     app.cli.add_command(access_init)
+    app.cli.add_command(register_deployed_dags)
 
     return app
 
@@ -124,6 +127,16 @@ def register_base_assignations(verbose):
 @with_appcontext
 def access_init(verbose):
     access_init_command(verbose)
+
+
+@click.command("register_deployed_dags")
+@click.option("-r", "--url", type=str)
+@click.option("-u", "--username", type=str)
+@click.option("-p", "--password", type=str)
+@click.option("-v", "--verbose", default=0)
+@with_appcontext
+def register_deployed_dags(url, username, password, verbose):
+    register_deployed_dags_command(url, username, password, verbose)
 
 
 if __name__ == "__main__":

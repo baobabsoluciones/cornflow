@@ -7,6 +7,9 @@ from flask_testing import LiveServerTestCase
 # Internal modules
 from cornflow.app import create_app, access_init
 from cornflow.models import UserRoleModel
+from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import PREFIX
@@ -31,8 +34,8 @@ class CustomTestCaseLive(LiveServerTestCase):
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
-        self.runner = create_app().test_cli_runner()
-        self.runner.invoke(access_init)
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
         user_data = dict(
             username="testname",
             email="test@test.com",
@@ -44,6 +47,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.url = None
         self.model = None
         self.items_to_check = []
+        register_dag_permissions_command(open_deployment=1, verbose=0)
 
     def tearDown(self):
         db.session.remove()
