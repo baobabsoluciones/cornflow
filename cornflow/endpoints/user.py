@@ -181,7 +181,7 @@ class RecoverPassword(MetaResource, MethodResource):
         if not UserModel.check_email_in_use(email):
             raise InvalidCredentials("The email address doesn't correspond to any user")
         new_password = UserModel.generate_password()
-        text_email = get_pwd_email(new_password)
+        text_email = get_pwd_email(new_password, email)
         send_email_to(text_email, email)
 
         data = {'password': new_password}
