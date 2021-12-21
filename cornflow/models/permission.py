@@ -46,6 +46,15 @@ class PermissionViewRoleModel(TraceAttributes):
         """
         return PermissionViewRoleModel.query.get(idx)
 
+    def update(self, data):
+        """
+        Updates the object in the database and automatically updates the updated_at field
+        :param dict data:  A dictionary containing the updated data for the execution
+        """
+        for key, item in data.items():
+            setattr(self, key, item)
+        super().update(data)
+
     @staticmethod
     def get_all_objects():
         return PermissionViewRoleModel.query.all()
