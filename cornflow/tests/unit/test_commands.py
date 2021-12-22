@@ -204,3 +204,9 @@ class TestCommands(TestCase):
         service = UserModel.get_one_user_by_email("testemail@test.org")
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         self.assertEqual(0, len(service_permissions))
+
+    def test_argument_parsing_correct_verbose(self):
+        self.test_service_user_command()
+        result = self.runner.invoke(register_dag_permissions, ["-o", 1, "-v", "a"])
+        self.assertEqual(2, result.exit_code)
+        self.assertIn("is not a valid integer", result.output)
