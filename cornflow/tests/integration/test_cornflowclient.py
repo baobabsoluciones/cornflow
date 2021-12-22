@@ -271,7 +271,11 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
 
     def test_get_all_schemas(self):
         response = self.client.get_all_schemas()
-        self.assertIn(
+        self.assertEqual([], response)
+
+    def test_get_one_schema(self):
+        response = self.client.get_schema("solve_model_dag")
+        self.assertEqual(
             {"error": "User does not have permission to access this dag"}, response
         )
 
