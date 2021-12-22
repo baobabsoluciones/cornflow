@@ -11,7 +11,10 @@ from flask_restful import Api
 from .commands.access import access_init_command
 from .commands.actions import register_actions_command
 from .commands.dag import register_deployed_dags_command
-from .commands.permissions import register_base_permissions_command
+from .commands.permissions import (
+    register_base_permissions_command,
+    register_dag_permissions_command,
+)
 from .commands.roles import register_roles_command
 from .commands.users import create_admin_user_command, create_service_user_command
 from .commands.views import register_views_command
@@ -70,6 +73,7 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_base_assignations)
     app.cli.add_command(access_init)
     app.cli.add_command(register_deployed_dags)
+    app.cli.add_command(register_dag_permissions)
 
     return app
 
@@ -137,6 +141,14 @@ def access_init(verbose):
 @with_appcontext
 def register_deployed_dags(url, username, password, verbose):
     register_deployed_dags_command(url, username, password, verbose)
+
+
+@click.command("register_dag_permissions")
+@click.option("-o", "--open_deployment", default=0, type=int)
+@click.option("-v", "--verbose", default=0)
+@with_appcontext
+def register_dag_permissions(open_deployment, verbose):
+    register_dag_permissions_command(open_deployment=open_deployment, verbose=verbose)
 
 
 if __name__ == "__main__":

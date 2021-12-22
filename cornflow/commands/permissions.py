@@ -72,12 +72,16 @@ def register_base_permissions_command(verbose):
     return True
 
 
-def register_dag_permissions_command(open_deployment: int = 1, verbose: int = 0):
+def register_dag_permissions_command(open_deployment: int = None, verbose: int = 0):
 
+    from flask import current_app
     from sqlalchemy.exc import IntegrityError
 
     from ..models import DeployedDAG, PermissionsDAG, UserModel
     from ..shared.utils import db
+
+    if open_deployment is None:
+        open_deployment = int(current_app.config["OPEN_DEPLOYMENT"])
 
     existing_permissions = [
         (permission.dag_id, permission.user_id)

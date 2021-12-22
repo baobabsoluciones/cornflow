@@ -1,14 +1,15 @@
+from flask import current_app
 from flask_testing import TestCase
 
 from cornflow.app import (
+    access_init,
+    create_admin_user,
     create_app,
     create_service_user,
-    create_admin_user,
     register_actions,
-    access_init,
+    register_dag_permissions,
     register_roles,
     register_views,
-    register_deployed_dags,
 )
 
 from cornflow.commands.dag import register_deployed_dags_command_test
@@ -18,6 +19,7 @@ from cornflow.models import (
     ActionModel,
     ApiViewModel,
     DeployedDAG,
+    PermissionsDAG,
     PermissionViewRoleModel,
     RoleModel,
     UserModel,
@@ -33,6 +35,7 @@ from cornflow.shared.utils import db
 class TestCommands(TestCase):
     def create_app(self):
         app = create_app("testing")
+        app.config["OPEN_DEPLOYMENT"] = 1
         return app
 
     def setUp(self):
@@ -74,7 +77,7 @@ class TestCommands(TestCase):
             create_service_user,
             [
                 "-u",
-                "administrator",
+                "cornflow",
                 "-e",
                 self.payload["email"],
                 "-p",
@@ -86,7 +89,7 @@ class TestCommands(TestCase):
 
         self.assertNotEqual(None, user)
         self.assertEqual(self.payload["email"], user.email)
-        self.assertEqual("administrator", user.username)
+        self.assertEqual("cornflow", user.username)
         # TODO: check the user has both roles
 
     def test_service_user_existing_service(self):
@@ -104,16 +107,16 @@ class TestCommands(TestCase):
                 "-u",
                 "administrator",
                 "-e",
-                self.payload["email"],
+                "admin@test.org",
                 "-p",
                 self.payload["password"],
             ],
         )
 
-        user = UserModel.get_one_user_by_email("testemail@test.org")
+        user = UserModel.get_one_user_by_email("admin@test.org")
 
         self.assertNotEqual(None, user)
-        self.assertEqual(self.payload["email"], user.email)
+        self.assertEqual("admin@test.org", user.email)
         return user
 
     def test_register_actions(self):
@@ -160,6 +163,36 @@ class TestCommands(TestCase):
         dags = DeployedDAG.get_all_objects()
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])
+
+    def test_dag_permissions_command(self):
+        register_deployed_dags_command_test()
+        self.test_service_user_command()
+        self.test_admin_user_command()
+        self.runner.invoke(register_dag_permissions, ["-o", 1])
+
+        service = UserModel.get_one_user_by_email("testemail@test.org")
+        admin = UserModel.get_one_user_by_email("admin@test.org")
+
+        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
+        admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
+
+        self.assertEqual(3, len(service_permissions))
+        self.assertEqual(3, len(admin_permissions))
+
+    def test_dag_permissions_command_no_open(self):
+        register_deployed_dags_command_test()
+        self.test_service_user_command()
+        self.test_admin_user_command()
+        self.runner.invoke(register_dag_permissions, ["-o", 0])
+
+        service = UserModel.get_one_user_by_email("testemail@test.org")
+        admin = UserModel.get_one_user_by_email("admin@test.org")
+
+        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
+        admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
+
+        self.assertEqual(3, len(service_permissions))
+        self.assertEqual(0, len(admin_permissions))
 
     # def test_argument_parsing_correct(self):
     #     command = RegisterRoles()

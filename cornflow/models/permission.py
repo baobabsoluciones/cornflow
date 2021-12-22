@@ -69,6 +69,10 @@ class PermissionsDAG(TraceAttributes):
         return PermissionsDAG.query.all()
 
     @staticmethod
+    def get_user_dag_permissions(user_id):
+        return PermissionsDAG.query.filter_by(user_id=user_id).all()
+
+    @staticmethod
     def add_all_permissions_to_user(user_id):
         dags = DeployedDAG.get_all_objects()
         permissions = [
