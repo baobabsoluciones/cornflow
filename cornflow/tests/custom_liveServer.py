@@ -2,6 +2,7 @@
 import cornflow_client as cf
 
 # External libraries
+from flask import current_app
 from flask_testing import LiveServerTestCase
 
 # Internal modules
@@ -48,7 +49,9 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.url = None
         self.model = None
         self.items_to_check = []
-        register_dag_permissions_command(open_deployment=1, verbose=0)
+        register_dag_permissions_command(
+            open_deployment=current_app.config["OPEN_DEPLOYMENT"], verbose=0
+        )
 
     def tearDown(self):
         db.session.remove()
