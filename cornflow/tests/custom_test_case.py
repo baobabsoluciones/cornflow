@@ -66,7 +66,9 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        register_dag_permissions_command(open_deployment=1, verbose=0)
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
 
         data.pop("email")
 
