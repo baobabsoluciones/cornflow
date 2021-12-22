@@ -280,9 +280,6 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
         )
 
 
-# TODO: maybe we should have a test-suite for service_user
-
-
 class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
