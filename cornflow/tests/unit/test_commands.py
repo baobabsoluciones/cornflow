@@ -194,11 +194,13 @@ class TestCommands(TestCase):
         self.assertEqual(3, len(service_permissions))
         self.assertEqual(0, len(admin_permissions))
 
-    # def test_argument_parsing_correct(self):
-    #     command = RegisterRoles()
-    #     command.run(verbose="0")
-    #
-    #     roles = RoleModel.query.all()
-    #
-    #     for r in roles:
-    #         self.assertEqual(ROLES_MAP[r.id], r.name)
+    def test_argument_parsing_correct(self):
+        self.test_service_user_command()
+        result = self.runner.invoke(register_dag_permissions, ["-o", "a"])
+
+        self.assertEqual(2, result.exit_code)
+        self.assertIn("is not a valid integer", result.output)
+
+        service = UserModel.get_one_user_by_email("testemail@test.org")
+        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
+        self.assertEqual(0, len(service_permissions))
