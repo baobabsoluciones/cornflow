@@ -5,7 +5,7 @@ import cornflow_client as cf
 from flask_testing import LiveServerTestCase
 
 # Internal modules
-from cornflow.app import create_app, access_init
+from cornflow.app import create_app
 from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test

@@ -1,11 +1,14 @@
 """
 Unit test for the permissions table
 """
+import json
 
 # Import from internal modules
+from cornflow.app import create_app
 from cornflow.endpoints import PermissionsViewRoleEndpoint
+from cornflow.models import InstanceModel
 from cornflow.shared.const import ROLES_MAP
-from cornflow.tests.const import PERMISSION_URL
+from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
@@ -46,3 +49,29 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
                 )
 
                 self.assertEqual(403, response.status_code)
+
+
+class TestPermissionsDagNoOpen(CustomTestCase):
+    def create_app(self):
+        app = create_app("testing")
+        app.config["OPEN_DEPLOYMENT"] = 0
+        return app
+
+    def setUp(self):
+        super().setUp()
+        self.url = INSTANCE_URL
+        self.model = InstanceModel
+
+        def load_file(_file):
+            with open(_file) as f:
+                temp = json.load(f)
+            return temp
+
+        self.payload = load_file(INSTANCE_PATH)
+
+    def test_create_instance_no_permissions(self):
+        self.create_new_row(self.url, self.model, self.payload, 403, False)
+
+    def test_missing_schema(self):
+        self.payload.pop("schema")
+        self.create_new_row(self.url, self.model, self.payload, 400, False)

@@ -1,18 +1,14 @@
 import json
 import pulp
 import logging as log
-import time
+
 import unittest
 
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
-from cornflow.shared.const import (
-    EXEC_STATE_CORRECT,
-    EXEC_STATE_STOPPED,
-    EXEC_STATE_RUNNING,
-)
+
 from cornflow.tests.const import INSTANCE_PATH
 from cornflow.shared.const import STATUS_HEALTHY
 from cornflow.schemas.solution_log import LogSchema

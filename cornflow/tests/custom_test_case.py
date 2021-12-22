@@ -66,7 +66,9 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        register_dag_permissions_command(open_deployment=1, verbose=0)
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
 
         data.pop("email")
 
@@ -444,7 +446,7 @@ class BaseTestCases:
             payload = {**self.payload, **dict(id=idx, name="new_name")}
             self.update_row(
                 self.url + str(idx) + "/",
-                dict(name="new_name", schema=payload["schema"]),
+                dict(name="new_name"),
                 payload,
             )
 

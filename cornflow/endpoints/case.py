@@ -198,7 +198,6 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
 
     @doc(description="Edit a case", tags=["Cases"])
     @Auth.auth_required
-    @Auth.dag_permission_required
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
@@ -260,7 +259,6 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
     @Auth.auth_required
-    @Auth.dag_permission_required
     @inflate
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
