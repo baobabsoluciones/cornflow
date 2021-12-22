@@ -60,6 +60,7 @@ class UserModel(TraceAttributes):
     )
 
     user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
+
     dag_permissions = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",

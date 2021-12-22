@@ -9,6 +9,7 @@ from cornflow.models import (
     CaseModel,
     ExecutionModel,
     InstanceModel,
+    PermissionsDAG,
     UserModel,
     UserRoleModel,
 )
@@ -561,3 +562,24 @@ class TestUserModel(TestCase):
         role = UserRoleModel.query.filter_by(user_id=self.viewer["id"]).delete()
         user = UserModel.query.get(self.viewer["id"])
         self.assertEqual(user.roles, {})
+
+    def test_permission_dag_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+
+        before = PermissionsDAG.get_user_dag_permissions(user_id)
+        self.assertIsNotNone(before)
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        after = PermissionsDAG.get_user_dag_permissions(user_id)
+        self.assertEqual([], after)
+        self.assertNotEqual(before, after)
