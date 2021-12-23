@@ -5,6 +5,7 @@
 import json
 import pulp
 import logging as log
+import time
 import unittest
 
 # Imports from environment
@@ -15,7 +16,12 @@ from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from airflow_config.dags.model_functions import solve as solve_model
 from cornflow.app import create_app
 from cornflow.schemas.solution_log import LogSchema
-from cornflow.shared.const import STATUS_HEALTHY
+from cornflow.shared.const import (
+    EXEC_STATE_CORRECT,
+    EXEC_STATE_STOPPED,
+    EXEC_STATE_RUNNING,
+    STATUS_HEALTHY,
+)
 from cornflow.tests.const import INSTANCE_PATH
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
@@ -298,27 +304,27 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             )
         )
 
-    # def test_solve_and_wait(self):
-    #     execution = self.create_instance_and_execution()
-    #     time.sleep(15)
-    #     status = self.client.get_status(execution["id"])
-    #     results = self.client.get_results(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-    #     self.assertEqual(results["state"], EXEC_STATE_CORRECT)
+    def test_solve_and_wait(self):
+        execution = self.create_instance_and_execution()
+        time.sleep(15)
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
-    # def test_interrupt(self):
-    #     execution = self.create_timer_instance_and_execution(5)
-    #     self.client.stop_execution(execution_id=execution["id"])
-    #     time.sleep(2)
-    #     status = self.client.get_status(execution["id"])
-    #     results = self.client.get_results(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_STOPPED)
-    #     self.assertEqual(results["state"], EXEC_STATE_STOPPED)
-    #
-    # def test_status_solving(self):
-    #     execution = self.create_timer_instance_and_execution(5)
-    #     status = self.client.get_status(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+    def test_interrupt(self):
+        execution = self.create_timer_instance_and_execution(5)
+        self.client.stop_execution(execution_id=execution["id"])
+        time.sleep(2)
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+        self.assertEqual(results["state"], EXEC_STATE_STOPPED)
+
+    def test_status_solving(self):
+        execution = self.create_timer_instance_and_execution(5)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
 
