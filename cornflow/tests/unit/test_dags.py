@@ -120,7 +120,6 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         return
 
 
-# To test the permission deletion on cascade
 class TestDeployedDAGModel(TestCase):
     def create_app(self):
         app = create_app("testing")
