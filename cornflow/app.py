@@ -16,7 +16,11 @@ from .commands.permissions import (
     register_dag_permissions_command,
 )
 from .commands.roles import register_roles_command
-from .commands.users import create_admin_user_command, create_service_user_command
+from .commands.users import (
+    create_admin_user_command,
+    create_base_user_command,
+    create_service_user_command,
+)
 from .commands.views import register_views_command
 from .config import app_config
 from .endpoints import resources
@@ -68,6 +72,7 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(create_service_user)
     app.cli.add_command(create_admin_user)
     app.cli.add_command(register_roles)
+    app.cli.add_command(create_base_user)
     app.cli.add_command(register_actions)
     app.cli.add_command(register_views)
     app.cli.add_command(register_base_assignations)
@@ -96,6 +101,16 @@ def create_service_user(username, email, password, verbose):
 @with_appcontext
 def create_admin_user(username, email, password, verbose):
     create_admin_user_command(username, email, password, verbose)
+
+
+@click.command("create_base_user")
+@click.option("-u", "--username", required=True, type=str)
+@click.option("-e", "--email", required=True, type=str)
+@click.option("-p", "--password", required=True, type=str)
+@click.option("-v", "--verbose", type=int, default=0)
+@with_appcontext
+def create_base_user(username, email, password, verbose):
+    create_base_user_command(username, email, password, verbose)
 
 
 @click.command("register_roles")
