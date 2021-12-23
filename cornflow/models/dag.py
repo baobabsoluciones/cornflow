@@ -18,6 +18,13 @@ class DeployedDAG(TraceAttributes):
     id = db.Column(db.String(128), primary_key=True)
     description = db.Column(TEXT, nullable=True)
 
+    dag_permissions = db.relationship(
+        "PermissionsDAG",
+        cascade="all,delete",
+        backref="deployed_dags",
+        primaryjoin="and_(DeployedDAG.id==PermissionsDAG.dag_id)",
+    )
+
     def __init__(self, data):
         super().__init__()
         self.id = data.get("id")
