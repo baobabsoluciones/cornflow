@@ -5,6 +5,7 @@ from cornflow.app import (
     access_init,
     create_admin_user,
     create_app,
+    create_base_user,
     create_service_user,
     register_actions,
     register_dag_permissions,
@@ -52,24 +53,64 @@ class TestCommands(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_service_user_command(self):
+    def user_command(self, command, username, email):
         self.runner.invoke(
-            create_service_user,
+            command,
             [
                 "-u",
-                "cornflow",
+                username,
+                "-e",
+                email,
+                "-p",
+                self.payload["password"],
+            ],
+        )
+
+        user = UserModel.get_one_user_by_email(email)
+
+        self.assertNotEqual(None, user)
+        self.assertEqual(email, user.email)
+        return user
+
+    def user_missing_arguments(self, command):
+        result = self.runner.invoke(
+            command,
+            [
                 "-e",
                 self.payload["email"],
                 "-p",
                 self.payload["password"],
             ],
         )
+        self.assertEqual(2, result.exit_code)
+        self.assertIn("Missing option '-u' / '--username'", result.output)
 
-        user = UserModel.get_one_user_by_email("testemail@test.org")
+        result = self.runner.invoke(
+            command,
+            [
+                "-u",
+                "cornflow",
+                "-p",
+                self.payload["password"],
+            ],
+        )
+        self.assertEqual(2, result.exit_code)
+        self.assertIn("Missing option '-e' / '--email'", result.output)
 
-        self.assertNotEqual(None, user)
-        self.assertEqual(self.payload["email"], user.email)
-        return user
+        result = self.runner.invoke(
+            command,
+            [
+                "-u",
+                "cornflow",
+                "-e",
+                self.payload["email"],
+            ],
+        )
+        self.assertEqual(2, result.exit_code)
+        self.assertIn("Missing option '-p' / '--password'", result.output)
+
+    def test_service_user_command(self):
+        return self.user_command(create_service_user, "cornflow", self.payload["email"])
 
     def test_service_user_existing_admin(self):
         self.test_admin_user_command()
@@ -99,25 +140,11 @@ class TestCommands(TestCase):
         self.assertEqual("cornflow", user.username)
         # TODO: check the user has the role
 
-    #
     def test_admin_user_command(self):
-        self.runner.invoke(
-            create_admin_user,
-            [
-                "-u",
-                "administrator",
-                "-e",
-                "admin@test.org",
-                "-p",
-                self.payload["password"],
-            ],
-        )
+        return self.user_command(create_admin_user, "admin", "admin@test.org")
 
-        user = UserModel.get_one_user_by_email("admin@test.org")
-
-        self.assertNotEqual(None, user)
-        self.assertEqual("admin@test.org", user.email)
-        return user
+    def test_base_user_command(self):
+        return self.user_command(create_admin_user, "base", "base@test.org")
 
     def test_register_actions(self):
         self.runner.invoke(register_actions)
@@ -210,3 +237,12 @@ class TestCommands(TestCase):
         result = self.runner.invoke(register_dag_permissions, ["-o", 1, "-v", "a"])
         self.assertEqual(2, result.exit_code)
         self.assertIn("is not a valid integer", result.output)
+
+    def test_missing_required_argument_service(self):
+        self.user_missing_arguments(create_service_user)
+
+    def test_missing_required_argument_admin(self):
+        self.user_missing_arguments(create_admin_user)
+
+    def test_missing_required_argument_user(self):
+        self.user_missing_arguments(create_base_user)

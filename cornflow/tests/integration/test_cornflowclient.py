@@ -1,18 +1,23 @@
+"""
+
+"""
+# Full imports
 import json
 import pulp
 import logging as log
-
 import unittest
 
+# Imports from environment
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
-
-from cornflow.tests.const import INSTANCE_PATH
-from cornflow.shared.const import STATUS_HEALTHY
-from cornflow.schemas.solution_log import LogSchema
+# Import internal modules
 from airflow_config.dags.model_functions import solve as solve_model
+from cornflow.app import create_app
+from cornflow.schemas.solution_log import LogSchema
+from cornflow.shared.const import STATUS_HEALTHY
+from cornflow.tests.const import INSTANCE_PATH
+from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 
 def load_file(_file):
@@ -129,7 +134,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         return self.create_new_execution(payload)
 
 
-class TestCornflowClient(TestCornflowClientBasic):
+class TestCornflowClientOpen(TestCornflowClientBasic):
 
     # TODO: user management
     # TODO: infeasible execution
@@ -257,7 +262,22 @@ class TestCornflowClient(TestCornflowClientBasic):
         self.assertEqual(af_status, STATUS_HEALTHY)
 
 
-# TODO: maybe we should have a test-suite for service_user
+class TestCornflowClientNotOpen(TestCornflowClientBasic):
+    def create_app(self):
+        app = create_app("testing")
+        app.config["LIVESERVER_PORT"] = 5050
+        app.config["OPEN_DEPLOYMENT"] = 0
+        return app
+
+    def test_get_all_schemas(self):
+        response = self.client.get_all_schemas()
+        self.assertEqual([], response)
+
+    def test_get_one_schema(self):
+        response = self.client.get_schema("solve_model_dag")
+        self.assertEqual(
+            {"error": "User does not have permission to access this dag"}, response
+        )
 
 
 class TestCornflowClientAdmin(TestCornflowClientBasic):

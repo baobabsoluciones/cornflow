@@ -47,3 +47,14 @@ def create_admin_user_command(username, email, password, verbose):
     return create_user_with_role(
         username, email, password, "admin", ADMIN_ROLE, verbose
     )
+
+
+def create_base_user_command(username, email, password, verbose):
+    from ..shared.const import VIEWER_ROLE
+
+    if username is None or email is None or password is None:
+        print("Missing required arguments")
+        return False
+    return create_user_with_role(
+        username, email, password, username, VIEWER_ROLE, verbose
+    )
