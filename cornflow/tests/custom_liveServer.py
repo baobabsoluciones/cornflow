@@ -19,7 +19,7 @@ from cornflow.tests.const import PREFIX
 class CustomTestCaseLive(LiveServerTestCase):
     def create_app(self):
         app = create_app("testing")
-        app.config["LIVESERVER_PORT"] = 5000
+        app.config["LIVESERVER_PORT"] = 5050
         return app
 
     def set_client(self, server):
