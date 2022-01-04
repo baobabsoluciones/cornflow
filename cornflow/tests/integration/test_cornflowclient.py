@@ -324,7 +324,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_status_solving(self):
         execution = self.create_timer_instance_and_execution(10)
-        print(execution)
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
