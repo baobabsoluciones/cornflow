@@ -306,6 +306,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
+        print(execution)
         time.sleep(15)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
@@ -322,7 +323,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(results["state"], EXEC_STATE_STOPPED)
 
     def test_status_solving(self):
-        execution = self.create_timer_instance_and_execution(5)
+        execution = self.create_timer_instance_and_execution(10)
+        print(execution)
+        time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
