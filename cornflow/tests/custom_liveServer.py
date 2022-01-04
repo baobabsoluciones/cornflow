@@ -65,6 +65,7 @@ class CustomTestCaseLive(LiveServerTestCase):
                 "password": "Testpassword1!",
             }
         response = self.login_or_signup(data)
+        print(response)
         user_role = UserRoleModel({"user_id": response["id"], "role_id": role_id})
         user_role.save()
 
