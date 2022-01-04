@@ -292,11 +292,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
         # we create a service user:
         self.create_service_user(
-            dict(
-                username="airflow",
-                pwd="serviceuser1234",
-                email="service_user@cornflow.com",
-            )
+            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
         )
         # we create an admin user
         # we guarantee that the admin is there for airflow
