@@ -76,13 +76,6 @@ class SchemaGenerator(unittest.TestCase):
         self.assertRaises(ValidationError, func_error2)
 
     def test_two_classes(self):
-        # class CoefficientsSchema(Schema):
-        #     name = fields.Str(required=True)
-        #     value = fields.Float(required=True)
-        #
-        # class ObjectiveSchema(Schema):
-        #     name = fields.Str(required=False, allow_none=True)
-        #     coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
 
         dict_params = dict(
             CoefficientsSchema=[

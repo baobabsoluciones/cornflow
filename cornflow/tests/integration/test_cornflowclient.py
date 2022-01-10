@@ -5,6 +5,7 @@
 import json
 import pulp
 import logging as log
+import time
 import unittest
 
 # Imports from environment
@@ -15,7 +16,12 @@ from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from airflow_config.dags.model_functions import solve as solve_model
 from cornflow.app import create_app
 from cornflow.schemas.solution_log import LogSchema
-from cornflow.shared.const import STATUS_HEALTHY
+from cornflow.shared.const import (
+    EXEC_STATE_CORRECT,
+    EXEC_STATE_STOPPED,
+    EXEC_STATE_RUNNING,
+    STATUS_HEALTHY,
+)
 from cornflow.tests.const import INSTANCE_PATH
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
@@ -149,7 +155,9 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     #  optional arguments for the headers of the request
     # def test_get_instance__data(self):
     #     instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
-    #     response = self.client.get_api_for_id("instance", instance["id"], "data")
+    #     response = self.client.get_api_for_id(
+    #         "instance", instance["id"], "data", encoding="gzip"
+    #     )
     #     self.assertEqual(response.headers["Content-Encoding"], "gzip")
 
     def test_delete_instance(self):
@@ -288,6 +296,15 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.create_service_user(
             dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
         )
+
+        self.create_service_user(
+            dict(
+                username="service_user@cornflow.com",
+                pwd="Serviceuser_1234",
+                email="service_user@cornflow.com",
+            )
+        )
+
         # we create an admin user
         # we guarantee that the admin is there for airflow
         self.client.token = self.create_admin(
@@ -298,27 +315,28 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             )
         )
 
-    # def test_solve_and_wait(self):
-    #     execution = self.create_instance_and_execution()
-    #     time.sleep(15)
-    #     status = self.client.get_status(execution["id"])
-    #     results = self.client.get_results(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-    #     self.assertEqual(results["state"], EXEC_STATE_CORRECT)
+    def test_solve_and_wait(self):
+        execution = self.create_instance_and_execution()
+        time.sleep(15)
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
-    # def test_interrupt(self):
-    #     execution = self.create_timer_instance_and_execution(5)
-    #     self.client.stop_execution(execution_id=execution["id"])
-    #     time.sleep(2)
-    #     status = self.client.get_status(execution["id"])
-    #     results = self.client.get_results(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_STOPPED)
-    #     self.assertEqual(results["state"], EXEC_STATE_STOPPED)
-    #
-    # def test_status_solving(self):
-    #     execution = self.create_timer_instance_and_execution(5)
-    #     status = self.client.get_status(execution["id"])
-    #     self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+    def test_interrupt(self):
+        execution = self.create_timer_instance_and_execution(5)
+        self.client.stop_execution(execution_id=execution["id"])
+        time.sleep(2)
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+        self.assertEqual(results["state"], EXEC_STATE_STOPPED)
+
+    def test_status_solving(self):
+        execution = self.create_timer_instance_and_execution(10)
+        time.sleep(5)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
 
@@ -376,7 +394,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             schema="solve_model_dag",
         )
         execution = self.client.create_api("execution/?run=0", json=payload)
-        print(execution.json())
         payload = dict(log_text="")
         response = self.client.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
