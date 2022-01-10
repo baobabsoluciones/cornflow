@@ -153,12 +153,12 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     # TODO: reactivate test with new version of cornflow client which allows to pass
     #  optional arguments for the headers of the request
-    def test_get_instance__data(self):
-        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
-        response = self.client.get_api_for_id(
-            "instance", instance["id"], "data", encoding="gzip"
-        )
-        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+    # def test_get_instance__data(self):
+    #     instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+    #     response = self.client.get_api_for_id(
+    #         "instance", instance["id"], "data", encoding="gzip"
+    #     )
+    #     self.assertEqual(response.headers["Content-Encoding"], "gzip")
 
     def test_delete_instance(self):
         instance = self.test_new_instance()
@@ -317,7 +317,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
-        print(execution)
         time.sleep(15)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
@@ -395,7 +394,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             schema="solve_model_dag",
         )
         execution = self.client.create_api("execution/?run=0", json=payload)
-        print(execution.json())
         payload = dict(log_text="")
         response = self.client.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
