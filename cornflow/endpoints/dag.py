@@ -161,7 +161,6 @@ class DeployedDAGEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = DeployedDAG
-        self.foreign_data = None
 
     @doc(
         description="Get list of deployed dags registered on the data base",

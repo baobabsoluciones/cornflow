@@ -4,5 +4,5 @@ from marshmallow import fields, Schema
 class DeployedDAGSchema(Schema):
     """"""
 
-    id = fields.Str()
-    description = fields.Str()
+    id = fields.Str(required=True)
+    description = fields.Str(allow_none=True)
