@@ -161,6 +161,7 @@ class DeployedDAGEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = DeployedDAG
+        self.foreign_data = None
 
     @doc(
         description="Get list of deployed dags registered on the data base",
@@ -170,3 +171,11 @@ class DeployedDAGEndpoint(MetaResource, MethodResource):
     @marshal_with(DeployedDAGSchema(many=True))
     def get(self, **kwargs):
         return self.model.get_all_objects()
+
+    @doc(description="Post a new deployed dag", tags=["DeployedDAGs"])
+    @Auth.auth_required
+    @marshal_with(DeployedDAGSchema)
+    @use_kwargs(DeployedDAGSchema)
+    def post(self, **kwargs):
+        response = self.post_list(kwargs)
+        return response
