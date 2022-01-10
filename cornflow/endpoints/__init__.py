@@ -86,7 +86,7 @@ resources = [
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=DAGEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
-    dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", ednpoint="deployed-dag"),
+    dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
