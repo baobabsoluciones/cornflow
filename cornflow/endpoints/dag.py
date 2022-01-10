@@ -13,6 +13,7 @@ import logging as log
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import DeployedDAG, ExecutionModel, InstanceModel
+from ..schemas import DeployedDAGSchema
 from ..schemas.execution import (
     ExecutionDagPostRequest,
     ExecutionDagRequest,
@@ -165,5 +166,7 @@ class DeployedDAGEndpoint(MetaResource, MethodResource):
         description="Get list of deployed dags registered on the data base",
         tags=["DeployedDAGs"],
     )
-    def get(self):
+    @Auth.auth_required
+    @marshal_with(DeployedDAGSchema(many=True))
+    def get(self, **kwargs):
         return self.model.get_all_objects()
