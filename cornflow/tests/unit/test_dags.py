@@ -11,15 +11,17 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.shared.const import ADMIN_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
 from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.shared.utils import db
 from cornflow.tests.const import (
     CASE_PATH,
     DAG_URL,
+    DEPLOYED_DAG_URL,
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
+    LOGIN_URL,
     SIGNUP_URL,
     USER_URL,
 )
@@ -120,7 +122,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         return
 
 
-class TestDeployedDAGModel(TestCase):
+class TestDeployedDAG(TestCase):
     def create_app(self):
         app = create_app("testing")
         return app
@@ -142,9 +144,24 @@ class TestDeployedDAGModel(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
+        data = dict(self.admin)
+        data.pop("email")
         self.admin["id"] = response.json["id"]
 
+        self.token = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        ).json["token"]
+
         user_role = UserRoleModel({"user_id": self.admin["id"], "role_id": ADMIN_ROLE})
+        user_role.save()
+        db.session.commit()
+
+        user_role = UserRoleModel(
+            {"user_id": self.admin["id"], "role_id": SERVICE_ROLE}
+        )
         user_role.save()
         db.session.commit()
 
@@ -162,3 +179,87 @@ class TestDeployedDAGModel(TestCase):
         after = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertNotEqual(before, after)
         self.assertGreater(len(before), len(after))
+
+    def test_get_deployed_dags(self):
+        response = self.client.get(
+            DEPLOYED_DAG_URL,
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json,
+            [
+                {"description": None, "id": "solve_model_dag"},
+                {"description": None, "id": "gc"},
+                {"description": None, "id": "timer"},
+            ],
+        )
+
+    def test_endpoint_permissions(self):
+        user_role = UserRoleModel.query.filter_by(
+            user_id=self.admin["id"], role_id=SERVICE_ROLE
+        )
+        user_role.delete()
+        db.session.commit()
+        data = self.client.get(
+            DEPLOYED_DAG_URL,
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(data.status_code, 403)
+        self.assertEqual(
+            data.json, {"error": "You do not have permission to access this endpoint"}
+        )
+
+    def test_post_endpoint(self):
+        payload = {"description": None, "id": "test_dag"}
+        response = self.client.post(
+            DEPLOYED_DAG_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json, payload)
+
+        response = self.client.get(
+            DEPLOYED_DAG_URL,
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(payload, response.json)
+
+    def test_post_not_valid(self):
+        payload = {"description": "test_description"}
+        response = self.client.post(
+            DEPLOYED_DAG_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json,
+            {"error": "{'json': {'id': ['Missing data for required field.']}}"},
+        )
