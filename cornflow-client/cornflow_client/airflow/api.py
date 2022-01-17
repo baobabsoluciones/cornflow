@@ -3,7 +3,7 @@ from requests.exceptions import ConnectionError, HTTPError
 import json
 from requests.auth import HTTPBasicAuth
 from cornflow_client import SchemaManager
-from marshmallow import ValidationError, INCLUDE
+from marshmallow import ValidationError
 
 from cornflow_client.constants import AirflowError, InvalidUsage
 
@@ -62,6 +62,12 @@ class Airflow(object):
         payload = dict(conf=conf)
         return self.consume_dag_run(dag_name, payload=payload, method="POST")
 
+    def update_schemas(self, dag_name="update_all_schemas"):
+        return self.consume_dag_run(dag_name, payload={}, method="POST")
+
+    def update_dag_registry(self, dag_name="update_dag_registry"):
+        return self.consume_dag_run(dag_name, payload={}, method="POST")
+
     def get_dag_run_status(self, dag_name, dag_run_id):
         return self.consume_dag_run(
             dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
@@ -116,6 +122,18 @@ class Airflow(object):
     def get_all_schemas(self):
         response = self.get_all_variables()
         return [dict(name=variable["key"]) for variable in response["variables"]]
+
+    def get_all_dags(self, method="GET"):
+        url = "{}/dags".format(self.url)
+        return self.request_headers_auth(method=method, url=url)
+
+    def get_internal_dags(self, method="GET"):
+        url = "{}/dags?tags=internal".format(self.url)
+        return self.request_headers_auth(method=method, url=url)
+
+    def get_model_dags(self, method="GET"):
+        url = "{}/dags?tags=model".format(self.url)
+        return self.request_headers_auth(method=method, url=url)
 
 
 def get_schema(config, dag_name, schema="instance"):
