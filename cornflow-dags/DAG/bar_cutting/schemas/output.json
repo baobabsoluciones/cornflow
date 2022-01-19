@@ -1,0 +1,94 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "detail_cutting_patterns": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with the detail of the final cutting patterns per bar.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id_bar": {
+                        "description": "The unique identifier for each bar.",
+                        "title": "Bar id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "id_pattern": {
+                        "description": "The unique identifier for each pattern.",
+                        "title": "Pattern id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "id_product": {
+                        "description": "The unique identifier for each product.",
+                        "title": "Product id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "number_of_products": {
+                        "description": "The number of products per bar and pattern.",
+                        "title": "Number of products",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id_bar",
+                    "id_pattern",
+                    "id_product",
+                    "number_of_products"
+                ]
+            }
+        },
+        "number_cutting_patterns": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with the number of cutting patterns required to satisfy the demand.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id_bar": {
+                        "description": "The unique identifier for each bar.",
+                        "title": "Bar id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "id_pattern": {
+                        "description": "The unique identifier for each pattern.",
+                        "title": "Pattern id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "number_of_patterns": {
+                        "description": "The number of patterns per bar.",
+                        "title": "Number of patterns",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id_bar",
+                    "id_pattern",
+                    "number_of_patterns"
+                ]
+            }
+        }
+    },
+    "required": [
+        "detail_cutting_patterns",
+        "number_cutting_patterns"
+    ]
+}

@@ -8,7 +8,6 @@ from cornflow_client import (
     get_pulp_jsonschema,
 )
 from cornflow_client.constants import (
-    STATUS_OPTIMAL,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
 )

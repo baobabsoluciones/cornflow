@@ -7,21 +7,22 @@ class Algorithm(Experiment):
         return
 
     def solve(self, options):
-
-        data = self.instance.data
-        nodes = data["demand"].keys_l()
+        # data
+        nodes = self.instance.get_nodes()
+        arcs = self.instance.get_weights()
+        depots = self.instance.get_depots()
         # arcs indexed by node:
-        arcs_i = data["arcs"].to_dictdict()
-        demand = data["demand"].get_property("demand")
-        max_capacity = data["parameters"].get("capacity", 10000)
+        arcs_i = arcs.to_dictdict()
+        demand = self.instance.get_demand()
+        max_capacity = self.instance.get_capacity()[None]
 
         # iterations
-        depot = node = data["depots"][0]["n"]
+        depot = node = depots[0]
         route = 0
-        solution = {route: [node]}
-        remaining_nodes = set(nodes)
-        remaining_nodes.remove(node)
-        route = 0
+        solution = {route: [node]}  # routes will only start from one depot
+        remaining_nodes = [
+            i_node for i_node in nodes if i_node not in depots
+        ]  # other depots shouldn't be visited
         rem_cap = max_capacity
 
         # we will look for the nearest neighbor at each time:

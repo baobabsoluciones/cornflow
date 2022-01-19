@@ -59,16 +59,10 @@ class Instance(InstanceCore):
         return data_dict
 
     def get_objects_values(self):
-        return {
-            self.data["ids"][i]: self.data["values"][i]
-            for i in range(self.get_number_objects())
-        }
+        return {self.data["ids"][i]: self.data["values"][i] for i in range(self.get_number_objects())}
 
     def get_objects_weights(self):
-        return {
-            self.data["ids"][i]: self.data["weights"][i]
-            for i in range(self.get_number_objects())
-        }
+        return {self.data["ids"][i]: self.data["weights"][i] for i in range(self.get_number_objects())}
 
     def get_weight_capacity(self):
         return self.data["weight_capacity"]

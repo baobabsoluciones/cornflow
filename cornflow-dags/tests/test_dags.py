@@ -145,6 +145,12 @@ class Vrp(BaseDAGTests.SolvingTests):
     def test_solve_algorithm1(self):
         return self.test_try_solving_testcase(dict(solver="algorithm1", **self.config))
 
+    def test_solve_heuristic(self):
+        return self.test_try_solving_testcase(dict(solver="algorithm2", **self.config))
+
+    def test_solve_mip(self):
+        return self.test_try_solving_testcase(dict(solver="mip", **self.config))
+
 
 class Knapsack(BaseDAGTests.SolvingTests):
     def setUp(self):
@@ -164,6 +170,65 @@ class Knapsack(BaseDAGTests.SolvingTests):
 
     def test_solve_mip(self):
         return self.test_try_solving_testcase(dict(solver="MIP.cbc", **self.config))
+
+
+class Roadef(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.roadef import Roadef
+
+        self.app = Roadef()
+
+    def test_solve_mip(self):
+        return self.test_try_solving_testcase(
+            dict(solver="MIPModel.PULP_CBC_CMD", **self.config)
+        )
+
+    def test_solve_periodic_mip(self):
+        return self.test_try_solving_testcase(
+            dict(solver="PeriodicMIPModel.PULP_CBC_CMD", **self.config)
+        )
+
+    def test_read_xml(self):
+        data_dir = os.path.join(os.path.dirname(__file__), "../DAG/roadef/data/")
+        instance = self.app.instance.from_file(
+            data_dir + "Instance_V_1.0_ConvertedTo_V2.xml"
+        )
+        instance = self.app.instance.from_dict(instance.to_dict())
+        self.assertEqual(instance.get_customer_property(2, "allowedTrailers"), [0, 1])
+        self.assertEqual(len(instance.check_schema()), 0)
+
+
+class Rostering(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.rostering import Rostering
+
+        self.app = Rostering()
+        self.config.update(dict(solver="mip"))
+
+
+class BarCutting(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.bar_cutting import BarCutting
+
+        self.app = BarCutting()
+
+    def test_solve_mip(self):
+        return self.test_try_solving_testcase(dict(solver="mip.cbc", **self.config))
+
+    def test_solve_column_generation(self):
+        return self.test_try_solving_testcase(dict(solver="CG.cbc", **self.config))
+
+
+class FacilityLocation(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.facility_location import FacilityLocation
+
+        self.app = FacilityLocation()
+        self.config.update(dict(solver="Pyomo.cbc", gapAbs=1, gapRel=0.01))
 
 
 class PuLP(BaseDAGTests.SolvingTests):

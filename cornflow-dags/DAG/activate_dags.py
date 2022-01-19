@@ -9,7 +9,13 @@ def create_dag(app):
     def solve(**kwargs):
         return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
 
-    dag = DAG(app.name, default_args=utils.default_args, schedule_interval=None)
+    dag = DAG(
+        app.name,
+        description=app.description,
+        default_args=utils.default_args,
+        schedule_interval=None,
+        tags=["model"],
+    )
     with dag:
         t1 = PythonOperator(task_id=app.name, python_callable=solve)
     return dag

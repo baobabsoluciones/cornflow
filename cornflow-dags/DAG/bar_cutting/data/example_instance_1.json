@@ -1,0 +1,150 @@
+{
+    "bars": [
+        {
+            "id": "bar1",
+            "length": 150
+        },
+        {
+            "id": "bar2",
+            "length": 200
+        }
+    ],
+    "products": [
+        {
+            "id": "pr1",
+            "length": 40
+        },
+        {
+            "id": "pr2",
+            "length": 60
+        },
+        {
+            "id": "pr3",
+            "length": 70
+        }
+    ],
+    "demand": [
+        {
+            "id": "pr1",
+            "demand": 600
+        },
+        {
+            "id": "pr2",
+            "demand": 500
+        },
+        {
+            "id": "pr3",
+            "demand": 400
+        }
+    ],
+    "cutting_patterns": [
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa1",
+            "id_product": "pr1",
+            "number_of_products": 3
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa1",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa1",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr2",
+            "number_of_products": 2
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr3",
+            "number_of_products": 2
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr1",
+            "number_of_products": 5
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr2",
+            "number_of_products": 3
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa6",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa6",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa6",
+            "id_product": "pr3",
+            "number_of_products": 2
+        }
+    ]
+}

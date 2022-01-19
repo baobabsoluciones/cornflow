@@ -25,12 +25,19 @@ class Algorithm(Experiment):
                 node_index = manager.IndexToNode(index)
                 solution_export[vehicle_id].append(nodes_list[node_index])
                 index = solution.Value(routing.NextVar(index))
-            solution_export[vehicle_id].append(nodes_list[manager.IndexToNode(index)])
 
+            solution_export[vehicle_id].append(nodes_list[manager.IndexToNode(index)])
             if len(solution_export[vehicle_id]) <= 2:
                 solution_export.pop(vehicle_id)
 
-        return Solution(dict(routes=solution_export))
+        ordered_solution = {
+            new_key: value
+            for key, value in solution_export.items()
+            for new_key in range(len(solution_export))
+            if new_key == list(solution_export).index(key)
+        }  # Reassign dict keys with routes 0,1,2,3...
+
+        return Solution(dict(routes=ordered_solution))
 
     def solve(self, options):
         """
@@ -38,25 +45,22 @@ class Algorithm(Experiment):
         :param options: options to be used in the first solution strategy (not used)
         :return:
         """
-        data = self.instance.data
         # Initial data
-        depots = data["depots"]
-        demand = data["demand"].get_property("demand")
-        arcs = data["arcs"]
-        parameters = data["parameters"]
-        nodes = data["demand"].keys_l()
+        demand = self.instance.get_demand()
+        arcs = self.instance.get_weights()
+        nodes = self.instance.get_nodes()
 
         # Depots. Operations to adapt to ORTools notation
-        depots_l = [i["n"] for i in depots]
+        depots_l = self.instance.get_depots()
 
         starts = depots_l
         ends = depots_l
 
-        # Defining max number of active routes. If Inf vehicle number --> amount of nodes
-        if parameters["numVehicles"] <= 0:
-            max_active_vehicles = parameters["size"]
+        # Defining max number of active routes. If infeasible vehicle number --> amount of nodes
+        if self.instance.get_num_vehicles() <= 0:
+            max_active_vehicles = self.instance.get_num_nodes()
         else:
-            max_active_vehicles = parameters["numVehicles"]
+            max_active_vehicles = self.instance.get_num_vehicles()
 
         # Defining lists of nodes used as starts and ends
         starts_v = starts * max_active_vehicles
@@ -64,15 +68,12 @@ class Algorithm(Experiment):
         starts_i = [nodes.index(v) for v in starts_v]
         ends_i = [nodes.index(v) for v in ends_v]
 
-        # Defining total number of router
+        # Defining total number of routes
         total_routes = len(depots_l) * max_active_vehicles
 
-        vehicle_capacities = parameters["capacity"]
+        vehicle_capacities = self.instance.get_capacity()[None]
 
         # Operations to create list of vehicle capacities depending on the amount of vehicles
-        if parameters["numVehicles"] <= 0:
-            parameters["numVehicles"] = parameters["size"]
-
         if isinstance(vehicle_capacities, list):
             if (len(vehicle_capacities) == 1) & (max_active_vehicles > 1):
                 vehicle_capacities = [vehicle_capacities] * total_routes
@@ -80,7 +81,7 @@ class Algorithm(Experiment):
             vehicle_capacities = [vehicle_capacities] * total_routes
 
         manager = pywrapcp.RoutingIndexManager(
-            parameters["size"], total_routes, starts_i, ends_i
+            self.instance.get_num_nodes(), total_routes, starts_i, ends_i
         )
 
         routing = pywrapcp.RoutingModel(manager)
@@ -138,8 +139,6 @@ class Algorithm(Experiment):
 
         # Solve the problem.
         solution = routing.SolveWithParameters(search_parameters)
-
-        # Print solution on console.
         if solution:
             self.solution = self.get_solution_ort(manager, routing, solution, nodes)
 

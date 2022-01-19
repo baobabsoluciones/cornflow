@@ -97,7 +97,7 @@ class MIPSolver(Experiment):
         model = self.get_knapsack_model()
         model_instance = model.create_instance(data)
 
-        solver_name = config.get("solver", "cbc")
+        solver_name = config.get("solver","cbc")
         if "." in solver_name:
             _, solver_name = solver_name.split(".")
 

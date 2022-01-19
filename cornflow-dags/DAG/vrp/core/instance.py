@@ -3,6 +3,7 @@ from cornflow_client.core.tools import load_json
 from cornflow_client import InstanceCore
 import os
 import pickle
+from pytups import SuperDict
 
 
 class Instance(InstanceCore):
@@ -29,3 +30,37 @@ class Instance(InstanceCore):
         )
 
         return data
+
+    def get_nodes(self):
+        return [i["n"] for i in self.data["demand"].values()]
+
+    def get_arcs(self):
+        return self.data["arcs"].keys_tl()
+
+    def get_vehicles(self):
+        if self.data["parameters"]["numVehicles"] < 1:
+            return list(range(self.data["parameters"]["size"]))
+        return list(range(self.data["parameters"]["numVehicles"]))
+
+    def get_weights(self):
+        return self.data["arcs"]
+
+    def _get_property(self, key, prop) -> SuperDict:
+        return self.data[key].get_property(prop)
+
+    def get_demand(self):
+        return self._get_property("demand", "demand")
+
+    def get_capacity(self):
+        return {None: self.data["parameters"]["capacity"]}
+
+    def get_depots(self):
+        return [n["n"] for n in self.data["depots"]]
+
+    def get_num_nodes(self):
+        return self.data["parameters"]["size"]
+
+    def get_num_vehicles(self):
+        if self.data["parameters"]["numVehicles"] < 1:
+            return self.data["parameters"]["size"]
+        return self.data["parameters"]["numVehicles"]

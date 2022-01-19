@@ -1,4 +1,4 @@
-from typing import Union, Type
+from typing import  Union, Type
 from cornflow_client import ApplicationCore, get_empty_schema
 import os
 from .core import Instance, Solution, Experiment
@@ -17,8 +17,7 @@ class Knapsack(ApplicationCore):
         MIP=MIPSolver,
     )
     schema = get_empty_schema(
-        properties=dict(timeLimit=dict(type="number")),
-        solvers=list(solvers.keys()) + ["MIP.cbc"],
+        properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys()) + ["MIP.cbc"],
     )
 
     def get_solver_name(self, data, conf):

@@ -1,13 +1,18 @@
+# General imports
+import importlib as il
+import os
+import sys
+
+# Partial imports
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 from airflow import DAG
 from airflow.utils.db import create_session
-
 from datetime import datetime, timedelta
-import importlib as il
-import os, sys
+from typing import List
+
+# Import from cornflow environment
 from cornflow_client import ApplicationCore
-from typing import List, Dict
 
 
 default_args = {
@@ -86,7 +91,9 @@ def update_schemas(**kwargs):
             Variable.delete(_var, session)
 
 
-dag = DAG("update_all_schemas", default_args=default_args, catchup=False)
+dag = DAG(
+    "update_all_schemas", default_args=default_args, catchup=False, tags=["internal"]
+)
 
 update_schema2 = PythonOperator(
     task_id="update_all_schemas",
