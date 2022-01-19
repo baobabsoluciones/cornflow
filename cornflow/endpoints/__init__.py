@@ -36,7 +36,7 @@ from .instance import (
 )
 
 from .login import LoginEndpoint
-from .permission import PermissionsViewRoleEndpoint
+from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 from .roles import (
     RolesListEndpoint,
     RoleDetailEndpoint,
@@ -131,6 +131,11 @@ resources = [
         resource=PermissionsViewRoleEndpoint,
         urls="/permission/",
         endpoint="permissions",
+    ),
+    dict(
+        resource=PermissionsViewRoleDetailEndpoint,
+        urls="/permission/<int:idx>/",
+        endpoint="permission-detail"
     ),
     dict(resource=RolesListEndpoint, urls="/roles/", endpoint="roles"),
     dict(
