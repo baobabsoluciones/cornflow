@@ -123,6 +123,17 @@
 </dd></dl>
 
 <dl class="py method">
+<dt id="cornflow_client.core.application.ApplicationCore.description">
+<em class="property">property </em><code class="sig-name descname">description</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional property</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the description of the class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="cornflow_client.core.application.ApplicationCore.instance">
 <em class="property">abstract property </em><code class="sig-name descname">instance</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
@@ -448,7 +459,7 @@ inside represents one error of that particular type.</p>
 <p>Base class to access cornflow-server</p>
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.api_for_id">
-<code class="sig-name descname">api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">method</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">method</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -456,48 +467,52 @@ inside represents one error of that particular type.</p>
 <li><p><strong>id</strong> – the id of the particular object</p></li>
 <li><p><strong>method</strong> – HTTP method to apply</p></li>
 <li><p><strong>post_url</strong> – optional action to apply</p></li>
-<li><p><strong>kwargs</strong> – other arguments to requests.request</p></li>
+<li><p><strong>encoding</strong> – optional string with the type of encoding, if it is not specified it uses br encoding,</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>requests.request</p>
+</dl>
+<p>options are: gzip, compress, deflate, br or identity
+:param kwargs: other arguments to requests.request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>requests.request</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_api_for_id">
-<code class="sig-name descname">get_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>api_for_id with a GET request</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.delete_api_for_id">
-<code class="sig-name descname">delete_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">delete_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>api_for_id with a DELETE request</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.put_api_for_id">
-<code class="sig-name descname">put_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">put_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>api_for_id with a PUT request</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.patch_api_for_id">
-<code class="sig-name descname">patch_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">patch_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>api_for_id with a PATCH request</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.post_api_for_id">
-<code class="sig-name descname">post_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.post_api_for_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.post_api_for_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>api_for_id with a POST request</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.sign_up">
-<code class="sig-name descname">sign_up</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">pwd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.sign_up" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sign_up</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">pwd</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.sign_up" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sign-up to the server. Creates a new user or returns error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -505,6 +520,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – username</p></li>
 <li><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – email</p></li>
 <li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – password</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -521,13 +537,14 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.login">
-<code class="sig-name descname">login</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">pwd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.login" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">login</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">pwd</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.login" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log-in to the server.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – username</p></li>
 <li><p><strong>pwd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – password</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -538,7 +555,7 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.create_instance">
-<code class="sig-name descname">create_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uploads an instance to the server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -547,6 +564,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for instance</p></li>
 <li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the instance</p></li>
 <li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of problem to solve</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -554,7 +572,7 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.create_case">
-<code class="sig-name descname">create_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">schema</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">solution</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">schema</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">solution</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uploads a case to the server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -565,6 +583,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of problem of case</p></li>
 <li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id of the parent directory in the tree structure</p></li>
 <li><p><strong>solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional solution data to store inside case</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -572,7 +591,7 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.create_instance_file">
-<code class="sig-name descname">create_instance_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">minimize</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_instance_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">minimize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uploads a file to the server to be parsed into an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -580,6 +599,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to filename to upload</p></li>
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name for instance</p></li>
 <li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the instance</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -587,7 +607,7 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.create_execution">
-<code class="sig-name descname">create_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'test1'</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_execution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'test1'</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_execution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an execution from a (previously) uploaded instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -597,6 +617,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the execution</p></li>
 <li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – execution configuration</p></li>
 <li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the problem to solve</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -604,24 +625,28 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_data">
-<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the data from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.write_solution">
-<code class="sig-name descname">write_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.write_solution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">write_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.write_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Edits an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
 <li><p><strong>kwargs</strong> – optional data to edit</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -629,18 +654,21 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.stop_execution">
-<code class="sig-name descname">stop_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.stop_execution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.stop_execution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interrupts an ongoing execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.manual_execution">
-<code class="sig-name descname">manual_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.manual_execution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">manual_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.manual_execution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uploads an execution from solution data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -650,6 +678,7 @@ inside represents one error of that particular type.</p>
 <li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – description of the execution</p></li>
 <li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – execution configuration</p></li>
 <li><p><strong>schema</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the problem to solve</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 <li><p><strong>kwargs</strong> – contents of the solution (inside data)</p></li>
 </ul>
 </dd>
@@ -658,140 +687,175 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_results">
-<code class="sig-name descname">get_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_results" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads results from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_status">
-<code class="sig-name descname">get_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the current status of an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_log">
-<code class="sig-name descname">get_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_log" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the log for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_solution">
-<code class="sig-name descname">get_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_solution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the solution data for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>execution_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the execution</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_all_instances">
-<code class="sig-name descname">get_all_instances</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_instances" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_all_instances</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_instances" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads all the user’s instances</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_all_cases">
-<code class="sig-name descname">get_all_cases</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_cases" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_all_cases</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_cases" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads all the user’s cases</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_all_executions">
-<code class="sig-name descname">get_all_executions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_executions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_all_executions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_executions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads all the user’s executions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – optional filters</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_all_users">
-<code class="sig-name descname">get_all_users</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_users" title="Permalink to this definition">¶</a></dt>
-<dd><p>Downloads all the users in the server</p>
+<code class="sig-name descname">get_all_users</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_users" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads all the users in the server
+:param str encoding: the type of encoding used in the call. Defaults to ‘br’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_one_user">
-<code class="sig-name descname">get_one_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_user" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_one_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_user" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads all information on a user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – user id</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – user id</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_one_instance">
-<code class="sig-name descname">get_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_instance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads header of an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_one_case">
-<code class="sig-name descname">get_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads header of a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.delete_one_case">
-<code class="sig-name descname">delete_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">delete_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.put_one_case">
-<code class="sig-name descname">put_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_one_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">put_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_one_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Edits a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
 <li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data to edit</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -799,13 +863,14 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.patch_one_case">
-<code class="sig-name descname">patch_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_one_case" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">patch_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_one_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Patch a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the case</p></li>
 <li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – data to edit</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
 </ul>
 </dd>
 </dl>
@@ -813,30 +878,52 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.delete_one_instance">
-<code class="sig-name descname">delete_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_instance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">delete_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the instance</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_schema">
-<code class="sig-name descname">get_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dag_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_schema" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dag_name</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_schema" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads schemas for a problem</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dag_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the problem</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dag_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – id for the problem</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="cornflow_client.cornflow_client.CornFlow.get_all_schemas">
-<code class="sig-name descname">get_all_schemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_schemas" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_all_schemas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_schemas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads all problems’ (aka as app’s) names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cornflow_client.cornflow_client.CornFlow.get_deployed_dags">
+<code class="sig-name descname">get_deployed_dags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_deployed_dags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads the deployed dags in cornflow in order to update them</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the type of encoding used in the call. Defaults to ‘br’</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
