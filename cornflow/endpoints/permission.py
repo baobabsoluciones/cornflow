@@ -51,12 +51,6 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
     @use_kwargs(PermissionViewRoleRequest, location="json")
     @marshal_with(PermissionViewRoleResponse)
     def post(self, **kwargs):
-        AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        if AUTH_TYPE == AUTH_LDAP:
-            raise EndpointNotImplemented(
-                "The permissions have to be created in the directory."
-            )
-
         if PermissionViewRoleModel.get_permission(
             kwargs.get("role_id"), kwargs.get("api_view_id"), kwargs.get("action_id")
         ):
