@@ -1,5 +1,3 @@
-# TODO: add command to register if there is new DAGs.
-#  This should be executed on each deployment.
 def register_deployed_dags_command(
     url: str = None, user: str = None, pwd: str = None, verbose: int = 0
 ):
