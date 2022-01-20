@@ -95,11 +95,6 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
     @Auth.auth_required
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
-        AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        if AUTH_TYPE == AUTH_LDAP:
-            raise EndpointNotImplemented(
-                "The permissions have to be modified in the directory."
-            )
         response = self.put_detail(kwargs, idx)
         log.info("User {} edits permission {}".format(self.get_user_id(), idx))
         return response
@@ -107,11 +102,6 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
     @Auth.auth_required
     def delete(self, idx):
-        AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        if AUTH_TYPE == AUTH_LDAP:
-            raise EndpointNotImplemented(
-                "The permissions have to be deleted in the directory."
-            )
         response = self.delete_detail(idx)
         log.info("User {} deletes permission {}".format(self.get_user_id(), idx))
         return response
