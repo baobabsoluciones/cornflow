@@ -1,6 +1,7 @@
 """
 Unit test for the permissions table
 """
+
 # Import from libraries
 import json
 
@@ -10,10 +11,7 @@ from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,
 )
-from cornflow.models import (
-    InstanceModel,
-    PermissionViewRoleModel
-)
+from cornflow.models import InstanceModel, PermissionViewRoleModel
 from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase

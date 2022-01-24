@@ -17,8 +17,8 @@ from ..schemas.permission import (
 )
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
+from ..shared.const import ADMIN_ROLE
+from ..shared.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
