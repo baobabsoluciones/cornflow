@@ -1,27 +1,36 @@
-from cornflow_client import InstanceCore, SolutionCore, ApplicationCore, ExperimentCore
+from cornflow_client import (
+    InstanceCore,
+    SolutionCore,
+    ApplicationCore,
+    ExperimentCore,
+    get_empty_schema,
+)
+from cornflow_client.constants import BadConfiguration, BadInstance
 import unittest
 
 
 class TestABC(unittest.TestCase):
     def test_good_solution(self):
-        GoodSolution(dict(a=1))
+        GoodSolutionClass(dict(a=1))
 
     def test_bad_solution(self):
-        must_fail = lambda: BadSolution(dict(a=1))
+        must_fail = lambda: BadSolutionClass(dict(a=1))
         self.assertRaises(TypeError, must_fail)
 
     def test_good_instance(self):
-        GoodInstance(dict(a=1))
+        GoodInstanceClass(dict(a=1))
 
     def test_bad_instance(self):
-        must_fail = lambda: BadInstance(dict(a=1))
+        must_fail = lambda: BadInstanceClass(dict(a=1))
         self.assertRaises(TypeError, must_fail)
 
     def test_experiment(self):
-        GoodExperiment(GoodInstance(dict()), GoodSolution(dict()))
+        GoodExperiment(GoodInstanceClass(dict()), GoodSolutionClass(dict()))
 
     def test_bad_experiment(self):
-        must_fail = lambda: BadExperiment(GoodInstance(dict()), GoodSolution(dict()))
+        must_fail = lambda: BadExperiment(
+            GoodInstanceClass(dict()), GoodSolutionClass(dict())
+        )
         self.assertRaises(TypeError, must_fail)
 
     def test_good_application(self):
@@ -39,35 +48,44 @@ class TestABC(unittest.TestCase):
         must_fail = lambda: BadApp()
         self.assertRaises(TypeError, must_fail)
 
+    def test_bad_configuration(self):
+        must_fail = lambda: GoodApp().solve(
+            data=dict(number=1), config=dict(timeLimit="")
+        )
+        self.assertRaises(BadConfiguration, must_fail)
 
-class GoodInstance(InstanceCore):
-    def schema(self):
-        return dict()
+    def test_incorrect_good_instance(self):
+        must_fail = lambda: GoodApp().solve(data=dict(number=""), config=dict())
+        self.assertRaises(BadInstance, must_fail)
 
 
-class BadInstance(InstanceCore):
+class GoodInstanceClass(InstanceCore):
+    schema = get_empty_schema(dict(number=dict(type="number")))
+
+
+class BadInstanceClass(InstanceCore):
     @classmethod
-    def from_dict(cls, data: dict) -> "BadInstance":
+    def from_dict(cls, data: dict) -> "BadInstanceClass":
         return cls(data)
 
 
-class GoodSolution(SolutionCore):
+class GoodSolutionClass(SolutionCore):
     def schema(self):
         return dict()
 
 
-class BadSolution(SolutionCore):
+class BadSolutionClass(SolutionCore):
     @classmethod
-    def from_dict(cls, data: dict) -> "BadSolution":
+    def from_dict(cls, data: dict) -> "BadSolutionClass":
         return cls(data)
 
 
 class GoodExperiment(ExperimentCore):
     def solve(self, options: dict):
-        raise NotImplementedError()
+        return dict(sol_status=1, status=1)
 
     def get_objective(self) -> float:
-        raise NotImplementedError()
+        return 1
 
     def check_solution(self, *args, **kwargs) -> dict:
         return dict()
@@ -80,19 +98,19 @@ class BadExperiment(ExperimentCore):
 
 class GoodApp(ApplicationCore):
     name = "123"
-    instance = GoodInstance
-    solution = GoodSolution
+    instance = GoodInstanceClass
+    solution = GoodSolutionClass
     solvers = dict(default=GoodExperiment)
-    schema = dict(default="pulp")
+    schema = get_empty_schema(dict(timeLimit=dict(type="number")), solvers=["default"])
     test_cases = [dict()]
 
 
 class ConcatenatedSolver(ApplicationCore):
     name = "123"
-    instance = GoodInstance
-    solution = GoodSolution
+    instance = GoodInstanceClass
+    solution = GoodSolutionClass
     solvers = dict(pulp=GoodExperiment)
-    schema = dict(pulp="default.cbc")
+    schema = get_empty_schema(dict(timeLimit=dict(type="number")), solvers=["pulp.cbc"])
     test_cases = [dict()]
 
 
