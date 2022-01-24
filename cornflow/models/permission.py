@@ -12,7 +12,7 @@ class PermissionViewRoleModel(TraceAttributes):
     action_id = db.Column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
     action = db.relationship("ActionModel", viewonly=True)
 
-    api_view_id = db.Column(db.Integer, db.ForeignKey("api_view.id"), nullable=True)
+    api_view_id = db.Column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
     api_view = db.relationship("ApiViewModel", viewonly=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
