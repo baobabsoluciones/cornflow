@@ -63,3 +63,19 @@ class AirflowError(InvalidUsage):
         self.payload = payload
         if status_code is not None:
             self.status_code = status_code
+
+
+class NoSolverException(Exception):
+    pass
+
+
+class BadConfiguration(Exception):
+    pass
+
+
+class BadInstance(Exception):
+    pass
+
+
+class BadSolution(Exception):
+    pass
