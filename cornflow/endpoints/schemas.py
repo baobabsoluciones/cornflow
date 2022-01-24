@@ -34,7 +34,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
         """
         user = Auth.get_user_obj_from_header(request.headers)
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
-        available_dags = [{"name": dag.dag_id, "test": 1} for dag in dags]
+        available_dags = [{"name": dag.dag_id} for dag in dags]
 
         log.debug("User gets list of schema")
         return available_dags

@@ -55,7 +55,7 @@ def register_base_permissions_command(verbose):
     try:
         db.session.commit()
     except IntegrityError:
-        db.session.commit()
+        db.session.rollback()
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
