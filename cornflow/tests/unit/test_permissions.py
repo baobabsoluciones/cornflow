@@ -11,9 +11,15 @@ from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,
 )
-from cornflow.models import InstanceModel, PermissionViewRoleModel
-from cornflow.shared.const import ROLES_MAP
-from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL
+from cornflow.models import (
+    ActionModel,
+    ApiViewModel,
+    InstanceModel,
+    PermissionViewRoleModel,
+    RoleModel,
+)
+from cornflow.shared.const import GET_ACTION, ROLES_MAP, VIEWER_ROLE
+from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL, ROLES_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
@@ -209,3 +215,29 @@ class TestPermissionsDagNoOpen(CustomTestCase):
     def test_missing_schema(self):
         self.payload.pop("schema")
         self.create_new_row(self.url, self.model, self.payload, 400, False)
+
+
+class TestPermissionsViewModel(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def test_permission_role_cascade_deletion(self):
+        before_permissions = PermissionViewRoleModel.get_all_objects()
+        role = RoleModel.get_one_object(VIEWER_ROLE)
+        role.delete()
+        after_permissions = PermissionViewRoleModel.get_all_objects()
+        self.assertNotEqual(before_permissions, after_permissions)
+
+    def test_permission_action_cascade_deletion(self):
+        before_permissions = PermissionViewRoleModel.get_all_objects()
+        action = ActionModel.get_one_object(GET_ACTION)
+        action.delete()
+        after_permissions = PermissionViewRoleModel.get_all_objects()
+        self.assertNotEqual(before_permissions, after_permissions)
+
+    def test_permission_api_view_cascade_deletion(self):
+        before_permissions = PermissionViewRoleModel.get_all_objects()
+        api_view = ApiViewModel.get_one_by_name("instance")
+        api_view.delete()
+        after_permissions = PermissionViewRoleModel.get_all_objects()
+        self.assertNotEqual(before_permissions, after_permissions)
