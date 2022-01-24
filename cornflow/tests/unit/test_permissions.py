@@ -238,7 +238,6 @@ class TestPermissionsViewModel(CustomTestCase):
     def test_permission_api_view_cascade_deletion(self):
         before_permissions = PermissionViewRoleModel.get_all_objects()
         api_view = ApiViewModel.get_one_by_name("instance")
-        print(api_view)
         api_view.delete()
         after_permissions = PermissionViewRoleModel.get_all_objects()
         self.assertNotEqual(before_permissions, after_permissions)
