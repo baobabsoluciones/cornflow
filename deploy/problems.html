@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Known problems &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Known problems &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -96,21 +98,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="known-problems">
-<h1>Known problems<a class="headerlink" href="#known-problems" title="Permalink to this headline">¶</a></h1>
+  <section id="known-problems">
+<h1>Known problems<a class="headerlink" href="#known-problems" title="Permalink to this headline"></a></h1>
 <p>When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.</p>
-<div class="section" id="situations">
-<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="development">
-<h3>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h3>
+<section id="situations">
+<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this headline"></a></h2>
+<section id="development">
+<h3>Development<a class="headerlink" href="#development" title="Permalink to this headline"></a></h3>
 <p>Problem: Possible error with psycopg2</p>
 <blockquote>
 <div><p>Error: Error pg_config executable not found.</p>
 <p>Possible solution: The installation of the psycopg2 may generate an error because it does not find the pg_config file. One way to solve this problem is to previously install libpq-dev which installs pg_config (“sudo apt install libpq-dev”)</p>
 </div></blockquote>
-</div>
-<div class="section" id="docker-build">
-<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="docker-build">
+<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this headline"></a></h3>
 <p>Problem: The volume airflow_config can´t be mounted.</p>
 <blockquote>
 <div><p>Error: Unable to prepare context: path “local_path_to_docker-compose.yml/airflow_config”</p>
@@ -126,41 +128,41 @@
 <div><p>Error: gcc exited code error 1</p>
 <p>Possible solution: Try to use docker platform argument “—platform linux/amd64” for build image with extended compatibility.</p>
 </div></blockquote>
-</div>
-<div class="section" id="cornflow-database">
-<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="cornflow-database">
+<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this headline"></a></h3>
 <p>Problem: Cornflow can´t reach postgres internal database</p>
 <blockquote>
 <div><p>Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name “host_database” to address: Name or service not known</p>
 <p>Possible solution: See again the name given to CORNFLOW_DB_HOST environment variable in docker-compose file.</p>
 </div></blockquote>
-</div>
-<div class="section" id="running-cornflow-server">
-<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="running-cornflow-server">
+<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this headline"></a></h3>
 <p>Problem: Users were not created when cornflow started</p>
 <blockquote>
-<div><p>Error: usage: manage.py [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
-<p>Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of python mange.py create_admin_user/create_service_user.</p>
+<div><p>Error: usage: flask [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
+<p>Possible solution: If you have modified the entrypoint script, checks that the conditions are met in the execution of flask create_admin_user/create_service_user.</p>
 </div></blockquote>
-</div>
-<div class="section" id="flower">
-<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="flower">
+<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this headline"></a></h3>
 <p>Problem: Can´t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
 <p>Possible solution: The admin user and password is the same than airflow.</p>
 </div></blockquote>
-</div>
-<div class="section" id="airflow">
-<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="airflow">
+<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline"></a></h3>
 <p>Problem: Can´t login to airflow GUI</p>
 <blockquote>
 <div><p>Error: Bad Request The CSRF session token is missing</p>
 <p>Possible solution: Delete cookies from web browser.</p>
 </div></blockquote>
-</div>
-<div class="section" id="ldap-docker">
-<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="ldap-docker">
+<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this headline"></a></h3>
 <p>Problem: Can´t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
@@ -181,9 +183,9 @@
 <div><p>Error: failed: bash ls -l not ldif on path</p>
 <p>Possible solution: Try to mount openldap volume with full local path of ldif folder in your machine</p>
 </div></blockquote>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

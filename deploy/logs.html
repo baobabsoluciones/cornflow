@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Logging and monitoring &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Logging and monitoring &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -97,10 +99,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="logging-and-monitoring">
-<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="cornflow-logs">
-<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this headline">¶</a></h2>
+  <section id="logging-and-monitoring">
+<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this headline"></a></h1>
+<section id="cornflow-logs">
+<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this headline"></a></h2>
 <p>Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
 </pre></div>
@@ -124,12 +126,12 @@ error.log - here the application errors will be recorded
 </pre></div>
 </div>
 <p>The compressed logs will have this format: <code class="docutils literal notranslate"><span class="pre">info.log.1.gz</span></code></p>
-</div>
-<div class="section" id="airflow-logs">
-<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="airflow-logs">
+<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this headline"></a></h2>
 <p>Airflow supports a variety of logging and monitoring mechanisms as shown on it’s <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/index.html#logging-monitoring">documentation page</a>.</p>
-<div class="section" id="scheduler-log">
-<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Permalink to this headline">¶</a></h3>
+<section id="scheduler-log">
+<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Permalink to this headline"></a></h3>
 <p>The logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.</p>
 <p>The scheduler logs are named after the DAGs handled by the service. Navigate to where the log file is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker exec -it `docker ps -q --filter name=scheduler` bash -c &quot;ls -l ${AIRFLOW_HOME}logs/scheduler/latest/&quot;
@@ -141,9 +143,9 @@ error.log - here the application errors will be recorded
 -rw-r--r-- 1 airflow airflow 1495255 May 20 10:03 update_all_schemas.py.log
 </pre></div>
 </div>
-</div>
-<div class="section" id="worker-logs">
-<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="worker-logs">
+<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Permalink to this headline"></a></h3>
 <p>As in the rest of airflow services, the logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.
 The logs are divided into folders with the name of the DAGs and into subfolders with their execution dates.</p>
 <p>If we want to view logs with a command, here things get a bit complicated since we can have different workers deployed, with different DAGs. We must help ourselves with the linux bash commands to filter the search as much as possible. Let’s say we want to review today logs of the DAG <code class="docutils literal notranslate"><span class="pre">update_all_squemas</span></code> in every worker:</p>
@@ -162,12 +164,12 @@ The logs are divided into folders with the name of the DAGs and into subfolders 
 </pre></div>
 </div>
 <p>Note that we can get an error of the type (<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory</span></code>) because that log does not exist in all workers.</p>
-</div>
-</div>
-<div class="section" id="monitoring">
-<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="cornflow-monitoring">
-<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="monitoring">
+<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this headline"></a></h2>
+<section id="cornflow-monitoring">
+<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Permalink to this headline"></a></h3>
 <p>You can call the <code class="docutils literal notranslate"><span class="pre">/health</span></code> endpoint to obtain the status of the cornflow and airflow servers. It should return a 200 code as well as “healthy” of status for both <code class="docutils literal notranslate"><span class="pre">cornflow_status</span></code> and <code class="docutils literal notranslate"><span class="pre">airflow_status</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;airflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
@@ -176,13 +178,13 @@ The logs are divided into folders with the name of the DAGs and into subfolders 
 </pre></div>
 </div>
 <p>Check the <a class="reference external" href="https://baobabsoluciones.github.io/cornflow-server/stable-rest-api-ref.html#tag/Health">API docs</a> for more information.</p>
-</div>
-<div class="section" id="airflow-monitoring">
-<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="airflow-monitoring">
+<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Permalink to this headline"></a></h3>
 <p>To check the <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html#checking-airflow-health-status">health status of your Airflow instance</a> directly without using cornflow, you can simply access the endpoint <code class="docutils literal notranslate"><span class="pre">/health</span></code>. It will return a JSON object in which a high-level glance is provided.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

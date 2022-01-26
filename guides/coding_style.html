@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coding style and rules &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Coding style and rules &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -92,11 +94,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="coding-style-and-rules">
-<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Permalink to this headline">¶</a></h1>
+  <section id="coding-style-and-rules">
+<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Permalink to this headline"></a></h1>
 <p>The following rules and notation come from examples in PR-revisions that we think can become common rules. Each rule will have an example and a description.</p>
-<div class="section" id="commenting-out-code">
-<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Permalink to this headline">¶</a></h2>
+<section id="commenting-out-code">
+<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Permalink to this headline"></a></h2>
 <p>Having commented code makes no sense. It should be eliminated from the commit altogether. If for some reason you fear losing the piece of code in the future, remember that it will be present in the git history if it has taken part of the <strong>master branch</strong> at some point:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="cm">/* LMapPoints () {</span>
 <span class="cm">  var points = []</span>
@@ -117,15 +119,15 @@
 <span class="cm">} */</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="argument-type-checking">
-<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="argument-type-checking">
+<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Permalink to this headline"></a></h2>
 <p>Both python and javascript can be very lax with type validations in arguments and interfaces. This is usually very practical but it can sometimes lead to the following (incorrect) “runtime validations” inside a function:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span> <span class="kd">class</span> <span class="nx">Experiment</span> <span class="k">extends</span> <span class="nx">ExperimentCore</span> <span class="p">{</span>
   <span class="k">static</span> <span class="nx">MyInstance</span> <span class="o">=</span> <span class="nx">Instance</span>
   <span class="k">static</span> <span class="nx">MySolution</span> <span class="o">=</span> <span class="nx">Solution</span>
 
-  <span class="nx">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kr">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">solution</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
@@ -157,7 +159,7 @@
   <span class="k">static</span> <span class="nx">MyInstance</span> <span class="o">=</span> <span class="nx">Instance</span>
   <span class="k">static</span> <span class="nx">MySolution</span> <span class="o">=</span> <span class="nx">Solution</span>
 
-  <span class="nx">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kr">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span>
 
     <span class="k">this</span><span class="p">.</span><span class="nx">colors</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="p">.</span><span class="nx">colors</span>
@@ -174,9 +176,9 @@
   <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="indentation">
-<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="indentation">
+<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline"></a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
 <span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
@@ -270,9 +272,9 @@
 </pre></div>
 </div>
 <p>Of course, this can be greatly improved with more tweaks.</p>
-</div>
-<div class="section" id="no-repetition">
-<h2>No repetition<a class="headerlink" href="#no-repetition" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="no-repetition">
+<h2>No repetition<a class="headerlink" href="#no-repetition" title="Permalink to this headline"></a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -285,9 +287,9 @@
     <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="filtering-lists-or-dictionaries">
-<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="filtering-lists-or-dictionaries">
+<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this headline"></a></h2>
 <p>Filtering lists with list comprehensions is the easiest way to filter one. With <cite>pytups</cite>, you make it a little shorter.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
@@ -299,11 +301,11 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">used_routes</span> <span class="o">=</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">vfilter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">keep</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="working-with-superdicts">
-<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="accessing-properties">
-<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="working-with-superdicts">
+<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this headline"></a></h2>
+<section id="accessing-properties">
+<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this headline"></a></h3>
 <p>If we have our data in <cite>SuperDicts</cite> there is a set of operations that can be done in a much simplier way.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
@@ -325,9 +327,9 @@
 </pre></div>
 </div>
 <p>And if we set up a method to access the properties as we have in some <cite>Instances</cite> (<cite>_get_property</cite>), we can have:</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

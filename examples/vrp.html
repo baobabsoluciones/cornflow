@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vehicle Routing Problem &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Vehicle Routing Problem &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -78,8 +80,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="vehicle-routing-problem">
-<h1>Vehicle Routing Problem<a class="headerlink" href="#vehicle-routing-problem" title="Permalink to this headline">¶</a></h1>
+  <section id="vehicle-routing-problem">
+<h1>Vehicle Routing Problem<a class="headerlink" href="#vehicle-routing-problem" title="Permalink to this headline"></a></h1>
 <p>The problem consists on scheduling routes to vehicles in order to deliver goods to each customer while minimizing the total distance. There are many variants of this problem. The current implementation solves the Capacitated VRP (CVRP) where vehicles have a max capacity of goods to deliver.</p>
 <p><strong>Name of dag</strong>: vrp</p>
 <p><strong>Available solution methods</strong>:</p>
@@ -88,7 +90,7 @@
 <li><p><strong>algorithm2</strong>: Dumb heuristic that chooses the closes neighbor at each time. Takes capacity into account.</p></li>
 <li><p><strong>algorithm3</strong>: CP model built in ortools with CP-SAT as solver.</p></li>
 </ul>
-</div>
+</section>
 
 
            </div>

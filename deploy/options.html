@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deployment options &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Deployment options &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -90,10 +92,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="deployment-options">
-<h1>Deployment options<a class="headerlink" href="#deployment-options" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="running-airflow-with-reverse-proxy">
-<h2>Running airflow with reverse proxy<a class="headerlink" href="#running-airflow-with-reverse-proxy" title="Permalink to this headline">¶</a></h2>
+  <section id="deployment-options">
+<h1>Deployment options<a class="headerlink" href="#deployment-options" title="Permalink to this headline"></a></h1>
+<section id="running-airflow-with-reverse-proxy">
+<h2>Running airflow with reverse proxy<a class="headerlink" href="#running-airflow-with-reverse-proxy" title="Permalink to this headline"></a></h2>
 <p>Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
 Eg.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Nginx</span><span class="p">]</span>
@@ -114,9 +116,9 @@ Eg.:</p>
 </pre></div>
 </div>
 <p>More information in <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html">airflow documentation page</a></p>
-</div>
-<div class="section" id="setup-cornflow-database-with-your-own-postgresql-server">
-<h2>Setup cornflow database with your own PostgreSQL server<a class="headerlink" href="#setup-cornflow-database-with-your-own-postgresql-server" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="setup-cornflow-database-with-your-own-postgresql-server">
+<h2>Setup cornflow database with your own PostgreSQL server<a class="headerlink" href="#setup-cornflow-database-with-your-own-postgresql-server" title="Permalink to this headline"></a></h2>
 <p>Please visit the official <a class="reference external" href="https://www.postgresql.org/docs/">PostgreSQL</a> documentation page to learn more about this database engine.</p>
 <p><strong>Create user, password and database</strong></p>
 <p>To create a database, you must be a superuser. A user called postgres is made on and the user postgres has full superadmin access to entire PostgreSQL:</p>
@@ -128,12 +130,12 @@ Eg.:</p>
 </div>
 <p><strong>Cornflow set connection to database</strong></p>
 <p>Before deploying Cornflow, set the environment variable with the address of the database:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="n">myserverport</span><span class="o">/</span><span class="n">cornflow</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">cornflow</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="n">myserverport</span><span class="o">/</span><span class="n">cornflow</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">cornflow</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="connect-to-your-own-airflow-deployment">
-<h2>Connect to your own airflow deployment<a class="headerlink" href="#connect-to-your-own-airflow-deployment" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="connect-to-your-own-airflow-deployment">
+<h2>Connect to your own airflow deployment<a class="headerlink" href="#connect-to-your-own-airflow-deployment" title="Permalink to this headline"></a></h2>
 <p>For do this kind of deployment, you could use the template <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-separate.yml</span></code>.
 To deploy you should fetch docker-compose-cornflow-separate.yml:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml&#39;</span>
@@ -150,9 +152,9 @@ To deploy you should fetch docker-compose-cornflow-separate.yml:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">separate</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">env</span><span class="o">-</span><span class="n">file</span> <span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">airflow</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="using-custom-ssh-keys">
-<h2>Using custom ssh keys<a class="headerlink" href="#using-custom-ssh-keys" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="using-custom-ssh-keys">
+<h2>Using custom ssh keys<a class="headerlink" href="#using-custom-ssh-keys" title="Permalink to this headline"></a></h2>
 <p>If you want to install packages that require a secure connection to a server, you can install your own private key file in the airflow service. To do this, you must mount a volume from its key file to the path <code class="docutils literal notranslate"><span class="pre">/usr/local/airflow/.ssh/id_rsa</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">volume</span><span class="p">:</span>
     <span class="o">-</span> <span class="o">./</span><span class="n">your_ssh_priv_key</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">airflow</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span>
@@ -162,8 +164,8 @@ To deploy you should fetch docker-compose-cornflow-separate.yml:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CUSTOM_SSH_HOST</span><span class="o">=</span><span class="n">github</span><span class="o">.</span><span class="n">com</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

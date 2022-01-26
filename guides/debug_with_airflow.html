@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Debug your solution method &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Debug your solution method &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -87,17 +89,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="debug-your-solution-method">
-<h1>Debug your solution method<a class="headerlink" href="#debug-your-solution-method" title="Permalink to this headline">¶</a></h1>
+  <section id="debug-your-solution-method">
+<h1>Debug your solution method<a class="headerlink" href="#debug-your-solution-method" title="Permalink to this headline"></a></h1>
 <p>When your solution method is running, you can use the airflow web interface to check what is going on with your application - if it is running or paused for example - and to see the execution logs in case of an error. In airflow, our solution method runs inside something called a DAG and so we refer to dag and solution method indistinctly.</p>
-<div class="section" id="common-errors">
-<h2>Common errors<a class="headerlink" href="#common-errors" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="update-schemas-in-cornflow">
-<h3>Update schemas in Cornflow<a class="headerlink" href="#update-schemas-in-cornflow" title="Permalink to this headline">¶</a></h3>
+<section id="common-errors">
+<h2>Common errors<a class="headerlink" href="#common-errors" title="Permalink to this headline"></a></h2>
+<section id="update-schemas-in-cornflow">
+<h3>Update schemas in Cornflow<a class="headerlink" href="#update-schemas-in-cornflow" title="Permalink to this headline"></a></h3>
 <p>Note that even if your dag is running, the schemas it uses might not be up to date. If you get an error saying that the variables are not found when you try to send data to the server, you might want to check the variables saved for your dag (on the airflow interface, in “Admin” → “Variables”). If there are no variables saved, it is time to update them. To that extent, you will need to trigger the dag called ‘update_all_schemas’. You can trigger it from the page ‘update_all_schemas’ on the airflow interface. It does not take any arguments.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

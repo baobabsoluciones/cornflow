@@ -43,7 +43,7 @@ To create a database, you must be a superuser. A user called postgres is made on
 
 Before deploying Cornflow, set the environment variable with the address of the database::
 
-    docker run -e DATABASE_URL=postgres://myuser:myuserpwd@myserverip:myserverport/cornflow -d --name=cornflow baobabsoluciones/cornflow
+    docker run -e DATABASE_URL=postgresql://myuser:myuserpwd@myserverip:myserverport/cornflow -d --name=cornflow baobabsoluciones/cornflow
     
 Connect to your own airflow deployment
 *******************************************

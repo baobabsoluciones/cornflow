@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cornflow-client &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Cornflow-client &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -100,20 +102,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="cornflow-client">
-<h1>Cornflow-client<a class="headerlink" href="#cornflow-client" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="core-classes">
-<h2>Core classes<a class="headerlink" href="#core-classes" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-cornflow_client.core.application">
-<span id="applicationcore"></span><h3>ApplicationCore<a class="headerlink" href="#module-cornflow_client.core.application" title="Permalink to this headline">¶</a></h3>
+  <section id="cornflow-client">
+<h1>Cornflow-client<a class="headerlink" href="#cornflow-client" title="Permalink to this headline"></a></h1>
+<section id="core-classes">
+<h2>Core classes<a class="headerlink" href="#core-classes" title="Permalink to this headline"></a></h2>
+<section id="module-cornflow_client.core.application">
+<span id="applicationcore"></span><h3>ApplicationCore<a class="headerlink" href="#module-cornflow_client.core.application" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.core.application.ApplicationCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">ApplicationCore</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.application.</span></span><span class="sig-name descname"><span class="pre">ApplicationCore</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The application template.</p>
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.name">
-<em class="property">abstract property </em><code class="sig-name descname">name</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.name" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.name">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.name" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -122,9 +124,9 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.description">
-<em class="property">property </em><code class="sig-name descname">description</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.description" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.description">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.description" title="Permalink to this definition"></a></dt>
 <dd><p>Optional property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -133,9 +135,9 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.instance">
-<em class="property">abstract property </em><code class="sig-name descname">instance</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.instance">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">cornflow_client.core.instance.InstanceCore</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -144,9 +146,9 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.solution">
-<em class="property">abstract property </em><code class="sig-name descname">solution</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solution" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solution">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">cornflow_client.core.solution.SolutionCore</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solution" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -155,9 +157,9 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.schema">
-<em class="property">abstract property </em><code class="sig-name descname">schema</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.schema" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.schema">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.schema" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -166,9 +168,9 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.test_cases">
-<em class="property">abstract property </em><code class="sig-name descname">test_cases</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.test_cases">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_cases</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -183,9 +185,9 @@ if each element in the list is:</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.solvers">
-<em class="property">abstract property </em><code class="sig-name descname">solvers</code><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solvers" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solvers">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solvers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><span class="pre">cornflow_client.core.experiment.ExperimentCore</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solvers" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -195,8 +197,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.solve">
-<code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em>, <em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em>, <em class="sig-param"><span class="n">solution_data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Dict<span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -212,8 +214,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.get_solver">
-<code class="sig-name descname">get_solver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span> <span class="o">=</span> <span class="default_value">'default'</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Type<span class="p">[</span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore">cornflow_client.core.experiment.ExperimentCore</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_solver" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.get_solver">
+<span class="sig-name descname"><span class="pre">get_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><span class="pre">cornflow_client.core.experiment.ExperimentCore</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_solver" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>name</strong> – name of the solver to find</p>
@@ -225,8 +227,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.get_default_solver_name">
-<code class="sig-name descname">get_default_solver_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.get_default_solver_name">
+<span class="sig-name descname"><span class="pre">get_default_solver_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the name of the default solver</p>
@@ -235,8 +237,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.application.ApplicationCore.get_schemas">
-<code class="sig-name descname">get_schemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_schemas" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.get_schemas">
+<span class="sig-name descname"><span class="pre">get_schemas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.get_schemas" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dictionary with the three schemas that define the solution method</p>
@@ -246,67 +248,43 @@ if each element in the list is:</p>
 
 </dd></dl>
 
-<dl class="py exception">
-<dt id="cornflow_client.core.application.NoSolverException">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">NoSolverException</code><a class="headerlink" href="#cornflow_client.core.application.NoSolverException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-</dd></dl>
-
-<dl class="py exception">
-<dt id="cornflow_client.core.application.BadConfiguration">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadConfiguration</code><a class="headerlink" href="#cornflow_client.core.application.BadConfiguration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-</dd></dl>
-
-<dl class="py exception">
-<dt id="cornflow_client.core.application.BadInstance">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadInstance</code><a class="headerlink" href="#cornflow_client.core.application.BadInstance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-</dd></dl>
-
-<dl class="py exception">
-<dt id="cornflow_client.core.application.BadSolution">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.core.application.</code><code class="sig-name descname">BadSolution</code><a class="headerlink" href="#cornflow_client.core.application.BadSolution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-cornflow_client.core.instance">
-<span id="instancecore"></span><h3>InstanceCore<a class="headerlink" href="#module-cornflow_client.core.instance" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.core.instance">
+<span id="instancecore"></span><h3>InstanceCore<a class="headerlink" href="#module-cornflow_client.core.instance" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.core.instance.InstanceCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance.</code><code class="sig-name descname">InstanceCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The instance template.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow_client.core.solution">
-<span id="solutioncore"></span><h3>SolutionCore<a class="headerlink" href="#module-cornflow_client.core.solution" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.core.solution">
+<span id="solutioncore"></span><h3>SolutionCore<a class="headerlink" href="#module-cornflow_client.core.solution" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.core.solution.SolutionCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.solution.</code><code class="sig-name descname">SolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.solution.SolutionCore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.solution.</span></span><span class="sig-name descname"><span class="pre">SolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The solution template.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow_client.core.instance_solution">
-<span id="instancesolution"></span><h3>InstanceSolution<a class="headerlink" href="#module-cornflow_client.core.instance_solution" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.core.instance_solution">
+<span id="instancesolution"></span><h3>InstanceSolution<a class="headerlink" href="#module-cornflow_client.core.instance_solution" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.instance_solution.</code><code class="sig-name descname">InstanceSolutionCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance_solution.</span></span><span class="sig-name descname"><span class="pre">InstanceSolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>Common interface for the instance and solution templates</p>
-<dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.data">
-<em class="property">property </em><code class="sig-name descname">data</code><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data" title="Permalink to this definition"></a></dt>
 <dd><p>input data (not necessarily in json-format)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict">
-<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> – json-schema in a dictionary format</p>
@@ -318,8 +296,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dictionary with the json-schema representation</p>
@@ -328,8 +306,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_json">
-<em class="property">classmethod </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore">cornflow_client.core.instance_solution.InstanceSolutionCore</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>path</strong> – path to json-schema json file</p>
@@ -341,8 +319,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_json">
-<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)">None</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>path</strong> – path to json-schema json file</p>
@@ -351,15 +329,15 @@ if each element in the list is:</p>
 <p>writes a json file with the json-schema representation of the object</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.schema">
-<em class="property">abstract property </em><code class="sig-name descname">schema</code><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.schema">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema" title="Permalink to this definition"></a></dt>
 <dd><p>a dictionary representation of the json-schema for the object</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema">
-<code class="sig-name descname">check_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema">
+<span class="sig-name descname"><span class="pre">check_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema" title="Permalink to this definition"></a></dt>
 <dd><p>checks that the json-schema export complies with the defined schema</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -369,8 +347,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">
-<code class="sig-name descname">generate_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">
+<span class="sig-name descname"><span class="pre">generate_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dict json-schema based on the current data</p>
@@ -380,17 +358,17 @@ if each element in the list is:</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow_client.core.experiment">
-<span id="experimentcore"></span><h3>ExperimentCore<a class="headerlink" href="#module-cornflow_client.core.experiment" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.core.experiment">
+<span id="experimentcore"></span><h3>ExperimentCore<a class="headerlink" href="#module-cornflow_client.core.experiment" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.core.experiment.ExperimentCore">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.core.experiment.</code><code class="sig-name descname">ExperimentCore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore">cornflow_client.core.instance.InstanceCore</a></span></em>, <em class="sig-param"><span class="n">solution</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore">cornflow_client.core.solution.SolutionCore</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">cornflow_client.core.instance.InstanceCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">cornflow_client.core.solution.SolutionCore</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The solver template.</p>
-<dl class="py method">
-<dt id="cornflow_client.core.experiment.ExperimentCore.instance">
-<em class="property">property </em><code class="sig-name descname">instance</code><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.instance" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.instance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">cornflow_client.core.instance.InstanceCore</span></a></em><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.instance" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the instance</p>
@@ -398,9 +376,9 @@ if each element in the list is:</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="cornflow_client.core.experiment.ExperimentCore.solution">
-<em class="property">property </em><code class="sig-name descname">solution</code><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solution" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.solution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">cornflow_client.core.solution.SolutionCore</span></a></em><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solution" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the solution</p>
@@ -409,8 +387,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.experiment.ExperimentCore.solve">
-<em class="property">abstract </em><code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">options</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.solve">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -424,8 +402,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.experiment.ExperimentCore.get_objective">
-<em class="property">abstract </em><code class="sig-name descname">get_objective</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_objective">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_objective</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -435,8 +413,8 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.core.experiment.ExperimentCore.check_solution">
-<em class="property">abstract </em><code class="sig-name descname">check_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a><span class="p">, </span>Dict<span class="p">]</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check_solution">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition"></a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -448,18 +426,18 @@ inside represents one error of that particular type.</p>
 
 </dd></dl>
 
-</div>
-</div>
-<div class="section" id="module-cornflow_client.cornflow_client">
-<span id="id1"></span><h2>Cornflow client<a class="headerlink" href="#module-cornflow_client.cornflow_client" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="module-cornflow_client.cornflow_client">
+<span id="id1"></span><h2>Cornflow client<a class="headerlink" href="#module-cornflow_client.cornflow_client" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt id="cornflow_client.cornflow_client.CornFlow">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.cornflow_client.</code><code class="sig-name descname">CornFlow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span></em>, <em class="sig-param"><span class="n">token</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.cornflow_client.</span></span><span class="sig-name descname"><span class="pre">CornFlow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class to access cornflow-server</p>
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.api_for_id">
-<code class="sig-name descname">api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">method</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.api_for_id">
+<span class="sig-name descname"><span class="pre">api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.api_for_id" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -481,38 +459,38 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_api_for_id">
-<code class="sig-name descname">get_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">post_url</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_api_for_id">
+<span class="sig-name descname"><span class="pre">get_api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_api_for_id" title="Permalink to this definition"></a></dt>
 <dd><p>api_for_id with a GET request</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.delete_api_for_id">
-<code class="sig-name descname">delete_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.delete_api_for_id">
+<span class="sig-name descname"><span class="pre">delete_api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_api_for_id" title="Permalink to this definition"></a></dt>
 <dd><p>api_for_id with a DELETE request</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.put_api_for_id">
-<code class="sig-name descname">put_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.put_api_for_id">
+<span class="sig-name descname"><span class="pre">put_api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_api_for_id" title="Permalink to this definition"></a></dt>
 <dd><p>api_for_id with a PUT request</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.patch_api_for_id">
-<code class="sig-name descname">patch_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.patch_api_for_id">
+<span class="sig-name descname"><span class="pre">patch_api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_api_for_id" title="Permalink to this definition"></a></dt>
 <dd><p>api_for_id with a PATCH request</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.post_api_for_id">
-<code class="sig-name descname">post_api_for_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.post_api_for_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.post_api_for_id">
+<span class="sig-name descname"><span class="pre">post_api_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.post_api_for_id" title="Permalink to this definition"></a></dt>
 <dd><p>api_for_id with a POST request</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.sign_up">
-<code class="sig-name descname">sign_up</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">email</span></em>, <em class="sig-param"><span class="n">pwd</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.sign_up" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.sign_up">
+<span class="sig-name descname"><span class="pre">sign_up</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.sign_up" title="Permalink to this definition"></a></dt>
 <dd><p>Sign-up to the server. Creates a new user or returns error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -530,14 +508,14 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.is_alive">
-<code class="sig-name descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.is_alive" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.is_alive" title="Permalink to this definition"></a></dt>
 <dd><p>Asks the server if it’s alive</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.login">
-<code class="sig-name descname">login</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">pwd</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.login" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.login">
+<span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.login" title="Permalink to this definition"></a></dt>
 <dd><p>Log-in to the server.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -554,8 +532,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.create_instance">
-<code class="sig-name descname">create_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.create_instance">
+<span class="sig-name descname"><span class="pre">create_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'solve_model_dag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance" title="Permalink to this definition"></a></dt>
 <dd><p>Uploads an instance to the server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -571,8 +549,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.create_case">
-<code class="sig-name descname">create_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">schema</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">solution</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_case" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.create_case">
+<span class="sig-name descname"><span class="pre">create_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_case" title="Permalink to this definition"></a></dt>
 <dd><p>Uploads a case to the server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -590,8 +568,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.create_instance_file">
-<code class="sig-name descname">create_instance_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">minimize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.create_instance_file">
+<span class="sig-name descname"><span class="pre">create_instance_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_instance_file" title="Permalink to this definition"></a></dt>
 <dd><p>Uploads a file to the server to be parsed into an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -606,8 +584,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.create_execution">
-<code class="sig-name descname">create_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'test1'</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">schema</span><span class="o">=</span><span class="default_value">'solve_model_dag'</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_execution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.create_execution">
+<span class="sig-name descname"><span class="pre">create_execution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'solve_model_dag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.create_execution" title="Permalink to this definition"></a></dt>
 <dd><p>Creates an execution from a (previously) uploaded instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -624,8 +602,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_data">
-<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_data" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads the data from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -638,8 +616,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.write_solution">
-<code class="sig-name descname">write_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.write_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.write_solution">
+<span class="sig-name descname"><span class="pre">write_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.write_solution" title="Permalink to this definition"></a></dt>
 <dd><p>Edits an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -653,8 +631,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.stop_execution">
-<code class="sig-name descname">stop_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.stop_execution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.stop_execution">
+<span class="sig-name descname"><span class="pre">stop_execution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.stop_execution" title="Permalink to this definition"></a></dt>
 <dd><p>Interrupts an ongoing execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -667,8 +645,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.manual_execution">
-<code class="sig-name descname">manual_execution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instance_id</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.manual_execution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.manual_execution">
+<span class="sig-name descname"><span class="pre">manual_execution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.manual_execution" title="Permalink to this definition"></a></dt>
 <dd><p>Uploads an execution from solution data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -686,8 +664,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_results">
-<code class="sig-name descname">get_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_results" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_results">
+<span class="sig-name descname"><span class="pre">get_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_results" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads results from an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -700,8 +678,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_status">
-<code class="sig-name descname">get_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_status" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_status">
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_status" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads the current status of an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -714,8 +692,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_log">
-<code class="sig-name descname">get_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_log" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_log">
+<span class="sig-name descname"><span class="pre">get_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_log" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads the log for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -728,8 +706,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_solution">
-<code class="sig-name descname">get_solution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">execution_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_solution">
+<span class="sig-name descname"><span class="pre">get_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_solution" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads the solution data for an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -742,8 +720,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_all_instances">
-<code class="sig-name descname">get_all_instances</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_instances" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_all_instances">
+<span class="sig-name descname"><span class="pre">get_all_instances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_instances" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all the user’s instances</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -756,8 +734,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_all_cases">
-<code class="sig-name descname">get_all_cases</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_cases" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_all_cases">
+<span class="sig-name descname"><span class="pre">get_all_cases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_cases" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all the user’s cases</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -770,8 +748,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_all_executions">
-<code class="sig-name descname">get_all_executions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_executions" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_all_executions">
+<span class="sig-name descname"><span class="pre">get_all_executions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_executions" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all the user’s executions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -784,15 +762,15 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_all_users">
-<code class="sig-name descname">get_all_users</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_users" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_all_users">
+<span class="sig-name descname"><span class="pre">get_all_users</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_users" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all the users in the server
 :param str encoding: the type of encoding used in the call. Defaults to ‘br’</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_one_user">
-<code class="sig-name descname">get_one_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_user" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_one_user">
+<span class="sig-name descname"><span class="pre">get_one_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_user" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all information on a user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -805,8 +783,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_one_instance">
-<code class="sig-name descname">get_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_instance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_one_instance">
+<span class="sig-name descname"><span class="pre">get_one_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_instance" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads header of an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -819,8 +797,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_one_case">
-<code class="sig-name descname">get_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_case" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_one_case">
+<span class="sig-name descname"><span class="pre">get_one_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_one_case" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads header of a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -833,8 +811,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.delete_one_case">
-<code class="sig-name descname">delete_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_case" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.delete_one_case">
+<span class="sig-name descname"><span class="pre">delete_one_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_case" title="Permalink to this definition"></a></dt>
 <dd><p>Deletes a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -847,8 +825,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.put_one_case">
-<code class="sig-name descname">put_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_one_case" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.put_one_case">
+<span class="sig-name descname"><span class="pre">put_one_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.put_one_case" title="Permalink to this definition"></a></dt>
 <dd><p>Edits a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -862,8 +840,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.patch_one_case">
-<code class="sig-name descname">patch_one_case</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">payload</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_one_case" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.patch_one_case">
+<span class="sig-name descname"><span class="pre">patch_one_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.patch_one_case" title="Permalink to this definition"></a></dt>
 <dd><p>Patch a case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -877,8 +855,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.delete_one_instance">
-<code class="sig-name descname">delete_one_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reference_id</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_instance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.delete_one_instance">
+<span class="sig-name descname"><span class="pre">delete_one_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.delete_one_instance" title="Permalink to this definition"></a></dt>
 <dd><p>Delete an instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -891,8 +869,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_schema">
-<code class="sig-name descname">get_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dag_name</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_schema">
+<span class="sig-name descname"><span class="pre">get_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dag_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads schemas for a problem</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -905,8 +883,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_all_schemas">
-<code class="sig-name descname">get_all_schemas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_schemas" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_all_schemas">
+<span class="sig-name descname"><span class="pre">get_all_schemas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_all_schemas" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads all problems’ (aka as app’s) names</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -916,8 +894,8 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.cornflow_client.CornFlow.get_deployed_dags">
-<code class="sig-name descname">get_deployed_dags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_deployed_dags" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlow.get_deployed_dags">
+<span class="sig-name descname"><span class="pre">get_deployed_dags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlow.get_deployed_dags" title="Permalink to this definition"></a></dt>
 <dd><p>Downloads the deployed dags in cornflow in order to update them</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -929,55 +907,55 @@ inside represents one error of that particular type.</p>
 </dd></dl>
 
 <dl class="py exception">
-<dt id="cornflow_client.cornflow_client.CornFlowApiError">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.cornflow_client.</code><code class="sig-name descname">CornFlowApiError</code><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlowApiError" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.CornFlowApiError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.cornflow_client.</span></span><span class="sig-name descname"><span class="pre">CornFlowApiError</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.CornFlowApiError" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>CornFlow returns an error</p>
 </dd></dl>
 
-</div>
-<div class="section" id="constants">
-<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="solving-status">
-<h3>Solving status<a class="headerlink" href="#solving-status" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline"></a></h2>
+<section id="solving-status">
+<h3>Solving status<a class="headerlink" href="#solving-status" title="Permalink to this headline"></a></h3>
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_NOT_SOLVED</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_NOT_SOLVED</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_OPTIMAL</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_OPTIMAL</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_INFEASIBLE</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_INFEASIBLE</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_UNBOUNDED</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_UNBOUNDED</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_UNDEFINED</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_UNDEFINED</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_TIME_LIMIT</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_TIME_LIMIT</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_MEMORY_LIMIT</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_MEMORY_LIMIT</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">STATUS_NODE_LIMIT</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">STATUS_NODE_LIMIT</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <table class="docutils align-default">
@@ -1017,17 +995,17 @@ inside represents one error of that particular type.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="solution-status">
-<h3>Solution status<a class="headerlink" href="#solution-status" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="solution-status">
+<h3>Solution status<a class="headerlink" href="#solution-status" title="Permalink to this headline"></a></h3>
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">SOLUTION_STATUS_INFEASIBLE</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">SOLUTION_STATUS_INFEASIBLE</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
-<dt id="cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE">
-<code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">SOLUTION_STATUS_FEASIBLE</code><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">SOLUTION_STATUS_FEASIBLE</span></span><a class="headerlink" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <table class="docutils align-default">
@@ -1051,32 +1029,32 @@ inside represents one error of that particular type.</p>
 </table>
 <span class="target" id="module-cornflow_client.constants"></span><p>Constants values used in schemas functions.</p>
 <dl class="py exception">
-<dt id="cornflow_client.constants.InvalidUsage">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">InvalidUsage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">status_code</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">payload</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">InvalidUsage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <dl class="py attribute">
-<dt id="cornflow_client.constants.InvalidUsage.error">
-<code class="sig-name descname">error</code><em class="property"> = 'Unknown error'</em><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.error" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage.error">
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Unknown</span> <span class="pre">error'</span></em><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.error" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="cornflow_client.constants.InvalidUsage.status_code">
-<code class="sig-name descname">status_code</code><em class="property"> = 400</em><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.status_code" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></em><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.status_code" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.constants.InvalidUsage.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.to_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.to_dict" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="cornflow_client.constants.InvalidUsage.args">
-<code class="sig-name descname">args</code><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.args" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.args" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.constants.InvalidUsage.with_traceback">
-<code class="sig-name descname">with_traceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.InvalidUsage.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.InvalidUsage.with_traceback" title="Permalink to this definition"></a></dt>
 <dd><p>Exception.with_traceback(tb) –
 set self.__traceback__ to tb and return self.</p>
 </dd></dl>
@@ -1084,63 +1062,135 @@ set self.__traceback__ to tb and return self.</p>
 </dd></dl>
 
 <dl class="py exception">
-<dt id="cornflow_client.constants.AirflowError">
-<em class="property">exception </em><code class="sig-prename descclassname">cornflow_client.constants.</code><code class="sig-name descname">AirflowError</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">error</span></em>, <em class="sig-param"><span class="n">status_code</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">payload</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">AirflowError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.constants.InvalidUsage" title="cornflow_client.constants.InvalidUsage"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.constants.InvalidUsage</span></code></a></p>
 <dl class="py attribute">
-<dt id="cornflow_client.constants.AirflowError.args">
-<code class="sig-name descname">args</code><a class="headerlink" href="#cornflow_client.constants.AirflowError.args" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.error">
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Unknown</span> <span class="pre">error'</span></em><a class="headerlink" href="#cornflow_client.constants.AirflowError.error" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="cornflow_client.constants.AirflowError.error">
-<code class="sig-name descname">error</code><em class="property"> = 'Unknown error'</em><a class="headerlink" href="#cornflow_client.constants.AirflowError.error" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></em><a class="headerlink" href="#cornflow_client.constants.AirflowError.status_code" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.AirflowError.args" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.constants.AirflowError.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.to_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.to_dict" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.constants.AirflowError.with_traceback">
-<code class="sig-name descname">with_traceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.with_traceback" title="Permalink to this definition"></a></dt>
 <dd><p>Exception.with_traceback(tb) –
 set self.__traceback__ to tb and return self.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">NoSolverException</span></span><a class="headerlink" href="#cornflow_client.constants.NoSolverException" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <dl class="py attribute">
-<dt id="cornflow_client.constants.AirflowError.status_code">
-<code class="sig-name descname">status_code</code><em class="property"> = 400</em><a class="headerlink" href="#cornflow_client.constants.AirflowError.status_code" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.NoSolverException.args" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.NoSolverException.with_traceback" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
 
 </dd></dl>
 
-</div>
-</div>
-<div class="section" id="schemas">
-<h2>Schemas<a class="headerlink" href="#schemas" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-cornflow_client.schema.tools">
-<span id="schema-utility-functions"></span><h3>Schema utility functions<a class="headerlink" href="#module-cornflow_client.schema.tools" title="Permalink to this headline">¶</a></h3>
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadConfiguration</span></span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration.args" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration.with_traceback" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstance">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstance</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstance.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstance.args" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstance.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadInstance.with_traceback" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolution">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolution</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolution" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolution.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolution.args" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolution.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolution.with_traceback" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="schemas">
+<h2>Schemas<a class="headerlink" href="#schemas" title="Permalink to this headline"></a></h2>
+<section id="module-cornflow_client.schema.tools">
+<span id="schema-utility-functions"></span><h3>Schema utility functions<a class="headerlink" href="#module-cornflow_client.schema.tools" title="Permalink to this headline"></a></h3>
 <dl class="py function">
-<dt id="cornflow_client.schema.tools.get_pulp_jsonschema">
-<code class="sig-prename descclassname">cornflow_client.schema.tools.</code><code class="sig-name descname">get_pulp_jsonschema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pulp_json_schema.json'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">'data'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_pulp_jsonschema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.get_pulp_jsonschema">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">get_pulp_jsonschema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pulp_json_schema.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'data'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_pulp_jsonschema" title="Permalink to this definition"></a></dt>
 <dd><p>returns the PuLP model schema</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="cornflow_client.schema.tools.get_empty_schema">
-<code class="sig-prename descclassname">cornflow_client.schema.tools.</code><code class="sig-name descname">get_empty_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">properties</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solvers</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_empty_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.get_empty_schema">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">get_empty_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solvers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.get_empty_schema" title="Permalink to this definition"></a></dt>
 <dd><p>assumes the first solver is the default</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow_client.schema.manager">
-<span id="schema-manager"></span><h3>Schema manager<a class="headerlink" href="#module-cornflow_client.schema.manager" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.schema.manager">
+<span id="schema-manager"></span><h3>Schema manager<a class="headerlink" href="#module-cornflow_client.schema.manager" title="Permalink to this headline"></a></h3>
 <p>Class to help create and manage data schema and to validate json files.</p>
 <dl class="py class">
-<dt id="cornflow_client.schema.manager.SchemaManager">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.schema.manager.</code><code class="sig-name descname">SchemaManager</code><span class="sig-paren">(</span><em class="sig-param">schema</em>, <em class="sig-param">validator=&lt;class 'jsonschema.validators.Draft7Validator'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.manager.</span></span><span class="sig-name descname"><span class="pre">SchemaManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validator=&lt;class</span> <span class="pre">'jsonschema.validators.Draft7Validator'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A schema manager between json-schema, dict-schema and marshmallow</p>
 <p>Class to help create and manage data schema.
@@ -1151,22 +1201,22 @@ Once a schema is loaded, allow the validation of data.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.from_filepath">
-<em class="property">classmethod </em><code class="sig-name descname">from_filepath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.from_filepath" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.from_filepath">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.from_filepath" title="Permalink to this definition"></a></dt>
 <dd><p>Load a json schema from a json file.</p>
 <p>:param path the file path</p>
 <p>return The SchemaManager instance</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.get_jsonschema">
-<code class="sig-name descname">get_jsonschema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_jsonschema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.get_jsonschema">
+<span class="sig-name descname"><span class="pre">get_jsonschema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_jsonschema" title="Permalink to this definition"></a></dt>
 <dd><p>Return a copy of the stored jsonschema.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.get_validation_errors">
-<code class="sig-name descname">get_validation_errors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_validation_errors" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.get_validation_errors">
+<span class="sig-name descname"><span class="pre">get_validation_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_validation_errors" title="Permalink to this definition"></a></dt>
 <dd><p>Validate json data according to the loaded jsonschema and return a list of errors.
 Return an empty list if data is valid.</p>
 <dl class="field-list simple">
@@ -1182,8 +1232,8 @@ Return an empty list if data is valid.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.validate_data">
-<code class="sig-name descname">validate_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">print_errors</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.validate_data">
+<span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_data" title="Permalink to this definition"></a></dt>
 <dd><p>Validate json data according to the loaded jsonschema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1199,8 +1249,8 @@ Return an empty list if data is valid.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.get_file_errors">
-<code class="sig-name descname">get_file_errors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_file_errors" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.get_file_errors">
+<span class="sig-name descname"><span class="pre">get_file_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.get_file_errors" title="Permalink to this definition"></a></dt>
 <dd><p>Get json file errors according to the loaded jsonschema.</p>
 <p>:param path the file path</p>
 <dl class="field-list simple">
@@ -1213,8 +1263,8 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.validate_file">
-<code class="sig-name descname">validate_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">print_errors</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.validate_file">
+<span class="sig-name descname"><span class="pre">validate_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_file" title="Permalink to this definition"></a></dt>
 <dd><p>Validate a json file according to the loaded jsonschema.</p>
 <p>:param path the file path
 :param print_errors: If true, will print the errors.</p>
@@ -1226,8 +1276,8 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.to_dict_schema">
-<code class="sig-name descname">to_dict_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_dict_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.to_dict_schema">
+<span class="sig-name descname"><span class="pre">to_dict_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_dict_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Transform a jsonschema into a dictionary format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1237,14 +1287,14 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj">
-<code class="sig-name descname">to_schema_dict_obj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj">
+<span class="sig-name descname"><span class="pre">to_schema_dict_obj</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj" title="Permalink to this definition"></a></dt>
 <dd><p>Returns an DictSchema object equivalent of the jsonschema</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.to_marshmallow">
-<code class="sig-name descname">to_marshmallow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_marshmallow" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.to_marshmallow">
+<span class="sig-name descname"><span class="pre">to_marshmallow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_marshmallow" title="Permalink to this definition"></a></dt>
 <dd><p>Create marshmallow schemas</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1257,8 +1307,8 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.export_schema_dict">
-<code class="sig-name descname">export_schema_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.export_schema_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.export_schema_dict">
+<span class="sig-name descname"><span class="pre">export_schema_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.export_schema_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Print the schema_dict in a json file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1271,8 +1321,8 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.draft_schema_from">
-<code class="sig-name descname">draft_schema_from</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.draft_schema_from" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.draft_schema_from">
+<span class="sig-name descname"><span class="pre">draft_schema_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.draft_schema_from" title="Permalink to this definition"></a></dt>
 <dd><p>Create a draft jsonschema from a json file of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1288,8 +1338,8 @@ For more details about the error format, see:
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.to_template">
-<code class="sig-name descname">to_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_template" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.to_template">
+<span class="sig-name descname"><span class="pre">to_template</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.to_template" title="Permalink to this definition"></a></dt>
 <dd><p>This function assumes certain structure for the jsonschema.
 For now, three types of tables exist: array of objects, arrays and objects.
 {
@@ -1300,8 +1350,8 @@ table3: {config1: a, config2: b},
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.load_json">
-<em class="property">static </em><code class="sig-name descname">load_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_json" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.load_json">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_json" title="Permalink to this definition"></a></dt>
 <dd><p>Load a json file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1312,8 +1362,8 @@ table3: {config1: a, config2: b},
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.dict_to_flask">
-<code class="sig-name descname">dict_to_flask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.dict_to_flask" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.dict_to_flask">
+<span class="sig-name descname"><span class="pre">dict_to_flask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.dict_to_flask" title="Permalink to this definition"></a></dt>
 <dd><p>Create marshmallow schemas</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1326,16 +1376,16 @@ table3: {config1: a, config2: b},
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.load_schema">
-<em class="property">classmethod </em><code class="sig-name descname">load_schema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.load_schema">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Load a json schema from a json file.</p>
 <p>:param path the file path</p>
 <p>return The SchemaManager instance</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask">
-<code class="sig-name descname">jsonschema_to_flask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask">
+<span class="sig-name descname"><span class="pre">jsonschema_to_flask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask" title="Permalink to this definition"></a></dt>
 <dd><p>Create marshmallow schemas</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1348,8 +1398,8 @@ table3: {config1: a, config2: b},
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict">
-<code class="sig-name descname">jsonschema_to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict">
+<span class="sig-name descname"><span class="pre">jsonschema_to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Transform a jsonschema into a dictionary format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1360,12 +1410,12 @@ table3: {config1: a, config2: b},
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow_client.schema.dictSchema">
-<span id="dictionary-schema"></span><h3>Dictionary schema<a class="headerlink" href="#module-cornflow_client.schema.dictSchema" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="module-cornflow_client.schema.dictSchema">
+<span id="dictionary-schema"></span><h3>Dictionary schema<a class="headerlink" href="#module-cornflow_client.schema.dictSchema" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt id="cornflow_client.schema.dictSchema.DictSchema">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow_client.schema.dictSchema.</code><code class="sig-name descname">DictSchema</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jsonschema</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.dictSchema.DictSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.dictSchema.</span></span><span class="sig-name descname"><span class="pre">DictSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A json-schema to dict-schema parser</p>
 <p>Class to manage internal dictionary schema</p>
@@ -1375,16 +1425,16 @@ table3: {config1: a, config2: b},
 </dd>
 </dl>
 <dl class="py method">
-<dt id="cornflow_client.schema.dictSchema.DictSchema.get_empty_schema">
-<em class="property">static </em><code class="sig-name descname">get_empty_schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.schema.dictSchema.DictSchema.get_empty_schema">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Create un empty schema dict</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>docker-compose.yml &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>docker-compose.yml &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -88,8 +90,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="docker-compose-yml">
-<h1>docker-compose.yml<a class="headerlink" href="#docker-compose-yml" title="Permalink to this headline">¶</a></h1>
+  <section id="docker-compose-yml">
+<h1>docker-compose.yml<a class="headerlink" href="#docker-compose-yml" title="Permalink to this headline"></a></h1>
 <p>To deploy cornflow on Docker Compose, you should fetch the <cite>docker-compose.yml</cite> file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose.yml&#39;</span>
 </pre></div>
@@ -100,8 +102,8 @@ On Linux, the mounted volumes in the container use the native Linux filesystem u
 <span class="n">cp</span> <span class="s2">&quot;yourpathtofilerequirements.txt&quot;</span> <span class="o">./</span><span class="n">airflow_config</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
-<div class="section" id="running-cornflow">
-<h2>Running cornflow<a class="headerlink" href="#running-cornflow" title="Permalink to this headline">¶</a></h2>
+<section id="running-cornflow">
+<h2>Running cornflow<a class="headerlink" href="#running-cornflow" title="Permalink to this headline"></a></h2>
 <p>Now you can start all services:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
 </pre></div>
@@ -112,21 +114,21 @@ Airflow service available at <a class="reference external" href="http://localhos
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
 
 <span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>          <span class="n">STATUS</span>                    <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
-<span class="mi">10863</span><span class="n">a20e7d6</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
-<span class="mi">0</span><span class="n">cfdd4debaab</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
+<span class="mi">10863</span><span class="n">a20e7d6</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
+<span class="mi">0</span><span class="n">cfdd4debaab</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
 <span class="mi">9</span><span class="n">bc91747cd37</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
 <span class="n">c477c235b199</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">16</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">16</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="stop-and-clean-docker-environment">
-<h2>Stop and clean docker environment<a class="headerlink" href="#stop-and-clean-docker-environment" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="stop-and-clean-docker-environment">
+<h2>Stop and clean docker environment<a class="headerlink" href="#stop-and-clean-docker-environment" title="Permalink to this headline"></a></h2>
 <p>Stop the docker services and remove all volumes:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span> <span class="o">--</span><span class="n">volumes</span> <span class="o">--</span><span class="n">rmi</span> <span class="nb">all</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

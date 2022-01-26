@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deploy your own Cornflow-server &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Deploy your own Cornflow-server &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -83,8 +85,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="deploy-your-own-cornflow-server">
-<h1>Deploy your own Cornflow-server<a class="headerlink" href="#deploy-your-own-cornflow-server" title="Permalink to this headline">¶</a></h1>
+  <section id="deploy-your-own-cornflow-server">
+<h1>Deploy your own Cornflow-server<a class="headerlink" href="#deploy-your-own-cornflow-server" title="Permalink to this headline"></a></h1>
 <p>From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
 In <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-server">this repository</a> you can find various templates for <a class="reference external" href="https://docs.docker.com/compose/">docker-compose</a> in which to test different types of deployment.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> describes the build of this services:</p>
@@ -93,10 +95,12 @@ In <a class="reference external" href="https://github.com/baobabsoluciones/cornf
 <li><p>postgresql server for cornflow and airflow internal database</p></li>
 <li><p>airflow webserver and scheduler server</p></li>
 </ol>
-<div class="figure align-default" id="id1">
+<figure class="align-default" id="id1">
 <span id="cornflow-docker-stack"></span><img alt="../_images/cornflow_docker_stack.png" src="../_images/cornflow_docker_stack.png" />
-<p class="caption"><span class="caption-text">Since to run cornflow it is essential to have the airflow application, the <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> file includes a deployment of said platform.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">Since to run cornflow it is essential to have the airflow application, the <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> file includes a deployment of said platform.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -180,7 +184,7 @@ In <a class="reference external" href="https://github.com/baobabsoluciones/cornf
 </li>
 </ul>
 </div>
-</div>
+</section>
 
 
            </div>

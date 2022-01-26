@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Production deployment and security &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Production deployment and security &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -91,19 +93,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="production-deployment-and-security">
-<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this headline">¶</a></h1>
+  <section id="production-deployment-and-security">
+<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this headline"></a></h1>
 <p>It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html">production-ready</a>.</p>
-<div class="section" id="database-backend">
-<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this headline">¶</a></h2>
+<section id="database-backend">
+<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this headline"></a></h2>
 <p>Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgres</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="ssl">
-<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ssl">
+<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h2>
 <p>At the moment cornflow does not have built-in <a class="reference external" href="https://en.wikipedia.org/wiki/Transport_Layer_Security">SSL</a> support. You can use a reverse proxy service such as <a class="reference external" href="http://nginx.org/">Nginx</a> to give adequate security to the connection with your server.
 Please go to the <a class="reference external" href="http://nginx.org/en/docs/http/configuring_https_servers.html">Nginx documentation page</a> to correctly configure your server’s certificates.</p>
 <p>This is a Nginx configuration template (<code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/mysite.conf</span></code>) that we can use to configure the ssl encryption with the cornflow service:</p>
@@ -136,9 +138,9 @@ Please go to the <a class="reference external" href="http://nginx.org/en/docs/ht
 }
 </pre></div>
 </div>
-</div>
-<div class="section" id="enforce-security">
-<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="enforce-security">
+<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this headline"></a></h2>
 <p>When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the <a class="reference external" href="https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose">docker secret manager</a>.</p>
 <p>It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key:</p>
@@ -146,9 +148,9 @@ If you are running docker services in production, it is also convenient to use t
 </pre></div>
 </div>
 <p>Flower has by default a <a class="reference external" href="https://flower.readthedocs.io/en/latest/auth.html">basic authentication</a> shared with the airflow server in the deployment.</p>
-</div>
-<div class="section" id="ldap-authentication">
-<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ldap-authentication">
+<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this headline"></a></h2>
 <p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
 <p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow-server/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
@@ -163,13 +165,13 @@ To activate the functionality that supports this type of access, it is necessary
 </pre></div>
 </div>
 <p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
-</div>
-<div class="section" id="airflow-user">
-<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="airflow-user">
+<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this headline"></a></h2>
 <p>It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow.
 A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

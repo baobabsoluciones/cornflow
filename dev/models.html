@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Models &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Models &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../deploy/index.html">Deploy your own Cornflow-server</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-cornflow.models.case">Case model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-cornflow.models.execution">Execution model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-cornflow.models.instance">Instance model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-cornflow.models.user">User model</a></li>
@@ -83,14 +86,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-cornflow.models.execution">
-<span id="execution-model"></span><h2>Execution model<a class="headerlink" href="#module-cornflow.models.execution" title="Permalink to this headline">¶</a></h2>
+  <section id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline"></a></h1>
+<section id="module-cornflow.models.case">
+<span id="case-model"></span><h2>Case model<a class="headerlink" href="#module-cornflow.models.case" title="Permalink to this headline"></a></h2>
+<p>Model for the cases</p>
+</section>
+<section id="module-cornflow.models.execution">
+<span id="execution-model"></span><h2>Execution model<a class="headerlink" href="#module-cornflow.models.execution" title="Permalink to this headline"></a></h2>
 <p>Model for the executions</p>
 <dl class="py class">
-<dt id="cornflow.models.execution.ExecutionModel">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.models.execution.</code><code class="sig-name descname">ExecutionModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.execution.</span></span><span class="sig-name descname"><span class="pre">ExecutionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseDataModel</span></code></p>
 <p>Model class for the Executions.
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code> to have the trace fields and user field</p>
@@ -126,9 +133,60 @@ This datetime is generated automatically, the user does not need to provide it.<
 create a new execution</p>
 </dd>
 </dl>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.created_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.data_hash">
+<span class="sig-name descname"><span class="pre">data_hash</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.data_hash" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.deleted_at">
+<span class="sig-name descname"><span class="pre">deleted_at</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.deleted_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.description" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.schema" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.updated_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt id="cornflow.models.execution.ExecutionModel.update_state">
-<code class="sig-name descname">update_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">code</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.update_state" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.execution.ExecutionModel.update_state">
+<span class="sig-name descname"><span class="pre">update_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.execution.ExecutionModel.update_state" title="Permalink to this definition"></a></dt>
 <dd><p>Method to update the state code and message of an execution</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -142,13 +200,13 @@ create a new execution</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow.models.instance">
-<span id="instance-model"></span><h2>Instance model<a class="headerlink" href="#module-cornflow.models.instance" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-cornflow.models.instance">
+<span id="instance-model"></span><h2>Instance model<a class="headerlink" href="#module-cornflow.models.instance" title="Permalink to this headline"></a></h2>
 <p>Model for the instances</p>
 <dl class="py class">
-<dt id="cornflow.models.instance.InstanceModel">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.models.instance.</code><code class="sig-name descname">InstanceModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.instance.InstanceModel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.BaseDataModel</span></code></p>
 <p>Model class for the Instances
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code> to have the trace fields and user field</p>
@@ -178,14 +236,59 @@ This datetime is generated automatically, the user does not need to provide it.<
 information to create a new instance</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.created_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.data_hash">
+<span class="sig-name descname"><span class="pre">data_hash</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.data_hash" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.deleted_at">
+<span class="sig-name descname"><span class="pre">deleted_at</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.deleted_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.description" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.schema" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.updated_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.instance.InstanceModel.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#cornflow.models.instance.InstanceModel.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
-</div>
-<div class="section" id="module-cornflow.models.user">
-<span id="user-model"></span><h2>User model<a class="headerlink" href="#module-cornflow.models.user" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-cornflow.models.user">
+<span id="user-model"></span><h2>User model<a class="headerlink" href="#module-cornflow.models.user" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt id="cornflow.models.user.UserModel">
-<em class="property">class </em><code class="sig-prename descclassname">cornflow.models.user.</code><code class="sig-name descname">UserModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.user.</span></span><span class="sig-name descname"><span class="pre">UserModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.models.meta_model.TraceAttributes</span></code></p>
 <p>Model class for the Users.
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributes</span></code> to have trace fields.</p>
@@ -212,9 +315,15 @@ This datetime is generated automatically, the user does not need to provide it.<
 create a new user.</p>
 </dd>
 </dl>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.update" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.update" title="Permalink to this definition"></a></dt>
 <dd><p>Updates the user information in the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -224,38 +333,38 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.disable">
-<code class="sig-name descname">disable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.disable" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.disable">
+<span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.disable" title="Permalink to this definition"></a></dt>
 <dd><p>Disables the user in the database</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.delete" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.delete" title="Permalink to this definition"></a></dt>
 <dd><p>Deletes the user from the database</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.is_admin">
-<code class="sig-name descname">is_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_admin" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_admin">
+<span class="sig-name descname"><span class="pre">is_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_admin" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a boolean if a user is an admin or not</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.is_service_user">
-<code class="sig-name descname">is_service_user</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_service_user" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_service_user">
+<span class="sig-name descname"><span class="pre">is_service_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_service_user" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a boolean if a user is a super user or not</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.comes_from_ldap">
-<code class="sig-name descname">comes_from_ldap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.comes_from_ldap" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.comes_from_ldap">
+<span class="sig-name descname"><span class="pre">comes_from_ldap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.comes_from_ldap" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a boolean if the user comes from ldap or not</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.check_hash">
-<code class="sig-name descname">check_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_hash" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_hash">
+<span class="sig-name descname"><span class="pre">check_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_hash" title="Permalink to this definition"></a></dt>
 <dd><p>Method to check if the hash stored in the database is the same as the password given by the user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -271,8 +380,8 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.get_all_users">
-<em class="property">static </em><code class="sig-name descname">get_all_users</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_all_users" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_all_users">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_all_users" title="Permalink to this definition"></a></dt>
 <dd><p>Query to get all users</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -285,8 +394,8 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.get_one_user">
-<em class="property">static </em><code class="sig-name descname">get_one_user</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user" title="Permalink to this definition"></a></dt>
 <dd><p>Query to get the information of one user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -302,8 +411,8 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.get_one_user_by_email">
-<em class="property">static </em><code class="sig-name descname">get_one_user_by_email</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_email" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user_by_email">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_email" title="Permalink to this definition"></a></dt>
 <dd><p>Query to get one user from the email</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -319,8 +428,8 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.get_one_user_by_username">
-<em class="property">static </em><code class="sig-name descname">get_one_user_by_username</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_username" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user_by_username">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_username</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_username" title="Permalink to this definition"></a></dt>
 <dd><p>Returns one user (object) given a username
 :param str username: the user username that we are quering with
 :return: the user object
@@ -328,27 +437,60 @@ create a new user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.check_username_in_use">
-<em class="property">static </em><code class="sig-name descname">check_username_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_username_in_use" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_username_in_use">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_username_in_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_username_in_use" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if a username is already in use
 :param str username: the username to check
 :return: a boolean if the username is in use
 :rtype: bool</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.created_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.deleted_at">
+<span class="sig-name descname"><span class="pre">deleted_at</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.deleted_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.updated_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt id="cornflow.models.user.UserModel.check_email_in_use">
-<em class="property">static </em><code class="sig-name descname">check_email_in_use</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">email</span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_in_use" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_email_in_use">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_email_in_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_in_use" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if a email is already in use
 :param str email: the email to check
 :return: a boolean if the username is in use
 :rtype: bool</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_password_pattern">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_password_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_password_pattern" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if a password is valid
+:param password: the password to check
+:return: a dictionary containing: a boolean indicating if the password is valid, and a message
+:rtype: dict</p>
 </dd></dl>
 
-</div>
-</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_email_pattern">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_email_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_pattern" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if an email address is valid
+:param email: The email to validate
+:return: A dictionary containing: a boolean indicating if the email address is valid, and a message
+:rtype: dict</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 
 
            </div>

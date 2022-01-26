@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation instructions &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Installation instructions &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -97,52 +99,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="installation-instructions">
-<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+  <section id="installation-instructions">
+<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline"></a></h1>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p>Linux or Windows with WSL</p></li>
 <li><p>python &gt;= 3.5</p></li>
 </ul>
-</div>
-<div class="section" id="install-cornflow">
-<h2>Install cornflow<a class="headerlink" href="#install-cornflow" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="install-cornflow">
+<h2>Install cornflow<a class="headerlink" href="#install-cornflow" title="Permalink to this headline"></a></h2>
 <p>Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the “development deploy” that consists on installing them in the same machine.</p>
 <p>Download the Cornflow project:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">corn</span>
-<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">cfvenv</span>
-<span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
+<span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>activate the virtual environment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
 <p>or, in windows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfvenv</span><span class="o">/</span><span class="n">Scripts</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">venv</span><span class="o">/</span><span class="n">Scripts</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="setup-cornflow-database">
-<h2>Setup cornflow database<a class="headerlink" href="#setup-cornflow-database" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="setup-cornflow-database">
+<h2>Setup cornflow database<a class="headerlink" href="#setup-cornflow-database" title="Permalink to this headline"></a></h2>
 <p>This local example assumes sqlite as database engine. For an example of postgresql deployment, see the <a class="reference internal" href="../deploy/options.html#setup-cornflow-database-with-your-own-postgresql-server"><span class="std std-ref">this section</span></a>.</p>
 <p>Initialize the database:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 <span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
 <span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">sqlite</span><span class="p">:</span><span class="o">///</span><span class="n">cornflow</span><span class="o">.</span><span class="n">db</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">db</span> <span class="n">upgrade</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">access_init</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_service_user</span>  <span class="o">--</span><span class="n">username</span><span class="o">=</span><span class="n">airflow</span> <span class="o">--</span><span class="n">email</span><span class="o">=</span><span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">airflow_test_password</span>
-<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">create_admin_user</span>  <span class="o">--</span><span class="n">username</span><span class="o">=</span><span class="n">cornflow</span> <span class="o">--</span><span class="n">email</span><span class="o">=</span><span class="n">cornflow_admin</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">--</span><span class="n">password</span><span class="o">=</span><span class="n">cornflow_admin_password</span>
+<span class="n">flask</span> <span class="n">db</span> <span class="n">upgrade</span>
+<span class="n">flask</span> <span class="n">access_init</span> <span class="o">-</span><span class="n">v</span> <span class="mi">0</span>
+<span class="n">flask</span> <span class="n">create_service_user</span>  <span class="o">-</span><span class="n">u</span> <span class="n">airflow</span> <span class="o">-</span><span class="n">e</span> <span class="n">airflow_test</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">-</span><span class="n">p</span> <span class="n">airflow_test_password</span> <span class="o">-</span><span class="n">v</span> <span class="mi">0</span>
+<span class="n">flask</span> <span class="n">create_admin_user</span>  <span class="o">-</span><span class="n">u</span> <span class="n">cornflow</span> <span class="o">-</span><span class="n">e</span> <span class="n">cornflow_admin</span><span class="nd">@admin</span><span class="o">.</span><span class="n">com</span> <span class="o">-</span><span class="n">p</span> <span class="n">cornflow_admin_password</span> <span class="o">-</span><span class="n">v</span> <span class="mi">0</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="launch-cornflow-server">
-<h2>Launch cornflow server<a class="headerlink" href="#launch-cornflow-server" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="launch-cornflow-server">
+<h2>Launch cornflow server<a class="headerlink" href="#launch-cornflow-server" title="Permalink to this headline"></a></h2>
 <p>Each time you run the flask server, execute the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">cfvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 <span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span>
 <span class="n">export</span> <span class="n">FLASK_ENV</span><span class="o">=</span><span class="n">development</span>
 <span class="n">export</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">sqlite</span><span class="p">:</span><span class="o">///</span><span class="n">cornflow</span><span class="o">.</span><span class="n">db</span>
@@ -154,9 +156,9 @@
 </pre></div>
 </div>
 <p>In windows use <code class="docutils literal notranslate"><span class="pre">set</span></code> instead of <code class="docutils literal notranslate"><span class="pre">export</span></code>.</p>
-</div>
-<div class="section" id="install-and-configure-airflow">
-<h2>Install and configure airflow<a class="headerlink" href="#install-and-configure-airflow" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="install-and-configure-airflow">
+<h2>Install and configure airflow<a class="headerlink" href="#install-and-configure-airflow" title="Permalink to this headline"></a></h2>
 <p>Here are the minimal instructions to install and configure airflow with the default dags in this project. The instructions assume Ubuntu.</p>
 <p>Create a virtual environment for airflow:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">corn</span>
@@ -165,7 +167,7 @@
 </pre></div>
 </div>
 <p>Install airflow from pip:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_VERSION</span><span class="o">=</span><span class="mf">2.1</span><span class="o">.</span><span class="mi">0</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_VERSION</span><span class="o">=</span><span class="mf">2.1.0</span>
 <span class="n">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;$(python3 --version | cut -d &quot;</span> <span class="s2">&quot; -f 2 | cut -d &quot;</span><span class="o">.</span><span class="s2">&quot; -f 1-2)&quot;</span>
 <span class="n">CONSTRAINT_URL</span><span class="o">=</span><span class="s2">&quot;https://raw.githubusercontent.com/apache/airflow/constraints-$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">/constraints-$</span><span class="si">{PYTHON_VERSION}</span><span class="s2">.txt&quot;</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;apache-airflow==$</span><span class="si">{AIRFLOW_VERSION}</span><span class="s2">&quot;</span> <span class="o">--</span><span class="n">constraint</span> <span class="s2">&quot;$</span><span class="si">{CONSTRAINT_URL}</span><span class="s2">&quot;</span>
@@ -187,9 +189,9 @@
       <span class="o">--</span><span class="n">email</span> <span class="n">admin</span><span class="nd">@example</span><span class="o">.</span><span class="n">org</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="launch-airflow-server">
-<h2>Launch airflow server<a class="headerlink" href="#launch-airflow-server" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="launch-airflow-server">
+<h2>Launch airflow server<a class="headerlink" href="#launch-airflow-server" title="Permalink to this headline"></a></h2>
 <p>Set the base config:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">afvenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 <span class="n">export</span> <span class="n">AIRFLOW_HOME</span><span class="o">=</span><span class="s2">&quot;$PWD/airflow_config&quot;</span>
@@ -212,9 +214,9 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8080</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="killing-airflow">
-<h2>Killing airflow<a class="headerlink" href="#killing-airflow" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="killing-airflow">
+<h2>Killing airflow<a class="headerlink" href="#killing-airflow" title="Permalink to this headline"></a></h2>
 <p>Search for the code of the process in Linux:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">airflow</span>
 </pre></div>
@@ -227,19 +229,19 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kill -9 $(ps aux | grep &#39;airflow&#39; | awk &#39;{print $2}&#39;)
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="install-with-docker">
-<h1>Install with docker<a class="headerlink" href="#install-with-docker" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="pull">
-<h2>Pull<a class="headerlink" href="#pull" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="install-with-docker">
+<h1>Install with docker<a class="headerlink" href="#install-with-docker" title="Permalink to this headline"></a></h1>
+<section id="pull">
+<h2>Pull<a class="headerlink" href="#pull" title="Permalink to this headline"></a></h2>
 <p>Pull the image from the Docker repository.</p>
 <blockquote>
 <div><p>docker pull baobabsoluciones/cornflow</p>
 </div></blockquote>
-</div>
-<div class="section" id="build">
-<h2>Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="build">
+<h2>Build<a class="headerlink" href="#build" title="Permalink to this headline"></a></h2>
 <p>Build cornflow image:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">cornflow</span> <span class="o">.</span>
 </pre></div>
@@ -249,9 +251,9 @@
 </pre></div>
 </div>
 <p>Don’t forget to update the images in the docker-compose files to baobabsoluciones/cornflow:latest and baobabsoluciones/docker-airflow:latest.</p>
-</div>
-<div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p>We have created several <cite>docker-compose.yml</cite> files so that you can use them and deploy the test environment:
 By default, docker-airflow runs Airflow with SequentialExecutor:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">--</span><span class="n">build</span> <span class="o">-</span><span class="n">d</span>
@@ -277,14 +279,14 @@ By default, docker-airflow runs Airflow with SequentialExecutor:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span> <span class="o">--</span><span class="n">volumes</span> <span class="o">--</span><span class="n">rmi</span> <span class="nb">all</span>
 </pre></div>
 </div>
-<div class="section" id="help-me">
-<h3>Help me<a class="headerlink" href="#help-me" title="Permalink to this headline">¶</a></h3>
+<section id="help-me">
+<h3>Help me<a class="headerlink" href="#help-me" title="Permalink to this headline"></a></h3>
 <p>If you have a database server and you only want to create the database or, for example, you already have an airflow environment, you can go to the following links to learn more about other types of cornflow deployment.</p>
 <p><a class="reference internal" href="../deploy/index.html#deploy-your-own-cornflow-server"><span class="std std-ref">Deploy cornflow with docker</span></a></p>
 <p><a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/2.1.0/index.html">Airflow documentation</a></p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

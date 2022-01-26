@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Docker stack &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Docker stack &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -92,10 +94,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="docker-stack">
-<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="image-build">
-<h2>Image build<a class="headerlink" href="#image-build" title="Permalink to this headline">¶</a></h2>
+  <section id="docker-stack">
+<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Permalink to this headline"></a></h1>
+<section id="image-build">
+<h2>Image build<a class="headerlink" href="#image-build" title="Permalink to this headline"></a></h2>
 <p>The Dockerfile in <a class="reference external" href="https://github.com/baobabsoluciones/corn">cornflow github project</a> is builded from python3-slim-buster docker image.
 Installation path of cornflow app is <code class="docutils literal notranslate"><span class="pre">/usr/src/app</span></code>.
 There is no docker volumes attached to deployment for cornflow app.</p>
@@ -104,16 +106,16 @@ There is no docker volumes attached to deployment for cornflow app.</p>
 </pre></div>
 </div>
 <p>Where my-image is the name you want to name it and my-tag is the tag you want to tag the image with.</p>
-</div>
-<div class="section" id="official-image-build">
-<h2>Official image build<a class="headerlink" href="#official-image-build" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="official-image-build">
+<h2>Official image build<a class="headerlink" href="#official-image-build" title="Permalink to this headline"></a></h2>
 <p>The cornflow image is built from the Dockerfile file hosted in the official repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="p">:</span><span class="n">latest</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="environment-variables">
-<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="environment-variables">
+<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline"></a></h2>
 <p>Main cornflow environment variables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">user</span>
 <span class="n">CORNFLOW_ADMIN_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">pwd</span>
@@ -129,9 +131,9 @@ There is no docker volumes attached to deployment for cornflow app.</p>
 <span class="n">FLASK_ENV</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">deployment</span> <span class="n">environment</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="entrypoint">
-<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="entrypoint">
+<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this headline"></a></h2>
 <p>If you are using the default entrypoint of the production image, it will execute the <code class="docutils literal notranslate"><span class="pre">init_cornflow_service.py</span></code> script which uses and initializes environment variables to work with postgresql and airflow defined in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>.
 The image entrypoint works as follows:</p>
 <ol class="arabic simple">
@@ -141,9 +143,9 @@ The image entrypoint works as follows:</p>
 <li><p>For the very first time it will create the cornflow superuser.</p></li>
 <li><p>Finally launch gunicorn server with 3 gevent workers.</p></li>
 </ol>
-</div>
-<div class="section" id="airflow-personalized-image">
-<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="airflow-personalized-image">
+<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Permalink to this headline"></a></h2>
 <p>For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
 The airflow personalized image is built from the Dockerfile file hosted in the official cornflow repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span><span class="p">:</span><span class="n">latest</span>
@@ -167,9 +169,9 @@ AIRFLOW_DB - airflow database name
 </pre></div>
 </div>
 <p>These volumes allow you to persist the DAG files and also link the development packages necessary for their execution.</p>
-</div>
-<div class="section" id="postgresql-docker-image">
-<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="postgresql-docker-image">
+<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Permalink to this headline"></a></h2>
 <p>The image displayed in the container will be the official image of the popular <a class="reference external" href="https://hub.docker.com/_/postgres">PostgreSQL</a> database engine.
 The postgresql environment variables included in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POSTGRES_USER - database username of service
@@ -181,8 +183,8 @@ POSTGRES_DB - database name of service
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">postgres_cf_data</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">postgresql</span><span class="o">/</span><span class="n">data</span><span class="o">/</span> <span class="o">-</span> <span class="n">This</span> <span class="n">volume</span> <span class="n">stores</span> <span class="n">the</span> <span class="n">database</span> <span class="n">files</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test your solution method &mdash; Cornflow 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Test your solution method &mdash; Cornflow 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -86,10 +88,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="test-your-solution-method">
-<h1>Test your solution method<a class="headerlink" href="#test-your-solution-method" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="basics-of-testing">
-<h2>Basics of testing<a class="headerlink" href="#basics-of-testing" title="Permalink to this headline">¶</a></h2>
+  <section id="test-your-solution-method">
+<h1>Test your solution method<a class="headerlink" href="#test-your-solution-method" title="Permalink to this headline"></a></h1>
+<section id="basics-of-testing">
+<h2>Basics of testing<a class="headerlink" href="#basics-of-testing" title="Permalink to this headline"></a></h2>
 <p>The <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-dags-public">cornflow-dags-public</a> project includes some unit tests that can be run to be sure the projects are “ready to be merged”. These unit tests use as input data the output of the function <code class="docutils literal notranslate"><span class="pre">test_cases()</span></code> defined in cornflow-dags/DAG/my_project/__init__.py. The tests themselves load the data, validate it with the schema, solve the problem, get a solution and validate it.</p>
 <p>In order for your dag to be tested along with the others, you should add it to the unit tests to be run. The file to modify is <code class="docutils literal notranslate"><span class="pre">c</span>
 <span class="pre">ornflow-dags/tests/test_dags.py</span></code>. In this file, you must add a class corresponding to your project. It should look something like:</p>
@@ -105,9 +107,9 @@
                                                  <span class="c1"># Will test another solver</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="test-locally">
-<h2>Test locally<a class="headerlink" href="#test-locally" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="test-locally">
+<h2>Test locally<a class="headerlink" href="#test-locally" title="Permalink to this headline"></a></h2>
 <p>Once the tests are defined, it’s possible to run them in the local machine. To do this, you need to do the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m unittest tests/test_dags.py
 </pre></div>
@@ -116,12 +118,12 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m unittest tests.test_dags.MyProject
 </pre></div>
 </div>
-</div>
-<div class="section" id="test-in-github">
-<h2>Test in github<a class="headerlink" href="#test-in-github" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="test-in-github">
+<h2>Test in github<a class="headerlink" href="#test-in-github" title="Permalink to this headline"></a></h2>
 <p>When the source code for your application is uploaded to the git repository, github will perform the same unit tests for each of the dags to check whether the code produces errors. It will also run some additional tests.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
