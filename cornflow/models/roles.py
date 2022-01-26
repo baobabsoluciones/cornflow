@@ -98,10 +98,10 @@ class UserRoleModel(TraceAttributes):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user = db.relationship("UserModel")
+    user = db.relationship("UserModel", viewonly=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleModel")
+    role = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
         """
@@ -239,7 +239,12 @@ class UserRoleModel(TraceAttributes):
         :return: the representation
         :rtype: str
         """
-        return self.user.username + " has role " + self.role.name
+        try:
+            assignation = self.user.username + " has role " + self.role.name
+            return assignation
+        except AttributeError:
+            assignation = str(self.user_id) + "has role" + str(self.role_id)
+            return assignation
 
     def __str__(self):
         """
@@ -248,4 +253,9 @@ class UserRoleModel(TraceAttributes):
         :return: the string representation
         :rtype: str
         """
-        return self.user.username + " has role " + self.role.name
+        try:
+            assignation = self.user.username + " has role " + self.role.name
+            return assignation
+        except AttributeError:
+            assignation = str(self.user_id) + " has role " + str(self.role_id)
+            return assignation

@@ -9,7 +9,7 @@ import logging as log
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import UserModel, UserRoleModel
+from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_LDAP, PLANNER_ROLE
@@ -34,7 +34,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
             raise EndpointNotImplemented(
-                "The user has to sing up on the active directory"
+                "The user has to sign up on the active directory"
             )
 
         if UserModel.check_username_in_use(kwargs.get("username")):
@@ -47,11 +47,26 @@ class SignUpEndpoint(MetaResource, MethodResource):
                 error="Email already in use, please supply another email address"
             )
 
+        check_pwd = UserModel.check_password_pattern(kwargs.get('password'))
+        if not check_pwd["valid"]:
+            raise InvalidCredentials(
+                error=check_pwd["message"]
+            )
+
+        check_email = UserModel.check_email_pattern(kwargs.get("email"))
+        if not check_email["valid"]:
+            raise InvalidCredentials(
+                error=check_email["message"]
+            )
+
         user = UserModel(kwargs)
         user.save()
 
         user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
         user_role.save()
+
+        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+            PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
             token = Auth.generate_token(user.id)

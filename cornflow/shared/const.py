@@ -97,4 +97,5 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
     (PLANNER_ROLE, POST_ACTION, "dag-manual"),
     (SERVICE_ROLE, POST_ACTION, "dag-manual"),
+    (SERVICE_ROLE, POST_ACTION, "deployed-dag"),
 ]

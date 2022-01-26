@@ -1,32 +1,41 @@
-import unittest
-import json
+"""
 
-from cornflow.tests.custom_test_case import CustomTestCase
-from cornflow.tests.const import SCHEMA_URL
-from unittest.mock import patch
-from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
-from cornflow_client import get_pulp_jsonschema, get_empty_schema
+"""
+# General imports
+import unittest
+
+# Partial imports
 from marshmallow import ValidationError, Schema, fields
+from unittest.mock import patch
+
+# Imports from environment
+from cornflow_client import get_pulp_jsonschema, get_empty_schema
+from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
+
+# Imports from internal modules
+from cornflow.app import create_app
+from cornflow.tests.const import SCHEMA_URL
+from cornflow.tests.custom_test_case import CustomTestCase
 
 
 class SchemaGenerator(unittest.TestCase):
     data1 = [
         {
             "name": "filename",
-            "description": "Should be a filename",
             "required": True,
             "type": "String",
             "valid_values": ["hello.txt", "foo.py", "bar.png"],
+            "metadata": {"description": "Should be a filename"},
         },
         {
             "name": "SomeBool",
-            "description": "Just a bool",
+            "metadata": {"description": "Just a bool"},
             "required": True,
             "type": "Boolean",
         },
         {
             "name": "NotRequiredBool",
-            "description": "Another bool that's not required",
+            "metadata": {"description": "Another bool that's not required"},
             "required": False,
             "type": "Boolean",
         },
@@ -67,13 +76,6 @@ class SchemaGenerator(unittest.TestCase):
         self.assertRaises(ValidationError, func_error2)
 
     def test_two_classes(self):
-        # class CoefficientsSchema(Schema):
-        #     name = fields.Str(required=True)
-        #     value = fields.Float(required=True)
-        #
-        # class ObjectiveSchema(Schema):
-        #     name = fields.Str(required=False, allow_none=True)
-        #     coefficients = fields.Nested(CoefficientsSchema, many=True, required=True)
 
         dict_params = dict(
             CoefficientsSchema=[
@@ -154,7 +156,7 @@ class TestSchemaEndpoint(CustomTestCase):
         self.schema = get_pulp_jsonschema()
         self.config = get_empty_schema(dict(timeLimit=1, solvers=["cbc"]))
         self.url = SCHEMA_URL
-        self.schema_name = "pulp"
+        self.schema_name = "solve_model_dag"
 
     def patch_af_client(self, Airflow_mock):
         af_client = Airflow_mock.return_value
@@ -187,15 +189,44 @@ class TestSchemaEndpoint(CustomTestCase):
         af_client.get_dag_info.assert_called_once()
         af_client.get_schemas_for_dag_name.assert_called_once()
 
-    @patch("cornflow.endpoints.schemas.Airflow.from_config")
-    def test_get_all_schemas(self, airflow_init):
-        af_client = self.patch_af_client(airflow_init)
-        schemas = self.get_one_row(
-            self.url, {}, expected_status=200, check_payload=False
+
+class TestNewSchemaEndpointOpen(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.url = SCHEMA_URL
+
+    def test_get_all_schemas(self):
+        schemas = self.get_one_row(self.url, {}, 200, False)
+        dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer"]]
+
+        self.assertEqual(dags, schemas)
+
+
+class TestNewSchemaEndpointNotOpen(CustomTestCase):
+    def create_app(self):
+        app = create_app("testing")
+        app.config["OPEN_DEPLOYMENT"] = 0
+        return app
+
+    def setUp(self):
+        super().setUp()
+        self.url = SCHEMA_URL
+        self.schema_name = "solve_model_dag"
+
+    def test_get_all_schemas(self):
+        schemas = self.get_one_row(self.url, {}, 200, False)
+        self.assertEqual([], schemas)
+
+    def test_get_one_schema(self):
+        schema = self.get_one_row(
+            self.url + "{}/".format(self.schema_name),
+            {},
+            expected_status=403,
+            check_payload=False,
         )
-        self.assertEqual(schemas[0]["name"], self.schema_name)
-        af_client.is_alive.assert_called_once()
-        af_client.get_all_schemas.assert_called_once()
+        self.assertEqual(
+            {"error": "User does not have permission to access this dag"}, schema
+        )
 
 
 if __name__ == "__main__":

@@ -32,6 +32,7 @@ jobs:
       run: python -m unittest discover -s cornflow.tests.ldap
       env:
         FLASK_ENV: testing
+        DATABASE_URL: sqlite:///cornflow_test.db
         AUTH_TYPE: 2
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
@@ -45,7 +46,7 @@ jobs:
         LDAP_EMAIL_ATTRIBUTE: mail
         LDAP_USER_OBJECT_CLASS: inetOrgPerson
         LDAP_GROUP_ATTRIBUTE: cn
-        LDAP_GROUP_TO_ROLE_SERVICE: service
+        LDAP_GROUP_TO_ROLE_SERVICE: services
         LDAP_GROUP_TO_ROLE_ADMIN: administrators
         LDAP_GROUP_TO_ROLE_VIEWER: viewers
         LDAP_GROUP_TO_ROLE_PLANNER: planners

@@ -9,7 +9,7 @@ from cornflow.endpoints import (
     UserRoleListEndpoint,
     UserRoleDetailEndpoint,
 )
-from cornflow.models import PermissionViewRoleModel, RoleModel, UserRoleModel
+from cornflow.models import PermissionViewRoleModel, RoleModel, UserModel, UserRoleModel
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
@@ -331,11 +331,11 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser" + str(role),
             "email": "testemail" + str(role) + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user_response = self.create_user(data)
 
-        self.create_role(user_response.json["id"], role)
+        self.assign_role(user_response.json["id"], role)
 
         self.client.delete(
             self.url + str(user_response.json["id"]) + "/" + str(PLANNER_ROLE) + "/",
@@ -371,15 +371,15 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser",
             "email": "testemail" + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user_response = self.create_user(data)
         user_id = user_response.json["id"]
         # give it all roles:
         for role in ROLES_MAP:
-            self.create_role(user_id, role)
-        all_roles = UserRoleModel.get_one_user(user_id)
-        diff = set(r.role_id for r in all_roles).symmetric_difference(ROLES_MAP.keys())
+            self.assign_role(user_id, role)
+        all_roles = UserModel.get_one_user(user_id).roles
+        diff = set(r for r in all_roles).symmetric_difference(ROLES_MAP.keys())
         self.assertEqual(len(all_roles), len(ROLES_MAP))
         self.assertEqual(len(diff), 0)
         UserRoleModel.del_one_user(user_id)

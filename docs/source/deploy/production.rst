@@ -9,7 +9,7 @@ Database backend
 Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config::
 
-    DATABASE_URL=postgres://myuser:myuserpwd@myserverip:5432/cornflow
+    DATABASE_URL=postgresql://myuser:myuserpwd@myserverip:5432/cornflow
 
 SSL
 ******
