@@ -34,7 +34,7 @@ def install():
         highs_path = "/usr/local/bin/highs"
         os.chown(highs_path, uid, gid)
 
-    except (error):
+    except error:
 
         print(error)
 

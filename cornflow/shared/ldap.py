@@ -115,7 +115,6 @@ class LDAP:
         # first element is the cn string, the second is the USER_BASE
         # we only want the cn string
         roles = [el.cn[0] for el in conn.entries]
-
         env_to_role = {
             "LDAP_GROUP_TO_ROLE_" + str.upper(ROLES_MAP[k]): k
             for k in ALL_DEFAULT_ROLES

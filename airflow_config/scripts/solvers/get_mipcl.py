@@ -30,7 +30,7 @@ def install():
         mips_path = "/usr/local/bin/mps_mipcl"
         os.chown(mips_path, uid, gid)
 
-    except (error):
+    except error:
 
         print(error)
 

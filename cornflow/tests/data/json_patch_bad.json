@@ -31,5 +31,6 @@
       "path": "/name",
       "value": "test_case_2"
     }
-  ]
+  ],
+  "schema": "solve_model_dag"
 }

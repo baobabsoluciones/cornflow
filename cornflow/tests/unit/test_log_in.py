@@ -19,15 +19,15 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         user = UserModel(data=self.data)
         user.save()
         db.session.commit()
         # we take out the email, we do not need it to log in
         self.data.pop("email")
-        self.id = UserModel.query.filter_by(username="testname").first().id
+        self.idx = UserModel.query.filter_by(username="testname").first().id
 
     def test_successful_log_in(self):
         super().test_successful_log_in()
-        self.assertEqual(self.id, self.response.json["id"])
+        self.assertEqual(self.idx, self.response.json["id"])

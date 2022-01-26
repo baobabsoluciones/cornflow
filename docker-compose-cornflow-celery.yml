@@ -10,7 +10,7 @@ services:
       - 5000:5000
     environment:
       - CORNFLOW_ADMIN_EMAIL=cornflow_admin@cornflow.com
-      - CORNFLOW_ADMIN_PWD=cornflowadmin1234
+      - CORNFLOW_ADMIN_PWD=Cornflowadmin_1234
       - CORNFLOW_DB_HOST=cornflow_db
       - CORNFLOW_DB_PORT=5432
       - CORNFLOW_DB_USER=cornflow

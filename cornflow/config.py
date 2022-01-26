@@ -16,6 +16,9 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = True
 
+    # Open deployment (all dags accessible to all users)
+    OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
+
     # LDAP configuration
     LDAP_HOST = os.getenv("LDAP_HOST", "ldap://openldap:389")
     LDAP_BIND_DN = os.getenv("LDAP_BIND_DN", "cn=admin,dc=example,dc=org")

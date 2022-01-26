@@ -1,9 +1,10 @@
 from cornflow_client import CornFlow, group_variables_by_name
 import pulp
 
-email = 'some_email@gmail.com'
-pwd = 'some_password'
-name = 'some_name'
+email = "some_email@gmail.com"
+pwd = "some_password"
+name = "some_name"
+
 
 def run_example():
 
@@ -31,18 +32,20 @@ def run_example():
         gapRel=0.1,
         gapAbs=1,
         threads=1,
-        logPath="test_export_solver_json.log"
+        logPath="test_export_solver_json.log",
     )
 
     execution_id = client.create_execution(instance_id, config)
     status = client.get_status(execution_id)
     results = client.get_solution(execution_id)
 
-    _vars, prob = pulp.LpProblem.from_dict(results['data'])
-    actual_vars = group_variables_by_name(_vars, ['Route', 'BuildaPlant'], replace_underscores_with_spaces=True)
+    _vars, prob = pulp.LpProblem.from_dict(results["data"])
+    actual_vars = group_variables_by_name(
+        _vars, ["Route", "BuildaPlant"], replace_underscores_with_spaces=True
+    )
     actual_vars.keys()
-    actual_vars['BuildaPlant']
-    actual_vars['Route'][('San Francisco', 'Barstow')]
+    actual_vars["BuildaPlant"]
+    actual_vars["Route"][("San Francisco", "Barstow")]
 
     # The status of the solution is printed to the screen
     print("Status:", pulp.LpStatus[prob.status])
@@ -58,18 +61,15 @@ def run_example():
     {k: v.value() for k, v in _vars.items()}
 
     # get the log in text format
-    results['log_text']
+    results["log_text"]
 
     # get the log in json format
-    results['log_json']
+    results["log_json"]
 
 
 def build_pulp_problem():
     # Creates a list of all the supply nodes
-    Plants = ["San Francisco",
-              "Los Angeles",
-              "Phoenix",
-              "Denver"]
+    Plants = ["San Francisco", "Los Angeles", "Phoenix", "Denver"]
 
     # Creates a dictionary of lists for the number of units of supply at
     # each plant and the fixed cost of running each plant
@@ -77,21 +77,18 @@ def build_pulp_problem():
         "San Francisco": [1700, 70000],
         "Los Angeles": [2000, 70000],
         "Phoenix": [1700, 65000],
-        "Denver": [2000, 70000]
+        "Denver": [2000, 70000],
     }
 
     # Creates a list of all demand nodes
-    Stores = ["San Diego",
-              "Barstow",
-              "Tucson",
-              "Dallas"]
+    Stores = ["San Diego", "Barstow", "Tucson", "Dallas"]
 
     # Creates a dictionary for the number of units of demand at each store
     demand = {  # Store    Demand
         "San Diego": 1700,
         "Barstow": 1000,
         "Tucson": 1500,
-        "Dallas": 1200
+        "Dallas": 1200,
     }
 
     # Creates a list of costs for each transportation path
@@ -100,7 +97,7 @@ def build_pulp_problem():
         [5, 3, 2, 6],  # SF
         [4, 7, 8, 10],  # LA    Plants
         [6, 5, 3, 8],  # PH
-        [9, 8, 6, 5]  # DE
+        [9, 8, 6, 5],  # DE
     ]
 
     # Creates a list of tuples containing all the possible routes for transport
@@ -124,15 +121,24 @@ def build_pulp_problem():
     prob = pulp.LpProblem("Computer Plant Problem", pulp.LpMinimize)
 
     # The objective function is added to prob - The sum of the transportation costs and the building fixed costs
-    prob += pulp.lpSum([flow[p, s] * costs[p][s] for (p, s) in Routes]) + pulp.lpSum(
-        [fixedCost[p] * build[p] for p in Plants]), "Total Costs"
+    prob += (
+        pulp.lpSum([flow[p, s] * costs[p][s] for (p, s) in Routes])
+        + pulp.lpSum([fixedCost[p] * build[p] for p in Plants]),
+        "Total Costs",
+    )
 
     # The Supply maximum constraints are added for each supply node (plant)
     for p in Plants:
-        prob += pulp.lpSum([flow[p, s] for s in Stores]) <= supply[p] * build[p], "Sum of Products out of Plant %s" % p
+        prob += (
+            pulp.lpSum([flow[p, s] for s in Stores]) <= supply[p] * build[p],
+            "Sum of Products out of Plant %s" % p,
+        )
 
     # The Demand minimum constraints are added for each demand node (store)
     for s in Stores:
-        prob += pulp.lpSum([flow[p, s] for p in Plants]) >= demand[s], "Sum of Products into Stores %s" % s
+        prob += (
+            pulp.lpSum([flow[p, s] for p in Plants]) >= demand[s],
+            "Sum of Products into Stores %s" % s,
+        )
 
     return prob

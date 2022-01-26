@@ -10,9 +10,9 @@ services:
       - 5000:5000
     environment:
       - CORNFLOW_ADMIN_EMAIL=cornflow_admin@cornflow.com
-      - CORNFLOW_ADMIN_PWD=cornflowadmin1234
+      - CORNFLOW_ADMIN_PWD=Cornflowadmin_1234
       - CORNFLOW_SERVICE_USER=service_user@cornflow.com
-      - CORNFLOW_SERVICE_PWD=serviceuser1234
+      - CORNFLOW_SERVICE_PWD=Serviceuser_1234
       - AIRFLOW_USER=admin
       - AIRFLOW_PWD=admin
       - CORNFLOW_DB_HOST=cornflow_db

@@ -52,3 +52,5 @@ ROLES_URL = PREFIX + "/roles/"
 USER_ROLE_URL = PREFIX + "/user/role/"
 
 APIVIEW_URL = PREFIX + "/apiview/"
+
+DEPLOYED_DAG_URL = PREFIX + "/dag/deployed/"

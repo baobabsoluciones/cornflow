@@ -35,7 +35,7 @@ def install():
         choco_path = "/usr/local/bin/choco.jar"
         os.chown(choco_path, uid, gid)
 
-    except (error):
+    except error:
 
         print(error)
 
