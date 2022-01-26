@@ -26,7 +26,7 @@ from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
     USER_URL,
-    RECOVER_PASSWORD_URL
+    RECOVER_PASSWORD_URL,
 )
 
 

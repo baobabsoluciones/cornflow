@@ -280,9 +280,8 @@ class UserModel(TraceAttributes):
         symbols = random.sample("!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\", nb_special_char)
         chars = upper_letters + lower_letters + numbers + symbols
         random.shuffle(chars)
-        pwd = ''.join(chars)
+        pwd = "".join(chars)
         return pwd
-
 
     def __repr__(self):
         """
