@@ -9,13 +9,13 @@ from flask_testing import TestCase
 import json
 import jwt
 from unittest.mock import patch, Mock
-import cProfile
-import pstats
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
-from cornflow.models import UserModel, UserRoleModel
+from cornflow.models import UserRoleModel
+from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow.shared.utils import db
@@ -51,11 +51,12 @@ class CustomTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run(verbose=0)
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
         data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
 
         self.client.post(
@@ -63,6 +64,10 @@ class CustomTestCase(TestCase):
             data=json.dumps(data),
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
+        )
+
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
         )
 
         data.pop("email")
@@ -93,7 +98,8 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         )
 
-    def create_role(self, user_id, role_id):
+    @staticmethod
+    def assign_role(user_id, role_id):
 
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(
@@ -116,10 +122,10 @@ class CustomTestCase(TestCase):
         data = {
             "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
-            "password": "testpassword",
+            "password": "Testpassword1!",
         }
         response = self.create_user(data)
-        self.create_role(response.json["id"], role_id)
+        self.assign_role(response.json["id"], role_id)
 
         data.pop("email")
         return self.client.post(
@@ -153,6 +159,7 @@ class CustomTestCase(TestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(token),
         )
+
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
@@ -437,7 +444,11 @@ class BaseTestCases:
                 self.url_with_query_arguments(), self.model, self.payload
             )
             payload = {**self.payload, **dict(id=idx, name="new_name")}
-            self.update_row(self.url + str(idx) + "/", dict(name="new_name"), payload)
+            self.update_row(
+                self.url + str(idx) + "/",
+                dict(name="new_name"),
+                payload,
+            )
 
         def test_update_one_row_bad_format(self):
             idx = self.create_new_row(
@@ -637,10 +648,10 @@ class LoginTestCases:
                 headers={"Content-Type": "application/json"},
             )
 
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -662,10 +673,10 @@ class LoginTestCases:
             )
 
             token = response.json["token"]
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
@@ -688,10 +699,10 @@ class LoginTestCases:
                 follow_redirects=True,
                 headers={"Content-Type": "application/json"},
             )
-            self.id = response.json["id"]
+            self.idx = response.json["id"]
 
             response = self.client.get(
-                USER_URL + str(self.id) + "/",
+                USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",

@@ -2,14 +2,18 @@ import json
 
 from flask_testing import TestCase
 from cornflow.app import create_app
-from cornflow.commands import AccessInitialization
+from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.models import (
     CaseModel,
     ExecutionModel,
     InstanceModel,
+    PermissionsDAG,
     UserModel,
     UserRoleModel,
 )
+
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.shared.utils import db
 from cornflow.tests.const import (
@@ -32,39 +36,42 @@ class TestUserEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
 
         self.url = USER_URL
         self.model = UserModel
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="Testpassword1!"
         )
 
         self.planner = dict(
             username="aPlanner",
             email="test@test.com",
-            password="testpassword",
+            password="Testpassword1!",
             first_name="first_planner",
             last_name="last_planner",
         )
 
         self.planner_2 = dict(
-            username="aSecondPlanner", email="test2@test.com", password="testpassword2"
+            username="aSecondPlanner", email="test2@test.com", password="Testpassword2!"
         )
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="testpassword"
+            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
 
         self.admin_2 = dict(
-            username="aSecondAdmin", email="admin2@admin2.com", password="testpassword2"
+            username="aSecondAdmin",
+            email="admin2@admin2.com",
+            password="Testpassword2!",
         )
 
         self.service_user = dict(
             username="aServiceUser",
             email="service_user@test.com",
-            password="tpass_service_user",
+            password="Tpass_service_user1",
         )
 
         self.login_keys = ["username", "password"]
@@ -121,6 +128,7 @@ class TestUserEndpoint(TestCase):
                 user_role.save()
 
         db.session.commit()
+        register_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()
@@ -306,7 +314,7 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(403, response.status_code)
 
     def test_change_password(self):
-        payload = {"password": "newtestpassword"}
+        payload = {"password": "Newtestpassword1!"}
         response = self.modify_info(self.planner, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
@@ -315,12 +323,12 @@ class TestUserEndpoint(TestCase):
         self.assertIsNotNone(response.json["token"])
 
     def test_change_other_user_password(self):
-        payload = {"password": "newtestpassword_2"}
+        payload = {"password": "Newtestpassword_2"}
         response = self.modify_info(self.planner_2, self.planner, payload)
         self.assertEqual(403, response.status_code)
 
     def test_admin_change_password(self):
-        payload = {"password": "newtestpassword_3"}
+        payload = {"password": "Newtestpassword_3"}
         response = self.modify_info(self.admin, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
@@ -329,12 +337,12 @@ class TestUserEndpoint(TestCase):
         self.assertIsNotNone(response.json["token"])
 
     def test_service_user_change_password(self):
-        payload = {"password": "newtestpassword_4"}
+        payload = {"password": "Newtestpassword_4"}
         response = self.modify_info(self.service_user, self.planner, payload)
         self.assertEqual(403, response.status_code)
 
     def test_viewer_user_change_password(self):
-        payload = {"password": "newtestpassword_5"}
+        payload = {"password": "Newtestpassword_5"}
         response = self.modify_info(self.viewer, self.viewer, payload)
         self.assertEqual(200, response.status_code)
         self.viewer["password"] = payload["password"]
@@ -350,13 +358,14 @@ class TestUserModel(TestCase):
 
     def setUp(self):
         db.create_all()
-        AccessInitialization().run()
+        access_init_command(0)
+        register_deployed_dags_command_test(verbose=0)
 
         self.url = USER_URL
         self.model = UserModel
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="testpassword"
+            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
 
         response = self.client.post(
@@ -375,7 +384,7 @@ class TestUserModel(TestCase):
         self.login_keys = ["username", "password"]
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="testpassword"
+            username="aViewer", email="viewer@test.com", password="Testpassword1!"
         )
 
         response = self.client.post(
@@ -386,6 +395,7 @@ class TestUserModel(TestCase):
         )
 
         self.viewer["id"] = response.json["id"]
+        register_dag_permissions_command(verbose=0)
 
     def tearDown(self):
         db.session.remove()
@@ -553,3 +563,24 @@ class TestUserModel(TestCase):
         role = UserRoleModel.query.filter_by(user_id=self.viewer["id"]).delete()
         user = UserModel.query.get(self.viewer["id"])
         self.assertEqual(user.roles, {})
+
+    def test_permission_dag_cascade(self):
+        response = self.log_in(self.admin)
+        token = response.json["token"]
+        user_id = response.json["id"]
+
+        before = PermissionsDAG.get_user_dag_permissions(user_id)
+        self.assertIsNotNone(before)
+        response = self.client.delete(
+            self.url + str(user_id) + "/",
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        after = PermissionsDAG.get_user_dag_permissions(user_id)
+        self.assertEqual([], after)
+        self.assertNotEqual(before, after)

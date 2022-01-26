@@ -1,22 +1,29 @@
+"""
+
+"""
+# Full imports
 import json
 import pulp
 import logging as log
 import time
 import unittest
 
+# Imports from environment
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
+# Import internal modules
+from airflow_config.dags.model_functions import solve as solve_model
+from cornflow.app import create_app
+from cornflow.schemas.solution_log import LogSchema
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
     EXEC_STATE_RUNNING,
+    STATUS_HEALTHY,
 )
 from cornflow.tests.const import INSTANCE_PATH
-from cornflow.shared.const import STATUS_HEALTHY
-from cornflow.schemas.solution_log import LogSchema
-from airflow_config.dags.model_functions import solve as solve_model
+from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 
 def load_file(_file):
@@ -56,7 +63,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         description = "description123"
         data = pulp.LpProblem.fromMPS(mps_file, sense=1)[1].toDict()
         schema = "solve_model_dag"
-        payload = dict(data=data, name=name, description=description)
+        payload = dict(data=data, name=name, description=description, schema=schema)
         return self.create_new_instance_payload(payload)
 
     def create_new_instance_payload(self, payload):
@@ -133,7 +140,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         return self.create_new_execution(payload)
 
 
-class TestCornflowClient(TestCornflowClientBasic):
+class TestCornflowClientOpen(TestCornflowClientBasic):
 
     # TODO: user management
     # TODO: infeasible execution
@@ -144,10 +151,14 @@ class TestCornflowClient(TestCornflowClientBasic):
     def test_new_instance(self):
         return self.create_new_instance("./cornflow/tests/data/test_mps.mps")
 
-    def test_get_instance__data(self):
-        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
-        response = self.client.get_api_for_id("instance", instance["id"], "data")
-        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+    # TODO: reactivate test with new version of cornflow client which allows to pass
+    #  optional arguments for the headers of the request
+    # def test_get_instance__data(self):
+    #     instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+    #     response = self.client.get_api_for_id(
+    #         "instance", instance["id"], "data", encoding="gzip"
+    #     )
+    #     self.assertEqual(response.headers["Content-Encoding"], "gzip")
 
     def test_delete_instance(self):
         instance = self.test_new_instance()
@@ -259,7 +270,22 @@ class TestCornflowClient(TestCornflowClientBasic):
         self.assertEqual(af_status, STATUS_HEALTHY)
 
 
-# TODO: maybe we should have a test-suite for service_user
+class TestCornflowClientNotOpen(TestCornflowClientBasic):
+    def create_app(self):
+        app = create_app("testing")
+        app.config["LIVESERVER_PORT"] = 5050
+        app.config["OPEN_DEPLOYMENT"] = 0
+        return app
+
+    def test_get_all_schemas(self):
+        response = self.client.get_all_schemas()
+        self.assertEqual([], response)
+
+    def test_get_one_schema(self):
+        response = self.client.get_schema("solve_model_dag")
+        self.assertEqual(
+            {"error": "User does not have permission to access this dag"}, response
+        )
 
 
 class TestCornflowClientAdmin(TestCornflowClientBasic):
@@ -268,15 +294,24 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
         # we create a service user:
         self.create_service_user(
-            dict(username="airflow", pwd="airflow_test_password", email="af@cf.com")
+            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
         )
+
+        self.create_service_user(
+            dict(
+                username="service_user@cornflow.com",
+                pwd="Serviceuser_1234",
+                email="service_user@cornflow.com",
+            )
+        )
+
         # we create an admin user
         # we guarantee that the admin is there for airflow
         self.client.token = self.create_admin(
             dict(
                 username="airflow_test@admin.com",
                 email="airflow_test@admin.com",
-                pwd="airflow_test_password",
+                pwd="Airflow_test_password1",
             )
         )
 
@@ -298,7 +333,8 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(results["state"], EXEC_STATE_STOPPED)
 
     def test_status_solving(self):
-        execution = self.create_timer_instance_and_execution(5)
+        execution = self.create_timer_instance_and_execution(10)
+        time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
@@ -352,7 +388,10 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_edit_one_execution(self):
         one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
         payload = dict(
-            name="bla", config=dict(solver="CBC"), instance_id=one_instance["id"]
+            name="bla",
+            config=dict(solver="CBC"),
+            instance_id=one_instance["id"],
+            schema="solve_model_dag",
         )
         execution = self.client.create_api("execution/?run=0", json=payload)
         payload = dict(log_text="")
@@ -363,10 +402,12 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
 
 class PuLPLogSchema(unittest.TestCase):
-    def solve_model(self, input_data, config):
+    @staticmethod
+    def solve_model(input_data, config):
         return solve_model(input_data, config)
 
-    def dump_progress(self, log_dict):
+    @staticmethod
+    def dump_progress(log_dict):
         LS = LogSchema()
         return LS.load(log_dict)
 
