@@ -10,7 +10,7 @@ from .meta_resource import MetaResource
 from ..models import ActionModel
 from ..schemas.action import ActionsResponse
 from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
+from ..shared.const import ADMIN_ROLE
 
 
 class ActionListEndpoint(MetaResource, MethodResource):

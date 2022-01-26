@@ -163,7 +163,7 @@ In the cornflow image, if no environment variables are set, an admin user is cre
 
     CORNFLOW_ADMIN_USER - cornflow_admin
     CORNFLOW_ADMIN_EMAIL - cornflow_admin@cornflow.com
-    CORNFLOW_ADMIN_PWD - cornflowadmin1234
+    CORNFLOW_ADMIN_PWD - Cornflowadmin_1234
 
 It is advisable to change the default admin user and keep the password in a safe place.
 

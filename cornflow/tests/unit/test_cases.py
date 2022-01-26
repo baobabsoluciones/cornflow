@@ -125,6 +125,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "description": "test case for unit tests",
             "instance_id": instance_id,
             "execution_id": execution_id,
+            "schema": "solve_model_dag",
         }
         self.user_object = UserModel.get_one_user(self.user)
         self.instance = InstanceModel.get_one_object_from_user(
@@ -391,11 +392,11 @@ class TestCaseJsonPatch(CustomTestCase):
         self.payloads = [self.load_file(f) for f in CASES_LIST]
         self.items_to_check = ["name", "description", "schema"]
         self.url = CASE_URL
-        self.patch = {
-            "data_patch": jsonpatch.make_patch(
+        self.patch = dict(
+            data_patch=jsonpatch.make_patch(
                 self.payloads[0]["data"], self.payloads[1]["data"]
             ).patch
-        }
+        )
         self.patch_file = self.load_file(JSON_PATCH_GOOD_PATH)
 
     def test_json_patch(self):
@@ -548,6 +549,7 @@ class TestCaseCompare(CustomTestCase):
         self.cases_id = [
             self.create_new_row(self.url, self.model, p) for p in self.payloads
         ]
+
         self.items_to_check = ["name", "description", "schema"]
 
     def test_get_full_patch(self):

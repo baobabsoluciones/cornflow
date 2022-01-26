@@ -20,6 +20,15 @@ class ApiViewModel(EmptyModel):
     url_rule = db.Column(db.String(128), nullable=False)
     description = db.Column(TEXT, nullable=True)
 
+    permissions = db.relationship(
+        "PermissionViewRoleModel",
+        backref="api_views",
+        lazy=True,
+        primaryjoin="and_(ApiViewModel.id==PermissionViewRoleModel.api_view_id, "
+        "PermissionViewRoleModel.deleted_at==None)",
+        cascade="all,delete",
+    )
+
     def __init__(self, data):
         super().__init__()
         self.name = data.get("name")

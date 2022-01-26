@@ -1,6 +1,14 @@
 Models
 ==========================
 
+Case model
+-----------
+
+.. automodule:: cornflow.models.case
+   :members:
+   :show-inheritance:
+   :member-order: bysource
+
 Execution model
 ------------------
 

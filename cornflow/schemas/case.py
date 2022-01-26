@@ -60,6 +60,7 @@ class CaseFromInstanceExecution(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
     parent_id = fields.Int(allow_none=True)
+    schema = fields.Str(required=True)
 
 
 class CaseToInstanceResponse(Schema):
@@ -72,7 +73,6 @@ class CaseToInstanceResponse(Schema):
 class CaseEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
-    schema = fields.Str()
 
 
 class CaseCompareResponse(Schema):

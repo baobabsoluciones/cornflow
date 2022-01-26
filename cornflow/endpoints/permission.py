@@ -3,8 +3,7 @@
 """
 
 # Import from libraries
-from flask import current_app
-from flask_apispec import marshal_with, use_kwargs, doc
+from flask_apispec import doc, marshal_with, use_kwargs
 from flask_apispec.views import MethodResource
 import logging as log
 
@@ -18,8 +17,8 @@ from ..schemas.permission import (
 )
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
+from ..shared.const import ADMIN_ROLE
+from ..shared.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):

@@ -1,5 +1,4 @@
 # Airflow init script for Dockerfile ENTRYPOINT
-from logging import error
 import os
 import subprocess
 import sys
@@ -24,8 +23,8 @@ global_env_vars = [
     ("AIRFLOW_ROLE", "Admin"),
     ("AIRFLOW_PWD", "admin"),
     ("AIRFLOW_USER_EMAIL", "admin@example.com"),
-    ("CORNFLOW_SERVICE_USER", "serviceuser@cornflow.com"),
-    ("CORNFLOW_SERVICE_PWD", "servicecornflow1234"),
+    ("CORNFLOW_SERVICE_USER", "service_user@cornflow.com"),
+    ("CORNFLOW_SERVICE_PWD", "Serviceuser_1234"),
     ("AIRFLOW_LDAP_ENABLE", "False"),
 ]
 # update environ set
@@ -147,6 +146,7 @@ if os.getenv("AIRFLOW_LDAP_ENABLE") == "True":
             "FATAL: if you set AIRFLOW_LDAP_USE_TLS you must also set AIRFLOW_LDAP_TLS_CA_CERTIFICATE"
         )
 
+
 # Entrypoint of airflow services depends on command given by arg
 def airflowsvc(afsvc):
     if afsvc == "webserver":
@@ -171,7 +171,7 @@ def airflowsvc(afsvc):
         os.system(f"airflow {afsvc}")
     if afsvc == "flower":
         time.sleep(10)
-        os.system(f"airflow celery {afsvc} --basic-auth={AIRFLOW_USER}:\"{AIRFLOW_PWD}\"")
+        os.system(f'airflow celery {afsvc} --basic-auth={AIRFLOW_USER}:"{AIRFLOW_PWD}"')
     else:
         os.system("airflow version")
 
