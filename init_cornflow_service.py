@@ -40,12 +40,12 @@ os.environ["DATABASE_URL"] = CORNFLOW_DB_CONN
 AUTH = int(os.getenv("AUTH_TYPE", AUTH_DB))
 CORNFLOW_ADMIN_USER = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
 CORNFLOW_ADMIN_EMAIL = os.getenv("CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com")
-CORNFLOW_ADMIN_PWD = os.getenv("CORNFLOW_ADMIN_PWD", "cornflowadmin1234")
+CORNFLOW_ADMIN_PWD = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
 CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 CORNFLOW_SERVICE_EMAIL = os.getenv(
     "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
 )
-CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "serviceuser1234")
+CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
 
 # Cornflow logging and storage config
 CORNFLOW_LOGGING = os.getenv("CORNFLOW_LOGGING", "console")
