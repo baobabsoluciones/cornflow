@@ -148,7 +148,7 @@ Service user is a good solution for doing all the data interaction between appli
 
     CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
     CORNFLOW_SERVICE_MAIL - service user account email (default value `service_user@cornflow.com`)
-    CORNFLOW_SERVICE_PWD - service user account password (default value `servicecornflow1234`)
+    CORNFLOW_SERVICE_PWD - service user account password (default value `Service_user1234`)
 
 This connection is provided by::
 

@@ -25,7 +25,7 @@ def install():
         output_cbc = cbc_install.stdout
         print(output_cbc)
 
-    except (error):
+    except error:
 
         print(error)
 

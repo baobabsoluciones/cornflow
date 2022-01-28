@@ -15,7 +15,7 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
-from .dag import DAGEndpoint, DAGEndpointManual
+from .dag import DAGEndpoint, DAGEndpointManual, DeployedDAGEndpoint
 
 from .execution import (
     ExecutionEndpoint,
@@ -36,7 +36,7 @@ from .instance import (
 )
 
 from .login import LoginEndpoint
-from .permission import PermissionsViewRoleEndpoint
+from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 from .roles import (
     RolesListEndpoint,
     RoleDetailEndpoint,
@@ -86,6 +86,7 @@ resources = [
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=DAGEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
+    dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -131,6 +132,11 @@ resources = [
         resource=PermissionsViewRoleEndpoint,
         urls="/permission/",
         endpoint="permissions",
+    ),
+    dict(
+        resource=PermissionsViewRoleDetailEndpoint,
+        urls="/permission/<int:idx>/",
+        endpoint="permission-detail"
     ),
     dict(resource=RolesListEndpoint, urls="/roles/", endpoint="roles"),
     dict(

@@ -46,12 +46,12 @@ Download the Cornflow project and install requirements::
 
     git clone git@github.com:baobabsoluciones/cornflow-server.git
     cd corn
-    python3 -m venv cfvenv
-    cfvenv/bin/pip3 install -r requirements-dev.txt
+    python3 -m venv venv
+    venv/bin/pip3 install -r requirements-dev.txt
 
 activate the virtual environment and run Cornflow::
 
-    source cfvenv/bin/activate
+    source venv/bin/activate
     export FLASK_APP=cornflow.app
     flask run
 

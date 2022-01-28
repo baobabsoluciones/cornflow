@@ -52,7 +52,7 @@ def upgrade():
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("action_id", sa.Integer(), nullable=False),
-        sa.Column("api_view_id", sa.Integer(), nullable=True),
+        sa.Column("api_view_id", sa.Integer(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["action_id"],

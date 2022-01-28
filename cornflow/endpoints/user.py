@@ -25,6 +25,7 @@ from ..shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
     EndpointNotImplemented,
+    InvalidCredentials
 )
 from ..shared.utils import db
 
@@ -125,6 +126,20 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         # in ldap-mode, users cannot be edited.
         if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
+
+        if data.get('password'):
+            check_pwd = UserModel.check_password_pattern(data.get('password'))
+            if not check_pwd["valid"]:
+                raise InvalidCredentials(
+                    error=check_pwd["message"]
+                )
+
+        if data.get('email'):
+            check_email = UserModel.check_email_pattern(data.get("email"))
+            if not check_email["valid"]:
+                raise InvalidCredentials(
+                    error=check_email["message"]
+                )
         user_obj.update(data)
         user_obj.save()
         log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
