@@ -16,7 +16,7 @@ from ..schemas.user import (
     UserEndpointResponse,
     UserDetailsEndpointResponse,
     UserEditRequest,
-    RecoverPasswordRequest
+    RecoverPasswordRequest,
 )
 
 from ..shared.authentication import Auth
@@ -26,10 +26,10 @@ from ..shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
     EndpointNotImplemented,
-    InvalidCredentials
+    InvalidCredentials,
 )
 from ..shared.utils import db
-from ..shared.email import get_pwd_email, send_email_to
+from ..shared.messages import get_pwd_email, send_email_to
 
 
 # Initialize the schema that the endpoint uses
@@ -129,19 +129,15 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
 
-        if data.get('password'):
-            check_pwd = UserModel.check_password_pattern(data.get('password'))
+        if data.get("password"):
+            check_pwd = UserModel.check_password_pattern(data.get("password"))
             if not check_pwd["valid"]:
-                raise InvalidCredentials(
-                    error=check_pwd["message"]
-                )
+                raise InvalidCredentials(error=check_pwd["message"])
 
-        if data.get('email'):
+        if data.get("email"):
             check_email = UserModel.check_email_pattern(data.get("email"))
             if not check_email["valid"]:
-                raise InvalidCredentials(
-                    error=check_email["message"]
-                )
+                raise InvalidCredentials(error=check_email["message"])
         user_obj.update(data)
         user_obj.save()
         log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
@@ -179,7 +175,6 @@ class ToggleUserAdmin(MetaResource, MethodResource):
 
 
 class RecoverPassword(MetaResource, MethodResource):
-
     @doc(description="Send email to create new password", tags=["Users"])
     @use_kwargs(RecoverPasswordRequest)
     def put(self, **kwargs):
@@ -191,17 +186,16 @@ class RecoverPassword(MetaResource, MethodResource):
             the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        email = kwargs.get('email')
+        email = kwargs.get("email")
         if not UserModel.check_email_in_use(email):
             raise InvalidCredentials("The email address doesn't correspond to any user")
         new_password = UserModel.generate_password()
         text_email = get_pwd_email(new_password, email)
         send_email_to(text_email, email)
 
-        data = {'password': new_password}
+        data = {"password": new_password}
         user_obj = UserModel.get_one_user_by_email(email)
         user_obj.update(data)
-        user_obj.save()
 
         log.info(f"A new password was generated for user with email: {email}")
-        return {'message': f'A temporary password was sent to email {email}'}, 200
+        return {"message": f"A temporary password was sent to email {email}"}, 200

@@ -1,5 +1,11 @@
+"""
+
+"""
 # Imports from libraries
-import ssl, smtplib
+import smtplib
+import ssl
+
+# Partial imports
 from flask import current_app
 
 # Imports from internal modules
@@ -24,8 +30,9 @@ def get_pwd_email(pwd, receiver_email):
                 <p> Hi, </p>
                 Here is your temporary password to access cornflow: <big><b>{pwd}</b></big>.<br>
                 You can use it to login and then change your password. Please change your password as soon as you can.
+                Your older password has been disabled.
             </p>
-            <p>Conflow</p>
+            <p>Cornflow</p>
         </body>
     </html>
     """
@@ -40,23 +47,21 @@ def get_pwd_email(pwd, receiver_email):
 
 
 def send_email_to(email_text, email_receiver):
-    port = 465
-    smtp_server = "smtp.gmail.com"
+    port = current_app.config["CORNFLOW_EMAIL_PORT"]
+    smtp_server = current_app.config["CORNFLOW_EMAIL_SERVER"]
     email_sender = current_app.config["CORNFLOW_EMAIL_ADDRESS"]
     password = current_app.config["CORNFLOW_EMAIL_PASSWORD"]
     context = ssl.create_default_context()
-    if email_sender is None or password is None:
+    if email_sender is None or password is None or port is None or smtp_server is None:
         raise InvalidUsage(
-            "This functionality is not available. "
-            + "Check that cornflow's email is correctly configured"
+            "This functionality is not available. Check that cornflow's email is correctly configured"
         )
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         try:
             server.login(email_sender, password)
         except smtplib.SMTPAuthenticationError:
             raise InvalidUsage(
-                "This functionality is not available. "
-                + "Check that cornflow's email is correctly configured"
+                "This functionality is not available. Check that cornflow's email is correctly configured"
             )
         try:
             server.sendmail(email_sender, email_receiver, email_text)
