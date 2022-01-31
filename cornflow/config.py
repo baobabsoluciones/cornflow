@@ -52,6 +52,12 @@ class DefaultConfig(object):
     # compress config
     COMPRESS_REGISTER = False
 
+    # Email server
+    CORNFLOW_EMAIL_ADDRESS = os.getenv("CORNFLOW_EMAIL_ADDRESS", None)
+    CORNFLOW_EMAIL_PASSWORD = os.getenv("CORNFLOW_EMAIL_PASSWORD", None)
+    CORNFLOW_EMAIL_SERVER = os.getenv("CORNFLOW_EMAIL_SERVER", None)
+    CORNFLOW_EMAIL_PORT = os.getenv("CORNFLOW_EMAIL_PORT", None)
+
 
 class Development(DefaultConfig):
     """ """

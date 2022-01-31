@@ -45,7 +45,7 @@ from .roles import (
 )
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .signup import SignUpEndpoint
-from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
+from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 
 
 resources = [
@@ -149,4 +149,9 @@ resources = [
         urls="/user/role/<int:user_id>/<int:role_id>/",
         endpoint="user-roles-detail",
     ),
+    dict(
+        resource=RecoverPassword,
+        urls="/user/recover-password/",
+        endpoint="recover-password"
+    )
 ]
