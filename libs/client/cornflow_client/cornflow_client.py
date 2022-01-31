@@ -1,19 +1,14 @@
-from urllib.parse import urljoin
-import re
-import logging as log
-import requests
-from functools import partial, wraps
+"""
 
-# def expect_status(func, status):
-#     @wraps(func)
-#     def wrapper(*args, **kwargs):
-#         response = func(*args, **kwargs)
-#         if response.status_code != status:
-#             raise CornFlowApiError("Expected a code {}, got a {} error instead: {}".
-#                                    format(status, response.status_code, response.text))
-#         return response
-#
-#     return wrapper
+"""
+# Full imports
+import logging as log
+import re
+import requests
+
+# Partial imports
+from functools import wraps
+from urllib.parse import urljoin
 
 
 class CornFlow(object):

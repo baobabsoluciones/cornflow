@@ -1,4 +1,5 @@
 from cornflow_client import SchemaManager
+from cornflow_client.core.tools import load_json
 from cornflow_client.constants import DATASCHEMA
 from unittest import TestCase
 from data.dict_schema_example import dict_example
@@ -81,6 +82,41 @@ class TestSchemaManager(TestCase):
             content = json.load(f)
         marshmallow_object().load(content)
         # marshmallow_object().fields['jobs'].nested().fields['successors']
+
+    def test_check_schema(self):
+        sm = SchemaManager.from_filepath(
+            self.get_project_data_file("vrp_solution_schema.json")
+        )
+        val = sm.validate_schema()
+        self.assertTrue(val)
+        sm.jsonschema_to_flask()
+
+    def test_check_wrong_schema_1(self):
+        schema = load_json(
+            self.get_project_data_file("vrp_solution_schema.json")
+        )
+        del schema['properties']['routes']['items']['required']
+        sm = SchemaManager(schema)
+        val = sm.validate_schema()
+        self.assertFalse(val)
+
+    def test_check_wrong_schema_2(self):
+        schema = load_json(
+            self.get_project_data_file("vrp_solution_schema.json")
+        )
+        schema['properties']['routes']['items']['properties']['pos']['type'] = 'not_a_type'
+        sm = SchemaManager(schema)
+        val = sm.validate_schema()
+        self.assertFalse(val)
+
+    def test_check_wrong_schema_3(self):
+        schema = load_json(
+            self.get_project_data_file("vrp_solution_schema.json")
+        )
+        del schema['properties']['routes']['items']['properties']['pos']['type']
+        sm = SchemaManager(schema)
+        val = sm.validate_schema()
+        self.assertFalse(val)
 
     def test_validation_errors(self):
         sm = SchemaManager.from_filepath(

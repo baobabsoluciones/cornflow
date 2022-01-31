@@ -1,7 +1,13 @@
+"""
+
+"""
+# Partial imports
 from abc import ABC, abstractmethod
+from typing import Union, Dict
+
+# Imports from internal modules
 from .instance import InstanceCore
 from .solution import SolutionCore
-from typing import Union, Dict
 
 
 class ExperimentCore(ABC):

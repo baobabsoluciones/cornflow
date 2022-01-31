@@ -1,8 +1,18 @@
-from cornflow_client import CornFlow, CornFlowApiError, SchemaManager
-from urllib.parse import urlparse, urljoin
-from datetime import datetime, timedelta
+"""
+
+"""
+# Full imports
 import json
 import os
+
+# Partial imports
+from datetime import datetime, timedelta
+from urllib.parse import urlparse, urljoin
+
+
+# Imports from modules
+from cornflow_client import CornFlow, CornFlowApiError
+
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
