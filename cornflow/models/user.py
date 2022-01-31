@@ -1,5 +1,10 @@
 # Imports from libraries
 import re
+import string
+import random
+
+# Imports from sqlalchemy
+from sqlalchemy.sql import expression
 
 # Imports from internal modules
 from .meta_model import TraceAttributes
@@ -262,6 +267,21 @@ class UserModel(TraceAttributes):
         if re.match(email_pattern, email) is None:
             return {"valid": False, "message": "Invalid email address"}
         return {"valid": True, "message": ""}
+
+    @staticmethod
+    def generate_password():
+        nb_lower = random.randint(1, 9)
+        nb_upper = random.randint(10 - nb_lower, 11)
+        nb_numbers = random.randint(1, 3)
+        nb_special_char = random.randint(1, 3)
+        upper_letters = random.sample(string.ascii_uppercase, nb_upper)
+        lower_letters = random.sample(string.ascii_lowercase, nb_lower)
+        numbers = random.sample(list(map(str, list(range(10)))), nb_numbers)
+        symbols = random.sample("!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\", nb_special_char)
+        chars = upper_letters + lower_letters + numbers + symbols
+        random.shuffle(chars)
+        pwd = "".join(chars)
+        return pwd
 
     def __repr__(self):
         """

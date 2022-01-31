@@ -37,6 +37,7 @@ LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"
 TOKEN_URL = PREFIX + "/token/"
 USER_URL = PREFIX + "/user/"
+RECOVER_PASSWORD_URL = PREFIX + "/user/recover-password/"
 
 SCHEMA_URL = PREFIX + "/schema/"
 

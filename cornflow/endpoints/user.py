@@ -12,22 +12,25 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import (
-    UserSchema,
-    UserEndpointResponse,
+    RecoverPasswordRequest,
     UserDetailsEndpointResponse,
     UserEditRequest,
+    UserEndpointResponse,
+    UserSchema,
 )
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
 from ..shared.exceptions import (
-    InvalidUsage,
-    ObjectDoesNotExist,
-    NoPermission,
     EndpointNotImplemented,
-    InvalidCredentials
+    InvalidCredentials,
+    InvalidData,
+    InvalidUsage,
+    NoPermission,
+    ObjectDoesNotExist,
 )
 from ..shared.utils import db
+from ..shared.messages import get_pwd_email, send_email_to
 
 
 # Initialize the schema that the endpoint uses
@@ -127,19 +130,15 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
 
-        if data.get('password'):
-            check_pwd = UserModel.check_password_pattern(data.get('password'))
+        if data.get("password"):
+            check_pwd = UserModel.check_password_pattern(data.get("password"))
             if not check_pwd["valid"]:
-                raise InvalidCredentials(
-                    error=check_pwd["message"]
-                )
+                raise InvalidCredentials(error=check_pwd["message"])
 
-        if data.get('email'):
+        if data.get("email"):
             check_email = UserModel.check_email_pattern(data.get("email"))
             if not check_email["valid"]:
-                raise InvalidCredentials(
-                    error=check_email["message"]
-                )
+                raise InvalidCredentials(error=check_email["message"])
         user_obj.update(data)
         user_obj.save()
         log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
@@ -174,3 +173,53 @@ class ToggleUserAdmin(MetaResource, MethodResource):
             db.session.commit()
 
         return user_obj, 200
+
+
+class RecoverPassword(MetaResource, MethodResource):
+    @doc(description="Send email to create new password", tags=["Users"])
+    @use_kwargs(RecoverPasswordRequest)
+    def put(self, **kwargs):
+        """
+        API method to send an email to the user if they forgot to password.
+        Sends a temporary password and updates the database.
+        :param kwargs: a dictionary containing the email address
+        :return: A dictionary with a message (error if the email address is not in the database) and an integer with
+            the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        email = kwargs.get("email")
+
+        email_config = {
+            "email_sender": current_app.config["CORNFLOW_EMAIL_ADDRESS"],
+            "password": current_app.config["CORNFLOW_EMAIL_PASSWORD"],
+            "server": current_app.config["CORNFLOW_EMAIL_SERVER"],
+            "port": current_app.config["CORNFLOW_EMAIL_PORT"],
+            "email_receiver": email,
+        }
+
+        if (
+            email_config["email_sender"] is None
+            or email_config["password"] is None
+            or email_config["server"] is None
+            or email_config["port"] is None
+            or email_config["email_receiver"] is None
+        ):
+            raise InvalidUsage(
+                "This functionality is not available. Check that cornflow's email is correctly configured"
+            )
+
+        message = "The password recovery process has started. Check the email inbox."
+
+        if not UserModel.check_email_in_use(email):
+            return {"message": message}, 200
+
+        new_password = UserModel.generate_password()
+        text_email = get_pwd_email(new_password, email_config)
+        send_email_to(text_email, email_config)
+
+        data = {"password": new_password}
+        user_obj = UserModel.get_one_user_by_email(email)
+        user_obj.update(data)
+
+        log.info(message)
+        return {"message": message}, 200
