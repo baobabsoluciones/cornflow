@@ -256,6 +256,39 @@ if each element in the list is:</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
 <p>The instance template.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.check_inconsistencies">
+<span class="sig-name descname"><span class="pre">check_inconsistencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check_inconsistencies" title="Permalink to this definition"></a></dt>
+<dd><p>Method that checks if there are inconsistencies in the data of the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary containing the inconsistencies found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.check_feasibility">
+<span class="sig-name descname"><span class="pre">check_feasibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check_feasibility" title="Permalink to this definition"></a></dt>
+<dd><p>Method that checks if the problem is feasible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the problem is feasible, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check" title="Permalink to this definition"></a></dt>
+<dd><p>Method that checks if there are inconsistencies in the data of the instance and if the problem is feasible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An dictionary containing the inconsistencies found and indicating if the problem is infeasible</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -352,6 +385,34 @@ if each element in the list is:</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a dict json-schema based on the current data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">cornflow_client.core.instance_solution.InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Read an entire excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path of the excel file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a dict with a list of dict (records format) for each table.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.to_excel">
+<span class="sig-name descname"><span class="pre">to_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Write data to excel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path or name of the excel file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nothing</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1184,6 +1245,53 @@ set self.__traceback__ to tb and return self.</p>
 <dd><p>assumes the first solver is the default</p>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.schema_from_excel">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">schema_from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_tables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.schema_from_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Create a jsonschema based on an excel data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_in</strong> – path of the excel file</p></li>
+<li><p><strong>param_tables</strong> – array containing the names of the parameter tables</p></li>
+<li><p><strong>path_out</strong> – path where to save the json schema as a json file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the jsonschema</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.str_key">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">str_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.str_key" title="Permalink to this definition"></a></dt>
+<dd><p>Apply str to the keys of a dict.
+This must be a applied to a dict in order to transform it into json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dic</strong> – a dict</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the dict with keys as strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.str_columns">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">str_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.str_columns" title="Permalink to this definition"></a></dt>
+<dd><p>Transform the columns of a table (the keys of a list of dict) into strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>table</strong> – a list of dict.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the modified list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-cornflow_client.schema.manager">
 <span id="schema-manager"></span><h3>Schema manager<a class="headerlink" href="#module-cornflow_client.schema.manager" title="Permalink to this headline"></a></h3>
@@ -1244,6 +1352,18 @@ Return an empty list if data is valid.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>True if data format is valid, else False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.validate_schema">
+<span class="sig-name descname"><span class="pre">validate_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.validate_schema" title="Permalink to this definition"></a></dt>
+<dd><p>Validate the loaded jsonschema
+:param bool print_errors: If true, will print the errors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if jsonschema is valid, else False</p>
 </dd>
 </dl>
 </dd></dl>

@@ -1086,6 +1086,35 @@ a message) and an integer with the HTTP status code.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="cornflow.endpoints.user.RecoverPassword">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.user.</span></span><span class="sig-name descname"><span class="pre">RecoverPassword</span></span><a class="headerlink" href="#cornflow.endpoints.user.RecoverPassword" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">cornflow.endpoints.meta_resource.MetaResource</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_apispec.views.MethodResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.user.RecoverPassword.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.user.RecoverPassword.put" title="Permalink to this definition"></a></dt>
+<dd><p>API method to send an email to the user if they forgot to password.
+Sends a temporary password and updates the database.
+:param kwargs: a dictionary containing the email address
+:return: A dictionary with a message (error if the email address is not in the database) and an integer with</p>
+<blockquote>
+<div><p>the HTTP status code.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>, integer)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.user.RecoverPassword.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'PUT'}</span></em><a class="headerlink" href="#cornflow.endpoints.user.RecoverPassword.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
