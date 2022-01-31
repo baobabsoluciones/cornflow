@@ -15,7 +15,7 @@ from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import LoginEndpointRequest
 from ..shared.authentication import Auth
-from ..shared.const import AUTH_DB, AUTH_LDAP
+from ..shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
 from ..shared.exceptions import InvalidUsage, InvalidCredentials
 from ..shared.ldap import LDAP
 from ..shared.utils import db

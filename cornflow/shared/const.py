@@ -34,8 +34,12 @@ AIRFLOW_TO_STATE_MAP = dict(
     success=EXEC_STATE_CORRECT, running=EXEC_STATE_RUNNING, failed=EXEC_STATE_ERROR
 )
 
+# These codes and names are inherited from flask appbuilder in order to have the same names and values
+# as this library that is the base of airflow
 AUTH_DB = 1
 AUTH_LDAP = 2
+AUTH_OAUTH = 4
+AUTH_OID = 0
 
 GET_ACTION = 1
 PATCH_ACTION = 2
