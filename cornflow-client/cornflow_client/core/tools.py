@@ -1,5 +1,11 @@
-from pytups import OrderSet
+"""
+
+"""
+# Full imports
 import json
+
+# Partial imports
+from pytups import OrderSet
 
 
 def new_set(seq):

@@ -1,11 +1,17 @@
-from typing import Type, Dict, List, Tuple, Union
-from timeit import default_timer as timer
-from jsonschema import Draft7Validator
+"""
 
+"""
+# Partial imports
+from abc import ABC, abstractmethod
+from jsonschema import Draft7Validator
+from timeit import default_timer as timer
+from typing import Type, Dict, List, Tuple, Union
+
+# Imports from internal modules
 from .instance import InstanceCore
 from .solution import SolutionCore
 from .experiment import ExperimentCore
-from abc import ABC, abstractmethod
+
 from cornflow_client.constants import (
     STATUS_OPTIMAL,
     STATUS_NOT_SOLVED,
@@ -137,6 +143,16 @@ class ApplicationCore(ABC):
                 raise BadSolution(
                     "The solution does not match the schema:\n{}".format(sol_errors)
                 )
+
+        if inst.check():
+            log = dict(
+                time=0,
+                solver=solver,
+                status="Infeasible",
+                status_code=STATUS_INFEASIBLE,
+                sol_code=SOLUTION_STATUS_INFEASIBLE,
+            )
+            return dict(), "", log
 
         algo = solver_class(inst, sol)
         start = timer()

@@ -7,9 +7,12 @@ required = []
 with open("requirements.txt", "r") as fh:
     required.append(fh.read().splitlines())
 
+extra_required = {"excel": ["openpyxl"]}
+
+
 setuptools.setup(
     name="cornflow-client",
-    version="0.30.0",
+    version="0.31.0",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="Client to connect to a cornflow server",
@@ -26,4 +29,5 @@ setuptools.setup(
     python_requires=">=3.6",
     include_package_data=True,
     install_requires=required,
+    extra_require=extra_required,
 )

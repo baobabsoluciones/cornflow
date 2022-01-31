@@ -1,10 +1,18 @@
-import requests
-from requests.exceptions import ConnectionError, HTTPError
-import json
-from requests.auth import HTTPBasicAuth
-from cornflow_client import SchemaManager
-from marshmallow import ValidationError
+"""
 
+"""
+
+# Full imports
+import json
+import requests
+
+# Partial imports
+from marshmallow import ValidationError
+from requests.auth import HTTPBasicAuth
+from requests.exceptions import ConnectionError, HTTPError
+
+# Imports from modules
+from cornflow_client import SchemaManager
 from cornflow_client.constants import AirflowError, InvalidUsage
 
 

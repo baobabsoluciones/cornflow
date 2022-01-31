@@ -1,9 +1,19 @@
-from abc import ABC, abstractmethod
+"""
+
+"""
+# Full imports
 import json
-from typing import List
-from pytups import SuperDict
-from jsonschema import Draft7Validator
+import pandas as pd
+
+# Partial imports
+from abc import ABC, abstractmethod
 from genson import SchemaBuilder
+from jsonschema import Draft7Validator
+from pytups import SuperDict
+from typing import List
+
+# Imports from internal modules
+from .read_tools import read_excel, is_xl_type
 
 
 class InstanceSolutionCore(ABC):
@@ -92,3 +102,52 @@ class InstanceSolutionCore(ABC):
         builder.add_schema({"type": "object", "properties": {}})
         builder.add_object(self.to_dict())
         return builder.to_schema()
+
+    @classmethod
+    def from_excel(cls, path: str) -> "InstanceSolutionCore":
+        """
+        Read an entire excel file.
+
+        :param path: path of the excel file
+        :return: a dict with a list of dict (records format) for each table.
+        """
+
+        param_tables_names = cls.__get_parameter_tables_names()
+
+        tables = read_excel(path, param_tables_names)
+        return cls.from_dict(tables)
+
+    @classmethod
+    def __get_parameter_tables_names(cls) -> List:
+        """
+        :return: The names of the table of the schema that are parameter tables
+        """
+        json_schema = cls(dict()).schema
+        if json_schema.get("properties", None):
+            return [
+                table_name
+                for table_name, content in json_schema["properties"].items()
+                if content["type"] == "object"
+            ]
+        return []
+
+    def to_excel(self, path: str):
+        """
+        Write data to excel.
+
+        :param path: path or name of the excel file
+        :return: nothing
+        """
+        is_xl_type(path)
+
+        with pd.ExcelWriter(path) as writer:
+            for table in self.data.keys():
+                content = self.data[table]
+                if isinstance(content, list):
+                    pd.DataFrame.from_records(content).to_excel(
+                        writer, table, index=False
+                    )
+                elif isinstance(content, dict):
+                    pd.DataFrame.from_dict(content, orient="index").to_excel(
+                        writer, table, header=False
+                    )

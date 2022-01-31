@@ -1,10 +1,16 @@
 """
 Class to help create and manage data schema and to validate json files.
 """
+# Full imports
+import os
 
-from jsonschema import Draft7Validator
+# Partial imports
 from copy import deepcopy
 from genson import SchemaBuilder
+from jsonschema import Draft7Validator
+
+
+# Imports form internal modules
 from .dictSchema import DictSchema
 from cornflow_client.core.tools import load_json, save_json
 
@@ -78,6 +84,28 @@ class SchemaManager:
                 print(e)
 
         return len(errors_list) == 0
+
+    def validate_schema(self, print_errors=False):
+        """
+        Validate the loaded jsonschema
+        :param bool print_errors: If true, will print the errors
+
+        :return: True if jsonschema is valid, else False
+        """
+        path_schema_validator = os.path.join(
+            os.path.dirname(__file__), "../data/schema_validator.json"
+        )
+        validation_schema = load_json(path_schema_validator)
+        v = self.validator(validation_schema)
+
+        if v.is_valid(self.get_jsonschema()):
+            return True
+
+        error_list = [e for e in v.iter_errors(self.get_jsonschema())]
+        if print_errors:
+            for e in error_list:
+                print(e)
+        return False
 
     def get_file_errors(self, path):
         """
