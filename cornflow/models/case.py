@@ -4,7 +4,9 @@ Model for the cases
 
 # Import from libraries
 import jsonpatch
+import logging as log
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_model import BaseDataModel
@@ -129,8 +131,12 @@ class CaseModel(BaseDataModel):
                 db.session.delete(n)
             db.session.delete(self)
             db.session.commit()
-        except:
+        except IntegrityError as e:
             db.session.rollback()
+            log.error(f"Error on deletion of case and children cases: {e}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on deletion of case and children cases: {e}")
 
     @staticmethod
     def apply_patch(original_data, data_patch):

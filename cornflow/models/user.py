@@ -101,20 +101,12 @@ class UserModel(TraceAttributes):
                 setattr(self, key, item)
 
         super().update(data)
-        db.session.commit()
 
     def disable(self):
         """
         Disables the user in the database
         """
         super().disable()
-
-    def delete(self):
-        """
-        Deletes the user from the database
-        """
-        db.session.delete(self)
-        db.session.commit()
 
     def is_admin(self):
         """

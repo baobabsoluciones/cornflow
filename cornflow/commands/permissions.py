@@ -1,5 +1,6 @@
 def register_base_permissions_command(verbose):
-    from sqlalchemy.exc import IntegrityError
+    import logging as log
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..endpoints import resources
     from ..models import ApiViewModel, PermissionViewRoleModel
@@ -11,7 +12,12 @@ def register_base_permissions_command(verbose):
         for perm in PermissionViewRoleModel.get_all_objects()
     ]
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on database commit: {e}")
+
     views = {view.name: view.id for view in ApiViewModel.get_all_objects()}
 
     # Create base permissions
@@ -54,14 +60,23 @@ def register_base_permissions_command(verbose):
 
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.session.rollback()
+        log.error(f"Integrity error on base permissions register: {e}")
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on base permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
             "SELECT setval(pg_get_serial_sequence('permission_view', 'id'), MAX(id)) FROM permission_view;"
         )
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on base permissions sequence updating: {e}")
 
     if verbose == 1:
         if len(permissions_to_register) > 0:
@@ -74,8 +89,10 @@ def register_base_permissions_command(verbose):
 
 def register_dag_permissions_command(open_deployment: int = None, verbose: int = 0):
 
+    import logging as log
+
     from flask import current_app
-    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..models import DeployedDAG, PermissionsDAG, UserModel
     from ..shared.utils import db
@@ -88,7 +105,12 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
         for permission in PermissionsDAG.get_all_objects()
     ]
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on database commit: {e}")
+
     all_users = UserModel.get_all_users()
     all_dags = DeployedDAG.get_all_objects()
 
@@ -113,8 +135,23 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
 
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.session.rollback()
+        log.error(f"Integrity error on dag permissions register: {e}")
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on dag permissions register: {e}")
+
+    if "postgres" in str(db.session.get_bind()):
+        db.engine.execute(
+            "SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;"
+        )
+
+        try:
+            db.session.commit()
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on dag permissions sequence updating: {e}")
 
     if verbose == 1:
         if len(permissions) > 1:
