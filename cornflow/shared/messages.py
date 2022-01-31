@@ -3,25 +3,22 @@
 """
 # Imports from libraries
 import smtplib
-import ssl
 
 # Partial imports
 from flask import current_app
 
 # Imports from internal modules
-from ..shared.exceptions import InvalidUsage, InvalidCredentials
+from ..shared.exceptions import InvalidData
 
 
-def get_pwd_email(pwd, receiver_email):
+def get_pwd_email(pwd, email_config):
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
 
-    sender_email = current_app.config["CORNFLOW_EMAIL_ADDRESS"]
-
     message = MIMEMultipart("alternative")
     message["Subject"] = "Cornflow - Temporary password"
-    message["From"] = sender_email
-    message["To"] = receiver_email
+    message["From"] = email_config["email_sender"]
+    message["To"] = email_config["email_receiver"]
 
     html = f"""
     <html>
@@ -46,24 +43,23 @@ def get_pwd_email(pwd, receiver_email):
     return message.as_string()
 
 
-def send_email_to(email_text, email_receiver):
-    port = current_app.config["CORNFLOW_EMAIL_PORT"]
-    smtp_server = current_app.config["CORNFLOW_EMAIL_SERVER"]
-    email_sender = current_app.config["CORNFLOW_EMAIL_ADDRESS"]
-    password = current_app.config["CORNFLOW_EMAIL_PASSWORD"]
-    context = ssl.create_default_context()
-    if email_sender is None or password is None or port is None or smtp_server is None:
-        raise InvalidUsage(
-            "This functionality is not available. Check that cornflow's email is correctly configured"
-        )
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+def send_email_to(email_text, email_config):
+    port = email_config["port"]
+    smtp_server = email_config["server"]
+    email_sender = email_config["email_sender"]
+    password = email_config["password"]
+    email_receiver = email_config["email_receiver"]
+
+    with smtplib.SMTP_SSL(smtp_server, port) as server:
         try:
             server.login(email_sender, password)
         except smtplib.SMTPAuthenticationError:
-            raise InvalidUsage(
-                "This functionality is not available. Check that cornflow's email is correctly configured"
+            raise InvalidData(
+                "There is an error with the email provider. Please contact administration."
             )
         try:
             server.sendmail(email_sender, email_receiver, email_text)
         except smtplib.SMTPRecipientsRefused:
-            raise InvalidCredentials("The provided email address is invalid")
+            raise InvalidData(
+                "There is an error with the email provider. Please contact administration."
+            )

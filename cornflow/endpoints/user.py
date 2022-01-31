@@ -12,21 +12,22 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import (
-    UserSchema,
-    UserEndpointResponse,
+    RecoverPasswordRequest,
     UserDetailsEndpointResponse,
     UserEditRequest,
-    RecoverPasswordRequest,
+    UserEndpointResponse,
+    UserSchema,
 )
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
 from ..shared.exceptions import (
-    InvalidUsage,
-    ObjectDoesNotExist,
-    NoPermission,
     EndpointNotImplemented,
     InvalidCredentials,
+    InvalidData,
+    InvalidUsage,
+    NoPermission,
+    ObjectDoesNotExist,
 )
 from ..shared.utils import db
 from ..shared.messages import get_pwd_email, send_email_to
@@ -187,15 +188,38 @@ class RecoverPassword(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         email = kwargs.get("email")
+
+        email_config = {
+            "email_sender": current_app.config["CORNFLOW_EMAIL_ADDRESS"],
+            "password": current_app.config["CORNFLOW_EMAIL_PASSWORD"],
+            "server": current_app.config["CORNFLOW_EMAIL_SERVER"],
+            "port": current_app.config["CORNFLOW_EMAIL_PORT"],
+            "email_receiver": email,
+        }
+
+        if (
+            email_config["email_sender"] is None
+            or email_config["password"] is None
+            or email_config["server"] is None
+            or email_config["port"] is None
+            or email_config["email_receiver"] is None
+        ):
+            raise InvalidUsage(
+                "This functionality is not available. Check that cornflow's email is correctly configured"
+            )
+
+        message = f"A new password was generated for user with email: {email}"
+
         if not UserModel.check_email_in_use(email):
-            raise InvalidCredentials("The email address doesn't correspond to any user")
+            return {"message": message}, 200
+
         new_password = UserModel.generate_password()
-        text_email = get_pwd_email(new_password, email)
-        send_email_to(text_email, email)
+        text_email = get_pwd_email(new_password, email_config)
+        send_email_to(text_email, email_config)
 
         data = {"password": new_password}
         user_obj = UserModel.get_one_user_by_email(email)
         user_obj.update(data)
 
-        log.info(f"A new password was generated for user with email: {email}")
-        return {"message": f"A temporary password was sent to email {email}"}, 200
+        log.info(message)
+        return {"message": message}, 200
