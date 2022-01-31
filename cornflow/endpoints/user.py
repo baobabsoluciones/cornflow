@@ -208,7 +208,7 @@ class RecoverPassword(MetaResource, MethodResource):
                 "This functionality is not available. Check that cornflow's email is correctly configured"
             )
 
-        message = f"A new password was generated for user with email: {email}"
+        message = "The password recovery process has started. Check the email inbox."
 
         if not UserModel.check_email_in_use(email):
             return {"message": message}, 200
