@@ -1,12 +1,15 @@
 """
 Endpoints for the user profiles
 """
+# Full imports
+import logging as log
 
-# Import from libraries
+# Partial imports from libraries
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask import current_app
-import logging as log
+from sqlalchemy.exc import DBAPIError, IntegrityError
+
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -24,7 +27,6 @@ from ..shared.const import ADMIN_ROLE, AUTH_LDAP
 from ..shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
-    InvalidData,
     InvalidUsage,
     NoPermission,
     ObjectDoesNotExist,
@@ -170,7 +172,14 @@ class ToggleUserAdmin(MetaResource, MethodResource):
             UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
         else:
             UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
-            db.session.commit()
+            try:
+                db.session.commit()
+            except IntegrityError as e:
+                db.session.rollback()
+                log.error(f"Integrity error on privileges: {e}")
+            except DBAPIError as e:
+                db.session.rollback()
+                log.error(f"Unknown error on privileges: {e}")
 
         return user_obj, 200
 
