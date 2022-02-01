@@ -68,7 +68,7 @@ Initialize the api client::
 
     from cornflow_client import CornFlow
     email = 'some_email@gmail.com'
-    pwd = 'some_password'
+    pwd = 'Some_password1'
     username = 'some_name'
     client = CornFlow(url="http://127.0.0.1:5000")
 
