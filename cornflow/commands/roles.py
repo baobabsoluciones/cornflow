@@ -1,12 +1,19 @@
 def register_roles_command(verbose):
-    from sqlalchemy.exc import IntegrityError
+    import logging as log
+
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..models import RoleModel
     from ..shared.const import ROLES_MAP
     from ..shared.utils import db
 
     roles_registered = [role.name for role in RoleModel.get_all_objects()]
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on database commit: {e}")
 
     roles_to_register = [
         RoleModel({"id": key, "name": value})
@@ -19,14 +26,22 @@ def register_roles_command(verbose):
 
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.session.rollback()
+        log.error(f"Integrity error on roles register: {e}")
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on roles register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
             "SELECT setval(pg_get_serial_sequence('roles', 'id'), MAX(id)) FROM roles;"
         )
-        db.session.commit()
+        try:
+            db.session.commit()
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on roles sequence updating: {e}")
 
     if verbose:
         if len(roles_to_register) > 0:
