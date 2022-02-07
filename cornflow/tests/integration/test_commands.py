@@ -14,5 +14,6 @@ class TestCornflowCommands(CustomTestCaseLive):
             config["AIRFLOW_URL"], config["AIRFLOW_USER"], config["AIRFLOW_PWD"], 0
         )
         dags = DeployedDAG.get_all_objects()
+        print(dags)
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])
