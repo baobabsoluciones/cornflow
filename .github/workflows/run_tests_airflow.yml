@@ -30,7 +30,7 @@ jobs:
     - name: Show contents
       run: |
         ls -ltr
-        cp dags/DAG/* airflow_config/dags/
+        cp -r dags/DAG/* airflow_config/dags/
         cp dags/requirements.txt airflow_config/
     - name: Install dependencies
       run: |
