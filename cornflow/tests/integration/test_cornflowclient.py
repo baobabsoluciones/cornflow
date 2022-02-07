@@ -338,6 +338,13 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
+    def test_status_solving_2(self):
+        execution = self.create_timer_instance_and_execution(5)
+        status = self.client.get_status(execution["id"])
+        result = self.client.get_results(execution[id])
+        print(f"DAG with error: {result}")
+        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+
     def test_manual_execution(self):
 
         instance_payload = load_file(INSTANCE_PATH)
