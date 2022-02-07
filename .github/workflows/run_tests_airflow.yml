@@ -23,7 +23,8 @@ jobs:
     - name: Clone dags from cornflow dags repo
       uses : actions/checkout@master
       with:
-        repository: baobabsoluciones/cornflow-dags@main
+        repository: baobabsoluciones/cornflow-dags
+        ref: main
         path: ./dags
         token: ${{ secrets.GH_TOKEN }}
     - name: Show contents
