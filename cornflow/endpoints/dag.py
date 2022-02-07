@@ -85,8 +85,6 @@ class DAGEndpoint(MetaResource, MethodResource):
         if data is not None:
             new_data["data"] = data
         req_data.update(new_data)
-        print(f"UPDATE DAG DATA: {req_data}")
-        log.info(f"UPDATE DAG DATA: {req_data}")
         execution.update(req_data)
         # TODO: is this save necessary?
         execution.save()

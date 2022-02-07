@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Clone dags from cornflow dags repo
+    - name: Clone dags from cornflow dags public repo
       uses : actions/checkout@master
       with:
         repository: baobabsoluciones/cornflow-dags-public
@@ -31,11 +31,6 @@ jobs:
       run: |
         cp -r dags/DAG/* airflow_config/dags/
         cp dags/requirements.txt airflow_config/
-    - name: Small DAG print
-      run: |
-        cd airflow_config
-        cd dags
-        cat dag_timer.py
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
