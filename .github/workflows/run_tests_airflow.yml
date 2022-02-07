@@ -27,11 +27,15 @@ jobs:
         ref: main
         path: ./dags
         token: ${{ secrets.GH_TOKEN }}
-    - name: Show contents
+    - name: Copy DAG files
       run: |
-        ls -ltr
         cp -r dags/DAG/* airflow_config/dags/
         cp dags/requirements.txt airflow_config/
+    - name: Small DAG print
+      run: |
+        cd airflow_config
+        cd dags
+        cat dag_timer.py
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
