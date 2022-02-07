@@ -151,7 +151,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
             raise AirflowError(
                 error=error,
                 payload=dict(
-                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                    message=error,
                     state=EXEC_STATE_ERROR,
                 ),
             )
