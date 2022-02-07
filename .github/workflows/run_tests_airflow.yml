@@ -25,6 +25,7 @@ jobs:
       with:
         repository: baobabsoluciones/cornflow-dags@main
         path: ./dags
+        token: ${{ secrets.GH_TOKEN }}
     - name: Show contents
       run: cd dags & ls -ltr
     - name: Install dependencies
