@@ -95,6 +95,7 @@ class ExecutionStatusEndpointResponse(Schema):
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
+    checks = fields.Raw()
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
