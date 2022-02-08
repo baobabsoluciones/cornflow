@@ -115,6 +115,7 @@ class BaseDataModel(TraceAttributes):
     __abstract__ = True
 
     data = db.Column(JSON, nullable=True)
+    checks = db.Column(JSON, nullable=True)
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     data_hash = db.Column(db.String(256), nullable=False)
@@ -131,6 +132,7 @@ class BaseDataModel(TraceAttributes):
         self.name = data.get("name")
         self.description = data.get("description")
         self.schema = data.get("schema")
+        self.checks = data.get("checks")
         super().__init__()
 
     def update(self, data):

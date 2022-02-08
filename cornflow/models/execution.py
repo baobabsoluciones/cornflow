@@ -67,7 +67,6 @@ class ExecutionModel(BaseDataModel):
         default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE],
         nullable=True,
     )
-    checks = db.Column(JSON, nullable=True)
 
     def __init__(self, data):
         super().__init__(data)
@@ -89,7 +88,6 @@ class ExecutionModel(BaseDataModel):
         self.config = data.get("config")
         self.log_text = data.get("log_text")
         self.log_json = data.get("log_json")
-        self.checks = data.get("checks")
 
     def update_state(self, code, message=None):
         """
