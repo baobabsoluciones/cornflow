@@ -1,7 +1,9 @@
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
 from flask import current_app
-from cornflow.models import DeployedDAG
+
 from cornflow.commands.dag import register_deployed_dags_command
+from cornflow.models import DeployedDAG
+from cornflow.tests.const import PUBLIC_DAGS
+from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 
 class TestCornflowCommands(CustomTestCaseLive):
@@ -14,5 +16,6 @@ class TestCornflowCommands(CustomTestCaseLive):
             config["AIRFLOW_URL"], config["AIRFLOW_USER"], config["AIRFLOW_PWD"], 0
         )
         dags = DeployedDAG.get_all_objects()
-        for dag in ["solve_model_dag", "gc", "timer"]:
+
+        for dag in PUBLIC_DAGS:
             self.assertIn(dag, [d.id for d in dags])
