@@ -343,7 +343,8 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         result = self.client.get_results(execution["id"])
-        print(f"DAG with error: {result}")
+        print(f"DAG with error status: {status}")
+        print(f"DAG with error result: {result}")
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_manual_execution(self):
