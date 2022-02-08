@@ -96,7 +96,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
             instance_id is None and execution_id is None
         ):
             raise InvalidData(
-                error="You must provide an instance_id OR an execution_id",
+                error="You must provide a valid instance_id OR an execution_id",
                 status_code=400,
             )
         user = self.get_user()
@@ -113,6 +113,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
                 raise ObjectDoesNotExist("Execution does not exist")
             data = get_instance_data(execution.instance_id)
             data["solution"] = execution.data
+            data["solution_checks"] = execution.checks
             return data
 
         if instance_id is not None:
@@ -148,7 +149,7 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
             "data",
             "schema",
             "solution",
-            "path",
+            "solution_checks" "path",
         ]
         self.fields_to_modify = ["name"]
 
@@ -281,14 +282,14 @@ class CaseToInstance(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(
-        description="Copies the information stored in a case into a new instance or instance and execution",
+        description="Copies the information stored in a case into a new instance",
         tags=["Cases"],
     )
     @Auth.auth_required
     @marshal_with(CaseToInstanceResponse)
     def post(self, idx):
         """
-        API method to copy the information stored in a case to a new instance or a new instance and execution.
+        API method to copy the information stored in a case to a new instance
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 

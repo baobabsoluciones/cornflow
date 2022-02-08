@@ -19,6 +19,7 @@ class CaseRawRequest(Schema):
     parent_id = fields.Int(allow_none=True)
     data = fields.Raw()
     solution = fields.Raw(allow_none=True, dump_default=None)
+    solution_checks = fields.Raw(required=False, allow_none=True)
 
 
 class CaseListResponse(BaseDataEndpointResponse):
@@ -37,7 +38,8 @@ class CaseBase(CaseListResponse):
     """ """
 
     data = fields.Raw()
-    solution = fields.Raw()
+    solution = fields.Raw(required=False)
+    solution_checks = fields.Raw(required=False)
 
 
 class CaseSchema(Schema):

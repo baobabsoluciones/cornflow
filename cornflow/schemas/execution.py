@@ -37,6 +37,7 @@ class ExecutionSchema(Schema):
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
+    checks = fields.Raw(required=False, allow_none=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     finished = fields.Boolean(required=False)
