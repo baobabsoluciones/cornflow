@@ -91,15 +91,19 @@ class ExecutionModel(BaseDataModel):
         self.log_json = data.get("log_json")
         self.checks = data.get("checks")
 
-    def update_state(self, code):
+    def update_state(self, code, message=None):
         """
         Method to update the state code and message of an execution
 
         :param int code: State code for the execution
+        :param str message: Message for the error
         :return: nothing
         """
         self.state = code
-        self.state_message = EXECUTION_STATE_MESSAGE_DICT[code]
+        if message is None:
+            self.state_message = EXECUTION_STATE_MESSAGE_DICT[code]
+        else:
+            self.state_message = message
         super().update({})
 
     def __repr__(self):
