@@ -86,6 +86,7 @@ class DAGEndpoint(MetaResource, MethodResource):
             new_data["data"] = data
         req_data.update(new_data)
         execution.update(req_data)
+        # TODO: is this save necessary?
         execution.save()
         return {"message": "results successfully saved"}, 200
 
