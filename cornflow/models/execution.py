@@ -89,7 +89,7 @@ class ExecutionModel(BaseDataModel):
         self.log_text = data.get("log_text")
         self.log_json = data.get("log_json")
 
-    def update_state(self, code, message: None):
+    def update_state(self, code, message=None):
         """
         Method to update the state code and message of an execution
 
