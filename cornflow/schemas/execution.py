@@ -84,7 +84,6 @@ class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
     state = fields.Int()
     message = fields.Str(attribute="state_message")
     dag_run_id = fields.Str(required=False, dump_only=True)
-    data = fields.Raw(dump_only=True)
 
 
 class ExecutionStatusEndpointResponse(Schema):
@@ -92,7 +91,6 @@ class ExecutionStatusEndpointResponse(Schema):
     state = fields.Int()
     message = fields.Str(attribute="state_message")
     data_hash = fields.Str(dump_only=True)
-    dag_run_id = fields.Str(required=False, dump_only=True)
 
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):

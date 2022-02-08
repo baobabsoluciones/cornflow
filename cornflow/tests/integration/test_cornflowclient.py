@@ -340,10 +340,12 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_status_solving_2(self):
         execution = self.create_timer_instance_and_execution(10)
+        status = self.client.get_status(execution["id"])
+        print(f"DAG with error status: {status}")
+
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         result = self.client.get_results(execution["id"])
-        print(f"DAG with error status: {status}")
         print(f"DAG with error result: {result}")
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
