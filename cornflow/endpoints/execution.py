@@ -147,11 +147,11 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)
-            execution.update_state(EXEC_STATE_ERROR)
+            execution.update_state(EXEC_STATE_ERROR, error)
             raise AirflowError(
                 error=error,
                 payload=dict(
-                    message=error,
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
             )
