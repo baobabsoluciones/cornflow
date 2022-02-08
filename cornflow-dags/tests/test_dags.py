@@ -149,7 +149,8 @@ class Vrp(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="algorithm2", **self.config))
 
     def test_solve_mip(self):
-        return self.test_try_solving_testcase(dict(solver="mip", **self.config))
+        self.config.update(dict(solver="mip", timeLimit=2))
+        return self.test_try_solving_testcase(self.config)
 
 
 class Knapsack(BaseDAGTests.SolvingTests):

@@ -23,15 +23,22 @@ class Solver(ExperimentCore):
         self.solution = Solution({})
         return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
 
+    def get_objective(self) -> float:
+        return 0
+
+    def check_solution(self, *args, **kwargs):
+        return dict(errors=dict())
+
 
 class Timer(ApplicationCore):
     name = "timer"
-    schema = get_empty_schema(
-        dict(seconds=dict(type="number"), timeLimit=dict(type="number"))
-    )
     instance = Instance
     solution = Solution
-    solvers = [dict(default=Solver)]
+    solvers = dict(default=Solver)
+    schema = get_empty_schema(
+        properties=dict(seconds=dict(type="number"), timeLimit=dict(type="number")),
+        solvers=list(solvers.keys()),
+    )
 
     def test_cases(self):
         return []
