@@ -61,6 +61,7 @@ class DAGEndpoint(MetaResource, MethodResource):
         #  at least, check they have the same schema-name
         # Check data format
         data = req_data.get("data")
+        checks = req_data.get("checks")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -81,9 +82,12 @@ class DAGEndpoint(MetaResource, MethodResource):
             # because we do not want to store airflow's user:
             user_id=execution.user_id,
         )
+
         # newly validated data from marshmallow
         if data is not None:
             new_data["data"] = data
+        if checks is not None:
+            new_data["checks"] = checks
         req_data.update(new_data)
         execution.update(req_data)
         execution.save()

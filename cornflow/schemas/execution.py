@@ -71,6 +71,7 @@ class ExecutionDagRequest(Schema):
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
+    checks = fields.Raw(required=False)
     solution_schema = fields.Str(required=False, allow_none=True)
 
 
