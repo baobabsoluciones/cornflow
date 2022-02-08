@@ -306,7 +306,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
 
         data = response.json()
         state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
-        execution.update_state(state, message=data["state"])
+        execution.update_state(state)
         return execution, 200
 
 
