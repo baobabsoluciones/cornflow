@@ -107,12 +107,12 @@ class ApplicationCore(ABC):
 
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
-    ) -> Tuple[Dict, str, Dict]:
+    ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
         """
         :param data: json for the problem
         :param config: execution configuration, including solver
         :param solution_data: optional json with an initial solution
-        :return: solution and log
+        :return: solution, solution checks, instance checks and logs
         """
         if config.get("msg", True):
             print("Solving the model")
@@ -144,7 +144,8 @@ class ApplicationCore(ABC):
                     "The solution does not match the schema:\n{}".format(sol_errors)
                 )
 
-        if inst.check():
+        instance_checks = inst.check()
+        if instance_checks:
             log = dict(
                 time=0,
                 solver=solver,
@@ -152,7 +153,7 @@ class ApplicationCore(ABC):
                 status_code=STATUS_INFEASIBLE,
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
-            return dict(), "", log
+            return dict(), None, instance_checks, "", log
 
         algo = solver_class(inst, sol)
         start = timer()
@@ -187,7 +188,10 @@ class ApplicationCore(ABC):
 
         if log["sol_code"] > 0:
             sol = algo.solution.to_dict()
-        return sol, "", log
+
+        checks = algo.check_solution()
+
+        return sol, checks, {}, "", log
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         """

@@ -109,12 +109,26 @@ def try_to_write_solution(client, exec_id, payload):
     If it fails tries to write again that it failed.
     If it fails at least once: it raises an exception
     """
+    execution_payload = dict(**payload)
+    execution_payload.pop("inst_id")
+    execution_payload.pop("inst_checks")
     try:
-        client.write_solution(execution_id=exec_id, **payload)
+        client.write_solution(execution_id=exec_id, **execution_payload)
     except CornFlowApiError:
         try_to_save_error(client, exec_id, -6)
         # attempt to update the execution with a failed status.
         raise AirflowDagException("The writing of the solution failed")
+
+    if payload["inst_checks"]:
+        checks_payload = dict()
+        checks_payload["checks"] = payload["inst_checks"]
+        try:
+            client.write_instance_checks(
+                instance_id=payload["inst_id"], **checks_payload
+            )
+        except CornFlowApiError:
+            try_to_save_error(client, exec_id, -6)
+            raise AirflowDagException("The writing of the instance checks failed")
 
 
 def get_schema(dag_name):
@@ -142,8 +156,9 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     execution_data = client.get_data(exec_id)
     data = execution_data["data"]
     config = execution_data["config"]
+    inst_id = execution_data["id"]
     try:
-        solution, log, log_json = fun(data, config)
+        solution, sol_checks, inst_checks, log, log_json = fun(data, config)
     except NoSolverException as e:
         if config.get("msg", True):
             print("No solver found !")
@@ -154,7 +169,16 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         raise AirflowDagException("There was an error during the solving")
-    payload = dict(state=1, log_json=log_json, log_text=log, solution_schema=dag_name)
+
+    payload = dict(
+        state=1,
+        log_json=log_json,
+        log_text=log,
+        solution_schema=dag_name,
+        inst_checks=inst_checks,
+        inst_id=inst_id,
+    )
+
     if not solution:
         # No solution found: we just send everything to cornflow.
         if config.get("msg", True):
@@ -166,8 +190,12 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     # If it's not: we change the status to Invalid
     # and take out the server validation of the schema\
     payload["data"] = solution
+
     if config.get("msg", True):
         print("A solution was found: we will first validate it")
+
+    if sol_checks is not None:
+        payload["checks"] = sol_checks
 
     try_to_write_solution(client, exec_id, payload)
 
