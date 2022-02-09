@@ -54,7 +54,7 @@ class CaseEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         response = CaseModel.get_all_objects(self.get_user(), **kwargs)
-        log.debug("User {} gets all cases".format(self.get_user_id()))
+        log.debug(f"User {self.get_user_id()} gets all cases")
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
@@ -69,7 +69,7 @@ class CaseEndpoint(MetaResource, MethodResource):
         data["user_id"] = self.get_user_id()
         item = CaseModel.from_parent_id(self.get_user(), data)
         item.save()
-        log.info("User {} creates case {}".format(self.get_user_id(), item.id))
+        log.info(f"User {self.get_user_id()} creates case {item.id}")
         return item, 201
 
 
@@ -126,9 +126,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
         item = CaseModel.from_parent_id(user, data)
         item.save()
         log.info(
-            "User {} creates case {} from instance/execution".format(
-                self.get_user_id(), item.id
-            )
+            f"User {self.get_user_id()} creates case {item.id} from instance/execution"
         )
         return item, 201
 
@@ -147,9 +145,11 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
             "name",
             "description",
             "data",
+            "checks",
             "schema",
             "solution",
-            "solution_checks" "path",
+            "solution_checks",
+            "path",
         ]
         self.fields_to_modify = ["name"]
 
@@ -168,11 +168,7 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
                 payload[key] = "Copy_" + payload[key]
 
         response = self.post_list(payload)
-        log.info(
-            "User {} copied case {} into {}".format(
-                self.get_user_id(), idx, response[0].id
-            )
-        )
+        log.info(f"User {self.get_user_id()} copied case {idx} into {response[0].id}")
         return response
 
 
@@ -194,7 +190,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         response = CaseModel.get_one_object_from_user(self.get_user(), idx)
-        log.debug("User {} gets case {}".format(self.get_user_id(), idx))
+        log.debug(f"User {self.get_user_id()} gets case {idx}")
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
@@ -208,7 +204,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info("User {} edits case {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} edits case {idx}")
         return self.put_detail(
             kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
         )
@@ -229,7 +225,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         if item is None:
             raise ObjectDoesNotExist()
         CaseModel.delete(item)
-        log.info("User {} deletes case {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} deletes case {idx}")
         return {"message": "The object has been deleted"}, 200
 
 
@@ -255,7 +251,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         response = CaseModel.get_one_object_from_user(self.get_user(), idx)
-        log.debug("User {} retrieved data for case {}".format(self.get_user_id(), idx))
+        log.debug(f"User {self.get_user_id()} retrieved data for case {idx}")
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
@@ -266,7 +262,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         response = self.patch_detail(
             kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
         )
-        log.info("User {} patches case {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} patches case {idx}")
         return response
 
 
@@ -322,9 +318,7 @@ class CaseToInstance(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), payload["data"])
         response = self.post_list(payload)
         log.info(
-            "User {} creates case {} from instance {}".format(
-                self.get_user_id(), response[0].id, idx
-            )
+            f"User {self.get_user_id()} creates instance {response[0].id} from case {idx}"
         )
         return response
 
@@ -387,7 +381,5 @@ class CaseCompare(MetaResource, MethodResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        log.debug(
-            "User {} compared cases {} and {}".format(self.get_user_id(), idx1, idx2)
-        )
+        log.debug(f"User {self.get_user_id()} compared cases {idx1} and {idx2}")
         return payload, 200

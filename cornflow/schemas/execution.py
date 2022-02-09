@@ -40,7 +40,6 @@ class ExecutionSchema(Schema):
     checks = fields.Raw(required=False, allow_none=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
-    finished = fields.Boolean(required=False)
     state = fields.Int(
         validate=validate.Range(
             min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE

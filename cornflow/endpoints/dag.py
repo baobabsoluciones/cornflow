@@ -116,7 +116,7 @@ class DAGEndpoint(MetaResource, MethodResource):
         if instance is None:
             raise ObjectDoesNotExist(error="The instance does not exist")
         config = execution.config
-        return {"data": instance.data, "config": config}, 200
+        return {"id": instance.id, "data": instance.data, "config": config}, 200
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
