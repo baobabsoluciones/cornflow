@@ -14,6 +14,7 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import DeployedDAG, ExecutionModel, InstanceModel
 from ..schemas import DeployedDAGSchema
+from ..schemas.instance import InstanceCheckRequest
 from ..schemas.execution import (
     ExecutionDagPostRequest,
     ExecutionDagRequest,
@@ -117,6 +118,28 @@ class DAGEndpoint(MetaResource, MethodResource):
             raise ObjectDoesNotExist(error="The instance does not exist")
         config = execution.config
         return {"id": instance.id, "data": instance.data, "config": config}, 200
+
+
+class DAGInstanceEndpoint(MetaResource, MethodResource):
+    """
+    Endpoint used by airflow to write instance checks
+    """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
+    @doc(
+        description="Endpoint to save instance checks performed on the DAG",
+        tags=["DAGs"],
+    )
+    @Auth.auth_required
+    @use_kwargs(InstanceCheckRequest, location="json")
+    def put(self, idx, **req_data):
+        instance = InstanceModel.get_one_object_from_user(self.get_user(), idx)
+        if instance is None:
+            raise ObjectDoesNotExist(error="The instance does not exist")
+        instance.update(req_data)
+        instance.save()
+        return {"message": "The instance checks have been saved"}, 200
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
