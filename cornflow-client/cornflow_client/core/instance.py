@@ -13,6 +13,7 @@ class InstanceCore(InstanceSolutionCore, ABC):
     The instance template.
     """
 
+    # TODO: make abstractmethod
     def check_inconsistencies(self, *args, **kwargs) -> dict:
         """
         Method that checks if there are inconsistencies in the data of the current instance.
@@ -21,6 +22,7 @@ class InstanceCore(InstanceSolutionCore, ABC):
         """
         return dict()
 
+    # TODO: make abstractmethod
     def check_feasibility(self, *args, **kwargs) -> bool:
         """
         Method that checks if the problem is feasible.
@@ -29,6 +31,7 @@ class InstanceCore(InstanceSolutionCore, ABC):
         """
         return True
 
+    # TODO: make abstractmethod
     def check(self, *args, **kwargs) -> dict:
         """
         Method that checks if there are inconsistencies in the data of the instance and if the problem is feasible
