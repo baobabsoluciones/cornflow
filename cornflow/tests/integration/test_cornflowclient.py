@@ -319,6 +319,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(15)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
+        print(f"DAG test fail: {results}")
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
@@ -335,6 +336,8 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution = self.create_instance_and_execution()
         time.sleep(2)
         status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        print(f"DAG test fail: {results}")
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_status_solving_timer(self):
@@ -368,7 +371,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution_data = self.client.get_solution(response["id"])
         self.assertEqual(execution_data["data"], payload["data"])
 
-    def test_manual_execution2(self):
+    def test_manual_execution_2(self):
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"
