@@ -84,7 +84,7 @@ class PuLP(ApplicationCore):
 
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
-    ) -> Tuple[Dict, str, Dict]:
+    ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
 
         # we overwrite the logPath argument before solving.
         log_path = config["logPath"] = "temp.log"
@@ -126,4 +126,4 @@ class PuLP(ApplicationCore):
         except:
             pass
 
-        return solution, log, log_dict
+        return solution, {}, {}, log, log_dict

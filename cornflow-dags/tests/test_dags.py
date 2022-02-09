@@ -55,12 +55,22 @@ class BaseDAGTests:
                 marshm = SchemaManager(self.app.instance.schema).jsonschema_to_flask()
                 marshm().load(data)
                 if data_out is not None:
-                    solution_data, log, log_dict = self.app.solve(
-                        data, config, data_out
-                    )
+                    (
+                        solution_data,
+                        solution_check,
+                        inst_checks,
+                        log,
+                        log_dict,
+                    ) = self.app.solve(data, config, data_out)
                 else:
                     # for compatibility with previous format
-                    solution_data, log, log_dict = self.app.solve(data, config)
+                    (
+                        solution_data,
+                        solution_check,
+                        inst_check,
+                        log,
+                        log_dict,
+                    ) = self.app.solve(data, config)
                 if solution_data is None:
                     raise ValueError("No solution found")
                 marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
@@ -84,7 +94,7 @@ class BaseDAGTests:
                     # sometimes we have input and output
                     data, data_out = data
                 mock = Mock()
-                mock.get_data.return_value = dict(data=data, config=config)
+                mock.get_data.return_value = dict(data=data, config=config, id=1)
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")
