@@ -105,7 +105,9 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
             instance = InstanceModel.get_one_object_from_user(user, instance_id)
             if instance is None:
                 raise ObjectDoesNotExist("Instance does not exist")
-            return dict(data=instance.data, schema=instance.schema)
+            return dict(
+                data=instance.data, schema=instance.schema, checks=instance.checks
+            )
 
         def get_execution_data(execution_id):
             execution = ExecutionModel.get_one_object_from_user(user, execution_id)
