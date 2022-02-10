@@ -6,7 +6,6 @@ import json
 import pulp
 import logging as log
 import time
-import unittest
 
 # Imports from environment
 from cornflow_client import CornFlowApiError
@@ -14,7 +13,6 @@ from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 # Import internal modules
 from cornflow.app import create_app
-from cornflow.schemas.solution_log import LogSchema
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
@@ -319,7 +317,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(15)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
-        print(f"DAG test fail: {results}")
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
@@ -336,8 +333,6 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution = self.create_instance_and_execution()
         time.sleep(2)
         status = self.client.get_status(execution["id"])
-        results = self.client.get_results(execution["id"])
-        print(f"DAG test fail: {results}")
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
 
     def test_status_solving_timer(self):
