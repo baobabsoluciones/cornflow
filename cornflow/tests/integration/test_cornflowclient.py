@@ -6,7 +6,6 @@ import json
 import pulp
 import logging as log
 import time
-import unittest
 
 # Imports from environment
 from cornflow_client import CornFlowApiError
@@ -14,7 +13,6 @@ from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 # Import internal modules
 from cornflow.app import create_app
-from cornflow.schemas.solution_log import LogSchema
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
@@ -368,7 +366,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution_data = self.client.get_solution(response["id"])
         self.assertEqual(execution_data["data"], payload["data"])
 
-    def test_manual_execution2(self):
+    def test_manual_execution_2(self):
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"

@@ -43,6 +43,7 @@ from ..shared.compress import compressed
 
 
 # Initialize the schema that all endpoints are going to use
+# TODO: is it needed?
 execution_schema = ExecutionSchema()
 
 
