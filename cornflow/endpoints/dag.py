@@ -14,6 +14,7 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import DeployedDAG, ExecutionModel, InstanceModel
 from ..schemas import DeployedDAGSchema
+from ..schemas.instance import InstanceCheckRequest
 from ..schemas.execution import (
     ExecutionDagPostRequest,
     ExecutionDagRequest,
@@ -61,6 +62,7 @@ class DAGEndpoint(MetaResource, MethodResource):
         #  at least, check they have the same schema-name
         # Check data format
         data = req_data.get("data")
+        checks = req_data.get("checks")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -81,9 +83,12 @@ class DAGEndpoint(MetaResource, MethodResource):
             # because we do not want to store airflow's user:
             user_id=execution.user_id,
         )
+
         # newly validated data from marshmallow
         if data is not None:
             new_data["data"] = data
+        if checks is not None:
+            new_data["checks"] = checks
         req_data.update(new_data)
         execution.update(req_data)
         # TODO: is this save necessary?
@@ -112,7 +117,29 @@ class DAGEndpoint(MetaResource, MethodResource):
         if instance is None:
             raise ObjectDoesNotExist(error="The instance does not exist")
         config = execution.config
-        return {"data": instance.data, "config": config}, 200
+        return {"id": instance.id, "data": instance.data, "config": config}, 200
+
+
+class DAGInstanceEndpoint(MetaResource, MethodResource):
+    """
+    Endpoint used by airflow to write instance checks
+    """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
+    @doc(
+        description="Endpoint to save instance checks performed on the DAG",
+        tags=["DAGs"],
+    )
+    @Auth.auth_required
+    @use_kwargs(InstanceCheckRequest, location="json")
+    def put(self, idx, **req_data):
+        instance = InstanceModel.get_one_object_from_user(self.get_user(), idx)
+        if instance is None:
+            raise ObjectDoesNotExist(error="The instance does not exist")
+        instance.update(req_data)
+        instance.save()
+        return {"message": "The instance checks have been saved"}, 200
 
 
 class DAGEndpointManual(MetaResource, MethodResource):
