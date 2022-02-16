@@ -361,6 +361,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
             "id",
             "name",
             "data",
+            "checks",
             "data_hash",
             "schema",
             "user_id",

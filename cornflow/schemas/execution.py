@@ -37,9 +37,9 @@ class ExecutionSchema(Schema):
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
+    checks = fields.Raw(required=False, allow_none=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
-    finished = fields.Boolean(required=False)
     state = fields.Int(
         validate=validate.Range(
             min=MIN_EXECUTION_STATUS_CODE, max=MAX_EXECUTION_STATUS_CODE
@@ -71,6 +71,7 @@ class ExecutionDagRequest(Schema):
     log_text = fields.Str(required=False)
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
+    checks = fields.Raw(required=False)
     solution_schema = fields.Str(required=False, allow_none=True)
 
 
@@ -94,6 +95,7 @@ class ExecutionStatusEndpointResponse(Schema):
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
+    checks = fields.Raw()
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
