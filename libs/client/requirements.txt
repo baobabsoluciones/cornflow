@@ -4,5 +4,4 @@ jsonschema
 marshmallow
 pytups
 ortools
-pandas
 PuLP>=2.3
