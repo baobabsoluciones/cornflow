@@ -697,7 +697,7 @@ class CornFlow(object):
 
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
-        return self.get_api("dag/deployed/", encoding=encoding).json()
+        return self.get_api("dag/deployed", encoding=encoding).json()
 
     @log_call
     @ask_token
