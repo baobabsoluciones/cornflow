@@ -28,11 +28,9 @@ def register_deployed_dags_command(
         return False
 
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
-    print(f"DAGs on Cornflow{dags_registered}")
 
     response = af_client.get_model_dags()
     dag_list = response.json()["dags"]
-    print(f"DAGS on Airflow {dag_list}")
 
     processed_dags = [
         DeployedDAG({"id": dag["dag_id"], "description": dag["description"]})
