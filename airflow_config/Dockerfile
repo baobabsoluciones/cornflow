@@ -69,6 +69,10 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 # execute installation solvers script
 RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
+ENV GUROBI_HOME=${AIRFLOW_HOME}/gurobi/linux64
+ENV PATH=${PATH}:${GUROBI_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib
+ENV GRB_LICENSE_FILE=${AIRFLOW_HOME}/gurobi.lic
 
 EXPOSE 8080 5555 8793
 
