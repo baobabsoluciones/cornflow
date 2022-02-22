@@ -254,6 +254,7 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
             raise InvalidUsage(error=val_err.normalized_messages())
 
         item = InstanceModel(data)
+        item.schema = "solve_model_dag"
         item.save()
         log.info(f"User {self.get_user_id()} creates instance {item.id} from mps file")
         return item, 201
