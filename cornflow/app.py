@@ -18,7 +18,7 @@ from .commands.permissions import (
 from .commands.roles import register_roles_command
 from .commands.users import (
     create_admin_user_command,
-    create_base_user_command,
+    create_planner_user_command,
     create_service_user_command,
 )
 from .commands.views import register_views_command
@@ -110,7 +110,7 @@ def create_admin_user(username, email, password, verbose):
 @click.option("-v", "--verbose", type=int, default=0)
 @with_appcontext
 def create_base_user(username, email, password, verbose):
-    create_base_user_command(username, email, password, verbose)
+    create_planner_user_command(username, email, password, verbose)
 
 
 @click.command("register_roles")
