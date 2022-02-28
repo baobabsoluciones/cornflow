@@ -1,4 +1,11 @@
+import os
 from cornflow_client.constants import DATASCHEMA
+
+path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+def _get_file(relative_path):
+    return os.path.join(path_to_tests_dir, relative_path)
 
 
 dict_example = dict(
@@ -79,3 +86,20 @@ dict_example.update(
         ]
     }
 )
+
+PULP_EXAMPLE = _get_file("./data/pulp_example_data.json")
+
+PUBLIC_DAGS = [
+    "solve_model_dag",
+    "graph_coloring",
+    "timer",
+    "bar_cutting",
+    "facility_location",
+    "graph_coloring",
+    "hk_2020_dag",
+    "knapsack",
+    "roadef",
+    "rostering",
+    "tsp",
+    "vrp",
+]

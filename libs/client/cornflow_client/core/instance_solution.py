@@ -146,9 +146,11 @@ class InstanceSolutionCore(ABC):
 
         is_xl_type(path)
 
+        data = self.to_dict()
+
         with pd.ExcelWriter(path) as writer:
-            for table in self.data.keys():
-                content = self.data[table]
+            for table in data.keys():
+                content = data[table]
                 if isinstance(content, list):
                     pd.DataFrame.from_records(content).to_excel(
                         writer, table, index=False
