@@ -339,6 +339,7 @@ class CornFlow(object):
         description="",
         schema="solve_model_dag",
         encoding=None,
+        run=True,
     ):
         """
         Creates an execution from a (previously) uploaded instance
@@ -349,7 +350,9 @@ class CornFlow(object):
         :param dict config: execution configuration
         :param str schema: name of the problem to solve
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param bool run: if the execution should be run or not
         """
+        api = "execution/"
         payload = dict(
             config=config,
             instance_id=instance_id,
@@ -357,7 +360,9 @@ class CornFlow(object):
             description=description,
             schema=schema,
         )
-        response = self.create_api("execution/", json=payload, encoding=encoding)
+        if not run:
+            api += "?run=0"
+        response = self.create_api(api, json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
                 "Expected a code 201, got a {} error instead: {}".format(

@@ -9,11 +9,8 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8]
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        exclude:
-          - os: macos-latest
-            python-version: '3.6'
 
     steps:
     - uses: actions/checkout@v1
@@ -28,4 +25,5 @@ jobs:
         pip install .
     - name: Test
       run: |
-        python -m unittest discover -s cornflow_client/tests
+        coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+        coverage report -m
