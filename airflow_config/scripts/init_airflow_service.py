@@ -12,7 +12,7 @@ import time
 # Get env config
 global_env_vars = [
     ("AIRFLOW_HOME", "/usr/local/airflow"),
-    ("EXECUTOR", "Sequential"),
+    ("EXECUTOR", "Local"),
     ("AIRFLOW__CORE__LOAD_EXAMPLES", "0"),
     ("AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"),
     ("AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"),
