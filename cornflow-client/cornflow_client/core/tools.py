@@ -3,6 +3,7 @@
 """
 # Full imports
 import json
+import pickle
 
 # Partial imports
 from pytups import OrderSet
@@ -25,3 +26,7 @@ def load_json(path):
 def save_json(data, path):
     with open(path, "w") as outfile:
         json.dump(data, outfile)
+
+
+def copy(dictionary):
+    return pickle.loads(pickle.dumps(dictionary, -1))
