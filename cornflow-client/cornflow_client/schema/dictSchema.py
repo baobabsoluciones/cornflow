@@ -92,7 +92,7 @@ class DictSchema:
                     "required": (name in required_list),
                 }
             else:
-                print("\nType missing for item: {}".format(name))
+                print(f"\nType missing for item: {name}")
                 raise TypeError("Type missing")
 
         if content["type"] == "object":

@@ -189,10 +189,9 @@ class CornFlow(object):
         if response.status_code == 200:
             return response.json()
         raise CornFlowApiError(
-            "Connection failed with status code: {}: {}".format(
-                response.status_code, response.text
+            f"Connection failed with status code: {response.status_code}: {response.text}"
             )
-        )
+
 
     @prepare_encoding
     def login(self, username, pwd, encoding=None):
@@ -216,9 +215,7 @@ class CornFlow(object):
             return result
         else:
             raise CornFlowApiError(
-                "Login failed with status code: {}: {}".format(
-                    response.status_code, response.text
-                )
+                f"Login failed with status code: {response.status_code}: {response.text}"
             )
 
     # TODO: those status_code checks should be done via a decorator. But I do not know how.
@@ -246,9 +243,7 @@ class CornFlow(object):
         response = self.create_api("instance/", json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -292,9 +287,7 @@ class CornFlow(object):
         response = self.create_api("case/", json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -322,9 +315,7 @@ class CornFlow(object):
 
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -365,9 +356,7 @@ class CornFlow(object):
         response = self.create_api(api, json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -398,9 +387,7 @@ class CornFlow(object):
         )
         if response.status_code != 200:
             raise CornFlowApiError(
-                "Expected a code 200, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 200, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -432,9 +419,7 @@ class CornFlow(object):
         )
         if response.status_code != 200:
             raise CornFlowApiError(
-                "Expected a code 200, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 200, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -456,9 +441,7 @@ class CornFlow(object):
         response = self.create_api("dag/", json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
@@ -716,9 +699,7 @@ class CornFlow(object):
         response = self.create_api("dag/deployed/", json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(
-                "Expected a code 201, got a {} error instead: {}".format(
-                    response.status_code, response.text
-                )
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
             )
         return response.json()
 
