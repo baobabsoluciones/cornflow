@@ -51,7 +51,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             token = Auth.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
-                error="error in generating user token: " + str(e), status_code=400
+                error=f"error in generating user token: {str(e)}", status_code=400
             )
 
         return {"token": token, "id": user.id}, 200
@@ -76,7 +76,7 @@ class LoginEndpoint(MetaResource, MethodResource):
         user = UserModel.get_one_user_by_username(username)
 
         if not user:
-            log.info("LDAP username {} does not exist and is created".format(username))
+            log.info(f"LDAP username {username} does not exist and is created")
             email = ldap_obj.get_user_email(username)
             if not email:
                 email = ""

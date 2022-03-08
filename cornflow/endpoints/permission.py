@@ -57,9 +57,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
         else:
             response = self.post_list(kwargs)
             log.info(
-                "User {} creates permission {}".format(
-                    self.get_user_id(), response[0].id
-                )
+                f"User {self.get_user_id()} creates permission {response[0].id}"
             )
             return response
 
@@ -95,12 +93,12 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
         response = self.put_detail(kwargs, idx)
-        log.info("User {} edits permission {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} edits permission {idx}")
         return response
 
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
     @Auth.auth_required
     def delete(self, idx):
         response = self.delete_detail(idx)
-        log.info("User {} deletes permission {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} deletes permission {idx}")
         return response
