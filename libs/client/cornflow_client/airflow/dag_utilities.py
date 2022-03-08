@@ -58,7 +58,7 @@ def get_requirements(path):
     :param path: The path of the project
     :return: A list of required packages
     """
-    req_path = path + "/requirements.txt"
+    req_path = f"{path}/requirements.txt"
 
     try:
         with open(req_path, "r") as file:
@@ -83,9 +83,9 @@ def connect_to_cornflow(secrets):
     scheme = conn.scheme
     if scheme == "cornflow":
         scheme = "http"
-    url = "{}://{}".format(scheme, conn.hostname)
+    url = f"{scheme}://{conn.hostname}"
     if conn.port:
-        url += ":{uri.port}".format(uri=conn)
+        url=f"{url}:{conn.port}"
     if conn.path:
         url = urljoin(url, conn.path)
     airflow_user = CornFlow(url=url)
@@ -100,7 +100,7 @@ def try_to_save_error(client, exec_id, state=-1):
     try:
         client.put_api_for_id("dag/", id=exec_id, payload=dict(state=state))
     except Exception as e:
-        print("An exception trying to register the failed status: {}".format(e))
+        print(f"An exception trying to register the failed status: {e}")
 
 
 def try_to_write_solution(client, exec_id, payload):
@@ -132,7 +132,7 @@ def try_to_write_solution(client, exec_id, payload):
 
 
 def get_schema(dag_name):
-    _file = os.path.join(os.path.dirname(__file__), "{}_output.json".format(dag_name))
+    _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
     with open(_file, "r") as f:
         schema = json.load(f)
     return schema

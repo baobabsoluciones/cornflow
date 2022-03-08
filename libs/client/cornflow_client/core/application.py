@@ -120,7 +120,7 @@ class ApplicationCore(ABC):
         if not validator.is_valid(config):
             error_list = [e for e in validator.iter_errors(config)]
             raise BadConfiguration(
-                "The configuration does not match the schema:\n{}".format(error_list)
+                f"The configuration does not match the schema:\n{error_list}"
             )
 
         solver = config.get("solver")
@@ -128,12 +128,12 @@ class ApplicationCore(ABC):
             solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
         if solver_class is None:
-            raise NoSolverException("Solver {} is not available".format(solver))
+            raise NoSolverException(f"Solver {solver} is not available")
         inst = self.instance.from_dict(data)
         inst_errors = inst.check_schema()
         if inst_errors:
             raise BadInstance(
-                "The instance does not match the schema:\n{}".format(inst_errors)
+                f"The instance does not match the schema:\n{inst_errors}"
             )
         sol = None
         if solution_data is not None:
@@ -141,7 +141,7 @@ class ApplicationCore(ABC):
             sol_errors = sol.check_schema()
             if sol_errors:
                 raise BadSolution(
-                    "The solution does not match the schema:\n{}".format(sol_errors)
+                    f"The solution does not match the schema:\n{sol_errors}"
                 )
 
         instance_checks = inst.check()
