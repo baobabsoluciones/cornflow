@@ -18,7 +18,7 @@ from cornflow_client.constants import AirflowError, InvalidUsage
 
 class Airflow(object):
     def __init__(self, url, user, pwd):
-        self.url = url + "/api/v1"
+        self.url = f"{url}/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
 
     @classmethod
@@ -32,7 +32,7 @@ class Airflow(object):
 
     def is_alive(self):
         try:
-            response = requests.get(self.url + "/health")
+            response = requests.get(f"{self.url}/health")
         except (ConnectionError, HTTPError):
             return False
         try:
@@ -55,14 +55,14 @@ class Airflow(object):
         return response
 
     def consume_dag_run(self, dag_name, payload, dag_run_id=None, method="POST"):
-        url = "{}/dags/{}/dagRuns".format(self.url, dag_name)
+        url = f"{self.url}/dags/{dag_name}/dagRuns"
         if dag_run_id is not None:
-            url = url + "/{}".format(dag_run_id)
+            url = url + f"/{dag_run_id}"
         response = self.request_headers_auth(method=method, url=url, json=payload)
         return response
 
     def set_dag_run_state(self, dag_name, payload):
-        url = "{}/dags/{}/updateTaskInstancesState".format(self.url, dag_name)
+        url = f"{self.url}/dags/{dag_name}/updateTaskInstancesState"
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
     def run_dag(self, execution_id, dag_name="solve_model_dag"):
@@ -106,16 +106,16 @@ class Airflow(object):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
     def get_dag_info(self, dag_name, method="GET"):
-        url = "{}/dags/{}".format(self.url, dag_name)
+        url = f"{self.url}/dags/{dag_name}"
         return self.request_headers_auth(method=method, url=url)
 
     def get_one_variable(self, variable):
-        url = "{}/variables/{}".format(self.url, variable)
+        url = f"{self.url}/variables/{variable}"
         return self.request_headers_auth(method="GET", url=url).json()
 
     def get_all_variables(self):
         return self.request_headers_auth(
-            method="GET", url="{}/variables".format(self.url)
+            method="GET", url=f"{self.url}/variables"
         ).json()
 
     def get_one_schema(self, dag_name, schema):
@@ -132,15 +132,15 @@ class Airflow(object):
         return [dict(name=variable["key"]) for variable in response["variables"]]
 
     def get_all_dags(self, method="GET"):
-        url = "{}/dags".format(self.url)
+        url = f"{self.url}/dags"
         return self.request_headers_auth(method=method, url=url)
 
     def get_internal_dags(self, method="GET"):
-        url = "{}/dags?tags=internal".format(self.url)
+        url = f"{self.url}/dags?tags=internal"
         return self.request_headers_auth(method=method, url=url)
 
     def get_model_dags(self, method="GET"):
-        url = "{}/dags?tags=model".format(self.url)
+        url = f"{self.url}/dags?tags=model"
         return self.request_headers_auth(method=method, url=url)
 
 
@@ -169,8 +169,8 @@ def validate_and_continue(obj, data):
     try:
         validate = obj.load(data)
     except ValidationError as e:
-        raise InvalidUsage(error="Bad data format: {}".format(e))
+        raise InvalidUsage(error=f"Bad data format: {e}")
     err = ""
     if validate is None:
-        raise InvalidUsage(error="Bad data format: {}".format(err))
+        raise InvalidUsage(error=f"Bad data format: {err}")
     return validate
