@@ -26,7 +26,6 @@ global_env_vars = [
     ("CORNFLOW_SERVICE_USER", "service_user"),
     ("CORNFLOW_SERVICE_PWD", "Service_user1234"),
     ("AIRFLOW_LDAP_ENABLE", "False"),
-    ("AIRFLOW__CORE__XCOM_BACKEND", "include.gce_xcom_backend.GCSXComBackend"),
 ]
 # update environ set
 for name, default in global_env_vars:
