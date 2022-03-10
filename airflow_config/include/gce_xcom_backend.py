@@ -8,7 +8,7 @@ from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 class GCSXComBackend(BaseXCom):
     PREFIX = "xcom_gcs://"
-    BUCKET_NAME = ""
+    BUCKET_NAME = "cornflow"
 
     @staticmethod
     def serialize_value(value: Any):
