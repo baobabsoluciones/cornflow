@@ -34,5 +34,9 @@ class GCSXComBackend(BaseXCom):
                 bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
             ) as f:
                 f.flush()
+                print(f"F: {f}")
+                print(f"Class: {type(f)}")
+                print(f"DICT: {f.__dict__}")
+
                 result = pickle.loads(f.name)
         return result
