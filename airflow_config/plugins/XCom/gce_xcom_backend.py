@@ -19,9 +19,6 @@ class GCSXComBackend(BaseXCom):
             with hook.provide_file_and_upload(
                 bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
             ) as f:
-                print(f"F: {f}")
-                print(f"DICT: {f.__dict__}")
-                print(f"TYPE: {type(f)}")
                 pickle.dump(value, f)
 
             value = f"{GCSXComBackend.PREFIX}{object_name}"
@@ -38,16 +35,8 @@ class GCSXComBackend(BaseXCom):
             with hook.provide_file(
                 bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
             ) as f:
-                print(f"F: {f}")
-                print(f"DICT: {f.__dict__}")
-                print(f"NAME: {f.name}")
-                print(f"File: {f.file}")
                 f.flush()
-                print(f"F: {f}")
-                print(f"DICT: {f.__dict__}")
-                print(f"NAME: {f.name}")
-                print(f"File: {f.file}")
-
                 result = pickle.load(f)
 
+        print(f"RESULT: {result}")
         return result
