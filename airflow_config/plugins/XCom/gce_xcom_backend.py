@@ -38,5 +38,4 @@ class GCSXComBackend(BaseXCom):
                 f.flush()
                 result = pickle.load(f)
 
-        print(f"RESULT: {result}")
         return result
