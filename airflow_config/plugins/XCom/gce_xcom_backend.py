@@ -30,13 +30,14 @@ class GCSXComBackend(BaseXCom):
         result = BaseXCom.deserialize_value(result)
         if isinstance(result, str) and result.startswith(GCSXComBackend.PREFIX):
             object_name = result.replace(GCSXComBackend.PREFIX, "")
-            with GCSHook().provide_file(
-                bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
-            ) as f:
-                f.flush()
-                print(f"F: {f}")
-                print(f"DICTT: {f.__dict__}")
-                result = pickle.load(f)
-                print(f"RESULT: {result}")
+
+            hook = GCSHook()
+            filename = hook.download(
+                bucket_name=GCSXComBackend.BUCKET_NAME,
+                object_name=object_name,
+                filename=f"tmp/{object_name}",
+            )
+
+            result = pickle.load(filename)
 
         return result
