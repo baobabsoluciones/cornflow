@@ -19,7 +19,7 @@ class GCSXComBackend(BaseXCom):
             with hook.provide_file_and_upload(
                 bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
             ) as f:
-                pickle.dumps(value, f.name)
+                pickle.dump(value, f.name)
 
             value = f"{GCSXComBackend.PREFIX}{object_name}"
 
