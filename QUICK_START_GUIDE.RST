@@ -118,6 +118,8 @@ You will then need to install the defaults workers dependencies, to initialize t
       --password admin \
       --email admin@example.org
 
+If on Windows export should be changed to set.
+
 .. raw:: html
 
   </details>
