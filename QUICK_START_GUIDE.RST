@@ -41,9 +41,9 @@ Common
 .. raw:: html
 
   <details open>
-    <summary>Python >= 3.6 and virtual environment</summary>
+    <summary>Python >= 3.7 and virtual environment</summary>
     
-We recommend using a version of `Python ≥ 3.6 <https://www.python.org/downloads/>`_, along with the `Pycharm editor <https://www.jetbrains.com/pycharm/>`_. Please use `black code formatter <https://github.com/psf/black>`_ to format your python files. See `here <https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea>`_ to integrate **black** to your development environment and make it format automatically your files.
+We recommend using a version of `Python ≥ 3.7 <https://www.python.org/downloads/>`_, along with the `Pycharm editor <https://www.jetbrains.com/pycharm/>`_. Please use `black code formatter <https://github.com/psf/black>`_ to format your python files. See `here <https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea>`_ to integrate **black** to your development environment and make it format automatically your files.
 
 Once python is installed, you will need to create a virtual environment for the project: from the :code:`/cornflow-dags` directory, run:
 
@@ -323,7 +323,7 @@ Views
 In the directory :code:`/src/views/apps`, you will need to add your views, computed from the data contained in your Instance, Solution and Experiment classes.
 To do so, you must create a directory with the name of your project, and place your files in that directory.
 
-Unitary tests
+Unit tests
 -------------
 In the directory :code:`/tests/unit`, you should define a new directory :code:`my_project`. In this directory, you should define unitary tests that will test that your application works correctly. You can follow the example of the unitary tests of the other projects. The data needed to execute the tests should be placed in the directory :code:`/tests/data`.
 
