@@ -74,5 +74,5 @@ class SignUpEndpoint(MetaResource, MethodResource):
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400
             )
-        log.info("User {} was created".format(user.id))
+        log.info(f"User {user.id} was created")
         return {"token": token, "id": user.id}, 201
