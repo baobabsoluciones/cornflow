@@ -15,7 +15,12 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
-from .dag import DAGEndpoint, DAGEndpointManual, DeployedDAGEndpoint
+from .dag import (
+    DAGEndpoint,
+    DAGEndpointManual,
+    DAGInstanceEndpoint,
+    DeployedDAGEndpoint,
+)
 
 from .execution import (
     ExecutionEndpoint,
@@ -45,7 +50,7 @@ from .roles import (
 )
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .signup import SignUpEndpoint
-from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin
+from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 
 
 resources = [
@@ -86,6 +91,11 @@ resources = [
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=DAGEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
+    dict(
+        resource=DAGInstanceEndpoint,
+        urls="/dag/instance/<string:idx>/",
+        endpoint="dag-instance",
+    ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
@@ -136,7 +146,7 @@ resources = [
     dict(
         resource=PermissionsViewRoleDetailEndpoint,
         urls="/permission/<int:idx>/",
-        endpoint="permission-detail"
+        endpoint="permission-detail",
     ),
     dict(resource=RolesListEndpoint, urls="/roles/", endpoint="roles"),
     dict(
@@ -148,5 +158,10 @@ resources = [
         resource=UserRoleDetailEndpoint,
         urls="/user/role/<int:user_id>/<int:role_id>/",
         endpoint="user-roles-detail",
+    ),
+    dict(
+        resource=RecoverPassword,
+        urls="/user/recover-password/",
+        endpoint="recover-password",
     ),
 ]

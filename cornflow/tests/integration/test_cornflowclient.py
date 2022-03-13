@@ -6,16 +6,13 @@ import json
 import pulp
 import logging as log
 import time
-import unittest
 
 # Imports from environment
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 # Import internal modules
-from airflow_config.dags.model_functions import solve as solve_model
 from cornflow.app import create_app
-from cornflow.schemas.solution_log import LogSchema
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
@@ -132,7 +129,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         one_instance = self.create_new_instance_payload(payload)
         payload = dict(
             instance_id=one_instance["id"],
-            config=dict(timeLimit=seconds),
+            config=dict(timeLimit=seconds, solver="default"),
             name="timer_execution",
             description="timer_exec_description",
             schema="timer",
@@ -333,6 +330,12 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(results["state"], EXEC_STATE_STOPPED)
 
     def test_status_solving(self):
+        execution = self.create_instance_and_execution()
+        time.sleep(2)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+
+    def test_status_solving_timer(self):
         execution = self.create_timer_instance_and_execution(10)
         time.sleep(5)
         status = self.client.get_status(execution["id"])
@@ -363,7 +366,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution_data = self.client.get_solution(response["id"])
         self.assertEqual(execution_data["data"], payload["data"])
 
-    def test_manual_execution2(self):
+    def test_manual_execution_2(self):
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"
@@ -399,37 +402,3 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             api="dag/", id=execution.json()["id"], payload=payload
         )
         self.assertEqual(response.status_code, 200)
-
-
-class PuLPLogSchema(unittest.TestCase):
-    @staticmethod
-    def solve_model(input_data, config):
-        return solve_model(input_data, config)
-
-    @staticmethod
-    def dump_progress(log_dict):
-        LS = LogSchema()
-        return LS.load(log_dict)
-
-    def solve_test_progress(self):
-        with open("./cornflow/tests/data/gc_20_7.json", "r") as f:
-            data = json.load(f)
-
-        config = dict(solver="PULP_CBC_CMD", timeLimit=10)
-        solution, log, log_dict = self.solve_model(data, config)
-        loaded_data = self.dump_progress(log_dict)
-        self.assertEqual(loaded_data["solver"], "CBC")
-        self.assertEqual(loaded_data["version"], "2.9.0")
-        matrix_keys = {"nonzeros", "constraints", "variables"}
-        a = matrix_keys.symmetric_difference(loaded_data["matrix"].keys())
-        self.assertEqual(len(a), 0)
-
-    def test_progress2(self):
-        with open("./cornflow/tests/data/gc_50_3_log.json", "r") as f:
-            data = json.load(f)
-        loaded_data = self.dump_progress(data)
-        self.assertEqual(loaded_data["solver"], "CPLEX")
-        self.assertEqual(type(loaded_data["progress"]["Node"][0]), str)
-        self.assertEqual(type(loaded_data["progress"]["Time"][0]), str)
-        self.assertEqual(type(loaded_data["cut_info"]["cuts"]["Clique"]), int)
-        self.assertEqual(type(loaded_data["nodes"]), int)

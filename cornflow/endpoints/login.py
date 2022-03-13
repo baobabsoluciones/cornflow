@@ -8,7 +8,7 @@ import logging as log
 from flask import g, current_app
 from flask_apispec import use_kwargs, doc
 from flask_apispec.views import MethodResource
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -51,7 +51,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             token = Auth.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
-                error="error in generating user token: " + str(e), status_code=400
+                error=f"error in generating user token: {str(e)}", status_code=400
             )
 
         return {"token": token, "id": user.id}, 200
@@ -76,7 +76,7 @@ class LoginEndpoint(MetaResource, MethodResource):
         user = UserModel.get_one_user_by_username(username)
 
         if not user:
-            log.info("LDAP username {} does not exist and is created".format(username))
+            log.info(f"LDAP username {username} does not exist and is created")
             email = ldap_obj.get_user_email(username)
             if not email:
                 email = ""
@@ -97,8 +97,11 @@ class LoginEndpoint(MetaResource, MethodResource):
             # we only commit if everything went well
             db.session.commit()
         except IntegrityError as e:
-            log.error("Foreign keys error")
-            log.error(e)
             # or we rollback
             db.session.rollback()
+            log.error(f"Integrity error on user role assignment on log in: {e}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on user role assignment on log in: {e}")
+
         return user

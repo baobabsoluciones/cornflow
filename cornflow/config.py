@@ -52,6 +52,12 @@ class DefaultConfig(object):
     # compress config
     COMPRESS_REGISTER = False
 
+    # Email server
+    CORNFLOW_EMAIL_ADDRESS = os.getenv("CORNFLOW_EMAIL_ADDRESS", None)
+    CORNFLOW_EMAIL_PASSWORD = os.getenv("CORNFLOW_EMAIL_PASSWORD", None)
+    CORNFLOW_EMAIL_SERVER = os.getenv("CORNFLOW_EMAIL_SERVER", None)
+    CORNFLOW_EMAIL_PORT = os.getenv("CORNFLOW_EMAIL_PORT", None)
+
 
 class Development(DefaultConfig):
     """ """
@@ -66,10 +72,10 @@ class Testing(DefaultConfig):
     PROPAGATE_EXCEPTIONS = True
     SECRET_KEY = "TESTINGSECRETKEY"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
-    AIRFLOW_URL = "http://localhost:8080"
+    AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://localhost:8080")
     PRESERVE_CONTEXT_ON_EXCEPTION = False
-    AIRFLOW_USER = "admin"
-    AIRFLOW_PWD = "admin"
+    AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
+    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
 
 
 class Production(DefaultConfig):
