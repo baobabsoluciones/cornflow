@@ -1,6 +1,7 @@
 from typing import Any, Dict
 import pickle
 from uuid import uuid4
+from datetime import datetime
 
 from airflow.models.xcom import BaseXCom
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
@@ -14,7 +15,11 @@ class GCSXComBackend(BaseXCom):
     def serialize_value(value: Any):
         if isinstance(value, Dict):
             hook = GCSHook()
-            object_name = f"model/data_{uuid4()}.pickle"
+            if "model_name" in value.keys():
+                object_name = f"model/{value['model_name']}/data_{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.pickle"
+            else:
+                object_name = f"model/data_{uuid4()}.pickle"
+            value["location"] = object_name
 
             with hook.provide_file_and_upload(
                 bucket_name=GCSXComBackend.BUCKET_NAME, object_name=object_name
