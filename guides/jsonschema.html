@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Write a json-schema &mdash; Cornflow 0.4 documentation</title>
+  <title>Write a json-schema &mdash; Cornflow 3.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> Cornflow
           </a>
               <div class="version">
-                0.4
+                3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -476,7 +476,12 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 <ul class="simple">
 <li><p>We use the <code class="docutils literal notranslate"><span class="pre">title</span></code> property to set up a meaningful name for the table columns on the data tables.</p></li>
 <li><p>We use the <code class="docutils literal notranslate"><span class="pre">description</span></code> property to give a description of the table or fields of the data tables.</p></li>
-<li><p>We use the <code class="docutils literal notranslate"><span class="pre">$comment</span></code> property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.</p></li>
+<li><p>These two properties can be an object indexed by the language key (<code class="docutils literal notranslate"><span class="pre">en</span></code> or <code class="docutils literal notranslate"><span class="pre">es</span></code> for example) in order to set up the internationalization of the user interface.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">show</span></code> property to indicate if the table or column has to be seen in the user interface.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">filterable</span></code> property to indicate if the table or the column can be filtered down on the user interface.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">sortable</span></code> property to indicate if the table or column can be sorted on the user interface.</p></li>
+<li><p>We use the <code class="docutils literal notranslate"><span class="pre">format</span></code> property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.</p></li>
+<li><p>We uses the <code class="docutils literal notranslate"><span class="pre">minimum</span></code> and <code class="docutils literal notranslate"><span class="pre">maximum</span></code> properties for integer or number fields in order to set up the limits of the data. This limits are used by the forms in the user interface as well.</p></li>
 </ul>
 </section>
 </section>
