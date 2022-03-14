@@ -77,7 +77,7 @@ Create a user::
     config = dict(username=username, email=email, pwd=pwd)
     client.sign_up(**config)
 
-log in::
+Log in::
 
     client.login(username=username, pwd=pwd)
 

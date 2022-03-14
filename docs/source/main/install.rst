@@ -5,7 +5,7 @@ Requirements
 ~~~~~~~~~~~~~~~~~~
 
 * Linux or Windows with WSL
-* python >= 3.5
+* python >= 3.7
 
 Install cornflow
 ~~~~~~~~~~~~~~~~~~
@@ -142,7 +142,7 @@ Install with docker
 Pull
 ~~~~~~~~
 
-Pull the image from the Docker repository.
+Pull the image from the Docker repository::
 
     docker pull baobabsoluciones/cornflow
 
