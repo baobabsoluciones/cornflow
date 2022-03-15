@@ -19,7 +19,7 @@ class GCSXComBackend(BaseXCom):
                 object_name = f"model/{value['execution_date']}/data.pickle"
             elif "execution_date" in value.keys():
                 object_name = (
-                    f"model/temp/data_{value['model_name']}_"
+                    f"model/{value['execution_date']}/temp/data_{value['model_name']}_"
                     f"{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.pickle"
                 )
             else:
