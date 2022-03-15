@@ -15,8 +15,13 @@ class GCSXComBackend(BaseXCom):
     def serialize_value(value: Any):
         if isinstance(value, Dict):
             hook = GCSHook()
-            if "model_name" in value.keys():
-                object_name = f"model/{value['model_name']}/data_{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.pickle"
+            if value.get("final", False) and "execution_date" in value.keys():
+                object_name = f"model/{value['execution_date']}/data.pickle"
+            elif "execution_date" in value.keys():
+                object_name = (
+                    f"model/temp/data_{value['model_name']}_"
+                    f"{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.pickle"
+                )
             else:
                 object_name = f"model/data_{uuid4()}.pickle"
             value["location"] = object_name
