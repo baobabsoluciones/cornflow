@@ -50,7 +50,6 @@ services:
       - AIRFLOW_DB_USER=airflow
       - AIRFLOW_DB_PASSWORD=airflow
       - AIRFLOW_DB=airflow
-      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     ports:
       - 8080:8080
     depends_on:

@@ -50,7 +50,6 @@ services:
       - AIRFLOW_DB=airflow
       - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
-      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     ports:
       - 8080:8080
     depends_on:
@@ -84,7 +83,6 @@ services:
       - AIRFLOW_DB=airflow
       - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
-      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     command: scheduler
 
   flower:
@@ -132,7 +130,6 @@ services:
       - AIRFLOW_DB_PASSWORD=airflow
       - AIRFLOW__CORE__FERNET_KEY=L5Z7WRVv5zaexK0OL3pS2stYUF-gx_UmfDBqWQ4br6Y=
       - EXECUTOR=Celery
-      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     command: worker
 
 volumes:

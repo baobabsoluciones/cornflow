@@ -52,7 +52,6 @@ services:
       - AIRFLOW_LDAP_BIND_USER=cn=admin,dc=example,dc=org
       - AIRFLOW_LDAP_BIND_PASSWORD=admin
       - AIRFLOW_LDAP_UID_FIELD=cn
-      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     ports:
       - 8080:8080
     depends_on:
