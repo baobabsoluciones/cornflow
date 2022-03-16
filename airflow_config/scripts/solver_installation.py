@@ -35,4 +35,4 @@ for solver in solver_list:
         install(solver)
 
     else:
-        print(solver + " is not in cornflow available solver list")
+        print(f"{solver} is not in cornflow available solver list")

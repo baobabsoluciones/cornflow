@@ -105,7 +105,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         if user_obj.is_service_user():
             raise NoPermission()
         user_obj.delete()
-        log.info("User {} was deleted by user {}".format(user_id, self.get_user_id()))
+        log.info(f"User {user_id} was deleted by user {self.get_user_id()}")
         return {"message": "The object has been deleted"}, 200
 
     @doc(description="Edit a user", tags=["Users"])
@@ -143,7 +143,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
                 raise InvalidCredentials(error=check_email["message"])
         user_obj.update(data)
         user_obj.save()
-        log.info("User {} was edited by user {}".format(user_id, self.get_user_id()))
+        log.info(f"User {user_id} was edited by user {self.get_user_id()}")
         return user_obj, 200
 
 
