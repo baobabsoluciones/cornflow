@@ -10,7 +10,7 @@ from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 class GCSXComBackend(BaseXCom):
     PREFIX = "xcom_gcs://"
-    BUCKET_NAME = os.getenv("GCE_BUCKET_NAME")
+    BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
 
     @staticmethod
     def serialize_value(value: Any):

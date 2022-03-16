@@ -39,6 +39,7 @@ services:
     volumes:
       - ./airflow_config/dags:/usr/local/airflow/dags
       - ./airflow_config/requirements.txt:/requirements.txt
+      - ./airflow_config/plugins:/usr/local/airflow/plugins
     environment:
       - AIRFLOW_DB_HOST=airflow_db
       - AIRFLOW_DB_PORT=5432
@@ -51,6 +52,7 @@ services:
       - AIRFLOW_LDAP_BIND_USER=cn=admin,dc=example,dc=org
       - AIRFLOW_LDAP_BIND_PASSWORD=admin
       - AIRFLOW_LDAP_UID_FIELD=cn
+      - AIRFLOW__CORE__XCOM_BACKEND=XCom.gce_xcom_backend.GCSXComBackend
     ports:
       - 8080:8080
     depends_on:
