@@ -210,7 +210,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info("User {} edits execution {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} edits execution {idx}")
         return self.put_detail(data, self.get_user(), idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
@@ -226,7 +226,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info("User {} deleted execution {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} deleted execution {idx}")
         return self.delete_detail(self.get_user(), idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
@@ -245,7 +245,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
-        log.info("User {} stopped execution {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} stopped execution {idx}")
         return {"message": "The execution has been stopped"}, 200
 
 
@@ -302,7 +302,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
             )
         except AirflowError as err:
             _raise_af_error(
-                execution, "Airflow responded with an error: {}".format(err)
+                execution, f"Airflow responded with an error: {err}"
             )
 
         data = response.json()

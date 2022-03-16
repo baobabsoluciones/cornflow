@@ -80,7 +80,7 @@ def register_base_permissions_command(verbose):
 
     if verbose == 1:
         if len(permissions_to_register) > 0:
-            print("Permissions registered: ", permissions_to_register)
+            print(f"Permissions registered: {permissions_to_register}")
         else:
             print("No new permissions to register")
 
