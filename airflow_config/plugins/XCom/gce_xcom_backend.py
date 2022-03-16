@@ -1,5 +1,7 @@
 from typing import Any, Dict
 import pickle
+import os
+import warnings
 from uuid import uuid4
 from datetime import datetime
 
@@ -9,10 +11,13 @@ from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 class GCSXComBackend(BaseXCom):
     PREFIX = "xcom_gcs://"
-    BUCKET_NAME = "cornflow"
+    BUCKET_NAME = os.getenv("GCE_BUCKET_NAME", "error")
 
     @staticmethod
     def serialize_value(value: Any):
+        if GCSXComBackend.BUCKET_NAME == "error":
+            print("BUCKET NOT FOUND")
+            warnings.warn("BUCKET NOT FOUND")
         if isinstance(value, Dict):
             hook = GCSHook()
             if value.get("final", False) and "execution_date" in value.keys():
@@ -38,6 +43,9 @@ class GCSXComBackend(BaseXCom):
     @staticmethod
     def deserialize_value(result) -> Any:
         result = BaseXCom.deserialize_value(result)
+        if GCSXComBackend.BUCKET_NAME == "error":
+            print("BUCKET NOT FOUND")
+            warnings.warn("BUCKET NOT FOUND")
         if isinstance(result, str) and result.startswith(GCSXComBackend.PREFIX):
             object_name = result.replace(GCSXComBackend.PREFIX, "")
             hook = GCSHook()
