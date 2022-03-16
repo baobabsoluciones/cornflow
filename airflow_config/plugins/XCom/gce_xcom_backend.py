@@ -23,7 +23,7 @@ class GCSXComBackend(BaseXCom):
                     f"{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.pickle"
                 )
             else:
-                object_name = f"model/data_{uuid4()}.pickle"
+                object_name = f"data/data_{uuid4()}.pickle"
             value["location"] = object_name
 
             with hook.provide_file_and_upload(
