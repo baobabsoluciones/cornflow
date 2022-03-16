@@ -48,21 +48,9 @@ Before deploying Cornflow, set the environment variable with the address of the 
 Connect to your own airflow deployment
 *******************************************
 
-For do this kind of deployment, you could use the template ``docker-compose-cornflow-separate.yml``.
-To deploy you should fetch docker-compose-cornflow-separate.yml::
+Before deploying, set the required airflow environment connection. For example ::
 
-    curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml'
-
-Before deploying Cornflow, set the required airflow environment variables. For example with a file named ``.env.airflow`` ::
-
-    AIRFLOW_USER=myairflowuser
-    AIRFLOW_PWD=myairflowuserpwd
-    AIRFLOW_URL=http://myairflowurl:8080
     AIRFLOW_CONN_CF_URI=http://mycornflowuser:mycornflowpassword@mycornflowurl
-
-Then execute this::
-
-    docker-compose -f docker-compose-cornflow-separate.yml --env-file .env.airflow up -d
 
 Using custom ssh keys
 ******************************
