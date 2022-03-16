@@ -136,20 +136,8 @@ Eg.:</p>
 </section>
 <section id="connect-to-your-own-airflow-deployment">
 <h2>Connect to your own airflow deployment<a class="headerlink" href="#connect-to-your-own-airflow-deployment" title="Permalink to this headline"></a></h2>
-<p>For do this kind of deployment, you could use the template <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-separate.yml</span></code>.
-To deploy you should fetch docker-compose-cornflow-separate.yml:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-separate.yml&#39;</span>
-</pre></div>
-</div>
-<p>Before deploying Cornflow, set the required airflow environment variables. For example with a file named <code class="docutils literal notranslate"><span class="pre">.env.airflow</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_USER</span><span class="o">=</span><span class="n">myairflowuser</span>
-<span class="n">AIRFLOW_PWD</span><span class="o">=</span><span class="n">myairflowuserpwd</span>
-<span class="n">AIRFLOW_URL</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">myairflowurl</span><span class="p">:</span><span class="mi">8080</span>
-<span class="n">AIRFLOW_CONN_CF_URI</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mycornflowuser</span><span class="p">:</span><span class="n">mycornflowpassword</span><span class="nd">@mycornflowurl</span>
-</pre></div>
-</div>
-<p>Then execute this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">separate</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">env</span><span class="o">-</span><span class="n">file</span> <span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">airflow</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+<p>Before deploying, set the required airflow environment connection. For example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_CONN_CF_URI</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mycornflowuser</span><span class="p">:</span><span class="n">mycornflowpassword</span><span class="nd">@mycornflowurl</span>
 </pre></div>
 </div>
 </section>
