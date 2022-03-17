@@ -58,6 +58,7 @@ RUN pip install cmake
 
 # copy init script and config to container
 COPY scripts ${AIRFLOW_HOME}/scripts
+COPY plugins ${AIRFLOW_HOME}/plugins
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 # create folder for custom ssh keys
@@ -69,6 +70,10 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 # execute installation solvers script
 RUN python ${AIRFLOW_HOME}/scripts/solver_installation.py
+ENV GUROBI_HOME=${AIRFLOW_HOME}/gurobi/linux64
+ENV PATH=${PATH}:${GUROBI_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib
+ENV GRB_LICENSE_FILE=${AIRFLOW_HOME}/gurobi.lic
 
 EXPOSE 8080 5555 8793
 

@@ -37,6 +37,7 @@ LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"
 TOKEN_URL = PREFIX + "/token/"
 USER_URL = PREFIX + "/user/"
+RECOVER_PASSWORD_URL = PREFIX + "/user/recover-password/"
 
 SCHEMA_URL = PREFIX + "/schema/"
 
@@ -53,3 +54,18 @@ USER_ROLE_URL = PREFIX + "/user/role/"
 APIVIEW_URL = PREFIX + "/apiview/"
 
 DEPLOYED_DAG_URL = PREFIX + "/dag/deployed/"
+
+PUBLIC_DAGS = [
+    "solve_model_dag",
+    "gc",
+    "timer",
+    "bar_cutting",
+    "facility_location",
+    "graph_coloring",
+    "hk_2020_dag",
+    "knapsack",
+    "roadef",
+    "rostering",
+    "tsp",
+    "vrp",
+]

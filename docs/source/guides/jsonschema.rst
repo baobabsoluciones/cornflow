@@ -359,4 +359,9 @@ The main properties used are: ``title``, ``description`` and ``$comment``:
 
 - We use the ``title`` property to set up a meaningful name for the table columns on the data tables.
 - We use the ``description`` property to give a description of the table or fields of the data tables.
-- We use the ``$comment`` property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.
+- These two properties can be an object indexed by the language key (``en`` or ``es`` for example) in order to set up the internationalization of the user interface.
+- We use the ``show`` property to indicate if the table or column has to be seen in the user interface.
+- We use the ``filterable`` property to indicate if the table or the column can be filtered down on the user interface.
+- We use the ``sortable`` property to indicate if the table or column can be sorted on the user interface.
+- We use the ``format`` property to set up additional information of the type of the property, mainly if the field is a date field and should be treated as such for validation.
+- We uses the ``minimum`` and ``maximum`` properties for integer or number fields in order to set up the limits of the data. This limits are used by the forms in the user interface as well.

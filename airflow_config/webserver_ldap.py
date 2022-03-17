@@ -41,25 +41,24 @@ AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Op"
 
 # When using LDAP Auth, setup the ldap server
-AUTH_LDAP_SERVER = os.environ.get('AIRFLOW_LDAP_URI')
-AUTH_LDAP_USE_TLS = os.environ.get('AIRFLOW_LDAP_USE_TLS')
-AUTH_LDAP_SEARCH = os.environ.get('AIRFLOW_LDAP_SEARCH')
-AUTH_LDAP_UID_FIELD = os.environ.get('AIRFLOW_LDAP_UID_FIELD')
+AUTH_LDAP_SERVER = os.environ.get("AIRFLOW_LDAP_URI")
+AUTH_LDAP_USE_TLS = os.environ.get("AIRFLOW_LDAP_USE_TLS")
+AUTH_LDAP_SEARCH = os.environ.get("AIRFLOW_LDAP_SEARCH")
+AUTH_LDAP_UID_FIELD = os.environ.get("AIRFLOW_LDAP_UID_FIELD")
 
 # For a typical OpenLDAP setup (where LDAP searches require a special account):
 # The user must be the LDAP USER as defined in LDAP_ADMIN_USERNAME
-AUTH_LDAP_BIND_USER = os.environ.get('AIRFLOW_LDAP_BIND_USER')
-AUTH_LDAP_BIND_PASSWORD = os.environ.get('AIRFLOW_LDAP_BIND_PASSWORD')
+AUTH_LDAP_BIND_USER = os.environ.get("AIRFLOW_LDAP_BIND_USER")
+AUTH_LDAP_BIND_PASSWORD = os.environ.get("AIRFLOW_LDAP_BIND_PASSWORD")
 
 # a mapping from LDAP DN to a list of FAB roles
 AUTH_ROLES_MAPPING = {
-    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_ADMIN'): ["Admin"],
-    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_OP'): ["Op"],
-    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC'): ["Public"],
-    os.environ.get('AIRFLOW_LDAP_ROLE_MAPPING_VIEWER'): ["User"],
+    os.environ.get("AIRFLOW_LDAP_ROLE_MAPPING_ADMIN"): ["Admin"],
+    os.environ.get("AIRFLOW_LDAP_ROLE_MAPPING_OP"): ["Op"],
+    os.environ.get("AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC"): ["Public"],
+    os.environ.get("AIRFLOW_LDAP_ROLE_MAPPING_VIEWER"): ["User"],
 }
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
 # the LDAP user attribute which has their role DNs
-AUTH_LDAP_GROUP_FIELD = os.environ.get('AIRFLOW_LDAP_GROUP_FIELD')
-
+AUTH_LDAP_GROUP_FIELD = os.environ.get("AIRFLOW_LDAP_GROUP_FIELD")

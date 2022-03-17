@@ -26,6 +26,7 @@ from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
     USER_URL,
+    RECOVER_PASSWORD_URL,
 )
 
 
@@ -584,3 +585,63 @@ class TestUserModel(TestCase):
         after = PermissionsDAG.get_user_dag_permissions(user_id)
         self.assertEqual([], after)
         self.assertNotEqual(before, after)
+
+
+"""class TestRecoverPasswordEndpoint(TestCase):
+    def create_app(self):
+        app = create_app("testing")
+        return app
+
+    def setUp(self):
+        db.create_all()
+        AccessInitialization().run()
+
+        self.url = USER_URL
+        self.model = UserModel
+
+        self.user = dict(
+            username="aViewer", email="cornflow.user.test@gmail.com", password="Testpassword1!"
+        )
+
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(self.user),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.user["id"] = response.json["id"]
+        db.session.commit()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_recover_password_valid_address(self):
+        response = self.client.put(
+            RECOVER_PASSWORD_URL,
+            data=json.dumps(dict(email=self.user["email"])),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.user.pop("email")
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.user),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(str, type(response.json["error"]))
+
+    def test_recover_password_inexistant_address(self):
+        response = self.client.put(
+            RECOVER_PASSWORD_URL,
+            data=json.dumps(dict(email="invalid.viewer@test.com")),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 400)
+"""

@@ -1,5 +1,6 @@
 def register_actions_command(verbose):
-    from sqlalchemy.exc import IntegrityError
+    import logging as log
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..models import ActionModel
     from ..shared.const import ACTIONS_MAP
@@ -7,7 +8,11 @@ def register_actions_command(verbose):
 
     actions_registered = [ac.name for ac in ActionModel.get_all_objects()]
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on database commit: {e}")
 
     actions_to_register = [
         ActionModel(id=key, name=value)
@@ -20,14 +25,23 @@ def register_actions_command(verbose):
 
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         db.session.rollback()
+        log.error(f"Integrity error on actions register: {e}")
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on actions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
             "SELECT setval(pg_get_serial_sequence('actions', 'id'), MAX(id)) FROM actions;"
         )
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on actions sequence updating: {e}")
 
     if verbose == 1:
         if len(actions_to_register) > 0:

@@ -63,6 +63,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :return: a list of objects with the data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        log.info(f"User {self.get_user_id()} gets all the instances")
         return self.model.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
@@ -98,9 +99,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
         # if we're here, we validated and the data seems to fit the schema
         response = self.post_list(kwargs)
-        log.info(
-            "User {} creates instance {}".format(self.get_user_id(), response[0].id)
-        )
+        log.info(f"User {self.get_user_id()} creates instance {response[0].id}")
         return response
 
 
@@ -131,6 +130,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info(f"User {self.get_user_id()} gets instance {idx}")
         return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
@@ -150,7 +150,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.put_detail(data, self.get_user(), idx)
-        log.info("User {} edits instance {}".format(self.get_user_id(), idx))
+        log.info(f"User {self.get_user_id()} edits instance {idx}")
         return response
 
     @doc(description="Delete an instance", tags=["Instances"])
@@ -167,7 +167,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.delete_detail(self.get_user(), idx)
-        log.info("User {} deletes instance {}".format(self.get_user_id(), idx))
+        log.info("User {self.get_user_id()} deletes instance {idx}")
         return response
 
 
@@ -196,6 +196,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        log.info(f"User {self.get_user_id()} gets the data of case {idx}")
         return InstanceModel.get_one_object_from_user(self.get_user(), idx)
 
 
@@ -227,9 +228,7 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
         filename = secure_filename(file.filename)
         if not (file and allowed_file(filename)):
             raise InvalidUsage(
-                error="Could not open file to upload. Check the extension matches {}".format(
-                    ALLOWED_EXTENSIONS
-                )
+                error=f"Could not open file to upload. Check the extension matches {ALLOWED_EXTENSIONS}"
             )
         file.save(filename)
         sense = 1 if minimize else -1
@@ -255,12 +254,9 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
             raise InvalidUsage(error=val_err.normalized_messages())
 
         item = InstanceModel(data)
+        item.schema = "solve_model_dag"
         item.save()
-        log.info(
-            "User {} creates instance {} from mps file".format(
-                self.get_user_id(), item.id
-            )
-        )
+        log.info(f"User {self.get_user_id()} creates instance {item.id} from mps file")
         return item, 201
 
 

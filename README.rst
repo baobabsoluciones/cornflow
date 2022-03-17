@@ -16,7 +16,7 @@ Cornflow
 .. image:: https://img.shields.io/pypi/pyversions/cornflow-client.svg?style=svg
    :target: https://pypi.python.org/pypi/cornflow-client
 
-.. image:: https://img.shields.io/badge/License-MIT-blue.svg?style=svg
+.. image:: https://img.shields.io/badge/License-Apache2.0-blue
 
 Cornflow is open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
 
@@ -68,7 +68,7 @@ Initialize the api client::
 
     from cornflow_client import CornFlow
     email = 'some_email@gmail.com'
-    pwd = 'some_password'
+    pwd = 'Some_password1'
     username = 'some_name'
     client = CornFlow(url="http://127.0.0.1:5000")
 
@@ -77,7 +77,7 @@ Create a user::
     config = dict(username=username, email=email, pwd=pwd)
     client.sign_up(**config)
 
-log in::
+Log in::
 
     client.login(username=username, pwd=pwd)
 

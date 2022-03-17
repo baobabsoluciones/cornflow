@@ -4,7 +4,9 @@ Model for the cases
 
 # Import from libraries
 import jsonpatch
+import logging as log
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_model import BaseDataModel
@@ -48,6 +50,7 @@ class CaseModel(BaseDataModel):
     )
     solution = db.Column(JSON, nullable=True)
     solution_hash = db.Column(db.String(256), nullable=False)
+    solution_checks = db.Column(JSON, nullable=True)
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
@@ -92,6 +95,7 @@ class CaseModel(BaseDataModel):
 
         self.solution = data.get("solution", None)
         self.solution_hash = hash_json_256(self.solution)
+        self.solution_checks = data.get("solution_checks", None)
 
     @classmethod
     def from_parent_id(cls, user, data):
@@ -129,8 +133,12 @@ class CaseModel(BaseDataModel):
                 db.session.delete(n)
             db.session.delete(self)
             db.session.commit()
-        except:
+        except IntegrityError as e:
             db.session.rollback()
+            log.error(f"Error on deletion of case and children cases: {e}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on deletion of case and children cases: {e}")
 
     @staticmethod
     def apply_patch(original_data, data_patch):

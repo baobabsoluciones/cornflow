@@ -1,12 +1,15 @@
 def register_deployed_dags_command(
     url: str = None, user: str = None, pwd: str = None, verbose: int = 0
 ):
+    # Full imports
+    import logging as log
     import time
 
-    #
-    from cornflow_client.airflow.api import Airflow
+    # Partial imports
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from sqlalchemy.exc import IntegrityError
+    # Internal modules imports
+    from cornflow_client.airflow.api import Airflow
     from ..models import DeployedDAG
     from ..shared.utils import db
 
@@ -42,6 +45,10 @@ def register_deployed_dags_command(
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
+        log.error(f"Integrity error on deployed dags register: {e}")
+    except DBAPIError as e:
+        db.session.rollback()
+        log.error(f"Unknown error on deployed dags register: {e}")
 
     if verbose == 1:
         if len(processed_dags) > 0:

@@ -3,9 +3,11 @@
 """
 # Import from libraries
 import datetime
+import logging as log
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.declarative import declared_attr
 
 # Import from internal modules
@@ -17,11 +19,31 @@ class EmptyModel(db.Model):
 
     def save(self):
         db.session.add(self)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            log.error(f"Integrity error on saving new data: {e}")
+            log.error(f"Data: {self}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on saving new data: {e}")
+            log.error(f"Data: {self}")
 
     def delete(self):
         db.session.delete(self)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            log.error(f"Integrity error on deleting existing data: {e}")
+            log.error(f"Data: {self}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on deleting existing data: {e}")
+            log.error(f"Data: {self}")
 
 
 class TraceAttributes(EmptyModel):
@@ -43,18 +65,48 @@ class TraceAttributes(EmptyModel):
     def update(self, data):
         self.updated_at = datetime.datetime.utcnow()
         db.session.add(self)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            log.error(f"Integrity error on updating data: {e}")
+            log.error(f"Data: {self}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on updating data: {e}")
+            log.error(f"Data: {self}")
 
     def disable(self):
         self.deleted_at = datetime.datetime.utcnow()
         db.session.add(self)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            log.error(f"Integrity error on disabling data: {e}")
+            log.error(f"Data: {self}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on disabling data: {e}")
+            log.error(f"Data: {self}")
 
     def activate(self):
         self.updated_at = datetime.datetime.utcnow()
         self.deleted_at = None
         db.session.add(self)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            log.error(f"Integrity error on activating data: {e}")
+            log.error(f"Data: {self}")
+        except DBAPIError as e:
+            db.session.rollback()
+            log.error(f"Unknown error on activating data: {e}")
+            log.error(f"Data: {self}")
 
 
 class BaseDataModel(TraceAttributes):
@@ -63,6 +115,7 @@ class BaseDataModel(TraceAttributes):
     __abstract__ = True
 
     data = db.Column(JSON, nullable=True)
+    checks = db.Column(JSON, nullable=True)
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
     data_hash = db.Column(db.String(256), nullable=False)
@@ -79,14 +132,8 @@ class BaseDataModel(TraceAttributes):
         self.name = data.get("name")
         self.description = data.get("description")
         self.schema = data.get("schema")
+        self.checks = data.get("checks")
         super().__init__()
-
-    def save(self):
-        """
-        Saves the object to the database
-        """
-        db.session.add(self)
-        db.session.commit()
 
     def update(self, data):
         """
@@ -96,13 +143,6 @@ class BaseDataModel(TraceAttributes):
         for key, item in data.items():
             setattr(self, key, item)
         super().update(data)
-
-    def delete(self):
-        """
-        Deletes an object permanently from the data base
-        """
-        db.session.delete(self)
-        db.session.commit()
 
     @classmethod
     def get_all_objects(
