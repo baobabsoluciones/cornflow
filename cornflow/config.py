@@ -39,6 +39,12 @@ class DefaultConfig(object):
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS", "False")
 
+    # OpenID login -> Default Azure
+    OID_PROVIDER = os.getenv("OID_PROVIDER", 0)
+    OID_CLIENT_ID = os.getenv("OID_CLIENT_ID")
+    OID_TENANT_ID = os.getenv("OID_TENANT_ID")
+    OID_ISSUER = os.getenv("OID_ISSUER")
+
     # APISPEC:
     APISPEC_SPEC = APISpec(
         title="Cornflow API docs",
