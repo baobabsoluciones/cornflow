@@ -66,7 +66,7 @@ class Auth:
             return {"user_id": payload["sub"]}
         except jwt.ExpiredSignatureError:
             raise InvalidCredentials(
-                error="Token expired, please login again", status_code=400
+                error="The token has expired, please login again", status_code=400
             )
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
@@ -84,15 +84,25 @@ class Auth:
         :param int provider:
         """
         public_key = Auth._get_public_key(token, tenant_id, provider)
-        decoded = jwt.decode(
-            token,
-            public_key,
-            verify=True,
-            algorithms=["RS256"],
-            audience=[client_id],
-            issuer=issuer,
-        )
-        return decoded
+        try:
+            decoded = jwt.decode(
+                token,
+                public_key,
+                verify=True,
+                algorithms=["RS256"],
+                audience=[client_id],
+                issuer=issuer,
+            )
+            return decoded
+        except jwt.ExpiredSignatureError:
+            raise InvalidCredentials(
+                error="The token has expired, please login again", status_code=400
+            )
+        except jwt.InvalidTokenError:
+            raise InvalidCredentials(
+                error="Invalid token, please try again with a new token",
+                status_code=400,
+            )
 
     @staticmethod
     def get_token_from_header(headers):
