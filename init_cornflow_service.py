@@ -97,8 +97,8 @@ with app.app_context():
     migrate = Migrate(app=app, db=db)
     upgrade()
     access_init_command(0)
-    # create user if auth type is db
-    if AUTH == 1:
+    # create user if auth type is db or oid
+    if AUTH == 1 or AUTH == 0:
         # create cornflow admin user
         create_user_with_role(
             CORNFLOW_ADMIN_USER,
