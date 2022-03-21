@@ -13,7 +13,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import UserModel, UserRoleModel
+from ..models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
 from ..schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from ..shared.authentication import Auth
 from ..shared.const import (
@@ -125,6 +125,7 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
         info = self.check_token(kwargs.get("token"))
         user = UserModel.get_one_user_by_username(info["preferred_username"])
 
+        # If the user does not exist we create it and assign it the default role and dag permissions
         if not user:
             log.info(
                 f"OpenID username {info['preferred_username']} does not exist and is created"
@@ -139,6 +140,10 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
             UserRoleModel.del_one_user(user.id)
             user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
             user_role.save()
+
+            if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+                PermissionsDAG.delete_all_permissions_from_user(user.id)
+                PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
             token = Auth.generate_token(user.id)

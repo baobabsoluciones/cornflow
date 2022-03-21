@@ -76,7 +76,6 @@ def create_app(env_name="development", dataconn=None):
 
     # Resource for the log-in
     AUTH_TYPE = app.config["AUTH_TYPE"]
-    print(f"AUTH_TYPE: {AUTH_TYPE}")
 
     if AUTH_TYPE == AUTH_DB or AUTH_TYPE == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")

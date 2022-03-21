@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB
+from .shared.const import AUTH_DB, PLANNER_ROLE
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -11,6 +11,7 @@ class DefaultConfig(object):
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
