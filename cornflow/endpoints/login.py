@@ -138,7 +138,9 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
             user.save()
 
             UserRoleModel.del_one_user(user.id)
-            user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
+            user_role = UserRoleModel(
+                {"user_id": user.id, "role_id": current_app.config["DEFAULT_ROLE"]}
+            )
             user_role.save()
 
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:

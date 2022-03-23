@@ -60,6 +60,8 @@ os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
 
 OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 os.environ["OPEN_DEPLOYMENT"] = str(OPEN_DEPLOYMENT)
+DEFAULT_ROLE = os.getenv("DEFAULT_ROLE", 2)
+os.environ["DEFAULT_ROLE"] = str(DEFAULT_ROLE)
 
 # Check LDAP parameters for active directory and show message
 if os.getenv("AUTH_TYPE") == 2:
