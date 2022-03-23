@@ -1,0 +1,19 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"route": {
+			"description": "Order of nodes in each route",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"node": {"type": "integer"},
+					"pos": {"type": "integer"}
+				},
+				"required": ["pos", "node"]
+			}
+		}
+	},
+	"required": ["route"]
+}
