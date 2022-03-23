@@ -40,6 +40,11 @@ class InvalidData(InvalidUsage):
     error = "The data sent is not valid"
 
 
+class CommunicationError(InvalidUsage):
+    status_code = 400
+    error = "The communication failed"
+
+
 class InvalidPatch(InvalidUsage):
     status_code = 400
     error = "The json patch sent is not valid"

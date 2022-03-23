@@ -2,9 +2,10 @@
 External endpoint for the user to login to the cornflow webserver
 """
 
-# Import from libraries
+# Full import from libraries
 import logging as log
 
+# Partial imports
 from flask import g, current_app
 from flask_apispec import use_kwargs, doc
 from flask_apispec.views import MethodResource
@@ -12,11 +13,18 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import UserModel, UserRoleModel
-from ..schemas.user import LoginEndpointRequest
+from ..models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
+from ..schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from ..shared.authentication import Auth
-from ..shared.const import AUTH_DB, AUTH_LDAP
-from ..shared.exceptions import InvalidUsage, InvalidCredentials
+from ..shared.const import (
+    AUTH_DB,
+    AUTH_LDAP,
+    OID_AZURE,
+    OID_GOOGLE,
+    OID_NONE,
+    PLANNER_ROLE,
+)
+from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
 from ..shared.ldap import LDAP
 from ..shared.utils import db
 
@@ -105,3 +113,70 @@ class LoginEndpoint(MetaResource, MethodResource):
             log.error(f"Unknown error on user role assignment on log in: {e}")
 
         return user
+
+
+class LoginOpenAuthEndpoint(MetaResource, MethodResource):
+    """ """
+
+    @doc(description="Log in", tags=["Users"])
+    @use_kwargs(LoginOpenAuthRequest, location="json")
+    def post(self, **kwargs):
+        """ """
+        info = self.check_token(kwargs.get("token"))
+        user = UserModel.get_one_user_by_username(info["preferred_username"])
+
+        # If the user does not exist we create it and assign it the default role and dag permissions
+        if not user:
+            log.info(
+                f"OpenID username {info['preferred_username']} does not exist and is created"
+            )
+            data = {
+                "username": info["preferred_username"],
+                "email": info["preferred_username"],
+            }
+            user = UserModel(data=data)
+            user.save()
+
+            UserRoleModel.del_one_user(user.id)
+            user_role = UserRoleModel(
+                {"user_id": user.id, "role_id": current_app.config["DEFAULT_ROLE"]}
+            )
+            user_role.save()
+
+            if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+                PermissionsDAG.delete_all_permissions_from_user(user.id)
+                PermissionsDAG.add_all_permissions_to_user(user.id)
+
+        try:
+            token = Auth.generate_token(user.id)
+        except Exception as e:
+            raise InvalidUsage(
+                error=f"error in generating user token: {str(e)}", status_code=400
+            )
+
+        return {"token": token, "id": user.id}, 200
+
+    @staticmethod
+    def check_token(token):
+        OID_PROVIDER = int(current_app.config["OID_PROVIDER"])
+
+        client_id = current_app.config["OID_CLIENT_ID"]
+        tenant_id = current_app.config["OID_TENANT_ID"]
+        issuer = current_app.config["OID_ISSUER"]
+
+        if client_id is None or tenant_id is None or issuer is None:
+            raise EndpointNotImplemented("The OID provider configuration is not valid")
+
+        if OID_PROVIDER == OID_AZURE:
+            decoded_token = Auth.validate_oid_token(
+                token, client_id, tenant_id, issuer, OID_PROVIDER
+            )
+
+        elif OID_PROVIDER == OID_GOOGLE:
+            raise EndpointNotImplemented("The selected OID provider is not implemented")
+        elif OID_PROVIDER == OID_NONE:
+            raise EndpointNotImplemented("The OID provider configuration is not valid")
+        else:
+            raise EndpointNotImplemented("The OID provider configuration is not valid")
+
+        return decoded_token

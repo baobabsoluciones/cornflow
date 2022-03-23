@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB
+from .shared.const import AUTH_DB, PLANNER_ROLE
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -11,6 +11,7 @@ class DefaultConfig(object):
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
@@ -38,6 +39,12 @@ class DefaultConfig(object):
 
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS", "False")
+
+    # OpenID login -> Default Azure
+    OID_PROVIDER = os.getenv("OID_PROVIDER", 0)
+    OID_CLIENT_ID = os.getenv("OID_CLIENT_ID")
+    OID_TENANT_ID = os.getenv("OID_TENANT_ID")
+    OID_ISSUER = os.getenv("OID_ISSUER")
 
     # APISPEC:
     APISPEC_SPEC = APISpec(

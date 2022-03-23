@@ -661,7 +661,7 @@ class LoginTestCases:
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "Token expired, please login again", response.json["error"]
+                "The token has expired, please login again", response.json["error"]
             )
 
         def test_bad_format_token(self):

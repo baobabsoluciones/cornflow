@@ -60,6 +60,8 @@ os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
 
 OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 os.environ["OPEN_DEPLOYMENT"] = str(OPEN_DEPLOYMENT)
+DEFAULT_ROLE = os.getenv("DEFAULT_ROLE", 2)
+os.environ["DEFAULT_ROLE"] = str(DEFAULT_ROLE)
 
 # Check LDAP parameters for active directory and show message
 if os.getenv("AUTH_TYPE") == 2:
@@ -97,8 +99,8 @@ with app.app_context():
     migrate = Migrate(app=app, db=db)
     upgrade()
     access_init_command(0)
-    # create user if auth type is db
-    if AUTH == 1:
+    # create user if auth type is db or oid
+    if AUTH == 1 or AUTH == 0:
         # create cornflow admin user
         create_user_with_role(
             CORNFLOW_ADMIN_USER,
