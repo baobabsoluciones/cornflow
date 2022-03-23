@@ -1,0 +1,184 @@
+{
+    "routes": [
+        {
+            "node": 1,
+            "pos": 0,
+            "route": 0
+        },
+        {
+            "node": 2,
+            "pos": 1,
+            "route": 0
+        },
+        {
+            "node": 3,
+            "pos": 2,
+            "route": 0
+        },
+        {
+            "node": 4,
+            "pos": 3,
+            "route": 0
+        },
+        {
+            "node": 5,
+            "pos": 4,
+            "route": 0
+        },
+        {
+            "node": 6,
+            "pos": 5,
+            "route": 0
+        },
+        {
+            "node": 7,
+            "pos": 6,
+            "route": 0
+        },
+        {
+            "node": 8,
+            "pos": 7,
+            "route": 0
+        },
+        {
+            "node": 9,
+            "pos": 8,
+            "route": 0
+        },
+        {
+            "node": 10,
+            "pos": 9,
+            "route": 0
+        },
+        {
+            "node": 11,
+            "pos": 10,
+            "route": 0
+        },
+        {
+            "node": 12,
+            "pos": 11,
+            "route": 0
+        },
+        {
+            "node": 13,
+            "pos": 12,
+            "route": 0
+        },
+        {
+            "node": 14,
+            "pos": 13,
+            "route": 0
+        },
+        {
+            "node": 15,
+            "pos": 14,
+            "route": 0
+        },
+        {
+            "node": 16,
+            "pos": 15,
+            "route": 0
+        },
+        {
+            "node": 17,
+            "pos": 16,
+            "route": 0
+        },
+        {
+            "node": 18,
+            "pos": 17,
+            "route": 0
+        },
+        {
+            "node": 19,
+            "pos": 18,
+            "route": 0
+        },
+        {
+            "node": 20,
+            "pos": 19,
+            "route": 0
+        },
+        {
+            "node": 21,
+            "pos": 20,
+            "route": 0
+        },
+        {
+            "node": 22,
+            "pos": 21,
+            "route": 0
+        },
+        {
+            "node": 23,
+            "pos": 22,
+            "route": 0
+        },
+        {
+            "node": 24,
+            "pos": 23,
+            "route": 0
+        },
+        {
+            "node": 25,
+            "pos": 24,
+            "route": 0
+        },
+        {
+            "node": 26,
+            "pos": 25,
+            "route": 0
+        },
+        {
+            "node": 27,
+            "pos": 26,
+            "route": 0
+        },
+        {
+            "node": 28,
+            "pos": 27,
+            "route": 0
+        },
+        {
+            "node": 29,
+            "pos": 28,
+            "route": 0
+        },
+        {
+            "node": 30,
+            "pos": 29,
+            "route": 0
+        },
+        {
+            "node": 31,
+            "pos": 30,
+            "route": 0
+        },
+        {
+            "node": 32,
+            "pos": 31,
+            "route": 0
+        },
+        {
+            "node": 33,
+            "pos": 32,
+            "route": 0
+        },
+        {
+            "node": 34,
+            "pos": 33,
+            "route": 0
+        },
+        {
+            "node": 35,
+            "pos": 34,
+            "route": 0
+        },
+        {
+            "node": 36,
+            "pos": 35,
+            "route": 0
+        }
+    ]
+}

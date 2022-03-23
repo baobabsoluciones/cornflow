@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "solver": {
+			"type": "string",
+			"enum": ["mip", "CG"],
+			"default": "mip"
+			},
+        "timeLimit": {
+			"type": "number"
+			}
+    }
+}

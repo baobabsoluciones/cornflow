@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "objects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "weight": {
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "integer"
+                    },
+                    "id": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["weight", "value", "id"]
+            }
+        },
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "weight_capacity": {
+                    "type": "integer"
+                },
+                "nb_objects": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                    "weight_capacity",
+                    "nb_objects"
+                ]
+        }
+    },
+    "required": ["objects", "parameters"]
+}
+

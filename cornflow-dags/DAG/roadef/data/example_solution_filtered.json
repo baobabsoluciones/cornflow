@@ -1,0 +1,130 @@
+{
+    "details_shifts": [
+        {
+            "arrival": 1080,
+            "cumulated_driving_time": 0,
+            "day": 0,
+            "departure": 1080,
+            "driving_time_before_layover": 0,
+            "id_shift": 1,
+            "layover_before": 0,
+            "location": 0,
+            "position": 0,
+            "quantity": 0
+        },
+        {
+            "arrival": 1080,
+            "cumulated_driving_time": 0,
+            "day": 0,
+            "departure": 1110,
+            "driving_time_before_layover": 0,
+            "id_shift": 1,
+            "layover_before": 0,
+            "location": 1,
+            "position": 1,
+            "quantity": 6106.0
+        },
+        {
+            "arrival": 1167,
+            "cumulated_driving_time": 57,
+            "day": 0,
+            "departure": 1197,
+            "driving_time_before_layover": 0,
+            "id_shift": 1,
+            "layover_before": 0,
+            "location": 13,
+            "position": 2,
+            "quantity": -9448.0
+        },
+        {
+            "arrival": 1222,
+            "cumulated_driving_time": 82,
+            "day": 0,
+            "departure": 1252,
+            "driving_time_before_layover": 0,
+            "id_shift": 1,
+            "layover_before": 0,
+            "location": 8,
+            "position": 3,
+            "quantity": -3497.0
+        },
+        {
+            "arrival": 1288,
+            "cumulated_driving_time": 118,
+            "day": 0,
+            "departure": 1288,
+            "driving_time_before_layover": 0,
+            "id_shift": 1,
+            "layover_before": 0,
+            "location": 0,
+            "position": 4,
+            "quantity": 0
+        },
+        {
+            "arrival": 0,
+            "cumulated_driving_time": 0,
+            "day": 0,
+            "departure": 0,
+            "driving_time_before_layover": 0,
+            "id_shift": 2,
+            "layover_before": 0,
+            "location": 0,
+            "position": 0,
+            "quantity": 0
+        },
+        {
+            "arrival": 102,
+            "cumulated_driving_time": 102,
+            "day": 0,
+            "departure": 132,
+            "driving_time_before_layover": 0,
+            "id_shift": 2,
+            "layover_before": 0,
+            "location": 9,
+            "position": 1,
+            "quantity": -1682.0
+        },
+        {
+            "arrival": 196,
+            "cumulated_driving_time": 166,
+            "day": 0,
+            "departure": 226,
+            "driving_time_before_layover": 0,
+            "id_shift": 2,
+            "layover_before": 0,
+            "location": 7,
+            "position": 2,
+            "quantity": -14479.0
+        },
+        {
+            "arrival": 399,
+            "cumulated_driving_time": 309,
+            "day": 0,
+            "departure": 399,
+            "driving_time_before_layover": 0,
+            "id_shift": 2,
+            "layover_before": 0,
+            "location": 0,
+            "position": 3,
+            "quantity": 0
+        }
+    ],
+    "info_shifts": [
+        {
+            "departure_time": 1080,
+            "driver": 1,
+            "id_shift": 1,
+            "initial_quantity": 6839.0,
+            "nb_steps": 5,
+            "trailer": 1
+        },
+        {
+            "departure_time": 0,
+            "driver": 1,
+            "id_shift": 2,
+            "initial_quantity": 23000.0,
+            "nb_steps": 4,
+            "trailer": 1
+        }
+    ]
+}
