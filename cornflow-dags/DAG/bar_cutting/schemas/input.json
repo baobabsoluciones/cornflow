@@ -1,0 +1,148 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "bars": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with bars master information.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for each bar.",
+                        "title": "Bar id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "length": {
+                        "description": "The length of each bar.",
+                        "title": "Length",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "length"
+                ]
+            }
+        },
+        "products": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with products master information.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for each product.",
+                        "title": "Product id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "length": {
+                        "description": "The length of each product.",
+                        "title": "Length",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "length"
+                ]
+            }
+        },
+        "demand": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with the demand for each product.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for each product.",
+                        "title": "Product id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "demand": {
+                        "description": "The demand of each product.",
+                        "title": "Demand",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "demand"
+                ]
+            }
+        },
+        "cutting_patterns": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Table with the available cutting patterns per bar for the mip model and with the initial cutting patterns per bar for generation column method.",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "id_bar": {
+                        "description": "The unique identifier for each bar.",
+                        "title": "Bar id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "id_pattern": {
+                        "description": "The unique identifier for each pattern.",
+                        "title": "Pattern id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "id_product": {
+                        "description": "The unique identifier for each product.",
+                        "title": "Product id.",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "number_of_products": {
+                        "description": "The number of products per bar and pattern.",
+                        "title": "Number of products",
+                        "type": "integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id_bar",
+                    "id_pattern",
+                    "id_product",
+                    "number_of_products"
+                ]
+            }
+        }
+    },
+    "required": [
+        "bars",
+        "products",
+        "demand",
+        "cutting_patterns"
+    ]
+}

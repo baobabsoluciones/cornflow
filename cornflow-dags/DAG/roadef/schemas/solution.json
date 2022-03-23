@@ -1,0 +1,164 @@
+{ "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "info_shifts":{
+      "title": "Info shifts",
+      "type": "array",
+      "description": "Table with the information about each shift",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_shift": {
+            "type": "integer",
+            "title": "Index shift",
+            "description": "Index of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "driver": {
+            "type": "integer",
+            "title": "Driver",
+            "description": "Index of the driver of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "trailer": {
+            "type": "integer",
+            "title": "Trailer",
+            "description": "Index of the trailer of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "departure_time": {
+            "type": "integer",
+            "title": "Departure time",
+            "description": "Start time (in minutes) of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "initial_quantity": {
+            "type": "integer",
+            "title": "Initial quantity",
+            "description": "Quantity of product in the trailer at the beginning of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "nb_steps": {
+            "type": "integer",
+            "title": "Number of steps",
+            "description": "Number of locations visited in the shift (including the base)",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_shift",
+          "driver",
+          "trailer",
+          "departure_time",
+          "initial_quantity",
+          "nb_steps"
+        ]
+      }
+    },
+    "details_shifts": {
+      "title": "Details shifts",
+      "type": "array",
+      "description": "Table with the information about each operation of each shift",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_shift": {
+            "type": "integer",
+            "title": "Index shift",
+            "description": "Index of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "type": "integer",
+            "title": "Day",
+            "description": "Day of the beginning of the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position",
+            "description": "Position of the operation in the shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "location": {
+            "type": "integer",
+            "title": "Index location",
+            "description": "Location of the operation",
+            "sortable": true,
+            "filterable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity",
+            "description": "Quantity loaded/delivered at the location",
+            "sortable": true,
+            "filterable": true
+          },
+          "arrival": {
+            "type": "integer",
+            "title": "Arrival time",
+            "description": "Arrival time (in minutes) at the location",
+            "sortable": true,
+            "filterable": true
+          },
+          "departure": {
+            "type": "integer",
+            "title": "Departure time",
+            "description": "Departure time (in minutes) at the location",
+            "sortable": true,
+            "filterable": true
+          },
+          "layover_before": {
+            "type": "integer",
+            "title": "Layover before",
+            "description": "1 if a layover is included before the operation",
+            "sortable": true,
+            "filterable": true
+          },
+          "driving_time_before_layover": {
+            "type": "integer",
+            "title": "Driving time before layover",
+            "description": "If a layover is included before the operation, driving time before the layover (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "cumulated_driving_time": {
+            "type": "integer",
+            "title": "Cumulated driving time",
+            "description": "Cumulated driving time between the beginning of the shift and the current operation",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_shift",
+          "day",
+          "position",
+          "location",
+          "quantity",
+          "arrival",
+          "departure",
+          "layover_before",
+          "cumulated_driving_time"
+        ]
+      }
+    }
+  },
+  "required": ["info_shifts", "details_shifts"]
+}
+

@@ -1,0 +1,57 @@
+name: integration
+
+on:
+  pull_request:
+    types: [ opened, edited, synchronize, reopened ]
+
+jobs:
+  integration:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Install airflow
+      run: |
+        AIRFLOW_VERSION=2.1.0
+        PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+        CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+        pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+        airflow db init
+        airflow users create \
+              --username admin \
+              --firstname admin \
+              --lastname admin \
+              --role Admin \
+              --password admin \
+              --email admin@example.org
+        airflow webserver -p 8080 &
+        airflow scheduler &
+        sleep 5s
+      env:
+        AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
+        AIRFLOW_HOME: "${GITHUB_WORKSPACE}"
+        AIRFLOW__CORE__DAGS_FOLDER: "${GITHUB_WORKSPACE}/DAG"
+        AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
+        AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+        AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+        AIRFLOW__CORE__LOAD_EXAMPLES: 0
+        AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
+    - name: Run dag tests
+      run: |
+        python -m unittest tests/test_dags_af.py
+      env:
+        FLASK_ENV: testing

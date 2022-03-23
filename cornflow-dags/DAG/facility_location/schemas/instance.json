@@ -1,0 +1,109 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "cost_per_km_per_dose": {
+                    "description": "cost of transporting one dose per km",
+                    "type": "number"
+                }
+            },
+            "required": ["cost_per_km_per_dose"]
+        },
+        "products": {
+            "type": "array",
+            "description": "cost of purchasing a unit of a product from any supplier",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "nb_doses": {"type": "integer"},
+                    "unit_cost": {"type": "number"}
+                },
+                "required": ["id", "nb_doses" ,"unit_cost"]
+            }
+        },
+        "suppliers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "information on the amount of each of product that a supplier has available",
+                "properties": {
+                    "id": {"type": "string"},
+                    "id_product": {"type": "string"},
+                    "availability": {"type": "integer"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"}
+                },
+                "required": ["id", "id_product", "availability"]
+            }
+        },
+        "warehouses": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "information on the capacity and costs of each warehouse of the network",
+                "properties": {
+                    "id": {"type": "string"},
+                    "level": {"type": "integer"},
+                    "capacity": {"type": "integer"},
+                    "fixed_cost": {"type": "number"},
+                    "variable_cost": {"type": "number"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"}
+                },
+                "required": ["id", "capacity", "fixed_cost", "variable_cost"]
+            }
+        },
+        "clients": {
+            "type": "array",
+            "description": "information on the demand of each customer (there is no distinction between one product and another) ",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "demand": {"type": "integer"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"}
+                },
+                "required": ["id", "demand"]
+            }
+        },
+        "distances": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "distances (km) between every two nodes od the network",
+                "properties": {
+                    "origin": {"type": "string"},
+                    "destination": {"type": "string"},
+                    "distance": {"type": "number"},
+                    "time": {"type": "number"}
+                },
+                "required": ["origin", "destination", "distance"]
+            }
+        },
+        "restricted_flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "pairs of nodes between which there can be no flow",
+                "properties": {
+                    "origin": {"type": "string"},
+                    "destination": {"type": "string"}
+                },
+                "required": ["origin", "destination"]
+            }
+        }
+    },
+    "required": [
+        "products",
+        "suppliers",
+        "warehouses",
+        "clients",
+        "distances",
+        "restricted_flows"
+    ]
+}
