@@ -1,17 +1,51 @@
-name: integration
+name: cornflow-dags tests
 
 on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
 
 jobs:
-  integration:
+  unit:
 
     runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install cbc
+      run: |
+        sudo apt-get install -y coinor-cbc
+    - name: Install cbc
+      run: |
+        sudo apt-get install -y coinor-cbc
+    - name: Install dependencies
+      run: |
+        cd cornflow-dags
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements.txt
+    - name: Run dag tests
+      run: |
+        cd cornflow-dags
+        python -m unittest tests/test_dags.py
+      env:
+        FLASK_ENV: testing
+  
+  integration:
+
+    needs: unit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.7, 3.8]
         os: [ubuntu-latest]
 
     steps:
@@ -22,6 +56,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        cd cornflow-dags
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
     - name: Install airflow
@@ -44,7 +79,7 @@ jobs:
       env:
         AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
         AIRFLOW_HOME: "${GITHUB_WORKSPACE}"
-        AIRFLOW__CORE__DAGS_FOLDER: "${GITHUB_WORKSPACE}/DAG"
+        AIRFLOW__CORE__DAGS_FOLDER: "${GITHUB_WORKSPACE}/cornflow-dags/DAG"
         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
         AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
@@ -52,6 +87,7 @@ jobs:
         AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
     - name: Run dag tests
       run: |
+        cd cornflow-dags
         python -m unittest tests/test_dags_af.py
       env:
         FLASK_ENV: testing
