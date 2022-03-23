@@ -1,0 +1,203 @@
+name: cornflow-server tests
+
+on:
+  pull_request:
+    types: [ opened, edited, synchronize, reopened ]
+  push:
+    branches:
+      - master
+
+jobs:
+  unit:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        cd cornflow-server
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Run unit tests
+      run: | 
+        cd cornflow-server
+        python -m unittest discover -s cornflow.tests.unit
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: sqlite:///cornflow_test.db
+  
+  unit-postgres:
+
+    needs: unit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-latest]
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: cornflow-test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgresadmin
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        cd cornflow-server
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Run unit tests
+      run: | 
+        cd cornflow-server
+        python -m unittest discover -s cornflow.tests.unit
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
+
+  ldap-integration:
+
+    needs: unit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        cd cornflow-server
+        docker run --volume $GITHUB_WORKSPACE/cornflow-server/airflow_config:/etc/ldap.dist/prepopulate \
+        -e SLAPD_DOMAIN=example.org \
+        -e SLAPD_PASSWORD=admin \
+        -d -p 389:389 dinkel/openldap
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Run unit tests
+      run: | 
+        cd cornflow-server
+        python -m unittest discover -s cornflow.tests.ldap
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: sqlite:///cornflow_test.db
+        AUTH_TYPE: 2
+        LDAP_HOST: ldap://localhost:389
+        LDAP_BIND_PASSWORD: admin
+        LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
+        LDAP_GROUP_OBJECT_CLASS: posixGroup
+        LDAP_PROTOCOL_VERSION: 3
+        LDAP_BIND_DN: cn=admin,dc=example,dc=org
+        LDAP_USE_TLS: False
+        LDAP_USERNAME_ATTRIBUTE: cn
+        LDAP_USER_BASE: ou=users,dc=example,dc=org
+        LDAP_EMAIL_ATTRIBUTE: mail
+        LDAP_USER_OBJECT_CLASS: inetOrgPerson
+        LDAP_GROUP_ATTRIBUTE: cn
+        LDAP_GROUP_TO_ROLE_SERVICE: services
+        LDAP_GROUP_TO_ROLE_ADMIN: administrators
+        LDAP_GROUP_TO_ROLE_VIEWER: viewers
+        LDAP_GROUP_TO_ROLE_PLANNER: planners
+
+  integration:
+
+    needs: unit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Clone dags from cornflow dags public repo
+      uses : actions/checkout@master
+      with:
+        repository: baobabsoluciones/cornflow-dags-public
+        ref: main
+        path: cornflow-server/dags
+    - name: Copy DAG files
+      run: |
+        cd cornflow-server
+        cp -r dags/DAG/* airflow_config/dags/
+        cp dags/requirements.txt airflow_config/
+    - name: Install dependencies
+      run: |
+        cd cornflow-server
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Install airflow
+      run: |
+        cd cornflow-server
+        python -m venv afvenv
+        source afvenv/bin/activate
+        AIRFLOW_VERSION=2.2.1
+        PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+        CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+        python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+        python -m pip install -U orloge pulp
+        python -m pip install -U git+https://github.com/baobabsoluciones/cornflow-client@master
+        python -m pip install -U -r airflow_config/requirements.txt
+        airflow db init
+        airflow users create \
+              --username admin \
+              --firstname admin \
+              --lastname admin \
+              --role Admin \
+              --password admin \
+              --email admin@example.org
+        airflow webserver -p 8080 &
+        airflow scheduler &
+        deactivate
+        sleep 5s
+      env:
+        AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
+        AIRFLOW_HOME: "${GITHUB_WORKSPACE}/cornflow-server/airflow_config"
+        AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
+        AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+        AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+        AIRFLOW__CORE__LOAD_EXAMPLES: 0
+        AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+    - name: Run integration tests
+      run: |
+        cd cornflow-server
+        python -m unittest discover -s cornflow.tests.integration
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: sqlite:///cornflow_test.db
