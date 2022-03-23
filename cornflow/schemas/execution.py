@@ -100,3 +100,4 @@ class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
+    log_text = fields.Str(attribute="log_text")
