@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "include": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["id"]
+            }
+        }
+    },
+    "required": ["include"]
+}
+
+

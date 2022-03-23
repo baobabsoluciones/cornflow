@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "arcs": {
+            "description": "Arc information between pairs of nodes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n1": {"type": "integer"},
+                    "n2": {"type": "integer"},
+                    "w": {"type": "number"}
+                },
+                "required": ["n1", "n2", "w"]
+            }
+        }
+    },
+    "required": ["arcs"]
+}
