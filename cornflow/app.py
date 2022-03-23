@@ -1,6 +1,11 @@
+"""
+
+"""
+# Full imports
 import click
 import os
 
+# Partial imports
 from flask import Flask
 from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
@@ -8,6 +13,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 
+# Module imports
 from .commands.access import access_init_command
 from .commands.actions import register_actions_command
 from .commands.dag import register_deployed_dags_command
@@ -24,9 +30,11 @@ from .commands.users import (
 from .commands.views import register_views_command
 from .config import app_config
 from .endpoints import resources
+from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from .shared.compress import init_compress
 from .shared.exceptions import initialize_errorhandlers
 from .shared.utils import db, bcrypt
+from .shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
 
 
 def create_app(env_name="development", dataconn=None):
@@ -65,6 +73,14 @@ def create_app(env_name="development", dataconn=None):
     docs = FlaskApiSpec(app)
     for res in resources:
         docs.register(target=res["resource"], endpoint=res["endpoint"])
+
+    # Resource for the log-in
+    AUTH_TYPE = app.config["AUTH_TYPE"]
+
+    if AUTH_TYPE == AUTH_DB or AUTH_TYPE == AUTH_LDAP:
+        api.add_resource(LoginEndpoint, "/login/", endpoint="login")
+    elif AUTH_TYPE == AUTH_OID:
+        api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
 
     initialize_errorhandlers(app)
     init_compress(app)
