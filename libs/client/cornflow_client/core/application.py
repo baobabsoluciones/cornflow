@@ -132,9 +132,7 @@ class ApplicationCore(ABC):
         inst = self.instance.from_dict(data)
         inst_errors = inst.check_schema()
         if inst_errors:
-            raise BadInstance(
-                f"The instance does not match the schema:\n{inst_errors}"
-            )
+            raise BadInstance(f"The instance does not match the schema:\n{inst_errors}")
         sol = None
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
@@ -178,6 +176,12 @@ class ApplicationCore(ABC):
             status_code=status,
             sol_code=SOLUTION_STATUS_INFEASIBLE,
         )
+
+        try:
+            log_txt = algo.log
+        except:
+            log_txt = ""
+
         # check if there is a solution
         # TODO: we need to extract the solution status too
         #  because there may be already an initial solution in the solver
@@ -191,7 +195,7 @@ class ApplicationCore(ABC):
 
         checks = algo.check_solution()
 
-        return sol, checks, {}, "", log
+        return sol, checks, {}, log_txt, log
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         """
