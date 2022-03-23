@@ -96,6 +96,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
 
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
+        # TODO: review the order of these two operations
         execution, status_code = self.post_list(kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id
@@ -301,9 +302,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
                 dag_name=execution.schema, dag_run_id=dag_run_id
             )
         except AirflowError as err:
-            _raise_af_error(
-                execution, f"Airflow responded with an error: {err}"
-            )
+            _raise_af_error(execution, f"Airflow responded with an error: {err}")
 
         data = response.json()
         state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)

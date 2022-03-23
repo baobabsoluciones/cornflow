@@ -58,6 +58,7 @@ RUN pip install cmake
 
 # copy init script and config to container
 COPY scripts ${AIRFLOW_HOME}/scripts
+COPY plugins ${AIRFLOW_HOME}/plugins
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 # create folder for custom ssh keys

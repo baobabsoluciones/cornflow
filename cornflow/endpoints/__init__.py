@@ -1,8 +1,8 @@
 """
 Initialization file for the endpoints module
 All references to endpoints should be imported from here
+The login resource gets created on app startup as it depends on configuration
 """
-
 from .action import ActionListEndpoint
 from .apiview import ApiViewListEndpoint
 
@@ -40,7 +40,8 @@ from .instance import (
     InstanceDataEndpoint,
 )
 
-from .login import LoginEndpoint
+from .login import LoginOpenAuthEndpoint, LoginEndpoint
+
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 from .roles import (
     RolesListEndpoint,
@@ -108,7 +109,6 @@ resources = [
         urls="/user/<int:user_id>/<int:make_admin>/",
         endpoint="user-admin",
     ),
-    dict(resource=LoginEndpoint, urls="/login/", endpoint="login"),
     dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
     dict(resource=TokenEndpoint, urls="/token/", endpoint="token"),
     dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),

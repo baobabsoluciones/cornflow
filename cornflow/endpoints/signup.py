@@ -12,7 +12,7 @@ from .meta_resource import MetaResource
 from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
-from ..shared.const import AUTH_LDAP, PLANNER_ROLE
+from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
 from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
 
 
@@ -36,6 +36,10 @@ class SignUpEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The user has to sign up on the active directory"
             )
+        elif AUTH_TYPE == AUTH_OID:
+            raise EndpointNotImplemented(
+                "The user has to sign up with the OpenID protocol"
+            )
 
         if UserModel.check_username_in_use(kwargs.get("username")):
             raise InvalidCredentials(
@@ -47,22 +51,20 @@ class SignUpEndpoint(MetaResource, MethodResource):
                 error="Email already in use, please supply another email address"
             )
 
-        check_pwd = UserModel.check_password_pattern(kwargs.get('password'))
+        check_pwd = UserModel.check_password_pattern(kwargs.get("password"))
         if not check_pwd["valid"]:
-            raise InvalidCredentials(
-                error=check_pwd["message"]
-            )
+            raise InvalidCredentials(error=check_pwd["message"])
 
         check_email = UserModel.check_email_pattern(kwargs.get("email"))
         if not check_email["valid"]:
-            raise InvalidCredentials(
-                error=check_email["message"]
-            )
+            raise InvalidCredentials(error=check_email["message"])
 
         user = UserModel(kwargs)
         user.save()
 
-        user_role = UserRoleModel({"user_id": user.id, "role_id": PLANNER_ROLE})
+        user_role = UserRoleModel(
+            {"user_id": user.id, "role_id": current_app.config["DEFAULT_ROLE"]}
+        )
         user_role.save()
 
         if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:

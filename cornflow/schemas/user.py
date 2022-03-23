@@ -60,3 +60,7 @@ class UserSignupRequest(Schema):
     password = fields.Str(required=True, load_only=True)
     first_name = fields.Str(required=False)
     last_name = fields.Str(required=False)
+
+
+class LoginOpenAuthRequest(Schema):
+    token = fields.Str(required=True)
