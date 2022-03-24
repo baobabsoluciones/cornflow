@@ -5,6 +5,9 @@ on: push
 jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
+    defaults:
+      run:
+        working-directory: ./cornflow-client
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
