@@ -1,0 +1,161 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "definitions": {
+        "schemaArray": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#" }
+        },
+        "simpleTypes": {
+            "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]
+        },
+        "elementaryTypes": {
+            "anyOf": [
+                {"enum": ["boolean", "integer", "null", "number", "string" ]},
+                {"type": "array",
+                "items": {
+                    "enum": ["boolean", "integer", "null", "number", "string" ]
+                }}
+            ]
+        },
+        "stringArray": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+        },
+        "stringDict": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "titleOrDescriptionDict": {
+            "anyOf": [
+              { "type": "string" },
+              { "$ref": "#/definitions/stringDict" }
+            ]
+        },
+        "dataTable": {
+            "type": "object",
+            "properties": {
+                "show": {
+                    "type": "boolean"
+                },
+                "filterable": {
+                    "type": "boolean"
+                },
+                "sortable": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "const": "array"
+                },
+                "title": {
+                    "$ref": "#/definitions/titleOrDescriptionDict"
+                },
+                "description": {
+                    "$ref": "#/definitions/titleOrDescriptionDict"
+                },
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "object"
+                        },
+                        "properties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {"$ref": "#/definitions/elementaryTypes" },
+                                    "description": {"$ref": "#/definitions/titleOrDescriptionDict"},
+                                    "title": {"$ref": "#/definitions/titleOrDescriptionDict"},
+                                    "is_date": {
+                                        "type": "boolean"
+                                    },
+                                    "sortable": {
+                                        "type": "boolean"
+                                    },
+                                    "filterable": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": ["type"]
+                            }
+                        },
+                        "required": { "$ref": "#/definitions/stringArray" }
+                    },
+                    "required": ["required", "properties"]
+                }
+            },
+            "required": ["type", "items"]
+        },
+        "parameterTable": {
+            "type": "object",
+            "properties": {
+                "show": {
+                    "type": "boolean"
+                },
+                "filterable": {
+                    "type": "boolean"
+                },
+                "sortable": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "const": "object"
+                },
+                "title": {
+                    "$ref": "#/definitions/titleOrDescriptionDict"
+                },
+                "description": {
+                    "$ref": "#/definitions/titleOrDescriptionDict"
+                },
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "type": {"$ref": "#/definitions/elementaryTypes" },
+                            "description": {"$ref": "#/definitions/titleOrDescriptionDict"},
+                            "title": {"$ref": "#/definitions/titleOrDescriptionDict"},
+                            "is_date": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": ["type"]
+                    }
+                },
+                "required": { "$ref": "#/definitions/stringArray" }
+            },
+            "required": ["required", "properties"]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "format": "uri"
+        },
+        "type": {
+            "const": "object"
+        },
+        "default": { },
+        "definitions": {
+            "type": "object",
+            "default": { }
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    { "$ref": "#/definitions/dataTable" },
+                    { "$ref": "#/definitions/parameterTable" }
+                ]
+            }
+        },
+        "required": { "$ref": "#/definitions/stringArray" }
+    },
+    "default": { },
+    "required": ["required", "properties", "$schema"]
+}
