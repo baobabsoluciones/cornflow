@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+
+  "properties": {
+    "solver": {
+      "type": "string",
+      "default": "PULP_CBC_CMD"
+    },
+    "mip": {
+      "type": "boolean"
+    },
+    "msg": {
+      "type": "boolean"
+    },
+    "warmStart": {
+      "type": "boolean"
+    },
+    "timeLimit": {
+      "type": "number"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "keepFiles": {
+      "type": "boolean"
+    },
+    "gapRel": {
+      "type": "number"
+    },
+    "gapAbs": {
+      "type": "number"
+    },
+    "maxMemory": {
+      "type": "integer"
+    },
+    "maxNodes": {
+      "type": "integer"
+    },
+    "threads": {
+      "type": "integer"
+    },
+    "logPath": {
+      "type": "string"
+    }
+  },
+  "required": []
+}
