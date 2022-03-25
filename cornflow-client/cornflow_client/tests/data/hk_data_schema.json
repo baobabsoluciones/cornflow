@@ -1,0 +1,83 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"durations": {
+			"description": "The duration of a job when in some mode",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"duration": {
+						"type": "integer"
+					},
+					"job": {
+						"type": "integer"
+					},
+					"mode": {
+						"type": "integer"
+					}
+				},
+				"required": ["job", "mode", "duration"]
+			}
+		},
+		"jobs": {
+			"description": "Successor job ids for each job id",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"successors": {
+						"type": "array",
+						"items": {
+							"type": "integer"
+						}
+					}
+				},
+				"required": ["id", "successors"]
+			}
+		},
+		"needs": {
+			"description": "Resource consumption (need) for each resource when doing a job in some mode",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"job": {
+						"type": "integer"
+					},
+					"mode": {
+						"type": "integer"
+					},
+					"need": {
+						"type": "integer"
+					},
+					"resource": {
+						"type": "string"
+					}
+				},
+				"required": ["job", "mode", "resource", "need"]
+			}
+		},
+		"resources": {
+			"description": "Total quantity of available resource for each resource id",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"available": {
+						"type": "integer"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": ["id", "available"]
+			}
+		}
+	},
+	"required": ["durations", "jobs", "needs", "resources"]
+}
