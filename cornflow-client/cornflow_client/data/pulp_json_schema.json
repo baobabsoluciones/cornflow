@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "definitions": {
+    "coefficient": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "value": {"type": "number"}
+      },
+      "required": ["name", "value"]
+    }
+  },
+
+  "type": "object",
+
+  "properties": {
+    "objective": {
+      "type": "object",
+      "properties": {
+        "name": {"type": ["string", "null"]},
+        "coefficients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/coefficient"
+          }
+        }
+      },
+      "required": [
+        "coefficients"
+      ]
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sense": {
+            "type": "integer"
+          },
+          "pi": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "constant": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "coefficients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/coefficient"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "sense",
+          "pi",
+          "coefficients"
+        ]
+      }
+    },
+	"variables": {
+	  "type": "array",
+	  "items": {
+		"type": "object",
+		"properties": {
+		  "name": {"type": "string"},
+		  "lowBound": {"type": ["number", "null"]},
+		  "upBound": {"type": ["number", "null"]},
+		  "cat": {"type": "string"},
+		  "varValue": {"type": ["number", "null"]},
+		  "dj": {"type": ["number", "null"]}
+		},
+		"required": ["name", "cat"]
+	  }
+	},
+	"parameters": {
+	  "type": "object",
+	  "properties": {
+        "name": {"type": "string"},
+        "sense": {"type": "integer"},
+		"status": {"type": "integer"},
+		"sol_status": {"type": "integer"}
+	  },
+	  "required": ["name", "sense"]
+    },
+	"sos1": {
+	  "type": "array",
+	  "items": {
+	    "placeholder": {"type": "string"}
+	  }
+	},
+	"sos2": {
+	  "type": "array",
+	  "items": {
+	    "placeholder": {"type": "string"}
+	  }
+	}
+  },
+  "required": ["constraints", "objective", "parameters", "variables"]
+}
