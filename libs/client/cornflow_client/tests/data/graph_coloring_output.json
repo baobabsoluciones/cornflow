@@ -1,0 +1,27 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"assignment": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"node": {
+						"type": "integer"
+					},
+					"color": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"color",
+					"node"
+				]
+			}
+		}
+	},
+	"required": [
+		"assignment"
+	]
+}
