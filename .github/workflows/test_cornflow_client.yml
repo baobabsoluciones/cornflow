@@ -3,6 +3,9 @@ name: cornflow-client tests
 on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
+    paths:
+      - 'cornflow-client/**'
+      - '!cornflow-clients/README.rst'
 
 jobs:
   unit:
