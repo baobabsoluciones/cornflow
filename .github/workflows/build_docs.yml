@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'cornflow-server/docs/**'
+      - 'cornflow-server/README.rst'
 
 jobs:
   build:

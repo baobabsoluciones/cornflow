@@ -3,6 +3,9 @@ name: cornflow-dags tests
 on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
+    paths:
+      - 'cornflow-dags/**'
+      - '!cornflow-dags/README.rst'
 
 jobs:
   unit:
