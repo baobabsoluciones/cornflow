@@ -86,7 +86,7 @@ jobs:
           sleep 5s
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
-          AIRFLOW_HOME: cornflow-server/airflow_config
+          AIRFLOW_HOME: "${GITHUB_WORKSPACE}/cornflow-server/airflow_config"
           AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
           AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
