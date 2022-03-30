@@ -153,7 +153,7 @@ If you are running docker services in production, it is also convenient to use t
 <h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this headline"></a></h2>
 <p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
-<p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow-server/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
+<p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">ldap</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
 </pre></div>
 </div>
