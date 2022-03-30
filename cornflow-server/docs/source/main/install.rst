@@ -14,8 +14,8 @@ Cornflow consists of two projects: cornflow (itself) and airflow (from apache). 
 
 Download the Cornflow project::
 
-    git clone git@github.com:baobabsoluciones/cornflow-server.git
-    cd corn
+    git clone git@github.com:baobabsoluciones/cornflow.git
+    cd cornflow-server
     python3 -m venv venv
     venv/bin/pip3 install -r requirements-dev.txt
 
