@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "number of doses of a given vaccine (product) that is transported between two nodes on a given day",
+                "properties": {
+                    "origin": {"type": "string"},
+                    "destination": {"type": "string"},
+                    "product": {"type": "string"},
+                    "day": {"type": "string"},
+                    "flow": {"type": "number"}
+                },
+                "required": ["origin", "destination", "product", "day", "flow"]
+            }
+        }
+    },
+    "required": ["flows"]
+}

@@ -1,0 +1,23 @@
+{ "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties":{
+    "solver":{
+      "type": "string",
+      "default": "Greedy",
+      "enum": ["Greedy", "MIPModel", "PeriodicMIPModel", "MIPModel.PULP_CBC_CMD", "PeriodicMIPModel.PULP_CBC_CMD"]
+    },
+    "timeLimit":{
+      "type": "number"
+    },
+    "maxSlack": {
+      "type": "number"
+    },
+    "inventoryConservation": {
+      "type": "number"
+    },
+    "partialInventoryConservation": {
+      "type": "number"
+    }
+  }
+}
+
