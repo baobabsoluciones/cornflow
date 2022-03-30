@@ -22,7 +22,7 @@ class TestSignUp(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.runner = create_app().test_cli_runner()
+        self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(access_init)
         self.data = {
             "username": "testname",
