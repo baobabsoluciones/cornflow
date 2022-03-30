@@ -46,7 +46,7 @@ class TestCommands(TestCase):
             "password": "Testpassword1!",
         }
         self.resources = resources
-        self.runner = create_app().test_cli_runner()
+        self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v", 1])
 
     def tearDown(self):

@@ -6,6 +6,7 @@ on:
     paths:
       - 'cornflow-client/**'
       - '!cornflow-client/README.rst'
+      - '!cornflow-client/setup.py'
 
 jobs:
   unit:

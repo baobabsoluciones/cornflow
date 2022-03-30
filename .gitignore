@@ -148,6 +148,7 @@ build/
 *.egg-info/
 
 .idea/*
+*/.idea/*
 
 # vagrant machine folder
 .vagrant
@@ -163,3 +164,9 @@ cornssh.pub
 # DS Store and vscode
 .DS_Store
 .vscode
+
+# sqlite databases
+*.db
+
+# IO files
+*.mps
