@@ -119,7 +119,7 @@ jobs:
         LDAP_GROUP_TO_ROLE_PLANNER: planners
     - name: Run postgres unit tests
       run: | 
-        coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/unit
+        coverage run -a --source=./cornflow/ -m unittest cornflow/tests/unit/test_commands.py
         coverage report -m
       env:
         FLASK_ENV: testing
