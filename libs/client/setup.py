@@ -18,7 +18,7 @@ setuptools.setup(
     description="Client to connect to a cornflow server",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    url="https://github.com/baobabsoluciones/cornflow-client",
+    url="https://github.com/baobabsoluciones/cornflow",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

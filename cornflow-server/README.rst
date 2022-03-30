@@ -1,14 +1,14 @@
 Cornflow
 =========
 
-.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/build/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/cornflow-server/actions
+.. image:: https://github.com/baobabsoluciones/cornflow/workflows/build/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow/actions
 
-.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/docs/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/cornflow-server/actions
+.. image:: https://github.com/baobabsoluciones/cornflow/workflows/docs/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow/actions
 
-.. image:: https://github.com/baobabsoluciones/cornflow-server/workflows/integration/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/cornflow-server/actions
+.. image:: https://github.com/baobabsoluciones/cornflow/workflows/integration/badge.svg?style=svg
+    :target: https://github.com/baobabsoluciones/cornflow/actions
 
 .. image:: https://img.shields.io/pypi/v/cornflow-client.svg?style=svg
    :target: https://pypi.python.org/pypi/cornflow-client
@@ -44,8 +44,8 @@ Cornflow is tested with Ubuntu 20.04, python >= 3.5 and git.
 
 Download the Cornflow project and install requirements::
 
-    git clone git@github.com:baobabsoluciones/cornflow-server.git
-    cd corn
+    git clone git@github.com:baobabsoluciones/cornflow.git
+    cd cornflow-server
     python3 -m venv venv
     venv/bin/pip3 install -r requirements-dev.txt
 
@@ -55,7 +55,7 @@ activate the virtual environment and run Cornflow::
     export FLASK_APP=cornflow.app
     flask run
 
-**Cornflow needs a running installation of airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow-server/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
+**Cornflow needs a running installation of Airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
 
 Using cornflow to solve a PuLP model
 ---------------------------------------
@@ -137,9 +137,9 @@ To deploy a cornflow solution method, the following tasks need to be accomplishe
 
 #. Create I/O schemas for the new problem (e.g., “TSP format”).
 #. Create a solve function (e.g., a 2-opt heuristic).
-#. Do a PR to a compatible repo linked to a server instance (e.g., like `this one <https://github.com/baobabsoluciones/cornflow-dags-public>`_).
+#. Do a PR to a compatible repo linked to a server instance (e.g., like `this one <https://github.com/baobabsoluciones/cornflow>`_).
 
-For more details on each part, check the `deployment guide <https://baobabsoluciones.github.io/cornflow-server/guides/deploy_solver.html>`_.
+For more details on each part, check the `deployment guide <https://baobabsoluciones.github.io/cornflow/guides/deploy_solver.html>`_.
 
 Using cornflow to solve a problem
 -------------------------------------------
