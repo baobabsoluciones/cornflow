@@ -2,7 +2,7 @@ Deploy your own Cornflow-server
 ==========================================
 
 From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.
-In `this repository <https://github.com/baobabsoluciones/cornflow-server>`_ you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
+In `this repository <https://github.com/baobabsoluciones/cornflow>`_ you can find various templates for `docker-compose <https://docs.docker.com/compose/>`_ in which to test different types of deployment.
 
 The ``docker-compose.yml`` describes the build of this services:
 

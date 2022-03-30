@@ -8,27 +8,26 @@ Quick Start Guide
 Presentation
 ------------
 
-This is the **contributors's quick start guide** for the **Cornflow** project. This project is divided into four directories: `Cornflow-Server <https://github.com/baobabsoluciones/cornflow-server>`_, `Cornflow-client <https://github.com/baobabsoluciones/cornflow-client>`_, `Cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_, and `Cornflow-app <https://github.com/baobabsoluciones/cornflow-app>`_. 
+This is the **contributors's quick start guide** for the **Cornflow** project. This project is divided into four directories: `cornflow-Server <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-server>`_, `cornflow-client <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-client>`_, `cornflow-dags <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags>`_, and `cornflow-app <https://github.com/baobabsoluciones/cornflow-app>`_. 
 
-**Cornflow-server** allows you to run a local server on your computer, that will manage the instances of your problems, the created executions, and the communication with Airflow.
+**cornflow-server** allows you to run a local server on your computer, that will manage the instances of your problems, the created executions, and the communication with Airflow.
 
-**Cornflow-dags** allows you to formalize the problems you are trying to develop a solution to.
+**cornflow-dags** allows you to formalize the problems you are trying to develop a solution to.
 
-**Cornflow-client** provides a communication interface between your computer and cornflow-server.
+**cornflow-client** provides a communication interface between your computer and cornflow-server.
 
-**Cornflow-app** provides a graphic interface that can be customized and adapted to the solvers you deploy on cornflow-dags.
+**cornflow-app** provides a graphic interface that can be customized and adapted to the solvers you deploy on cornflow-dags.
 
 -----------
 First steps
 -----------
-The first steps to using Cornflow are to clone **Cornflow-server**, **Cornflow-dags** and **Cornflow-app** git repositories on your computer:
+The first steps to using Cornflow is to clone the **cornflow** repository, which contains the code for the **cornflow-server**, **cornflow-dags** and **cornflow-client** and the **cornflow-app** repository.:
 
 .. code-block:: console
 
   mkdir cornflow-project
   cd cornflow-project
-  git clone https://github.com/baobabsoluciones/cornflow-server.git
-  git clone https://github.com/baobabsoluciones/cornflow-dags-public.git
+  git clone https://github.com/baobabsoluciones/cornflow.git
   git clone https://github.com/baobabsoluciones/cornflow-app.git
 
 -------------
@@ -130,7 +129,7 @@ If on Windows export should be changed to set.
 Docker
 ------
 
-You will also need to install `Docker Community Edition <https://docs.docker.com/engine/install/>`_ and `Docker Compose <https://docs.docker.com/compose/install/>`_. See `here   <https://baobabsoluciones.github.io/cornflow-server/deploy/index.html>`_ how to deploy your own cornflow server.
+You will also need to install `Docker Community Edition <https://docs.docker.com/engine/install/>`_ and `Docker Compose <https://docs.docker.com/compose/install/>`_. See `here   <https://baobabsoluciones.github.io/cornflow/deploy/index.html>`_ how to deploy your own cornflow server.
 
    
 For cornflow-app
@@ -212,7 +211,7 @@ From there, you can launch cornflow-server by navigating to the cornflow-server 
   flask run
 
 
-See the `documentation <https://baobabsoluciones.github.io/cornflow-server/main/install.html>`_ for more details on how to launch cornflow-server.
+See the `documentation <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on how to launch cornflow-server.
 
 .. raw:: html
 
@@ -226,7 +225,7 @@ Cornflow-dags
   <details open>
     <summary>DAGs</summary>
 
-When you start developing your solver, you will need to deploy it as a DAG, similar to the ones you can find on `cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_. 
+When you start developing your solver, you will need to deploy it as a DAG, similar to the ones you can find on `cornflow-dags <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags>`_. 
 
 Code
 ----
@@ -261,7 +260,7 @@ To do so, you need to clone the repository and create a new folder with the name
   - :code:`__init__.py`: contains a class that subclasses :code`ApplicationCore` from the library `cornflow-client`.
   - :code:`README.RST`: contains a description of the problem, of the input data and the output.
 
-See the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/deploy_solver_new.html>`_ for a more specific description of the requisites for each class, and feel free to check out the deployed on `cornflow-dags <https://github.com/baobabsoluciones/cornflow-dags-public>`_ for a better understanding of the structure of a dag.
+See the `documentation <https://baobabsoluciones.github.io/cornflow/guides/deploy_solver_new.html>`_ for a more specific description of the requisites for each class, and feel free to check out the deployed on `cornflow-dags <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags>`_ for a better understanding of the structure of a dag.
 
 Unit  tests
 -------------
@@ -280,7 +279,7 @@ to run all of the unit tests, or, assuming that your project is name 'MyProject'
   
 to run the unit tests of your project only.
 
-Please refer to the `documentation <https://baobabsoluciones.github.io/cornflow-server/guides/testing_app.html>`_ for more details on the unit tests.
+Please refer to the `documentation <https://baobabsoluciones.github.io/cornflow/guides/testing_app.html>`_ for more details on the unit tests.
 
 .. raw:: html
 
@@ -289,7 +288,7 @@ Please refer to the `documentation <https://baobabsoluciones.github.io/cornflow-
   
 Use your solution method
 ========================
-Once your dag is entirely developed, you can use the cornflow-client package to access it on the server. See an example `here <https://baobabsoluciones.github.io/cornflow-server/guides/use_solver.html>`_.
+Once your dag is entirely developed, you can use the cornflow-client package to access it on the server. See an example `here <https://baobabsoluciones.github.io/cornflow/guides/use_solver.html>`_.
 
 
 Cornflow-app
@@ -339,15 +338,15 @@ Contributions
 Contribute
 ==========
 
-Please check the `contributor's guide <https://github.com/baobabsoluciones/cornflow-server/blob/master/CONTRIBUTING.md>`_ to know how to contribute to the project.
+Please check the `contributor's guide <https://github.com/baobabsoluciones/cornflow/blob/master/CONTRIBUTING.md>`_ to know how to contribute to the project.
 
-If you create a Pull Request to contribute, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow-server/guides/coding_style.html>`_ and that you applied the black formatter. Please make sure as well that your code respects rules of syntax, spelling, etc. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
+If you create a Pull Request to contribute, please make sure that your code respects the coding style and rules described `here <https://baobabsoluciones.github.io/cornflow/guides/coding_style.html>`_ and that you applied the black formatter. Please make sure as well that your code respects rules of syntax, spelling, etc. Futhermore, please check that your code always pass the unitary tests and correct it if it doesn't.
 
 
 
 Report bugs
 ===========
 
-Report bugs through `GitHub <https://github.com/baobabsoluciones/cornflow-server/issues>`_. Please check that the issues has not been reported before, and, if it has not, please report only relevant issues and try to join code that produces those bugs.
+Report bugs through `GitHub <https://github.com/baobabsoluciones/cornflow/issues>`_. Please check that the issues has not been reported before, and, if it has not, please report only relevant issues and try to join code that produces those bugs.
 
 
