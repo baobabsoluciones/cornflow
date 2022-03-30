@@ -1,0 +1,78 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "depots": {
+            "description": "List of depots",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n": {"type": "integer"}
+                },
+                "required": ["n"]
+            }
+        },
+        "demand": {
+            "description": "Demand for each node",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n": {"type": "integer"},
+                    "demand": {"type": "integer"}
+                },
+                "required": ["n", "demand"]
+            }
+        },
+        "arcs": {
+            "description": "Arc information between pairs of nodes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n1": {
+                        "type": "integer"
+                    },
+                    "n2": {
+                        "type": "integer"
+                    },
+                    "w": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["n1", "n2", "w"]
+            }
+        },
+        "positions": {
+            "description": "Positions of nodes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n": {
+                        "type": "integer"
+                    },
+                    "lat": {
+                        "type": "number"
+                    },
+                    "lng": {
+                        "type": "number"
+                    }
+                },
+                "required": ["n", "lat", "lng"]
+            }
+        },
+        "parameters": {
+            "description": "One dimensional configuration",
+            "type": "object",
+            "properties": {
+                "size": {"type":  "integer"},
+                "capacity": {"type":  "integer"},
+                "numVehicles": {"type":  "integer"}
+            },
+            "required": ["size", "capacity", "numVehicles"]
+        }
+    },
+    "required": ["depots", "demand", "arcs", "parameters"]
+}

@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "pairs": {
+            "description": "Pairs of nodes that cannot share the same color",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n1": {
+                        "type": "integer"
+                    },
+                    "n2": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["n1", "n2"]
+            }
+        }
+    },
+    "required": ["pairs"]
+}

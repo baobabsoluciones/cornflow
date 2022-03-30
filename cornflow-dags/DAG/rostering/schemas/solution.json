@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "works": {
+      "type": "array",
+      "description": "Table with the solution for each employee in which time slots has to work",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "type": "integer",
+            "description": "The unique identifier for each employee.",
+            "title": "Employee id.",
+            "sortable": true,
+            "filterable": true
+          },
+          "time_slot": {
+            "type": "string",
+            "title": "Time slot",
+            "description": "The time slot the employee has to work on",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_employee",
+          "time_slot"
+        ]
+      }
+    }
+  },
+  "required": [
+    "works"
+  ]
+}
