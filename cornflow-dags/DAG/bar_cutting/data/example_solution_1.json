@@ -1,0 +1,98 @@
+{
+    "detail_cutting_patterns": [
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr2",
+            "number_of_products": 2
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "id_product": "pr3",
+            "number_of_products": 2
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr1",
+            "number_of_products": 5
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr2",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "id_product": "pr3",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr1",
+            "number_of_products": 0
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr2",
+            "number_of_products": 3
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "id_product": "pr3",
+            "number_of_products": 0
+        }
+    ],
+    "number_cutting_patterns": [
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa2",
+            "number_of_patterns": 1
+        },
+        {
+            "id_bar": "bar1",
+            "id_pattern": "pa3",
+            "number_of_patterns": 200
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa4",
+            "number_of_patterns": 120
+        },
+        {
+            "id_bar": "bar2",
+            "id_pattern": "pa5",
+            "number_of_patterns": 166
+        }
+    ]
+}

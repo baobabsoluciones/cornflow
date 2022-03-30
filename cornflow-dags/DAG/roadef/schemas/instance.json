@@ -1,0 +1,574 @@
+{ "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "parameters": {
+      "type": "object",
+      "description":  "Scalar values needed for the roadef problem",
+      "show": true,
+      "filterable": false,
+      "sortable": true,
+      "properties": {
+        "unit": {
+          "type": "integer",
+          "description": "Time decomposition",
+          "title": "Unit"
+        },
+        "horizon": {
+          "type": "integer",
+          "description": "The number of hours that are going to be solved",
+          "title": "Horizon"
+        }
+      },
+      "required": ["unit", "horizon"]
+    },
+    "matrices": {
+      "description": "Distance and travel time between each pair of locations",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "L1": {
+            "type": "integer",
+            "title": "Start location",
+            "description": "Index of the start location",
+            "sortable": true,
+            "filterable": true
+          },
+          "L2": {
+            "type": "integer",
+            "title": "End location",
+            "description": "Index of the end location",
+            "sortable": true,
+            "filterable": true
+          },
+          "dist": {
+            "type": "number",
+            "title": "Distance",
+            "description": "Distance between the two locations",
+            "sortable": true,
+            "filterable": true
+          },
+          "time": {
+            "type": "integer",
+            "title": "Travel time",
+            "description": "Travel time between the two locations",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["L1", "L2", "dist", "time"]
+      }
+    },
+    "coordinates": {
+      "description": "Geographical coordinates of each location",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "integer",
+            "title": "Location",
+            "desctiption": "Index of the location",
+            "sortable": true,
+            "filterable": true
+          },
+          "x": {
+            "type": "integer",
+            "title": "x",
+            "description": "Coordinates on the x-axis",
+            "sortable": true,
+            "filterable": true
+          },
+          "y": {
+            "type": "integer",
+            "title": "y",
+            "description": "Coordinates on the y-axis",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["location", "x", "y"]
+      }
+    },
+    "drivers": {
+      "type": "array",
+      "description": "Table with the drivers' information",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index driver",
+            "description": "Index of the driver",
+            "sortable": true,
+            "filterable": true
+          },
+          "minInterSHIFTDURATION": {
+            "type": "integer",
+            "title": "Rest time",
+            "description": "Minimum rest time between two shifts (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "maxDrivingDuration": {
+            "type": "integer",
+            "title": "Maximum driving duration",
+            "description": "Maximum time that the driver can drive during a shift (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "LayoverDuration": {
+            "type": "integer",
+            "title": "Layover duration",
+            "description": "Duration of a layover during a shift (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "LayoverCost": {
+            "type": "integer",
+            "title": "Layover cost",
+            "description": "Cost of inserting a layover in the driver' shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "TimeCost": {
+            "type": "number",
+            "title": "Time Cost",
+            "description": "Cost per hour worked by the driver",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "index",
+          "minInterSHIFTDURATION",
+          "maxDrivingDuration",
+          "LayoverDuration",
+          "LayoverCost",
+          "TimeCost"
+        ]
+      }
+    },
+    "trailers": {
+      "type": "array",
+      "description": "Table with the trailers' information",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items":{
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index trailer",
+            "description": "The index of the trailer",
+            "sortable": true,
+            "filterable": true
+          },
+          "Capacity": {
+            "type": "integer",
+            "title": "Capacity",
+            "description": "The maximum quantity of product that can be loaded in the trailer",
+            "sortable": true,
+            "filterable": true
+          },
+          "InitialQuantity": {
+            "type": "number",
+            "title": "Initial quantity",
+            "description": "The quantity of product in the trailer at hour 0",
+            "sortable": true,
+            "filterable": true
+          },
+          "DistanceCost": {
+            "type": "number",
+            "title": "Distance cost",
+            "description": "Cost per kilometer driven",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "index",
+          "Capacity",
+          "InitialQuantity",
+          "DistanceCost"
+        ]
+      }
+    },
+    "bases": {
+      "type": "array",
+      "description": "Index of the base",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index",
+            "description": "Index of the base",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["index"]
+      }
+    },
+    "sources": {
+      "type": "array",
+      "description": "Table with the information about each source",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index",
+            "description": "Index of the source",
+            "sortable": true,
+            "filterable": true
+          },
+          "setupTime": {
+            "type": "integer",
+            "title": "Setup time",
+            "description": "Minimum time that a trailer must stay at the source to load the product safely (in minutes)",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "index",
+          "setupTime"
+        ]
+      }
+    },
+    "customers": {
+      "type": "array",
+      "description": "Table with the information about each customer",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index",
+            "description": "Index of the customer",
+            "sortable": true,
+            "filterable": true
+          },
+          "LayoverCustomer": {
+            "type": "integer",
+            "title": "Layover customer",
+            "description": "1 if the customer requires a layover to be visited in a shift",
+            "sortable": true,
+            "filterable": true
+          },
+          "callIn": {
+            "type": "integer",
+            "title": "Call-in customer",
+            "description": "1 if the customer is a call-in customer (i.e. the deliveries need to be realized according to its orders)",
+            "sortable": true,
+            "filterable": true
+          },
+          "setupTime": {
+            "type": "integer",
+            "title": "Setup time",
+            "description": "Minimum time that a trailer must stay at the customer's to unload the product safely (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "Capacity": {
+            "type": "number",
+            "title": "Tank capacity",
+            "description": "The maximum quantity of product that can be loaded into the customer's tank",
+            "sortable": true,
+            "filterable": true
+          },
+          "InitialTankQuantity": {
+            "type": "number",
+            "title": "Initial quantity",
+            "description": "Quantity of product in the customer's tank at hour 0",
+            "sortable": true,
+            "filterable": true
+          },
+          "MinOperationQuantity": {
+            "type": "number",
+            "title": "Minimum operation quantity",
+            "description": "Minimum quantity that can be delivered at each delivery",
+            "sortable": true,
+            "filterable": true
+          },
+          "SafetyLevel": {
+            "type": "number",
+            "title": "Safety level",
+            "description": "Minimum quantity in the customer's tank. The quantity of product can never be lower.",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "index",
+          "LayoverCustomer",
+          "callIn",
+          "setupTime",
+          "Capacity",
+          "InitialTankQuantity"
+        ]
+      }
+    },
+    "forecasts": {
+      "type": "array",
+      "description": "Future consumption of each customer at each hour",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_customer": {
+            "type": "integer",
+            "title": "Index customer",
+            "description": "Index of the customer",
+            "sortable": true,
+            "filterable": true
+          },
+          "time": {
+            "type": "integer",
+            "title": "Hour",
+            "description": "Hour at which the product is used",
+            "sortable": true,
+            "filterable": true
+          },
+          "forecast": {
+            "type": "number",
+            "title": "Quantity",
+            "description": "Quantity of product consumed",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["id_customer", "time", "forecast"]
+      }
+    },
+    "customersTimeWindows": {
+      "title": "Customer's time windows",
+      "type": "array",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "description": "Opening time windows of each customer",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_customer": {
+            "type": "integer",
+            "title": "Index customer",
+            "description": "Index of the customer",
+            "sortable": true,
+            "filterable": true
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "description": "Start of the time window (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "end": {
+            "type": "integer",
+            "title": "End",
+            "description": "End of the time window (in minutes)",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_customer",
+          "start",
+          "end"
+        ]
+      }
+    },
+    "driversTimeWindows": {
+      "title": "Driver's time windows",
+      "type": "array",
+      "description": "Working hours of each driver",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_driver": {
+            "type": "integer",
+            "title": "Index driver",
+            "description": "Index of the driver",
+            "sortable": true,
+            "filterable": true
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "description": "Start of the time window (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "end": {
+            "type": "integer",
+            "title": "End",
+            "description": "End of the time window (in minutes)",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_driver",
+          "start",
+          "end"
+        ]
+      }
+    },
+    "allowedTrailers": {
+      "title": "Allowed trailers",
+      "type": "array",
+      "description": "Trailers allowed at each location",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_location": {
+            "type": "integer",
+            "title": "Index location",
+            "description": "Index of the location",
+            "sortable": true,
+            "filterable": true
+          },
+          "id_trailer": {
+            "type": "integer",
+            "title": "Index trailer",
+            "description": "Index of a trailer allowed at the location",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_location",
+          "id_trailer"
+        ]
+      }
+    },
+    "driversTrailers": {
+      "title": "Drivers' trailers",
+      "type": "array",
+      "description": "Table with the relationship between drivers and the trailers they are allowed to drive",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_driver": {
+            "type": "integer",
+            "title": "Index driver",
+            "description": "Index of the driver",
+            "sortable": true,
+            "filterable": true
+          },
+          "id_trailer": {
+            "type": "integer",
+            "title": "Index trailer",
+            "description": "Index of a trailer that can be driven by the driver",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["id_driver", "id_trailer"]
+      }
+    },
+    "orders": {
+      "type": "array",
+      "description": "Information about each order for call-in customers",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_customer": {
+            "type": "integer",
+            "title": "Index customer",
+            "description": "Index of the customer",
+            "sortable": true,
+            "filterable": true
+          },
+          "earliestTime": {
+            "type": "integer",
+            "title": "Earliest time",
+            "description": "Earliest time the order can be delivered (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "latestTime": {
+            "type": "integer",
+            "title": "Latest time",
+            "description": "Latest time an order can be delvered (in minutes)",
+            "sortable": true,
+            "filterable": true
+          },
+          "orderQuantityFlexibility": {
+            "type": "integer",
+            "title": "Quantity flexibility",
+            "description": "Maximum difference between the quantity ordered and the quantity delivered",
+            "sortable": true,
+            "filterable": true
+          },
+          "Quantity": {
+            "type": "integer",
+            "title": "Quantity",
+            "description": "Quantity of product delivered",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_customer",
+          "earliestTime",
+          "latestTime",
+          "Quantity",
+          "orderQuantityFlexibility"
+        ]
+      }
+    }
+  },
+  "required": [
+    "drivers",
+    "customers",
+    "trailers",
+    "bases",
+    "sources",
+    "matrices",
+    "parameters",
+    "allowedTrailers",
+    "forecasts",
+    "customersTimeWindows",
+    "driversTimeWindows",
+    "driversTrailers",
+    "orders"
+  ]
+}

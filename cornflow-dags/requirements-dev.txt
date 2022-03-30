@@ -1,0 +1,4 @@
+-r requirements.txt
+apache-airflow>=2.0.1
+openpyxl==3.0.9
+numpyencoder==0.3.0

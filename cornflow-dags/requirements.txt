@@ -1,0 +1,13 @@
+cornflow-client @ git+https://github.com/ggsdc/cornflow-server@master#subdirectory=cornflow-client
+orloge>=0.13
+PuLP>=2.3
+pandas>=1.0
+hackathonbaobab2020[solvers] @ git+https://github.com/baobabsoluciones/hackathonbaobab2020@main
+marshmallow
+pytups
+ortools
+xmltodict
+openpyxl
+pyomo
+acopy
+tsplib95
