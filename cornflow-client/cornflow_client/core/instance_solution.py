@@ -3,7 +3,6 @@
 """
 # Full imports
 import json
-import warnings
 
 # Partial imports
 from abc import ABC, abstractmethod
@@ -141,7 +140,6 @@ class InstanceSolutionCore(ABC):
         try:
             import pandas as pd
         except (ImportError, ModuleNotFoundError):
-            warnings.warn("You have to install pandas to use this method")
             raise Exception("You must install pandas package to use this method")
 
         is_xl_type(path)
