@@ -10,8 +10,8 @@ on:
 
 jobs:
   unit:
-
     runs-on: ${{ matrix.os }}
+    name: Run unit test on cornflow-client
     defaults:
       run:
         working-directory: ./cornflow-client
@@ -36,9 +36,10 @@ jobs:
       run: |
         coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
         coverage report -m
-
+  
   integration:
 
+    name: Run all test suites on cornflow-client
     needs: unit
     runs-on: ${{ matrix.os }}
     defaults:
@@ -119,8 +120,11 @@ jobs:
           SECRET_KEY: THISNEEDSTOBECHANGED
           OPEN_DEPLOYMENT: 1
           AUTH_TYPE: 1
+      - name: Run unit tests
+        run: |
+          coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+          coverage report -m
       - name: Run integration tests
         run: |
-          coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
-          coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+          coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
           coverage report -m

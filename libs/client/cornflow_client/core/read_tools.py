@@ -3,7 +3,6 @@
 """
 # Full imports
 import math
-import warnings
 
 # Partial imports
 from pytups import TupList, SuperDict
@@ -23,13 +22,11 @@ def read_excel(path: str, param_tables_names: list = None) -> dict:
     try:
         import openpyxl
     except (ModuleNotFoundError, ImportError) as e:
-        warnings.warn("You must install openpyxl package to use this method")
         raise Exception("You must install openpyxl package to use this method")
 
     try:
         import pandas as pd
     except (ModuleNotFoundError, ImportError):
-        warnings.warn("You must install pandas package to use this method")
         raise Exception("You must install pandas package to use this method")
 
     data = pd.read_excel(path, sheet_name=None)
@@ -74,7 +71,6 @@ def read_excel_table(path: str, table: str, **kwargs):
     try:
         import pandas as pd
     except (ModuleNotFoundError, ImportError):
-        warnings.warn("You must install pandas package to use this method")
         raise Exception("You must install pandas package to use this method")
 
     data = pd.read_excel(path, sheet_name=table, **kwargs)
