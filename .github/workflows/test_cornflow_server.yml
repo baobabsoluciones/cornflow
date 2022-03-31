@@ -11,6 +11,7 @@ on:
 jobs:
   testing:
 
+    name: Run all test suites on cornflow-server
     runs-on: ${{ matrix.os }}
     defaults:
       run:
