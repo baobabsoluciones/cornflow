@@ -7,44 +7,14 @@ on:
       - 'cornflow-dags/**'
       - '!cornflow-dags/README.rst'
 
-jobs:
-  unit:
+jobs:  
+  testing:
 
+    name: Run all test suites on cornflow-dags
     runs-on: ${{ matrix.os }}
-    strategy:
-      max-parallel: 21
-      matrix:
-        python-version: [3.7, 3.8]
-        os: [ubuntu-latest]
-
-    steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install cbc
-      run: |
-        sudo apt-get install -y coinor-cbc
-    - name: Install cbc
-      run: |
-        sudo apt-get install -y coinor-cbc
-    - name: Install dependencies
-      run: |
-        cd cornflow-dags
-        python -m pip install --upgrade pip
-        python -m pip install -U -r requirements.txt
-    - name: Run dag tests
-      run: |
-        cd cornflow-dags
-        python -m unittest tests/test_dags.py
-      env:
-        FLASK_ENV: testing
-  
-  integration:
-
-    needs: unit
-    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./cornflow-dags
     strategy:
       max-parallel: 21
       matrix:
@@ -57,9 +27,11 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install cbc
+      run: |
+        sudo apt-get install -y coinor-cbc
     - name: Install dependencies
       run: |
-        cd cornflow-dags
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
     - name: Install airflow
@@ -88,9 +60,11 @@ jobs:
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
         AIRFLOW__CORE__LOAD_EXAMPLES: 0
         AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
-    - name: Run dag tests
+    - name: Run unit tests
       run: |
-        cd cornflow-dags
-        python -m unittest tests/test_dags_af.py
-      env:
-        FLASK_ENV: testing
+        coverage run --source=. -m unittest tests/test_dags.py
+        coverage report -m
+    - name: Run integration tests
+      run: |
+        coverage run -a --source=. -m unittest tests/test_dags_af.py
+        coverage report -m
