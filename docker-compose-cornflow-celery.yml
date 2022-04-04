@@ -3,7 +3,7 @@ version: '3'
 services:
   cornflow:
     build:
-      context: .
+      context: ./cornflow-server
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -33,7 +33,7 @@ services:
 
   webserver:
     build:
-      context: ./airflow_config
+      context: ./cornflow-server/airflow_config
       dockerfile: Dockerfile
     restart: always
     volumes:
@@ -64,7 +64,7 @@ services:
 
   scheduler:
     build:
-      context: ./airflow_config
+      context: ./cornflow-server/airflow_config
       dockerfile: Dockerfile
     restart: always
     depends_on:
@@ -87,7 +87,7 @@ services:
 
   flower:
     build:
-      context: ./airflow_config
+      context: ./cornflow-server/airflow_config
       dockerfile: Dockerfile
     restart: always
     depends_on:
@@ -115,7 +115,7 @@ services:
 
   worker:
     build:
-      context: ./airflow_config
+      context: ./cornflow-server/airflow_config
       dockerfile: Dockerfile
     restart: always
     depends_on:
