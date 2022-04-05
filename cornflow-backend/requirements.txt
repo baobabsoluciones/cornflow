@@ -1,0 +1,17 @@
+bcrypt
+cffi
+click
+Flask
+Flask-Bcrypt
+Flask-SQLAlchemy
+greenlet
+importlib-metadata
+itsdangerous
+Jinja2
+MarkupSafe
+pycparser
+six
+SQLAlchemy==1.3.21
+typing-extensions
+Werkzeug
+zipp
