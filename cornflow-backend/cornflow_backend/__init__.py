@@ -1,2 +1,2 @@
 from .models import EmptyBaseModel, TraceAttributesModel, UserBaseModel
-from .shared import db, bcrypt
+from .shared import database, password_crypt
