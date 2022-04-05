@@ -9,9 +9,13 @@ importlib-metadata
 itsdangerous
 Jinja2
 MarkupSafe
+marshmallow
+packaging
 pycparser
+pyparsing
 six
 SQLAlchemy==1.3.21
 typing-extensions
+webargs
 Werkzeug
 zipp

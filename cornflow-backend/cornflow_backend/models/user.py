@@ -6,7 +6,12 @@ import string
 import random
 
 from .meta_models import TraceAttributesModel
-from cornflow_backend.shared import password_crypt, database
+from cornflow_backend.shared import (
+    password_crypt,
+    database,
+    check_password_pattern,
+    check_email_pattern,
+)
 
 
 class UserBaseModel(TraceAttributesModel):
@@ -23,8 +28,10 @@ class UserBaseModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
-        self.password = self.__generate_hash(data.get("password"))
-        self.email = data.get("email")
+        if check_password_pattern(data.get("password")):
+            self.password = self.__generate_hash(data.get("password"))
+        if check_email_pattern(data.get("email")):
+            self.email = data.get("email")
 
     def update(self, data):
         """
@@ -109,72 +116,21 @@ class UserBaseModel(TraceAttributesModel):
         """
         return self.query.filter_by(username=username, deleted_at=None).first()
 
-    def check_username_in_use(self, username):
+    def check_username_in_use(self):
         """
         Checks if a username is already in use
-        :param str username: the username to check
         :return: a boolean if the username is in use
         :rtype: bool
         """
-        return self.query.filter_by(username=username).first() is not None
+        return self.query.filter_by(username=self.username).first() is not None
 
-    def check_email_in_use(self, email):
+    def check_email_in_use(self):
         """
         Checks if a email is already in use
-        :param str email: the email to check
         :return: a boolean if the username is in use
         :rtype: bool
         """
-        return self.query.filter_by(email=email).first() is not None
-
-    @staticmethod
-    def check_password_pattern(password: str):
-        """
-        Checks if a password is valid
-        :param password: the password to check
-        :return: a dictionary containing: a boolean indicating if the password is valid, and a message
-        :rtype: dict
-        """
-        if len(password) < 5:
-            return {
-                "valid": False,
-                "message": "Password must contain at least 5. characters",
-            }
-        if password.islower() or password.isupper():
-            return {
-                "valid": False,
-                "message": "Password must contain uppercase and lowercase letters",
-            }
-        if len(list(filter(str.isdigit, password))) == 0:
-            return {
-                "valid": False,
-                "message": "Password must contain at least one number and one special character",
-            }
-
-        def is_special_character(character):
-            return character in [
-                char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"
-            ]
-
-        if len(list(filter(is_special_character, password))) == 0:
-            return {
-                "valid": False,
-                "message": "Password must contain at least one number and one special character",
-            }
-        return {"valid": True, "message": ""}
-
-    @staticmethod
-    def check_email_pattern(email: str):
-        """
-        Checks if an email address is valid
-        :param email: The email to validate
-        :return: A dictionary containing: a boolean indicating if the email address is valid, and a message
-        :rtype: dict
-        """
-        email_pattern = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-        if re.match(email_pattern, email) is None:
-            return {"valid": False, "message": "Invalid email address"}
-        return {"valid": True, "message": ""}
+        return self.query.filter_by(email=self.email).first() is not None
 
     @staticmethod
     def generate_random_password():
