@@ -157,20 +157,3 @@ def get_schema(config, dag_name, schema="instance"):
     schema_json = af_client.get_one_schema(dag_name, schema)
     manager = SchemaManager(schema_json)
     return manager.jsonschema_to_flask()
-
-
-def validate_and_continue(obj, data):
-    """
-    This function validates some data meets a marshmallow object specs.
-    In case it does not: we raise an error.
-    In case we do, we return the transformed data
-
-    """
-    try:
-        validate = obj.load(data)
-    except ValidationError as e:
-        raise InvalidUsage(error=f"Bad data format: {e}")
-    err = ""
-    if validate is None:
-        raise InvalidUsage(error=f"Bad data format: {err}")
-    return validate
