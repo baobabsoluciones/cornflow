@@ -1,1 +1,2 @@
-from .utils import password_crypt, check_password_pattern, database, check_email_pattern
+from .utils import database, password_crypt
+from .validators import check_email_pattern, check_password_pattern
