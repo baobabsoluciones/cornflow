@@ -29,6 +29,7 @@ class UserBaseModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
+        # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(data.get("password"))
         if check_pass:
             self.password = self.__generate_hash(data.get("password"))

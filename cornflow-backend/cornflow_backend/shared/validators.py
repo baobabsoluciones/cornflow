@@ -3,7 +3,7 @@
 """
 import re
 from marshmallow import ValidationError
-from cornflow_backend.exceptions import InvalidCredentials, InvalidUsage
+from cornflow_backend.exceptions import InvalidUsage
 
 
 def is_special_character(character):
@@ -11,6 +11,9 @@ def is_special_character(character):
 
 
 def check_password_pattern(password: str):
+    # TODO: handle better None passwords that can be found when using ldap
+    if password is None:
+        return True, None
     if len(password) < 5:
         return False, "Password must contain at least 5 characters."
     if password.islower() or password.isupper():
