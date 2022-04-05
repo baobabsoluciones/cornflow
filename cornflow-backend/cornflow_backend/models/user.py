@@ -12,6 +12,7 @@ from cornflow_backend.shared import (
     check_password_pattern,
     check_email_pattern,
 )
+from cornflow_backend.exceptions import InvalidCredentials
 
 
 class UserBaseModel(TraceAttributesModel):
@@ -28,10 +29,17 @@ class UserBaseModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
-        if check_password_pattern(data.get("password")):
+        check_pass, msg = check_password_pattern(data.get("password"))
+        if check_pass:
             self.password = self.__generate_hash(data.get("password"))
-        if check_email_pattern(data.get("email")):
+        else:
+            raise InvalidCredentials(msg)
+
+        check_email, msg = check_email_pattern(data.get("email"))
+        if check_email:
             self.email = data.get("email")
+        else:
+            raise InvalidCredentials(msg)
 
     def update(self, data):
         """
