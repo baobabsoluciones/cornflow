@@ -134,10 +134,15 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
 
         if data.get("password"):
-            check_password_pattern(data.get("password"))
+            check, msg = check_password_pattern(data.get("password"))
+            if not check:
+                raise InvalidCredentials(msg)
 
         if data.get("email"):
-            check_email_pattern(data.get("email"))
+            check, msg = check_email_pattern(data.get("email"))
+            if not check:
+                raise InvalidCredentials(msg)
+
         user_obj.update(data)
         user_obj.save()
         log.info(f"User {user_id} was edited by user {self.get_user_id()}")
