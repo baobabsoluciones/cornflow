@@ -2,7 +2,8 @@
 
 """
 import re
-from cornflow_backend.exceptions import InvalidCredentials
+from marshmallow import ValidationError
+from cornflow_backend.exceptions import InvalidCredentials, InvalidUsage
 
 
 def check_password_pattern(password: str):
@@ -32,3 +33,14 @@ def check_email_pattern(email: str):
     if re.match(email_pattern, email) is None:
         raise InvalidCredentials("Invalid email address.")
     return True
+
+
+def validate_and_continue(obj, data):
+    try:
+        validate = obj.load(data)
+    except ValidationError as e:
+        raise InvalidUsage(error=f"Bad data format: {e}")
+    err = ""
+    if validate is None:
+        raise InvalidUsage(error=f"Bad data format: {err}")
+    return validate
