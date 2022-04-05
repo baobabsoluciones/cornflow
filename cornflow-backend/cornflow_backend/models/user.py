@@ -78,14 +78,15 @@ class UserBaseModel(TraceAttributesModel):
         """
         return password_crypt.check_password_hash(self.password, password)
 
-    def get_all_users(self):
+    @classmethod
+    def get_all_users(cls):
         """
         Query to get all users
 
         :return: a list with all the users.
         :rtype: list(:class:`UserModel`)
         """
-        return self.query.filter_by(deleted_at=None)
+        return cls.query.filter_by(deleted_at=None)
 
     def get_one_user(self, idx):
         """
