@@ -12,6 +12,7 @@ def is_special_character(character):
 
 def check_password_pattern(password: str):
     # TODO: handle better None passwords that can be found when using ldap
+    # TODO: add maximum password length based on bcrypt specification (72 bytes on UTF8 representation)
     if password is None:
         return True, None
     if len(password) < 5:
