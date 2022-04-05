@@ -3,7 +3,7 @@ name: Publish cornflow-backend Python 🐍 distributions 📦 to PyPI
 on:
   push:
     tags:
-      - "vcb[0-9]+.[0-9]+.[0-9]+"
+      - "vcb*"
 
 jobs:
   build-n-publish:
