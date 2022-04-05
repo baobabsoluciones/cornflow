@@ -4,12 +4,14 @@
 # Import from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
+from cornflow_backend.models import EmptyBaseModel
+
 # Import from internal modules
-from .meta_model import EmptyModel
+# from .meta_model import EmptyModel
 from ..shared.utils import db
 
 
-class ApiViewModel(EmptyModel):
+class ApiViewModel(EmptyBaseModel):
     """
     This model should contain all the views by name declared in the endpoints init
     """

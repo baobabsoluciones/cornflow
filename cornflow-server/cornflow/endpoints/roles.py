@@ -19,7 +19,7 @@ from ..schemas.roles import (
 )
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
+from cornflow_backend.exceptions import EndpointNotImplemented, ObjectAlreadyExists
 
 
 class RolesListEndpoint(MetaResource, MethodResource):

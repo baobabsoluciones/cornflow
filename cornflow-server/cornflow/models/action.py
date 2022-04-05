@@ -1,11 +1,13 @@
 """
 
 """
-from .meta_model import EmptyModel
+from cornflow_backend.models import EmptyBaseModel
+
+# from .meta_model import EmptyModel
 from ..shared.utils import db
 
 
-class ActionModel(EmptyModel):
+class ActionModel(EmptyBaseModel):
     """
     This model contains the base actions over the REST API. These are:
 

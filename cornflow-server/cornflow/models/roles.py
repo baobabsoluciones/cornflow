@@ -2,13 +2,14 @@
 Models defined for the roles and the assignation of roles to users.
 """
 
+from cornflow_backend.models import TraceAttributesModel
+
 # Import from internal modules
-from .meta_model import TraceAttributes
 from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 from ..shared.utils import db
 
 
-class RoleModel(TraceAttributes):
+class RoleModel(TraceAttributesModel):
     # TODO: Should have a user_id to store the user that defined the role?
     __tablename__ = "roles"
 
@@ -91,7 +92,7 @@ class RoleModel(TraceAttributes):
         return self.name
 
 
-class UserRoleModel(TraceAttributes):
+class UserRoleModel(TraceAttributesModel):
     # TODO: Should have a user_id to store the user that defined the assignation?
     __tablename__ = "user_role"
     __table_args__ = (db.UniqueConstraint("user_id", "role_id"),)

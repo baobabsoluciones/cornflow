@@ -13,7 +13,11 @@ from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
-from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
+from cornflow_backend.exceptions import (
+    InvalidUsage,
+    InvalidCredentials,
+    EndpointNotImplemented,
+)
 
 
 class SignUpEndpoint(MetaResource, MethodResource):
@@ -41,25 +45,18 @@ class SignUpEndpoint(MetaResource, MethodResource):
                 "The user has to sign up with the OpenID protocol"
             )
 
-        if UserModel.check_username_in_use(kwargs.get("username")):
+        user = UserModel(kwargs)
+
+        if user.check_username_in_use():
             raise InvalidCredentials(
                 error="Username already in use, please supply another username"
             )
 
-        if UserModel.check_email_in_use(kwargs.get("email")):
+        if user.check_email_in_use():
             raise InvalidCredentials(
                 error="Email already in use, please supply another email address"
             )
 
-        check_pwd = UserModel.check_password_pattern(kwargs.get("password"))
-        if not check_pwd["valid"]:
-            raise InvalidCredentials(error=check_pwd["message"])
-
-        check_email = UserModel.check_email_pattern(kwargs.get("email"))
-        if not check_email["valid"]:
-            raise InvalidCredentials(error=check_email["message"])
-
-        user = UserModel(kwargs)
         user.save()
 
         user_role = UserRoleModel(

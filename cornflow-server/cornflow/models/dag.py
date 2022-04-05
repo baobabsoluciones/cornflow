@@ -4,12 +4,14 @@
 # Import from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
+from cornflow_backend.models import TraceAttributesModel
+
 # Import from internal modules
-from .meta_model import TraceAttributes
+# from .meta_model import TraceAttributes
 from ..shared.utils import db
 
 
-class DeployedDAG(TraceAttributes):
+class DeployedDAG(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """

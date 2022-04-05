@@ -24,13 +24,14 @@ from ..schemas.user import (
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from ..shared.exceptions import (
+from cornflow_backend.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
     InvalidUsage,
     NoPermission,
     ObjectDoesNotExist,
 )
+from cornflow_backend.shared import check_email_pattern, check_password_pattern
 from ..shared.utils import db
 from ..shared.messages import get_pwd_email, send_email_to
 
@@ -133,14 +134,10 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
 
         if data.get("password"):
-            check_pwd = UserModel.check_password_pattern(data.get("password"))
-            if not check_pwd["valid"]:
-                raise InvalidCredentials(error=check_pwd["message"])
+            check_password_pattern(data.get("password"))
 
         if data.get("email"):
-            check_email = UserModel.check_email_pattern(data.get("email"))
-            if not check_email["valid"]:
-                raise InvalidCredentials(error=check_email["message"])
+            check_email_pattern(data.get("email"))
         user_obj.update(data)
         user_obj.save()
         log.info(f"User {user_id} was edited by user {self.get_user_id()}")
@@ -222,7 +219,7 @@ class RecoverPassword(MetaResource, MethodResource):
         if not UserModel.check_email_in_use(email):
             return {"message": message}, 200
 
-        new_password = UserModel.generate_password()
+        new_password = UserModel.generate_random_password()
         text_email = get_pwd_email(new_password, email_config)
         send_email_to(text_email, email_config)
 

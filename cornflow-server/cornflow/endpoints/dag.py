@@ -3,7 +3,8 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema
+from cornflow_backend.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
@@ -32,7 +33,7 @@ from ..shared.const import (
     SERVICE_ROLE,
 )
 
-from ..shared.exceptions import ObjectDoesNotExist
+from cornflow_backend.exceptions import ObjectDoesNotExist
 
 execution_schema = ExecutionSchema()
 
@@ -175,9 +176,7 @@ class DAGEndpointManual(MetaResource, MethodResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        log.info(
-            f"User {self.get_user_id()} manually created the execution {item.id}"
-        )
+        log.info(f"User {self.get_user_id()} manually created the execution {item.id}")
         return item, 201
 
 

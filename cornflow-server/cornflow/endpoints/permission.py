@@ -18,7 +18,7 @@ from ..schemas.permission import (
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
 from ..shared.const import ADMIN_ROLE
-from ..shared.exceptions import ObjectAlreadyExists
+from cornflow_backend.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
@@ -56,9 +56,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
             raise ObjectAlreadyExists
         else:
             response = self.post_list(kwargs)
-            log.info(
-                f"User {self.get_user_id()} creates permission {response[0].id}"
-            )
+            log.info(f"User {self.get_user_id()} creates permission {response[0].id}")
             return response
 
 

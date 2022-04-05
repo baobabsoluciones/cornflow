@@ -6,7 +6,7 @@ from flask_apispec import marshal_with, doc
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..schemas.user import TokenEndpointResponse
-from ..shared.exceptions import InvalidCredentials, ObjectDoesNotExist
+from cornflow_backend.exceptions import InvalidCredentials, ObjectDoesNotExist
 from ..shared.authentication import Auth
 
 

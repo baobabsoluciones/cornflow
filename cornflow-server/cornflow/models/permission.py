@@ -1,9 +1,11 @@
-from .meta_model import TraceAttributes
+from cornflow_backend.models import TraceAttributesModel
+
+# from .meta_model import TraceAttributes
 from .dag import DeployedDAG
 from ..shared.utils import db
 
 
-class PermissionViewRoleModel(TraceAttributes):
+class PermissionViewRoleModel(TraceAttributesModel):
     __tablename__ = "permission_view"
     __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
 
@@ -64,7 +66,7 @@ class PermissionViewRoleModel(TraceAttributes):
         return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
 
 
-class PermissionsDAG(TraceAttributes):
+class PermissionsDAG(TraceAttributesModel):
     __tablename__ = "permission_dag"
     __table_args__ = (db.UniqueConstraint("dag_id", "user_id"),)
 

@@ -5,7 +5,8 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow, get_schema, validate_and_continue
+from cornflow_client.airflow.api import Airflow, get_schema
+from cornflow_backend.shared import validate_and_continue
 from cornflow_client.constants import INSTANCE_SCHEMA
 from flask import request, current_app
 from flask_apispec.views import MethodResource
@@ -38,7 +39,7 @@ from ..shared.const import (
     EXEC_STATE_STOPPED,
 )
 
-from ..shared.exceptions import AirflowError, ObjectDoesNotExist
+from cornflow_backend.exceptions import AirflowError, ObjectDoesNotExist
 from ..shared.compress import compressed
 
 

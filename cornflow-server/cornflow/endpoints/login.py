@@ -24,7 +24,11 @@ from ..shared.const import (
     OID_NONE,
     PLANNER_ROLE,
 )
-from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
+from cornflow_backend.exceptions import (
+    InvalidUsage,
+    InvalidCredentials,
+    EndpointNotImplemented,
+)
 from ..shared.ldap import LDAP
 from ..shared.utils import db
 

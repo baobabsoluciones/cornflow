@@ -24,7 +24,7 @@ from .const import (
     OID_AZURE_DISCOVERY_TENANT_URL,
 )
 
-from .exceptions import (
+from cornflow_backend.exceptions import (
     CommunicationError,
     EndpointNotImplemented,
     InvalidCredentials,

@@ -5,7 +5,8 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema
+from cornflow_backend.shared import validate_and_continue
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
@@ -32,7 +33,7 @@ from ..schemas.case import (
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from ..shared.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow_backend.exceptions import InvalidData, ObjectDoesNotExist
 
 
 class CaseEndpoint(MetaResource, MethodResource):

@@ -32,7 +32,9 @@ from .config import app_config
 from .endpoints import resources
 from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from .shared.compress import init_compress
-from .shared.exceptions import initialize_errorhandlers
+from cornflow_backend.exceptions import initialize_errorhandlers
+
+# from .shared.exceptions import initialize_errorhandlers
 from .shared.utils import db, bcrypt
 from .shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
 

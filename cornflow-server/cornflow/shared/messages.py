@@ -8,7 +8,7 @@ import smtplib
 from flask import current_app
 
 # Imports from internal modules
-from ..shared.exceptions import InvalidData
+from cornflow_backend.exceptions import InvalidData
 
 
 def get_pwd_email(pwd, email_config):

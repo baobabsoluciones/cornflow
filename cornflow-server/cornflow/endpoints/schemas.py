@@ -13,7 +13,7 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import PermissionsDAG
 from ..shared.authentication import Auth
-from ..shared.exceptions import AirflowError, NoPermission
+from cornflow_backend.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
 
 
