@@ -29,12 +29,12 @@ jobs:
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.TEST_PYPI_NEW_PROJECT }}
+        password: ${{ secrets.BACKEND_TEST_PYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
         packages_dir: cornflow-backend/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.pypi_password }}
+        password: ${{ secrets.BACKEND_PYPI_TOKEN }}
         packages_dir: cornflow-backend/dist/
 
