@@ -6,7 +6,7 @@ import string
 import random
 
 from .meta_models import TraceAttributesModel
-from ..shared.utils import bcrypt, db
+from cornflow_backend.shared import bcrypt, db
 
 
 class UserBaseModel(TraceAttributesModel):
