@@ -35,10 +35,10 @@ class ActionModel(EmptyBaseModel):
     def __repr__(self):
         return str(self.id) + ": " + self.name
 
-    @staticmethod
-    def get_all_objects():
-        return ActionModel.query.all()
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.all()
 
-    @staticmethod
-    def get_one_object(idx):
-        return ActionModel.query.get(idx)
+    @classmethod
+    def get_one_object(cls, idx):
+        return cls.query.get(idx)

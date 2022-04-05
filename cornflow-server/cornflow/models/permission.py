@@ -26,9 +26,9 @@ class PermissionViewRoleModel(TraceAttributesModel):
         self.api_view_id = data.get("api_view_id")
         self.role_id = data.get("role_id")
 
-    @staticmethod
-    def get_permission(role_id, view_id, action_id):
-        permission = PermissionViewRoleModel.query.filter_by(
+    @classmethod
+    def get_permission(cls, role_id, view_id, action_id):
+        permission = cls.query.filter_by(
             role_id=role_id,
             api_view_id=view_id,
             action_id=action_id,
@@ -38,8 +38,8 @@ class PermissionViewRoleModel(TraceAttributesModel):
         if permission is not None:
             return True
 
-    @staticmethod
-    def get_one_object(idx):
+    @classmethod
+    def get_one_object(cls, idx):
         """
         Method to get one permission by its id
 
@@ -47,7 +47,7 @@ class PermissionViewRoleModel(TraceAttributesModel):
         :return: an instance of object :class:`PermissionViewRoleModel`
         :rtype: :class:`PermissionViewRoleModel`
         """
-        return PermissionViewRoleModel.query.get(idx)
+        return cls.query.get(idx)
 
     def update(self, data):
         """
@@ -58,9 +58,9 @@ class PermissionViewRoleModel(TraceAttributesModel):
             setattr(self, key, item)
         super().update(data)
 
-    @staticmethod
-    def get_all_objects():
-        return PermissionViewRoleModel.query.all()
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.all()
 
     def __repr__(self):
         return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
@@ -86,13 +86,13 @@ class PermissionsDAG(TraceAttributesModel):
     def __repr__(self):
         return f"User {self.user_id} can access {self.dag_id}"
 
-    @staticmethod
-    def get_all_objects():
-        return PermissionsDAG.query.all()
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.all()
 
-    @staticmethod
-    def get_user_dag_permissions(user_id):
-        return PermissionsDAG.query.filter_by(user_id=user_id).all()
+    @classmethod
+    def get_user_dag_permissions(cls, user_id):
+        return cls.query.filter_by(user_id=user_id).all()
 
     @staticmethod
     def add_all_permissions_to_user(user_id):

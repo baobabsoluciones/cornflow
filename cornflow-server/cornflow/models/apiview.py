@@ -46,10 +46,10 @@ class ApiViewModel(EmptyBaseModel):
     def __repr__(self):
         return self.name
 
-    @staticmethod
-    def get_one_by_name(name):
-        return ApiViewModel.query.filter_by(name=name).first()
+    @classmethod
+    def get_one_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
 
-    @staticmethod
-    def get_all_objects():
-        return ApiViewModel.query.all()
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.all()

@@ -4,7 +4,7 @@
 import hashlib
 
 # Imported from internal models
-from .meta_model import BaseDataModel
+from .base_data_model import BaseDataModel
 from ..shared.utils import db
 
 

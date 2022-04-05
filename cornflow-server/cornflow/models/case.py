@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
-from .meta_model import BaseDataModel
+from .base_data_model import BaseDataModel
 from cornflow_backend.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
 from ..shared.utils import db, hash_json_256
 

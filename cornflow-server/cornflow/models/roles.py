@@ -52,18 +52,18 @@ class RoleModel(TraceAttributesModel):
             setattr(self, key, item)
         super().update(data)
 
-    @staticmethod
-    def get_all_objects():
+    @classmethod
+    def get_all_objects(cls):
         """
         Gets all the objects on the table
 
         :return: a list with the objects defined
         :rtype: list
         """
-        return RoleModel.query.all()
+        return cls.query.all()
 
-    @staticmethod
-    def get_one_object(idx):
+    @classmethod
+    def get_one_object(cls, idx):
         """
         Gets one object defined on the table by its id
 
@@ -71,7 +71,7 @@ class RoleModel(TraceAttributesModel):
         :return: the object got from the database
         :rtype: :class:`RoleModel`
         """
-        return RoleModel.query.get(idx)
+        return cls.query.get(idx)
 
     def __repr__(self):
         """
@@ -114,8 +114,8 @@ class UserRoleModel(TraceAttributesModel):
         self.user_id = data.get("user_id")
         self.role_id = data.get("role_id")
 
-    @staticmethod
-    def get_one_user(user_id):
+    @classmethod
+    def get_one_user(cls, user_id):
         """
         Method to get all the assigned roles to one user
 
@@ -123,10 +123,10 @@ class UserRoleModel(TraceAttributesModel):
         :return: a list with all the objects of the assigned roles.
         :rtype: list
         """
-        return UserRoleModel.query.filter_by(user_id=user_id).all()
+        return cls.query.filter_by(user_id=user_id).all()
 
-    @staticmethod
-    def del_one_user(user_id):
+    @classmethod
+    def del_one_user(cls, user_id):
         """
         Method to delete all the assigned roles to one user
 
@@ -134,22 +134,20 @@ class UserRoleModel(TraceAttributesModel):
         :return: a list with all the deleted objects.
         :rtype: list
         """
-        return UserRoleModel.query.filter_by(user_id=user_id).delete(
-            synchronize_session=False
-        )
+        return cls.query.filter_by(user_id=user_id).delete(synchronize_session=False)
 
-    @staticmethod
-    def get_all_objects():
+    @classmethod
+    def get_all_objects(cls):
         """
         Method to get all the role assignations to all the users
 
         :return: a list containing all the objects in the table
         :rtype: list
         """
-        return UserRoleModel.query.all()
+        return cls.query.all()
 
-    @staticmethod
-    def get_one_object(idx):
+    @classmethod
+    def get_one_object(cls, idx):
         """
         Method to get one assignation of role by its id
 
@@ -157,10 +155,10 @@ class UserRoleModel(TraceAttributesModel):
         :return: an instance of object :class:`UserRoleModel`
         :rtype: :class:`UserRoleModel`
         """
-        return UserRoleModel.query.get(idx)
+        return cls.query.get(idx)
 
-    @staticmethod
-    def get_one_user_role(user_id, role_id):
+    @classmethod
+    def get_one_user_role(cls, user_id, role_id):
         """
         Method to get one object from the user and role
 
@@ -169,7 +167,7 @@ class UserRoleModel(TraceAttributesModel):
         :return: an instance of the user roles model
         :rtype: :class:`UserRoleModel`
         """
-        return UserRoleModel.query.filter_by(user_id=user_id, role_id=role_id).first()
+        return cls.query.filter_by(user_id=user_id, role_id=role_id).first()
 
     @staticmethod
     def is_admin(user_id):
