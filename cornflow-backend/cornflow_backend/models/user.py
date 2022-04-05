@@ -88,7 +88,8 @@ class UserBaseModel(TraceAttributesModel):
         """
         return cls.query.filter_by(deleted_at=None)
 
-    def get_one_user(self, idx):
+    @classmethod
+    def get_one_user(cls, idx):
         """
         Query to get the information of one user
 
@@ -96,9 +97,10 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return self.query.filter_by(id=idx, deleted_at=None).first()
+        return cls.query.filter_by(id=idx, deleted_at=None).first()
 
-    def get_one_user_by_email(self, email):
+    @classmethod
+    def get_one_user_by_email(cls, email):
         """
         Query to get one user from the email
 
@@ -106,16 +108,17 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return self.query.filter_by(email=email, deleted_at=None).first()
+        return cls.query.filter_by(email=email, deleted_at=None).first()
 
-    def get_one_user_by_username(self, username):
+    @classmethod
+    def get_one_user_by_username(cls, username):
         """
         Returns one user (object) given a username
         :param str username: the user username that we are quering with
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return self.query.filter_by(username=username, deleted_at=None).first()
+        return cls.query.filter_by(username=username, deleted_at=None).first()
 
     def check_username_in_use(self):
         """
