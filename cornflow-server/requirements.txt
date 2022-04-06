@@ -7,7 +7,7 @@ cffi
 chardet
 click
 cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=libs/core
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
 cryptography
 Flask
 flask-apispec
