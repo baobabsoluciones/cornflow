@@ -13,7 +13,7 @@ from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
 from cornflow_client import SchemaManager
-from cornflow_client.constants import AirflowError, InvalidUsage
+from cornflow_client.constants import AirflowError
 
 
 class Airflow(object):
