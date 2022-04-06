@@ -1,5 +1,6 @@
 from flask import jsonify
 from webargs.flaskparser import parser
+from cornflow_client.constants import AirflowError
 
 
 class InvalidUsage(Exception):
@@ -18,16 +19,6 @@ class InvalidUsage(Exception):
         rv = dict(self.payload or ())
         rv["error"] = self.error
         return rv
-
-
-class AirflowError(InvalidUsage):
-    status_code = 400
-
-    def __init__(self, error, status_code=None, payload=None):
-        self.error = error
-        self.payload = payload
-        if status_code is not None:
-            self.status_code = status_code
 
 
 class ObjectDoesNotExist(InvalidUsage):

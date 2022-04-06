@@ -1,6 +1,7 @@
 bcrypt
 cffi
 click
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
 Flask
 Flask-Bcrypt
 Flask-SQLAlchemy
