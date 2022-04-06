@@ -8,8 +8,8 @@ with open("requirements.txt", "r") as fh:
     required.append(fh.read().splitlines())
 
 setuptools.setup(
-    name="cornflow-backend",
-    version="0.0.1a6",
+    name="cornflow-core",
+    version="0.0.1a7",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="REST API backend components used by cornflow and other REST APIs",
