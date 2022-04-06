@@ -1,4 +1,4 @@
-from cornflow_backend.models import UserBaseModel
+from cornflow_core.models import UserBaseModel
 
 # Imports from internal modules
 

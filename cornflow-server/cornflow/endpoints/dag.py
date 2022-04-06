@@ -4,7 +4,7 @@ This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
 from cornflow_client.airflow.api import get_schema
-from cornflow_backend.shared import validate_and_continue
+from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
@@ -33,7 +33,7 @@ from ..shared.const import (
     SERVICE_ROLE,
 )
 
-from cornflow_backend.exceptions import ObjectDoesNotExist
+from cornflow_core.exceptions import ObjectDoesNotExist
 
 execution_schema = ExecutionSchema()
 

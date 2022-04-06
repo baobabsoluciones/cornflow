@@ -10,7 +10,7 @@ from functools import wraps
 # Import from internal modules
 from ..shared.authentication import Auth
 from ..shared.const import ALL_DEFAULT_ROLES
-from cornflow_backend.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class MetaResource(Resource):

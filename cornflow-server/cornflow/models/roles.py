@@ -2,7 +2,7 @@
 Models defined for the roles and the assignation of roles to users.
 """
 
-from cornflow_backend.models import TraceAttributesModel
+from cornflow_core.models import TraceAttributesModel
 
 # Import from internal modules
 from ..shared.const import ADMIN_ROLE, SERVICE_ROLE

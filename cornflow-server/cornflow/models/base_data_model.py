@@ -2,7 +2,7 @@
 
 """
 # Import from libraries
-from cornflow_backend.models import TraceAttributesModel
+from cornflow_core.models import TraceAttributesModel
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT

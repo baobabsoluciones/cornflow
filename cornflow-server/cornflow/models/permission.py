@@ -1,4 +1,4 @@
-from cornflow_backend.models import TraceAttributesModel
+from cornflow_core.models import TraceAttributesModel
 
 # from .meta_model import TraceAttributes
 from .dag import DeployedDAG

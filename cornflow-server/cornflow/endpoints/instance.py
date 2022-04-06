@@ -5,7 +5,7 @@ These endpoints have different access url, but manage the same data entities
 """
 # Import from libraries
 from cornflow_client.airflow.api import get_schema
-from cornflow_backend.shared import validate_and_continue
+from cornflow_core.shared import validate_and_continue
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_apispec.views import MethodResource
@@ -33,7 +33,7 @@ from ..schemas.instance import (
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
-from cornflow_backend.exceptions import InvalidUsage
+from cornflow_core.exceptions import InvalidUsage
 
 
 # Initialize the schema that all endpoints are going to use

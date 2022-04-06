@@ -13,7 +13,7 @@ from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
 from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
-from cornflow_backend.exceptions import (
+from cornflow_core.exceptions import (
     InvalidUsage,
     InvalidCredentials,
     EndpointNotImplemented,

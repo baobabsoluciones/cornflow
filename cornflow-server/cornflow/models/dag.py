@@ -4,7 +4,7 @@
 # Import from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
-from cornflow_backend.models import TraceAttributesModel
+from cornflow_core.models import TraceAttributesModel
 
 # Import from internal modules
 # from .meta_model import TraceAttributes

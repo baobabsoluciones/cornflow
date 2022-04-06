@@ -18,7 +18,7 @@ from ..schemas.permission import (
 from ..shared.authentication import Auth
 from ..shared.compress import compressed
 from ..shared.const import ADMIN_ROLE
-from cornflow_backend.exceptions import ObjectAlreadyExists
+from cornflow_core.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(MetaResource, MethodResource):

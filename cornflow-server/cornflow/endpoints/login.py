@@ -24,7 +24,7 @@ from ..shared.const import (
     OID_NONE,
     PLANNER_ROLE,
 )
-from cornflow_backend.exceptions import (
+from cornflow_core.exceptions import (
     InvalidUsage,
     InvalidCredentials,
     EndpointNotImplemented,

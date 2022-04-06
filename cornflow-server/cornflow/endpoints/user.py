@@ -24,14 +24,14 @@ from ..schemas.user import (
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
-from cornflow_backend.exceptions import (
+from cornflow_core.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
     InvalidUsage,
     NoPermission,
     ObjectDoesNotExist,
 )
-from cornflow_backend.shared import check_email_pattern, check_password_pattern
+from cornflow_core.shared import check_email_pattern, check_password_pattern
 from ..shared.utils import db
 from ..shared.messages import get_pwd_email, send_email_to
 

@@ -4,7 +4,7 @@
 # Import from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
-from cornflow_backend.models import EmptyBaseModel
+from cornflow_core.models import EmptyBaseModel
 
 # Import from internal modules
 # from .meta_model import EmptyModel

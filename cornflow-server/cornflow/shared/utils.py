@@ -3,8 +3,8 @@
 """
 import hashlib
 import json
-from cornflow_backend.shared import database
-from cornflow_backend.shared import password_crypt
+from cornflow_core.shared import database
+from cornflow_core.shared import password_crypt
 
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_bcrypt import Bcrypt

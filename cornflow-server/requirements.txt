@@ -6,7 +6,7 @@ certifi
 cffi
 chardet
 click
-cornflow-backend @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_backend#subdirectory=cornflow-backend
+cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=libs/core
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
 cryptography
 Flask

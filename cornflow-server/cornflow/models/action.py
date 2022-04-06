@@ -1,7 +1,7 @@
 """
 
 """
-from cornflow_backend.models import EmptyBaseModel
+from cornflow_core.models import EmptyBaseModel
 
 # from .meta_model import EmptyModel
 from ..shared.utils import db
