@@ -6,13 +6,13 @@ import string
 import random
 
 from .meta_models import TraceAttributesModel
-from cornflow_backend.shared import (
+from cornflow_core.shared import (
     password_crypt,
     database,
     check_password_pattern,
     check_email_pattern,
 )
-from cornflow_backend.exceptions import InvalidCredentials
+from cornflow_core.exceptions import InvalidCredentials
 
 
 class UserBaseModel(TraceAttributesModel):

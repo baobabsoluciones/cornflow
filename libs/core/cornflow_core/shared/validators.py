@@ -3,7 +3,7 @@
 """
 import re
 from marshmallow import ValidationError
-from cornflow_backend.exceptions import InvalidUsage
+from cornflow_core.exceptions import InvalidUsage
 
 
 def is_special_character(character):

@@ -5,7 +5,7 @@ import datetime
 import logging as log
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
-from cornflow_backend.shared import database
+from cornflow_core.shared import database
 
 
 class EmptyBaseModel(database.Model):
