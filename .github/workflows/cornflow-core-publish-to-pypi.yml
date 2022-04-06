@@ -1,4 +1,4 @@
-name: Publish cornflow-backend Python 🐍 distributions 📦 to PyPI
+name: Publish cornflow-core Python 🐍 distributions 📦 to PyPI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-n-publish:
-    name: Build and publish cornflow-backend Python 🐍 distributions 📦 to PyPI
+    name: Build and publish cornflow-core Python 🐍 distributions 📦 to PyPI
     defaults:
       run:
         working-directory: ./libs/core
