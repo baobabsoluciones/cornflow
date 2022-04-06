@@ -4,6 +4,7 @@ click
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
 Flask
 Flask-Bcrypt
+Flask-RESTful
 Flask-SQLAlchemy
 greenlet
 importlib-metadata
@@ -13,6 +14,7 @@ MarkupSafe
 marshmallow
 packaging
 pycparser
+PyJWT
 pyparsing
 six
 SQLAlchemy==1.3.21
