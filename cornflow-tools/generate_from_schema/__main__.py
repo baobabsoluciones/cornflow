@@ -25,7 +25,7 @@ parser.add_argument(
 options = ["getOne", "getAll", "update", "deleteOne", "deleteAll"]
 parser.add_argument(
     "--remove_methods",
-    nargs="*",
+    nargs="+",
     help="Methods that will NOT be added to the new endpoints.",
     required=False,
     type=str,
