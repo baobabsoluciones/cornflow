@@ -10,7 +10,7 @@ from cornflow_core.shared import database
 class ViewBaseModel(EmptyBaseModel):
     __abstract__ = True
     id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    name = database.Column(database.Strin(128), unique=True, nullable=False)
+    name = database.Column(database.String(128), unique=True, nullable=False)
     url_rule = database.Column(database.String(128), nullable=False)
     description = database.Column(TEXT, nullable=True)
 
