@@ -32,7 +32,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = Auth.get_user_obj_from_header(request.headers)
+        user = Auth.get_user_from_header(request.headers)
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
@@ -55,7 +55,7 @@ class SchemaDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = Auth.get_user_obj_from_header(request.headers)
+        user = Auth.get_user_from_header(request.headers)
         permission = PermissionsDAG.check_if_has_permissions(
             user_id=user.id, dag_id=dag_name
         )

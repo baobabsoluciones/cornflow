@@ -32,7 +32,7 @@ class MetaResource(Resource):
         :rtype: UserModel
         """
         if self.user is None:
-            self.user = Auth.get_user_obj_from_header(request.headers)
+            self.user = Auth.get_user_from_header(request.headers)
             if self.user is None:
                 raise InvalidUsage("Error authenticating user")
         return self.user

@@ -22,7 +22,7 @@ class TokenEndpoint(MetaResource, MethodResource):
         """
         token = Auth.get_token_from_header(request.headers)
         try:
-            Auth.get_user_obj_from_header(request.headers)
+            Auth.get_user_from_header(request.headers)
         except (InvalidCredentials, ObjectDoesNotExist):
             return {"token": token, "valid": 0}, 200
         return {"token": token, "valid": 1}, 200

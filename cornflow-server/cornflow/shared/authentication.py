@@ -3,7 +3,6 @@
 """
 # Global imports
 import base64
-import datetime
 import jwt
 import requests
 import requests.exceptions
@@ -30,49 +29,15 @@ from cornflow_core.exceptions import (
     InvalidCredentials,
     InvalidData,
     NoPermission,
-    ObjectDoesNotExist,
 )
 
 from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
 
+from cornflow_core.authentication import Auth as AuthBase
 
-class Auth:
-    @staticmethod
-    def generate_token(user_id):
-        """
 
-        :param user_id:
-        :return:
-        """
-        payload = {
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1),
-            "iat": datetime.datetime.utcnow(),
-            "sub": user_id,
-        }
-
-        return jwt.encode(payload, current_app.config["SECRET_KEY"], "HS256")
-
-    @staticmethod
-    def decode_token(token):
-        """
-
-        :param token:
-        :return:
-        """
-        try:
-            payload = jwt.decode(
-                token, current_app.config["SECRET_KEY"], algorithms="HS256"
-            )
-            return {"user_id": payload["sub"]}
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                error="The token has expired, please login again", status_code=400
-            )
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                error="Invalid token, please try again with a new token",
-                status_code=400,
-            )
+class Auth(AuthBase):
+    user_model = UserModel
 
     @staticmethod
     def validate_oid_token(token, client_id, tenant_id, issuer, provider):
@@ -105,38 +70,6 @@ class Auth:
             )
 
     @staticmethod
-    def get_token_from_header(headers):
-        if "Authorization" not in headers:
-            raise InvalidCredentials(
-                error="Auth token is not available", status_code=400
-            )
-        auth_header = headers.get("Authorization")
-        if not auth_header:
-            return ""
-        try:
-            return auth_header.split(" ")[1]
-        except Exception as e:
-            raise InvalidCredentials(
-                error="The Authorization header has a bad syntax: {}".format(e)
-            )
-
-    @staticmethod
-    def get_user_obj_from_header(headers):
-        """
-        returns a user from the headers of the request
-
-        :return: user
-        :rtype: UserModel
-        """
-        token = Auth.get_token_from_header(headers)
-        data = Auth.decode_token(token)
-        user_id = data["user_id"]
-        user = UserModel.get_one_user(user_id)
-        if user is None:
-            raise ObjectDoesNotExist("User does not exist, invalid token")
-        return user
-
-    @staticmethod
     def auth_required(func):
         """
         Auth decorator
@@ -146,7 +79,7 @@ class Auth:
 
         @wraps(func)
         def decorated_user(*args, **kwargs):
-            user = Auth.get_user_obj_from_header(request.headers)
+            user = Auth.get_user_from_header(request.headers)
             Auth._get_permission_for_request(request, user.id)
             g.user = {"id": user.id}
             return func(*args, **kwargs)
@@ -164,7 +97,7 @@ class Auth:
         @wraps(func)
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
-                user_id = Auth.get_user_obj_from_header(request.headers).id
+                user_id = Auth.get_user_from_header(request.headers).id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
                     raise InvalidData(
@@ -257,7 +190,6 @@ class Auth:
             response = requests.get(discovery_url)
             response.raise_for_status()
         except requests.exceptions.HTTPError as error:
-            print(response.text)
             raise CommunicationError(
                 f"Error getting issuer discovery meta from {discovery_url}", error
             )
@@ -278,7 +210,6 @@ class Auth:
             response = requests.get(jwks_uri)
             response.raise_for_status()
         except requests.exceptions.HTTPError as error:
-            print(response.text)
             raise CommunicationError(
                 f"Error getting issuer jwks from {jwks_uri}", error
             )
@@ -291,6 +222,7 @@ class Auth:
                 return jwk
         raise InvalidCredentials("Token has an unknown key identifier")
 
+    @staticmethod
     def _ensure_bytes(key):
         if isinstance(key, str):
             key = key.encode("utf-8")
