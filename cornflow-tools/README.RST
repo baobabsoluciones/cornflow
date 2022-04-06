@@ -2,7 +2,7 @@
 Cornflow-tools
 ==============
 
-Cornflow-tools is a module that contains modules to help you adapt cornflow to your needs
+Cornflow-tools is a library that contains modules to help you adapt cornflow to your needs
 
 -----------------------------------
 Module :code:`generate_from_schema`
