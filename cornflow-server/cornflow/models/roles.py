@@ -2,19 +2,17 @@
 Models defined for the roles and the assignation of roles to users.
 """
 
-from cornflow_core.models import TraceAttributesModel
+from cornflow_core.models import TraceAttributesModel, RoleBaseModel
 
 # Import from internal modules
 from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
 from ..shared.utils import db
 
 
-class RoleModel(TraceAttributesModel):
+class RoleModel(RoleBaseModel):
     # TODO: Should have a user_id to store the user that defined the role?
     __tablename__ = "roles"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
     user_roles = db.relationship(
         "UserRoleModel",
         backref="roles",
@@ -31,65 +29,6 @@ class RoleModel(TraceAttributesModel):
         "PermissionViewRoleModel.deleted_at==None)",
         cascade="all,delete",
     )
-
-    def __init__(self, data):
-        """
-        Method to initialize an instance of a role
-
-        :param dict data: dict with the information needed to the creation of a new role
-        """
-        super().__init__()
-        self.id = data.get("id")
-        self.name = data.get("name")
-
-    def update(self, data):
-        """
-        Updates the object in the database and automatically updates the updated_at field
-
-        :param dict data:  A dictionary containing the updated data for the execution
-        """
-        for key, item in data.items():
-            setattr(self, key, item)
-        super().update(data)
-
-    @classmethod
-    def get_all_objects(cls):
-        """
-        Gets all the objects on the table
-
-        :return: a list with the objects defined
-        :rtype: list
-        """
-        return cls.query.all()
-
-    @classmethod
-    def get_one_object(cls, idx):
-        """
-        Gets one object defined on the table by its id
-
-        :param int idx: the ID of the object
-        :return: the object got from the database
-        :rtype: :class:`RoleModel`
-        """
-        return cls.query.get(idx)
-
-    def __repr__(self):
-        """
-        Method for the representation of the roles
-
-        :return: the representation of the role
-        :rtype: str
-        """
-        return self.name
-
-    def __str__(self):
-        """
-        Method for the string representation of the roles
-
-        :return: the string rtepresentation of the roles
-        :rtype: str
-        """
-        return self.name
 
 
 class UserRoleModel(TraceAttributesModel):

@@ -430,9 +430,9 @@ class TestRolesModelMethods(CustomTestCase):
     def test_repr_method(self):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(idx, "test_role")
+        self.repr_method(idx, "<Role test_role>")
 
     def test_str_method(self):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(idx, "test_role")
+        self.str_method(idx, "<Role test_role>")
