@@ -15,7 +15,7 @@ from cornflow.models import (
 )
 
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import database as db
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,
@@ -319,6 +319,7 @@ class TestUserEndpoint(TestCase):
         response = self.modify_info(self.planner, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
+        print(self.planner)
         response = self.log_in(self.planner)
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])

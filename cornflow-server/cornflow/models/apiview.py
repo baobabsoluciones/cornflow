@@ -8,7 +8,7 @@ from cornflow_core.models import ViewBaseModel
 
 # Import from internal modules
 # from .meta_model import EmptyModel
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class ApiViewModel(ViewBaseModel):

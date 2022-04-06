@@ -8,7 +8,7 @@ from cornflow_core.models import TraceAttributesModel
 
 # Import from internal modules
 # from .meta_model import TraceAttributes
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class DeployedDAG(TraceAttributesModel):

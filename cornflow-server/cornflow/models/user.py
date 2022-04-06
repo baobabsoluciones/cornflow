@@ -3,7 +3,7 @@ from cornflow_core.models import UserBaseModel
 # Imports from internal modules
 
 from .roles import UserRoleModel
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class UserModel(UserBaseModel):

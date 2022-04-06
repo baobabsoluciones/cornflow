@@ -5,7 +5,7 @@ def register_views_command(verbose):
 
     from ..endpoints import resources
     from ..models import ApiViewModel
-    from ..shared.utils import db
+    from cornflow_core.shared import database as db
 
     views_registered = [view.name for view in ApiViewModel.get_all_objects()]
 

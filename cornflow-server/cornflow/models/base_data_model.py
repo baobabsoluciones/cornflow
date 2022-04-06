@@ -9,7 +9,8 @@ from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
 # Import from internal modules
-from ..shared.utils import db, hash_json_256
+from cornflow_core.shared import database as db
+from ..shared.utils import hash_json_256
 
 
 class BaseDataModel(TraceAttributesModel):

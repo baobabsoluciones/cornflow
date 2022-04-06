@@ -6,7 +6,7 @@ from cornflow_core.models import TraceAttributesModel, RoleBaseModel
 
 # Import from internal modules
 from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class RoleModel(RoleBaseModel):

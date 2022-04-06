@@ -12,7 +12,7 @@ from flask_apispec import marshal_with, doc
 from .meta_resource import MetaResource
 from ..schemas.health import HealthResponse
 from ..shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class HealthEndpoint(MetaResource, MethodResource):

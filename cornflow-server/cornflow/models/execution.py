@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import TEXT
 # Imports from internal modules
 from .base_data_model import BaseDataModel
 from ..shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class ExecutionModel(BaseDataModel):

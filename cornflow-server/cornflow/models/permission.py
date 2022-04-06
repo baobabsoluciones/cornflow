@@ -2,7 +2,7 @@ from cornflow_core.models import TraceAttributesModel
 
 # from .meta_model import TraceAttributes
 from .dag import DeployedDAG
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class PermissionViewRoleModel(TraceAttributesModel):

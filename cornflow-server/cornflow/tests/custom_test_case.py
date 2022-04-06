@@ -18,7 +18,7 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import database as db
 from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,

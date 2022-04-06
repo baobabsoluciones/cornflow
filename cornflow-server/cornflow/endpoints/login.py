@@ -30,7 +30,7 @@ from cornflow_core.exceptions import (
     EndpointNotImplemented,
 )
 from ..shared.ldap import LDAP
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 
 
 class LoginEndpoint(MetaResource, MethodResource):

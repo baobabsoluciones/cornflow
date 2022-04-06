@@ -32,7 +32,7 @@ from cornflow_core.exceptions import (
     ObjectDoesNotExist,
 )
 from cornflow_core.shared import check_email_pattern, check_password_pattern
-from ..shared.utils import db
+from cornflow_core.shared import database as db
 from ..shared.messages import get_pwd_email, send_email_to
 
 
