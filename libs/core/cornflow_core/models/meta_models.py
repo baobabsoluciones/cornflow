@@ -64,6 +64,8 @@ class TraceAttributesModel(EmptyBaseModel):
         self.deleted_at = None
 
     def update(self, data):
+        for key, item in data.items():
+            setattr(self, key, item)
         self.updated_at = datetime.datetime.utcnow()
         super().update(data)
 
@@ -97,3 +99,11 @@ class TraceAttributesModel(EmptyBaseModel):
             database.session.rollback()
             log.error(f"Unknown error on activating data: {e}")
             log.error(f"Data: {self}")
+
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.filter_by(deleted_at=None)
+
+    @classmethod
+    def get_one_object(cls, idx):
+        return cls.query.filter_by(id=idx, deleted_at=None).first()

@@ -25,6 +25,11 @@ class UserBaseModel(TraceAttributesModel):
     email = database.Column(database.String(128), nullable=False, unique=True)
 
     def __init__(self, data):
+        """
+
+        :param data:
+        :type data:
+        """
         super().__init__()
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
@@ -95,7 +100,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: a list with all the users.
         :rtype: list(:class:`UserModel`)
         """
-        return cls.query.filter_by(deleted_at=None)
+        return cls.get_all_objects()
 
     @classmethod
     def get_one_user(cls, idx):
@@ -106,7 +111,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return cls.query.filter_by(id=idx, deleted_at=None).first()
+        return cls.get_one_object(idx)
 
     @classmethod
     def get_one_user_by_email(cls, email):
