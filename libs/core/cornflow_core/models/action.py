@@ -1,7 +1,6 @@
 """
 
 """
-
 from cornflow_core.models import EmptyBaseModel
 from cornflow_core.shared import database
 
