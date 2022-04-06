@@ -1,18 +1,17 @@
 """
 
 """
-import re
-import string
 import random
+import string
 
-from .meta_models import TraceAttributesModel
+from cornflow_core.exceptions import InvalidCredentials
 from cornflow_core.shared import (
     password_crypt,
     database,
     check_password_pattern,
     check_email_pattern,
 )
-from cornflow_core.exceptions import InvalidCredentials
+from .meta_models import TraceAttributesModel
 
 
 class UserBaseModel(TraceAttributesModel):

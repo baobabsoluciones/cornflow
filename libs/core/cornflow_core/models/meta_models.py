@@ -3,6 +3,7 @@
 """
 import datetime
 import logging as log
+
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow_core.shared import database
@@ -11,45 +12,40 @@ from cornflow_core.shared import database
 class EmptyBaseModel(database.Model):
     __abstract__ = True
 
-    def save(self):
-        database.session.add(self)
+    def commit_changes(self, action: str = None):
+        if action is None:
+            action = ""
+
         try:
             database.session.commit()
         except IntegrityError as e:
             database.session.rollback()
-            log.error(f"Integrity error on saving new data: {e}")
+            log.error(f"Integrity error on {action} new data: {e}")
             log.error(f"Data: {self}")
         except DBAPIError as e:
             database.session.rollback()
-            log.error(f"Unknown error on saving new data: {e}")
+            log.error(f"Unknown error on {action} new data: {e}")
             log.error(f"Data: {self}")
+
+    def save(self):
+        database.session.add(self)
+        self.commit_changes("saving")
 
     def delete(self):
         database.session.delete(self)
-
-        try:
-            database.session.commit()
-        except IntegrityError as e:
-            database.session.rollback()
-            log.error(f"Integrity error on deleting existing data: {e}")
-            log.error(f"Data: {self}")
-        except DBAPIError as e:
-            database.session.rollback()
-            log.error(f"Unknown error on deleting existing data: {e}")
-            log.error(f"Data: {self}")
+        self.commit_changes("deleting")
 
     def update(self, data):
         database.session.add(self)
-        try:
-            database.session.commit()
-        except IntegrityError as e:
-            database.session.rollback()
-            log.error(f"Integrity error on updating data: {e}")
-            log.error(f"Data: {self}")
-        except DBAPIError as e:
-            database.session.rollback()
-            log.error(f"Unknown error on updating data: {e}")
-            log.error(f"Data: {self}")
+        self.commit_changes("updating")
+
+    @classmethod
+    def get_all_objects(cls):
+        return cls.query.all()
+
+    @classmethod
+    def get_one_object(cls, idx):
+        return cls.query.get(idx)
 
 
 class TraceAttributesModel(EmptyBaseModel):
@@ -72,36 +68,16 @@ class TraceAttributesModel(EmptyBaseModel):
     def disable(self):
         self.deleted_at = datetime.datetime.utcnow()
         database.session.add(self)
-
-        try:
-            database.session.commit()
-        except IntegrityError as e:
-            database.session.rollback()
-            log.error(f"Integrity error on disabling data: {e}")
-            log.error(f"Data: {self}")
-        except DBAPIError as e:
-            database.session.rollback()
-            log.error(f"Unknown error on disabling data: {e}")
-            log.error(f"Data: {self}")
+        self.commit_changes("disabling")
 
     def activate(self):
         self.updated_at = datetime.datetime.utcnow()
         self.deleted_at = None
         database.session.add(self)
-
-        try:
-            database.session.commit()
-        except IntegrityError as e:
-            database.session.rollback()
-            log.error(f"Integrity error on activating data: {e}")
-            log.error(f"Data: {self}")
-        except DBAPIError as e:
-            database.session.rollback()
-            log.error(f"Unknown error on activating data: {e}")
-            log.error(f"Data: {self}")
+        self.commit_changes("activating")
 
     @classmethod
-    def get_all_objects(cls):
+    def get_all_objects(cls, *args, **kwargs):
         return cls.query.filter_by(deleted_at=None)
 
     @classmethod

@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from cornflow_core.models import TraceAttributesModel
 from cornflow_core.shared import database
 
@@ -19,5 +23,6 @@ class RoleBaseModel(TraceAttributesModel):
         return self.__repr__()
 
 
-class RoleModel2(RoleBaseModel):
-    __tablename__ = "roles_aux"
+class UserRoleBaseModel(TraceAttributesModel):
+    __abstract__ = True
+    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
