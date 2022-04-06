@@ -3,7 +3,7 @@ name: Publish cornflow-backend Python 🐍 distributions 📦 to PyPI
 on:
   push:
     tags:
-      - "vcb*"
+      - "core*"
 
 jobs:
   build-n-publish:
@@ -31,10 +31,10 @@ jobs:
       with:
         password: ${{ secrets.CORE_TEST_PYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
-        packages_dir: cornflow-backend/dist/
+        packages_dir: libs/core/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.CORE_PYPI_TOKEN }}
-        packages_dir: cornflow-backend/dist/
+        packages_dir: libs/core/dist/
 
