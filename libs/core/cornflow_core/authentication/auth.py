@@ -100,28 +100,15 @@ class Auth:
         return user
 
     @staticmethod
-    def auth_required(func):
-        """
+    def auth_decorator(auth: bool = True):
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                if auth:
+                    user = Auth.get_user_from_header(request.headers)
+                    g.user = {"id": user.id}
+                return func(*args, **kwargs)
 
-        :param func:
-        :type func:
-        :return:
-        :rtype:
-        """
+            return wrapper
 
-        @wraps(func)
-        def decorated_auth(*args, **kwargs):
-            """
-
-            :param args:
-            :type args:
-            :param kwargs:
-            :type kwargs:
-            :return:
-            :rtype:
-            """
-            user = Auth.get_user_from_header(request.headers)
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
-
-        return decorated_auth
+        return decorator

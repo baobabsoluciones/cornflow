@@ -60,11 +60,7 @@ class TraceAttributesModel(EmptyBaseModel):
         self.deleted_at = None
 
     def update(self, data):
-        # TODO: avoid using setattr. Could be done as: self.__dict__.update(data)
-        #  but this would create new keys, not just update the existing ones
-        #  and a need to implement the __dict__ method.
-        for key, item in data.items():
-            setattr(self, key, item)
+        self.__dict__.update(data)
         self.updated_at = datetime.datetime.utcnow()
         super().update(data)
 
