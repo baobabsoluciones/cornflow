@@ -40,8 +40,8 @@ class EmptyBaseModel(database.Model):
         self.commit_changes("updating")
 
     @classmethod
-    def get_all_objects(cls):
-        return cls.query.all()
+    def get_all_objects(cls, **kwargs):
+        return cls.query.filter_by(**kwargs)
 
     @classmethod
     def get_one_object(cls, idx):
@@ -80,9 +80,5 @@ class TraceAttributesModel(EmptyBaseModel):
         self.commit_changes("activating")
 
     @classmethod
-    def get_all_objects(cls, *args, **kwargs):
-        return cls.query.filter_by(deleted_at=None)
-
-    @classmethod
-    def get_one_object(cls, idx):
-        return cls.query.filter_by(id=idx, deleted_at=None).first()
+    def get_all_objects(cls, **kwargs):
+        return super().get_all_objects(deleted_at=None, **kwargs)
