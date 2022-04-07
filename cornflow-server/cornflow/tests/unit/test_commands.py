@@ -178,9 +178,11 @@ class TestCommands(TestCase):
                 if base[0] in view["resource"].ROLES_WITH_ACCESS:
 
                     permission = PermissionViewRoleModel.get_permission(
-                        base[0],
-                        ApiViewModel.query.filter_by(name=view["endpoint"]).first().id,
-                        base[1],
+                        role_id=base[0],
+                        api_view_id=ApiViewModel.query.filter_by(name=view["endpoint"])
+                        .first()
+                        .id,
+                        action_id=base[1],
                     )
 
                     self.assertEqual(True, permission)

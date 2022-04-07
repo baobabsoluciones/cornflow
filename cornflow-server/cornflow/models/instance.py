@@ -65,7 +65,7 @@ class InstanceModel(BaseDataModel):
         :return: The representation of the :class:`InstanceModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return f"<Instance {self.id}>"
 
     def __str__(self):
         """
@@ -74,4 +74,4 @@ class InstanceModel(BaseDataModel):
         :return: The string for the :class:`InstanceModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return self.__repr__()

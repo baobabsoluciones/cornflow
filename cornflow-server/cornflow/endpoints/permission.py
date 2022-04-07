@@ -51,7 +51,9 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
     @marshal_with(PermissionViewRoleResponse)
     def post(self, **kwargs):
         if PermissionViewRoleModel.get_permission(
-            kwargs.get("role_id"), kwargs.get("api_view_id"), kwargs.get("action_id")
+            role_id=kwargs.get("role_id"),
+            api_view_id=kwargs.get("api_view_id"),
+            action_id=kwargs.get("action_id"),
         ):
             raise ObjectAlreadyExists
         else:

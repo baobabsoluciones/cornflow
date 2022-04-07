@@ -153,7 +153,7 @@ class Auth(AuthBase):
 
         for role in user_roles:
             has_permission = PermissionViewRoleModel.get_permission(
-                role, view_id, action_id
+                role_id=role, api_view_id=view_id, action_id=action_id
             )
 
             if has_permission:

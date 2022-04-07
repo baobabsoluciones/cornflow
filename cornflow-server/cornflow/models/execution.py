@@ -10,9 +10,9 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 
 # Imports from internal modules
+from cornflow_core.shared import database as db
 from .base_data_model import BaseDataModel
 from ..shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
-from cornflow_core.shared import database as db
 
 
 class ExecutionModel(BaseDataModel):
@@ -111,7 +111,7 @@ class ExecutionModel(BaseDataModel):
         :return: The representation of the :class:`ExecutionModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return f"<Execution {self.id}>"
 
     def __str__(self):
         """
@@ -120,4 +120,4 @@ class ExecutionModel(BaseDataModel):
         :return: The string for the :class:`ExecutionModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return self.__repr__()

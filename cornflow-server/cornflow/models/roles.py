@@ -76,27 +76,6 @@ class UserRoleModel(TraceAttributesModel):
         return cls.query.filter_by(user_id=user_id).delete(synchronize_session=False)
 
     @classmethod
-    def get_all_objects(cls):
-        """
-        Method to get all the role assignations to all the users
-
-        :return: a list containing all the objects in the table
-        :rtype: list
-        """
-        return cls.query.all()
-
-    @classmethod
-    def get_one_object(cls, idx):
-        """
-        Method to get one assignation of role by its id
-
-        :param int idx: ID of the assignation
-        :return: an instance of object :class:`UserRoleModel`
-        :rtype: :class:`UserRoleModel`
-        """
-        return cls.query.get(idx)
-
-    @classmethod
     def get_one_user_role(cls, user_id, role_id):
         """
         Method to get one object from the user and role

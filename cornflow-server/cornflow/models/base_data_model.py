@@ -44,6 +44,7 @@ class BaseDataModel(TraceAttributesModel):
         Updates the object in the database and automatically updates the updated_at field
         :param dict data:  A dictionary containing the updated data for the execution
         """
+        # TODO: this method should change
         for key, item in data.items():
             setattr(self, key, item)
         super().update(data)

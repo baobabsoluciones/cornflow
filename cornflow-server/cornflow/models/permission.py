@@ -26,44 +26,26 @@ class PermissionViewRoleModel(TraceAttributesModel):
         self.api_view_id = data.get("api_view_id")
         self.role_id = data.get("role_id")
 
-    @classmethod
-    def get_permission(cls, role_id, view_id, action_id):
-        permission = cls.query.filter_by(
-            role_id=role_id,
-            api_view_id=view_id,
-            action_id=action_id,
-            deleted_at=None,
-        ).first()
+    # @classmethod
+    # def get_permission(cls, role_id, view_id, action_id):
+    #     permission = cls.query.filter_by(
+    #         role_id=role_id,
+    #         api_view_id=view_id,
+    #         action_id=action_id,
+    #         deleted_at=None,
+    #     ).first()
+    #
+    #     if permission is not None:
+    #         return True
 
+    @classmethod
+    def get_permission(cls, **kwargs):
+        permission = cls.query.filter_by(deleted_at=None, **kwargs).first()
         if permission is not None:
             return True
 
-    @classmethod
-    def get_one_object(cls, idx):
-        """
-        Method to get one permission by its id
-
-        :param int idx: ID of the permission
-        :return: an instance of object :class:`PermissionViewRoleModel`
-        :rtype: :class:`PermissionViewRoleModel`
-        """
-        return cls.query.get(idx)
-
-    def update(self, data):
-        """
-        Updates the object in the database and automatically updates the updated_at field
-        :param dict data:  A dictionary containing the updated data for the execution
-        """
-        for key, item in data.items():
-            setattr(self, key, item)
-        super().update(data)
-
-    @classmethod
-    def get_all_objects(cls):
-        return cls.query.all()
-
     def __repr__(self):
-        return "{} can {} on {}".format(self.role_id, self.action_id, self.api_view_id)
+        return f"<Permission role: {self.role_id}, action: {self.action_id}, view: {self.api_view_id}>"
 
 
 class PermissionsDAG(TraceAttributesModel):
@@ -84,11 +66,7 @@ class PermissionsDAG(TraceAttributesModel):
         self.user_id = data.get("user_id")
 
     def __repr__(self):
-        return f"User {self.user_id} can access {self.dag_id}"
-
-    @classmethod
-    def get_all_objects(cls):
-        return cls.query.all()
+        return f"<DAG permission user: {self.user_id}, DAG: {self.dag_id}<"
 
     @classmethod
     def get_user_dag_permissions(cls, user_id):

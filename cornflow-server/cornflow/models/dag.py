@@ -4,10 +4,8 @@
 # Import from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
-from cornflow_core.models import TraceAttributesModel
-
 # Import from internal modules
-# from .meta_model import TraceAttributes
+from cornflow_core.models import TraceAttributesModel
 from cornflow_core.shared import database as db
 
 
@@ -33,8 +31,4 @@ class DeployedDAG(TraceAttributesModel):
         self.description = data.get("description", None)
 
     def __repr__(self):
-        return self.id
-
-    @classmethod
-    def get_all_objects(cls):
-        return cls.query.all()
+        return f"<DAG {self.id}>"

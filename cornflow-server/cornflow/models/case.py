@@ -117,6 +117,7 @@ class CaseModel(BaseDataModel):
 
         :param dict data: the patches to apply.
         """
+        # TODO: review the behaviour of this method.
         if "data_patch" in data:
             self.data, self.data_hash = self.apply_patch(self.data, data["data_patch"])
         if "solution_patch" in data:

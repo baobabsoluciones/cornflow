@@ -75,12 +75,3 @@ class UserModel(UserBaseModel):
         Returns a boolean if a user is a super user or not
         """
         return UserRoleModel.is_service_user(self.id)
-
-    def __repr__(self):
-        """
-        Representation method of the class
-
-        :return: the representation of the class
-        :rtype: str
-        """
-        return "<Username {}>".format(self.username)
