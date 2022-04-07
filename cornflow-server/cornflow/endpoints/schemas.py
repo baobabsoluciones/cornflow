@@ -12,7 +12,7 @@ import logging as log
 # Import from internal modules
 from .meta_resource import MetaResource
 from ..models import PermissionsDAG
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 from cornflow_core.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
 
@@ -23,7 +23,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get list of available apps", tags=["Schemas"])
-    @Auth.auth_decorator
+    @AuthCornflow.auth_decorator
     @marshal_with(SchemaListApp(many=True))
     def get(self):
         """
@@ -32,7 +32,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = Auth.get_user_from_header(request.headers)
+        user = AuthCornflow.get_user_from_header(request.headers)
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
@@ -46,7 +46,7 @@ class SchemaDetailsEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get instance, solution and config schema", tags=["Schemas"])
-    @Auth.auth_decorator
+    @AuthCornflow.auth_decorator
     @marshal_with(SchemaOneApp)
     def get(self, dag_name):
         """
@@ -55,7 +55,7 @@ class SchemaDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = Auth.get_user_from_header(request.headers)
+        user = AuthCornflow.get_user_from_header(request.headers)
         permission = PermissionsDAG.check_if_has_permissions(
             user_id=user.id, dag_id=dag_name
         )

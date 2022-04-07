@@ -9,7 +9,7 @@ from flask_apispec.views import MethodResource
 from .meta_resource import MetaResource
 from ..models import ApiViewModel
 from ..schemas.apiview import ApiViewResponse
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 from ..shared.const import ADMIN_ROLE
 
 
@@ -26,7 +26,7 @@ class ApiViewListEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Get all the api views", tags=["ApiViews"])
-    @Auth.auth_decorator
+    @AuthCornflow.auth_decorator
     @marshal_with(ApiViewResponse(many=True))
     def get(self):
         """

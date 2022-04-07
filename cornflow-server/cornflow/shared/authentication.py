@@ -33,10 +33,10 @@ from cornflow_core.exceptions import (
 
 from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
 
-from cornflow_core.authentication import Auth as AuthBase
+from cornflow_core.authentication import Auth
 
 
-class Auth(AuthBase):
+class AuthCornflow(Auth):
     user_model = UserModel
 
     @staticmethod
@@ -48,7 +48,7 @@ class Auth(AuthBase):
         :param str issuer:
         :param int provider:
         """
-        public_key = Auth._get_public_key(token, tenant_id, provider)
+        public_key = AuthCornflow._get_public_key(token, tenant_id, provider)
         try:
             decoded = jwt.decode(
                 token,
@@ -80,8 +80,8 @@ class Auth(AuthBase):
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                user = Auth.get_user_from_header(request.headers)
-                Auth._get_permission_for_request(request, user.id)
+                user = AuthCornflow.get_user_from_header(request.headers)
+                AuthCornflow._get_permission_for_request(request, user.id)
                 g.user = {"id": user.id}
                 return func(*args, **kwargs)
 
@@ -100,7 +100,7 @@ class Auth(AuthBase):
         @wraps(func)
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
-                user_id = Auth.get_user_from_header(request.headers).id
+                user_id = AuthCornflow.get_user_from_header(request.headers).id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
                     raise InvalidData(
@@ -130,7 +130,7 @@ class Auth(AuthBase):
         :return: the user id code.
         :rtype: int
         """
-        user_id = Auth.decode_token(token)["user_id"]
+        user_id = AuthCornflow.decode_token(token)["user_id"]
         return user_id
 
     """
@@ -143,7 +143,7 @@ class Auth(AuthBase):
 
     @staticmethod
     def _get_permission_for_request(req, user_id):
-        method, url = Auth._get_request_info(req)
+        method, url = AuthCornflow._get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
             raise NoPermission(
@@ -200,7 +200,7 @@ class Auth(AuthBase):
 
     @staticmethod
     def _get_jwks_uri(tenant_id, provider):
-        meta = Auth._fetch_discovery_meta(tenant_id, provider)
+        meta = AuthCornflow._fetch_discovery_meta(tenant_id, provider)
         if "jwks_uri" in meta:
             return meta["jwks_uri"]
         else:
@@ -208,7 +208,7 @@ class Auth(AuthBase):
 
     @staticmethod
     def _get_jwks(tenant_id, provider):
-        jwks_uri = Auth._get_jwks_uri(tenant_id, provider)
+        jwks_uri = AuthCornflow._get_jwks_uri(tenant_id, provider)
         try:
             response = requests.get(jwks_uri)
             response.raise_for_status()
@@ -220,7 +220,7 @@ class Auth(AuthBase):
 
     @staticmethod
     def _get_jwk(kid, tenant_id, provider):
-        for jwk in Auth._get_jwks(tenant_id, provider).get("keys"):
+        for jwk in AuthCornflow._get_jwks(tenant_id, provider).get("keys"):
             if jwk.get("kid") == kid:
                 return jwk
         raise InvalidCredentials("Token has an unknown key identifier")
@@ -233,14 +233,15 @@ class Auth(AuthBase):
 
     @staticmethod
     def _decode_value(val):
-        decoded = base64.urlsafe_b64decode(Auth._ensure_bytes(val) + b"==")
+        decoded = base64.urlsafe_b64decode(AuthCornflow._ensure_bytes(val) + b"==")
         return int.from_bytes(decoded, "big")
 
     @staticmethod
     def _rsa_pem_from_jwk(jwk):
         return (
             RSAPublicNumbers(
-                n=Auth._decode_value(jwk["n"]), e=Auth._decode_value(jwk["e"])
+                n=AuthCornflow._decode_value(jwk["n"]),
+                e=AuthCornflow._decode_value(jwk["e"]),
             )
             .public_key(default_backend())
             .public_bytes(
@@ -251,6 +252,6 @@ class Auth(AuthBase):
 
     @staticmethod
     def _get_public_key(token, tenant_id, provider):
-        kid = Auth._get_kid(token)
-        jwk = Auth._get_jwk(kid, tenant_id, provider)
-        return Auth._rsa_pem_from_jwk(jwk)
+        kid = AuthCornflow._get_kid(token)
+        jwk = AuthCornflow._get_jwk(kid, tenant_id, provider)
+        return AuthCornflow._rsa_pem_from_jwk(jwk)

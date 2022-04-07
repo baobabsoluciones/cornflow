@@ -11,7 +11,7 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
 from cornflow_core.exceptions import (
     InvalidUsage,
@@ -68,7 +68,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
             PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
-            token = Auth.generate_token(user.id)
+            token = AuthCornflow.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400

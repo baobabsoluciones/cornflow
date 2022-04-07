@@ -7,7 +7,7 @@ from flask_apispec import marshal_with, doc
 from .meta_resource import MetaResource
 from ..schemas.user import TokenEndpointResponse
 from cornflow_core.exceptions import InvalidCredentials, ObjectDoesNotExist
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 
 
 class TokenEndpoint(MetaResource, MethodResource):
@@ -20,9 +20,9 @@ class TokenEndpoint(MetaResource, MethodResource):
         :return: A dictionary (containing the token and a boolean 'valid') and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        token = Auth.get_token_from_header(request.headers)
+        token = AuthCornflow.get_token_from_header(request.headers)
         try:
-            Auth.get_user_from_header(request.headers)
+            AuthCornflow.get_user_from_header(request.headers)
         except (InvalidCredentials, ObjectDoesNotExist):
             return {"token": token, "valid": 0}, 200
         return {"token": token, "valid": 1}, 200

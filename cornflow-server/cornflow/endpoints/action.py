@@ -9,7 +9,7 @@ from flask_apispec.views import MethodResource
 from .meta_resource import MetaResource
 from ..models import ActionModel
 from ..schemas.action import ActionsResponse
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 from ..shared.const import ADMIN_ROLE
 from cornflow_core.resources import BaseMetaResource
 
@@ -17,6 +17,7 @@ from cornflow_core.resources import BaseMetaResource
 class ActionListEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
+    AUTH_CLASS = AuthCornflow
 
     def __init__(self):
         super().__init__()

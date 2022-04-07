@@ -15,7 +15,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from .meta_resource import MetaResource
 from ..models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
 from ..schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
-from ..shared.authentication import Auth
+from ..shared.authentication import AuthCornflow
 from ..shared.const import (
     AUTH_DB,
     AUTH_LDAP,
@@ -60,7 +60,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             raise InvalidUsage("No authentication method configured in server")
 
         try:
-            token = Auth.generate_token(user.id)
+            token = AuthCornflow.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error=f"error in generating user token: {str(e)}", status_code=400
@@ -152,7 +152,7 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
                 PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
-            token = Auth.generate_token(user.id)
+            token = AuthCornflow.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error=f"error in generating user token: {str(e)}", status_code=400
@@ -172,7 +172,7 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented("The OID provider configuration is not valid")
 
         if OID_PROVIDER == OID_AZURE:
-            decoded_token = Auth.validate_oid_token(
+            decoded_token = AuthCornflow.validate_oid_token(
                 token, client_id, tenant_id, issuer, OID_PROVIDER
             )
 
