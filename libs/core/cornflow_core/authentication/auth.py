@@ -104,6 +104,7 @@ class Auth:
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
+                print(f"AUTH auth required: {auth}")
                 if auth:
                     user = Auth.get_user_from_header(request.headers)
                     g.user = {"id": user.id}
