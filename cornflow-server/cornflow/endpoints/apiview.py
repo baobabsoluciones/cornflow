@@ -26,7 +26,7 @@ class ApiViewListEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Get all the api views", tags=["ApiViews"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(ApiViewResponse(many=True))
     def get(self):
         """

@@ -33,7 +33,7 @@ class RolesListEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Gets all the roles", tags=["Roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(RolesResponse(many=True))
     def get(self):
         """
@@ -48,7 +48,7 @@ class RolesListEndpoint(MetaResource, MethodResource):
         return RoleModel.get_all_objects()
 
     @doc(description="Creates a new role", tags=["Roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @use_kwargs(RolesRequest, location="json")
     @marshal_with(RolesResponse)
     def post(self, **kwargs):
@@ -82,7 +82,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Gets one role", tags=["Roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(RolesResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -99,7 +99,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         return RoleModel.query.get(idx)
 
     @doc(description="Modifies one role", tags=["Roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @use_kwargs(RolesResponse, location="json")
     def put(self, idx, **kwargs):
         """
@@ -122,7 +122,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         return self.put_detail(kwargs, idx)
 
     @doc(description="Deletes one role", tags=["Roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     def delete(self, idx):
         """
         DEACTIVATED - NOT IMPLEMENTED
@@ -152,7 +152,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Gets all the user role assignments", tags=["User roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserRoleResponse(many=True))
     def get(self):
         """
@@ -168,7 +168,7 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
         return UserRoleModel.get_all_objects()
 
     @doc(description="Creates a new role assignment", tags=["User roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @use_kwargs(UserRoleRequest)
     @marshal_with(UserRoleResponse)
     def post(self, **kwargs):
@@ -210,7 +210,7 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Gets one user role assignment", tags=["User roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserRoleResponse)
     def get(self, user_id, role_id):
         """
@@ -227,7 +227,7 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
         return UserRoleModel.get_one_user_role(user_id, role_id)
 
     @doc(description="Deletes one user role assignment", tags=["User roles"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     def delete(self, user_id, role_id):
         """
         API method to delete a role assignation of the application

@@ -70,24 +70,20 @@ class AuthCornflow(Auth):
             )
 
     @staticmethod
-    def auth_decorator(auth: bool = True):
+    def auth_required(func):
         """
         Auth decorator
         :param func:
         :return:
         """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            user = AuthCornflow.get_user_from_header(request.headers)
+            AuthCornflow._get_permission_for_request(request, user.id)
+            g.user = {"id": user.id}
+            return func(*args, **kwargs)
+        return wrapper
 
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                user = AuthCornflow.get_user_from_header(request.headers)
-                AuthCornflow._get_permission_for_request(request, user.id)
-                g.user = {"id": user.id}
-                return func(*args, **kwargs)
-
-            return wrapper
-
-        return decorator
 
     @staticmethod
     def dag_permission_required(func):

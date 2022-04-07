@@ -46,7 +46,7 @@ class DAGEndpoint(MetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Edit an execution", tags=["DAGs"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @use_kwargs(ExecutionDagRequest, location="json")
     def put(self, idx, **req_data):
         """
@@ -97,7 +97,7 @@ class DAGEndpoint(MetaResource, MethodResource):
         return {"message": "results successfully saved"}, 200
 
     @doc(description="Get input data and configuration for an execution", tags=["DAGs"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     def get(self, idx):
         """
         API method to get the data of the instance that is going to be executed
@@ -132,7 +132,7 @@ class DAGInstanceEndpoint(MetaResource, MethodResource):
         description="Endpoint to save instance checks performed on the DAG",
         tags=["DAGs"],
     )
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
         instance = InstanceModel.get_one_object_from_user(self.get_user(), idx)
@@ -149,7 +149,7 @@ class DAGEndpointManual(MetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Create an execution manually.", tags=["DAGs"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionDagPostRequest, location="json")
     def post(self, **kwargs):
@@ -191,13 +191,13 @@ class DeployedDAGEndpoint(MetaResource, MethodResource):
         description="Get list of deployed dags registered on the data base",
         tags=["DeployedDAGs"],
     )
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(DeployedDAGSchema(many=True))
     def get(self, **kwargs):
         return self.model.get_all_objects()
 
     @doc(description="Post a new deployed dag", tags=["DeployedDAGs"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):

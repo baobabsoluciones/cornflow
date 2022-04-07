@@ -49,7 +49,7 @@ class UserEndpoint(MetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Get all users", tags=["Users"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserEndpointResponse(many=True))
     def get(self):
         """
@@ -70,7 +70,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get a user", tags=["Users"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserDetailsEndpointResponse)
     def get(self, user_id):
         """
@@ -89,7 +89,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         return user_obj, 200
 
     @doc(description="Delete a user", tags=["Users"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     def delete(self, user_id):
         """
 
@@ -110,7 +110,7 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         return {"message": "The object has been deleted"}, 200
 
     @doc(description="Edit a user", tags=["Users"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserDetailsEndpointResponse)
     @use_kwargs(UserEditRequest, location="json")
     def put(self, user_id, **data):
@@ -153,7 +153,7 @@ class ToggleUserAdmin(MetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Toggle user into admin", tags=["Users"])
-    @AuthCornflow.auth_decorator
+    @AuthCornflow.auth_required
     @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
         """

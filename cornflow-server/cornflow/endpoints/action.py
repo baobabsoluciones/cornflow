@@ -11,20 +11,19 @@ from ..models import ActionModel
 from ..schemas.action import ActionsResponse
 from ..shared.authentication import AuthCornflow
 from ..shared.const import ADMIN_ROLE
-from cornflow_core.resources import BaseMetaResource
 
 
-class ActionListEndpoint(BaseMetaResource, MethodResource):
+class ActionListEndpoint(MetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 
     def __init__(self):
         super().__init__()
         self.data_model = ActionModel
-        ActionListEndpoint.AUTH_CLASS = AuthCornflow
-        # self.query = ActionModel.get_all_objects
-        # self.primary_key = "id"
+        self.query = ActionModel.get_all_objects
+        self.primary_key = "id"
 
+    @AuthCornflow.auth_required
     @doc(description="Get all the actions", tags=["Actions"])
     @marshal_with(ActionsResponse(many=True))
     def get(self):
@@ -37,4 +36,5 @@ class ActionListEndpoint(BaseMetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return self.get_list()
+        print("OK")
+        return ActionModel.get_all_objects()
