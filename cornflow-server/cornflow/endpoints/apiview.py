@@ -26,7 +26,7 @@ class ApiViewListEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Get all the api views", tags=["ApiViews"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @marshal_with(ApiViewResponse(many=True))
     def get(self):
         """

@@ -34,7 +34,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
         description="Get all the permissions assigned to the roles",
         tags=["PermissionViewRole"],
     )
-    @Auth.auth_required
+    @Auth.auth_decorator
     @marshal_with(PermissionViewRoleResponse(many=True))
     @compressed
     def get(self):
@@ -46,7 +46,7 @@ class PermissionsViewRoleEndpoint(MetaResource, MethodResource):
         return PermissionViewRoleModel.get_all_objects()
 
     @doc(description="Create a new permission", tags=["PermissionViewRole"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @use_kwargs(PermissionViewRoleRequest, location="json")
     @marshal_with(PermissionViewRoleResponse)
     def post(self, **kwargs):
@@ -72,7 +72,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Get one permission", tags=["PermissionViewRole"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @marshal_with(PermissionViewRoleResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -89,7 +89,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
         return PermissionViewRoleModel.query.get(idx)
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
         response = self.put_detail(kwargs, idx)
@@ -97,7 +97,7 @@ class PermissionsViewRoleDetailEndpoint(MetaResource, MethodResource):
         return response
 
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     def delete(self, idx):
         response = self.delete_detail(idx)
         log.info(f"User {self.get_user_id()} deletes permission {idx}")

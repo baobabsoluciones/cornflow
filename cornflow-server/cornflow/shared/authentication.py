@@ -70,21 +70,24 @@ class Auth(AuthBase):
             )
 
     @staticmethod
-    def auth_required(func):
+    def auth_decorator(auth: bool = True):
         """
         Auth decorator
         :param func:
         :return:
         """
 
-        @wraps(func)
-        def decorated_user(*args, **kwargs):
-            user = Auth.get_user_from_header(request.headers)
-            Auth._get_permission_for_request(request, user.id)
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                user = Auth.get_user_from_header(request.headers)
+                Auth._get_permission_for_request(request, user.id)
+                g.user = {"id": user.id}
+                return func(*args, **kwargs)
 
-        return decorated_user
+            return wrapper
+
+        return decorator
 
     @staticmethod
     def dag_permission_required(func):

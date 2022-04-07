@@ -23,7 +23,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get list of available apps", tags=["Schemas"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @marshal_with(SchemaListApp(many=True))
     def get(self):
         """
@@ -46,7 +46,7 @@ class SchemaDetailsEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get instance, solution and config schema", tags=["Schemas"])
-    @Auth.auth_required
+    @Auth.auth_decorator
     @marshal_with(SchemaOneApp)
     def get(self, dag_name):
         """
