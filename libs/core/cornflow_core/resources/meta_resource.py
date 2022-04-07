@@ -19,6 +19,8 @@ class BaseMetaResource(Resource):
     @AUTH_CLASS.auth_decorator(auth=AUTH_REQUIRED)
     @use_kwargs(QueryFilters, location="query")
     def get_list(self, **kwargs):
+        print(self.__class__)
+        print(self.AUTH_CLASS)
         return self.data_model.get_all_objects(**kwargs), 200
 
     @Auth.auth_decorator(auth=AUTH_REQUIRED)
