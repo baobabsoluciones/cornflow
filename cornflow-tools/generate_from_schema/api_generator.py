@@ -42,10 +42,16 @@ class APIGenerator:
             os.mkdir(self.output_path)
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
+        init_path = os.path.join(self.model_path, '__init__.py')
+        open(init_path, 'w').close()
         if not os.path.isdir(self.endpoint_path):
             os.mkdir(self.endpoint_path)
+        init_path = os.path.join(self.endpoint_path, '__init__.py')
+        open(init_path, 'w').close()
         if not os.path.isdir(self.schema_path):
             os.mkdir(self.schema_path)
+        init_path = os.path.join(self.schema_path, '__init__.py')
+        open(init_path, 'w').close()
 
     def main(self):
         self.prepare_dirs()
