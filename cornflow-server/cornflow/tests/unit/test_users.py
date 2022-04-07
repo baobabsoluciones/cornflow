@@ -319,7 +319,6 @@ class TestUserEndpoint(TestCase):
         response = self.modify_info(self.planner, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
-        print(self.planner)
         response = self.log_in(self.planner)
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])
