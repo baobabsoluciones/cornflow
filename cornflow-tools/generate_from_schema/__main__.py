@@ -43,7 +43,7 @@ args = parser.parse_args()
 path = args.path.replace("\\", "/")
 
 output_path = None
-if args.output_path:
+if args.output_path != 'output':
     output_path = args.output_path[0].replace("\\", "/")
 
 if args.remove_methods is not None:
