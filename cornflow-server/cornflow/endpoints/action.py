@@ -17,11 +17,11 @@ from cornflow_core.resources import BaseMetaResource
 class ActionListEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
-    AUTH_CLASS = AuthCornflow
 
     def __init__(self):
         super().__init__()
         self.data_model = ActionModel
+        ActionListEndpoint.AUTH_CLASS = AuthCornflow
         # self.query = ActionModel.get_all_objects
         # self.primary_key = "id"
 
