@@ -52,14 +52,11 @@ class UserBaseModel(TraceAttributesModel):
 
         :param dict data: the data to update the user
         """
-        # TODO: try not to use setattr
-        for key, item in data.items():
-            if key == "password":
-                new_password = self.__generate_hash(item)
-                setattr(self, key, new_password)
-            else:
-                setattr(self, key, item)
-
+        # First we create the hash of the new password and then we update the object
+        new_password = data.get("password")
+        if new_password:
+            new_password = self.__generate_hash(new_password)
+            data["password"] = new_password
         super().update(data)
 
     def comes_from_ldap(self):
