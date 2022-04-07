@@ -9,13 +9,14 @@ class BaseMetaResource(Resource):
     DESCRIPTION = ""
     ROLES_WITH_ACCESS = []
     AUTH_REQUIRED = True
+    AUTH_CLASS = Auth
 
     def __init__(self):
         super().__init__()
         self.data_model = None
         pass
 
-    @Auth.auth_decorator(auth=AUTH_REQUIRED)
+    @AUTH_CLASS.auth_decorator(auth=AUTH_REQUIRED)
     @use_kwargs(QueryFilters, location="query")
     def get_list(self, **kwargs):
         return self.data_model.get_all_objects(**kwargs), 200
