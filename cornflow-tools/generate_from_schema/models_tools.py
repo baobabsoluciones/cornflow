@@ -106,7 +106,7 @@ class ModelGenerator:
         res += SP8 + f":return: The representation of the :class:`{self.class_name}`\n"
         res += SP8 + ":rtype: str\n"
         res += SP8 + '"""\n'
-        res += SP8 + "return str(self.id)\n\n"
+        res += SP8 + f"return '{self.table_name.title()} ' + str(self.id)\n\n"
 
         res += "    def __str__(self):\n"
         res += SP8 + '"""\n'
@@ -117,7 +117,7 @@ class ModelGenerator:
         res += SP8 + f":return: The representation of the :class:`{self.class_name}`\n"
         res += SP8 + ":rtype: str\n"
         res += SP8 + '"""\n'
-        res += SP8 + "return str(self.id)\n"
+        res += SP8 + f"return '{self.table_name.title()} ' + str(self.id)\n"
         return res
 
     def generate_model_get_one(self):

@@ -110,8 +110,7 @@ class EndpointGenerator:
         res += SP8 + "and an integer with the HTTP status code.\n"
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
-        res += SP8 + "response = self.post_list(kwargs)\n"
-        res += SP8 + "return response\n"
+        res += SP8 + "return self.post_list(kwargs)\n"
         return res
 
     def generate_endpoint_delete_all(self):
@@ -165,8 +164,7 @@ class EndpointGenerator:
         res += SP8 + "a message) and an integer with the HTTP status code.\n"
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
-        res += SP8 + "response = self.delete_detail(idx)\n"
-        res += SP8 + "return response\n"
+        res += SP8 + "return self.delete_detail(idx)\n"
         return res
 
     def generate_endpoint_put(self):
@@ -194,6 +192,5 @@ class EndpointGenerator:
         res += SP8 + "a message) and an integer with the HTTP status code.\n"
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
-        res += SP8 + "response = self.put_detail(data, idx)\n"
-        res += SP8 + "return response\n"
+        res += SP8 + "return self.put_detail(data, idx)\n"
         return res

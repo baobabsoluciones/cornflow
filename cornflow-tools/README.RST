@@ -102,8 +102,9 @@ the schema can also have the following format:
       }
     }
 
-that is, the schema is simply the description of the table. In that case, you will need to use
-the :code:`--one` option and indicate the name of the table.
+that is, the schema is simply the description of the table. In that case, you can use
+the :code:`--one` option to indicate the name of the table. If not, the generated table will be called
+:code:`{application_name}_data` by default.
 
 Example:
 

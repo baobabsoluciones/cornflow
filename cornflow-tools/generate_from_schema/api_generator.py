@@ -13,7 +13,6 @@ class APIGenerator:
         app_name,
         output_path=None,
         options=None,
-        one_table=False,
         name_table=None,
     ):
         self.path = schema_path
@@ -21,10 +20,13 @@ class APIGenerator:
         self.options = options
         if not self.options:
             self.options = ["all"]
-        if not one_table:
-            self.schema = self.import_schema()
-        else:
-            self.schema = {"properties": {name_table: self.import_schema()}}
+        self.schema = self.import_schema()
+        if self.schema['type'] == 'array' and not name_table:
+            self.schema = {"properties": {'data': self.schema}}
+        elif self.schema['type'] == 'array' and name_table:
+            self.schema = {"properties": {name_table: self.schema}}
+        elif self.schema['type'] != 'array' and name_table:
+            print('The JSONSchema does not contain only one table. The --one option will be ignored')
         self.output_path = output_path or "output"
         self.model_path = os.path.join(self.output_path, "models")
         self.endpoint_path = os.path.join(self.output_path, "endpoints")

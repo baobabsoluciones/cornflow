@@ -17,7 +17,7 @@ parser.add_argument(
     "-op",
     "--output_path",
     type=str,
-    nargs="?",
+    nargs=1,
     help="The output path.",
     required=False,
     default="output",
@@ -42,22 +42,23 @@ parser.add_argument(
 args = parser.parse_args()
 path = args.path.replace("\\", "/")
 
+output_path = None
+if args.output_path:
+    output_path = args.output_path[0].replace("\\", "/")
+
 if args.remove_methods is not None:
     methods_to_add = list(set(options) - set(args.remove_methods))
 else:
     methods_to_add = []
 
-one_table = False
 name_table = None
 if args.one:
-    one_table = True
     name_table = args.one[0]
 
 APIGenerator(
     path,
     app_name=args.app_name,
-    output_path=args.output_path,
+    output_path=output_path,
     options=methods_to_add,
-    one_table=one_table,
     name_table=name_table,
 ).main()
