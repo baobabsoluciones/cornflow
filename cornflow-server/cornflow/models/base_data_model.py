@@ -39,16 +39,6 @@ class BaseDataModel(TraceAttributesModel):
         self.checks = data.get("checks")
         super().__init__()
 
-    def update(self, data):
-        """
-        Updates the object in the database and automatically updates the updated_at field
-        :param dict data:  A dictionary containing the updated data for the execution
-        """
-        # TODO: this method should change
-        for key, item in data.items():
-            setattr(self, key, item)
-        super().update(data)
-
     @classmethod
     def get_all_objects(
         cls,
