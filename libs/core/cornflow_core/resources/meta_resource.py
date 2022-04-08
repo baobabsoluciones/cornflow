@@ -88,7 +88,7 @@ class BaseMetaResource(Resource):
             try:
                 self.user = g.user
             except AttributeError:
-                self.user = self.auth_class.get_user_from_header(request.header)
+                self.user = self.auth_class.get_user_from_header(request.headers)
             if self.user is None:
                 raise InvalidUsage("Error authenticating the user")
         return self.user
