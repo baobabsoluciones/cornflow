@@ -2,6 +2,7 @@ bcrypt
 cffi
 click
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
+cryptography
 Flask
 Flask-Bcrypt
 Flask-RESTful
@@ -16,6 +17,7 @@ packaging
 pycparser
 PyJWT
 pyparsing
+requests
 six
 SQLAlchemy==1.3.21
 typing-extensions

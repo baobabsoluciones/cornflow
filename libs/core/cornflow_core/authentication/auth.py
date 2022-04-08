@@ -1,14 +1,29 @@
-from jwt import decode, encode, ExpiredSignatureError, InvalidTokenError
+import base64
 from datetime import datetime, timedelta
+from typing import Dict
+
+import jwt
+import requests
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from flask import current_app, g, request
+from jwt import decode, encode, ExpiredSignatureError, InvalidTokenError
+from werkzeug.datastructures import Headers
+
+from cornflow_core.constants import (
+    OID_AZURE,
+    OID_AZURE_DISCOVERY_TENANT_URL,
+    OID_AZURE_DISCOVERY_COMMON_URL,
+    OID_GOOGLE,
+)
 from cornflow_core.exceptions import (
     InvalidCredentials,
     InvalidUsage,
     ObjectDoesNotExist,
+    EndpointNotImplemented,
+    CommunicationError,
 )
-from typing import Dict
-from werkzeug.datastructures import Headers
-
 from cornflow_core.models import UserBaseModel
 
 
@@ -106,3 +121,92 @@ class BaseAuth:
         user = self.get_user_from_header(request.headers)
         g.user = user
         return True
+
+    """
+    START OF INTERNAL PROTECTED METHODS
+    """
+
+    @staticmethod
+    def _get_request_info(req):
+        return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
+
+    def _get_kid(self, token):
+        headers = jwt.get_unverified_header(token)
+        if not headers:
+            raise InvalidCredentials("Token is missing the headers")
+        try:
+            return headers["kid"]
+        except KeyError:
+            raise InvalidCredentials("Token is missing the key identifier")
+
+    def _fetch_discovery_meta(self, tenant_id, provider):
+        if provider == OID_AZURE:
+            oid_tenant_url = OID_AZURE_DISCOVERY_TENANT_URL
+            oid_common_url = OID_AZURE_DISCOVERY_COMMON_URL
+        elif provider == OID_GOOGLE:
+            raise EndpointNotImplemented("The OID provider configuration is not valid")
+        else:
+            raise EndpointNotImplemented("The OID provider configuration is not valid")
+
+        discovery_url = (
+            oid_tenant_url.format(tenant_id=tenant_id) if tenant_id else oid_common_url
+        )
+        try:
+            response = requests.get(discovery_url)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as error:
+            raise CommunicationError(
+                f"Error getting issuer discovery meta from {discovery_url}", error
+            )
+        return response.json()
+
+    def _get_jwks_uri(self, tenant_id, provider):
+        meta = self._fetch_discovery_meta(tenant_id, provider)
+        if "jwks_uri" in meta:
+            return meta["jwks_uri"]
+        else:
+            raise CommunicationError("jwks_uri not found in the issuer meta")
+
+    def _get_jwks(self, tenant_id, provider):
+        jwks_uri = self._get_jwks_uri(tenant_id, provider)
+        try:
+            response = requests.get(jwks_uri)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as error:
+            raise CommunicationError(
+                f"Error getting issuer jwks from {jwks_uri}", error
+            )
+        return response.json()
+
+    def _get_jwk(self, kid, tenant_id, provider):
+        for jwk in self._get_jwks(tenant_id, provider).get("keys"):
+            if jwk.get("kid") == kid:
+                return jwk
+        raise InvalidCredentials("Token has an unknown key identifier")
+
+    def _ensure_bytes(self, key):
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        return key
+
+    def _decode_value(self, val):
+        decoded = base64.urlsafe_b64decode(self._ensure_bytes(val) + b"==")
+        return int.from_bytes(decoded, "big")
+
+    def _rsa_pem_from_jwk(self, jwk):
+        return (
+            RSAPublicNumbers(
+                n=self._decode_value(jwk["n"]),
+                e=self._decode_value(jwk["e"]),
+            )
+            .public_key(default_backend())
+            .public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+        )
+
+    def _get_public_key(self, token, tenant_id, provider):
+        kid = self._get_kid(token)
+        jwk = self._get_jwk(kid, tenant_id, provider)
+        return self._rsa_pem_from_jwk(jwk)
