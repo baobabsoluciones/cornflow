@@ -12,7 +12,7 @@ from werkzeug.datastructures import Headers
 from cornflow_core.models import UserBaseModel
 
 
-class Auth:
+class BaseAuth:
     """ """
 
     def __init__(self, user_model=None):
@@ -90,6 +90,7 @@ class Auth:
         :return:
         :rtype:
         """
+        print(headers)
         if headers is None:
             raise InvalidUsage(
                 "Headers are missing from the request. Authentication was not possible to perform"

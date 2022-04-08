@@ -1,2 +1,2 @@
-from .auth import Auth
+from .auth import BaseAuth
 from .decorators import authenticate
