@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask_restful import Resource
 from flask import g
 
@@ -14,6 +16,7 @@ class BaseMetaResource(Resource):
         self.data_model = None
         self.user = None
         self.foreign_data = None
+        self.auth_class = None
         pass
 
     """
@@ -40,8 +43,16 @@ class BaseMetaResource(Resource):
         item.save()
         return item, 201
 
-    def put_detail(self):
-        pass
+    def put_detail(self, data, **kwargs):
+        item = self.data_model.get_one_object(**kwargs)
+        if item is None:
+            raise ObjectDoesNotExist(
+                "The id does not correspond to any object in the database"
+            )
+        data = dict(data)
+        data["user_id"] = self.get_user_id()
+        item.update(data)
+        return {"message": "Updated correctly"}, 200
 
     def patch_detail(self):
         pass
@@ -60,12 +71,46 @@ class BaseMetaResource(Resource):
         pass
 
     """
-    AUXILIAR METHODS
+    AUXILIARY METHODS
     """
 
     def get_user(self):
         if self.user is None:
-            self.user = g.user["id"]
+            self.user = g.user
             if self.user is None:
                 raise InvalidUsage("Error authenticating the user")
         return self.user
+
+    def get_user_id(self):
+        return self.get_user().id
+
+    def is_admin(self):
+        """
+        :return: if user is admin
+        :rtype: bool
+        """
+        return self.get_user().is_admin()
+
+    def is_service_user(self):
+        """
+        :return: if user is service user
+        :rtype: bool
+        """
+        return self.get_user().is_service_user()
+
+    @staticmethod
+    def get_data_or_404(func):
+        """
+        Auth decorator
+        :param func:
+        :return:
+        """
+
+        @wraps(func)
+        def decorated_func(*args, **kwargs):
+            data = func(*args, **kwargs)
+            if data is None:
+                raise ObjectDoesNotExist()
+            return data
+
+        return decorated_func

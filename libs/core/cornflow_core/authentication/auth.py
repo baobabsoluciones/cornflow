@@ -104,5 +104,5 @@ class BaseAuth:
 
     def authenticate(self):
         user = self.get_user_from_header(request.headers)
-        g.user = {"id": user.id}
+        g.user = user
         return True
