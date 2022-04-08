@@ -13,7 +13,7 @@ parser.add_argument(
 parser.add_argument(
     "-op",
     "--output_path",
-    metavar='path',
+    metavar="path",
     type=str,
     nargs=1,
     help="The output path.",
@@ -23,8 +23,9 @@ parser.add_argument(
     "-i",
     "--ignore_files",
     nargs="+",
-    metavar='file',
-    help="Files that will be ignored (with the .py extension). __init__.py files are automatically ignored. Ex: 'instance.py'",
+    metavar="file",
+    help="Files that will be ignored (with the .py extension)."
+    "__init__.py files are automatically ignored. Ex: 'instance.py'",
     required=False,
     type=str,
 )
