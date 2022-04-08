@@ -146,3 +146,45 @@ as follows:
     }
 
 If the property :code:`foreign_key` is left empty, it is assumed that the key is not a foreign key.
+
+-----------------------------------
+Module :code:`schema_from_models`
+-----------------------------------
+The module :code:`schema_from_models` allows you to automatically generate a JSONSchema based on
+a set of models.
+
+How to use?
+===========
+
+To start, you need to have a directory containing the SQLAlchemy models.
+Let's assume that this directory is stored on your computer as :code:`C:/Users/User/models`
+Open the terminal and navigate to the **cornflow-tools** directory. From there, run:
+
+.. code-block:: console
+
+    python schema_from_models C:/Users/User/models
+
+This command will create a new :code:`output_schema.json` directory in **cornflow-tools**,
+containing the generated schema.
+
+
+Optional arguments
+==================
+
+Output path
+-----------
+
+Specify an output path using the argument :code:`-op` or :code:`--output_path`.
+
+Ignore files
+------------
+
+By default, all the python files that do not contain models will be ignored. However, if you
+need to specify that some model files need to be ignored, you can use the :code:`-i` or
+:code:`--ignore_files` option. This option takes as arguments the name of the files to ignore
+with their extension. Example:
+
+.. code-block:: console
+
+    python schema_from_models C:/Users/User/models -i instance.py execution.py
+
