@@ -101,6 +101,6 @@ class Auth:
 
     @classmethod
     def authenticate(cls):
-        user = cls.get_user_from_header()
+        user = cls.get_user_from_header(request.headers)
         g.user = {"id": user.id}
         return True
