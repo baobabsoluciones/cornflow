@@ -99,17 +99,8 @@ class Auth:
             raise ObjectDoesNotExist("User does not exist, invalid token")
         return user
 
-    @staticmethod
-    def auth_decorator(auth: bool = True):
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                print(f"AUTH auth required: {auth}")
-                if auth:
-                    user = Auth.get_user_from_header(request.headers)
-                    g.user = {"id": user.id}
-                return func(*args, **kwargs)
-
-            return wrapper
-
-        return decorator
+    @classmethod
+    def authenticate(cls):
+        user = cls.get_user_from_header()
+        g.user = {"id": user.id}
+        return True
