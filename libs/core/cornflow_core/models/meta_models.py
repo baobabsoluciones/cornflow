@@ -7,6 +7,7 @@ import logging as log
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow_core.shared import database
+from typing import overload
 
 
 class EmptyBaseModel(database.Model):
@@ -44,7 +45,9 @@ class EmptyBaseModel(database.Model):
         return cls.query.filter_by(**kwargs)
 
     @classmethod
-    def get_one_object(cls, idx):
+    def get_one_object(cls, idx=None, **kwargs):
+        if idx is None:
+            return cls.get_all_objects(**kwargs).first()
         return cls.query.get(idx)
 
 

@@ -90,7 +90,6 @@ class BaseAuth:
         :return:
         :rtype:
         """
-        print(headers)
         if headers is None:
             raise InvalidUsage(
                 "Headers are missing from the request. Authentication was not possible to perform"
@@ -104,8 +103,6 @@ class BaseAuth:
         return user
 
     def authenticate(self):
-        print(f"REQUEST: {request}")
-        print(f"REQUEST HEADERS: {request.headers}")
         user = self.get_user_from_header(request.headers)
         g.user = {"id": user.id}
         return True
