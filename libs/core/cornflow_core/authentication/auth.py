@@ -103,6 +103,8 @@ class Auth:
         return user
 
     def authenticate(self):
+        print(f"REQUEST: {request}")
+        print(f"REQUEST HEADERS: {request.headers}")
         user = self.get_user_from_header(request.headers)
         g.user = {"id": user.id}
         return True
