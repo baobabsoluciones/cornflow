@@ -86,5 +86,5 @@ class TraceAttributesModel(EmptyBaseModel):
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
         if idx is None:
-            return cls.get_all_objects(deleted_at=None, **kwargs).first()
+            return cls.get_all_objects(**kwargs).first()
         return cls.query.get(idx)
