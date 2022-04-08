@@ -29,6 +29,13 @@ parser.add_argument(
     required=False,
     type=str,
 )
+parser.add_argument(
+    "-l",
+    "--leave_bases",
+    action='store_true',
+    help="Use this option to leave the bases classes BaseDataModel, "
+         "EmptyModel and TraceAttributes in the schema. By default, they will be deleted"
+)
 args = parser.parse_args()
 path = args.path.replace("\\", "/")
 output_path = None
@@ -39,4 +46,5 @@ SchemaGenerator(
     path,
     output_path=output_path,
     ignore_files=args.ignore_files,
+    leave_bases=args.leave_bases
 ).main()

@@ -1,4 +1,6 @@
 click
 flask-apispec
+flask_sqlalchemy
 marshmallow
 pytups
+sqlalchemy

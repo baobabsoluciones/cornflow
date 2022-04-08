@@ -13,13 +13,14 @@ from sqlalchemy.dialects.postgresql import TEXT, JSON
 
 
 class SchemaGenerator:
-    def __init__(self, path, output_path=None, ignore_files=None):
+    def __init__(self, path, output_path=None, ignore_files=None, leave_bases=False):
         self.path = path
         self.tmp_path = os.path.join(os.getcwd(), "tmp_files")
         self.output_path = output_path or "./output_schema.json"
         self.ignore_files = ignore_files or []
+        self.leave_bases = leave_bases or False
         self.parents = dict()
-        self.data = dict()
+        self.data = SuperDict()
         self.model_table = dict()
         self.table_model = dict()
 
@@ -84,9 +85,11 @@ class SchemaGenerator:
                 ):
                     continue
                 table_name = props.get("__tablename__", model)
-                self.data[table_name] = dict(
+                self.data[table_name] = SuperDict(
                     type="array", items=dict(properties=dict(), required=[])
                 )
+                if not props.get("__tablename__"):
+                    self.data[table_name]["remove"] = True
                 self.model_table[model] = table_name
                 self.table_model[table_name] = model
                 for key, val in props.items():
@@ -98,7 +101,7 @@ class SchemaGenerator:
                             type_col = "string"
                         if isinstance(type_col, JSON):
                             type_col = "object"
-                        self.data[table_name]["items"]["properties"][key] = dict(
+                        self.data[table_name]["items"]["properties"][key] = SuperDict(
                             type=type_col
                         )
                         if val.__dict__["foreign_keys"]:
@@ -125,10 +128,16 @@ class SchemaGenerator:
                 parent_props = self.data[self.model_table[parent]]["items"][
                     "properties"
                 ]
-                self.data[table_name]["items"]["properties"] = dict(
+                parent_requirements = self.data[self.model_table[parent]]["items"][
+                    "required"
+                ]
+                self.data[table_name]["items"]["properties"] = SuperDict(
                     **self.data[table_name]["items"]["properties"], **parent_props
                 )
+                self.data[table_name]["items"]["required"] += parent_requirements
             not_treated -= treated
+        if not self.leave_bases:
+            self.data = self.data.vfilter(lambda v: not v.get("remove", False))
 
     def clear(self):
         if os.path.isdir(self.tmp_path):
