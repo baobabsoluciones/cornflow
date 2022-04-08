@@ -27,8 +27,8 @@ class BaseMetaResource(Resource):
     def get_list(self, **kwargs):
         return self.data_model.get_all_objects(**kwargs)
 
-    def get_detail(self, idx, **kwargs):
-        return self.data_model.get_one_object(idx, **kwargs)
+    def get_detail(self, **kwargs):
+        return self.data_model.get_one_object(**kwargs)
 
     def post_list(self, data, trace_field="user_id"):
         data = dict(data)
@@ -74,8 +74,10 @@ class BaseMetaResource(Resource):
     def disable_detail(self):
         pass
 
-    def activate_detail(self):
-        pass
+    def activate_detail(self, **kwargs):
+        item = self.data_model.get_one_object(**kwargs)
+        item.activate()
+        return item, 200
 
     """
     AUXILIARY METHODS
