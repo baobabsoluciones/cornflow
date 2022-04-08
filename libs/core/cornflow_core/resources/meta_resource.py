@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask_restful import Resource
-from flask import g
+from flask import g, request
 
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
@@ -85,7 +85,10 @@ class BaseMetaResource(Resource):
 
     def get_user(self):
         if self.user is None:
-            self.user = g.user
+            try:
+                self.user = g.user
+            except AttributeError:
+                self.user = self.auth_class.get_user_from_header(request.header)
             if self.user is None:
                 raise InvalidUsage("Error authenticating the user")
         return self.user
