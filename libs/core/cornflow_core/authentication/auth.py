@@ -7,7 +7,6 @@ from cornflow_core.exceptions import (
     ObjectDoesNotExist,
 )
 from typing import Dict
-from functools import wraps
 from werkzeug.datastructures import Headers
 
 from cornflow_core.models import UserBaseModel
@@ -16,7 +15,10 @@ from cornflow_core.models import UserBaseModel
 class Auth:
     """ """
 
-    user_model = UserBaseModel
+    def __init__(self, user_model: UserBaseModel = None):
+        if user_model is None:
+            self.user_model = UserBaseModel
+        self.user_model = user_model
 
     @staticmethod
     def generate_token(user_id: int = None) -> str:
@@ -80,8 +82,7 @@ class Auth:
         except Exception as e:
             raise InvalidCredentials(f"The authorization header has a bad syntax: {e}")
 
-    @classmethod
-    def get_user_from_header(cls, headers: Headers = None) -> UserBaseModel:
+    def get_user_from_header(self, headers: Headers = None) -> UserBaseModel:
         """
 
         :param headers:
@@ -90,17 +91,18 @@ class Auth:
         :rtype:
         """
         if headers is None:
-            raise InvalidUsage()
-        token = cls.get_token_from_header(headers)
-        data = cls.decode_token(token)
+            raise InvalidUsage(
+                "Headers are missing from the request. Authentication was not possible to perform"
+            )
+        token = self.get_token_from_header(headers)
+        data = self.decode_token(token)
         user_id = data["user_id"]
-        user = cls.user_model.get_one_user(user_id)
+        user = self.user_model.get_one_user(user_id)
         if user is None:
             raise ObjectDoesNotExist("User does not exist, invalid token")
         return user
 
-    @classmethod
-    def authenticate(cls):
-        user = cls.get_user_from_header(request.headers)
+    def authenticate(self):
+        user = self.get_user_from_header(request.headers)
         g.user = {"id": user.id}
         return True
