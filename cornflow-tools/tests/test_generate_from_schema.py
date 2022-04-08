@@ -54,11 +54,6 @@ class GenerationTests(unittest.TestCase):
 
     def test_base(self):
         command = f"python generate_from_schema {self.full_inst_path} {self.app_name}"
-        os.system(command)
-        self.check()
-
-    def test_output_path_command(self):
-        command = f"python generate_from_schema {self.full_inst_path} {self.app_name}"
         command += f" --output_path {self.other_output_path}"
         os.system(command)
         self.last_path = self.other_output_path
@@ -66,22 +61,28 @@ class GenerationTests(unittest.TestCase):
 
     def test_one_table_schema(self):
         command = f"python generate_from_schema {self.one_tab_inst_path} {self.app_name}"
+        command += f" --output_path {self.other_output_path}"
         os.system(command)
         instance = SuperDict.from_dict({"properties": {"data": self.one_tab_inst}})
-        self.check(instance)
+        self.last_path = self.other_output_path
+        self.check(instance=instance, output_path=self.other_output_path)
 
     def test_one_table_one_option(self):
         command = f"python generate_from_schema {self.one_tab_inst_path} {self.app_name} --one newname"
+        command += f" --output_path {self.other_output_path}"
         os.system(command)
         instance = SuperDict.from_dict({"properties": {"newname": self.one_tab_inst}})
-        self.check(instance)
+        self.last_path = self.other_output_path
+        self.check(instance=instance, output_path=self.other_output_path)
 
     def test_remove_method(self):
         command = f"python generate_from_schema {self.full_inst_path} {self.app_name}"
+        command += f" --output_path {self.other_output_path}"
         command += f" --remove_methods deleteOne update getOne"
         os.system(command)
         include_methods = self.all_methods.vfilter(lambda v: v not in ['deleteOne', 'update', 'getOne'])
-        self.check(include_methods = include_methods)
+        self.last_path = self.other_output_path
+        self.check(output_path=self.other_output_path, include_methods=include_methods)
 
     def check(self, instance=None, output_path=None, include_methods=None):
         instance = instance or self.full_inst
