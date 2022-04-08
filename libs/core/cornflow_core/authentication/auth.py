@@ -15,7 +15,7 @@ from cornflow_core.models import UserBaseModel
 class Auth:
     """ """
 
-    def __init__(self, user_model: UserBaseModel = None):
+    def __init__(self, user_model=None):
         if user_model is None:
             self.user_model = UserBaseModel
         self.user_model = user_model
