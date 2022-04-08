@@ -41,7 +41,7 @@ class SchemaGenerator:
         self.inherit()
         schema = self.to_schema()
         with open(self.output_path, "w") as fd:
-            json.dump(schema, fd, sort_keys=True, indent=2)
+            json.dump(schema, fd, indent=2)
         self.clear()
 
     def mock_packages(self, files):
@@ -88,7 +88,7 @@ class SchemaGenerator:
                 self.data[table_name] = SuperDict(
                     type="array", items=dict(properties=dict(), required=[])
                 )
-                if not props.get("__tablename__"):
+                if not props.get("__tablename__") and not self.leave_bases:
                     self.data[table_name]["remove"] = True
                 self.model_table[model] = table_name
                 self.table_model[table_name] = model
@@ -148,4 +148,5 @@ class SchemaGenerator:
             "$schema": "http://json-schema.org/schema#",
             "type": "object",
             "properties": self.data,
+            "required": list(self.data.keys())
         }
