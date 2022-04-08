@@ -17,6 +17,7 @@ class BaseMetaResource(Resource):
         self.user = None
         self.foreign_data = None
         self.auth_class = None
+        self.dependents = None
         pass
 
     """
@@ -46,9 +47,7 @@ class BaseMetaResource(Resource):
     def put_detail(self, data, **kwargs):
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
-            raise ObjectDoesNotExist(
-                "The id does not correspond to any object in the database"
-            )
+            raise ObjectDoesNotExist("The data entity does not exist on the database")
         data = dict(data)
         data["user_id"] = self.get_user_id()
         item.update(data)
@@ -57,8 +56,16 @@ class BaseMetaResource(Resource):
     def patch_detail(self):
         pass
 
-    def delete_detail(self):
-        pass
+    def delete_detail(self, **kwargs):
+        item = self.data_model.get_one_object(**kwargs)
+        if item is None:
+            raise ObjectDoesNotExist("The data entity does not exist on the database")
+        if self.dependents is not None:
+            for element in getattr(item, self.dependents):
+                element.delete()
+        item.delete()
+
+        return {"message": "The object has been deleted"}, 200
 
     """
     METHODS USED FOR ACTIVATING / DISABLING RECORDS IN CASE WE DO NOT WANT TO DELETE THEM STRAIGHT AWAY
