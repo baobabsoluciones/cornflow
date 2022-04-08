@@ -32,7 +32,7 @@ class BaseMetaResource(Resource):
 
     def post_list(self, data, trace_field="user_id"):
         data = dict(data)
-        data[trace_field] = self.get_user()
+        data[trace_field] = self.get_user_id()
         item = self.data_model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
