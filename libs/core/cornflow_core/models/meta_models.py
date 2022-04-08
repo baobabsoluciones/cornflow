@@ -37,6 +37,8 @@ class EmptyBaseModel(database.Model):
         self.commit_changes("deleting")
 
     def update(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
         database.session.add(self)
         self.commit_changes("updating")
 
@@ -63,7 +65,6 @@ class TraceAttributesModel(EmptyBaseModel):
         self.deleted_at = None
 
     def update(self, data):
-        self.__dict__.update(data)
         self.updated_at = datetime.datetime.utcnow()
         super().update(data)
 
