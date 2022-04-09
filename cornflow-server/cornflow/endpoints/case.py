@@ -31,9 +31,10 @@ from ..schemas.case import (
 )
 
 from ..schemas.model_json import DataSchema
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.compress import compressed
 from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow_core.authentication import authenticate
 
 
 class CaseEndpoint(MetaResource, MethodResource):
@@ -42,7 +43,7 @@ class CaseEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get all cases", tags=["Cases"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListResponse(many=True))
     @use_kwargs(QueryFiltersCase, location="query")
     def get(self, **kwargs):
@@ -59,8 +60,8 @@ class CaseEndpoint(MetaResource, MethodResource):
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     @inflate
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseRawRequest, location="json")
@@ -80,8 +81,8 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseFromInstanceExecution, location="json")
     def post(self, **kwargs):
@@ -157,7 +158,7 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
         self.fields_to_modify = ["name"]
 
     @doc(description="Copies a case to a new one", tags=["Cases"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListResponse)
     def post(self, idx):
         """ """
@@ -181,7 +182,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get one case", tags=["Cases"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -197,7 +198,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
@@ -213,7 +214,7 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         )
 
     @doc(description="Delete a case", tags=["Cases"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, idx):
         """
         API method to delete an existing case.
@@ -238,7 +239,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     """
 
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseBase)
     @MetaResource.get_data_or_404
     @compressed
@@ -258,7 +259,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @inflate
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
@@ -284,7 +285,7 @@ class CaseToInstance(MetaResource, MethodResource):
         description="Copies the information stored in a case into a new instance",
         tags=["Cases"],
     )
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseToInstanceResponse)
     def post(self, idx):
         """
@@ -341,7 +342,7 @@ class CaseCompare(MetaResource, MethodResource):
         description="Compares the data and / or solution of two given cases",
         tags=["Cases"],
     )
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseCompareResponse)
     @use_kwargs(QueryCaseCompare, location="query")
     @compressed

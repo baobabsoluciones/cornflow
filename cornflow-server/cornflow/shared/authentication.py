@@ -2,45 +2,27 @@
 
 """
 # Global imports
-import base64
 import jwt
-import requests
-import requests.exceptions
 
 # Partial imports
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from flask import request, g, current_app
 from functools import wraps
 
 # Internal modules imports
-from .const import (
-    PERMISSION_METHOD_MAP,
-    OID_AZURE,
-    OID_GOOGLE,
-    OID_AZURE_DISCOVERY_COMMON_URL,
-    OID_AZURE_DISCOVERY_TENANT_URL,
-)
+from .const import PERMISSION_METHOD_MAP
 
-from cornflow_core.exceptions import (
-    CommunicationError,
-    EndpointNotImplemented,
-    InvalidCredentials,
-    InvalidData,
-    NoPermission,
-)
+from cornflow_core.exceptions import InvalidCredentials, InvalidData, NoPermission
 
 from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
 
-from cornflow_core.authentication import Auth
+from cornflow_core.authentication import BaseAuth
 
 
-class AuthCornflow(Auth):
-    user_model = UserModel
+class Auth(BaseAuth):
+    def __init__(self, user_model=UserModel):
+        super().__init__(user_model)
 
-    @staticmethod
-    def validate_oid_token(token, client_id, tenant_id, issuer, provider):
+    def validate_oid_token(self, token, client_id, tenant_id, issuer, provider):
         """
         :param str token:
         :param str client_id:
@@ -48,7 +30,7 @@ class AuthCornflow(Auth):
         :param str issuer:
         :param int provider:
         """
-        public_key = AuthCornflow._get_public_key(token, tenant_id, provider)
+        public_key = self._get_public_key(token, tenant_id, provider)
         try:
             decoded = jwt.decode(
                 token,
@@ -69,21 +51,11 @@ class AuthCornflow(Auth):
                 status_code=400,
             )
 
-    @staticmethod
-    def auth_required(func):
-        """
-        Auth decorator
-        :param func:
-        :return:
-        """
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            user = AuthCornflow.get_user_from_header(request.headers)
-            AuthCornflow._get_permission_for_request(request, user.id)
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
-        return wrapper
-
+    def authenticate(self):
+        user = self.get_user_from_header(request.headers)
+        check = Auth._get_permission_for_request(request, user.id)
+        g.user = user
+        return True
 
     @staticmethod
     def dag_permission_required(func):
@@ -96,7 +68,7 @@ class AuthCornflow(Auth):
         @wraps(func)
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
-                user_id = AuthCornflow.get_user_from_header(request.headers).id
+                user_id = g.user.id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
                     raise InvalidData(
@@ -126,7 +98,7 @@ class AuthCornflow(Auth):
         :return: the user id code.
         :rtype: int
         """
-        user_id = AuthCornflow.decode_token(token)["user_id"]
+        user_id = Auth.decode_token(token)["user_id"]
         return user_id
 
     """
@@ -134,12 +106,8 @@ class AuthCornflow(Auth):
     """
 
     @staticmethod
-    def _get_request_info(req):
-        return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
-
-    @staticmethod
     def _get_permission_for_request(req, user_id):
-        method, url = AuthCornflow._get_request_info(req)
+        method, url = Auth._get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
             raise NoPermission(
@@ -161,93 +129,3 @@ class AuthCornflow(Auth):
         raise NoPermission(
             error="You do not have permission to access this endpoint", status_code=403
         )
-
-    @staticmethod
-    def _get_kid(token):
-        headers = jwt.get_unverified_header(token)
-        if not headers:
-            raise InvalidCredentials("Token is missing the headers")
-        try:
-            return headers["kid"]
-        except KeyError:
-            raise InvalidCredentials("Token is missing the key identifier")
-
-    @staticmethod
-    def _fetch_discovery_meta(tenant_id, provider):
-        if provider == OID_AZURE:
-            oid_tenant_url = OID_AZURE_DISCOVERY_TENANT_URL
-            oid_common_url = OID_AZURE_DISCOVERY_COMMON_URL
-        elif provider == OID_GOOGLE:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-        else:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-
-        discovery_url = (
-            oid_tenant_url.format(tenant_id=tenant_id) if tenant_id else oid_common_url
-        )
-        try:
-            response = requests.get(discovery_url)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
-            raise CommunicationError(
-                f"Error getting issuer discovery meta from {discovery_url}", error
-            )
-        return response.json()
-
-    @staticmethod
-    def _get_jwks_uri(tenant_id, provider):
-        meta = AuthCornflow._fetch_discovery_meta(tenant_id, provider)
-        if "jwks_uri" in meta:
-            return meta["jwks_uri"]
-        else:
-            raise CommunicationError("jwks_uri not found in the issuer meta")
-
-    @staticmethod
-    def _get_jwks(tenant_id, provider):
-        jwks_uri = AuthCornflow._get_jwks_uri(tenant_id, provider)
-        try:
-            response = requests.get(jwks_uri)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
-            raise CommunicationError(
-                f"Error getting issuer jwks from {jwks_uri}", error
-            )
-        return response.json()
-
-    @staticmethod
-    def _get_jwk(kid, tenant_id, provider):
-        for jwk in AuthCornflow._get_jwks(tenant_id, provider).get("keys"):
-            if jwk.get("kid") == kid:
-                return jwk
-        raise InvalidCredentials("Token has an unknown key identifier")
-
-    @staticmethod
-    def _ensure_bytes(key):
-        if isinstance(key, str):
-            key = key.encode("utf-8")
-        return key
-
-    @staticmethod
-    def _decode_value(val):
-        decoded = base64.urlsafe_b64decode(AuthCornflow._ensure_bytes(val) + b"==")
-        return int.from_bytes(decoded, "big")
-
-    @staticmethod
-    def _rsa_pem_from_jwk(jwk):
-        return (
-            RSAPublicNumbers(
-                n=AuthCornflow._decode_value(jwk["n"]),
-                e=AuthCornflow._decode_value(jwk["e"]),
-            )
-            .public_key(default_backend())
-            .public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo,
-            )
-        )
-
-    @staticmethod
-    def _get_public_key(token, tenant_id, provider):
-        kid = AuthCornflow._get_kid(token)
-        jwk = AuthCornflow._get_jwk(kid, tenant_id, provider)
-        return AuthCornflow._rsa_pem_from_jwk(jwk)

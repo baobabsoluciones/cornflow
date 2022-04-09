@@ -272,7 +272,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         }
 
         self.payload_2 = {
-            "id": 2,
+            "id": 4,
             "role": "planner",
             "role_id": 2,
             "user": "testuser3",
@@ -348,7 +348,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         )
 
         self.assertEqual(201, user_response.status_code)
-        self.assertEqual(200, role_response.status_code)
+        self.assertEqual(201, role_response.status_code)
         self.assertEqual(self.payload_2, role_response.json)
 
     def test_delete_user_role_not_authorized_user(self):

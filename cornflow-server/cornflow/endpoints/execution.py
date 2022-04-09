@@ -27,7 +27,7 @@ from ..schemas.execution import (
     QueryFiltersExecution,
 )
 
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
@@ -38,7 +38,7 @@ from ..shared.const import (
     AIRFLOW_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
 )
-
+from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
 from ..shared.compress import compressed
 
@@ -61,7 +61,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Get all executions", tags=["Executions"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDetailsEndpointResponse(many=True))
     @use_kwargs(QueryFiltersExecution, location="query")
     def get(self, **kwargs):
@@ -77,8 +77,8 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         return ExecutionModel.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an execution", tags=["Executions"])
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionRequest, location="json")
     def post(self, **kwargs):
@@ -184,7 +184,7 @@ class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
 
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDetailsEndpointResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -201,7 +201,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(ExecutionEditRequest, location="json")
     def put(self, idx, **data):
         """
@@ -216,7 +216,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return self.put_detail(data, self.get_user(), idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, idx):
         """
         API method to delete an execution created by the user and its related info.
@@ -232,8 +232,8 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return self.delete_detail(self.get_user(), idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     def post(self, idx):
         execution = ExecutionModel.get_one_object_from_user(
             user=self.get_user(), idx=idx
@@ -257,7 +257,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
     """
 
     @doc(description="Get status of an execution", tags=["Executions"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionStatusEndpointResponse)
     def get(self, idx):
         """
@@ -321,7 +321,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
         tags=["Executions"],
         inherit=False,
     )
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDataEndpointResponse)
     @MetaResource.get_data_or_404
     @compressed
@@ -342,7 +342,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     """
 
     @doc(description="Get log of an execution", tags=["Executions"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionLogEndpointResponse)
     @MetaResource.get_data_or_404
     @compressed

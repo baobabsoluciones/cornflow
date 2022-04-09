@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # Import from internal modules
 from cornflow_core.shared import database as db
 from ..shared.utils import hash_json_256
+import datetime
 
 
 class BaseDataModel(TraceAttributesModel):

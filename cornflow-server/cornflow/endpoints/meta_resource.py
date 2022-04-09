@@ -8,9 +8,10 @@ from flask_restful import Resource
 from functools import wraps
 
 # Import from internal modules
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.const import ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from flask import g
 
 
 class MetaResource(Resource):
@@ -32,7 +33,10 @@ class MetaResource(Resource):
         :rtype: UserModel
         """
         if self.user is None:
-            self.user = AuthCornflow.get_user_from_header(request.headers)
+            try:
+                self.user = g.user
+            except AttributeError:
+                self.user = Auth().get_user_from_header(request.headers)
             if self.user is None:
                 raise InvalidUsage("Error authenticating user")
         return self.user

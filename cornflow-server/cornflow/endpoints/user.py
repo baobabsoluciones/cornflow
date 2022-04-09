@@ -5,11 +5,13 @@ Endpoints for the user profiles
 import logging as log
 
 # Partial imports from libraries
+from cornflow_core.resources import BaseMetaResource
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
+from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -22,8 +24,8 @@ from ..schemas.user import (
     UserSchema,
 )
 
-from ..shared.authentication import AuthCornflow
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP
+from ..shared.authentication import Auth
+from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -40,16 +42,20 @@ from ..shared.messages import get_pwd_email, send_email_to
 user_schema = UserSchema()
 
 
-class UserEndpoint(MetaResource, MethodResource):
+class UserEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions
     """
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Get all users", tags=["Users"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(UserEndpointResponse(many=True))
     def get(self):
         """
@@ -60,18 +66,24 @@ class UserEndpoint(MetaResource, MethodResource):
         :return: A dictionary with the user data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        users = UserModel.get_all_users()
-        return users, 200
+        return self.get_list()
 
 
-class UserDetailsEndpoint(MetaResource, MethodResource):
+class UserDetailsEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint use to get the information of one single user
     """
 
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+
     @doc(description="Get a user", tags=["Users"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(UserDetailsEndpointResponse)
+    @BaseMetaResource.get_data_or_404
     def get(self, user_id):
         """
 
@@ -83,13 +95,11 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             raise InvalidUsage(
                 error="You have no permission to access given user", status_code=400
             )
-        user_obj = UserModel.get_one_user(user_id)
-        if user_obj is None:
-            raise InvalidUsage(error="The object does not exist", status_code=404)
-        return user_obj, 200
+
+        return self.get_detail(idx=user_id)
 
     @doc(description="Delete a user", tags=["Users"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, user_id):
         """
 
@@ -105,13 +115,11 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
         # Service user can not be deleted
         if user_obj.is_service_user():
             raise NoPermission()
-        user_obj.delete()
         log.info(f"User {user_id} was deleted by user {self.get_user_id()}")
-        return {"message": "The object has been deleted"}, 200
+        return self.delete_detail(idx=user_id)
 
     @doc(description="Edit a user", tags=["Users"])
-    @AuthCornflow.auth_required
-    @marshal_with(UserDetailsEndpointResponse)
+    @authenticate(auth_class=Auth())
     @use_kwargs(UserEditRequest, location="json")
     def put(self, user_id, **data):
         """
@@ -143,17 +151,15 @@ class UserDetailsEndpoint(MetaResource, MethodResource):
             if not check:
                 raise InvalidCredentials(msg)
 
-        user_obj.update(data)
-        user_obj.save()
         log.info(f"User {user_id} was edited by user {self.get_user_id()}")
-        return user_obj, 200
+        return self.put_detail(data=data, idx=user_id)
 
 
-class ToggleUserAdmin(MetaResource, MethodResource):
+class ToggleUserAdmin(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Toggle user into admin", tags=["Users"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(UserEndpointResponse)
     def put(self, user_id, make_admin):
         """
@@ -186,7 +192,7 @@ class ToggleUserAdmin(MetaResource, MethodResource):
         return user_obj, 200
 
 
-class RecoverPassword(MetaResource, MethodResource):
+class RecoverPassword(BaseMetaResource, MethodResource):
     @doc(description="Send email to create new password", tags=["Users"])
     @use_kwargs(RecoverPasswordRequest)
     def put(self, **kwargs):

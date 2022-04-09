@@ -16,7 +16,7 @@ from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.shared.authentication import AuthCornflow
+from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
 from cornflow_core.shared import database as db
 from cornflow.tests.const import (
@@ -79,7 +79,7 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         ).json["token"]
 
-        self.user = AuthCornflow.return_user_from_token(self.token)
+        self.user = Auth.return_user_from_token(self.token)
         self.url = None
         self.model = None
         self.copied_items = set()
@@ -205,6 +205,7 @@ class CustomTestCase(TestCase):
             url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
 
+        print(row.json)
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
             return row.json

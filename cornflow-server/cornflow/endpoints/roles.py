@@ -7,6 +7,7 @@ Some of this endpoints are disable in case that the authentication is not perfor
 from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
 from flask_apispec.views import MethodResource
+from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -17,23 +18,22 @@ from ..schemas.roles import (
     UserRoleRequest,
     UserRoleResponse,
 )
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP
 from cornflow_core.exceptions import EndpointNotImplemented, ObjectAlreadyExists
+from cornflow_core.resources import BaseMetaResource
 
 
-class RolesListEndpoint(MetaResource, MethodResource):
+class RolesListEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get or create the current roles in the application"
 
     def __init__(self):
         super().__init__()
-        self.model = RoleModel
-        self.query = RoleModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = RoleModel
 
     @doc(description="Gets all the roles", tags=["Roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(RolesResponse(many=True))
     def get(self):
         """
@@ -45,10 +45,10 @@ class RolesListEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return RoleModel.get_all_objects()
+        return self.get_list()
 
     @doc(description="Creates a new role", tags=["Roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(RolesRequest, location="json")
     @marshal_with(RolesResponse)
     def post(self, **kwargs):
@@ -71,18 +71,16 @@ class RolesListEndpoint(MetaResource, MethodResource):
         return self.post_list(kwargs)
 
 
-class RoleDetailEndpoint(MetaResource, MethodResource):
+class RoleDetailEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get, modify or delete a specific role of the application"
 
     def __init__(self):
         super().__init__()
-        self.model = RoleModel
-        self.query = RoleModel.get_one_object
-        self.primary_key = "id"
+        self.data_model = RoleModel
 
     @doc(description="Gets one role", tags=["Roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(RolesResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -96,10 +94,10 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return RoleModel.query.get(idx)
+        return self.get_detail(idx=idx)
 
     @doc(description="Modifies one role", tags=["Roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(RolesResponse, location="json")
     def put(self, idx, **kwargs):
         """
@@ -119,10 +117,10 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be modified in the directory."
             )
-        return self.put_detail(kwargs, idx)
+        return self.put_detail(kwargs, idx=idx)
 
     @doc(description="Deletes one role", tags=["Roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, idx):
         """
         DEACTIVATED - NOT IMPLEMENTED
@@ -139,7 +137,7 @@ class RoleDetailEndpoint(MetaResource, MethodResource):
         raise EndpointNotImplemented("Roles can not be deleted")
 
 
-class UserRoleListEndpoint(MetaResource, MethodResource):
+class UserRoleListEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of roles assigned to users and create new assignments"
@@ -147,12 +145,10 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
 
     def __init__(self):
         super().__init__()
-        self.model = UserRoleModel
-        self.query = UserRoleModel.get_one_user_role
-        self.primary_key = "id"
+        self.data_model = UserRoleModel
 
     @doc(description="Gets all the user role assignments", tags=["User roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(UserRoleResponse(many=True))
     def get(self):
         """
@@ -165,10 +161,10 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
 
         """
-        return UserRoleModel.get_all_objects()
+        return self.get_list()
 
     @doc(description="Creates a new role assignment", tags=["User roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(UserRoleRequest)
     @marshal_with(UserRoleResponse)
     def post(self, **kwargs):
@@ -192,25 +188,25 @@ class UserRoleListEndpoint(MetaResource, MethodResource):
 
         # Check if the assignation is disabled, or it does exist
         if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
-            return self.activate_item(**kwargs)
+            return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
-            raise ObjectAlreadyExists
+            raise ObjectAlreadyExists()
         else:
+            # Admin id so it does not override user_id that appear on the table based on the user that makes
+            # the request that doesn't have to be the user that is getting a role
             return self.post_list(kwargs, trace_field="admin_id")
 
 
-class UserRoleDetailEndpoint(MetaResource, MethodResource):
+class UserRoleDetailEndpoint(BaseMetaResource, MethodResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get a specific role assignment or to delete one"
 
     def __init__(self):
         super().__init__()
-        self.model = UserRoleModel
-        self.query = UserRoleModel.get_one_user_role
-        self.primary_key = "id"
+        self.data_model = UserRoleModel
 
     @doc(description="Gets one user role assignment", tags=["User roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(UserRoleResponse)
     def get(self, user_id, role_id):
         """
@@ -224,10 +220,10 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return UserRoleModel.get_one_user_role(user_id, role_id)
+        return self.get_detail(user_id=user_id, role_id=role_id)
 
     @doc(description="Deletes one user role assignment", tags=["User roles"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, user_id, role_id):
         """
         API method to delete a role assignation of the application
@@ -247,4 +243,4 @@ class UserRoleDetailEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be created in the directory."
             )
-        return self.delete_detail(user_id, role_id)
+        return self.delete_detail(user_id=user_id, role_id=role_id)

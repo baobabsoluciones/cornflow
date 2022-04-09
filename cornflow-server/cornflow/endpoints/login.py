@@ -13,9 +13,9 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
 from .meta_resource import MetaResource
-from ..models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
+from ..models import PermissionsDAG, UserModel, UserRoleModel
 from ..schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.const import (
     AUTH_DB,
     AUTH_LDAP,
@@ -31,9 +31,10 @@ from cornflow_core.exceptions import (
 )
 from ..shared.ldap import LDAP
 from cornflow_core.shared import database as db
+from cornflow_core.resources import BaseMetaResource
 
 
-class LoginEndpoint(MetaResource, MethodResource):
+class LoginEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint used to do the login to the cornflow webserver
     """
@@ -60,7 +61,7 @@ class LoginEndpoint(MetaResource, MethodResource):
             raise InvalidUsage("No authentication method configured in server")
 
         try:
-            token = AuthCornflow.generate_token(user.id)
+            token = Auth.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error=f"error in generating user token: {str(e)}", status_code=400
@@ -119,7 +120,7 @@ class LoginEndpoint(MetaResource, MethodResource):
         return user
 
 
-class LoginOpenAuthEndpoint(MetaResource, MethodResource):
+class LoginOpenAuthEndpoint(BaseMetaResource, MethodResource):
     """ """
 
     @doc(description="Log in", tags=["Users"])
@@ -152,7 +153,7 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
                 PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
-            token = AuthCornflow.generate_token(user.id)
+            token = Auth.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error=f"error in generating user token: {str(e)}", status_code=400
@@ -172,7 +173,7 @@ class LoginOpenAuthEndpoint(MetaResource, MethodResource):
             raise EndpointNotImplemented("The OID provider configuration is not valid")
 
         if OID_PROVIDER == OID_AZURE:
-            decoded_token = AuthCornflow.validate_oid_token(
+            decoded_token = Auth().validate_oid_token(
                 token, client_id, tenant_id, issuer, OID_PROVIDER
             )
 

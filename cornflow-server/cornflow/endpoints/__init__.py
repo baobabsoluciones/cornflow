@@ -16,7 +16,7 @@ from .case import (
     CaseCompare,
 )
 from .dag import (
-    DAGEndpoint,
+    DAGDetailEndpoint,
     DAGEndpointManual,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
@@ -90,7 +90,7 @@ resources = [
         endpoint="execution-log",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
-    dict(resource=DAGEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
+    dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(
         resource=DAGInstanceEndpoint,

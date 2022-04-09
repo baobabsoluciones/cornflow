@@ -146,6 +146,7 @@ class TestUserEndpoint(TestCase):
 
     def get_user(self, user_asks, user_asked=None):
         data = {k: user_asks[k] for k in self.login_keys}
+        print(data)
         url = self.url
         if user_asked is not None:
             url += "{}/".format(user_asked["id"])
@@ -271,6 +272,7 @@ class TestUserEndpoint(TestCase):
         response = self.delete_user(self.admin, self.planner)
         self.assertEqual(200, response.status_code)
         response = self.get_user(self.admin, self.planner)
+        print(response.json)
         self.assertEqual(404, response.status_code)
 
     def test_service_user_deletes_admin(self):
@@ -279,13 +281,18 @@ class TestUserEndpoint(TestCase):
 
     def test_edit_info(self):
         payload = {
-            "username": "newtestname",
             "email": "newtest@test.com",
             "first_name": "FirstName",
             "last_name": "LastName",
         }
 
+        self.modifiable_items = ["email", "first_name", "last_name"]
+
         response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json["message"])
+
+        response = self.get_user(self.planner, self.planner)
         self.assertEqual(200, response.status_code)
 
         for item in self.modifiable_items:
@@ -302,6 +309,10 @@ class TestUserEndpoint(TestCase):
         }
 
         response = self.modify_info(self.admin, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json["message"])
+
+        response = self.get_user(self.admin, self.planner)
         self.assertEqual(200, response.status_code)
 
         for item in self.modifiable_items:

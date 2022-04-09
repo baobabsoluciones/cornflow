@@ -83,6 +83,7 @@ class Testing(DefaultConfig):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
+    OPEN_DEPLOYMENT = 1
 
 
 class Production(DefaultConfig):

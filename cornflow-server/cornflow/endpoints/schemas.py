@@ -8,22 +8,27 @@ from flask import current_app, request
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 import logging as log
+from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import PermissionsDAG
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from cornflow_core.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
+from cornflow_core.resources import BaseMetaResource
+
+from ..shared.const import ALL_DEFAULT_ROLES
 
 
-class SchemaEndpoint(MetaResource, MethodResource):
+class SchemaEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint used to obtain names of available apps
     """
 
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+
     @doc(description="Get list of available apps", tags=["Schemas"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(SchemaListApp(many=True))
     def get(self):
         """
@@ -32,7 +37,7 @@ class SchemaEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = AuthCornflow.get_user_from_header(request.headers)
+        user = Auth().get_user_from_header(request.headers)
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
@@ -40,13 +45,15 @@ class SchemaEndpoint(MetaResource, MethodResource):
         return available_dags
 
 
-class SchemaDetailsEndpoint(MetaResource, MethodResource):
+class SchemaDetailsEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint used to obtain schemas for one app
     """
 
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+
     @doc(description="Get instance, solution and config schema", tags=["Schemas"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(SchemaOneApp)
     def get(self, dag_name):
         """
@@ -55,7 +62,7 @@ class SchemaDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        user = AuthCornflow.get_user_from_header(request.headers)
+        user = Auth().get_user_from_header(request.headers)
         permission = PermissionsDAG.check_if_has_permissions(
             user_id=user.id, dag_id=dag_name
         )

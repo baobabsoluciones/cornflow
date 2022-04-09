@@ -2,6 +2,7 @@
 External endpoint for the user to signup
 """
 # Import from libraries
+from cornflow_core.resources import BaseMetaResource
 from flask import current_app
 from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
@@ -11,8 +12,8 @@ import logging as log
 from .meta_resource import MetaResource
 from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
-from ..shared.authentication import AuthCornflow
-from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
+from ..shared.authentication import Auth
+from ..shared.const import AUTH_LDAP, AUTH_OID
 from cornflow_core.exceptions import (
     InvalidUsage,
     InvalidCredentials,
@@ -20,7 +21,7 @@ from cornflow_core.exceptions import (
 )
 
 
-class SignUpEndpoint(MetaResource, MethodResource):
+class SignUpEndpoint(BaseMetaResource, MethodResource):
     """
     Endpoint used to sign up to the cornflow web server.
     """
@@ -68,7 +69,7 @@ class SignUpEndpoint(MetaResource, MethodResource):
             PermissionsDAG.add_all_permissions_to_user(user.id)
 
         try:
-            token = AuthCornflow.generate_token(user.id)
+            token = Auth.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400

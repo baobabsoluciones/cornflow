@@ -15,6 +15,7 @@ import os
 import pulp
 from werkzeug.utils import secure_filename
 import logging as log
+from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from .meta_resource import MetaResource
@@ -31,7 +32,7 @@ from ..schemas.instance import (
 )
 
 from ..schemas.model_json import DataSchema
-from ..shared.authentication import AuthCornflow
+from ..shared.authentication import Auth
 from ..shared.compress import compressed
 from cornflow_core.exceptions import InvalidUsage
 
@@ -52,7 +53,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         self.primary_key = "id"
 
     @doc(description="Get all instances", tags=["Instances"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(InstanceEndpointResponse(many=True))
     @use_kwargs(QueryFiltersInstance, location="query")
     def get(self, **kwargs):
@@ -68,8 +69,8 @@ class InstanceEndpoint(MetaResource, MethodResource):
         return self.model.get_all_objects(self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     @inflate
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceRequest, location="json")
@@ -117,7 +118,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
         self.dependents = "executions"
 
     @doc(description="Get one instance", tags=["Instances"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(InstanceDetailsEndpointResponse)
     @MetaResource.get_data_or_404
     def get(self, idx):
@@ -137,8 +138,8 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
 
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
     @doc(description="Edit an instance", tags=["Instances"])
-    @AuthCornflow.auth_required
-    @AuthCornflow.dag_permission_required
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
     @use_kwargs(InstanceEditRequest, location="json")
     def put(self, idx, **data):
         """
@@ -155,7 +156,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         return response
 
     @doc(description="Delete an instance", tags=["Instances"])
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, idx):
         """
         API method to delete an existing instance.
@@ -182,7 +183,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         self.dependents = None
 
     @doc(description="Get input data of an instance", tags=["Instances"], inherit=False)
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(InstanceDataEndpointResponse)
     @MetaResource.get_data_or_404
     @compressed
@@ -211,7 +212,7 @@ class InstanceFileEndpoint(MetaResource, MethodResource):
         tags=["Instances"],
         inherit=False,
     )
-    @AuthCornflow.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(InstanceDetailsEndpointResponse)
     @use_kwargs(InstanceFileRequest, location="form", inherit=False)
     def post(self, name, description, minimize=1):

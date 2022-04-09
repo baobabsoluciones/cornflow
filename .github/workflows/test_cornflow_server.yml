@@ -93,6 +93,7 @@ jobs:
         coverage report -m
       env:
         FLASK_ENV: testing
+        OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db
     - name: Run ldap unit tests
       run: | 
@@ -102,6 +103,7 @@ jobs:
         FLASK_ENV: testing
         DATABASE_URL: sqlite:///cornflow_test.db
         AUTH_TYPE: 2
+        OPEN_DEPLOYMENT: 1
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
         LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
@@ -124,6 +126,7 @@ jobs:
         coverage report -m
       env:
         FLASK_ENV: testing
+        OPEN_DEPLOYMENT: 1
         DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
     - name: Run integration tests
       run: |
@@ -131,4 +134,5 @@ jobs:
         coverage report -m
       env:
         FLASK_ENV: testing
+        OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db

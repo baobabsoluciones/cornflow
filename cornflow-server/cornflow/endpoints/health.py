@@ -9,13 +9,13 @@ from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..schemas.health import HealthResponse
 from ..shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
 from cornflow_core.shared import database as db
+from cornflow_core.resources import BaseMetaResource
 
 
-class HealthEndpoint(MetaResource, MethodResource):
+class HealthEndpoint(BaseMetaResource, MethodResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
     def get(self):
