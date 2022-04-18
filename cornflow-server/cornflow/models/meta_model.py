@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.declarative import declared_attr
+from flask import current_app
 
 # Import from internal modules
 from ..shared.utils import db, hash_json_256
@@ -166,9 +167,10 @@ class BaseDataModel(TraceAttributes):
         :return: The objects
         :rtype: list(:class:`BaseDataModel`)
         """
+        user_access = current_app.config["USER_ACCESS_ALL_OBJECTS"]
         query = cls.query.filter(cls.deleted_at == None)
         # TODO: in airflow they use: query = session.query(ExecutionModel)
-        if not user.is_admin() and not user.is_service_user():
+        if not user.is_admin() and not user.is_service_user() and not user_access:
             query = query.filter(cls.user_id == user.id)
 
         if schema:
@@ -191,7 +193,8 @@ class BaseDataModel(TraceAttributes):
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """
+        user_access = current_app.config["USER_ACCESS_ALL_OBJECTS"]
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user():
+        if not user.is_admin() and not user.is_service_user() and not user_access:
             query = query.filter_by(user_id=user.id)
         return query.first()

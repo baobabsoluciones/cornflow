@@ -18,6 +18,7 @@ from cornflow.tests.const import (
     INSTANCE_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+from flask import current_app
 
 
 class TestInstancesListEndpoint(BaseTestCases.ListFilters):
@@ -174,6 +175,23 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         token = self.create_service_user()
         payload = {**self.payload, **dict(id=idx)}
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+
+    def test_get_one_instance_planner(self):
+        # Depending on the value of DefaultConfig.USER_ACCESS_ALL_OBJECTS
+        # users can access objects of other users or not
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        payload = {**self.payload, **dict(id=idx)}
+        if current_app.config["USER_ACCESS_ALL_OBJECTS"]:
+            self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+        else:
+            self.get_one_row(
+                INSTANCE_URL + idx + "/data/",
+                payload=None,
+                expected_status=404,
+                check_payload=False,
+                token=token,
+            )
 
 
 class TestInstanceModelMethods(CustomTestCase):
