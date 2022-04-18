@@ -190,9 +190,13 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         )
 
 
-class TestAccessPlannerUsers(TestInstancesDetailEndpointBase):
+class TestAccessPlannerUsers(CustomTestCase):
     def setUp(self):
         super().setUp()
+        with open(INSTANCE_PATH) as f:
+            self.payload = json.load(f)
+        self.url = INSTANCE_URL
+        self.model = InstanceModel
         current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
 
     def test_get_one_instance_planner(self):
