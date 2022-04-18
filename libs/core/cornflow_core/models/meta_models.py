@@ -7,10 +7,10 @@ import logging as log
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow_core.shared import database
-from typing import overload
+from abc import ABC
 
 
-class EmptyBaseModel(database.Model):
+class EmptyBaseModel(database.Model, ABC):
     __abstract__ = True
 
     def commit_changes(self, action: str = None):

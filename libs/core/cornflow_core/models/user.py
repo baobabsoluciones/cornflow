@@ -12,10 +12,10 @@ from cornflow_core.shared import (
     check_email_pattern,
 )
 from .meta_models import TraceAttributesModel
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 
-class UserBaseModel(TraceAttributesModel, ABC):
+class UserBaseModel(TraceAttributesModel):
     __abstract__ = True
     id = database.Column(database.Integer, primary_key=True)
     first_name = database.Column(database.String(128), nullable=True)
