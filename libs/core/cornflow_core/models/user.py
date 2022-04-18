@@ -12,9 +12,10 @@ from cornflow_core.shared import (
     check_email_pattern,
 )
 from .meta_models import TraceAttributesModel
+from abc import ABC, abstractmethod
 
 
-class UserBaseModel(TraceAttributesModel):
+class UserBaseModel(TraceAttributesModel, ABC):
     __abstract__ = True
     id = database.Column(database.Integer, primary_key=True)
     first_name = database.Column(database.String(128), nullable=True)
@@ -160,6 +161,26 @@ class UserBaseModel(TraceAttributesModel):
         random.shuffle(chars)
         pwd = "".join(chars)
         return pwd
+
+    @abstractmethod
+    def is_admin(self) -> bool:
+        """
+        This should return True or False if the user is an admin
+
+        :return: if the user is an admin or not
+        :rtype: bool
+        """
+        raise NotImplemented
+
+    @abstractmethod
+    def is_service_user(self) -> bool:
+        """
+        This should return True or False if the user is a service user (type of user used for internal tasks)
+
+        :return: if the user is a service_user or not
+        :rtype: bool
+        """
+        raise NotImplemented
 
     def __repr__(self):
         """
