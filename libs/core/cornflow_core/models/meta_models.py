@@ -3,22 +3,13 @@
 """
 import datetime
 import logging as log
-from abc import ABCMeta
 
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 
 from cornflow_core.shared import database
 
 
-class DeclarativeABCMeta(DeclarativeMeta, ABCMeta):
-    pass
-
-
-Base = declarative_base(metaclass=DeclarativeABCMeta)
-
-
-class EmptyBaseModel(Base):
+class EmptyBaseModel(database.Model):
     __abstract__ = True
 
     def commit_changes(self, action: str = None):
