@@ -176,22 +176,32 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         payload = {**self.payload, **dict(id=idx)}
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
 
+    def test_get_none_instance_planner(self):
+        # Test planner users cannot access objects of other users
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+
+        self.get_one_row(
+            INSTANCE_URL + idx + "/data/",
+            payload=None,
+            expected_status=404,
+            check_payload=False,
+            token=token,
+        )
+
+
+class TestAccessPlannerUsers(TestInstancesDetailEndpointBase):
+    def setUp(self):
+        super().setUp()
+        current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
+
     def test_get_one_instance_planner(self):
-        # Depending on the value of DefaultConfig.USER_ACCESS_ALL_OBJECTS
-        # users can access objects of other users or not
+        # Test planner users can access objects of other users
         idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_planner()
         payload = {**self.payload, **dict(id=idx)}
-        if current_app.config["USER_ACCESS_ALL_OBJECTS"]:
-            self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
-        else:
-            self.get_one_row(
-                INSTANCE_URL + idx + "/data/",
-                payload=None,
-                expected_status=404,
-                check_payload=False,
-                token=token,
-            )
+
+        self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
 
 
 class TestInstanceModelMethods(CustomTestCase):
