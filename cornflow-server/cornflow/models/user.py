@@ -1,11 +1,8 @@
 from cornflow_core.models import UserBaseModel
 
-# Imports from internal modules
-from sqlalchemy.exc import IntegrityError, DBAPIError
 
 from .roles import UserRoleModel
 from cornflow_core.shared import database as db
-from cornflow_core.shared import password_crypt
 
 
 class UserModel(UserBaseModel):
