@@ -51,6 +51,10 @@ class EmptyBaseModel(database.Model):
             return cls.get_all_objects(**kwargs).first()
         return cls.query.get(idx)
 
+    def get(self, key):
+        value = getattr(self, key, None)
+        return value
+
 
 class TraceAttributesModel(EmptyBaseModel):
     __abstract__ = True
