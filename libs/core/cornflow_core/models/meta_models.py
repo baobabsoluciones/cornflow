@@ -49,7 +49,7 @@ class EmptyBaseModel(database.Model):
     def get_one_object(cls, idx=None, **kwargs):
         if idx is None:
             return cls.get_all_objects(**kwargs).first()
-        return cls.query.get(idx)
+        return cls.query.filter_by(id=idx, **kwargs)
 
     def get(self, key):
         value = getattr(self, key, None)
@@ -88,6 +88,4 @@ class TraceAttributesModel(EmptyBaseModel):
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
-        if idx is None:
-            return cls.get_all_objects(**kwargs).first()
-        return cls.query.get(idx)
+        return super().get_one_object(idx=idx, deleted_at=None)
