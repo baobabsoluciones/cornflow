@@ -31,7 +31,7 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(username, password)
-        if auth_type == AUTH_LDAP:
+        elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(username, password)
         else:
             raise ConfigurationError()
