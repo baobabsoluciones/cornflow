@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow-core",
-    version="0.0.1a45",
+    version="0.0.1a46",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="REST API backend components used by cornflow and other REST APIs",
