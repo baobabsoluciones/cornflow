@@ -46,23 +46,32 @@ class BaseMetaResource(Resource, MethodResource):
         item.save()
         return item, 201
 
-    def put_detail(self, data, **kwargs):
+    def put_detail(self, data, track_user: bool = True, **kwargs):
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
+
         data = dict(data)
-        user_id = kwargs.get("user").get("id") or self.get_user_id()
-        data["user_id"] = user_id
+
+        if track_user:
+            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            data["user_id"] = user_id
+
         item.update(data)
         return {"message": "Updated correctly"}, 200
 
-    def patch_detail(self, data, **kwargs):
+    def patch_detail(self, data, track_user: bool = True, **kwargs):
         item = self.data_model.get_one_object(**kwargs)
+
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
+
         data = dict(data)
-        user_id = kwargs.get("user").get("id") or self.get_user_id()
-        data["user_id"] = user_id
+
+        if track_user:
+            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            data["user_id"] = user_id
+
         item.patch(data)
         return {"message": "Patched correctly"}, 200
 
