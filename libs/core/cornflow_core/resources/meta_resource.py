@@ -2,11 +2,12 @@ from functools import wraps
 
 from flask_restful import Resource
 from flask import g, request
+from flask_apispec.views import MethodResource
 
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
-class BaseMetaResource(Resource):
+class BaseMetaResource(Resource, MethodResource):
 
     DESCRIPTION = ""
     ROLES_WITH_ACCESS = []
