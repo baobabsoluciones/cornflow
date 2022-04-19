@@ -4,13 +4,14 @@ from flask_restful import Resource
 from flask import g, request
 from flask_apispec.views import MethodResource
 
+from cornflow_core.constants import ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class BaseMetaResource(Resource, MethodResource):
 
     DESCRIPTION = ""
-    ROLES_WITH_ACCESS = []
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
 
     def __init__(self):
         super().__init__()
