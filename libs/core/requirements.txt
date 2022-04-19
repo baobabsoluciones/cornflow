@@ -7,7 +7,7 @@ certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.12
 click==8.1.2
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@74c72daa6baacec909b0253f3d06ccdbeb123320#subdirectory=cornflow-client
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
 cryptography==36.0.2
 Flask==2.1.1
 flask-apispec==0.11.1
@@ -22,6 +22,7 @@ importlib-resources==5.6.0
 itsdangerous==2.1.2
 Jinja2==3.1.1
 jsonschema==4.4.0
+ldap3==2.9.1
 MarkupSafe==2.1.1
 marshmallow==3.15.0
 numpy==1.21.5
@@ -29,6 +30,7 @@ ortools==9.3.10497
 packaging==21.3
 protobuf==3.20.0
 PuLP==2.6.0
+pyasn1==0.4.8
 pycparser==2.21
 PyJWT==2.3.0
 pyparsing==3.0.7

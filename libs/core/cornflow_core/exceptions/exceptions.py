@@ -61,6 +61,11 @@ class InvalidPatch(InvalidUsage):
     error = "The json patch sent is not valid"
 
 
+class ConfigurationError(InvalidUsage):
+    status_code = 501
+    error = "No authentication method configured on the server"
+
+
 def initialize_errorhandlers(app):
     @app.errorhandler(InvalidUsage)
     @app.errorhandler(ObjectDoesNotExist)
@@ -70,6 +75,7 @@ def initialize_errorhandlers(app):
     @app.errorhandler(AirflowError)
     @app.errorhandler(InvalidData)
     @app.errorhandler(InvalidPatch)
+    @app.errorhandler(ConfigurationError)
     def handle_invalid_usage(error):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
