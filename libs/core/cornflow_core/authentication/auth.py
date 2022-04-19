@@ -75,6 +75,23 @@ class BaseAuth:
         except InvalidTokenError:
             raise InvalidCredentials("Invalid token, please try again with a new token")
 
+    def validate_oid_token(self, token, client_id, tenant_id, issuer, provider):
+        public_key = self._get_public_key(token, tenant_id, provider)
+        try:
+            decoded = jwt.decode(
+                token,
+                public_key,
+                verify=True,
+                algorithms=["RS256"],
+                audience=[client_id],
+                issuer=issuer,
+            )
+            return decoded
+        except jwt.ExpiredSignatureError:
+            raise InvalidCredentials("The token has expired, please login again")
+        except jwt.InvalidTokenError:
+            raise InvalidCredentials("Invalid token, please try again with a new token")
+
     @staticmethod
     def get_token_from_header(headers: Headers = None) -> str:
         """
