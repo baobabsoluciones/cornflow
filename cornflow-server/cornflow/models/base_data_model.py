@@ -3,6 +3,7 @@
 """
 # Import from libraries
 from cornflow_core.models import TraceAttributesModel
+from flask import current_app
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
@@ -63,8 +64,13 @@ class BaseDataModel(TraceAttributesModel):
         :rtype: list(:class:`BaseDataModel`)
         """
         query = cls.query.filter(cls.deleted_at == None)
-        # TODO: in airflow they use: query = session.query(ExecutionModel)
-        if not user.is_admin() and not user.is_service_user():
+        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+        if (
+            user is not None
+            and not user.is_admin()
+            and not user.is_service_user()
+            and user_access == 0
+        ):
             query = query.filter(cls.user_id == user.id)
 
         if schema:
@@ -78,7 +84,7 @@ class BaseDataModel(TraceAttributesModel):
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
 
     @classmethod
-    def get_one_object_from_user(cls, user, idx):
+    def get_one_object(cls, user=None, idx=None, **kwargs):
         """
         Query to get one object from the user and the id.
 
@@ -87,7 +93,10 @@ class BaseDataModel(TraceAttributesModel):
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """
+        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+        if user is None:
+            return super().get_one_object(idx=idx)
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user():
+        if not user.is_admin() and not user.is_service_user() and user_access == 0:
             query = query.filter_by(user_id=user.id)
         return query.first()

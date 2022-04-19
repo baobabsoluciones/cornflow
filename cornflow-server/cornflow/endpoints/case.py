@@ -112,7 +112,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
         user = self.get_user()
 
         def get_instance_data(instance_id):
-            instance = InstanceModel.get_one_object_from_user(user, instance_id)
+            instance = InstanceModel.get_one_object(user=user, idx=instance_id)
             if instance is None:
                 raise ObjectDoesNotExist("Instance does not exist")
             return dict(
@@ -120,7 +120,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
             )
 
         def get_execution_data(execution_id):
-            execution = ExecutionModel.get_one_object_from_user(user, execution_id)
+            execution = ExecutionModel.get_one_object(user=user, idx=execution_id)
             if execution is None:
                 raise ObjectDoesNotExist("Execution does not exist")
             data = get_instance_data(execution.instance_id)
@@ -171,7 +171,7 @@ class CaseCopyEndpoint(BaseMetaResource):
     @marshal_with(CaseListResponse)
     def post(self, idx):
         """ """
-        case = self.model.get_one_object_from_user(self.get_user(), idx)
+        case = self.model.get_one_object(user=self.get_user(), idx=idx)
         data = case.__dict__
         payload = dict()
         for key in data.keys():
@@ -300,7 +300,7 @@ class CaseToInstance(BaseMetaResource):
         :return: an object with the instance or instance and execution ID that have been created and the status code
         :rtype: Tuple (dict, integer)
         """
-        case = CaseModel.get_one_object_from_user(self.get_user(), idx)
+        case = CaseModel.get_one_object(user=self.get_user(), idx=idx)
 
         if case is None:
             raise ObjectDoesNotExist()
@@ -362,8 +362,8 @@ class CaseCompare(BaseMetaResource):
         """
         if idx1 == idx2:
             raise InvalidData("The case identifiers should be different", 400)
-        case_1 = self.model.get_one_object_from_user(self.get_user(), idx1)
-        case_2 = self.model.get_one_object_from_user(self.get_user(), idx2)
+        case_1 = self.model.get_one_object(user=self.get_user(), idx=idx1)
+        case_2 = self.model.get_one_object(user=self.get_user(), idx=idx2)
 
         if case_1 is None:
             raise ObjectDoesNotExist(

@@ -194,8 +194,9 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        response = self.get_detail(user=self.get_user(), idx=idx)
         log.info(f"User {self.get_user_id()} gets the data of case {idx}")
-        return self.get_detail(user=self.get_user(), idx=idx)
+        return response
 
 
 class InstanceFileEndpoint(BaseMetaResource):

@@ -97,8 +97,8 @@ class ExecutionEndpoint(BaseMetaResource):
             kwargs["schema"] = "solve_model_dag"
         # TODO: review the order of these two operations
         execution, status_code = self.post_list(data=kwargs)
-        instance = InstanceModel.get_one_object_from_user(
-            self.get_user(), execution.instance_id
+        instance = InstanceModel.get_one_object(
+            user=self.get_user(), idx=execution.instance_id
         )
 
         if instance is None:
@@ -231,9 +231,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     def post(self, idx):
-        execution = ExecutionModel.get_one_object_from_user(
-            user=self.get_user(), idx=idx
-        )
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
         af_client = Airflow.from_config(current_app.config)

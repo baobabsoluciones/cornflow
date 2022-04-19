@@ -104,7 +104,7 @@ class CaseModel(BaseDataModel):
             # we assume at root
             return cls(data, parent=None)
         # we look for the parent object
-        parent = cls.get_one_object_from_user(user, data["parent_id"])
+        parent = cls.get_one_object(user=user, idx=data["parent_id"])
         if parent is None:
             raise ObjectDoesNotExist("Parent does not exist")
         if parent.data is not None:
