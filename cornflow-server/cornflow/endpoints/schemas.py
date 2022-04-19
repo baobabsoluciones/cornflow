@@ -5,7 +5,6 @@ Endpoints to get the schemas
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from flask import current_app, request
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 import logging as log
 from cornflow_core.authentication import authenticate
@@ -20,7 +19,7 @@ from cornflow_core.resources import BaseMetaResource
 from ..shared.const import ALL_DEFAULT_ROLES
 
 
-class SchemaEndpoint(BaseMetaResource, MethodResource):
+class SchemaEndpoint(BaseMetaResource):
     """
     Endpoint used to obtain names of available apps
     """
@@ -45,7 +44,7 @@ class SchemaEndpoint(BaseMetaResource, MethodResource):
         return available_dags
 
 
-class SchemaDetailsEndpoint(BaseMetaResource, MethodResource):
+class SchemaDetailsEndpoint(BaseMetaResource):
     """
     Endpoint used to obtain schemas for one app
     """

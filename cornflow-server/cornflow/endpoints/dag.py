@@ -8,7 +8,6 @@ from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
-from flask_apispec.views import MethodResource
 import logging as log
 
 # Import from internal modules
@@ -39,7 +38,7 @@ from cornflow_core.resources import BaseMetaResource
 execution_schema = ExecutionSchema()
 
 
-class DAGDetailEndpoint(BaseMetaResource, MethodResource):
+class DAGDetailEndpoint(BaseMetaResource):
     """
     Endpoint used for the DAG endpoint
     """
@@ -122,12 +121,16 @@ class DAGDetailEndpoint(BaseMetaResource, MethodResource):
         return {"message": "results successfully saved"}, 200
 
 
-class DAGInstanceEndpoint(BaseMetaResource, MethodResource):
+class DAGInstanceEndpoint(BaseMetaResource):
     """
     Endpoint used by airflow to write instance checks
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = InstanceModel
 
     @doc(
         description="Endpoint to save instance checks performed on the DAG",
@@ -136,15 +139,11 @@ class DAGInstanceEndpoint(BaseMetaResource, MethodResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
-        instance = InstanceModel.get_one_object_from_user(self.get_user(), idx)
-        if instance is None:
-            raise ObjectDoesNotExist(error="The instance does not exist")
-        instance.update(req_data)
-        instance.save()
-        return {"message": "The instance checks have been saved"}, 200
+        log.info(f"Instance checks saved for instance {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
-class DAGEndpointManual(BaseMetaResource, MethodResource):
+class DAGEndpointManual(BaseMetaResource):
     """ """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
@@ -181,7 +180,7 @@ class DAGEndpointManual(BaseMetaResource, MethodResource):
         return item, 201
 
 
-class DeployedDAGEndpoint(BaseMetaResource, MethodResource):
+class DeployedDAGEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     def __init__(self):

@@ -4,12 +4,10 @@
 
 # Import from libraries
 from flask_apispec import doc, marshal_with, use_kwargs
-from flask_apispec.views import MethodResource
 import logging as log
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import PermissionViewRoleModel
 from ..schemas.permission import (
     PermissionViewRoleResponse,
@@ -23,7 +21,7 @@ from cornflow_core.exceptions import ObjectAlreadyExists
 from cornflow_core.resources import BaseMetaResource
 
 
-class PermissionsViewRoleEndpoint(BaseMetaResource, MethodResource):
+class PermissionsViewRoleEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     def __init__(self):
@@ -56,7 +54,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource, MethodResource):
             return self.post_list(kwargs)
 
 
-class PermissionsViewRoleDetailEndpoint(BaseMetaResource, MethodResource):
+class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     def __init__(self):
@@ -66,7 +64,7 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource, MethodResource):
     @doc(description="Get one permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
     @marshal_with(PermissionViewRoleResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get one specific permission of the application
@@ -84,7 +82,7 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource, MethodResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
-        response = self.put_detail(kwargs, idx=idx)
+        response = self.put_detail(kwargs, idx=idx, user=self.get_user())
         log.info(f"User {self.get_user_id()} edits permission {idx}")
         return response
 

@@ -146,7 +146,6 @@ class TestUserEndpoint(TestCase):
 
     def get_user(self, user_asks, user_asked=None):
         data = {k: user_asks[k] for k in self.login_keys}
-        print(data)
         url = self.url
         if user_asked is not None:
             url += "{}/".format(user_asked["id"])
@@ -272,7 +271,6 @@ class TestUserEndpoint(TestCase):
         response = self.delete_user(self.admin, self.planner)
         self.assertEqual(200, response.status_code)
         response = self.get_user(self.admin, self.planner)
-        print(response.json)
         self.assertEqual(404, response.status_code)
 
     def test_service_user_deletes_admin(self):

@@ -1,14 +1,10 @@
 """
 
 """
-# Import from libraries
-from functools import wraps
 
 from flask_apispec import marshal_with, doc
-from flask_apispec.views import MethodResource
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import ActionModel
 from ..schemas.action import ActionsResponse
 from ..shared.authentication import Auth
@@ -17,7 +13,7 @@ from ..shared.const import ADMIN_ROLE
 from cornflow_core.resources import BaseMetaResource
 
 
-class ActionListEndpoint(BaseMetaResource, MethodResource):
+class ActionListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 

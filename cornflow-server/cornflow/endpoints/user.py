@@ -6,7 +6,6 @@ import logging as log
 
 # Partial imports from libraries
 from cornflow_core.resources import BaseMetaResource
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -14,7 +13,6 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import UserModel, UserRoleModel
 from ..schemas.user import (
     RecoverPasswordRequest,
@@ -42,7 +40,7 @@ from ..shared.messages import get_pwd_email, send_email_to
 user_schema = UserSchema()
 
 
-class UserEndpoint(BaseMetaResource, MethodResource):
+class UserEndpoint(BaseMetaResource):
     """
     Endpoint with a get method which gives back all the info related to the users.
     Including their instances and executions
@@ -69,7 +67,7 @@ class UserEndpoint(BaseMetaResource, MethodResource):
         return self.get_list()
 
 
-class UserDetailsEndpoint(BaseMetaResource, MethodResource):
+class UserDetailsEndpoint(BaseMetaResource):
     """
     Endpoint use to get the information of one single user
     """
@@ -152,10 +150,10 @@ class UserDetailsEndpoint(BaseMetaResource, MethodResource):
                 raise InvalidCredentials(msg)
 
         log.info(f"User {user_id} was edited by user {self.get_user_id()}")
-        return self.put_detail(data=data, idx=user_id)
+        return self.put_detail(data=data, idx=user_id, track_user=False)
 
 
-class ToggleUserAdmin(BaseMetaResource, MethodResource):
+class ToggleUserAdmin(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Toggle user into admin", tags=["Users"])
@@ -192,7 +190,7 @@ class ToggleUserAdmin(BaseMetaResource, MethodResource):
         return user_obj, 200
 
 
-class RecoverPassword(BaseMetaResource, MethodResource):
+class RecoverPassword(BaseMetaResource):
     @doc(description="Send email to create new password", tags=["Users"])
     @use_kwargs(RecoverPasswordRequest)
     def put(self, **kwargs):

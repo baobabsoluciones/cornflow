@@ -1,55 +1,24 @@
 """
 
 """
+
 # Global imports
-import jwt
+from functools import wraps
+
+from cornflow_core.authentication import BaseAuth
+from cornflow_core.exceptions import InvalidData, NoPermission
 
 # Partial imports
 from flask import request, g, current_app
-from functools import wraps
 
 # Internal modules imports
 from .const import PERMISSION_METHOD_MAP
-
-from cornflow_core.exceptions import InvalidCredentials, InvalidData, NoPermission
-
 from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
-
-from cornflow_core.authentication import BaseAuth
 
 
 class Auth(BaseAuth):
     def __init__(self, user_model=UserModel):
         super().__init__(user_model)
-
-    def validate_oid_token(self, token, client_id, tenant_id, issuer, provider):
-        """
-        :param str token:
-        :param str client_id:
-        :param str tenant_id:
-        :param str issuer:
-        :param int provider:
-        """
-        public_key = self._get_public_key(token, tenant_id, provider)
-        try:
-            decoded = jwt.decode(
-                token,
-                public_key,
-                verify=True,
-                algorithms=["RS256"],
-                audience=[client_id],
-                issuer=issuer,
-            )
-            return decoded
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                error="The token has expired, please login again", status_code=400
-            )
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                error="Invalid token, please try again with a new token",
-                status_code=400,
-            )
 
     def authenticate(self):
         user = self.get_user_from_header(request.headers)

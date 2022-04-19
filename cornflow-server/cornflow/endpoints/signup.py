@@ -4,12 +4,10 @@ External endpoint for the user to signup
 # Import from libraries
 from cornflow_core.resources import BaseMetaResource
 from flask import current_app
-from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
 import logging as log
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import UserModel, PermissionsDAG, UserRoleModel
 from ..schemas.user import UserSignupRequest
 from ..shared.authentication import Auth
@@ -21,7 +19,7 @@ from cornflow_core.exceptions import (
 )
 
 
-class SignUpEndpoint(BaseMetaResource, MethodResource):
+class SignUpEndpoint(BaseMetaResource):
     """
     Endpoint used to sign up to the cornflow web server.
     """

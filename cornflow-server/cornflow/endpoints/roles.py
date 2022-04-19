@@ -6,11 +6,9 @@ Some of this endpoints are disable in case that the authentication is not perfor
 # Import from libraries
 from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
-from flask_apispec.views import MethodResource
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import RoleModel, UserRoleModel
 from ..schemas.roles import (
     RolesRequest,
@@ -24,7 +22,7 @@ from cornflow_core.exceptions import EndpointNotImplemented, ObjectAlreadyExists
 from cornflow_core.resources import BaseMetaResource
 
 
-class RolesListEndpoint(BaseMetaResource, MethodResource):
+class RolesListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get or create the current roles in the application"
 
@@ -71,7 +69,7 @@ class RolesListEndpoint(BaseMetaResource, MethodResource):
         return self.post_list(kwargs)
 
 
-class RoleDetailEndpoint(BaseMetaResource, MethodResource):
+class RoleDetailEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get, modify or delete a specific role of the application"
 
@@ -82,7 +80,7 @@ class RoleDetailEndpoint(BaseMetaResource, MethodResource):
     @doc(description="Gets one role", tags=["Roles"])
     @authenticate(auth_class=Auth())
     @marshal_with(RolesResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get one specific role of the application
@@ -117,7 +115,7 @@ class RoleDetailEndpoint(BaseMetaResource, MethodResource):
             raise EndpointNotImplemented(
                 "The roles have to be modified in the directory."
             )
-        return self.put_detail(kwargs, idx=idx)
+        return self.put_detail(kwargs, idx=idx, user=self.get_user())
 
     @doc(description="Deletes one role", tags=["Roles"])
     @authenticate(auth_class=Auth())
@@ -137,7 +135,7 @@ class RoleDetailEndpoint(BaseMetaResource, MethodResource):
         raise EndpointNotImplemented("Roles can not be deleted")
 
 
-class UserRoleListEndpoint(BaseMetaResource, MethodResource):
+class UserRoleListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of roles assigned to users and create new assignments"
@@ -197,7 +195,7 @@ class UserRoleListEndpoint(BaseMetaResource, MethodResource):
             return self.post_list(kwargs, trace_field="admin_id")
 
 
-class UserRoleDetailEndpoint(BaseMetaResource, MethodResource):
+class UserRoleDetailEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get a specific role assignment or to delete one"
 

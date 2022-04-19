@@ -3,7 +3,6 @@
 """
 # Import from libraries
 from flask_apispec import marshal_with, doc
-from flask_apispec.views import MethodResource
 
 # Import from internal modules
 from ..models import ApiViewModel
@@ -14,7 +13,7 @@ from cornflow_core.authentication import authenticate
 from cornflow_core.resources import BaseMetaResource
 
 
-class ApiViewListEndpoint(BaseMetaResource, MethodResource):
+class ApiViewListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of all the endpoints defined in cornflow and its url"

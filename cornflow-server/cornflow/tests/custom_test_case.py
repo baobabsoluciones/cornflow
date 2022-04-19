@@ -205,7 +205,6 @@ class CustomTestCase(TestCase):
             url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
 
-        print(row.json)
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
             return row.json

@@ -6,15 +6,14 @@ These endpoints hve different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow, get_schema
+from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import INSTANCE_SCHEMA
 from flask import request, current_app
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
 import logging as log
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution import (
     ExecutionSchema,
@@ -48,7 +47,7 @@ from ..shared.compress import compressed
 execution_schema = ExecutionSchema()
 
 
-class ExecutionEndpoint(MetaResource, MethodResource):
+class ExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
     """
@@ -56,8 +55,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
-        self.query = ExecutionModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Get all executions", tags=["Executions"])
@@ -74,7 +72,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return ExecutionModel.get_all_objects(self.get_user(), **kwargs)
+        return self.get_list(user=self.get_user(), **kwargs)
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -98,7 +96,7 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
         # TODO: review the order of these two operations
-        execution, status_code = self.post_list(kwargs)
+        execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object_from_user(
             self.get_user(), execution.instance_id
         )
@@ -169,16 +167,14 @@ class ExecutionEndpoint(MetaResource, MethodResource):
         return execution, 201
 
 
-class ExecutionDetailsEndpointBase(MetaResource, MethodResource):
+class ExecutionDetailsEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a certain execution. But not the data!
     """
 
     def __init__(self):
         super().__init__()
-        self.model = ExecutionModel
-        self.query = ExecutionModel.get_one_object_from_user
-        self.primary_key = "id"
+        self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
 
 
@@ -186,7 +182,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDetailsEndpointResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get an execution created by the user and its related info.
@@ -198,7 +194,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -213,7 +209,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user_id()} edits execution {idx}")
-        return self.put_detail(data, self.get_user(), idx)
+        return self.put_detail(data, user=self.get_user(), idx=idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -229,7 +225,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user_id()} deleted execution {idx}")
-        return self.delete_detail(self.get_user(), idx)
+        return self.delete_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -251,10 +247,14 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return {"message": "The execution has been stopped"}, 200
 
 
-class ExecutionStatusEndpoint(MetaResource, MethodResource):
+class ExecutionStatusEndpoint(BaseMetaResource):
     """
     Endpoint used to get the status of a certain execution that is running in the airflow webserver
     """
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = ExecutionModel
 
     @doc(description="Get status of an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -270,9 +270,7 @@ class ExecutionStatusEndpoint(MetaResource, MethodResource):
             and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        execution = ExecutionModel.get_one_object_from_user(
-            user=self.get_user(), idx=idx
-        )
+        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
         if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_UNKNOWN]:
@@ -323,7 +321,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     )
     @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDataEndpointResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -333,7 +331,7 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx)
 
 
 class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
@@ -344,7 +342,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get log of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
     @marshal_with(ExecutionLogEndpointResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -354,4 +352,4 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return ExecutionModel.get_one_object_from_user(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx)

@@ -5,7 +5,6 @@
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from flask import current_app
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
@@ -15,7 +14,7 @@ from cornflow_core.shared import database as db
 from cornflow_core.resources import BaseMetaResource
 
 
-class HealthEndpoint(BaseMetaResource, MethodResource):
+class HealthEndpoint(BaseMetaResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
     def get(self):

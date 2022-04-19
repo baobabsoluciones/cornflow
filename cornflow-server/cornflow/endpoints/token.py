@@ -1,7 +1,6 @@
 # Import from libraries
 from cornflow_core.resources import BaseMetaResource
 from flask import request
-from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
@@ -11,7 +10,7 @@ from ..shared.authentication import Auth
 from ..shared.const import ALL_DEFAULT_ROLES
 
 
-class TokenEndpoint(BaseMetaResource, MethodResource):
+class TokenEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
 
     def __init__(self):

@@ -3,12 +3,13 @@ External endpoints to manage the instances: create new ones, or get all the inst
 or get only one.
 These endpoints have different access url, but manage the same data entities
 """
+
 # Import from libraries
 from cornflow_client.airflow.api import get_schema
+from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
-from flask_apispec.views import MethodResource
 from flask_inflate import inflate
 from marshmallow.exceptions import ValidationError
 import os
@@ -18,7 +19,6 @@ import logging as log
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import InstanceModel
 from ..schemas.instance import (
     InstanceSchema,
@@ -41,16 +41,14 @@ from cornflow_core.exceptions import InvalidUsage
 ALLOWED_EXTENSIONS = {"mps", "lp"}
 
 
-class InstanceEndpoint(MetaResource, MethodResource):
+class InstanceEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new instance or get all the instances and their related information
     """
 
     def __init__(self):
         super().__init__()
-        self.model = InstanceModel
-        self.query = InstanceModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = InstanceModel
 
     @doc(description="Get all instances", tags=["Instances"])
     @authenticate(auth_class=Auth())
@@ -66,7 +64,7 @@ class InstanceEndpoint(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user_id()} gets all the instances")
-        return self.model.get_all_objects(self.get_user(), **kwargs)
+        return self.get_list(user=self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
     @authenticate(auth_class=Auth())
@@ -87,12 +85,12 @@ class InstanceEndpoint(MetaResource, MethodResource):
 
         if data_schema is None:
             # no schema provided, no validation to do
-            return self.post_list(kwargs)
+            return self.post_list(data=kwargs)
 
         if data_schema == "pulp" or data_schema == "solve_model_dag":
             # this one we have the schema stored inside cornflow
             validate_and_continue(DataSchema(), kwargs["data"])
-            return self.post_list(kwargs)
+            return self.post_list(data=kwargs)
 
         # for the rest of the schemas: we need to ask airflow for the schema
         config = current_app.config
@@ -100,27 +98,25 @@ class InstanceEndpoint(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # if we're here, we validated and the data seems to fit the schema
-        response = self.post_list(kwargs)
+        response = self.post_list(data=kwargs)
         log.info(f"User {self.get_user_id()} creates instance {response[0].id}")
         return response
 
 
-class InstanceDetailsEndpointBase(MetaResource, MethodResource):
+class InstanceDetailsEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a single instance, edit it or delete it
     """
 
     def __init__(self):
         super().__init__()
-        self.model = InstanceModel
-        self.primary_key = "id"
-        self.query = InstanceModel.get_one_object_from_user
+        self.data_model = InstanceModel
         self.dependents = "executions"
 
     @doc(description="Get one instance", tags=["Instances"], inherit=False)
     @authenticate(auth_class=Auth())
     @marshal_with(InstanceDetailsEndpointResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get an instance created by the user and its related info.
@@ -133,7 +129,7 @@ class InstanceDetailsEndpointBase(MetaResource, MethodResource):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user_id()} gets instance {idx}")
-        return InstanceModel.get_one_object_from_user(self.get_user(), idx)
+        return self.get_detail(user=self.get_user(), idx=idx)
 
 
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
@@ -141,7 +137,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @use_kwargs(InstanceEditRequest, location="json")
-    def put(self, idx, **data):
+    def put(self, idx, **kwargs):
         """
         API method to edit an existing instance.
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -151,7 +147,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        response = self.put_detail(data, self.get_user(), idx)
+        response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
         log.info(f"User {self.get_user_id()} edits instance {idx}")
         return response
 
@@ -168,7 +164,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        response = self.delete_detail(self.get_user(), idx)
+        response = self.delete_detail(user=self.get_user(), idx=idx)
         log.info("User {self.get_user_id()} deletes instance {idx}")
         return response
 
@@ -185,7 +181,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     @doc(description="Get input data of an instance", tags=["Instances"], inherit=False)
     @authenticate(auth_class=Auth())
     @marshal_with(InstanceDataEndpointResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -199,10 +195,10 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user_id()} gets the data of case {idx}")
-        return InstanceModel.get_one_object_from_user(self.get_user(), idx)
+        return self.get_detail(user=self.get_user(), idx=idx)
 
 
-class InstanceFileEndpoint(MetaResource, MethodResource):
+class InstanceFileEndpoint(BaseMetaResource):
     """
     Endpoint to accept mps files to upload
     """
