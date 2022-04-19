@@ -41,7 +41,7 @@ class BaseMetaResource(Resource, MethodResource):
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
                     raise ObjectDoesNotExist()
-                if self.user != owner.user_id:
+                if self.user.id != owner.user_id:
                     raise NoPermission()
         item.save()
         return item, 201
