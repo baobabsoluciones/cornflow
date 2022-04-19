@@ -51,7 +51,7 @@ class BaseMetaResource(Resource, MethodResource):
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
         data = dict(data)
-        user_id = kwargs.get("user").id or self.get_user_id()
+        user_id = kwargs.get("user").get("id") or self.get_user_id()
         data["user_id"] = user_id
         item.update(data)
         return {"message": "Updated correctly"}, 200
@@ -61,7 +61,7 @@ class BaseMetaResource(Resource, MethodResource):
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
         data = dict(data)
-        user_id = kwargs.get("user").id or self.get_user_id()
+        user_id = kwargs.get("user").get("id") or self.get_user_id()
         data["user_id"] = user_id
         item.patch(data)
         return {"message": "Patched correctly"}, 200
