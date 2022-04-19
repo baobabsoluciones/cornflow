@@ -62,6 +62,8 @@ OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 os.environ["OPEN_DEPLOYMENT"] = str(OPEN_DEPLOYMENT)
 DEFAULT_ROLE = os.getenv("DEFAULT_ROLE", 2)
 os.environ["DEFAULT_ROLE"] = str(DEFAULT_ROLE)
+USER_ACCESS_ALL_OBJECTS = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+os.environ["USER_ACCESS_ALL_OBJECTS"] = str(USER_ACCESS_ALL_OBJECTS)
 
 # Check LDAP parameters for active directory and show message
 if os.getenv("AUTH_TYPE") == 2:
