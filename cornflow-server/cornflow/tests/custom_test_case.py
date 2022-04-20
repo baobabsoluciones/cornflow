@@ -544,6 +544,7 @@ class LoginTestCases:
             return app
 
         def setUp(self):
+            log.root.setLevel(log.DEBUG)
             db.create_all()
             self.data = None
             self.response = None
