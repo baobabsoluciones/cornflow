@@ -84,8 +84,10 @@ class TraceAttributesModel(EmptyBaseModel):
 
     @classmethod
     def get_all_objects(cls, **kwargs):
-        return super().get_all_objects(deleted_at=None, **kwargs)
+        kwargs.update({"deleted_at": None})
+        return super().get_all_objects(**kwargs)
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
-        return super().get_one_object(idx=idx, deleted_at=None)
+        kwargs.update({"deleted_at": None})
+        return super().get_one_object(idx=idx, **kwargs)
