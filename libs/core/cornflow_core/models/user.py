@@ -108,7 +108,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return cls.get_one_object(idx)
+        return cls.get_one_object(idx=idx)
 
     @classmethod
     def get_one_user_by_email(cls, email):
@@ -119,7 +119,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return cls.query.filter_by(email=email, deleted_at=None).first()
+        return cls.get_one_object(email=email)
 
     @classmethod
     def get_one_user_by_username(cls, username):
@@ -129,7 +129,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: the user object
         :rtype: :class:`UserModel`
         """
-        return cls.query.filter_by(username=username, deleted_at=None).first()
+        return cls.get_one_object(username=username)
 
     def check_username_in_use(self):
         """
