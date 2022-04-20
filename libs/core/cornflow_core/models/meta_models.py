@@ -49,7 +49,7 @@ class EmptyBaseModel(database.Model):
     def get_one_object(cls, idx=None, **kwargs):
         if idx is None:
             return cls.query.filter_by(**kwargs).first()
-        return cls.query.get(id=idx, **kwargs).first()
+        return cls.query.filter_by(id=idx, **kwargs).first()
 
     def get(self, key):
         value = getattr(self, key, None)
