@@ -80,7 +80,7 @@ class LoginBaseEndpoint(BaseMetaResource):
         roles = ldap_obj.get_user_roles(username)
 
         try:
-            self.user_role_association(user.id)
+            self.user_role_association.del_one_user(user.id)
             for role in roles:
                 user_role = self.user_role_association(
                     data={"user_id": user.id, "role_id": role}

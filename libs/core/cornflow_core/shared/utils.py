@@ -1,5 +1,6 @@
 """
-
+This file defines the database session with SQLAlchemy and the password encryption with Bcrypt
+Additionally we add the option to have our database models inherit ABCMeta class so that abstract methods can be defined
 """
 from abc import ABCMeta
 
@@ -10,6 +11,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 class CustomABCMeta(DefaultMeta, ABCMeta):
+    """
+    Custom meta class so that the models inherit ABCMeta
+    """
+
     pass
 
 
