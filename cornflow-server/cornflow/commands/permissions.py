@@ -5,7 +5,7 @@ def register_base_permissions_command(verbose):
     from ..endpoints import resources
     from ..models import ApiViewModel, PermissionViewRoleModel
     from ..shared.const import BASE_PERMISSION_ASSIGNATION, EXTRA_PERMISSION_ASSIGNATION
-    from cornflow_core.shared import database as db
+    from cornflow_core.shared import db
 
     permissions_registered = [
         (perm.action_id, perm.api_view_id, perm.role_id)
@@ -95,7 +95,7 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..models import DeployedDAG, PermissionsDAG, UserModel
-    from cornflow_core.shared import database as db
+    from cornflow_core.shared import db
 
     if open_deployment is None:
         open_deployment = int(current_app.config["OPEN_DEPLOYMENT"])

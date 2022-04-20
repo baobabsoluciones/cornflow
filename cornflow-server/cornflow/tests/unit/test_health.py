@@ -1,7 +1,7 @@
 from flask_testing import TestCase
 
 from cornflow.app import create_app
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 from cornflow.tests.const import HEALTH_URL
 from cornflow.shared.const import STATUS_HEALTHY
 

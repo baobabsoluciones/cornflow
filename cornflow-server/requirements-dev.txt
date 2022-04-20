@@ -8,6 +8,7 @@ Flask-Testing
 imagesize
 orloge
 packaging
+pipreqs
 Pygments
 pyparsing
 snowballstemmer

@@ -30,7 +30,7 @@ from cornflow.shared.const import (
     ROLES_MAP,
     BASE_PERMISSION_ASSIGNATION,
 )
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class TestCommands(TestCase):

@@ -10,7 +10,7 @@ from flask_apispec import marshal_with, doc
 # Import from internal modules
 from ..schemas.health import HealthResponse
 from ..shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 from cornflow_core.resources import BaseMetaResource
 
 

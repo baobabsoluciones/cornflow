@@ -4,7 +4,7 @@
 from cornflow_core.models import ActionBaseModel
 
 # from .meta_model import EmptyModel
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class ActionModel(ActionBaseModel):

@@ -2,7 +2,7 @@ from cornflow_core.models import UserRoleBaseModel
 
 # Import from internal modules
 from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class UserRoleModel(UserRoleBaseModel):

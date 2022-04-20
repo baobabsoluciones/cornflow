@@ -40,7 +40,7 @@ class SchemaEndpoint(BaseMetaResource):
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
-        log.debug("User gets list of schema")
+        log.info("User gets list of schema")
         return available_dags
 
 
@@ -77,7 +77,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
             # try airflow and see if dag_name exists
             af_client.get_dag_info(dag_name)
 
-            log.debug("User gets schema {}".format(dag_name))
+            log.info("User gets schema {}".format(dag_name))
             # it exists: we try to get its schemas
             return af_client.get_schemas_for_dag_name(dag_name)
         else:

@@ -32,9 +32,9 @@ from .config import app_config
 from .endpoints import resources
 from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from .endpoints.signup import SignUpEndpoint
-from .shared.compress import init_compress
+from cornflow_core.compress import init_compress
 from cornflow_core.exceptions import initialize_errorhandlers
-from cornflow_core.shared import database, password_crypt
+from cornflow_core.shared import db, bcrypt
 
 from .shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
 
@@ -54,9 +54,9 @@ def create_app(env_name="development", dataconn=None):
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
     CORS(app)
-    password_crypt.init_app(app)
-    database.init_app(app)
-    migrate = Migrate(app=app, db=database)
+    bcrypt.init_app(app)
+    db.init_app(app)
+    migrate = Migrate(app=app, db=db)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 
@@ -66,7 +66,7 @@ def create_app(env_name="development", dataconn=None):
         with app.app_context():
             from sqlalchemy import event
 
-            event.listen(database.engine, "connect", _fk_pragma_on_connect)
+            event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
     api = Api(app)
     for res in resources:

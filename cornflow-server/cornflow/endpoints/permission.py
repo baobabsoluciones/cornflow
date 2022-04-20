@@ -15,7 +15,7 @@ from ..schemas.permission import (
     PermissionViewRoleEditRequest,
 )
 from ..shared.authentication import Auth
-from ..shared.compress import compressed
+from cornflow_core.compress import compressed
 from ..shared.const import ADMIN_ROLE
 from cornflow_core.exceptions import ObjectAlreadyExists
 from cornflow_core.resources import BaseMetaResource

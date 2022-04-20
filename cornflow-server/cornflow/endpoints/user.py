@@ -4,13 +4,23 @@ Endpoints for the user profiles
 # Full imports
 import logging as log
 
+from cornflow_core.authentication import authenticate
+from cornflow_core.exceptions import (
+    EndpointNotImplemented,
+    InvalidCredentials,
+    InvalidUsage,
+    NoPermission,
+    ObjectDoesNotExist,
+)
+
 # Partial imports from libraries
 from cornflow_core.resources import BaseMetaResource
-from flask_apispec import marshal_with, use_kwargs, doc
+from cornflow_core.resources.recover_password import RecoverPasswordBaseEndpoint
+from cornflow_core.shared import check_email_pattern, check_password_pattern
+from cornflow_core.shared import db
 from flask import current_app
+from flask_apispec import marshal_with, use_kwargs, doc
 from sqlalchemy.exc import DBAPIError, IntegrityError
-
-from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from ..models import UserModel, UserRoleModel
@@ -21,20 +31,8 @@ from ..schemas.user import (
     UserEndpointResponse,
     UserSchema,
 )
-
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES
-from cornflow_core.exceptions import (
-    EndpointNotImplemented,
-    InvalidCredentials,
-    InvalidUsage,
-    NoPermission,
-    ObjectDoesNotExist,
-)
-from cornflow_core.shared import check_email_pattern, check_password_pattern
-from cornflow_core.shared import database as db
-from ..shared.messages import get_pwd_email, send_email_to
-
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -123,7 +121,7 @@ class UserDetailsEndpoint(BaseMetaResource):
         """
         API method to edit an existing user.
         It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user. Only admin and superadmin can edit other users.
+        an existing session (login) made by a user. Only admin and service user can edit other users.
 
         :param int user_id: id of the user
         :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
@@ -154,6 +152,10 @@ class UserDetailsEndpoint(BaseMetaResource):
 
 
 class ToggleUserAdmin(BaseMetaResource):
+    """
+    Endpoint to convert a user into and admin or to revoke admin privileges from a suer
+    """
+
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
 
     @doc(description="Toggle user into admin", tags=["Users"])
@@ -163,7 +165,7 @@ class ToggleUserAdmin(BaseMetaResource):
         """
         API method to make admin or take out privileges.
         It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user. Only superadmin can change this.
+        an existing session (login) made by a user. Only an admin can change this.
 
         :param int user_id: id of the user
         :param make_admin: 0 if the user is not going to be made admin, 1 if the user has to be made admin
@@ -190,7 +192,15 @@ class ToggleUserAdmin(BaseMetaResource):
         return user_obj, 200
 
 
-class RecoverPassword(BaseMetaResource):
+class RecoverPassword(RecoverPasswordBaseEndpoint):
+    """
+    Endpoint to recover the password
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+
     @doc(description="Send email to create new password", tags=["Users"])
     @use_kwargs(RecoverPasswordRequest)
     def put(self, **kwargs):
@@ -202,39 +212,8 @@ class RecoverPassword(BaseMetaResource):
             the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        email = kwargs.get("email")
 
-        email_config = {
-            "email_sender": current_app.config["CORNFLOW_EMAIL_ADDRESS"],
-            "password": current_app.config["CORNFLOW_EMAIL_PASSWORD"],
-            "server": current_app.config["CORNFLOW_EMAIL_SERVER"],
-            "port": current_app.config["CORNFLOW_EMAIL_PORT"],
-            "email_receiver": email,
-        }
+        response, status = self.recover_password(kwargs.get("email"))
 
-        if (
-            email_config["email_sender"] is None
-            or email_config["password"] is None
-            or email_config["server"] is None
-            or email_config["port"] is None
-            or email_config["email_receiver"] is None
-        ):
-            raise InvalidUsage(
-                "This functionality is not available. Check that cornflow's email is correctly configured"
-            )
-
-        message = "The password recovery process has started. Check the email inbox."
-
-        if not UserModel.check_email_in_use(email):
-            return {"message": message}, 200
-
-        new_password = UserModel.generate_random_password()
-        text_email = get_pwd_email(new_password, email_config)
-        send_email_to(text_email, email_config)
-
-        data = {"password": new_password}
-        user_obj = UserModel.get_one_user_by_email(email)
-        user_obj.update(data)
-
-        log.info(message)
-        return {"message": message}, 200
+        log.info(f"User with email {kwargs.get('email')} has requested a new password")
+        return response, status

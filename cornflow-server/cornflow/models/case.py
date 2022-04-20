@@ -11,7 +11,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 # Import from internal modules
 from .base_data_model import BaseDataModel
 from cornflow_core.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 from ..shared.utils import hash_json_256
 
 

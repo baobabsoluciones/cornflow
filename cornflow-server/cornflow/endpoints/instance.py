@@ -33,7 +33,7 @@ from ..schemas.instance import (
 
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.compress import compressed
+from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidUsage
 
 

@@ -5,7 +5,7 @@
 from cornflow_core.models import TraceAttributesModel
 
 # Import from internal modules
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 from flask import current_app
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON

@@ -2,7 +2,7 @@ from cornflow_core.models import UserBaseModel
 
 
 from .user_role import UserRoleModel
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class UserModel(UserBaseModel):

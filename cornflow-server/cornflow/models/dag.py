@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import TEXT
 
 # Import from internal modules
 from cornflow_core.models import TraceAttributesModel
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class DeployedDAG(TraceAttributesModel):

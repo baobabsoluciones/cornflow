@@ -57,7 +57,7 @@ AIRFLOW_TO_STATE_MAP = dict(
     queued=EXEC_STATE_RUNNING,
 )
 
-# These codes and names are inherited from flask appbuilder in order to have the same names and values
+# These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
 AUTH_DB = AUTH_DB
 AUTH_LDAP = AUTH_LDAP

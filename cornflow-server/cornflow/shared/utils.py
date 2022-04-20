@@ -3,14 +3,6 @@
 """
 import hashlib
 import json
-from cornflow_core.shared import database
-from cornflow_core.shared import password_crypt
-
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_bcrypt import Bcrypt
-
-db = database
-bcrypt = password_crypt
 
 
 def hash_json_256(data):

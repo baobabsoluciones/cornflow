@@ -95,6 +95,7 @@ jobs:
         FLASK_ENV: testing
         OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db
+        LOG_LEVEL: 30
     - name: Run ldap unit tests
       run: | 
         coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/ldap
@@ -120,6 +121,7 @@ jobs:
         LDAP_GROUP_TO_ROLE_ADMIN: administrators
         LDAP_GROUP_TO_ROLE_VIEWER: viewers
         LDAP_GROUP_TO_ROLE_PLANNER: planners
+        LOG_LEVEL: 30
     - name: Run postgres unit tests
       run: | 
         coverage run -a --source=./cornflow/ -m unittest cornflow/tests/unit/test_commands.py
@@ -128,6 +130,7 @@ jobs:
         FLASK_ENV: testing
         OPEN_DEPLOYMENT: 1
         DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
+        LOG_LEVEL: 30
     - name: Run integration tests
       run: |
         coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
@@ -136,3 +139,4 @@ jobs:
         FLASK_ENV: testing
         OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db
+        LOG_LEVEL: 30

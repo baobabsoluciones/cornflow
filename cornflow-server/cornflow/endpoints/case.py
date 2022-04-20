@@ -31,7 +31,7 @@ from ..schemas.case import (
 
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.compress import compressed
+from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
 from cornflow_core.authentication import authenticate
 
@@ -60,7 +60,7 @@ class CaseEndpoint(BaseMetaResource):
         """
 
         response = self.get_list(user=self.get_user(), **kwargs)
-        log.debug(f"User {self.get_user_id()} gets all cases")
+        log.info(f"User {self.get_user_id()} gets all cases")
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
@@ -207,7 +207,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.debug(f"User {self.get_user_id()} gets case {idx}")
+        log.info(f"User {self.get_user_id()} gets case {idx}")
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
@@ -262,7 +262,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.debug(f"User {self.get_user_id()} gets case {idx}")
+        log.info(f"User {self.get_user_id()} gets case {idx}")
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
@@ -388,5 +388,5 @@ class CaseCompare(BaseMetaResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        log.debug(f"User {self.get_user_id()} compared cases {idx1} and {idx2}")
+        log.info(f"User {self.get_user_id()} compared cases {idx1} and {idx2}")
         return payload, 200

@@ -39,7 +39,7 @@ from ..shared.const import (
 )
 from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
-from ..shared.compress import compressed
+from cornflow_core.compress import compressed
 
 
 # Initialize the schema that all endpoints are going to use

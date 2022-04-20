@@ -4,7 +4,7 @@ def register_actions_command(verbose):
 
     from ..models import ActionModel
     from ..shared.const import ACTIONS_MAP
-    from cornflow_core.shared import database as db
+    from cornflow_core.shared import db
 
     actions_registered = [ac.name for ac in ActionModel.get_all_objects()]
 

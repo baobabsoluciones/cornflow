@@ -5,6 +5,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 
 class DefaultConfig(object):
+    SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
     SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
@@ -16,9 +17,11 @@ class DefaultConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
     TESTING = True
+    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 30))
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
+
     # Planner users can access objects of other users (1) or not(0).
     USER_ACCESS_ALL_OBJECTS = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
 
@@ -62,10 +65,10 @@ class DefaultConfig(object):
     COMPRESS_REGISTER = False
 
     # Email server
-    CORNFLOW_EMAIL_ADDRESS = os.getenv("CORNFLOW_EMAIL_ADDRESS", None)
-    CORNFLOW_EMAIL_PASSWORD = os.getenv("CORNFLOW_EMAIL_PASSWORD", None)
-    CORNFLOW_EMAIL_SERVER = os.getenv("CORNFLOW_EMAIL_SERVER", None)
-    CORNFLOW_EMAIL_PORT = os.getenv("CORNFLOW_EMAIL_PORT", None)
+    SERVICE_EMAIL_ADDRESS = os.getenv("SERVICE_EMAIL_ADDRESS", None)
+    SERVICE_EMAIL_PASSWORD = os.getenv("SERVICE_EMAIL_PASSWORD", None)
+    SERVICE_EMAIL_SERVER = os.getenv("SERVICE_EMAIL_SERVER", None)
+    SERVICE_EMAIL_PORT = os.getenv("SERVICE_EMAIL_PORT", None)
 
 
 class Development(DefaultConfig):
@@ -86,6 +89,7 @@ class Testing(DefaultConfig):
     AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
+    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
 
 class Production(DefaultConfig):

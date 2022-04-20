@@ -5,7 +5,7 @@ Models defined for the roles and the assignation of roles to users.
 from cornflow_core.models import RoleBaseModel
 
 # Import from internal modules
-from cornflow_core.shared import database as db
+from cornflow_core.shared import db
 
 
 class RoleModel(RoleBaseModel):
