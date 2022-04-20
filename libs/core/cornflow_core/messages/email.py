@@ -10,7 +10,7 @@ from smtplib import SMTP_SSL, SMTPAuthenticationError, SMTPRecipientsRefused
 from cornflow_core.exceptions import InvalidData
 
 
-def get_email(text, subject, sender, receiver):
+def get_email(text, subject, sender, receiver, **kwargs):
     """
 
     :param text:
@@ -40,7 +40,7 @@ def get_email(text, subject, sender, receiver):
     return email.as_string()
 
 
-def get_password_recover_email(temp_password, service_name, sender, receiver):
+def get_password_recover_email(temp_password, service_name, sender, receiver, **kwargs):
     """
 
     :param temp_password:
@@ -71,7 +71,7 @@ def get_password_recover_email(temp_password, service_name, sender, receiver):
     return get_email(text_template, subject, sender, receiver)
 
 
-def send_email_to(email, smtp_server, port, sender, password, receiver):
+def send_email_to(email, smtp_server, port, sender, password, receiver, **kwargs):
     """
 
     :param email:
