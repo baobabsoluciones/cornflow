@@ -1,1 +1,2 @@
-from .query import QueryFilters
+from .query import BaseQueryFilters
+from .patch import BasePatchOperation

@@ -190,3 +190,6 @@ class UserBaseModel(TraceAttributesModel):
         :rtype: str
         """
         return "<Username {}>".format(self.username)
+
+    def __str__(self):
+        return self.__repr__()
