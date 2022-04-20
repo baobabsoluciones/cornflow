@@ -1,4 +1,4 @@
-from .utils import database, password_crypt
+from .utils import db, bcrypt
 from .validators import (
     check_email_pattern,
     check_password_pattern,

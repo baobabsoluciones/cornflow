@@ -18,7 +18,7 @@ class CustomABCMeta(DefaultMeta, ABCMeta):
     pass
 
 
-database = SQLAlchemy(
+db = SQLAlchemy(
     model_class=declarative_base(cls=Model, metaclass=CustomABCMeta, name="Model")
 )
-password_crypt = Bcrypt()
+bcrypt = Bcrypt()

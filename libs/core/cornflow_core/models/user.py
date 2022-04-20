@@ -6,8 +6,8 @@ import string
 
 from cornflow_core.exceptions import InvalidCredentials
 from cornflow_core.shared import (
-    password_crypt,
-    database,
+    bcrypt,
+    db,
     check_password_pattern,
     check_email_pattern,
 )
@@ -17,12 +17,12 @@ from abc import abstractmethod
 
 class UserBaseModel(TraceAttributesModel):
     __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True)
-    first_name = database.Column(database.String(128), nullable=True)
-    last_name = database.Column(database.String(128), nullable=True)
-    username = database.Column(database.String(128), nullable=False, unique=True)
-    password = database.Column(database.String(128), nullable=True)
-    email = database.Column(database.String(128), nullable=False, unique=True)
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(128), nullable=True)
+    last_name = db.Column(db.String(128), nullable=True)
+    username = db.Column(db.String(128), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=True)
+    email = db.Column(db.String(128), nullable=False, unique=True)
 
     def __init__(self, data):
         """
@@ -77,7 +77,7 @@ class UserBaseModel(TraceAttributesModel):
         """
         if password is None:
             return None
-        return password_crypt.generate_password_hash(password, rounds=10).decode("utf8")
+        return bcrypt.generate_password_hash(password, rounds=10).decode("utf8")
 
     def check_hash(self, password):
         """
@@ -87,7 +87,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: if the password is the same or not.
         :rtype: bool
         """
-        return password_crypt.check_password_hash(self.password, password)
+        return bcrypt.check_password_hash(self.password, password)
 
     @classmethod
     def get_all_users(cls):

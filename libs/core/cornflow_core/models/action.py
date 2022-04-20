@@ -2,13 +2,13 @@
 
 """
 from cornflow_core.models import EmptyBaseModel
-from cornflow_core.shared import database
+from cornflow_core.shared import db
 
 
 class ActionBaseModel(EmptyBaseModel):
     __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    name = database.Column(database.String(128), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(128), unique=True, nullable=False)
 
     def __repr__(self):
         return f"<Action {self.id}: {self.name}>"

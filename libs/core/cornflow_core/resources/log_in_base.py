@@ -19,7 +19,7 @@ from cornflow_core.exceptions import (
     EndpointNotImplemented,
 )
 from .meta_resource import BaseMetaResource
-from ..shared import database
+from ..shared import db
 
 
 class LoginBaseEndpoint(BaseMetaResource):
@@ -88,10 +88,10 @@ class LoginBaseEndpoint(BaseMetaResource):
                 user_role.save()
 
         except IntegrityError as e:
-            database.session.rollback()
+            db.session.rollback()
             log.error(f"Integrity error on user role assignment on log in: {e}")
         except DBAPIError as e:
-            database.session.rollback()
+            db.session.rollback()
             log.error(f"Unknown error on user role assignment on log in: {e}")
 
         return user

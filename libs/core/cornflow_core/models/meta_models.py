@@ -6,10 +6,10 @@ import logging as log
 
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
-from cornflow_core.shared import database
+from cornflow_core.shared import db
 
 
-class EmptyBaseModel(database.Model):
+class EmptyBaseModel(db.Model):
     __abstract__ = True
 
     def commit_changes(self, action: str = None):
@@ -17,28 +17,28 @@ class EmptyBaseModel(database.Model):
             action = ""
 
         try:
-            database.session.commit()
+            db.session.commit()
         except IntegrityError as e:
-            database.session.rollback()
+            db.session.rollback()
             log.error(f"Integrity error on {action} new data: {e}")
             log.error(f"Data: {self}")
         except DBAPIError as e:
-            database.session.rollback()
+            db.session.rollback()
             log.error(f"Unknown error on {action} new data: {e}")
             log.error(f"Data: {self}")
 
     def save(self):
-        database.session.add(self)
+        db.session.add(self)
         self.commit_changes("saving")
 
     def delete(self):
-        database.session.delete(self)
+        db.session.delete(self)
         self.commit_changes("deleting")
 
     def update(self, data):
         for key, value in data.items():
             setattr(self, key, value)
-        database.session.add(self)
+        db.session.add(self)
         self.commit_changes("updating")
 
     @classmethod
@@ -58,9 +58,9 @@ class EmptyBaseModel(database.Model):
 
 class TraceAttributesModel(EmptyBaseModel):
     __abstract__ = True
-    created_at = database.Column(database.DateTime, nullable=False)
-    updated_at = database.Column(database.DateTime, nullable=False)
-    deleted_at = database.Column(database.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self):
         self.created_at = datetime.datetime.utcnow()
@@ -73,13 +73,13 @@ class TraceAttributesModel(EmptyBaseModel):
 
     def disable(self):
         self.deleted_at = datetime.datetime.utcnow()
-        database.session.add(self)
+        db.session.add(self)
         self.commit_changes("disabling")
 
     def activate(self):
         self.updated_at = datetime.datetime.utcnow()
         self.deleted_at = None
-        database.session.add(self)
+        db.session.add(self)
         self.commit_changes("activating")
 
     @classmethod

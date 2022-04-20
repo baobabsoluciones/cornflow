@@ -3,12 +3,12 @@
 """
 
 from cornflow_core.models import TraceAttributesModel
-from cornflow_core.shared import database
+from cornflow_core.shared import db
 
 
 class UserRoleBaseModel(TraceAttributesModel):
     __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     @classmethod
     def del_one_user(cls, user_id):

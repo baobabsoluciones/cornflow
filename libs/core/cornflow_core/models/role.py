@@ -3,13 +3,13 @@
 """
 
 from cornflow_core.models import TraceAttributesModel
-from cornflow_core.shared import database
+from cornflow_core.shared import db
 
 
 class RoleBaseModel(TraceAttributesModel):
     __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    name = database.Column(database.String(128), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(128), nullable=False)
 
     def __init__(self, data):
         super().__init__()

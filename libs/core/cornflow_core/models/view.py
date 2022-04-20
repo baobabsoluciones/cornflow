@@ -4,15 +4,15 @@
 from sqlalchemy.dialects.postgresql import TEXT
 
 from cornflow_core.models import EmptyBaseModel
-from cornflow_core.shared import database
+from cornflow_core.shared import db
 
 
 class ViewBaseModel(EmptyBaseModel):
     __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-    name = database.Column(database.String(128), unique=True, nullable=False)
-    url_rule = database.Column(database.String(128), nullable=False)
-    description = database.Column(TEXT, nullable=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(128), unique=True, nullable=False)
+    url_rule = db.Column(db.String(128), nullable=False)
+    description = db.Column(TEXT, nullable=True)
 
     def __init__(self, data):
         super().__init__()
