@@ -3,6 +3,7 @@ This file contains the different custom test classes used to generalize the unit
 """
 
 # Import from libraries
+import logging as log
 from datetime import datetime, timedelta
 from flask import current_app
 from flask_testing import TestCase
@@ -50,6 +51,7 @@ class CustomTestCase(TestCase):
         return temp
 
     def setUp(self):
+        log.root.setLevel(log.DEBUG)
         db.create_all()
         access_init_command(0)
         register_deployed_dags_command_test(verbose=0)

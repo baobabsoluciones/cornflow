@@ -383,7 +383,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         self.assertEqual(len(all_roles), len(ROLES_MAP))
         self.assertEqual(len(diff), 0)
         UserRoleModel.del_one_user(user_id)
-        all_roles = UserRoleModel.get_one_user(user_id)
+        all_roles = UserRoleModel.get_all_objects(user_id=user_id).all()
         self.assertEqual(all_roles, [])
 
 

@@ -6,6 +6,7 @@ from cornflow_core.shared import database as db
 
 
 class PermissionViewRoleModel(TraceAttributesModel):
+    # TODO: trace the user that modifies the permissions
     __tablename__ = "permission_view"
     __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
 
@@ -26,23 +27,13 @@ class PermissionViewRoleModel(TraceAttributesModel):
         self.api_view_id = data.get("api_view_id")
         self.role_id = data.get("role_id")
 
-    # @classmethod
-    # def get_permission(cls, role_id, view_id, action_id):
-    #     permission = cls.query.filter_by(
-    #         role_id=role_id,
-    #         api_view_id=view_id,
-    #         action_id=action_id,
-    #         deleted_at=None,
-    #     ).first()
-    #
-    #     if permission is not None:
-    #         return True
-
     @classmethod
     def get_permission(cls, **kwargs):
         permission = cls.query.filter_by(deleted_at=None, **kwargs).first()
         if permission is not None:
             return True
+        else:
+            return False
 
     def __repr__(self):
         return f"<Permission role: {self.role_id}, action: {self.action_id}, view: {self.api_view_id}>"

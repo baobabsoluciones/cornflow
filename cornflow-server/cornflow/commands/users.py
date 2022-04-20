@@ -13,9 +13,9 @@ def create_user_with_role(username, email, password, role_name, role, verbose=0)
             print(f"User {username} is created and assigned {role_name} role")
         return True
 
-    user_role = UserRoleModel.get_one_user(user.id)
-    user_actual_roles = [ur.role for ur in user_role]
-    if user_role is not None and RoleModel.get_one_object(role) in user_actual_roles:
+    user_roles = UserRoleModel.get_all_objects(user_id=user.id)
+    user_actual_roles = [ur.role for ur in user_roles]
+    if user_roles is not None and RoleModel.get_one_object(role) in user_actual_roles:
         if verbose == 1:
             print(f"User {username} exists and already has {role_name} role assigned")
         return True

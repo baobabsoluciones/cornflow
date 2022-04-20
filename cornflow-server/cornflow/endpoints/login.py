@@ -11,7 +11,7 @@ from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
 from ..models import PermissionsDAG, UserModel, UserRoleModel
-from ..schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
+from cornflow_core.schemas import LoginEndpointRequest, LoginOpenAuthRequest
 from ..shared.authentication import Auth
 
 

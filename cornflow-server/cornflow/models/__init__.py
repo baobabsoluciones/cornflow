@@ -8,5 +8,6 @@ from .dag import DeployedDAG
 from .execution import ExecutionModel
 from .instance import InstanceModel
 from .permission import PermissionsDAG, PermissionViewRoleModel
-from .roles import RoleModel, UserRoleModel
+from .roles import RoleModel
 from .user import UserModel
+from .user_role import UserRoleModel

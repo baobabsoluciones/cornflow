@@ -31,6 +31,7 @@ from .commands.views import register_views_command
 from .config import app_config
 from .endpoints import resources
 from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
+from .endpoints.signup import SignUpEndpoint
 from .shared.compress import init_compress
 from cornflow_core.exceptions import initialize_errorhandlers
 from cornflow_core.shared import database, password_crypt
@@ -78,7 +79,10 @@ def create_app(env_name="development", dataconn=None):
     # Resource for the log-in
     AUTH_TYPE = app.config["AUTH_TYPE"]
 
-    if AUTH_TYPE == AUTH_DB or AUTH_TYPE == AUTH_LDAP:
+    if AUTH_TYPE == AUTH_DB:
+        api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
+        api.add_resource(LoginEndpoint, "/login/", endpoint="login")
+    elif AUTH_TYPE == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif AUTH_TYPE == AUTH_OID:
         api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")

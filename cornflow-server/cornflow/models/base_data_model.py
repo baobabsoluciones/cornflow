@@ -3,16 +3,16 @@
 """
 # Import from libraries
 from cornflow_core.models import TraceAttributesModel
+
+# Import from internal modules
+from cornflow_core.shared import database as db
 from flask import current_app
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
-# Import from internal modules
-from cornflow_core.shared import database as db
 from ..shared.utils import hash_json_256
-import datetime
 
 
 class BaseDataModel(TraceAttributesModel):
@@ -28,8 +28,12 @@ class BaseDataModel(TraceAttributesModel):
     schema = db.Column(db.String(256), nullable=True)
 
     @declared_attr
-    def user_id(cls):
+    def user_id(self):
         return db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    @declared_attr
+    def user(self):
+        return db.relationship("UserModel")
 
     def __init__(self, data):
         self.user_id = data.get("user_id")

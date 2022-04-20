@@ -2,15 +2,15 @@
 
 """
 
+from cornflow_core.authentication import authenticate
+from cornflow_core.resources import BaseMetaResource
+from cornflow_core.schemas import ActionsResponse
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from ..models import ActionModel
-from ..schemas.action import ActionsResponse
 from ..shared.authentication import Auth
-from cornflow_core.authentication import authenticate
 from ..shared.const import ADMIN_ROLE
-from cornflow_core.resources import BaseMetaResource
 
 
 class ActionListEndpoint(BaseMetaResource):

@@ -21,3 +21,4 @@ sphinxcontrib-jsmath
 sphinxcontrib-qthelp
 sphinxcontrib-serializinghtml
 sphinxcontrib-redoc
+vulture

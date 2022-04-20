@@ -48,7 +48,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
             api_view_id=kwargs.get("api_view_id"),
             action_id=kwargs.get("action_id"),
         ):
-            raise ObjectAlreadyExists
+            raise ObjectAlreadyExists()
         else:
             log.info(f"User {self.get_user_id()} creates permission")
             return self.post_list(kwargs)
@@ -82,7 +82,7 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
-        response = self.put_detail(kwargs, idx=idx, user=self.get_user())
+        response = self.put_detail(kwargs, idx=idx, track_user=False)
         log.info(f"User {self.get_user_id()} edits permission {idx}")
         return response
 

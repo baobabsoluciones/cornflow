@@ -1,7 +1,7 @@
 from cornflow_core.models import UserBaseModel
 
 
-from .roles import UserRoleModel
+from .user_role import UserRoleModel
 from cornflow_core.shared import database as db
 
 
