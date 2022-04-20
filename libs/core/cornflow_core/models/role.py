@@ -21,12 +21,3 @@ class RoleBaseModel(TraceAttributesModel):
 
     def __str__(self):
         return self.__repr__()
-
-
-class UserRoleBaseModel(TraceAttributesModel):
-    __abstract__ = True
-    id = database.Column(database.Integer, primary_key=True, autoincrement=True)
-
-    @classmethod
-    def del_one_user(cls, user_id):
-        return cls.query.filter_by(user_id=user_id).delete(synchronize_session=False)
