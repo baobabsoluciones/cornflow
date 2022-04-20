@@ -13,6 +13,7 @@ Flask-RESTful
 jsonpatch
 marshmallow
 PuLP
+psycopg2
 PyJWT
 SQLAlchemy==1.3.21
 Werkzeug
