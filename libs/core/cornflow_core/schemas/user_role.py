@@ -15,7 +15,7 @@ class UserRoleRequest(Schema):
     role_id = fields.Int()
 
 
-class UserRoleResponse(Schema):
+class UserRoleResponse(UserRoleRequest):
     """
     Schema used in the get methods. Inherits the rest of the fields from :class:`UserRoleRequest`
     """
