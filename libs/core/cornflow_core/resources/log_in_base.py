@@ -75,7 +75,7 @@ class LoginBaseEndpoint(BaseMetaResource):
                 email = ""
             data = {"username": username, "email": email}
             user = self.data_model(data=data)
-            user.dave()
+            user.save()
 
         roles = ldap_obj.get_user_roles(username)
 
