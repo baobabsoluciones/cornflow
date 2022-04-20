@@ -10,19 +10,16 @@ from smtplib import SMTP_SSL, SMTPAuthenticationError, SMTPRecipientsRefused
 from cornflow_core.exceptions import InvalidData
 
 
-def get_email(text, subject, sender, receiver, **kwargs):
+def get_email(text: str, subject: str, sender: str, receiver: str):
     """
+    This method is used to get the email object needed for the send_email_to method.
 
-    :param text:
-    :type text:
-    :param subject:
-    :type subject:
-    :param sender:
-    :type sender:
-    :param receiver:
-    :type receiver:
-    :return:
-    :rtype:
+    :param str text: The text of the email as a html in plain text
+    :param str subject: The subject of the email
+    :param str sender: The email address from which the email is going to be sent
+    :param str receiver: The email address to receive the email
+    :return: The email as a string to be sent
+    :rtype: str
     """
 
     email = MIMEMultipart("alternative")
@@ -40,19 +37,19 @@ def get_email(text, subject, sender, receiver, **kwargs):
     return email.as_string()
 
 
-def get_password_recover_email(temp_password, service_name, sender, receiver, **kwargs):
+def get_password_recover_email(
+    temp_password: str, service_name: str, sender: str, receiver: str
+):
     """
+    This method is used to get the email object needed for the send_email_to method to sent a new password to a user
 
-    :param temp_password:
-    :type temp_password:
-    :param service_name:
-    :type service_name:
-    :param sender:
-    :type sender:
-    :param receiver:
-    :type receiver:
-    :return:
-    :rtype:
+    :param str temp_password: The temporal password to be sent.
+    :param str service_name: The name of the service that is sending the password that is going to appear
+    on the subject and on the body
+    :param str sender: The email address from which the email is going to be sent.
+    :param str receiver: The email address to receive the email.
+    :return: The email as a string to be sent
+    :rtype: str
     """
     text_template = f"""
     <html>
@@ -71,23 +68,20 @@ def get_password_recover_email(temp_password, service_name, sender, receiver, **
     return get_email(text_template, subject, sender, receiver)
 
 
-def send_email_to(email, smtp_server, port, sender, password, receiver, **kwargs):
+def send_email_to(
+    email: str, smtp_server: str, port: int, sender: str, password: str, receiver: str
+):
     """
+    This method sends an email
 
-    :param email:
-    :type email:
-    :param smtp_server:
-    :type smtp_server:
-    :param port:
-    :type port:
-    :param sender:
-    :type sender:
-    :param password:
-    :type password:
-    :param receiver:
-    :type receiver:
-    :return:
-    :rtype:
+    :param str email: The email to be sent
+    :param str smtp_server: The SMTP Server that has to send the email.
+    :param int port: The port of the SMTP Server.
+    :param str sender: The email address from which the email is going to be sent
+    :param str password: The password of the sender email address
+    :param str receiver: The email address to receive the email
+    :return: None
+    :rtype: None
     """
     with SMTP_SSL(smtp_server, port) as server:
         try:
