@@ -11,4 +11,5 @@ from .user import (
     LoginOpenAuthRequest,
     SignupRequest,
 )
+from .user_role import UserRoleRequest, UserRoleResponse
 from .view import ViewResponse
