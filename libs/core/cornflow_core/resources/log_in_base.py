@@ -18,6 +18,7 @@ from cornflow_core.exceptions import (
     InvalidUsage,
     EndpointNotImplemented,
 )
+from cornflow_core.models import UserBaseModel, UserRoleBaseModel
 from .meta_resource import BaseMetaResource
 from ..shared import db
 
@@ -29,9 +30,10 @@ class LoginBaseEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
+        self.data_model = UserBaseModel
         self.auth_class = BaseAuth
         self.ldap_class = LDAPBase
-        self.user_role_association = None
+        self.user_role_association = UserRoleBaseModel
 
     def log_in(self, **kwargs):
         auth_type = current_app.config["AUTH_TYPE"]

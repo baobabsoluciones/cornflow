@@ -11,14 +11,16 @@ from cornflow_core.exceptions import (
     InvalidCredentials,
     InvalidUsage,
 )
+from cornflow_core.models import UserBaseModel, UserRoleBaseModel
 from .meta_resource import BaseMetaResource
 
 
 class SignupBaseEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
+        self.data_model = UserBaseModel
         self.auth_class = BaseAuth
-        self.user_role_association = None
+        self.user_role_association = UserRoleBaseModel
 
     def sign_up(self, **kwargs):
         AUTH_TYPE = current_app.config["AUTH_TYPE"]

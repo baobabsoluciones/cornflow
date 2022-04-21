@@ -6,6 +6,7 @@ from flask import current_app
 
 from cornflow_core.exceptions import ConfigurationError
 from cornflow_core.messages import get_password_recover_email, send_email_to
+from cornflow_core.models import UserBaseModel
 from .meta_resource import BaseMetaResource
 
 
@@ -13,6 +14,10 @@ class RecoverPasswordBaseEndpoint(BaseMetaResource):
     """
     Endpoint to recover the password
     """
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserBaseModel
 
     def recover_password(self, email):
         """

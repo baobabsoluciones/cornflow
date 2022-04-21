@@ -11,19 +11,47 @@ from cornflow_core.shared import (
     check_password_pattern,
     check_email_pattern,
 )
+from . import UserRoleBaseModel
 from .meta_models import TraceAttributesModel
 from abc import abstractmethod
 
 
 class UserBaseModel(TraceAttributesModel):
-    # __abstract__ = True
+    """
+    Model class for the Users
+    It inherits from :class:`TraceAttributesModel` to have trace fields
+
+    The :class:`UserBaseModel` has the following fields:
+
+    - **id**: int, the primary key for the users, a integer value thar is auto incremented
+    - **first_name**: str, to store the first name of the user. Usually is an optional field.
+    - **last_name**: str, to store the last name of the user. Usually is and optional field.
+    - **username**: str, the username of the user, used for the log in.
+    - **password**: str, the hashed password stored on the database in the case that the authentication is done
+      with auth db. In other authentication methods this field is empty
+    - **email**: str, the email of the user, used to send emails in case of password recovery.
+    - **created_at**: datetime, the datetime when the user was created (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **updated_at**: datetime, the datetime when the user was last updated (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **deleted_at**: datetime, the datetime when the user was deleted (in UTC).
+      This field is used only if we deactivate instead of deleting the record.
+      This datetime is generated automatically, the user does not need to provide it.
+    """
+
     __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     first_name = db.Column(db.String(128), nullable=True)
     last_name = db.Column(db.String(128), nullable=True)
     username = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
+
+    user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
+
+    @property
+    def roles(self):
+        return {r.role.id: r.role.name for r in self.user_roles}
 
     def __init__(self, data):
         """
@@ -61,9 +89,9 @@ class UserBaseModel(TraceAttributesModel):
             data["password"] = new_password
         super().update(data)
 
-    def comes_from_ldap(self):
+    def comes_from_external_provider(self):
         """
-        Returns a boolean if the user comes from ldap or not
+        Returns a boolean if the user comes from an external_provider or not
         """
         return self.password is None
 
@@ -171,7 +199,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: if the user is an admin or not
         :rtype: bool
         """
-        raise NotImplemented
+        return UserRoleBaseModel.is_admin(self.id)
 
     @abstractmethod
     def is_service_user(self) -> bool:
@@ -181,7 +209,7 @@ class UserBaseModel(TraceAttributesModel):
         :return: if the user is a service_user or not
         :rtype: bool
         """
-        raise NotImplemented
+        return UserRoleBaseModel.is_service_user(self.id)
 
     def __repr__(self):
         """
