@@ -3,6 +3,7 @@
 """
 import random
 import string
+from abc import abstractmethod
 
 from cornflow_core.exceptions import InvalidCredentials
 from cornflow_core.shared import (
@@ -11,9 +12,8 @@ from cornflow_core.shared import (
     check_password_pattern,
     check_email_pattern,
 )
-from . import UserRoleBaseModel
 from .meta_models import TraceAttributesModel
-from abc import abstractmethod
+from .user_role import UserRoleBaseModel
 
 
 class UserBaseModel(TraceAttributesModel):
