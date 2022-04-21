@@ -6,9 +6,28 @@ from cornflow_core.shared import db
 
 
 class ActionBaseModel(EmptyBaseModel):
-    __abstract__ = True
+    """
+    Model to store the actions that can be performed over the REST API: get, patch, post, put, delete.
+    This model inherits from :class:`EmptyBaseModel` and does not have traceability
+
+    The fields for this model are:
+
+    - **id**:
+    - **name**:
+    """
+
+    __tablename__ = "actions"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
+
+    permissions = db.relationship(
+        "PermissionViewRoleBaseModel",
+        backref="actions",
+        lazy=True,
+        primaryjoin="and_(ActionBaseModel.id==PermissionViewRoleBaseModel.action_id, "
+        "PermissionViewRoleBaseModel.deleted_at==None)",
+        cascade="all,delete",
+    )
 
     def __repr__(self):
         return f"<Action {self.id}: {self.name}>"

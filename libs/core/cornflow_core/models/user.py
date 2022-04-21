@@ -47,7 +47,9 @@ class UserBaseModel(TraceAttributesModel):
     password = db.Column(db.String(128), nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
 
-    user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
+    user_roles = db.relationship(
+        "UserRoleBaseModel", cascade="all,delete", backref="users"
+    )
 
     @property
     def roles(self):

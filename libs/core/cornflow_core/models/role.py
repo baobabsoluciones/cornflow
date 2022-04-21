@@ -12,11 +12,20 @@ class RoleBaseModel(TraceAttributesModel):
     name = db.Column(db.String(128), nullable=False)
 
     user_roles = db.relationship(
-        "UserRoleModel",
+        "UserRoleBaseModel",
         backref="roles",
         lazy=True,
-        primaryjoin="and_(RoleModel.id==UserRoleModel.role_id, "
-        "UserRoleModel.deleted_at==None)",
+        primaryjoin="and_(RoleBaseModel.id==UserRoleBaseModel.role_id, "
+        "UserRoleBaseModel.deleted_at==None)",
+        cascade="all,delete",
+    )
+
+    permissions = db.relationship(
+        "PermissionViewRoleBaseModel",
+        backref="roles",
+        lazy=True,
+        primaryjoin="and_(RoleBaseModel.id==PermissionViewRoleBaseModel.role_id, "
+        "PermissionViewRoleBaseModel.deleted_at==None)",
         cascade="all,delete",
     )
 
