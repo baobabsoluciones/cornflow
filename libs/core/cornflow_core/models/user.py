@@ -3,7 +3,6 @@
 """
 import random
 import string
-from abc import abstractmethod
 
 from cornflow_core.exceptions import InvalidCredentials
 from cornflow_core.shared import (
@@ -193,7 +192,6 @@ class UserBaseModel(TraceAttributesModel):
         pwd = "".join(chars)
         return pwd
 
-    @abstractmethod
     def is_admin(self) -> bool:
         """
         This should return True or False if the user is an admin
@@ -203,7 +201,6 @@ class UserBaseModel(TraceAttributesModel):
         """
         return UserRoleBaseModel.is_admin(self.id)
 
-    @abstractmethod
     def is_service_user(self) -> bool:
         """
         This should return True or False if the user is a service user (type of user used for internal tasks)

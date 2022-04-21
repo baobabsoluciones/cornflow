@@ -7,5 +7,5 @@ from .action import ActionBaseModel
 from .permissions import PermissionViewRoleBaseModel
 from .role import RoleBaseModel
 from .user import UserBaseModel
-from .user_role import UserRoleABC, UserRoleBaseModel
+from .user_role import UserRoleBaseModel
 from .view import ViewBaseModel

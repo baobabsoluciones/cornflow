@@ -5,6 +5,6 @@ Expose the resources
 from .meta_resource import BaseMetaResource
 
 # Then the specific
-from .log_in_base import LoginBaseEndpoint
+from .log_in import LoginBaseEndpoint
 from .recover_password import RecoverPasswordBaseEndpoint
-from .sign_up_base import SignupBaseEndpoint
+from .sign_up import SignupBaseEndpoint
