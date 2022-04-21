@@ -52,7 +52,7 @@ from .roles import (
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
-
+from ..external_app import external_resources
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -164,4 +164,4 @@ resources = [
         urls="/user/recover-password/",
         endpoint="recover-password",
     ),
-]
+] + external_resources
