@@ -16,7 +16,8 @@ from abc import abstractmethod
 
 
 class UserBaseModel(TraceAttributesModel):
-    __abstract__ = True
+    # __abstract__ = True
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(128), nullable=True)
     last_name = db.Column(db.String(128), nullable=True)
