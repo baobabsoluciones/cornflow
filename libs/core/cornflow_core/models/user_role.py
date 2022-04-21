@@ -8,9 +8,7 @@ from cornflow_core.models import TraceAttributesModel
 from cornflow_core.shared import db
 
 
-class UserRoleAbstract(TraceAttributesModel):
-    __abstract__ = True
-
+class UserRoleABC(object):
     @abstractmethod
     def is_admin(self, user_id):
         raise NotImplemented
@@ -20,7 +18,7 @@ class UserRoleAbstract(TraceAttributesModel):
         raise NotImplemented
 
 
-class UserRoleBaseModel(UserRoleAbstract):
+class UserRoleBaseModel(TraceAttributesModel, UserRoleABC):
     """
     Model class for the relationship between user and roles. Which roles has a user assigned
 
