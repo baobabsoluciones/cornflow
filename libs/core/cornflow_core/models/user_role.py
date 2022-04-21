@@ -8,7 +8,19 @@ from cornflow_core.models import TraceAttributesModel
 from cornflow_core.shared import db
 
 
-class UserRoleBaseModel(TraceAttributesModel):
+class UserRoleAbstract(TraceAttributesModel):
+    __abstract__ = True
+
+    @abstractmethod
+    def is_admin(self, user_id):
+        raise NotImplemented
+
+    @abstractmethod
+    def is_service_user(cls, user_id):
+        raise NotImplemented
+
+
+class UserRoleBaseModel(UserRoleAbstract):
     """
     Model class for the relationship between user and roles. Which roles has a user assigned
 
@@ -36,7 +48,6 @@ class UserRoleBaseModel(TraceAttributesModel):
         self.role_id = data.get("role_id")
 
     @classmethod
-    @abstractmethod
     def is_admin(cls, user_id):
         """
         Method that checks if a given user has the admin role assigned
@@ -53,7 +64,6 @@ class UserRoleBaseModel(TraceAttributesModel):
         return False
 
     @classmethod
-    @abstractmethod
     def is_service_user(cls, user_id):
         """
         Method that checks if a given user has the service role assigned
