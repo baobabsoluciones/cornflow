@@ -1,5 +1,5 @@
 """
-
+This file implements the class that handles the LDAP connection to authenticate the user on log in.
 """
 
 # Import from libraries

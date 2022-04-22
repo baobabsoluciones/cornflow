@@ -1,3 +1,6 @@
+"""
+This file contains the constants related to the roles of the REST API.
+"""
 VIEWER_ROLE = 1
 PLANNER_ROLE = 2
 ADMIN_ROLE = 3

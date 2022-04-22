@@ -8,3 +8,6 @@ from .meta_resource import BaseMetaResource
 from .log_in import LoginBaseEndpoint
 from .recover_password import RecoverPasswordBaseEndpoint
 from .sign_up import SignupBaseEndpoint
+
+
+base_resources = []

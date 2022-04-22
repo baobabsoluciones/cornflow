@@ -2,7 +2,7 @@
 THIS FILE CONTAINS THE CONSTANTS RELATED WITH THE AUTH PROCESS
 """
 
-# These codes and names are inherited from flask appbuilder in order to have the same names and values
+# These codes and names are inherited from flask app-builder in order to have the same names and values
 # as this library that is the base of airflow
 AUTH_DB = 1
 AUTH_LDAP = 2
