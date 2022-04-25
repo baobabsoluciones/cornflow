@@ -4,3 +4,4 @@ flask_sqlalchemy
 marshmallow
 pytups
 sqlalchemy
+cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=libs/core

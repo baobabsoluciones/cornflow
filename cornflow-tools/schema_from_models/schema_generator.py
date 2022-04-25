@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 import shutil
 from pytups import TupList, SuperDict
 from sqlalchemy.dialects.postgresql import TEXT, JSON
+from sqlalchemy.sql.sqltypes import Integer
 
 
 class SchemaGenerator:
@@ -58,16 +59,7 @@ class SchemaGenerator:
             with open(file_path, "w") as fd:
                 fd.write(text)
 
-        mymodule = MagicMock()
-        db = SQLAlchemy()
-        mymodule.db.Column = db.Column
-        mymodule.db.String.return_value = "string"
-        mymodule.db.Integer = "integer"
-        mymodule.db.SmallInteger = "integer"
-        mymodule.db.Float = "number"
-        mymodule.db.Boolean = "boolean"
-        mymodule.db.ForeignKey = db.ForeignKey
-        sys.modules["mockedpackage"] = mymodule
+        sys.modules["mockedpackage"] = MagicMock()
 
     def parse(self, files):
         forget_keys = ["created_at", "updated_at", "deleted_at"]
@@ -79,11 +71,24 @@ class SchemaGenerator:
 
             models = SuperDict(mod.__dict__).kfilter(lambda k: k in self.parents)
             for model in models:
-                props = mod.__dict__[model].__dict__["_mock_return_value"]
-                if not isinstance(
-                    mod.__dict__[model].__dict__["_mock_return_value"], dict
-                ):
-                    continue
+                if isinstance(models[model], MagicMock):
+                    # Models that inherit from other models that are relatively imported
+                    if not isinstance(
+                            mod.__dict__[model]._mock_return_value, dict
+                    ):
+                        continue
+                    props = mod.__dict__[model]._mock_return_value
+                elif mod.__dict__[model].__dict__.get('__abstract__'):
+                    # BaseDataModel
+                    props = mod.__dict__[model].__dict__
+                    self.parents[model] = None
+                else:
+                    # Models that inherit from other models that are imported from libraries
+                    self.parents[model] = None
+                    tmp = mod.__dict__[model].__dict__
+                    props = {'__tablename__': tmp.get('__tablename__')}
+                    for col in tmp['__table__']._columns:
+                        props[col.__dict__['key']] = next(iter(col.proxy_set))
                 table_name = props.get("__tablename__", model)
                 self.data[table_name] = SuperDict(
                     type="array", items=dict(properties=dict(), required=[])
@@ -95,21 +100,33 @@ class SchemaGenerator:
                 for key, val in props.items():
                     if key in forget_keys:
                         continue
-                    if isinstance(val, db.Column):
-                        type_col = val.name or val.type
-                        if isinstance(type_col, TEXT):
-                            type_col = "string"
-                        if isinstance(type_col, JSON):
-                            type_col = "object"
+                    elif isinstance(val, db.Column):
+                        type_converter = {
+                            db.String: 'string',
+                            TEXT: 'string',
+                            JSON: 'object',
+                            Integer: 'integer',
+                            db.Integer: 'integer',
+                            db.Boolean: 'boolean',
+                            db.SmallInteger: "integer",
+                            db.Float: "number"
+                        }
+                        type_col = 'null'
+                        for possible_type, repr_type in type_converter.items():
+                            if isinstance(val.type, possible_type):
+                                type_col = repr_type
+                        if type_col == 'null':
+                            raise Exception('Unknown column type')
+
                         self.data[table_name]["items"]["properties"][key] = SuperDict(
                             type=type_col
                         )
-                        if val.__dict__["foreign_keys"]:
-                            fk = list(val.__dict__["foreign_keys"])[0]
+                        if val.foreign_keys:
+                            fk = list(val.foreign_keys)[0]
                             self.data[table_name]["items"]["properties"][key][
                                 "foreign_key"
-                            ] = fk.__dict__["_colspec"]
-                        if not val.__dict__["nullable"]:
+                            ] = fk._colspec
+                        if not val.nullable:
                             self.data[table_name]["items"]["required"].append(key)
 
     def inherit(self):
@@ -119,6 +136,9 @@ class SchemaGenerator:
         while not_treated:
             for model in not_treated:
                 parent = self.parents[model]
+                if parent is None:
+                    treated.add(model)
+                    continue
                 if parent not in treated:
                     continue
                 treated.add(model)
@@ -132,7 +152,7 @@ class SchemaGenerator:
                     "required"
                 ]
                 self.data[table_name]["items"]["properties"] = SuperDict(
-                    **self.data[table_name]["items"]["properties"], **parent_props
+                    **parent_props, **self.data[table_name]["items"]["properties"]
                 )
                 self.data[table_name]["items"]["required"] += parent_requirements
             not_treated -= treated

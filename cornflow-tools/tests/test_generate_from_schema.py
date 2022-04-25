@@ -5,17 +5,13 @@ import os
 import sys
 import json
 import shutil
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import TEXT, JSON
+from sqlalchemy.sql.sqltypes import Integer
 from pytups import TupList, SuperDict
-from .mocks import MockColumn
+from cornflow_core.models import TraceAttributesModel
 
-
-mymodule = MagicMock()
-mymodule.db.Column = MockColumn
-mymodule.db.String.return_value = 'string'
-mymodule.db.Integer = 'integer'
-mymodule.db.Float = 'number'
-mymodule.db.Boolean = 'boolean'
-sys.modules['mockedpackage'] = mymodule
+sys.modules['mockedpackage'] = MagicMock()
 
 
 class GenerationTests(unittest.TestCase):
@@ -30,6 +26,7 @@ class GenerationTests(unittest.TestCase):
         self.one_tab_inst_path = "./tests/data/one_table.json"
         self.one_tab_inst = SuperDict.from_dict(self.import_schema(self.one_tab_inst_path))
         self.app_name = "test"
+        self.second_app_name = "test_sec"
         self.default_output_path = "./output"
         self.other_output_path = "./output_path"
         self.last_path = self.default_output_path
@@ -76,15 +73,18 @@ class GenerationTests(unittest.TestCase):
         self.check(instance=instance, output_path=self.other_output_path)
 
     def test_remove_method(self):
-        command = f"python generate_from_schema {self.full_inst_path} {self.app_name}"
+        command = f"python generate_from_schema {self.full_inst_path} {self.second_app_name}"
         command += f" --output_path {self.other_output_path}"
         command += f" --remove_methods deleteOne update getOne"
         os.system(command)
         include_methods = self.all_methods.vfilter(lambda v: v not in ['deleteOne', 'update', 'getOne'])
         self.last_path = self.other_output_path
-        self.check(output_path=self.other_output_path, include_methods=include_methods)
+        self.check(output_path=self.other_output_path, include_methods=include_methods, app_name=self.second_app_name)
 
-    def check(self, instance=None, output_path=None, include_methods=None):
+    def check(self, instance=None, output_path=None, include_methods=None, app_name=None):
+        if app_name is None:
+            app_name = self.app_name
+        db = SQLAlchemy()
         instance = instance or self.full_inst
         output_path = output_path or self.default_output_path
         include_methods = include_methods or self.all_methods
@@ -105,7 +105,7 @@ class GenerationTests(unittest.TestCase):
         # Checks that each file has been created
         created_dirs = created_dirs[1:4]
         files = instance["properties"].keys_tl().vapply(
-            lambda v: (self.app_name + "_" + v + ".py", v)
+            lambda v: (app_name + "_" + v + ".py", v)
         )
         absolute_paths = [
             os.path.join(path, file)
@@ -128,14 +128,13 @@ class GenerationTests(unittest.TestCase):
                 ]
                 for package in packages_to_mock:
                     txt = txt.replace(package, 'mockedpackage')
-                txt = txt.replace('MetaResource, MethodResource', 'MethodResource')
 
                 with open(path_file, 'w') as fd:
                     fd.write(txt)
 
         # Checks that the models have the correct methods and attributes
         for file, table in files:
-            class_name = self.snake_to_camel(self.app_name + "_" + table + "_model")
+            class_name = self.snake_to_camel(app_name + "_" + table + "_model")
             file_path = os.path.join(models_dir, file)
             spec = importlib.util.spec_from_file_location(
                 class_name,
@@ -143,46 +142,58 @@ class GenerationTests(unittest.TestCase):
             )
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
+
+            # Checks correct inheritance
+
+            self.assertTrue(issubclass(mod.__dict__[class_name], TraceAttributesModel))
+
+            # Checks that the all the columns are declared, have the correct type
             props_and_methods = (
                 mod
-                .__dict__[class_name]
-                .__dict__["_mock_return_value"]
+                .__dict__[class_name].__dict__
             )
-            # Checks that the all the columns are declared, have the correct type
+            props = dict()
+            for col in props_and_methods['__table__']._columns:
+                props[col.key] = next(iter(col.proxy_set))
+
             expected_prop = instance['properties'][table]['items']['properties']
             for prop in expected_prop:
-                self.assertIn(prop, props_and_methods)
+                self.assertIn(prop, props)
                 types = expected_prop[prop]['type']
                 if isinstance(types, list):
                     types = TupList(types).vfilter(lambda v: v != 'null')[0]
-                self.assertEqual(types, props_and_methods[prop].type_col)
+
+                type_converter = {
+                    db.String: 'string',
+                    TEXT: 'string',
+                    JSON: 'object',
+                    Integer: 'integer',
+                    db.Integer: 'integer',
+                    db.Boolean: 'boolean',
+                    db.SmallInteger: "integer",
+                    db.Float: "number"
+                }
+                actual_type = 'null'
+                for possible_type, repr_type in type_converter.items():
+                    if isinstance(props[prop].type, possible_type):
+                        actual_type = repr_type
+
+                self.assertEqual(types, actual_type)
             # Checks that all the methods are declared
             expected_methods = [
                 '__init__',
-                'get_one_object',
-                'get_all_objects',
-                'update',
-                'delete_all',
                 '__repr__',
                 '__str__'
             ]
             expected_methods = set(expected_methods)
-            methods_to_remove = {
-                'update': 'update',
-                'deleteAll': 'delete_all'
-            }
-            for method_cmd, method in methods_to_remove.items():
-                if method_cmd not in include_methods:
-                    expected_methods -= {method}
-
             for method in expected_methods:
                 self.assertIn(method, props_and_methods.keys())
 
         # Checks that the schemas have the correct methods and attributes
         for file, table in files:
-            mod_name = self.snake_to_camel(self.app_name + "_" + table + "_schema")
+            mod_name = self.snake_to_camel(app_name + "_" + table + "_schema")
             class_names = [
-                self.snake_to_camel(self.app_name + "_" + table + "_" + type_schema)
+                self.snake_to_camel(app_name + "_" + table + "_" + type_schema)
                 for type_schema in ["response", "edit_request", "post_request"]
             ]
             file_path = os.path.join(schemas_dir, file)
@@ -196,7 +207,7 @@ class GenerationTests(unittest.TestCase):
             # Checks that all the schemas are created
             for class_name in class_names:
                 self.assertIn(class_name, existing_classes)
-                props = mod.__dict__[class_name].__dict__["_declared_fields"]
+                props = mod.__dict__[class_name]._declared_fields
                 # Checks that the classes have all the attributes
                 expected_prop = instance['properties'][table]['items']['properties']
                 expected_prop = TupList(expected_prop).vfilter(lambda v: v != 'id')
@@ -205,11 +216,11 @@ class GenerationTests(unittest.TestCase):
 
         # Checks that the endpoints have all the methods
         for file, table in files:
-            mod_name = self.snake_to_camel(self.app_name + "_" + table + "_endpoint")
-            class_names = [self.snake_to_camel(self.app_name + "_" + table + "_endpoint")]
+            mod_name = self.snake_to_camel(app_name + "_" + table + "_endpoint")
+            class_names = [self.snake_to_camel(app_name + "_" + table + "_endpoint")]
             if 'getOne' in include_methods or 'deleteOne' in include_methods or 'update' in include_methods:
                 class_names.append(
-                    self.snake_to_camel(self.app_name + "_" + table + "_details_endpoint")
+                    self.snake_to_camel(app_name + "_" + table + "_details_endpoint")
                 )
             file_path = os.path.join(endpoints_dir, file)
             spec = importlib.util.spec_from_file_location(
@@ -240,7 +251,7 @@ class GenerationTests(unittest.TestCase):
             props_and_methods = (
                 mod
                 .__dict__[class_names[0]]
-                .__dict__['methods']
+                .methods
             )
             for method_name in include_methods_e1:
                 self.assertIn(api_methods[method_name], props_and_methods)
@@ -255,7 +266,7 @@ class GenerationTests(unittest.TestCase):
                 props_and_methods = (
                     mod
                     .__dict__[class_names[1]]
-                    .__dict__['methods']
+                    .methods
                 )
                 for method_name in include_methods_e2:
                     self.assertIn(api_methods[method_name], props_and_methods)

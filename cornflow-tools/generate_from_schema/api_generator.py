@@ -73,7 +73,7 @@ class APIGenerator:
     def new_model(self, table_name):
         filename = os.path.join(self.model_path, self.name + "_" + table_name + ".py")
         class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
-        parents_class = ["TraceAttributes"]
+        parents_class = ["TraceAttributesModel"]
         mg = ModelGenerator(
             class_name, self.schema, parents_class, table_name, self.name
         )
@@ -89,16 +89,6 @@ class APIGenerator:
             fd.write("\n")
             fd.write(mg.generate_model_init())
             fd.write("\n")
-            fd.write(mg.generate_model_get_one())
-            fd.write("\n")
-            fd.write(mg.generate_model_get_all())
-            fd.write("\n")
-            if "update" in self.options or "all" in self.options:
-                fd.write(mg.generate_model_update())
-                fd.write("\n")
-            if "deleteAll" in self.options or "all" in self.options:
-                fd.write(mg.generate_model_delete_all())
-                fd.write("\n")
             fd.write(mg.generate_model_repr_str())
             fd.write("\n")
         return class_name
@@ -111,7 +101,7 @@ class APIGenerator:
         class_name_details = self.snake_to_camel(
             self.name + "_" + table_name + "_details_endpoint"
         )
-        parents_class = "MetaResource", "MethodResource"
+        parents_class = ["BaseMetaResource"]
         roles_with_access = ["SERVICE_ROLE"]
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
         with open(filename, "w") as fd:

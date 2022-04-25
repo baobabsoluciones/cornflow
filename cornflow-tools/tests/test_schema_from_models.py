@@ -33,6 +33,7 @@ class SchemaFromModelsTests(unittest.TestCase):
                 'id': 'string',
                 'data': 'object',
                 'checks': 'object',
+                'name': 'string',
                 'description': 'string'
             },
             'actions': {
@@ -44,7 +45,7 @@ class SchemaFromModelsTests(unittest.TestCase):
                 'dag_id': 'string',
                 'user_id': 'integer'
             },
-            'permission_view': {
+            'permissions_view': {
                 'id': 'integer',
                 'action_id': 'integer',
                 'api_view_id': 'integer',
@@ -55,8 +56,8 @@ class SchemaFromModelsTests(unittest.TestCase):
         foreign_keys = [
             ('permission_dag', 'dag_id', 'deployed_dags.id'),
             ('permission_dag', 'user_id', 'users.id'),
-            ('permission_view', 'action_id', 'actions.id'),
-            ('permission_view', 'api_view_id', 'api_view.id')
+            ('permissions_view', 'action_id', 'actions.id'),
+            ('permissions_view', 'api_view_id', 'api_view.id')
         ]
         for tab_name, tab_checks in tables.items():
             # All tables exist

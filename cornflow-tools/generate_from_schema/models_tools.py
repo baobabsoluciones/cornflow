@@ -1,8 +1,8 @@
 # Models
 model_shared_imports = (
-    "# Import from internal modules\n"
-    "from ..shared.utils import db\n"
-    "from .meta_model import TraceAttributes\n\n"
+    "# Import from libraries\n"
+    "from cornflow_core.shared import db\n"
+    "from cornflow_core.models import TraceAttributesModel\n\n"
 )
 SP8 = 8 * " "
 SP12 = 12 * " "
@@ -112,7 +112,7 @@ class ModelGenerator:
         res += SP8 + f":return: The representation of the :class:`{self.class_name}`\n"
         res += SP8 + ":rtype: str\n"
         res += SP8 + '"""\n'
-        res += SP8 + f"return '{self.table_name.title()} ' + str(self.id)\n\n"
+        res += SP8 + f"return '<{self.table_name.title()} ' + str(self.id) + '>'\n\n"
 
         res += "    def __str__(self):\n"
         res += SP8 + '"""\n'
@@ -123,34 +123,5 @@ class ModelGenerator:
         res += SP8 + f":return: The representation of the :class:`{self.class_name}`\n"
         res += SP8 + ":rtype: str\n"
         res += SP8 + '"""\n'
-        res += SP8 + f"return '{self.table_name.title()} ' + str(self.id)\n"
-        return res
-
-    def generate_model_get_one(self):
-        res = "    @staticmethod\n"
-        res += "    def get_one_object(idx):\n"
-        res += SP8 + f"return {self.class_name}.query.get(idx)\n"
-
-        return res
-
-    def generate_model_get_all(self):
-        res = "    @staticmethod\n"
-        res += "    def get_all_objects():\n"
-        res += SP8 + f"return {self.class_name}.query.all()\n"
-        return res
-
-    @staticmethod
-    def generate_model_update():
-        res = "    def update(self, data):\n"
-        res += SP8 + "for key, item in data.items():\n"
-        res += SP12 + "setattr(self, key, item)\n"
-        res += SP8 + "super().update(data)\n"
-        return res
-
-    def generate_model_delete_all(self):
-        res = "    @staticmethod\n"
-        res += "    def delete_all():\n"
-        res += SP8 + f"objects = {self.class_name}.get_all_objects()\n"
-        res += SP8 + f"for obj in objects:\n"
-        res += SP12 + "obj.delete()\n"
+        res += SP8 + f"return self.__repr__()"
         return res

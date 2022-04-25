@@ -1,14 +1,14 @@
 """
-
 """
-from .meta_model import EmptyModel
-from ..shared.utils import db
+from cornflow_core.models import ActionBaseModel
+
+# from .meta_model import EmptyModel
+from cornflow_core.shared import db
 
 
-class ActionModel(EmptyModel):
+class ActionModel(ActionBaseModel):
     """
     This model contains the base actions over the REST API. These are:
-
     * can get
     * can patch
     * can post
@@ -18,9 +18,6 @@ class ActionModel(EmptyModel):
 
     __tablename__ = "actions"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
-
     permissions = db.relationship(
         "PermissionViewRoleModel",
         backref="actions",
@@ -29,14 +26,3 @@ class ActionModel(EmptyModel):
         "PermissionViewRoleModel.deleted_at==None)",
         cascade="all,delete",
     )
-
-    def __repr__(self):
-        return str(self.id) + ": " + self.name
-
-    @staticmethod
-    def get_all_objects():
-        return ActionModel.query.all()
-
-    @staticmethod
-    def get_one_object(idx):
-        return ActionModel.query.get(idx)

@@ -4,17 +4,15 @@
 import hashlib
 
 # Imported from internal models
-from .meta_model import BaseDataModel
-from ..shared.utils import db
+from .base_data_model import BaseDataModel
+from cornflow_core.shared import db
 
 
 class InstanceModel(BaseDataModel):
     """
     Model class for the Instances
     It inherits from :class:`BaseDataModel` to have the trace fields and user field
-
     The :class:`InstanceModel` has the following fields:
-
     - **id**: int, the primary key for the executions, a hash generated upon creation of the instance
       and the id given back to the user.The hash is generated from the creation time and the user id.
     - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
@@ -61,17 +59,15 @@ class InstanceModel(BaseDataModel):
     def __repr__(self):
         """
         Method to represent the class :class:`InstanceModel`
-
         :return: The representation of the :class:`InstanceModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return f"<Instance {self.id}>"
 
     def __str__(self):
         """
         Method to print a string representation of the :class:`InstanceModel`
-
         :return: The string for the :class:`InstanceModel`
         :rtype: str
         """
-        return "<id {}>".format(self.id)
+        return self.__repr__()
