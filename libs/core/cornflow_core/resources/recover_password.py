@@ -40,7 +40,8 @@ class RecoverPasswordBaseEndpoint(BaseMetaResource):
 
         message = "The password recovery process has started. Check the email inbox."
 
-        if not self.data_model.check_email_in_use(receiver):
+        user_obj = self.data_model({"email": receiver})
+        if not user_obj.check_email_in_use():
             return {"message": message}, 200
 
         new_password = self.data_model.generate_random_password()

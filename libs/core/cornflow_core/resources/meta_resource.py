@@ -1,14 +1,23 @@
+"""
+This file has all the logic shared for all the resources
+"""
+# Import from python standard libraries
 from functools import wraps
 
+# Import from external libraries
 from flask_restful import Resource
 from flask import g, request
 from flask_apispec.views import MethodResource
 
+# Import from internal modules
 from cornflow_core.constants import ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
 class BaseMetaResource(Resource, MethodResource):
+    """
+    The base resource from all methods inherit from.
+    """
 
     DESCRIPTION = ""
     ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
@@ -27,12 +36,31 @@ class BaseMetaResource(Resource, MethodResource):
     """
 
     def get_list(self, **kwargs):
+        """
+        Method to GET all objects
+
+        :param kwargs: the keyword arguments to filter.
+        :return: the list of objects
+        """
         return self.data_model.get_all_objects(**kwargs)
 
     def get_detail(self, **kwargs):
+        """
+        Method to GET one object
+
+        :param kwargs: the keyword arguments to filter
+        :return: the specific object
+        """
         return self.data_model.get_one_object(**kwargs)
 
     def post_list(self, data, trace_field="user_id"):
+        """
+        Method to POST one object
+
+        :param dict data: the data to create a new object
+        :param str trace_field: the field that tracks the used that created the object
+        :return: the newly created item and a status code
+        """
         data = dict(data)
         data[trace_field] = self.get_user_id()
         item = self.data_model(data)
@@ -47,6 +75,14 @@ class BaseMetaResource(Resource, MethodResource):
         return item, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
+        """
+        Method to PUT one object
+
+        :param dict data: a dict with the data used for updating the object
+        :param bool track_user: a control value if the user has to be updated or not
+        :param kwargs: the keyword arguments to identify the object
+        :return: a message if everything went well and a status code.
+        """
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
@@ -61,6 +97,14 @@ class BaseMetaResource(Resource, MethodResource):
         return {"message": "Updated correctly"}, 200
 
     def patch_detail(self, data, track_user: bool = True, **kwargs):
+        """
+        Method to PATCH one object
+
+        :param dict data: a dict with the data used for updating the object
+        :param bool track_user: a control value if the user has to be updated or not
+        :param kwargs: the keyword arguments to identify the object
+        :return: a message if everything went well and a status code.
+        """
         item = self.data_model.get_one_object(**kwargs)
 
         if item is None:
@@ -76,6 +120,12 @@ class BaseMetaResource(Resource, MethodResource):
         return {"message": "Patched correctly"}, 200
 
     def delete_detail(self, **kwargs):
+        """
+        Method to DELETE an object from the database
+
+        :param kwargs: the keyword arguments to identify the object
+        :return: a message if everything went well and a status code.
+        """
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
@@ -91,9 +141,18 @@ class BaseMetaResource(Resource, MethodResource):
     """
 
     def disable_detail(self):
-        pass
+        """
+        Method not implemented yet
+        """
+        raise NotImplemented
 
     def activate_detail(self, **kwargs):
+        """
+        Method to activate a deactivated object
+
+        :param kwargs: the keyword arguments to identify the object
+        :return: the object and a status code.
+        """
         item = self.data_model.get_one_object(**kwargs)
         item.activate()
         return item, 200
@@ -103,6 +162,12 @@ class BaseMetaResource(Resource, MethodResource):
     """
 
     def get_user(self):
+        """
+        Method to get the user from the request or from the application context
+
+        :return: the user object
+        :rtype: :class:`UserBaseModel`
+        """
         if self.user is None:
             try:
                 self.user = g.user
@@ -113,10 +178,18 @@ class BaseMetaResource(Resource, MethodResource):
         return self.user
 
     def get_user_id(self):
+        """
+        Method to get the user id from the request or from the application context
+
+        :return: the user id
+        :rtype: int
+        """
         return self.get_user().id
 
     def is_admin(self):
         """
+        Method that returns a boolean value if the user is an admin
+
         :return: if user is admin
         :rtype: bool
         """
@@ -124,6 +197,8 @@ class BaseMetaResource(Resource, MethodResource):
 
     def is_service_user(self):
         """
+        Method that returns a boolean value if the user is a service user
+
         :return: if user is service user
         :rtype: bool
         """
@@ -132,13 +207,18 @@ class BaseMetaResource(Resource, MethodResource):
     @staticmethod
     def get_data_or_404(func):
         """
-        Auth decorator
-        :param func:
-        :return:
+        Decorator to get back a 404 if there is not data
         """
 
         @wraps(func)
         def decorated_func(*args, **kwargs):
+            """
+            The function being decorated
+
+            :param args: the arguments of the decorated function
+            :param kwargs: the keyword arguments of the decorated function
+            :return: the result of the decorated function or it raises an exception of type :class:`ObjectDoesNotExist`
+            """
             data = func(*args, **kwargs)
             if data is None:
                 raise ObjectDoesNotExist()

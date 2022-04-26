@@ -90,7 +90,7 @@ class InvalidData(InvalidUsage):
 
 class CommunicationError(InvalidUsage):
     """
-    Exception used when there is a communication error between the REST API server and other thrid aprty components.
+    Exception used when there is a communication error between the REST API server and other third party components.
     """
 
     status_code = 400
@@ -117,11 +117,10 @@ class ConfigurationError(InvalidUsage):
 
 def initialize_errorhandlers(app):
     """
+    Function to register the different error handlers
 
-    :param app:
-    :type app:
-    :return:
-    :rtype:
+    :param app: the flask app where the errors have to be registered
+    :return: the app after registering the error handlers
     """
 
     @app.errorhandler(InvalidUsage)
@@ -136,10 +135,11 @@ def initialize_errorhandlers(app):
     def handle_invalid_usage(error):
         """
         Method to handle the error given by the different exceptions.
-        :param error:
-        :type error:
-        :return:
-        :rtype:
+
+        :param error: the raised error
+        :type error: `InvalidUsage`
+        :return: an HTTP response
+        :rtype: `Response`
         """
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
@@ -151,7 +151,8 @@ def initialize_errorhandlers(app):
 # This error handler is necessary for usage with Flask-RESTful
 @parser.error_handler
 def handle_request_parsing_error(err, req, schema, *, error_status_code, error_headers):
-    """webargs error handler that uses Flask-RESTful's abort function to return
+    """
+    webargs error handler that uses Flask-RESTful's abort function to return
     a JSON error response to the client.
     """
     raise InvalidUsage(

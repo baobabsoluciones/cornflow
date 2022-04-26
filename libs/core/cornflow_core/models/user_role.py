@@ -1,7 +1,6 @@
 """
 Model for the relationship between users and roles
 """
-from abc import abstractmethod
 
 from cornflow_core.constants import ADMIN_ROLE, SERVICE_ROLE
 from cornflow_core.models import TraceAttributesModel
@@ -11,7 +10,20 @@ from cornflow_core.shared import db
 class UserRoleBaseModel(TraceAttributesModel):
     """
     Model class for the relationship between user and roles. Which roles has a user assigned
+    It inherits from :class:`TraceAttributesModel` to have trace fields
 
+    The :class:`UserRoleBaseModel` has the following fields:
+
+    - **id**: int, the primary key of the assignation, an integer value that is auto incremented
+    - **user_id**: the id of the user.
+    - **role_id**: the id of the assigned role.
+    - **created_at**: datetime, the datetime when the user was created (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **updated_at**: datetime, the datetime when the user was last updated (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **deleted_at**: datetime, the datetime when the user was deleted (in UTC).
+      This field is used only if we deactivate instead of deleting the record.
+      This datetime is generated automatically, the user does not need to provide it.
     """
 
     __tablename__ = "user_role"

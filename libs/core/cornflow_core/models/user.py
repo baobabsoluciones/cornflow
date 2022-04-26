@@ -1,5 +1,5 @@
 """
-
+This file contains the UserBaseModel
 """
 import random
 import string
@@ -52,14 +52,12 @@ class UserBaseModel(TraceAttributesModel):
 
     @property
     def roles(self):
+        """
+        This property gives back the roles assigned to the user
+        """
         return {r.role.id: r.role.name for r in self.user_roles}
 
     def __init__(self, data):
-        """
-
-        :param data:
-        :type data:
-        """
         super().__init__()
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
@@ -155,7 +153,8 @@ class UserBaseModel(TraceAttributesModel):
     def get_one_user_by_username(cls, username):
         """
         Returns one user (object) given a username
-        :param str username: the user username that we are quering with
+
+        :param str username: the user username that we want to query for
         :return: the user object
         :rtype: :class:`UserModel`
         """
@@ -164,6 +163,7 @@ class UserBaseModel(TraceAttributesModel):
     def check_username_in_use(self):
         """
         Checks if a username is already in use
+
         :return: a boolean if the username is in use
         :rtype: bool
         """
@@ -172,13 +172,20 @@ class UserBaseModel(TraceAttributesModel):
     def check_email_in_use(self):
         """
         Checks if a email is already in use
+
         :return: a boolean if the username is in use
         :rtype: bool
         """
         return self.query.filter_by(email=self.email).first() is not None
 
     @staticmethod
-    def generate_random_password():
+    def generate_random_password() -> str:
+        """
+        Method to generate a new random password for the user
+
+        :return: the newly generated password
+        :rtype: str
+        """
         nb_lower = random.randint(1, 9)
         nb_upper = random.randint(10 - nb_lower, 11)
         nb_numbers = random.randint(1, 3)

@@ -61,7 +61,7 @@ class LDAPBase:
         conn = self.get_bound_connection()
         user_search = self.get_dn_from_user(user)
 
-        user_object = "(objectclass={})".format(self.config["LDAP_USER_OBJECT_CLASS"])
+        user_object = f"(objectclass={self.config['LDAP_USER_OBJECT_CLASS']})"
 
         conn.search(user_search, user_object, attributes=[attribute])
 
@@ -95,6 +95,7 @@ class LDAPBase:
         """
         # Reference:
         # https://stackoverflow.com/questions/51341936/how-to-get-groups-of-a-user-in-ldap
+
         conn = self.get_bound_connection()
         user_search = self.get_dn_from_user(user)
         group_search = self.config["LDAP_GROUP_BASE"]
@@ -105,6 +106,7 @@ class LDAPBase:
         conn.search(group_search, search_filter=search_filter, attributes=["cn"])
         if not len(conn.entries):
             return []
+
         # first element is the cn string, the second is the USER_BASE
         # we only want the cn string
         roles = [el.cn[0] for el in conn.entries]

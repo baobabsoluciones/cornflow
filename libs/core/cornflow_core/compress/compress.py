@@ -11,27 +11,22 @@ def compressed(f):
     """
     Decorator to make a view compressed
     :param callable f: function to be compressed
-    :return:
-    :rtype:
     """
 
     @functools.wraps(f)
     def view_func(*args, **kwargs):
         """
 
-        :param args:
-        :param kwargs:
-        :return:
-        :rtype:
+        :param args: the original args sent to the decorated function
+        :param kwargs: the original kwargs sent to the decorated function
         """
 
         def compressor(response):
             """
+            Function executed in the decorator
 
-            :param response:
-            :type response:
-            :return:
-            :rtype:
+            :param response: the response given by the decorated function (an HTTP response)
+            :return: the response compressed
             """
             compress = current_app.extensions["compress"]
             return compress.after_request(response)

@@ -1,5 +1,5 @@
 """
-
+This file contains the model that has the actions that can be performed on an REST API endpoint
 """
 from cornflow_core.models import EmptyBaseModel
 from cornflow_core.shared import db
@@ -12,8 +12,8 @@ class ActionBaseModel(EmptyBaseModel):
 
     The fields for this model are:
 
-    - **id**:
-    - **name**:
+    - **id**: an integer value to represent the action
+    - **name**: a string to give meaning to the action ('get', 'patch', 'post', 'put', 'delete')
     """
 
     __tablename__ = "actions"

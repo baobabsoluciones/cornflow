@@ -1,7 +1,6 @@
 """
 This file contains the view model
 """
-from typing import Union
 
 from sqlalchemy.dialects.postgresql import TEXT
 
@@ -16,10 +15,10 @@ class ViewBaseModel(EmptyBaseModel):
 
     The fields of the model are:
 
-    - **id**:
-    - **name**:
-    - **url_rule**:
-    - **description**:
+    - **id**: int, the primary key of the table, an integer value that is auto incremented
+    - **name**: str, the name of the view
+    - **url_rule**: str, the rule for the url
+    - **description**: the description of the view
     """
 
     __tablename__ = "api_view"
@@ -53,7 +52,7 @@ class ViewBaseModel(EmptyBaseModel):
         return self.__repr__()
 
     @classmethod
-    def get_one_by_name(cls, name: str) -> Union[None, "ViewBaseModel"]:
+    def get_one_by_name(cls, name: str):
         """
         This methods queries the model to search for a view with a given name.
 

@@ -7,6 +7,10 @@ from marshmallow import fields, Schema
 
 
 class PermissionViewRoleBaseRequest(Schema):
+    """
+    Schema used for the permissions
+    """
+
     action_id = fields.Int()
     role_id = fields.Int()
     api_view_id = fields.Int()
@@ -27,6 +31,10 @@ class PermissionViewRoleBaseResponse(Schema):
 
 
 class PermissionViewRoleBaseEditRequest(Schema):
+    """
+    Schema used for the edition request of the permissions
+    """
+
     action_id = fields.Int(required=False)
     action = fields.Function(
         lambda obj: obj.action.name.replace("_", " "), required=False

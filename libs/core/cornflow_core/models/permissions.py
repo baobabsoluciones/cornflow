@@ -1,5 +1,5 @@
 """
-
+This file contains the PermissionViewRoleBaseModel
 """
 
 from cornflow_core.models import TraceAttributesModel
@@ -7,7 +7,25 @@ from cornflow_core.shared import db
 
 
 class PermissionViewRoleBaseModel(TraceAttributesModel):
-    """ """
+    """
+    This model has the permissions that can be defined between an action, a view and a role
+    It inherits from :class:`TraceAttributesModel` to have trace fields
+
+    The :class:`PermissionViewRoleBaseModel` has the following fields:
+
+    - **id**: int, the primary key of the table, an integer value that is auto incremented
+    - **action_id**: the id of the action
+    - **api_view_id**: the id of the api view
+    - **role_id**: the id of the role
+    - **created_at**: datetime, the datetime when the user was created (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **updated_at**: datetime, the datetime when the user was last updated (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **deleted_at**: datetime, the datetime when the user was deleted (in UTC).
+      This field is used only if we deactivate instead of deleting the record.
+      This datetime is generated automatically, the user does not need to provide it.
+
+    """
 
     # TODO: trace the user that modifies the permissions
     __tablename__ = "permission_view"
@@ -31,12 +49,13 @@ class PermissionViewRoleBaseModel(TraceAttributesModel):
         self.role_id = data.get("role_id")
 
     @classmethod
-    def get_permission(cls, **kwargs):
+    def get_permission(cls, **kwargs: dict) -> bool:
         """
+        Method to check if there is permissions with the combination of fields that are in the keyword arguments
 
-        :param dict kwargs:
-        :return:
-        :rtype:
+        :param dict kwargs: the keyword arguments to search for
+        :return: if there are permissions or not
+        :rtype: bool
         """
         permission = cls.query.filter_by(deleted_at=None, **kwargs).first()
         if permission is not None:

@@ -1,5 +1,5 @@
 """
-
+This file contains the base for a sign up endpoint
 """
 
 from flask import current_app
@@ -16,6 +16,10 @@ from .meta_resource import BaseMetaResource
 
 
 class SignupBaseEndpoint(BaseMetaResource):
+    """
+    Ths base for the sign up endpoint
+    """
+
     def __init__(self):
         super().__init__()
         self.data_model = UserBaseModel
@@ -23,12 +27,18 @@ class SignupBaseEndpoint(BaseMetaResource):
         self.user_role_association = UserRoleBaseModel
 
     def sign_up(self, **kwargs):
-        AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        if AUTH_TYPE == AUTH_LDAP:
+        """
+        The method in charge of performing the sign up of users
+
+        :param kwargs: the keyword arguments needed to perform the sign up
+        :return: a dictionary with the newly issued token and the user id, and a status code
+        """
+        auth_type = current_app.config["AUTH_TYPE"]
+        if auth_type == AUTH_LDAP:
             raise EndpointNotImplemented(
                 "The user has to sign up on the active directory"
             )
-        elif AUTH_TYPE == AUTH_OID:
+        elif auth_type == AUTH_OID:
             raise EndpointNotImplemented(
                 "The user has to sign up with the OpenID protocol"
             )

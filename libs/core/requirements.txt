@@ -1,5 +1,6 @@
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
 cryptography
+disposable-email-domains
 Flask
 flask-apispec
 Flask-Bcrypt

@@ -1,3 +1,6 @@
+"""
+Exposes the different models defined
+"""
 # Import generic first
 from .meta_models import EmptyBaseModel
 from .meta_models import TraceAttributesModel

@@ -1,3 +1,6 @@
+"""
+This file contains the logic for the LoginBaseEndpoint
+"""
 import logging as log
 
 from flask import current_app
@@ -36,6 +39,14 @@ class LoginBaseEndpoint(BaseMetaResource):
         self.user_role_association = UserRoleBaseModel
 
     def log_in(self, **kwargs):
+        """
+        This method is in charge of performing the log in of the user
+
+        :param kwargs: keyword arguments passed for the login, these can be username, password or a token
+        :return: the response of the login or it raises an error. The correct response is a dict
+        with the newly issued token and the user id, and a status code of 200
+        :rtype: dict
+        """
         auth_type = current_app.config["AUTH_TYPE"]
 
         if auth_type == AUTH_DB:
@@ -55,6 +66,14 @@ class LoginBaseEndpoint(BaseMetaResource):
         return {"token": token, "id": user.id}, 200
 
     def auth_db_authenticate(self, username, password):
+        """
+        Method in charge of performing the authentication against the database
+
+        :param str username: the username of the user to log in
+        :param str password:  the password of the user to log in
+        :return: the user object or it raises an error if it has not been possible to log in
+        :rtype: :class:`UserBaseModel`
+        """
         user = self.data_model.get_one_object(username=username)
 
         if not user:
@@ -66,6 +85,14 @@ class LoginBaseEndpoint(BaseMetaResource):
         return user
 
     def auth_ldap_authenticate(self, username, password):
+        """
+        Method in charge of performing the authentication against the ldap server
+
+        :param str username: the username of the user to log in
+        :param str password:  the password of the user to log in
+        :return: the user object or it raises an error if it has not been possible to log in
+        :rtype: :class:`UserBaseModel`
+        """
         ldap_obj = self.ldap_class(current_app.config)
         if not ldap_obj.authenticate(username, password):
             raise InvalidCredentials()
@@ -99,6 +126,13 @@ class LoginBaseEndpoint(BaseMetaResource):
         return user
 
     def auth_oid_authenticate(self, token):
+        """
+        Method  in charge of performing the log in with the token issued by an Open ID provider
+
+        :param str token: the token that the user has obtained from the Open ID provider
+        :return: the user object or it raises an error if it has not been possible to log in
+        :rtype: :class:`UserBaseModel`
+        """
         oid_provider = int(current_app.config["OID_PROVIDER"])
 
         client_id = current_app.config["OID_CLIENT_ID"]
