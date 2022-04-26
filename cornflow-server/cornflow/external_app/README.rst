@@ -1,9 +1,9 @@
 Cornflow
 =========
 
-External Endpoints
+External endpoints
 -------------------------------
-On this folder you can add external endpoints that will be merged with the rest of Cornflow Endpoints.
+On this folder you can add external endpoints that will be merged with the rest of Cornflow endpoints.
 
 The structure should be the same as any other endpoint. 
 
