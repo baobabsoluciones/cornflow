@@ -3,11 +3,11 @@ def register_roles_command(verbose):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..models import RoleModel
+    from cornflow_core.models import RoleBaseModel
     from ..shared.const import ROLES_MAP
     from cornflow_core.shared import db
 
-    roles_registered = [role.name for role in RoleModel.get_all_objects()]
+    roles_registered = [role.name for role in RoleBaseModel.get_all_objects()]
 
     try:
         db.session.commit()
@@ -16,7 +16,7 @@ def register_roles_command(verbose):
         log.error(f"Unknown error on database commit: {e}")
 
     roles_to_register = [
-        RoleModel({"id": key, "name": value})
+        RoleBaseModel({"id": key, "name": value})
         for key, value in ROLES_MAP.items()
         if value not in roles_registered
     ]

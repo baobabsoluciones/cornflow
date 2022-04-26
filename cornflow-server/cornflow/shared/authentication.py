@@ -7,13 +7,14 @@ from functools import wraps
 
 from cornflow_core.authentication import BaseAuth
 from cornflow_core.exceptions import InvalidData, NoPermission
+from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
 
 # Partial imports
 from flask import request, g, current_app
 
 # Internal modules imports
 from .const import PERMISSION_METHOD_MAP
-from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
+from ..models import UserModel, PermissionsDAG
 
 
 class Auth(BaseAuth):
@@ -85,10 +86,10 @@ class Auth(BaseAuth):
             )
 
         action_id = PERMISSION_METHOD_MAP[method]
-        view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
+        view_id = ViewBaseModel.query.filter_by(url_rule=url).first().id
 
         for role in user_roles:
-            has_permission = PermissionViewRoleModel.get_permission(
+            has_permission = PermissionViewRoleBaseModel.get_permission(
                 role_id=role, api_view_id=view_id, action_id=action_id
             )
 

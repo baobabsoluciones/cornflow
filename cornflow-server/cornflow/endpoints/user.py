@@ -32,7 +32,7 @@ from ..schemas.user import (
     UserSchema,
 )
 from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES
+from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES, AUTH_OID
 
 # Initialize the schema that the endpoint uses
 user_schema = UserSchema()
@@ -111,7 +111,7 @@ class UserDetailsEndpoint(BaseMetaResource):
         # Service user can not be deleted
         if user_obj.is_service_user():
             raise NoPermission()
-        log.info(f"User {user_id} was deleted by user {self.get_user_id()}")
+        log.info(f"User {user_obj.id} was deleted by user {self.get_user()}")
         return self.delete_detail(idx=user_id)
 
     @doc(description="Edit a user", tags=["Users"])
@@ -133,9 +133,18 @@ class UserDetailsEndpoint(BaseMetaResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist()
-        # in ldap-mode, users cannot be edited.
-        if current_app.config["AUTH_TYPE"] == AUTH_LDAP and user_obj.comes_from_ldap():
+        # working with a ldap service users cannot be edited.
+        if (
+            current_app.config["AUTH_TYPE"] == AUTH_LDAP
+            and user_obj.comes_from_external_provider()
+        ):
             raise EndpointNotImplemented("To edit a user, go to LDAP server")
+        # working with an OID provider users can not be edited
+        if (
+            current_app.config["AUTH_TYPE"] == AUTH_OID
+            and user_obj.comes_from_external_provider()
+        ):
+            raise EndpointNotImplemented("To edit a user, go to the OID provider")
 
         if data.get("password"):
             check, msg = check_password_pattern(data.get("password"))
@@ -147,7 +156,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             if not check:
                 raise InvalidCredentials(msg)
 
-        log.info(f"User {user_id} was edited by user {self.get_user_id()}")
+        log.info(f"User {user_id} was edited by user {self.get_user()}")
         return self.put_detail(data=data, idx=user_id, track_user=False)
 
 

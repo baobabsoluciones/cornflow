@@ -1,5 +1,6 @@
 def create_user_with_role(username, email, password, role_name, role, verbose=0):
-    from ..models import RoleModel, UserModel, UserRoleModel
+    from ..models import UserModel, UserRoleModel
+    from cornflow_core.models import RoleBaseModel
 
     user = UserModel.get_one_user_by_username(username)
 
@@ -15,7 +16,10 @@ def create_user_with_role(username, email, password, role_name, role, verbose=0)
 
     user_roles = UserRoleModel.get_all_objects(user_id=user.id)
     user_actual_roles = [ur.role for ur in user_roles]
-    if user_roles is not None and RoleModel.get_one_object(role) in user_actual_roles:
+    if (
+        user_roles is not None
+        and RoleBaseModel.get_one_object(role) in user_actual_roles
+    ):
         if verbose == 1:
             print(f"User {username} exists and already has {role_name} role assigned")
         return True

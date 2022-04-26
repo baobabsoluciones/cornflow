@@ -1,4 +1,11 @@
-from flask import current_app
+from cornflow_core.models import (
+    ActionBaseModel,
+    PermissionViewRoleBaseModel,
+    RoleBaseModel,
+    ViewBaseModel,
+)
+
+from cornflow_core.shared import db
 from flask_testing import TestCase
 
 from cornflow.app import (
@@ -14,23 +21,19 @@ from cornflow.app import (
 )
 
 from cornflow.commands.dag import register_deployed_dags_command_test
-
 from cornflow.endpoints import resources
+
 from cornflow.models import (
-    ActionModel,
-    ApiViewModel,
     DeployedDAG,
     PermissionsDAG,
-    PermissionViewRoleModel,
-    RoleModel,
     UserModel,
 )
+
 from cornflow.shared.const import (
     ACTIONS_MAP,
     ROLES_MAP,
     BASE_PERMISSION_ASSIGNATION,
 )
-from cornflow_core.shared import db
 
 
 class TestCommands(TestCase):
@@ -149,7 +152,7 @@ class TestCommands(TestCase):
     def test_register_actions(self):
         self.runner.invoke(register_actions)
 
-        actions = ActionModel.query.all()
+        actions = ActionBaseModel.query.all()
 
         for a in actions:
             self.assertEqual(ACTIONS_MAP[a.id], a.name)
@@ -157,7 +160,7 @@ class TestCommands(TestCase):
     def test_register_views(self):
         self.runner.invoke(register_views)
 
-        views = ApiViewModel.query.all()
+        views = ViewBaseModel.query.all()
         views_list = [v.name for v in views]
         resources_list = [
             self.resources[i]["endpoint"] for i in range(len(self.resources))
@@ -166,7 +169,7 @@ class TestCommands(TestCase):
         self.assertCountEqual(views_list, resources_list)
 
     def test_register_roles(self):
-        roles = RoleModel.query.all()
+        roles = RoleBaseModel.query.all()
         for r in roles:
             self.assertEqual(ROLES_MAP[r.id], r.name)
 
@@ -177,9 +180,9 @@ class TestCommands(TestCase):
             for view in self.resources:
                 if base[0] in view["resource"].ROLES_WITH_ACCESS:
 
-                    permission = PermissionViewRoleModel.get_permission(
+                    permission = PermissionViewRoleBaseModel.get_permission(
                         role_id=base[0],
-                        api_view_id=ApiViewModel.query.filter_by(name=view["endpoint"])
+                        api_view_id=ViewBaseModel.query.filter_by(name=view["endpoint"])
                         .first()
                         .id,
                         action_id=base[1],

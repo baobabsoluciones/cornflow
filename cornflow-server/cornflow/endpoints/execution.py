@@ -208,7 +208,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} edits execution {idx}")
+        log.info(f"User {self.get_user()} edits execution {idx}")
         return self.put_detail(data, user=self.get_user(), idx=idx)
 
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
@@ -224,7 +224,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} deleted execution {idx}")
+        log.info(f"User {self.get_user()} deleted execution {idx}")
         return self.delete_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
@@ -241,7 +241,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
-        log.info(f"User {self.get_user_id()} stopped execution {idx}")
+        log.info(f"User {self.get_user()} stopped execution {idx}")
         return {"message": "The execution has been stopped"}, 200
 
 

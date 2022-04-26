@@ -2,14 +2,15 @@
 
 """
 from cornflow_core.authentication import authenticate
+
+# Import from internal modules
+from cornflow_core.models import ViewBaseModel
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.schemas import ViewResponse
 
 # Import from libraries
 from flask_apispec import marshal_with, doc
 
-# Import from internal modules
-from ..models import ApiViewModel
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
 
@@ -22,7 +23,7 @@ class ApiViewListEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = ApiViewModel
+        self.data_model = ViewBaseModel
 
     @doc(description="Get all the api views", tags=["ApiViews"])
     @authenticate(auth_class=Auth())

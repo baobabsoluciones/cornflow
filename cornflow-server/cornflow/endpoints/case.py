@@ -60,7 +60,7 @@ class CaseEndpoint(BaseMetaResource):
         """
 
         response = self.get_list(user=self.get_user(), **kwargs)
-        log.info(f"User {self.get_user_id()} gets all cases")
+        log.info(f"User {self.get_user()} gets all cases")
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
@@ -75,7 +75,7 @@ class CaseEndpoint(BaseMetaResource):
         data["user_id"] = self.get_user_id()
         item = CaseModel.from_parent_id(self.get_user(), data)
         item.save()
-        log.info(f"User {self.get_user_id()} creates case {item.id}")
+        log.info(f"User {self.get_user()} creates case {item.id}")
         return item, 201
 
 
@@ -138,7 +138,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
         item = CaseModel.from_parent_id(user, data)
         item.save()
         log.info(
-            f"User {self.get_user_id()} creates case {item.id} from instance/execution"
+            f"User {self.get_user()} creates case {item.id} from instance/execution"
         )
         return item, 201
 
@@ -181,7 +181,7 @@ class CaseCopyEndpoint(BaseMetaResource):
                 payload[key] = "Copy_" + data[key]
 
         response = self.post_list(payload)
-        log.info(f"User {self.get_user_id()} copied case {idx} into {response[0].id}")
+        log.info(f"User {self.get_user()} copied case {idx} into {response[0].id}")
         return response
 
 
@@ -207,7 +207,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user_id()} gets case {idx}")
+        log.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
@@ -221,7 +221,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} edits case {idx}")
+        log.info(f"User {self.get_user()} edits case {idx}")
         return self.put_detail(data=kwargs, idx=idx, user=self.get_user())
 
     @doc(description="Delete a case", tags=["Cases"])
@@ -236,7 +236,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} deletes case {idx}")
+        log.info(f"User {self.get_user()} deletes case {idx}")
         return self.delete_detail(idx=idx, user=self.get_user())
 
 
@@ -262,7 +262,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user_id()} gets case {idx}")
+        log.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
@@ -271,7 +271,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
         response = self.patch_detail(data=kwargs, idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user_id()} patches case {idx}")
+        log.info(f"User {self.get_user()} patches case {idx}")
         return response
 
 
@@ -325,7 +325,7 @@ class CaseToInstance(BaseMetaResource):
         validate_and_continue(marshmallow_obj(), payload["data"])
         response = self.post_list(payload)
         log.info(
-            f"User {self.get_user_id()} creates instance {response[0].id} from case {idx}"
+            f"User {self.get_user()} creates instance {response[0].id} from case {idx}"
         )
         return response
 
@@ -388,5 +388,5 @@ class CaseCompare(BaseMetaResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        log.info(f"User {self.get_user_id()} compared cases {idx1} and {idx2}")
+        log.info(f"User {self.get_user()} compared cases {idx1} and {idx2}")
         return payload, 200

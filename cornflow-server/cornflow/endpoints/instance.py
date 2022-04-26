@@ -63,7 +63,7 @@ class InstanceEndpoint(BaseMetaResource):
         :return: a list of objects with the data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} gets all the instances")
+        log.info(f"User {self.get_user()} gets all the instances")
         return self.get_list(user=self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
@@ -99,7 +99,7 @@ class InstanceEndpoint(BaseMetaResource):
 
         # if we're here, we validated and the data seems to fit the schema
         response = self.post_list(data=kwargs)
-        log.info(f"User {self.get_user_id()} creates instance {response[0].id}")
+        log.info(f"User {self.get_user()} creates instance {response[0].id}")
         return response
 
 
@@ -128,7 +128,7 @@ class InstanceDetailsEndpointBase(BaseMetaResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} gets instance {idx}")
+        log.info(f"User {self.get_user()} gets instance {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
 
 
@@ -148,7 +148,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
-        log.info(f"User {self.get_user_id()} edits instance {idx}")
+        log.info(f"User {self.get_user()} edits instance {idx}")
         return response
 
     @doc(description="Delete an instance", tags=["Instances"])
@@ -165,7 +165,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.delete_detail(user=self.get_user(), idx=idx)
-        log.info("User {self.get_user_id()} deletes instance {idx}")
+        log.info(f"User {self.get_user()} deletes instance {idx}")
         return response
 
 
@@ -195,7 +195,7 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(user=self.get_user(), idx=idx)
-        log.info(f"User {self.get_user_id()} gets the data of case {idx}")
+        log.info(f"User {self.get_user()} gets the data of case {idx}")
         return response
 
 
@@ -255,7 +255,7 @@ class InstanceFileEndpoint(BaseMetaResource):
         item = InstanceModel(data)
         item.schema = "solve_model_dag"
         item.save()
-        log.info(f"User {self.get_user_id()} creates instance {item.id} from mps file")
+        log.info(f"User {self.get_user()} creates instance {item.id} from mps file")
         return item, 201
 
 

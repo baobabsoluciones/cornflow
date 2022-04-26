@@ -176,7 +176,7 @@ class DAGEndpointManual(BaseMetaResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        log.info(f"User {self.get_user_id()} manually created the execution {item.id}")
+        log.info(f"User {self.get_user()} manually created the execution {item.id}")
         return item, 201
 
 

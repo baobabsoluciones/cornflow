@@ -2,6 +2,8 @@
 Unit test for the role endpoints
 """
 
+from cornflow_core.models import PermissionViewRoleBaseModel, RoleBaseModel
+
 # Import from internal modules
 from cornflow.endpoints import (
     RoleDetailEndpoint,
@@ -9,14 +11,17 @@ from cornflow.endpoints import (
     UserRoleListEndpoint,
     UserRoleDetailEndpoint,
 )
-from cornflow.models import PermissionViewRoleModel, RoleModel, UserModel, UserRoleModel
+from cornflow.models import (
+    UserModel,
+    UserRoleModel,
+)
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
     ROLES_MAP,
     VIEWER_ROLE,
 )
-from cornflow.tests.const import PERMISSION_URL, ROLES_URL, USER_ROLE_URL
+from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
@@ -26,7 +31,7 @@ class TestRolesListEndpoint(CustomTestCase):
         self.payload = {"name": "new_role"}
         self.payloads = [{"id": key, "name": value} for key, value in ROLES_MAP.items()]
         self.url = ROLES_URL
-        self.model = RoleModel
+        self.model = RoleBaseModel
         self.items_to_check = ["name"]
         self.roles_with_access = RolesListEndpoint.ROLES_WITH_ACCESS
 
@@ -80,7 +85,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.url = ROLES_URL
-        self.model = RoleModel
+        self.model = RoleBaseModel
         self.items_to_check = ["id", "name"]
         self.roles_with_access = RoleDetailEndpoint.ROLES_WITH_ACCESS
 
@@ -278,6 +283,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "user": "testuser3",
             "user_id": 2,
         }
+        print("super set up done")
 
     def tearDown(self):
         super().tearDown()
@@ -391,7 +397,7 @@ class TestRolesModelMethods(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.url = ROLES_URL
-        self.model = RoleModel
+        self.model = RoleBaseModel
         self.payload = {"name": "test_role"}
 
     def test_user_role_delete_cascade(self):
@@ -411,10 +417,10 @@ class TestRolesModelMethods(CustomTestCase):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
-        PermissionViewRoleModel(payload).save()
+        PermissionViewRoleBaseModel(payload).save()
 
         role = self.model.query.get(idx)
-        permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
+        permission = PermissionViewRoleBaseModel.query.filter_by(role_id=idx).first()
 
         self.assertIsNotNone(role)
         self.assertIsNotNone(permission)
@@ -422,7 +428,7 @@ class TestRolesModelMethods(CustomTestCase):
         role.delete()
 
         role = self.model.query.get(idx)
-        permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
+        permission = PermissionViewRoleBaseModel.query.filter_by(role_id=idx).first()
 
         self.assertIsNone(role)
         self.assertIsNone(permission)

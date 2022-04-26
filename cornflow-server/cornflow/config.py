@@ -89,7 +89,7 @@ class Testing(DefaultConfig):
     AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
-    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
 
 
 class Production(DefaultConfig):

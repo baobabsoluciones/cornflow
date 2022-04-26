@@ -2,23 +2,25 @@
 
 """
 
-# Import from libraries
-from flask_apispec import doc, marshal_with, use_kwargs
 import logging as log
-from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import PermissionViewRoleModel
-from ..schemas.permission import (
-    PermissionViewRoleResponse,
-    PermissionViewRoleRequest,
-    PermissionViewRoleEditRequest,
-)
-from ..shared.authentication import Auth
+from cornflow_core.authentication import authenticate
 from cornflow_core.compress import compressed
-from ..shared.const import ADMIN_ROLE
 from cornflow_core.exceptions import ObjectAlreadyExists
+from cornflow_core.models import PermissionViewRoleBaseModel
 from cornflow_core.resources import BaseMetaResource
+from cornflow_core.schemas import (
+    PermissionViewRoleBaseEditRequest,
+    PermissionViewRoleBaseRequest,
+    PermissionViewRoleBaseResponse,
+)
+
+# Import from libraries
+from flask_apispec import doc, marshal_with, use_kwargs
+
+from ..shared.authentication import Auth
+from ..shared.const import ADMIN_ROLE
 
 
 class PermissionsViewRoleEndpoint(BaseMetaResource):
@@ -26,31 +28,31 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = PermissionViewRoleModel
+        self.data_model = PermissionViewRoleBaseModel
 
     @doc(
         description="Get all the permissions assigned to the roles",
         tags=["PermissionViewRole"],
     )
     @authenticate(auth_class=Auth())
-    @marshal_with(PermissionViewRoleResponse(many=True))
+    @marshal_with(PermissionViewRoleBaseResponse(many=True))
     @compressed
     def get(self):
         return self.get_list()
 
     @doc(description="Create a new permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @use_kwargs(PermissionViewRoleRequest, location="json")
-    @marshal_with(PermissionViewRoleResponse)
+    @use_kwargs(PermissionViewRoleBaseRequest, location="json")
+    @marshal_with(PermissionViewRoleBaseResponse)
     def post(self, **kwargs):
-        if PermissionViewRoleModel.get_permission(
+        if PermissionViewRoleBaseModel.get_permission(
             role_id=kwargs.get("role_id"),
             api_view_id=kwargs.get("api_view_id"),
             action_id=kwargs.get("action_id"),
         ):
             raise ObjectAlreadyExists()
         else:
-            log.info(f"User {self.get_user_id()} creates permission")
+            log.info(f"User {self.get_user()} creates permission")
             return self.post_list(kwargs)
 
 
@@ -59,11 +61,11 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = PermissionViewRoleModel
+        self.data_model = PermissionViewRoleBaseModel
 
     @doc(description="Get one permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @marshal_with(PermissionViewRoleResponse)
+    @marshal_with(PermissionViewRoleBaseResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -80,15 +82,15 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @use_kwargs(PermissionViewRoleEditRequest, location="json")
+    @use_kwargs(PermissionViewRoleBaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         response = self.put_detail(kwargs, idx=idx, track_user=False)
-        log.info(f"User {self.get_user_id()} edits permission {idx}")
+        log.info(f"User {self.get_user()} edits permission {idx}")
         return response
 
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
     def delete(self, idx):
         response = self.delete_detail(idx=idx)
-        log.info(f"User {self.get_user_id()} deletes permission {idx}")
+        log.info(f"User {self.get_user()} deletes permission {idx}")
         return response

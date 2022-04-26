@@ -12,7 +12,7 @@ from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
 
 # Import from internal modules
-from ..models import RoleModel
+from cornflow_core.models import RoleBaseModel
 from cornflow_core.schemas import (
     RolesRequest,
     RolesResponse,
@@ -27,7 +27,7 @@ class RolesListEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = RoleModel
+        self.data_model = RoleBaseModel
 
     @doc(description="Gets all the roles", tags=["Roles"])
     @authenticate(auth_class=Auth())
@@ -74,7 +74,7 @@ class RoleDetailEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = RoleModel
+        self.data_model = RoleBaseModel
 
     @doc(description="Gets one role", tags=["Roles"])
     @authenticate(auth_class=Auth())

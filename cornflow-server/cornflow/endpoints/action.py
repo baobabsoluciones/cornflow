@@ -8,7 +8,7 @@ from cornflow_core.schemas import ActionsResponse
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
-from ..models import ActionModel
+from cornflow_core.models import ActionBaseModel
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
 
@@ -19,7 +19,7 @@ class ActionListEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = ActionModel
+        self.data_model = ActionBaseModel
 
     @doc(description="Get all the actions", tags=["Actions"])
     @authenticate(auth_class=Auth())

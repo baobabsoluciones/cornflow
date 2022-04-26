@@ -15,7 +15,7 @@ class InstanceModel(BaseDataModel):
 
     The :class:`InstanceModel` has the following fields:
 
-    - **id**: int, the primary key for the executions, a hash generated upon creation of the instance
+    - **id**: str, the primary key for the instances, a hash generated upon creation of the instance
       and the id given back to the user.The hash is generated from the creation time and the user id.
     - **data**: dict (JSON), the data structure of the instance (:class:`DataSchema`)
     - **name**: str, the name given to the instance by the user.
@@ -23,11 +23,11 @@ class InstanceModel(BaseDataModel):
     - **executions**: relationship, not a field in the model but the relationship between the _class:`InstanceModel`
       and its dependent :class:`ExecutionModel`.
     - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the execution to its owner.
-    - **created_at**: datetime, the datetime when the execution was created (in UTC).
+    - **created_at**: datetime, the datetime when the instance was created (in UTC).
       This datetime is generated automatically, the user does not need to provide it.
-    - **updated_at**: datetime, the datetime when the execution was last updated (in UTC).
+    - **updated_at**: datetime, the datetime when the instance was last updated (in UTC).
       This datetime is generated automatically, the user does not need to provide it.
-    - **deleted_at**: datetime, the datetime when the execution was deleted (in UTC). Even though it is deleted,
+    - **deleted_at**: datetime, the datetime when the instance was deleted (in UTC). Even though it is deleted,
       actually, it is not deleted from the database, in order to have a command that cleans up deleted data
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.

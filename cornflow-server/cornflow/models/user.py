@@ -1,8 +1,7 @@
 from cornflow_core.models import UserBaseModel
-
+from cornflow_core.shared import db
 
 from .user_role import UserRoleModel
-from cornflow_core.shared import db
 
 
 class UserModel(UserBaseModel):
@@ -32,6 +31,7 @@ class UserModel(UserBaseModel):
     """
 
     __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
 
     instances = db.relationship(
         "InstanceModel",
@@ -50,18 +50,12 @@ class UserModel(UserBaseModel):
         cascade="all,delete",
     )
 
-    user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
-
     dag_permissions = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",
         backref="users",
         primaryjoin="and_(UserModel.id==PermissionsDAG.user_id)",
     )
-
-    @property
-    def roles(self):
-        return {r.role.id: r.role.name for r in self.user_roles}
 
     def is_admin(self):
         """
