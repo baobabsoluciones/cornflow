@@ -31,7 +31,7 @@ class EmptyBaseModel(db.Model):
 
         try:
             db.session.commit()
-            log.info(f"Transaction type: {action}, performed correctly on {self}")
+            log.debug(f"Transaction type: {action}, performed correctly on {self}")
         except IntegrityError as err:
             db.session.rollback()
             log.error(f"Integrity error on {action} data: {err}")

@@ -32,10 +32,10 @@ class UserRoleBaseModel(TraceAttributesModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user = db.relationship("UserBaseModel", viewonly=True)
+    user = db.relationship("UserBaseModel", viewonly=True, lazy=False)
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleBaseModel", viewonly=True)
+    role = db.relationship("RoleBaseModel", viewonly=True, lazy=False)
 
     def __init__(self, data):
         """
