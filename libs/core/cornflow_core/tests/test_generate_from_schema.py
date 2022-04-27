@@ -22,17 +22,15 @@ class GenerationTests(unittest.TestCase):
     def setUp(self):
         super().setUp()
 
-        self.full_inst_path = "./data/instance.json"
-        self.full_inst = SuperDict.from_dict(
-            self.import_schema(self._get_path(self.full_inst_path))
-        )
+        self.full_inst_path = self._get_path("./data/instance.json")
+        self.full_inst = SuperDict.from_dict(self.import_schema(self.full_inst_path))
         # Removing parameter tables
         self.full_inst["properties"] = self.full_inst["properties"].vfilter(
             lambda v: v["type"] == "array"
         )
-        self.one_tab_inst_path = "./data/one_table.json"
+        self.one_tab_inst_path = self._get_path("./data/one_table.json")
         self.one_tab_inst = SuperDict.from_dict(
-            self.import_schema(self._get_path(self.one_tab_inst_path))
+            self.import_schema(self.one_tab_inst_path)
         )
         self.app_name = "test"
         self.second_app_name = "test_sec"
