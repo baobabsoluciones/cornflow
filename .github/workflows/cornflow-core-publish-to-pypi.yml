@@ -1,16 +1,16 @@
-name: Publish cornflow-client Python 🐍 distributions 📦 to PyPI
+name: Publish cornflow-core Python 🐍 distributions 📦 to PyPI
 
 on:
   push:
     tags:
-      - "client*"
+      - "core*"
 
 jobs:
   build-n-publish:
-    name: Build and publish cornflow-client Python 🐍 distributions 📦 to PyPI
+    name: Build and publish cornflow-core Python 🐍 distributions 📦 to PyPI
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/core
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
@@ -29,12 +29,12 @@ jobs:
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.test_pypi_password }}
+        password: ${{ secrets.CORE_TEST_PYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
-        packages_dir: cornflow-client/dist/
+        packages_dir: libs/core/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.pypi_password }}
-        packages_dir: cornflow-client/dist/
+        password: ${{ secrets.CORE_PYPI_TOKEN }}
+        packages_dir: libs/core/dist/
 
