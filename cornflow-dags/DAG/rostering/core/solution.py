@@ -27,11 +27,11 @@ class Solution(SolutionCore):
         }
         solution_data = cls(SuperDict(data_p))
         # indicators
-        indicators = solution_data.get_working_hours()
+        indicators = {"fo": solution_data.get_working_hours()}
 
         solution = {
             "works": data_p["works"],
-            "indicators":indicators,
+            "indicators": indicators,
         }
 
         return cls(SuperDict(solution))
