@@ -12,8 +12,8 @@ path_to_tests = os.path.dirname(os.path.abspath(__file__))
 class SchemaFromModelsTests(unittest.TestCase):
     def setUp(self):
         super().setUp()
-        self.models_path = "./data/models"
-        self.output_path = os.path.join(os.getcwd(), "test_output.json")
+        self.models_path = self._get_path("./data/models")
+        self.output_path = self._get_path(os.path.join(os.getcwd(), "test_output.json"))
 
     @staticmethod
     def import_schema(path):
@@ -22,7 +22,7 @@ class SchemaFromModelsTests(unittest.TestCase):
         return schema
 
     @staticmethod
-    def _get_file(rel_path):
+    def _get_path(rel_path):
         return os.path.join(path_to_tests, rel_path)
 
     def tearDown(self):
@@ -37,7 +37,7 @@ class SchemaFromModelsTests(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        schema = self.import_schema(self._get_file(self.output_path))
+        schema = self.import_schema(self._get_path(self.output_path))
         print(schema["properties"].keys())
         tables = {
             "instances": {
@@ -102,6 +102,6 @@ class SchemaFromModelsTests(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        schema = self.import_schema(self._get_file(self.output_path))
+        schema = self.import_schema(self.output_path)
 
         self.assertNotIn("instances", schema["properties"].keys())
