@@ -1,0 +1,16 @@
+cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow_core#subdirectory=cornflow-client
+cryptography
+disposable-email-domains
+Flask
+flask-apispec
+Flask-Bcrypt
+Flask-Compress
+Flask-RESTful
+Flask-SQLAlchemy
+ldap3
+marshmallow
+PyJWT
+requests
+SQLAlchemy==1.3.21
+webargs
+Werkzeug
