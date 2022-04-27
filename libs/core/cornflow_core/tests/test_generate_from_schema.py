@@ -36,8 +36,8 @@ class GenerationTests(unittest.TestCase):
         )
         self.app_name = "test"
         self.second_app_name = "test_sec"
-        self.default_output_path = "../output"
-        self.other_output_path = "../output_path"
+        self.default_output_path = "./data/output"
+        self.other_output_path = "./data/output_path"
         self.last_path = self.default_output_path
         self.all_methods = TupList(
             ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]
@@ -156,6 +156,7 @@ class GenerationTests(unittest.TestCase):
 
         # Checks that the directories have been created
         for path in created_dirs:
+            print(self._get_path(path))
             self.assertTrue(os.path.isdir(self._get_path(path)))
 
         # Checks that each file has been created
