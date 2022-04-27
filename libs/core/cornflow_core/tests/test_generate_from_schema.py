@@ -176,7 +176,6 @@ class GenerationTests(unittest.TestCase):
             os.path.join(path, file) for path in created_dirs for file, _ in files
         ]
         for path_file in absolute_paths:
-            print(self._get_path(path_file))
             self.assertTrue(os.path.exists(self._get_path(path_file)))
             if os.path.exists(path_file):
                 with open(path_file, "r") as fd:
