@@ -15,6 +15,7 @@ from sqlalchemy.sql.sqltypes import Integer
 
 class SchemaGenerator:
     def __init__(self, path, output_path=None, ignore_files=None, leave_bases=False):
+
         self.path = path
         self.tmp_path = os.path.join(os.getcwd(), "tmp_files")
         self.output_path = output_path or "./output_schema.json"
@@ -26,7 +27,10 @@ class SchemaGenerator:
         self.table_model = dict()
 
     def main(self):
+        os.mkdir(self.tmp_path)
+
         copy_tree(self.path, self.tmp_path)
+
         files = (
             TupList(os.listdir(self.tmp_path))
             .vfilter(
@@ -37,10 +41,15 @@ class SchemaGenerator:
             )
             .vapply(lambda v: (os.path.join(self.tmp_path, v), v[:-3]))
         )
+
         self.mock_packages(files)
+
         self.parse(files)
+
         self.inherit()
+
         schema = self.to_schema()
+
         with open(self.output_path, "w") as fd:
             json.dump(schema, fd, indent=2)
         self.clear()
@@ -63,71 +72,75 @@ class SchemaGenerator:
 
     def parse(self, files):
         forget_keys = ["created_at", "updated_at", "deleted_at"]
+        print("INIT PARSE")
         db = SQLAlchemy()
-        for file_path, file_name in files:
-            spec = importlib.util.spec_from_file_location(file_name, file_path)
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
+        try:
+            for file_path, file_name in files:
+                spec = importlib.util.spec_from_file_location(file_name, file_path)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
 
-            models = SuperDict(mod.__dict__).kfilter(lambda k: k in self.parents)
-            for model in models:
-                if isinstance(models[model], MagicMock):
-                    # Models that inherit from other models that are relatively imported
-                    if not isinstance(
-                            mod.__dict__[model]._mock_return_value, dict
-                    ):
-                        continue
-                    props = mod.__dict__[model]._mock_return_value
-                elif mod.__dict__[model].__dict__.get('__abstract__'):
-                    # BaseDataModel
-                    props = mod.__dict__[model].__dict__
-                    self.parents[model] = None
-                else:
-                    # Models that inherit from other models that are imported from libraries
-                    self.parents[model] = None
-                    tmp = mod.__dict__[model].__dict__
-                    props = {'__tablename__': tmp.get('__tablename__')}
-                    for col in tmp['__table__']._columns:
-                        props[col.__dict__['key']] = next(iter(col.proxy_set))
-                table_name = props.get("__tablename__", model)
-                self.data[table_name] = SuperDict(
-                    type="array", items=dict(properties=dict(), required=[])
-                )
-                if not props.get("__tablename__") and not self.leave_bases:
-                    self.data[table_name]["remove"] = True
-                self.model_table[model] = table_name
-                self.table_model[table_name] = model
-                for key, val in props.items():
-                    if key in forget_keys:
-                        continue
-                    elif isinstance(val, db.Column):
-                        type_converter = {
-                            db.String: 'string',
-                            TEXT: 'string',
-                            JSON: 'object',
-                            Integer: 'integer',
-                            db.Integer: 'integer',
-                            db.Boolean: 'boolean',
-                            db.SmallInteger: "integer",
-                            db.Float: "number"
-                        }
-                        type_col = 'null'
-                        for possible_type, repr_type in type_converter.items():
-                            if isinstance(val.type, possible_type):
-                                type_col = repr_type
-                        if type_col == 'null':
-                            raise Exception('Unknown column type')
+                models = SuperDict(mod.__dict__).kfilter(lambda k: k in self.parents)
+                for model in models:
+                    if isinstance(models[model], MagicMock):
+                        # Models that inherit from other models that are relatively imported
+                        if not isinstance(mod.__dict__[model]._mock_return_value, dict):
+                            continue
+                        props = mod.__dict__[model]._mock_return_value
+                    elif mod.__dict__[model].__dict__.get("__abstract__"):
+                        # BaseDataModel
+                        props = mod.__dict__[model].__dict__
+                        self.parents[model] = None
+                    else:
+                        # Models that inherit from other models that are imported from libraries
+                        self.parents[model] = None
+                        tmp = mod.__dict__[model].__dict__
+                        props = {"__tablename__": tmp.get("__tablename__")}
+                        for col in tmp["__table__"]._columns:
+                            props[col.__dict__["key"]] = next(iter(col.proxy_set))
+                    table_name = props.get("__tablename__", model)
+                    self.data[table_name] = SuperDict(
+                        type="array", items=dict(properties=dict(), required=[])
+                    )
+                    if not props.get("__tablename__") and not self.leave_bases:
+                        self.data[table_name]["remove"] = True
+                    self.model_table[model] = table_name
+                    self.table_model[table_name] = model
+                    for key, val in props.items():
+                        if key in forget_keys:
+                            continue
+                        elif isinstance(val, db.Column):
+                            type_converter = {
+                                db.String: "string",
+                                TEXT: "string",
+                                JSON: "object",
+                                Integer: "integer",
+                                db.Integer: "integer",
+                                db.Boolean: "boolean",
+                                db.SmallInteger: "integer",
+                                db.Float: "number",
+                            }
+                            type_col = "null"
+                            for possible_type, repr_type in type_converter.items():
+                                if isinstance(val.type, possible_type):
+                                    type_col = repr_type
+                            if type_col == "null":
+                                raise Exception("Unknown column type")
 
-                        self.data[table_name]["items"]["properties"][key] = SuperDict(
-                            type=type_col
-                        )
-                        if val.foreign_keys:
-                            fk = list(val.foreign_keys)[0]
-                            self.data[table_name]["items"]["properties"][key][
-                                "foreign_key"
-                            ] = fk._colspec
-                        if not val.nullable:
-                            self.data[table_name]["items"]["required"].append(key)
+                            self.data[table_name]["items"]["properties"][
+                                key
+                            ] = SuperDict(type=type_col)
+                            if val.foreign_keys:
+                                fk = list(val.foreign_keys)[0]
+                                self.data[table_name]["items"]["properties"][key][
+                                    "foreign_key"
+                                ] = fk._colspec
+                            if not val.nullable:
+                                self.data[table_name]["items"]["required"].append(key)
+
+            db.session.close()
+        except Exception as err:
+            print(err)
 
     def inherit(self):
         all_classes = set(self.parents.keys())
@@ -168,5 +181,5 @@ class SchemaGenerator:
             "$schema": "http://json-schema.org/schema#",
             "type": "object",
             "properties": self.data,
-            "required": list(self.data.keys())
+            "required": list(self.data.keys()),
         }

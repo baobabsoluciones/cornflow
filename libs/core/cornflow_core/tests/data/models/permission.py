@@ -1,14 +1,14 @@
-from cornflow_core.models import TraceAttributesModel
+from cornflow_core.models import PermissionViewRoleBaseModel, TraceAttributesModel
 
 # from .meta_model import TraceAttributes
 from .dag import DeployedDAG
 from cornflow_core.shared import db
 
 
-class PermissionViewRoleModel(TraceAttributesModel):
+class PermissionViewRoleModel(PermissionViewRoleBaseModel):
     # TODO: trace the user that modifies the permissions
-    __tablename__ = "permissions_view"
-    __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
+    __tablename__ = "permission_view"
+    __table_args__ = {"extend_existing": True}
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
@@ -22,7 +22,7 @@ class PermissionViewRoleModel(TraceAttributesModel):
     role = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
-        super().__init__()
+        super().__init__(data)
         self.action_id = data.get("action_id")
         self.api_view_id = data.get("api_view_id")
         self.role_id = data.get("role_id")
@@ -41,7 +41,10 @@ class PermissionViewRoleModel(TraceAttributesModel):
 
 class PermissionsDAG(TraceAttributesModel):
     __tablename__ = "permission_dag"
-    __table_args__ = (db.UniqueConstraint("dag_id", "user_id"),)
+    __table_args__ = (
+        {"extend_existing": True},
+        # db.UniqueConstraint("dag_id", "user_id"),
+    )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 

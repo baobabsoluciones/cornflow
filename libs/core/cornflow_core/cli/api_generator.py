@@ -1,9 +1,10 @@
 import json
-from tools import *
-from models_tools import *
-from endpoint_tools import *
-from schemas_tools import *
 import os
+
+from .endpoint_tools import *
+from .models_tools import *
+from .schemas_tools import *
+from .tools import *
 
 
 class APIGenerator:
@@ -21,12 +22,14 @@ class APIGenerator:
         if not self.options:
             self.options = ["all"]
         self.schema = self.import_schema()
-        if self.schema['type'] == 'array' and not name_table:
-            self.schema = {"properties": {'data': self.schema}}
-        elif self.schema['type'] == 'array' and name_table:
+        if self.schema["type"] == "array" and not name_table:
+            self.schema = {"properties": {"data": self.schema}}
+        elif self.schema["type"] == "array" and name_table:
             self.schema = {"properties": {name_table: self.schema}}
-        elif self.schema['type'] != 'array' and name_table:
-            print('The JSONSchema does not contain only one table. The --one option will be ignored')
+        elif self.schema["type"] != "array" and name_table:
+            print(
+                "The JSONSchema does not contain only one table. The --one option will be ignored"
+            )
         self.output_path = output_path or "output"
         self.model_path = os.path.join(self.output_path, "models")
         self.endpoint_path = os.path.join(self.output_path, "endpoints")
@@ -42,16 +45,16 @@ class APIGenerator:
             os.mkdir(self.output_path)
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
-        init_path = os.path.join(self.model_path, '__init__.py')
-        open(init_path, 'w').close()
+        init_path = os.path.join(self.model_path, "__init__.py")
+        open(init_path, "w").close()
         if not os.path.isdir(self.endpoint_path):
             os.mkdir(self.endpoint_path)
-        init_path = os.path.join(self.endpoint_path, '__init__.py')
-        open(init_path, 'w').close()
+        init_path = os.path.join(self.endpoint_path, "__init__.py")
+        open(init_path, "w").close()
         if not os.path.isdir(self.schema_path):
             os.mkdir(self.schema_path)
-        init_path = os.path.join(self.schema_path, '__init__.py')
-        open(init_path, 'w').close()
+        init_path = os.path.join(self.schema_path, "__init__.py")
+        open(init_path, "w").close()
 
     def main(self):
         self.prepare_dirs()

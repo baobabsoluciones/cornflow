@@ -1,20 +1,21 @@
-name: cornflow-tools tests
+name: cornflow-core tests
 
 on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
     paths:
-      - 'cornflow-tools/**'
-      - '!cornflow-tools/README.rst'
+      - 'libs/core/**'
+      - '!libs/core/README.rst'
+      - '!libs/core/LICENSE'
 
 jobs:  
   testing:
 
-    name: Run all test suites on cornflow-tools
+    name: Run all test suites on cornflow-core
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./cornflow-tools
+        working-directory: ./libs/core
     strategy:
       max-parallel: 21
       matrix:
@@ -33,7 +34,5 @@ jobs:
         python -m pip install -U -r requirements-dev.txt
     - name: Run generate_from_schema tests
       run: |
-        coverage run --source=. -m unittest tests/test_generate_from_schema.py
-    - name: Run schema_from_models tests
-      run: |
-        coverage run --source=. -m unittest tests/test_schema_from_models.py
+        coverage run --source=./cornflow_core/ -m unittest discover -s corflow_core/tests
+        coverage report -m
