@@ -44,6 +44,7 @@ class GenerationTests(unittest.TestCase):
         )
 
     def tearDown(self):
+
         if os.path.isdir(self.last_path):
             shutil.rmtree(self.last_path)
 
