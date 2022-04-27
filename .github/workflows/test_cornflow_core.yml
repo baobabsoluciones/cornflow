@@ -34,5 +34,5 @@ jobs:
         python -m pip install -U -r requirements-dev.txt
     - name: Run generate_from_schema tests
       run: |
-        coverage run --source=./cornflow_core/ -m unittest discover -s corflow_core/tests
+        coverage run --source=./cornflow_core/ -m unittest discover -s cornflow_core/tests
         coverage report -m
