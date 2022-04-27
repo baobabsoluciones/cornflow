@@ -20,9 +20,7 @@ METHOD_OPTIONS = [
 @click.option(
     "--path", "-p", type=str, help="The absolute path to the JSONSchema", required=True
 )
-@click.option(
-    "--app-name", "-a", type=str, default="", help="The name of the application"
-)
+@click.option("--app-name", "-a", type=str, help="The name of the application")
 @click.option(
     "--output-path",
     "-o",
