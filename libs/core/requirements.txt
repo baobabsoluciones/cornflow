@@ -1,5 +1,5 @@
 click
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
+cornflow-client
 cryptography
 disposable-email-domains
 Flask
