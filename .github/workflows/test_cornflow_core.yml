@@ -35,7 +35,7 @@ jobs:
     - name: Create folder structure
       run: |
         cd cornflow_core
-        cd test
+        cd tests
         cd data
         mkdir output
         mkdir output_path
