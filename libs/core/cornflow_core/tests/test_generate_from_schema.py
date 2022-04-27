@@ -44,9 +44,10 @@ class GenerationTests(unittest.TestCase):
         )
 
     def tearDown(self):
+        pass
 
-        if os.path.isdir(self.last_path):
-            shutil.rmtree(self.last_path)
+        # if os.path.isdir(self.last_path):
+        #     shutil.rmtree(self.last_path)
 
     @staticmethod
     def _get_path(rel_path):
@@ -71,6 +72,9 @@ class GenerationTests(unittest.TestCase):
                 self.other_output_path,
             ],
         )
+        print(result.exit_code)
+        print(result.output)
+        self.assertEqual(result.exit_code, 0)
         self.last_path = self.other_output_path
         self.check(output_path=self.other_output_path)
 
