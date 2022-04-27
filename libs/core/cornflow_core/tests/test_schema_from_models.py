@@ -38,7 +38,7 @@ class SchemaFromModelsTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
         schema = self.import_schema(self._get_path(self.output_path))
-        print(schema["properties"].keys())
+
         tables = {
             "instances": {
                 "id": "string",
