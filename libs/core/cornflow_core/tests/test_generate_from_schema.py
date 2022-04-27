@@ -32,12 +32,12 @@ class GenerationTests(unittest.TestCase):
         )
         self.one_tab_inst_path = "./data/one_table.json"
         self.one_tab_inst = SuperDict.from_dict(
-            self.import_schema(self.one_tab_inst_path)
+            self.import_schema(self._get_file(self.one_tab_inst_path))
         )
         self.app_name = "test"
         self.second_app_name = "test_sec"
-        self.default_output_path = "./output"
-        self.other_output_path = "./output_path"
+        self.default_output_path = "../output"
+        self.other_output_path = "../output_path"
         self.last_path = self.default_output_path
         self.all_methods = TupList(
             ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]

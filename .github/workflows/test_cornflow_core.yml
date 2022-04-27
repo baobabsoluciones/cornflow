@@ -32,7 +32,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
-    - name: Run generate_from_schema tests
+    - name: Run unit tests
       run: |
         coverage run --source=./cornflow_core/ -m unittest discover -s cornflow_core/tests
         coverage report -m
