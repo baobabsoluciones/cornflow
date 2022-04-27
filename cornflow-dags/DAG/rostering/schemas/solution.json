@@ -31,6 +31,18 @@
           "time_slot"
         ]
       }
+    },
+    "indicators": {
+      "type": "object",
+      "description": "Indicators of solution",
+      "show": true,
+      "properties": {
+        "f.o": {
+          "type": "number",
+          "title": "F:O",
+          "description": "Objective function"
+        }
+      }
     }
   },
   "required": [

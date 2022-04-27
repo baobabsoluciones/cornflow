@@ -25,8 +25,16 @@ class Solution(SolutionCore):
             el: {(v["id_employee"], v["time_slot"]): v for v in data[el]}
             for el in ["works"]
         }
+        solution_data = cls(SuperDict(data_p))
+        # indicators
+        indicators = solution_data.get_working_hours()
 
-        return cls(SuperDict(data_p))
+        solution = {
+            "works": data_p["works"],
+            "indicators":indicators,
+        }
+
+        return cls(SuperDict(solution))
 
     def to_dict(self) -> dict:
         return {"works": pickle.loads(pickle.dumps(self.data["works"].values_l(), -1))}
