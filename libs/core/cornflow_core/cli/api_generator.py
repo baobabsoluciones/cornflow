@@ -42,7 +42,9 @@ class APIGenerator:
 
     def prepare_dirs(self):
         if not os.path.isdir(self.output_path):
+            print(f"CREATE DIR {self.output_path}")
             os.mkdir(self.output_path)
+            print(f"CREATED DIR {self.output_path}")
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
         init_path = os.path.join(self.model_path, "__init__.py")
