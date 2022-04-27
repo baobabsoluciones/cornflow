@@ -17,7 +17,9 @@ METHOD_OPTIONS = [
 
 
 @click.command(name="generate_from_schema")
-@click.option("--path", "-p", type=str, help="The absolute path to the JSONSchema")
+@click.option(
+    "--path", "-p", type=str, help="The absolute path to the JSONSchema", required=True
+)
 @click.option(
     "--app-name", "-a", type=str, default="", help="The name of the application"
 )
