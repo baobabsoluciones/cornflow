@@ -58,6 +58,7 @@ class APIGenerator:
 
     def main(self):
         self.prepare_dirs()
+        print("DIRECTORIES CREATED SUCCESSFULLY")
         tables = self.schema["properties"].keys()
         for table in tables:
             if self.schema["properties"][table]["type"] != "array":
