@@ -34,7 +34,7 @@ jobs:
         python -m pip install -U -r requirements-dev.txt
     - name: Create folder structure
       run: |
-        cd cornflow-core
+        cd cornflow_core
         cd test
         cd data
         mkdir output
