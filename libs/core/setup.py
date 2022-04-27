@@ -1,21 +1,18 @@
 import setuptools
 
-with open("README.rst", "r") as fh:
+with open("README.rst") as fh:
     long_description = fh.read()
 
 required = []
 with open("requirements.txt", "r") as fh:
     required.append(fh.read().splitlines())
 
-extra_required = {"excel": ["openpyxl", "pandas"]}
-
-
 setuptools.setup(
-    name="cornflow-client",
-    version="0.39.2",
+    name="cornflow-core",
+    version="0.0.1a89",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
-    description="Client to connect to a cornflow server",
+    description="REST API flask backend components used by cornflow and other REST APIs",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/baobabsoluciones/cornflow",
@@ -29,5 +26,4 @@ setuptools.setup(
     python_requires=">=3.7",
     include_package_data=True,
     install_requires=required,
-    extra_require=extra_required,
 )
