@@ -14,11 +14,10 @@ class EndpointGenerator:
         return (
             "# Imports from libraries\n"
             "from flask_apispec import doc, marshal_with, use_kwargs\n"
-            "from cornflow_core.authentication import authenticate\n"
+            "from cornflow_core.authentication import authenticate, BaseAuth\n"
             "from cornflow_core.resources import BaseMetaResource\n\n"
+            "from cornflow_core.constants import SERVICE_ROLE\n"
             "# Import from internal modules\n"
-            "from ..shared.const import SERVICE_ROLE\n"
-            "from ..shared.authentification import Auth\n"
             f"from ..models import {self.model_name}\n"
             f"from ..schemas import {', '.join(self.schemas_names.values())}\n\n"
         )
@@ -41,9 +40,9 @@ class EndpointGenerator:
         res += SP8 + 'description="Get list of all the elements in the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
         res += f"    @marshal_with({schema_name}(many=True))\n"
-        res += "    def get(self):\n"
+        res += "    def get(self, **kwargs):\n"
         res += SP8 + '"""\n'
         res += SP8 + "API method to get all the rows of the table.\n"
         res += (
@@ -57,7 +56,7 @@ class EndpointGenerator:
         )
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
-        res += SP8 + "return self.get_List()\n"
+        res += SP8 + "return self.get_list(**kwargs)\n"
         return res
 
     def generate_endpoint_get_one(self):
@@ -66,7 +65,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Get one element of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
         res += f"    @marshal_with({schema_name})\n"
         res += "    def get(self, idx):\n"
         res += SP8 + '"""\n'
@@ -93,7 +92,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Add a new row to the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
         res += f"    @marshal_with({schema_marshal})\n"
         res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
         res += "    def post(self, **kwargs):\n"
@@ -111,40 +110,12 @@ class EndpointGenerator:
         res += SP8 + "return self.post_list(data=kwargs)\n"
         return res
 
-    def generate_endpoint_delete_all(self):
-        res = "    @doc(\n"
-        res += SP8 + 'description="Delete all the data of the table",\n'
-        res += SP8 + f'tags=["{self.app_name}"],\n'
-        res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
-        res += "    def delete(self):\n"
-        res += SP8 + '"""\n'
-        res += SP8 + "API method to delete all the rows of the table.\n"
-        res += (
-            SP8
-            + "It requires authentication to be passed in the form of a token that has to be linked to\n"
-        )
-        res += SP8 + "an existing session (login) made by a user.\n\n"
-        res += (
-            SP8
-            + ":return: A dictionary with a message (error if authentication failed"
-            + ", or the execution does not exist or\n"
-        )
-        res += SP8 + "a message) and an integer with the HTTP status code.\n"
-        res += SP8 + ":rtype: Tuple(dict, integer)\n"
-        res += SP8 + '"""\n'
-        res += SP8 + "items = self.data_model.get_all_objects()\n"
-        res += SP8 + "for item in items:\n"
-        res += SP12 + "item.disable()\n"
-        res += SP8 + 'return {"message": "All the objects have been deleted"}, 200\n'
-        return res
-
     def generate_endpoint_delete_one(self):
         res = "    @doc(\n"
         res += SP8 + 'description="Delete one row of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"], \n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
         res += "    def delete(self, idx):\n"
         res += SP8 + '"""\n'
         res += SP8 + "API method to delete a row of the table.\n"
@@ -171,7 +142,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Edit one row of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"], \n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=Auth())\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
         res += f'    @use_kwargs({schema_name}, location="json")\n'
         res += "    def put(self, idx, **data):\n"
         res += SP8 + '"""\n'
@@ -191,4 +162,32 @@ class EndpointGenerator:
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
         res += SP8 + "return self.put_detail(data=data, idx=idx)\n"
+        return res
+
+    def generate_endpoint_patch(self):
+        schema_name = self.schemas_names["editRequest"]
+        res = "    @doc(\n"
+        res += SP8 + 'description="Patch one row of the table",\n'
+        res += SP8 + f'tags=["{self.app_name}"], \n'
+        res += "    )\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += f'    @use_kwargs({schema_name}, location="json")\n'
+        res += "    def patch(self, idx, **data):\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "API method to patch a row of the table.\n"
+        res += (
+            SP8
+            + "It requires authentication to be passed in the form of a token that has to be linked to\n"
+        )
+        res += SP8 + "an existing session (login) made by a user.\n\n"
+        res += SP8 + ":param idx: ID of the row\n"
+        res += (
+            SP8
+            + ":return: A dictionary with a message (error if authentication failed, "
+            + "or the execution does not exist or\n"
+        )
+        res += SP8 + "a message) and an integer with the HTTP status code.\n"
+        res += SP8 + ":rtype: Tuple(dict, integer)\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "return self.patch_detail(data=data, idx=idx)\n"
         return res

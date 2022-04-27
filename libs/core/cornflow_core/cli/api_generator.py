@@ -1,13 +1,20 @@
+"""
+This file has the class that creates the new API
+"""
 import json
 import os
 
-from .endpoint_tools import *
-from .models_tools import *
+from .endpoint_tools import EndpointGenerator
+from .models_tools import ModelGenerator, model_shared_imports
 from .schemas_tools import *
 from .tools import *
 
 
 class APIGenerator:
+    """
+    This class is used to create the new API
+    """
+
     def __init__(
         self,
         schema_path,
@@ -35,12 +42,24 @@ class APIGenerator:
         self.endpoint_path = os.path.join(self.output_path, "endpoints")
         self.schema_path = os.path.join(self.output_path, "schemas")
 
-    def import_schema(self):
+    def import_schema(self) -> dict:
+        """
+        This method imports the JSONSchema file
+
+        :return: the read schema
+        :rtype: dict
+        """
         with open(self.path, "r") as fd:
             schema = json.load(fd)
         return schema
 
     def prepare_dirs(self):
+        """
+        This method creates all the folders needed
+
+        :return: None
+        :rtype: None
+        """
         if not os.path.isdir(self.output_path):
             os.mkdir(self.output_path)
         if not os.path.isdir(self.model_path):
@@ -57,8 +76,13 @@ class APIGenerator:
         open(init_path, "w").close()
 
     def main(self):
+        """
+        This is the main method that gets executed
+
+        :return: None
+        :rtype: None
+        """
         self.prepare_dirs()
-        print("DIRECTORIES CREATED SUCCESSFULLY")
         tables = self.schema["properties"].keys()
         for table in tables:
             if self.schema["properties"][table]["type"] != "array":
@@ -75,6 +99,13 @@ class APIGenerator:
         )
 
     def new_model(self, table_name):
+        """
+        This method takes a table name and creates a flask database model with the fields os said table
+
+        :param str table_name: the name of the table to create
+        :return: the name of the created model
+        :rtype: str
+        """
         filename = os.path.join(self.model_path, self.name + "_" + table_name + ".py")
         class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
         parents_class = ["TraceAttributesModel"]
@@ -97,57 +128,14 @@ class APIGenerator:
             fd.write("\n")
         return class_name
 
-    def new_endpoint(self, table_name, model_name, schemas_names):
-        filename = os.path.join(
-            self.endpoint_path, self.name + "_" + table_name + ".py"
-        )
-        class_name_all = self.snake_to_camel(self.name + "_" + table_name + "_endpoint")
-        class_name_details = self.snake_to_camel(
-            self.name + "_" + table_name + "_details_endpoint"
-        )
-        parents_class = ["BaseMetaResource"]
-        roles_with_access = ["SERVICE_ROLE"]
-        eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
-        with open(filename, "w") as fd:
-            # Global
-            fd.write(eg.generate_endpoints_imports())
-            fd.write("\n")
-            fd.write(generate_class_def(class_name_all, parents_class))
-            fd.write(eg.generate_endpoint_description())
-            fd.write("\n")
-            fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
-            fd.write("\n")
-            fd.write(eg.generate_endpoint_init())
-            fd.write("\n")
-            if "getAll" in self.options or "all" in self.options:
-                fd.write(eg.generate_endpoint_get_all())
-                fd.write("\n")
-            fd.write(eg.generate_endpoint_post())
-            fd.write("\n")
-            if "deleteAll" in self.options or "all" in self.options:
-                fd.write(eg.generate_endpoint_delete_all())
+    def new_schemas(self, table_name: str) -> dict:
+        """
+        This method takes a table name and creates a flask database model with the fields os said table
 
-            fd.write("\n\n")
-            if any(m in self.options for m in ["getOne", "update", "deleteOne", "all"]):
-                # Details
-                fd.write(generate_class_def(class_name_details, parents_class))
-                fd.write(eg.generate_endpoint_description())
-                fd.write("\n")
-                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
-                fd.write("\n")
-                fd.write(eg.generate_endpoint_init())
-                fd.write("\n")
-                if "getOne" in self.options or "all" in self.options:
-                    fd.write(eg.generate_endpoint_get_one())
-                    fd.write("\n")
-                if "update" in self.options or "all" in self.options:
-                    fd.write(eg.generate_endpoint_put())
-                    fd.write("\n")
-                if "deleteOne" in self.options or "all" in self.options:
-                    fd.write(eg.generate_endpoint_delete_one())
-                    fd.write("\n")
-
-    def new_schemas(self, table_name):
+        :param str table_name: the name of the table to create
+        :return: the dictionary with the names of the schemas created
+        :rtype: dict
+        """
         filename = os.path.join(self.schema_path, self.name + "_" + table_name + ".py")
         class_name_one = self.snake_to_camel(self.name + "_" + table_name + "_response")
         class_name_edit = self.snake_to_camel(
@@ -180,6 +168,88 @@ class APIGenerator:
             "postRequest": class_name_post,
         }
 
+    def new_endpoint(
+        self, table_name: str, model_name: str, schemas_names: dict
+    ) -> None:
+        """
+        This method takes a table name, a model_name and the names of the marshmallow schemas and
+        creates a flask endpoint with the methods passed
+
+        :param str table_name: the name of the table to create
+        :param str model_name: the name of the model that have been created
+        :param dict schemas_names: the names of the schemas that have been created
+        :return: None
+        :rtype: None
+        """
+        filename = os.path.join(
+            self.endpoint_path, self.name + "_" + table_name + ".py"
+        )
+        class_name_all = self.snake_to_camel(self.name + "_" + table_name + "_endpoint")
+        class_name_details = self.snake_to_camel(
+            self.name + "_" + table_name + "_details_endpoint"
+        )
+        parents_class = ["BaseMetaResource"]
+        roles_with_access = ["SERVICE_ROLE"]
+        eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
+        with open(filename, "w") as fd:
+            # Global
+            if any(m in self.options for m in ["get_list", "post_list", "all"]):
+                fd.write(eg.generate_endpoints_imports())
+                fd.write("\n")
+                fd.write(generate_class_def(class_name_all, parents_class))
+                fd.write(eg.generate_endpoint_description())
+                fd.write("\n")
+                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
+                fd.write("\n")
+                fd.write(eg.generate_endpoint_init())
+                fd.write("\n")
+                if "get_list" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_get_all())
+                    fd.write("\n")
+                if "post_list" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_post())
+                    fd.write("\n")
+
+            fd.write("\n\n")
+
+            if any(
+                m in self.options
+                for m in [
+                    "get_detail",
+                    "put_detail",
+                    "patch_detail",
+                    "delete_detail",
+                    "all",
+                ]
+            ):
+                # Details
+                fd.write(generate_class_def(class_name_details, parents_class))
+                fd.write(eg.generate_endpoint_description())
+                fd.write("\n")
+                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
+                fd.write("\n")
+                fd.write(eg.generate_endpoint_init())
+                fd.write("\n")
+                if "get_detail" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_get_one())
+                    fd.write("\n")
+                if "put_detail" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_put())
+                    fd.write("\n")
+                if "patch_detail" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_patch())
+                    fd.write("\n")
+                if "delete_detail" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_delete_one())
+                    fd.write("\n")
+
     @staticmethod
-    def snake_to_camel(name):
+    def snake_to_camel(name: str) -> str:
+        """
+        This static method takes a name with underscores in it and changes it to camelCase
+
+        :param str name: the name to mutate
+        :return: the mutated name
+        :rtype: str
+        """
         return "".join(word.title() for word in name.split("_"))

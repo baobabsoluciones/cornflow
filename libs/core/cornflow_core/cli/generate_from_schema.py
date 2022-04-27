@@ -1,9 +1,19 @@
+"""
+File that implements the generate from schema cli command
+"""
 import click
 
 from .api_generator import APIGenerator
 
 # TODO: change choices of remove_method to: get-list, get-detail, post-list, put-detail, patch-detail, delete-detail
-METHOD_OPTIONS = ["getOne", "getAll", "update", "deleteOne", "deleteAll"]
+METHOD_OPTIONS = [
+    "get_list",
+    "post_list",
+    "get_detail",
+    "put_detail",
+    "patch_detail",
+    "delete_detail",
+]
 
 
 @click.command(name="generate_from_schema")
@@ -35,19 +45,15 @@ METHOD_OPTIONS = ["getOne", "getAll", "update", "deleteOne", "deleteAll"]
 )
 def generate_from_schema(path, app_name, output_path, remove_methods, one):
     """
+    This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
 
-    :param path:
-    :type path:
-    :param app_name:
-    :type app_name:
-    :param output_path:
-    :type output_path:
-    :param remove_methods:
-    :type remove_methods:
-    :param one:
-    :type one:
-    :return:
-    :rtype:
+    :param str path: the path to the JSONSchema file
+    :param str app_name: the name of the application
+    :param str output_path: the output path
+    :param tuple remove_methods: the methods that will not be added to the new endpoints
+    :param str one: if your schema describes only one table, use this option to indicate the name of the table
+    :return: None
+    :rtype: None
     """
     path = path.replace("\\", "/")
     output = None

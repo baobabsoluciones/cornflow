@@ -127,11 +127,13 @@ class GenerationTests(unittest.TestCase):
                 "-o",
                 self.other_output_path,
                 "-r",
-                "deleteOne",
+                "delete_detail",
                 "-r",
-                "update",
+                "put_detail",
                 "-r",
-                "getOne",
+                "get_detail",
+                "-r",
+                "patch_detail",
             ],
         )
 
@@ -286,18 +288,18 @@ class GenerationTests(unittest.TestCase):
                 self.assertIn(class_name, existing_classes)
 
             api_methods = {
-                "getOne": "GET",
-                "getAll": "GET",
-                "deleteOne": "DELETE",
-                "post": "POST",
-                "deleteAll": "DELETE",
-                "update": "PUT",
+                "get_detail": "GET",
+                "get_list": "GET",
+                "post_list": "POST",
+                "delete_detail": "DELETE",
+                "put_detail": "PUT",
+                "patch_detail": "PATCH",
             }
             # Checks the methods of the first endpoint
             include_methods_e1 = [
                 method_name
                 for method_name in include_methods
-                if method_name in ["getAll", "deleteAll", "post"]
+                if method_name in ["get_list", "post_list"]
             ]
             props_and_methods = mod.__dict__[class_names[0]].methods
             for method_name in include_methods_e1:
@@ -308,7 +310,8 @@ class GenerationTests(unittest.TestCase):
                 include_methods_e2 = [
                     method_name
                     for method_name in include_methods
-                    if method_name in ["getOne", "update", "deleteOne"]
+                    if method_name
+                    in ["get_detail", "put_detail", "delete_detail", "patch_detail"]
                 ]
                 props_and_methods = mod.__dict__[class_names[1]].methods
                 for method_name in include_methods_e2:
