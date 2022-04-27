@@ -24,7 +24,7 @@ class GenerationTests(unittest.TestCase):
 
         self.full_inst_path = "./data/instance.json"
         self.full_inst = SuperDict.from_dict(
-            self.import_schema(self._get_file(self.full_inst_path))
+            self.import_schema(self._get_path(self.full_inst_path))
         )
         # Removing parameter tables
         self.full_inst["properties"] = self.full_inst["properties"].vfilter(
@@ -32,7 +32,7 @@ class GenerationTests(unittest.TestCase):
         )
         self.one_tab_inst_path = "./data/one_table.json"
         self.one_tab_inst = SuperDict.from_dict(
-            self.import_schema(self._get_file(self.one_tab_inst_path))
+            self.import_schema(self._get_path(self.one_tab_inst_path))
         )
         self.app_name = "test"
         self.second_app_name = "test_sec"
@@ -48,7 +48,7 @@ class GenerationTests(unittest.TestCase):
             shutil.rmtree(self.last_path)
 
     @staticmethod
-    def _get_file(rel_path):
+    def _get_path(rel_path):
         return os.path.join(path_to_tests, rel_path)
 
     @staticmethod
@@ -156,7 +156,7 @@ class GenerationTests(unittest.TestCase):
 
         # Checks that the directories have been created
         for path in created_dirs:
-            self.assertTrue(os.path.isdir(path))
+            self.assertTrue(os.path.isdir(self._get_path(path)))
 
         # Checks that each file has been created
         created_dirs = created_dirs[1:4]
