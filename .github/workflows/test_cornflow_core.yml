@@ -32,21 +32,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
-    - name: Create folder structure
-      run: |
-        cd cornflow_core
-        cd tests
-        cd data
-        mkdir output
-        mkdir output_path
-        cd output_path
-        mkdir models
-        mkdir endpoints
-        mkdir schemas
-        cd ..
-        cd ..
-        cd ..
-        cd ..
     - name: Run unit tests
       run: |
         coverage run --source=./cornflow_core/ -m unittest discover -s cornflow_core/tests
