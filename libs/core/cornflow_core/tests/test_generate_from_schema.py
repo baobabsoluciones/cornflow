@@ -89,6 +89,11 @@ class GenerationTests(unittest.TestCase):
                 self.other_output_path,
             ],
         )
+
+        print(result.exit_code)
+        print(result.output)
+        self.assertEqual(result.exit_code, 0)
+
         instance = SuperDict.from_dict({"properties": {"data": self.one_tab_inst}})
         self.last_path = self.other_output_path
         self.check(instance=instance, output_path=self.other_output_path)
@@ -108,6 +113,10 @@ class GenerationTests(unittest.TestCase):
                 self.other_output_path,
             ],
         )
+
+        print(result.exit_code)
+        print(result.output)
+        self.assertEqual(result.exit_code, 0)
 
         instance = SuperDict.from_dict({"properties": {"newname": self.one_tab_inst}})
         self.last_path = self.other_output_path
@@ -132,6 +141,10 @@ class GenerationTests(unittest.TestCase):
                 "getOne",
             ],
         )
+
+        print(result.exit_code)
+        print(result.output)
+        self.assertEqual(result.exit_code, 0)
 
         include_methods = self.all_methods.vfilter(
             lambda v: v not in ["deleteOne", "update", "getOne"]
