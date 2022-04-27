@@ -24,7 +24,7 @@ class ModelGenerator:
 
     def generate_model_description(self):
         res = '    """\n'
-        res += f"    Model class for table {self.table_name} of application {self.app_name}\n"
+        res += f"    Model class for table {self.table_name} of the application {self.app_name}\n"
         res += f'    It inherits from :class:`{" and :class:".join(self.parents_class)}`\n\n'
         app_description = self.schema.get("description")
         if app_description is not None and app_description != "":
@@ -59,7 +59,10 @@ class ModelGenerator:
 
     def generate_table_name(self):
         res = "    # Table name in the database\n"
-        res += f'    __tablename__ = "{self.app_name}_{self.table_name}"\n'
+        if self.app_name is None:
+            res += f'    __tablename__ = "{self.table_name}"\n'
+        else:
+            res += f'    __tablename__ = "{self.app_name}_{self.table_name}"\n'
         return res
 
     def generate_model_fields(self):
@@ -87,7 +90,9 @@ class ModelGenerator:
             res += JSON_TYPES_TO_SQLALCHEMY[types]
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
-                foreign_table = self.app_name + "_" + foreign_table
+                if self.app_name is not None:
+                    foreign_table = self.app_name + "_" + foreign_table
+
                 res += f', db.ForeignKey("{foreign_table}.{foreign_prop}")'
             if key in schema_table["required"] and not nullable:
                 res += ", nullable=False"

@@ -106,8 +106,13 @@ class APIGenerator:
         :return: the name of the created model
         :rtype: str
         """
-        filename = os.path.join(self.model_path, self.name + "_" + table_name + ".py")
-        class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
+        if self.name is None:
+            filename = os.path.join(self.model_path, f"{table_name}.py")
+            class_name = self.snake_to_camel(table_name + "_model")
+        else:
+            filename = os.path.join(self.model_path, f"{self.name}_{table_name}.py")
+            class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
+
         parents_class = ["TraceAttributesModel"]
         mg = ModelGenerator(
             class_name, self.schema, parents_class, table_name, self.name
@@ -136,14 +141,25 @@ class APIGenerator:
         :return: the dictionary with the names of the schemas created
         :rtype: dict
         """
-        filename = os.path.join(self.schema_path, self.name + "_" + table_name + ".py")
-        class_name_one = self.snake_to_camel(self.name + "_" + table_name + "_response")
-        class_name_edit = self.snake_to_camel(
-            self.name + "_" + table_name + "_edit_request"
-        )
-        class_name_post = self.snake_to_camel(
-            self.name + "_" + table_name + "_post_request"
-        )
+        if self.name is None:
+            filename = os.path.join(self.schema_path, table_name + ".py")
+            class_name_one = self.snake_to_camel(table_name + "_response")
+            class_name_edit = self.snake_to_camel(table_name + "_edit_request")
+            class_name_post = self.snake_to_camel(table_name + "_post_request")
+        else:
+            filename = os.path.join(
+                self.schema_path, self.name + "_" + table_name + ".py"
+            )
+            class_name_one = self.snake_to_camel(
+                self.name + "_" + table_name + "_response"
+            )
+            class_name_edit = self.snake_to_camel(
+                self.name + "_" + table_name + "_edit_request"
+            )
+            class_name_post = self.snake_to_camel(
+                self.name + "_" + table_name + "_post_request"
+            )
+
         parents_class = ["Schema"]
         partial_schema = self.schema["properties"][table_name]["items"]
         sg = SchemaGenerator(partial_schema, table_name, self.name)
@@ -181,13 +197,21 @@ class APIGenerator:
         :return: None
         :rtype: None
         """
-        filename = os.path.join(
-            self.endpoint_path, self.name + "_" + table_name + ".py"
-        )
-        class_name_all = self.snake_to_camel(self.name + "_" + table_name + "_endpoint")
-        class_name_details = self.snake_to_camel(
-            self.name + "_" + table_name + "_details_endpoint"
-        )
+        if self.name is None:
+            filename = os.path.join(self.endpoint_path, table_name + ".py")
+            class_name_all = self.snake_to_camel(table_name + "_endpoint")
+            class_name_details = self.snake_to_camel(table_name + "_details_endpoint")
+        else:
+            filename = os.path.join(
+                self.endpoint_path, self.name + "_" + table_name + ".py"
+            )
+            class_name_all = self.snake_to_camel(
+                self.name + "_" + table_name + "_endpoint"
+            )
+            class_name_details = self.snake_to_camel(
+                self.name + "_" + table_name + "_details_endpoint"
+            )
+
         parents_class = ["BaseMetaResource"]
         roles_with_access = ["SERVICE_ROLE"]
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
