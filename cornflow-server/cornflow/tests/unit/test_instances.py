@@ -18,6 +18,7 @@ from cornflow.tests.const import (
     INSTANCE_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+from flask import current_app
 
 
 class TestInstancesListEndpoint(BaseTestCases.ListFilters):
@@ -174,6 +175,57 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         token = self.create_service_user()
         payload = {**self.payload, **dict(id=idx)}
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+
+    def test_get_none_instance_planner_one(self):
+        # Test planner users cannot access objects of other users
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+
+        self.get_one_row(
+            INSTANCE_URL + idx + "/data/",
+            payload=None,
+            expected_status=404,
+            check_payload=False,
+            token=token,
+        )
+
+    def test_get_none_instance_planner_all(self):
+        # Test planner users cannot access objects of other users
+        self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        self.get_no_rows(INSTANCE_URL, token=token)
+
+
+class TestAccessPlannerUsers(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+
+        current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
+        with open(INSTANCE_PATH) as f:
+            self.payload = json.load(f)
+        self.url = INSTANCE_URL
+        self.model = InstanceModel
+
+    def test_get_one_instance_planner(self):
+        # Test planner users can access objects of other users
+        idx = self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        payload = {**self.payload, **dict(id=idx)}
+
+        self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+
+    def test_get_all_instance_planner(self):
+        # Test planner users can access objects of other users
+        self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        row = self.client.get(
+            INSTANCE_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(token),
+        )
+
+        self.assertEqual(200, row.status_code)
+        self.assertEqual(len(row.json), 1)
 
 
 class TestInstanceModelMethods(CustomTestCase):

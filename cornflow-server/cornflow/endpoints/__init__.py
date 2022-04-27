@@ -52,6 +52,7 @@ from .roles import (
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .signup import SignUpEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
+from ..external_app.endpoint import external_resources
 
 
 resources = [
@@ -165,3 +166,6 @@ resources = [
         endpoint="recover-password",
     ),
 ]
+
+if len(external_resources):
+    resources = resources + external_resources
