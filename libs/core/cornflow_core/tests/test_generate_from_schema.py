@@ -157,7 +157,6 @@ class GenerationTests(unittest.TestCase):
 
         # Checks that the directories have been created
         for path in created_dirs:
-            print(self._get_path(path))
             self.assertTrue(os.path.isdir(self._get_path(path)))
 
         # Checks that each file has been created
@@ -171,7 +170,8 @@ class GenerationTests(unittest.TestCase):
             os.path.join(path, file) for path in created_dirs for file, _ in files
         ]
         for path_file in absolute_paths:
-            self.assertTrue(os.path.exists(path_file))
+            print(self._get_path(path_file))
+            self.assertTrue(os.path.exists(self._get_path(path_file)))
             if os.path.exists(path_file):
                 with open(path_file, "r") as fd:
                     txt = fd.read()
