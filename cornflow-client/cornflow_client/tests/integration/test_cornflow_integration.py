@@ -175,7 +175,7 @@ class TestCornflowClientUser(TestCase):
         time.sleep(10)
         exec_to_check_id = exec_to_check["id"]
         execution = self.client.create_data_check_execution(exec_to_check_id)
-        print(execution.__dict__)
+        print(execution)
         config = execution.get("config")
         self.assertIsInstance(config, dict)
         self.assertTrue(config.get("checks_only"))
