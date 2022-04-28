@@ -191,6 +191,15 @@ class TestCornflowClientUser(TestCase):
         self.assertIn('instance_checks', results['data'].keys())
         self.assertIn('solution_checks', results['data'].keys())
 
+    def test_data_check_solution_copy(self):
+        execution = self.test_create_data_check_execution()
+        time.sleep(10)
+        results = self.client.get_solution(execution["id"])
+        print(results)
+        self.assertIn('data', results.keys())
+        self.assertIn('instance_checks', results['data'].keys())
+        self.assertIn('solution_checks', results['data'].keys())
+
     def test_execution_results(self):
         execution = self.test_create_execution()
         time.sleep(10)

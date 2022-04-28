@@ -252,7 +252,7 @@ def cf_check(fun, app_name, secrets, **kwargs):
         raise AirflowDagException("The writing of the solution failed")
 
     # The validation went correctly: can save the solution without problem
-    return "Solution saved"
+    return "Checks saved"
 
 
 class NoSolverException(Exception):
