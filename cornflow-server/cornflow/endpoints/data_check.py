@@ -37,29 +37,12 @@ class DataCheckEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-
-    """    @doc(description="Get all executions", tags=["Executions"])
-    @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointResponse(many=True))
-    @use_kwargs(QueryFiltersExecution, location="query")
-    def get(self, **kwargs):
-        "" "
-        API method to get all the executions created by the user and its related info
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by a user
-
-        :return: A dictionary with a message (error if authentication failed or a list with all the executions
-          created by the authenticated user) and a integer with the HTTP status code
-        :rtype: Tuple(dict, integer)
-        "" "
-        return self.get_list(user=self.get_user(), **kwargs)"""
 
     @doc(description="Create a data check execution", tags=["Data checks"])
     @authenticate(auth_class=Auth())
