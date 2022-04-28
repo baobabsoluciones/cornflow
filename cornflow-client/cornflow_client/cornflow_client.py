@@ -364,12 +364,12 @@ class CornFlow(object):
     @ask_token
     @prepare_encoding
     def create_data_check_execution(
-            self,
-            execution_id,
-            name="test1",
-            config=None,
-            encoding=None,
-            run=True,
+        self,
+        execution_id,
+        name="test1",
+        config=None,
+        encoding=None,
+        run=True,
     ):
         """
         Creates an execution to check the instance and solution of an execution
