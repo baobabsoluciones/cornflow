@@ -6,7 +6,7 @@ certifi
 cffi
 chardet
 click
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
+cornflow-client==0.39.0
 cryptography
 Flask
 flask-apispec
