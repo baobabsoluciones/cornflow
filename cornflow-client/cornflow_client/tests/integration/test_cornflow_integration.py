@@ -179,6 +179,16 @@ class TestCornflowClientUser(TestCase):
         self.assertTrue(config.get("checksOnly"))
         self.assertEqual(config.get("execution_id"), exec_to_check_id)
         self.assertEqual(config.get("schema"), "solve_model_dag")
+        return execution
+
+    def test_data_check_solution(self):
+        execution = self.test_create_data_check_execution()
+        time.sleep(10)
+        results = self.client.get_solution(execution["id"])
+        self.assertIn('data', results.keys())
+        if results.get('data'):
+            self.assertIn('instance_checks', results['data'].keys())
+            self.assertIn('solution_checks', results['data'].keys())
 
     def test_execution_results(self):
         execution = self.test_create_execution()
