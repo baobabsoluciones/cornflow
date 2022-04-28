@@ -176,7 +176,7 @@ class TestCornflowClientUser(TestCase):
         exec_to_check_id = exec_to_check["id"]
         execution = self.client.create_data_check_execution(exec_to_check_id)
         config = execution.get("config", dict())
-        self.assertTrue(config.get("checksOnly"))
+        self.assertTrue(config.get("checks_only"))
         self.assertEqual(config.get("execution_id"), exec_to_check_id)
         self.assertEqual(config.get("schema"), "solve_model_dag")
         return execution
