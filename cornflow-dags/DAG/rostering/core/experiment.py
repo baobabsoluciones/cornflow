@@ -42,6 +42,9 @@ class Experiment(ExperimentCore):
     def get_objective(self) -> float:
         return self.solution.get_working_hours()
 
+    def get_indicators(self) -> dict:
+        return {"fo": self.get_objective()}
+
     def solve(self, options: dict) -> dict:
         raise NotImplementedError()
 
