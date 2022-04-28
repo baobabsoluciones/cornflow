@@ -170,6 +170,16 @@ class TestCornflowClientUser(TestCase):
 
         return response
 
+    def test_create_data_check_execution(self):
+        exec_to_check = self.test_create_execution()
+        time.sleep(10)
+        exec_to_check_id = exec_to_check["id"]
+        execution = self.client.create_data_check_execution(exec_to_check_id)
+        config = execution.get("config", dict())
+        self.assertTrue(config.get("checksOnly"))
+        self.assertEqual(config.get("execution_id"), exec_to_check_id)
+        self.assertEqual(config.get("schema"), "solve_model_dag")
+
     def test_execution_results(self):
         execution = self.test_create_execution()
         time.sleep(10)
