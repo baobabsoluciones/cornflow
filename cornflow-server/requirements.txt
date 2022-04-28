@@ -1,8 +1,8 @@
 alembic
 apispec
 click
-cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=libs/core
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
+cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow-tools#subdirectory=libs/core
+cornflow-client
 cryptography
 Flask
 flask-apispec
