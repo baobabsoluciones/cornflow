@@ -421,6 +421,7 @@ class CornFlow(object):
         response = self.put_api_for_id(
             "dag/", id=execution_id, encoding=encoding, payload=kwargs
         )
+        print(response.json())
         if response.status_code != 200:
             raise CornFlowApiError(
                 f"Expected a code 200, got a {response.status_code} error instead: {response.text}"
