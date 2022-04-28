@@ -50,6 +50,8 @@ from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+from ..external_app.endpoint import external_resources
+
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -166,3 +168,6 @@ resources = [
         endpoint="recover-password",
     ),
 ]
+
+if len(external_resources):
+    resources = resources + external_resources
