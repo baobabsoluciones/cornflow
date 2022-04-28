@@ -81,8 +81,7 @@ class BadInstanceClass(InstanceCore):
 
 
 class GoodSolutionClass(SolutionCore):
-    def schema(self):
-        return dict()
+    schema = get_empty_schema()
 
 
 class BadSolutionClass(SolutionCore):
