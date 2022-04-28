@@ -67,7 +67,7 @@ def get_all_example_data():
     example_data_new = {}
 
     for app in apps:
-        tests = app.test_cases()
+        tests = app.test_cases
         n = 1
         example = dict()
         for t in tests:
