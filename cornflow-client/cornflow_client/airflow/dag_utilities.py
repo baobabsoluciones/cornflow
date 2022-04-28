@@ -236,7 +236,7 @@ def cf_check(fun, app_name, secrets, **kwargs):
         state=1,
         log_json=log_json,
         log_text="Instance and solution checked.",
-        solution_schema=None,
+        solution_schema="_data_checks",
         checks=sol_checks,
         inst_checks=inst_checks,
         inst_id=inst_id,
