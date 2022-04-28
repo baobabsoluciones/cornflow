@@ -148,6 +148,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["solution"] = self.execution.data
         self.payload["solution_hash"] = self.execution.data_hash
         self.payload["user_id"] = self.user
+        self.payload["indicators"] = ""
 
         for key in self.response_items:
             self.assertEqual(self.payload[key], getattr(created_case, key))

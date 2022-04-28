@@ -4,6 +4,8 @@ and to serialize the response data given by the same endpoints.
 """
 
 # Imports from marshmallow library
+import json
+
 from marshmallow import fields, Schema
 
 # Import from internal modules
@@ -32,6 +34,19 @@ class CaseListResponse(BaseDataEndpointResponse):
     is_dir = fields.Function(
         lambda obj: obj.data is None, deserialize=lambda v: bool(v)
     )
+
+
+class CaseListAllWithIndicators(CaseListResponse):
+    def get_indicators(self, obj):
+        indicators_string = ""
+        if obj.solution is not None and isinstance(obj.solution, dict):
+            if "indicators" in obj.solution.keys():
+                temp = obj.solution["indicators"]
+                for key, val in sorted(temp.items()):
+                    indicators_string = f"{indicators_string} {key}: {val};"
+        return indicators_string[1:-1]
+
+    indicators = fields.Method("get_indicators")
 
 
 class CaseBase(CaseListResponse):
