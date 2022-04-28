@@ -32,7 +32,7 @@ class TestDataChecksEndpoint(CustomTestCase):
             temp["instance_id"] = fk_id
             return temp
 
-        self.payload = {load_file_fk(EXECUTION_PATH)}
+        self.payload = load_file_fk(EXECUTION_PATH)
 
     def test_new_data_check_execution(self):
         exec_to_check_id = self.create_new_row(
