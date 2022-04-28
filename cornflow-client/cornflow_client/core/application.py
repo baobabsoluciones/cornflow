@@ -197,6 +197,47 @@ class ApplicationCore(ABC):
 
         return sol, checks, {}, log_txt, log
 
+    def check(self, instance_data: dict, solution_data: dict, *args, **kwargs) -> Tuple[Dict, Dict, Dict]:
+        """
+        Checks the instance and solution data
+        :param instance_data: json data of the instance
+        :param solution_data: json data of the solution
+        :return: instance checks, solution checks, log
+        """
+        solver = self.get_default_solver_name()
+        solver_class = self.get_solver(name=solver)
+        if solver_class is None:
+            raise NoSolverException(f"No solver is available")
+        inst = self.instance.from_dict(instance_data)
+
+        instance_checks = dict()
+        solution_checks = dict()
+
+        inst_errors = inst.check_schema()
+        if inst_errors:
+            instance_checks["schema_checks"] = inst_errors
+
+        sol = self.solution.from_dict(solution_data)
+        sol_errors = sol.check_schema()
+        if sol_errors:
+            solution_checks["schema_checks"] = sol_errors
+
+        instance_checks.update(inst.check(*args, **kwargs))
+
+        algo = solver_class(inst, sol)
+        start = timer()
+        solution_checks.update(algo.check_solution(*args, **kwargs))
+
+        log = dict(
+            time=timer() - start,
+            solver=solver,
+            status="Optimal",
+            status_code=STATUS_OPTIMAL,
+            sol_code=SOLUTION_STATUS_FEASIBLE,
+        )
+
+        return instance_checks, solution_checks, log
+
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         """
         :param name: name of the solver to find

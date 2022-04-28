@@ -39,7 +39,7 @@ from .instance import (
     InstanceFileEndpoint,
     InstanceDataEndpoint,
 )
-
+from .data_check import DataCheckEndpoint
 from .login import LoginOpenAuthEndpoint, LoginEndpoint
 
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
@@ -69,6 +69,11 @@ resources = [
     ),
     dict(
         resource=InstanceFileEndpoint, urls="/instancefile/", endpoint="instance-file"
+    ),
+    dict(
+        resource=DataCheckEndpoint,
+        urls="/data-check/",
+        endpoint="data-check",
     ),
     dict(
         resource=ExecutionDetailsEndpoint,

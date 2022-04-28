@@ -58,9 +58,21 @@ class TestABC(unittest.TestCase):
         must_fail = lambda: GoodApp().solve(data=dict(number=""), config=dict())
         self.assertRaises(BadInstance, must_fail)
 
+    def test_check_data(self):
+        inst_check, sol_check, log = GoodApp().check(dict(number=""), dict())
+        self.assertIsInstance(inst_check, dict)
+        self.assertFalse(inst_check.get("is_infeasible", True))
+        self.assertIsInstance(sol_check, dict)
+        self.assertIsInstance(log, dict)
+        self.assertEqual(log.get('status'), "Optimal")
+
 
 class GoodInstanceClass(InstanceCore):
     schema = get_empty_schema(dict(number=dict(type="number")))
+
+    def check(self) -> dict:
+        return dict(is_infeasible=False)
+
 
 
 class BadInstanceClass(InstanceCore):
@@ -70,8 +82,7 @@ class BadInstanceClass(InstanceCore):
 
 
 class GoodSolutionClass(SolutionCore):
-    def schema(self):
-        return dict()
+    schema = get_empty_schema()
 
 
 class BadSolutionClass(SolutionCore):
