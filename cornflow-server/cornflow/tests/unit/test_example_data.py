@@ -26,7 +26,7 @@ class TestExampleDataEndpoint(CustomTestCase):
                 temp = json.load(f)
             return temp
 
-        self.example = {"instance_1": load_file(INSTANCE_PATH)}
+        self.example = load_file(INSTANCE_PATH)
         self.url = EXAMPLE_URL
         self.schema_name = "solve_model_dag"
 
@@ -34,7 +34,10 @@ class TestExampleDataEndpoint(CustomTestCase):
         af_client = Airflow_mock.return_value
         af_client.is_alive.return_value = True
         af_client.get_dag_info.return_value = {}
-        af_client.get_one_variable.return_value = self.example
+        af_client.get_one_variable.return_value = {
+            "value": json.dumps(self.example),
+            "key": self.schema_name,
+        }
         af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
         return af_client
 
@@ -52,4 +55,3 @@ class TestExampleDataEndpoint(CustomTestCase):
         self.assertEqual(example["examples"], self.example)
         af_client.is_alive.assert_called_once()
         af_client.get_dag_info.assert_called_once()
-        af_client.get_schemas_for_dag_name.assert_called_once()
