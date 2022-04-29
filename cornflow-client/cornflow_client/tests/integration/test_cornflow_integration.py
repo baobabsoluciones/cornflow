@@ -186,6 +186,7 @@ class TestCornflowClientUser(TestCase):
         execution = self.test_create_data_check_execution()
         time.sleep(10)
         results = self.client.get_solution(execution["id"])
+        self.assertEqual(results['state'], 1)
         self.assertIn('data', results.keys())
         self.assertIn('instance_checks', results['data'].keys())
         self.assertIn('solution_checks', results['data'].keys())
