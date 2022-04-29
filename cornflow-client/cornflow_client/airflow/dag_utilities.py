@@ -234,7 +234,7 @@ def cf_check(fun, app_name, secrets, **kwargs):
     log_json["checks_only"] = True
     payload = dict(
         state=1,
-        log_json=log_json,
+        log_json=dict(),
         log_text="Instance and solution checked.",
         solution_schema="_data_checks",
         checks=sol_checks,
