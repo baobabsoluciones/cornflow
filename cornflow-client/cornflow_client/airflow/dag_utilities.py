@@ -119,7 +119,7 @@ def try_to_write_solution(client, exec_id, payload):
         # attempt to update the execution with a failed status.
         raise AirflowDagException("The writing of the solution failed")
 
-    if payload["inst_checks"]:
+    if payload.get("inst_checks") is not None:
         checks_payload = dict()
         checks_payload["checks"] = payload["inst_checks"]
         try:
