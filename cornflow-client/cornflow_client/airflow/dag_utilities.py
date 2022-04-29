@@ -140,7 +140,7 @@ def get_schema(dag_name):
 
 def cf_solve_app(app, secrets, **kwargs):
     if kwargs["dag_run"].conf.get('checks_only'):
-        return cf_check(app.check, app.name, secrets, **kwargs)
+        return cf_check(app.check, secrets, **kwargs)
     else:
         return cf_solve(app.solve, app.name, secrets, **kwargs)
 
@@ -206,11 +206,11 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     return "Solution saved"
 
 
-def cf_check(fun, app_name, secrets, **kwargs):
+def cf_check(fun, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
     :param fun: The function to use to check the data
-    :param app_name: the name of the app
+    :param secrets: Environment variables
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
