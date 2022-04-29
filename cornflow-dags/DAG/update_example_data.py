@@ -78,7 +78,7 @@ def get_all_example_data():
                 example[solution] = t[1]
             else:
                 instance = f"instance_{n}"
-                example[instance] = t[0]
+                example[instance] = t
             n = n+1
 
         example_data_new[f"z_{app.name}_examples"] = example
