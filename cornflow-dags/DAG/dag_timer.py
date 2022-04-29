@@ -40,5 +40,6 @@ class Timer(ApplicationCore):
         solvers=list(solvers.keys()),
     )
 
-    def test_cases(self):
-        return []
+    @property
+    def test_cases(self) -> List[Dict]:
+        return list()
