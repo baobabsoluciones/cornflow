@@ -68,17 +68,19 @@ def get_all_example_data():
 
     for app in apps:
         tests = app.test_cases
+        print(app, tests)
         n = 1
         example = dict()
         for t in tests:
-            if len(t)==2:
+            if isinstance(t, dict):
+                instance = f"instance_{n}"
+                example[instance] = t
+
+            elif isinstance(t, tuple):
                 instance = f"instance_{n}"
                 solution = f"solution_{n}"
                 example[instance] = t[0]
                 example[solution] = t[1]
-            else:
-                instance = f"instance_{n}"
-                example[instance] = t
             n = n+1
 
         example_data_new[f"z_{app.name}_examples"] = example
