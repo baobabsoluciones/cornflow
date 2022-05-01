@@ -1,5 +1,5 @@
 """
-
+Main file with the creation of the app logic
 """
 # Full imports
 import click
@@ -77,14 +77,14 @@ def create_app(env_name="development", dataconn=None):
         docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
-    AUTH_TYPE = app.config["AUTH_TYPE"]
+    auth_type = app.config["AUTH_TYPE"]
 
-    if AUTH_TYPE == AUTH_DB:
+    if auth_type == AUTH_DB:
         api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
-    elif AUTH_TYPE == AUTH_LDAP:
+    elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
-    elif AUTH_TYPE == AUTH_OID:
+    elif auth_type == AUTH_OID:
         api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
 
     initialize_errorhandlers(app)
@@ -190,5 +190,5 @@ def register_dag_permissions(open_deployment, verbose):
 if __name__ == "__main__":
     environment_name = os.getenv("FLASK_ENV", "development")
     # env_name = 'development'
-    app = create_app(environment_name)
-    app.run()
+    flask_app = create_app(environment_name)
+    flask_app.run()
