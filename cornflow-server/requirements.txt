@@ -1,7 +1,7 @@
 alembic
 apispec
 click
-cornflow-core @ git+https://github.com/baobabsoluciones/cornflow@feature/cornflow-tools#subdirectory=libs/core
+cornflow-core
 cornflow-client
 cryptography
 Flask
