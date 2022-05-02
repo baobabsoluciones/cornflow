@@ -139,7 +139,7 @@ class APIGenerator:
 
         with open(init_file, "a") as file:
             if self.name is None:
-                file.write(f"from .{table_name.split} import {class_name}\n")
+                file.write(f"from .{table_name} import {class_name}\n")
             else:
                 file.write(f"from .{self.name}_{table_name} import {class_name}\n")
 
