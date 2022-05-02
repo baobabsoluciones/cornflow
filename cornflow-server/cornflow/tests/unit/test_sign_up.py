@@ -10,7 +10,7 @@ import json
 from cornflow.app import create_app, access_init
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import db
 from cornflow.tests.const import SIGNUP_URL
 
 

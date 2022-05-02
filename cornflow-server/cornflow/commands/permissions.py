@@ -3,13 +3,13 @@ def register_base_permissions_command(verbose):
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..endpoints import resources
-    from ..models import ApiViewModel, PermissionViewRoleModel
+    from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
     from ..shared.const import BASE_PERMISSION_ASSIGNATION, EXTRA_PERMISSION_ASSIGNATION
-    from ..shared.utils import db
+    from cornflow_core.shared import db
 
     permissions_registered = [
         (perm.action_id, perm.api_view_id, perm.role_id)
-        for perm in PermissionViewRoleModel.get_all_objects()
+        for perm in PermissionViewRoleBaseModel.get_all_objects()
     ]
 
     try:
@@ -18,11 +18,11 @@ def register_base_permissions_command(verbose):
         db.session.rollback()
         log.error(f"Unknown error on database commit: {e}")
 
-    views = {view.name: view.id for view in ApiViewModel.get_all_objects()}
+    views = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
 
     # Create base permissions
     permissions_to_register = [
-        PermissionViewRoleModel(
+        PermissionViewRoleBaseModel(
             {
                 "role_id": role,
                 "action_id": action,
@@ -39,7 +39,7 @@ def register_base_permissions_command(verbose):
         )
         not in permissions_registered
     ] + [
-        PermissionViewRoleModel(
+        PermissionViewRoleBaseModel(
             {
                 "role_id": role,
                 "action_id": action,
@@ -95,7 +95,7 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..models import DeployedDAG, PermissionsDAG, UserModel
-    from ..shared.utils import db
+    from cornflow_core.shared import db
 
     if open_deployment is None:
         open_deployment = int(current_app.config["OPEN_DEPLOYMENT"])

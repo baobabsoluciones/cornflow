@@ -5,11 +5,11 @@
 from sqlalchemy.dialects.postgresql import TEXT
 
 # Import from internal modules
-from .meta_model import TraceAttributes
-from ..shared.utils import db
+from cornflow_core.models import TraceAttributesModel
+from cornflow_core.shared import db
 
 
-class DeployedDAG(TraceAttributes):
+class DeployedDAG(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """
@@ -31,8 +31,4 @@ class DeployedDAG(TraceAttributes):
         self.description = data.get("description", None)
 
     def __repr__(self):
-        return self.id
-
-    @staticmethod
-    def get_all_objects():
-        return DeployedDAG.query.all()
+        return f"<DAG {self.id}>"

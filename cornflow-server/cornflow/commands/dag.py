@@ -11,7 +11,7 @@ def register_deployed_dags_command(
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
     from ..models import DeployedDAG
-    from ..shared.utils import db
+    from cornflow_core.shared import db
 
     af_client = Airflow(url, user, pwd)
     max_attempts = 20

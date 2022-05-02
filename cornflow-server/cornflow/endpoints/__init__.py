@@ -15,8 +15,9 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
+
 from .dag import (
-    DAGEndpoint,
+    DAGDetailEndpoint,
     DAGEndpointManual,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
@@ -31,7 +32,6 @@ from .execution import (
 )
 
 from .health import HealthEndpoint
-from .token import TokenEndpoint
 
 from .instance import (
     InstanceEndpoint,
@@ -41,17 +41,14 @@ from .instance import (
 )
 
 from .login import LoginOpenAuthEndpoint, LoginEndpoint
-
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
-from .roles import (
-    RolesListEndpoint,
-    RoleDetailEndpoint,
-    UserRoleListEndpoint,
-    UserRoleDetailEndpoint,
-)
+
+from .roles import RolesListEndpoint, RoleDetailEndpoint
+
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
-from .signup import SignUpEndpoint
+from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
+from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 from ..external_app.endpoint import external_resources
 
 
@@ -91,7 +88,7 @@ resources = [
         endpoint="execution-log",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
-    dict(resource=DAGEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
+    dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(
         resource=DAGInstanceEndpoint,
@@ -110,7 +107,6 @@ resources = [
         urls="/user/<int:user_id>/<int:make_admin>/",
         endpoint="user-admin",
     ),
-    dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup"),
     dict(resource=TokenEndpoint, urls="/token/", endpoint="token"),
     dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),
     dict(
