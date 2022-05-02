@@ -57,6 +57,7 @@ class SchemaGenerator:
     def mock_packages(self, files):
         # Mocking all relative imports
         for file_path, file_name in files:
+            print(f"Mocking files: {file_path}, {file_name}")
             with open(file_path, "r") as fd:
                 text = fd.read()
             parents = re.findall(r"class (.+)\((.+)\):", text)
@@ -76,6 +77,7 @@ class SchemaGenerator:
         db = SQLAlchemy()
         try:
             for file_path, file_name in files:
+                print(f"Parsing files {file_path}, {file_name}")
                 spec = importlib.util.spec_from_file_location(file_name, file_path)
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
