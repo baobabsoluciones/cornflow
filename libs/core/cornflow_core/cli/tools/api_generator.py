@@ -98,9 +98,10 @@ class APIGenerator:
             model_name = self.new_model(table)
             schemas_names = self.new_schemas(table)
             self.new_endpoint(table, model_name, schemas_names)
-            init_file = os.path.join(self.endpoint_path, "__init__.py")
-            with open(init_file, "a") as file:
-                file.write("resources = []\n")
+
+        init_file = os.path.join(self.endpoint_path, "__init__.py")
+        with open(init_file, "a") as file:
+            file.write("resources = []\n")
         print(
             f"The generated files will be stored in {os.path.join(os.getcwd(), self.output_path)}\n"
         )
