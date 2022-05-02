@@ -2,11 +2,11 @@ def register_actions_command(verbose):
     import logging as log
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..models import ActionModel
+    from cornflow_core.models import ActionBaseModel
     from ..shared.const import ACTIONS_MAP
-    from ..shared.utils import db
+    from cornflow_core.shared import db
 
-    actions_registered = [ac.name for ac in ActionModel.get_all_objects()]
+    actions_registered = [ac.name for ac in ActionBaseModel.get_all_objects()]
 
     try:
         db.session.commit()
@@ -15,7 +15,7 @@ def register_actions_command(verbose):
         log.error(f"Unknown error on database commit: {e}")
 
     actions_to_register = [
-        ActionModel(id=key, name=value)
+        ActionBaseModel(id=key, name=value)
         for key, value in ACTIONS_MAP.items()
         if value not in actions_registered
     ]

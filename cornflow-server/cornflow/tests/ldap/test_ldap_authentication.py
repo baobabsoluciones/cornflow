@@ -116,4 +116,4 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
-        self.assertEqual(501, response.status_code)
+        self.assertEqual(404, response.status_code)
