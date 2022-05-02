@@ -69,6 +69,7 @@ class GenerationTests(unittest.TestCase):
             ],
         )
 
+        print(result.output)
         self.assertEqual(result.exit_code, 0)
         self.last_path = self.other_output_path
         self.check(output_path=self.other_output_path)

@@ -6,8 +6,8 @@ import os
 
 from .endpoint_tools import EndpointGenerator
 from .models_tools import ModelGenerator, model_shared_imports
-from .schemas_tools import *
-from .tools import *
+from .schemas_tools import SchemaGenerator, schemas_imports
+from .tools import generate_class_def
 
 
 class APIGenerator:
@@ -64,15 +64,15 @@ class APIGenerator:
             os.mkdir(self.output_path)
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
-        init_path = os.path.join(self.model_path, "__init__.py")
+        init_path = os.path.join(self.model_path, "../__init__.py")
         open(init_path, "w").close()
         if not os.path.isdir(self.endpoint_path):
             os.mkdir(self.endpoint_path)
-        init_path = os.path.join(self.endpoint_path, "__init__.py")
+        init_path = os.path.join(self.endpoint_path, "../__init__.py")
         open(init_path, "w").close()
         if not os.path.isdir(self.schema_path):
             os.mkdir(self.schema_path)
-        init_path = os.path.join(self.schema_path, "__init__.py")
+        init_path = os.path.join(self.schema_path, "../__init__.py")
         open(init_path, "w").close()
 
     def main(self):
@@ -112,7 +112,6 @@ class APIGenerator:
         else:
             filename = os.path.join(self.model_path, f"{self.name}_{table_name}.py")
             class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
-
         parents_class = ["TraceAttributesModel"]
         mg = ModelGenerator(
             class_name, self.schema, parents_class, table_name, self.name

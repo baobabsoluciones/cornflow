@@ -1,6 +1,6 @@
 import click
 
-from .schema_generator import SchemaGenerator
+from cornflow_core.cli.tools.schema_generator import SchemaGenerator
 
 
 @click.command(name="schema_from_models")

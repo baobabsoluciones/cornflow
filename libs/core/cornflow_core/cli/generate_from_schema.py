@@ -3,7 +3,7 @@ File that implements the generate from schema cli command
 """
 import click
 
-from .api_generator import APIGenerator
+from cornflow_core.cli.tools.api_generator import APIGenerator
 
 # TODO: change choices of remove_method to: get-list, get-detail, post-list, put-detail, patch-detail, delete-detail
 METHOD_OPTIONS = [
