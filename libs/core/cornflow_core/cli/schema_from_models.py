@@ -31,16 +31,12 @@ from cornflow_core.cli.tools.schema_generator import SchemaGenerator
 def schema_from_models(path, output_path, ignore_files, leave_bases):
     """
 
-    :param path:
-    :type path:
-    :param output_path:
-    :type output_path:
-    :param ignore_files:
-    :type ignore_files:
-    :param leave_bases:
-    :type leave_bases:
-    :return:
-    :rtype:
+    :param str path: the path to the folder that contains the models
+    :param output_path: the output path where the JSONSchema should be placed
+    :param str ignore_files: files to be ignored.
+    :param str leave_bases: if the JSONSchema should have abstract classes used as the base for other clases.
+    :return: a click status code
+    :rtype: int
     """
     path = path.replace("\\", "/")
     output = None

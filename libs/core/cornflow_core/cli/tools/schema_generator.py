@@ -42,8 +42,6 @@ class SchemaGenerator:
             .vapply(lambda v: (os.path.join(self.tmp_path, v), v[:-3]))
         )
 
-        print(f"FILES: {files}")
-
         self.mock_packages(files)
 
         self.parse(files)
@@ -55,11 +53,11 @@ class SchemaGenerator:
         with open(self.output_path, "w") as fd:
             json.dump(schema, fd, indent=2)
         self.clear()
+        return 0
 
     def mock_packages(self, files):
         # Mocking all relative imports
         for file_path, file_name in files:
-            print(f"Mocking files: {file_path}, {file_name}")
             with open(file_path, "r") as fd:
                 text = fd.read()
             parents = re.findall(r"class (.+)\((.+)\):", text)
@@ -75,15 +73,13 @@ class SchemaGenerator:
 
     def parse(self, files):
         forget_keys = ["created_at", "updated_at", "deleted_at"]
-        print("INIT PARSE")
         db = SQLAlchemy()
         try:
             for file_path, file_name in files:
-                print(f"Parsing files {file_path}, {file_name}")
+
                 spec = importlib.util.spec_from_file_location(file_name, file_path)
-                print(f"SPEC: {file_name}-{spec}")
                 mod = importlib.util.module_from_spec(spec)
-                print(f"MOD: {file_name}-{mod}")
+
                 spec.loader.exec_module(mod)
 
                 models = SuperDict(mod.__dict__).kfilter(lambda k: k in self.parents)

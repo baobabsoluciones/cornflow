@@ -5,7 +5,6 @@ import click
 
 from cornflow_core.cli.tools.api_generator import APIGenerator
 
-# TODO: change choices of remove_method to: get-list, get-detail, post-list, put-detail, patch-detail, delete-detail
 METHOD_OPTIONS = [
     "get_list",
     "post_list",
@@ -52,8 +51,8 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
     :param str output_path: the output path
     :param tuple remove_methods: the methods that will not be added to the new endpoints
     :param str one: if your schema describes only one table, use this option to indicate the name of the table
-    :return: None
-    :rtype: None
+    :return: a click status code
+    :rtype: int
     """
     path = path.replace("\\", "/")
     output = None

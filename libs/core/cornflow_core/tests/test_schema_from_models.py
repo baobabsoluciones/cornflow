@@ -26,9 +26,8 @@ class SchemaFromModelsTests(unittest.TestCase):
         return os.path.join(path_to_tests, rel_path)
 
     def tearDown(self):
-        pass
-        # if os.path.exists(self.output_path):
-        #     os.remove(self.output_path)
+        if os.path.exists(self.output_path):
+            os.remove(self.output_path)
 
     def test_base(self):
         runner = CliRunner()

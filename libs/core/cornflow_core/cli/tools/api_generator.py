@@ -109,6 +109,7 @@ class APIGenerator:
         print(
             f"The generated files will be stored in {os.path.join(os.getcwd(), self.output_path)}\n"
         )
+        return 0
 
     def new_model(self, table_name):
         """
