@@ -1,13 +1,13 @@
-name: Publish Python 🐍 distributions 📦 to PyPI
+name: Publish cornflow-client Python 🐍 distributions 📦 to PyPI
 
 on:
   push:
     tags:
-      - "vcc[0-9]+.[0-9]+.[0-9]+"
+      - "client*"
 
 jobs:
   build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
+    name: Build and publish cornflow-client Python 🐍 distributions 📦 to PyPI
     defaults:
       run:
         working-directory: ./cornflow-client

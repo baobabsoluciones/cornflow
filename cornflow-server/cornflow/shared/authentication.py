@@ -1,157 +1,31 @@
 """
 
 """
-# Global imports
-import base64
-import datetime
-import jwt
-import requests
-import requests.exceptions
 
-# Partial imports
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
-from flask import request, g, current_app
+# Global imports
 from functools import wraps
 
+from cornflow_core.authentication import BaseAuth
+from cornflow_core.exceptions import InvalidData, NoPermission
+from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
+
+# Partial imports
+from flask import request, g, current_app
+
 # Internal modules imports
-from .const import (
-    PERMISSION_METHOD_MAP,
-    OID_AZURE,
-    OID_GOOGLE,
-    OID_AZURE_DISCOVERY_COMMON_URL,
-    OID_AZURE_DISCOVERY_TENANT_URL,
-)
-
-from .exceptions import (
-    CommunicationError,
-    EndpointNotImplemented,
-    InvalidCredentials,
-    InvalidData,
-    NoPermission,
-    ObjectDoesNotExist,
-)
-
-from ..models import ApiViewModel, UserModel, PermissionsDAG, PermissionViewRoleModel
+from .const import PERMISSION_METHOD_MAP
+from ..models import UserModel, PermissionsDAG
 
 
-class Auth:
-    @staticmethod
-    def generate_token(user_id):
-        """
+class Auth(BaseAuth):
+    def __init__(self, user_model=UserModel):
+        super().__init__(user_model)
 
-        :param user_id:
-        :return:
-        """
-        payload = {
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1),
-            "iat": datetime.datetime.utcnow(),
-            "sub": user_id,
-        }
-
-        return jwt.encode(payload, current_app.config["SECRET_KEY"], "HS256")
-
-    @staticmethod
-    def decode_token(token):
-        """
-
-        :param token:
-        :return:
-        """
-        try:
-            payload = jwt.decode(
-                token, current_app.config["SECRET_KEY"], algorithms="HS256"
-            )
-            return {"user_id": payload["sub"]}
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                error="The token has expired, please login again", status_code=400
-            )
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                error="Invalid token, please try again with a new token",
-                status_code=400,
-            )
-
-    @staticmethod
-    def validate_oid_token(token, client_id, tenant_id, issuer, provider):
-        """
-        :param str token:
-        :param str client_id:
-        :param str tenant_id:
-        :param str issuer:
-        :param int provider:
-        """
-        public_key = Auth._get_public_key(token, tenant_id, provider)
-        try:
-            decoded = jwt.decode(
-                token,
-                public_key,
-                verify=True,
-                algorithms=["RS256"],
-                audience=[client_id],
-                issuer=issuer,
-            )
-            return decoded
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                error="The token has expired, please login again", status_code=400
-            )
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                error="Invalid token, please try again with a new token",
-                status_code=400,
-            )
-
-    @staticmethod
-    def get_token_from_header(headers):
-        if "Authorization" not in headers:
-            raise InvalidCredentials(
-                error="Auth token is not available", status_code=400
-            )
-        auth_header = headers.get("Authorization")
-        if not auth_header:
-            return ""
-        try:
-            return auth_header.split(" ")[1]
-        except Exception as e:
-            raise InvalidCredentials(
-                error="The Authorization header has a bad syntax: {}".format(e)
-            )
-
-    @staticmethod
-    def get_user_obj_from_header(headers):
-        """
-        returns a user from the headers of the request
-
-        :return: user
-        :rtype: UserModel
-        """
-        token = Auth.get_token_from_header(headers)
-        data = Auth.decode_token(token)
-        user_id = data["user_id"]
-        user = UserModel.get_one_user(user_id)
-        if user is None:
-            raise ObjectDoesNotExist("User does not exist, invalid token")
-        return user
-
-    @staticmethod
-    def auth_required(func):
-        """
-        Auth decorator
-        :param func:
-        :return:
-        """
-
-        @wraps(func)
-        def decorated_user(*args, **kwargs):
-            user = Auth.get_user_obj_from_header(request.headers)
-            Auth._get_permission_for_request(request, user.id)
-            g.user = {"id": user.id}
-            return func(*args, **kwargs)
-
-        return decorated_user
+    def authenticate(self):
+        user = self.get_user_from_header(request.headers)
+        check = Auth._get_permission_for_request(request, user.id)
+        g.user = user
+        return True
 
     @staticmethod
     def dag_permission_required(func):
@@ -164,7 +38,7 @@ class Auth:
         @wraps(func)
         def dag_decorator(*args, **kwargs):
             if int(current_app.config["OPEN_DEPLOYMENT"]) == 0:
-                user_id = Auth.get_user_obj_from_header(request.headers).id
+                user_id = g.user.id
                 dag_id = request.json.get("schema", None)
                 if dag_id is None:
                     raise InvalidData(
@@ -202,10 +76,6 @@ class Auth:
     """
 
     @staticmethod
-    def _get_request_info(req):
-        return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
-
-    @staticmethod
     def _get_permission_for_request(req, user_id):
         method, url = Auth._get_request_info(req)
         user_roles = UserModel.get_one_user(user_id).roles
@@ -216,11 +86,11 @@ class Auth:
             )
 
         action_id = PERMISSION_METHOD_MAP[method]
-        view_id = ApiViewModel.query.filter_by(url_rule=url).first().id
+        view_id = ViewBaseModel.query.filter_by(url_rule=url).first().id
 
         for role in user_roles:
-            has_permission = PermissionViewRoleModel.get_permission(
-                role, view_id, action_id
+            has_permission = PermissionViewRoleBaseModel.get_permission(
+                role_id=role, api_view_id=view_id, action_id=action_id
             )
 
             if has_permission:
@@ -229,93 +99,3 @@ class Auth:
         raise NoPermission(
             error="You do not have permission to access this endpoint", status_code=403
         )
-
-    @staticmethod
-    def _get_kid(token):
-        headers = jwt.get_unverified_header(token)
-        if not headers:
-            raise InvalidCredentials("Token is missing the headers")
-        try:
-            return headers["kid"]
-        except KeyError:
-            raise InvalidCredentials("Token is missing the key identifier")
-
-    @staticmethod
-    def _fetch_discovery_meta(tenant_id, provider):
-        if provider == OID_AZURE:
-            oid_tenant_url = OID_AZURE_DISCOVERY_TENANT_URL
-            oid_common_url = OID_AZURE_DISCOVERY_COMMON_URL
-        elif provider == OID_GOOGLE:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-        else:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-
-        discovery_url = (
-            oid_tenant_url.format(tenant_id=tenant_id) if tenant_id else oid_common_url
-        )
-        try:
-            response = requests.get(discovery_url)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
-            print(response.text)
-            raise CommunicationError(
-                f"Error getting issuer discovery meta from {discovery_url}", error
-            )
-        return response.json()
-
-    @staticmethod
-    def _get_jwks_uri(tenant_id, provider):
-        meta = Auth._fetch_discovery_meta(tenant_id, provider)
-        if "jwks_uri" in meta:
-            return meta["jwks_uri"]
-        else:
-            raise CommunicationError("jwks_uri not found in the issuer meta")
-
-    @staticmethod
-    def _get_jwks(tenant_id, provider):
-        jwks_uri = Auth._get_jwks_uri(tenant_id, provider)
-        try:
-            response = requests.get(jwks_uri)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
-            print(response.text)
-            raise CommunicationError(
-                f"Error getting issuer jwks from {jwks_uri}", error
-            )
-        return response.json()
-
-    @staticmethod
-    def _get_jwk(kid, tenant_id, provider):
-        for jwk in Auth._get_jwks(tenant_id, provider).get("keys"):
-            if jwk.get("kid") == kid:
-                return jwk
-        raise InvalidCredentials("Token has an unknown key identifier")
-
-    def _ensure_bytes(key):
-        if isinstance(key, str):
-            key = key.encode("utf-8")
-        return key
-
-    @staticmethod
-    def _decode_value(val):
-        decoded = base64.urlsafe_b64decode(Auth._ensure_bytes(val) + b"==")
-        return int.from_bytes(decoded, "big")
-
-    @staticmethod
-    def _rsa_pem_from_jwk(jwk):
-        return (
-            RSAPublicNumbers(
-                n=Auth._decode_value(jwk["n"]), e=Auth._decode_value(jwk["e"])
-            )
-            .public_key(default_backend())
-            .public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo,
-            )
-        )
-
-    @staticmethod
-    def _get_public_key(token, tenant_id, provider):
-        kid = Auth._get_kid(token)
-        jwk = Auth._get_jwk(kid, tenant_id, provider)
-        return Auth._rsa_pem_from_jwk(jwk)

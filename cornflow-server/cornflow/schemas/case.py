@@ -3,14 +3,15 @@ This file contains the schemas used to validate the incoming data to the differe
 and to serialize the response data given by the same endpoints.
 """
 
+from cornflow_core.schemas import BasePatchOperation
+
 # Imports from marshmallow library
 import json
 
 from marshmallow import fields, Schema
 
 # Import from internal modules
-from .common import QueryFilters, PatchOperation
-from .common import BaseDataEndpointResponse
+from .common import BaseDataEndpointResponse, QueryFilters
 
 
 class CaseRawRequest(Schema):
@@ -94,8 +95,8 @@ class CaseEditRequest(Schema):
 
 
 class CaseCompareResponse(Schema):
-    data_patch = fields.Nested(PatchOperation, many=True)
-    solution_patch = fields.Nested(PatchOperation, many=True)
+    data_patch = fields.Nested(BasePatchOperation, many=True)
+    solution_patch = fields.Nested(BasePatchOperation, many=True)
 
 
 class QueryFiltersCase(QueryFilters):

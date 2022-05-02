@@ -176,7 +176,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         payload = {**self.payload, **dict(id=idx)}
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
 
-    def test_get_none_instance_planner(self):
+    def test_get_none_instance_planner_one(self):
         # Test planner users cannot access objects of other users
         idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_planner()
@@ -189,15 +189,22 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
             token=token,
         )
 
+    def test_get_none_instance_planner_all(self):
+        # Test planner users cannot access objects of other users
+        self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        self.get_no_rows(INSTANCE_URL, token=token)
+
 
 class TestAccessPlannerUsers(CustomTestCase):
     def setUp(self):
         super().setUp()
+
+        current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
         self.url = INSTANCE_URL
         self.model = InstanceModel
-        current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
 
     def test_get_one_instance_planner(self):
         # Test planner users can access objects of other users
@@ -206,6 +213,19 @@ class TestAccessPlannerUsers(CustomTestCase):
         payload = {**self.payload, **dict(id=idx)}
 
         self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+
+    def test_get_all_instance_planner(self):
+        # Test planner users can access objects of other users
+        self.create_new_row(self.url, self.model, self.payload)
+        token = self.create_planner()
+        row = self.client.get(
+            INSTANCE_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(token),
+        )
+
+        self.assertEqual(200, row.status_code)
+        self.assertEqual(len(row.json), 1)
 
 
 class TestInstanceModelMethods(CustomTestCase):
@@ -232,8 +252,8 @@ class TestInstanceModelMethods(CustomTestCase):
 
     def test_repr_method(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(idx, "<id {}>".format(idx))
+        self.repr_method(idx, f"<Instance {idx}>")
 
     def test_str_method(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(idx, "<id {}>".format(idx))
+        self.str_method(idx, f"<Instance {idx}>")

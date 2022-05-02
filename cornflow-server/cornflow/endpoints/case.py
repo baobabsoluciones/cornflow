@@ -5,17 +5,17 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema
+from cornflow_core.resources import BaseMetaResource
+from cornflow_core.shared import validate_and_continue
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
-from flask_apispec.views import MethodResource
 from flask_inflate import inflate
 import jsonpatch
 import logging as log
 
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import CaseModel, ExecutionModel, InstanceModel
 from ..schemas.case import (
     CaseBase,
@@ -32,17 +32,22 @@ from ..schemas.case import (
 
 from ..schemas.model_json import DataSchema
 from ..shared.authentication import Auth
-from ..shared.compress import compressed
-from ..shared.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow_core.compress import compressed
+from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow_core.authentication import authenticate
 
 
-class CaseEndpoint(MetaResource, MethodResource):
+class CaseEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case or get all the cases and their related information
     """
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = CaseModel
+
     @doc(description="Get all cases", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListAllWithIndicators(many=True))
     @use_kwargs(QueryFiltersCase, location="query")
     def get(self, **kwargs):
@@ -54,12 +59,13 @@ class CaseEndpoint(MetaResource, MethodResource):
         :return: a dictionary with a tree structure of the cases and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        response = CaseModel.get_all_objects(self.get_user(), **kwargs)
-        log.debug(f"User {self.get_user_id()} gets all cases")
+
+        response = self.get_list(user=self.get_user(), **kwargs)
+        log.info(f"User {self.get_user()} gets all cases")
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @inflate
     @marshal_with(CaseListResponse)
@@ -70,17 +76,21 @@ class CaseEndpoint(MetaResource, MethodResource):
         data["user_id"] = self.get_user_id()
         item = CaseModel.from_parent_id(self.get_user(), data)
         item.save()
-        log.info(f"User {self.get_user_id()} creates case {item.id}")
+        log.info(f"User {self.get_user()} creates case {item.id}")
         return item, 201
 
 
-class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
+class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case from an already existing instance and execution
     """
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = CaseModel
+
     @doc(description="Create a new case from instance and execution", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @marshal_with(CaseListResponse)
     @use_kwargs(CaseFromInstanceExecution, location="json")
@@ -103,7 +113,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
         user = self.get_user()
 
         def get_instance_data(instance_id):
-            instance = InstanceModel.get_one_object_from_user(user, instance_id)
+            instance = InstanceModel.get_one_object(user=user, idx=instance_id)
             if instance is None:
                 raise ObjectDoesNotExist("Instance does not exist")
             return dict(
@@ -111,7 +121,7 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
             )
 
         def get_execution_data(execution_id):
-            execution = ExecutionModel.get_one_object_from_user(user, execution_id)
+            execution = ExecutionModel.get_one_object(user=user, idx=execution_id)
             if execution is None:
                 raise ObjectDoesNotExist("Execution does not exist")
             data = get_instance_data(execution.instance_id)
@@ -129,12 +139,12 @@ class CaseFromInstanceExecutionEndpoint(MetaResource, MethodResource):
         item = CaseModel.from_parent_id(user, data)
         item.save()
         log.info(
-            f"User {self.get_user_id()} creates case {item.id} from instance/execution"
+            f"User {self.get_user()} creates case {item.id} from instance/execution"
         )
         return item, 201
 
 
-class CaseCopyEndpoint(MetaResource, MethodResource):
+class CaseCopyEndpoint(BaseMetaResource):
     """
     Copies the case to a new case. Original case id goes in the url
     """
@@ -142,6 +152,7 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
     def __init__(self):
         super().__init__()
         self.model = CaseModel
+        self.data_model = CaseModel
         self.query = self.model.get_all_objects
         self.primary_key = "id"
         self.fields_to_copy = [
@@ -157,33 +168,37 @@ class CaseCopyEndpoint(MetaResource, MethodResource):
         self.fields_to_modify = ["name"]
 
     @doc(description="Copies a case to a new one", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListResponse)
     def post(self, idx):
         """ """
-        case = self.model.get_one_object_from_user(self.get_user(), idx)
+        case = self.model.get_one_object(user=self.get_user(), idx=idx)
         data = case.__dict__
         payload = dict()
         for key in data.keys():
             if key in self.fields_to_copy:
                 payload[key] = data[key]
             if key in self.fields_to_modify:
-                payload[key] = "Copy_" + payload[key]
+                payload[key] = "Copy_" + data[key]
 
         response = self.post_list(payload)
-        log.info(f"User {self.get_user_id()} copied case {idx} into {response[0].id}")
+        log.info(f"User {self.get_user()} copied case {idx} into {response[0].id}")
         return response
 
 
-class CaseDetailsEndpoint(MetaResource, MethodResource):
+class CaseDetailsEndpoint(BaseMetaResource):
     """
     Endpoint used to get the information of a single case, edit it or delete it
     """
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = CaseModel
+
     @doc(description="Get one case", tags=["Cases"], inherit=False)
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseListResponse)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
         API method to get an case created by the user and its related info.
@@ -192,12 +207,12 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        response = CaseModel.get_one_object_from_user(self.get_user(), idx)
-        log.debug(f"User {self.get_user_id()} gets case {idx}")
+        response = self.get_detail(idx=idx, user=self.get_user())
+        log.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(CaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         """
@@ -207,13 +222,11 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user_id()} edits case {idx}")
-        return self.put_detail(
-            kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
-        )
+        log.info(f"User {self.get_user()} edits case {idx}")
+        return self.put_detail(data=kwargs, idx=idx, user=self.get_user())
 
     @doc(description="Delete a case", tags=["Cases"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     def delete(self, idx):
         """
         API method to delete an existing case.
@@ -224,12 +237,8 @@ class CaseDetailsEndpoint(MetaResource, MethodResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        item = CaseModel.get_one_object_from_user(self.get_user(), idx)
-        if item is None:
-            raise ObjectDoesNotExist()
-        CaseModel.delete(item)
-        log.info(f"User {self.get_user_id()} deletes case {idx}")
-        return {"message": "The object has been deleted"}, 200
+        log.info(f"User {self.get_user()} deletes case {idx}")
+        return self.delete_detail(idx=idx, user=self.get_user())
 
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
@@ -238,9 +247,9 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     """
 
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseBase)
-    @MetaResource.get_data_or_404
+    @BaseMetaResource.get_data_or_404
     @compressed
     def get(self, idx):
         """
@@ -253,38 +262,34 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        response = CaseModel.get_one_object_from_user(self.get_user(), idx)
-        log.debug(f"User {self.get_user_id()} retrieved data for case {idx}")
+        response = self.get_detail(idx=idx, user=self.get_user())
+        log.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @inflate
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
-        response = self.patch_detail(
-            kwargs, self.get_user(), idx, model=CaseModel.get_one_object_from_user
-        )
-        log.info(f"User {self.get_user_id()} patches case {idx}")
+        response = self.patch_detail(data=kwargs, idx=idx, user=self.get_user())
+        log.info(f"User {self.get_user()} patches case {idx}")
         return response
 
 
-class CaseToInstance(MetaResource, MethodResource):
+class CaseToInstance(BaseMetaResource):
     """
     Endpoint used to create a new instance or instance and execution from a stored case
     """
 
     def __init__(self):
         super().__init__()
-        self.model = InstanceModel
-        self.query = InstanceModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = InstanceModel
 
     @doc(
         description="Copies the information stored in a case into a new instance",
         tags=["Cases"],
     )
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseToInstanceResponse)
     def post(self, idx):
         """
@@ -296,7 +301,7 @@ class CaseToInstance(MetaResource, MethodResource):
         :return: an object with the instance or instance and execution ID that have been created and the status code
         :rtype: Tuple (dict, integer)
         """
-        case = CaseModel.get_one_object_from_user(self.get_user(), idx)
+        case = CaseModel.get_one_object(user=self.get_user(), idx=idx)
 
         if case is None:
             raise ObjectDoesNotExist()
@@ -321,12 +326,12 @@ class CaseToInstance(MetaResource, MethodResource):
         validate_and_continue(marshmallow_obj(), payload["data"])
         response = self.post_list(payload)
         log.info(
-            f"User {self.get_user_id()} creates instance {response[0].id} from case {idx}"
+            f"User {self.get_user()} creates instance {response[0].id} from case {idx}"
         )
         return response
 
 
-class CaseCompare(MetaResource, MethodResource):
+class CaseCompare(BaseMetaResource):
     """
     Endpoint used to generate the json patch of two given cases
     """
@@ -341,7 +346,7 @@ class CaseCompare(MetaResource, MethodResource):
         description="Compares the data and / or solution of two given cases",
         tags=["Cases"],
     )
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(CaseCompareResponse)
     @use_kwargs(QueryCaseCompare, location="query")
     @compressed
@@ -358,8 +363,8 @@ class CaseCompare(MetaResource, MethodResource):
         """
         if idx1 == idx2:
             raise InvalidData("The case identifiers should be different", 400)
-        case_1 = self.model.get_one_object_from_user(self.get_user(), idx1)
-        case_2 = self.model.get_one_object_from_user(self.get_user(), idx2)
+        case_1 = self.model.get_one_object(user=self.get_user(), idx=idx1)
+        case_2 = self.model.get_one_object(user=self.get_user(), idx=idx2)
 
         if case_1 is None:
             raise ObjectDoesNotExist(
@@ -384,5 +389,5 @@ class CaseCompare(MetaResource, MethodResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        log.debug(f"User {self.get_user_id()} compared cases {idx1} and {idx2}")
+        log.info(f"User {self.get_user()} compared cases {idx1} and {idx2}")
         return payload, 200

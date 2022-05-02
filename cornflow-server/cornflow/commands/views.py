@@ -4,10 +4,10 @@ def register_views_command(verbose):
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..endpoints import resources
-    from ..models import ApiViewModel
-    from ..shared.utils import db
+    from cornflow_core.models import ViewBaseModel
+    from cornflow_core.shared import db
 
-    views_registered = [view.name for view in ApiViewModel.get_all_objects()]
+    views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
 
     try:
         db.session.commit()
@@ -16,7 +16,7 @@ def register_views_command(verbose):
         log.error(f"Unknown error on database commit: {e}")
 
     views_to_register = [
-        ApiViewModel(
+        ViewBaseModel(
             {
                 "name": view["endpoint"],
                 "url_rule": view["urls"],

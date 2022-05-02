@@ -48,49 +48,49 @@ class TestCasesModels(CustomTestCase):
         data = {**self.payload, **dict(user_id=user.id)}
         for parent in parents:
             if parent is not None:
-                parent = CaseModel.get_one_object_from_user(user=user, idx=parent)
+                parent = CaseModel.get_one_object(user=user, idx=parent)
             node = CaseModel(data=data, parent=parent)
             node.save()
 
     def test_new_case(self):
         user = UserModel.get_one_user(self.user)
-        case = CaseModel.get_one_object_from_user(user=user, idx=6)
+        case = CaseModel.get_one_object(user=user, idx=6)
         self.assertEqual(case.path, "1/3/")
-        case = CaseModel.get_one_object_from_user(user=user, idx=11)
+        case = CaseModel.get_one_object(user=user, idx=11)
         self.assertEqual(case.path, "1/7/")
 
     def test_move_case(self):
         user = UserModel.get_one_user(self.user)
-        case6 = CaseModel.get_one_object_from_user(user=user, idx=6)
-        case11 = CaseModel.get_one_object_from_user(user=user, idx=11)
+        case6 = CaseModel.get_one_object(user=user, idx=6)
+        case11 = CaseModel.get_one_object(user=user, idx=11)
         case6.move_to(case11)
         self.assertEqual(case6.path, "1/7/11/")
 
     def test_move_case2(self):
         user = UserModel.get_one_user(self.user)
-        case3 = CaseModel.get_one_object_from_user(user=user, idx=3)
-        case11 = CaseModel.get_one_object_from_user(user=user, idx=11)
-        case9 = CaseModel.get_one_object_from_user(user=user, idx=9)
-        case10 = CaseModel.get_one_object_from_user(user=user, idx=10)
+        case3 = CaseModel.get_one_object(user=user, idx=3)
+        case11 = CaseModel.get_one_object(user=user, idx=11)
+        case9 = CaseModel.get_one_object(user=user, idx=9)
+        case10 = CaseModel.get_one_object(user=user, idx=10)
         case3.move_to(case11)
         case9.move_to(case3)
         self.assertEqual(case10.path, "1/7/11/3/9/")
 
     def test_delete_case(self):
         user = UserModel.get_one_user(self.user)
-        case7 = CaseModel.get_one_object_from_user(user=user, idx=7)
+        case7 = CaseModel.get_one_object(user=user, idx=7)
         case7.delete()
-        case11 = CaseModel.get_one_object_from_user(user=user, idx=11)
+        case11 = CaseModel.get_one_object(user=user, idx=11)
         self.assertIsNone(case11)
 
     def test_descendants(self):
         user = UserModel.get_one_user(self.user)
-        case7 = CaseModel.get_one_object_from_user(user=user, idx=7)
+        case7 = CaseModel.get_one_object(user=user, idx=7)
         self.assertEqual(len(case7.descendants), 4)
 
     def test_depth(self):
         user = UserModel.get_one_user(self.user)
-        case10 = CaseModel.get_one_object_from_user(user=user, idx=10)
+        case10 = CaseModel.get_one_object(user=user, idx=10)
         self.assertEqual(case10.depth, 4)
 
 
@@ -128,17 +128,17 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "schema": "solve_model_dag",
         }
         self.user_object = UserModel.get_one_user(self.user)
-        self.instance = InstanceModel.get_one_object_from_user(
-            self.user_object, instance_id
+        self.instance = InstanceModel.get_one_object(
+            user=self.user_object, idx=instance_id
         )
-        self.execution = ExecutionModel.get_one_object_from_user(
-            self.user_object, execution_id
+        self.execution = ExecutionModel.get_one_object(
+            user=self.user_object, idx=execution_id
         )
 
     def test_new_case_execution(self):
         self.payload.pop("instance_id")
 
-        created_case = self.model.get_one_object_from_user(
+        created_case = self.model.get_one_object(
             self.user_object, self.create_new_row(self.url, self.model, self.payload)
         )
 
@@ -155,7 +155,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
 
     def test_new_case_instance(self):
         self.payload.pop("execution_id")
-        created_case = self.model.get_one_object_from_user(
+        created_case = self.model.get_one_object(
             self.user_object, self.create_new_row(self.url, self.model, self.payload)
         )
 
@@ -257,8 +257,8 @@ class TestCaseCopyEndpoint(CustomTestCase):
         )
         user = UserModel.get_one_user(self.user)
 
-        original_case = CaseModel.get_one_object_from_user(user, self.case_id)
-        new_case = CaseModel.get_one_object_from_user(user, new_case["id"])
+        original_case = CaseModel.get_one_object(user=user, idx=self.case_id)
+        new_case = CaseModel.get_one_object(user=user, idx=new_case["id"])
 
         for key in self.copied_items:
             self.assertEqual(getattr(original_case, key), getattr(new_case, key))

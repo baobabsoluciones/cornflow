@@ -3,6 +3,7 @@ This file contains the different custom test classes used to generalize the unit
 """
 
 # Import from libraries
+import logging as log
 from datetime import datetime, timedelta
 from flask import current_app
 from flask_testing import TestCase
@@ -18,7 +19,7 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import db
 from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
@@ -50,6 +51,7 @@ class CustomTestCase(TestCase):
         return temp
 
     def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
         db.create_all()
         access_init_command(0)
         register_deployed_dags_command_test(verbose=0)
@@ -172,23 +174,25 @@ class CustomTestCase(TestCase):
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data):
+    def get_rows(self, url, data, token=None, check_data=True):
+        token = token or self.token
 
         codes = [
             self.create_new_row(url=url, model=self.model, payload=d) for d in data
         ]
         rows = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+            url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
         # rows now come in desc order of date, so we reverse them:
         rows_data = list(reversed(rows.json))
         self.assertEqual(len(rows.json), len(data))
-        for i in range(len(data)):
-            self.assertEqual(rows_data[i]["id"], codes[i])
-            for key in self.get_keys_to_check(data[i]):
-                self.assertIn(key, rows_data[i])
-                if key in data[i]:
-                    self.assertEqual(rows_data[i][key], data[i][key])
+        if check_data:
+            for i in range(len(data)):
+                self.assertEqual(rows_data[i]["id"], codes[i])
+                for key in self.get_keys_to_check(data[i]):
+                    self.assertIn(key, rows_data[i])
+                    if key in data[i]:
+                        self.assertEqual(rows_data[i][key], data[i][key])
         return rows
 
     def get_keys_to_check(self, payload):
@@ -215,11 +219,13 @@ class CustomTestCase(TestCase):
                 self.assertEqual(row.json[key], payload[key])
         return row.json
 
-    def get_no_rows(self, url):
+    def get_no_rows(self, url, token=None):
+        token = token or self.token
         rows = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+            url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
         self.assertEqual(200, rows.status_code)
+        self.assertEqual(rows.json, [])
         return rows.json
 
     def update_row(
@@ -542,6 +548,7 @@ class LoginTestCases:
             return app
 
         def setUp(self):
+            log.root.setLevel(current_app.config["LOG_LEVEL"])
             db.create_all()
             self.data = None
             self.response = None

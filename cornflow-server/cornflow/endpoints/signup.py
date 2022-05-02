@@ -2,27 +2,29 @@
 External endpoint for the user to signup
 """
 # Import from libraries
+from cornflow_core.resources import SignupBaseEndpoint
 from flask import current_app
-from flask_apispec.views import MethodResource
 from flask_apispec import use_kwargs, doc
-import logging as log
 
 # Import from internal modules
-from .meta_resource import MetaResource
-from ..models import UserModel, PermissionsDAG, UserRoleModel
-from ..schemas.user import UserSignupRequest
+from ..models import PermissionsDAG, UserRoleModel, UserModel
+from cornflow_core.schemas import SignupRequest
 from ..shared.authentication import Auth
-from ..shared.const import AUTH_LDAP, AUTH_OID, PLANNER_ROLE
-from ..shared.exceptions import InvalidUsage, InvalidCredentials, EndpointNotImplemented
 
 
-class SignUpEndpoint(MetaResource, MethodResource):
+class SignUpEndpoint(SignupBaseEndpoint):
     """
     Endpoint used to sign up to the cornflow web server.
     """
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+        self.auth_class = Auth
+        self.user_role_association = UserRoleModel
+
     @doc(description="Sign up", tags=["Users"])
-    @use_kwargs(UserSignupRequest, location="json")
+    @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
         """
         API (POST) method to sign up to the cornflow webserver
@@ -31,50 +33,9 @@ class SignUpEndpoint(MetaResource, MethodResource):
           and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        AUTH_TYPE = current_app.config["AUTH_TYPE"]
-        if AUTH_TYPE == AUTH_LDAP:
-            raise EndpointNotImplemented(
-                "The user has to sign up on the active directory"
-            )
-        elif AUTH_TYPE == AUTH_OID:
-            raise EndpointNotImplemented(
-                "The user has to sign up with the OpenID protocol"
-            )
-
-        if UserModel.check_username_in_use(kwargs.get("username")):
-            raise InvalidCredentials(
-                error="Username already in use, please supply another username"
-            )
-
-        if UserModel.check_email_in_use(kwargs.get("email")):
-            raise InvalidCredentials(
-                error="Email already in use, please supply another email address"
-            )
-
-        check_pwd = UserModel.check_password_pattern(kwargs.get("password"))
-        if not check_pwd["valid"]:
-            raise InvalidCredentials(error=check_pwd["message"])
-
-        check_email = UserModel.check_email_pattern(kwargs.get("email"))
-        if not check_email["valid"]:
-            raise InvalidCredentials(error=check_email["message"])
-
-        user = UserModel(kwargs)
-        user.save()
-
-        user_role = UserRoleModel(
-            {"user_id": user.id, "role_id": current_app.config["DEFAULT_ROLE"]}
-        )
-        user_role.save()
+        content, status = self.sign_up(**kwargs)
 
         if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-            PermissionsDAG.add_all_permissions_to_user(user.id)
+            PermissionsDAG.add_all_permissions_to_user(content["id"])
 
-        try:
-            token = Auth.generate_token(user.id)
-        except Exception as e:
-            raise InvalidUsage(
-                error="Error in generating user token: " + str(e), status_code=400
-            )
-        log.info(f"User {user.id} was created")
-        return {"token": token, "id": user.id}, 201
+        return content, status

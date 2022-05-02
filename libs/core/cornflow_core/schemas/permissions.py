@@ -6,13 +6,17 @@ This file contains the schemas used for the endpoints that manage the permission
 from marshmallow import fields, Schema
 
 
-class PermissionViewRoleRequest(Schema):
+class PermissionViewRoleBaseRequest(Schema):
+    """
+    Schema used for the permissions
+    """
+
     action_id = fields.Int()
     role_id = fields.Int()
     api_view_id = fields.Int()
 
 
-class PermissionViewRoleResponse(Schema):
+class PermissionViewRoleBaseResponse(Schema):
     """
     Schema used for the get methods
     """
@@ -26,9 +30,15 @@ class PermissionViewRoleResponse(Schema):
     role = fields.Function(lambda obj: obj.role.name)
 
 
-class PermissionViewRoleEditRequest(Schema):
+class PermissionViewRoleBaseEditRequest(Schema):
+    """
+    Schema used for the edition request of the permissions
+    """
+
     action_id = fields.Int(required=False)
-    action = fields.Function(lambda obj: obj.action.name.replace("_", " "), required=False)
+    action = fields.Function(
+        lambda obj: obj.action.name.replace("_", " "), required=False
+    )
     api_view_id = fields.Int(required=False)
     api_view = fields.Function(lambda obj: obj.api_view.name, required=False)
     role_id = fields.Int(required=False)

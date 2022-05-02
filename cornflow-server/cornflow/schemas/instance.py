@@ -7,6 +7,7 @@ class QueryFiltersInstance(QueryFilters):
     pass
 
 
+# noinspection PyTypeChecker
 class InstanceSchema(Schema):
     """ """
 
@@ -51,6 +52,7 @@ class InstanceEndpointResponse(BaseDataEndpointResponse):
     pass
 
 
+# noinspection PyTypeChecker
 class InstanceDetailsEndpointResponse(InstanceEndpointResponse):
     executions = fields.List(fields.Nested(ExecutionDetailsEndpointResponse))
 

@@ -14,7 +14,7 @@ from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
 from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
-from cornflow.shared.utils import db
+from cornflow_core.shared import db
 from cornflow.tests.const import (
     CASE_PATH,
     DAG_URL,
