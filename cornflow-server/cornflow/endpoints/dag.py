@@ -3,15 +3,14 @@ Internal endpoint for getting and posting execution data
 This are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from cornflow_client.airflow.api import get_schema, validate_and_continue
+from cornflow_client.airflow.api import get_schema
+from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
-from flask_apispec.views import MethodResource
 import logging as log
 
 # Import from internal modules
-from .meta_resource import MetaResource
 from ..models import DeployedDAG, ExecutionModel, InstanceModel
 from ..schemas import DeployedDAGSchema
 from ..schemas.instance import InstanceCheckRequest
@@ -32,20 +31,46 @@ from ..shared.const import (
     SERVICE_ROLE,
 )
 
-from ..shared.exceptions import ObjectDoesNotExist
+from cornflow_core.exceptions import ObjectDoesNotExist
+from cornflow_core.authentication import authenticate
+from cornflow_core.resources import BaseMetaResource
 
 execution_schema = ExecutionSchema()
 
 
-class DAGEndpoint(MetaResource, MethodResource):
+class DAGDetailEndpoint(BaseMetaResource):
     """
     Endpoint used for the DAG endpoint
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
+    @doc(description="Get input data and configuration for an execution", tags=["DAGs"])
+    @authenticate(auth_class=Auth())
+    def get(self, idx):
+        """
+        API method to get the data of the instance that is going to be executed
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by the superuser created for the airflow webserver
+
+        :param str idx: ID of the execution
+        :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
+          and :class:`DataSchema` and an integer for HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist(error="The execution does not exist")
+        instance = InstanceModel.get_one_object(
+            user=self.get_user(), idx=execution.instance_id
+        )
+        if instance is None:
+            raise ObjectDoesNotExist(error="The instance does not exist")
+        config = execution.config
+        return {"id": instance.id, "data": instance.data, "config": config}, 200
+
     @doc(description="Edit an execution", tags=["DAGs"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(ExecutionDagRequest, location="json")
     def put(self, idx, **req_data):
         """
@@ -73,7 +98,7 @@ class DAGEndpoint(MetaResource, MethodResource):
             marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
-        execution = ExecutionModel.get_one_object_from_user(self.get_user(), idx)
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
         state = req_data.get("state", EXEC_STATE_CORRECT)
@@ -95,60 +120,36 @@ class DAGEndpoint(MetaResource, MethodResource):
         execution.save()
         return {"message": "results successfully saved"}, 200
 
-    @doc(description="Get input data and configuration for an execution", tags=["DAGs"])
-    @Auth.auth_required
-    def get(self, idx):
-        """
-        API method to get the data of the instance that is going to be executed
-        It requires authentication to be passed in the form of a token that has to be linked to
-        an existing session (login) made by the superuser created for the airflow webserver
 
-        :param str idx: ID of the execution
-        :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
-          and :class:`DataSchema` and an integer for HTTP status code
-        :rtype: Tuple(dict, integer)
-        """
-        execution = ExecutionModel.get_one_object_from_user(self.get_user(), idx)
-        if execution is None:
-            raise ObjectDoesNotExist(error="The execution does not exist")
-        instance = InstanceModel.get_one_object_from_user(
-            self.get_user(), execution.instance_id
-        )
-        if instance is None:
-            raise ObjectDoesNotExist(error="The instance does not exist")
-        config = execution.config
-        return {"id": instance.id, "data": instance.data, "config": config}, 200
-
-
-class DAGInstanceEndpoint(MetaResource, MethodResource):
+class DAGInstanceEndpoint(BaseMetaResource):
     """
     Endpoint used by airflow to write instance checks
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
+    def __init__(self):
+        super().__init__()
+        self.data_model = InstanceModel
+
     @doc(
         description="Endpoint to save instance checks performed on the DAG",
         tags=["DAGs"],
     )
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
-        instance = InstanceModel.get_one_object_from_user(self.get_user(), idx)
-        if instance is None:
-            raise ObjectDoesNotExist(error="The instance does not exist")
-        instance.update(req_data)
-        instance.save()
-        return {"message": "The instance checks have been saved"}, 200
+        log.info(f"Instance checks saved for instance {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
-class DAGEndpointManual(MetaResource, MethodResource):
+class DAGEndpointManual(BaseMetaResource):
     """ """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Create an execution manually.", tags=["DAGs"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ExecutionDagPostRequest, location="json")
     def post(self, **kwargs):
@@ -175,32 +176,29 @@ class DAGEndpointManual(MetaResource, MethodResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        log.info(
-            f"User {self.get_user_id()} manually created the execution {item.id}"
-        )
+        log.info(f"User {self.get_user()} manually created the execution {item.id}")
         return item, 201
 
 
-class DeployedDAGEndpoint(MetaResource, MethodResource):
+class DeployedDAGEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()
-        self.model = DeployedDAG
+        self.data_model = DeployedDAG
 
     @doc(
         description="Get list of deployed dags registered on the data base",
         tags=["DeployedDAGs"],
     )
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(DeployedDAGSchema(many=True))
-    def get(self, **kwargs):
-        return self.model.get_all_objects()
+    def get(self):
+        return self.get_list()
 
     @doc(description="Post a new deployed dag", tags=["DeployedDAGs"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        response = self.post_list(kwargs)
-        return response
+        return self.post_list(kwargs)
