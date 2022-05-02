@@ -42,6 +42,8 @@ class SchemaGenerator:
             .vapply(lambda v: (os.path.join(self.tmp_path, v), v[:-3]))
         )
 
+        print(f"FILES: {files}")
+
         self.mock_packages(files)
 
         self.parse(files)
@@ -79,7 +81,9 @@ class SchemaGenerator:
             for file_path, file_name in files:
                 print(f"Parsing files {file_path}, {file_name}")
                 spec = importlib.util.spec_from_file_location(file_name, file_path)
+                print(f"SPEC: {file_name}-{spec}")
                 mod = importlib.util.module_from_spec(spec)
+                print(f"MOD: {file_name}-{mod}")
                 spec.loader.exec_module(mod)
 
                 models = SuperDict(mod.__dict__).kfilter(lambda k: k in self.parents)

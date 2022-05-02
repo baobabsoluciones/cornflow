@@ -5,7 +5,11 @@ from cornflow_core.cli.tools.schema_generator import SchemaGenerator
 
 @click.command(name="schema_from_models")
 @click.option(
-    "--path", "-p", type=str, help="The absolute path to the JSONSchema", required=True
+    "--path",
+    "-p",
+    type=str,
+    help="The absolute path to folder containing the models",
+    required=True,
 )
 @click.option("--output-path", "-o", type=str, help="The output path", required=False)
 @click.option(

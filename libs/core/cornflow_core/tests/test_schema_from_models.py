@@ -26,14 +26,17 @@ class SchemaFromModelsTests(unittest.TestCase):
         return os.path.join(path_to_tests, rel_path)
 
     def tearDown(self):
-        if os.path.exists(self.output_path):
-            os.remove(self.output_path)
+        pass
+        # if os.path.exists(self.output_path):
+        #     os.remove(self.output_path)
 
     def test_base(self):
         runner = CliRunner()
         result = runner.invoke(
             schema_from_models, ["-p", self.models_path, "-o", self.output_path]
         )
+
+        print(result.output)
 
         self.assertEqual(result.exit_code, 0)
 
