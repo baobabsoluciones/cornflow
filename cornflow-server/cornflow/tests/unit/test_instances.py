@@ -252,8 +252,8 @@ class TestInstanceModelMethods(CustomTestCase):
 
     def test_repr_method(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(idx, "<id {}>".format(idx))
+        self.repr_method(idx, f"<Instance {idx}>")
 
     def test_str_method(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(idx, "<id {}>".format(idx))
+        self.str_method(idx, f"<Instance {idx}>")

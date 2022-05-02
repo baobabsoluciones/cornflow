@@ -190,8 +190,8 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
     def test_repr_method(self):
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.repr_method(idx, "<id {}>".format(idx))
+        self.repr_method(idx, f"<Execution {idx}>")
 
     def test_str_method(self):
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.str_method(idx, "<id {}>".format(idx))
+        self.str_method(idx, f"<Execution {idx}>")

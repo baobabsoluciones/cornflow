@@ -1,18 +1,12 @@
+from cornflow_core.schemas import BaseUserSchema
 from marshmallow import fields, Schema
+
 from .instance import InstanceSchema
 
 
-class UserSchema(Schema):
+class UserSchema(BaseUserSchema):
     """ """
 
-    id = fields.Int(dump_only=True)
-    first_name = fields.Str()
-    last_name = fields.Str()
-    username = fields.Str(required=True)
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    modified_at = fields.DateTime(dump_only=True)
     instances = fields.Nested(InstanceSchema, many=True)
 
 
@@ -33,11 +27,6 @@ class UserDetailsEndpointResponse(Schema):
     email = fields.Str()
 
 
-class LoginEndpointRequest(Schema):
-    username = fields.Str(required=True)
-    password = fields.Str(required=True)
-
-
 class TokenEndpointResponse(Schema):
     valid = fields.Int()
 
@@ -52,15 +41,3 @@ class UserEditRequest(Schema):
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
-
-
-class UserSignupRequest(Schema):
-    username = fields.Str(required=True)
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
-    first_name = fields.Str(required=False)
-    last_name = fields.Str(required=False)
-
-
-class LoginOpenAuthRequest(Schema):
-    token = fields.Str(required=True)
