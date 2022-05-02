@@ -190,6 +190,20 @@ class APIGenerator:
             parents_class = [class_name_post]
             fd.write(generate_class_def(class_name_one, parents_class))
             fd.write(sg.generate_schema())
+
+        init_file = os.path.join(self.schema_path, "__init__.py")
+        with open(init_file, "a") as file:
+            if self.name is None:
+                file.write(
+                    f"from .{table_name} import {class_name_one}, "
+                    f"{class_name_edit}, {class_name_post}\n"
+                )
+            else:
+                file.write(
+                    f"from .{self.name}_{table_name} import {class_name_one}, "
+                    f"{class_name_edit}, {class_name_post}\n"
+                )
+
         return {
             "one": class_name_one,
             "editRequest": class_name_edit,
