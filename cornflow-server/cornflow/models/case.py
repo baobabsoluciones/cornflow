@@ -9,9 +9,10 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
-from .meta_model import BaseDataModel
-from ..shared.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
-from ..shared.utils import db, hash_json_256
+from .base_data_model import BaseDataModel
+from cornflow_core.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
+from cornflow_core.shared import db
+from ..shared.utils import hash_json_256
 
 
 # Originally inspired by this:
@@ -103,7 +104,7 @@ class CaseModel(BaseDataModel):
             # we assume at root
             return cls(data, parent=None)
         # we look for the parent object
-        parent = cls.get_one_object_from_user(user, data["parent_id"])
+        parent = cls.get_one_object(user=user, idx=data["parent_id"])
         if parent is None:
             raise ObjectDoesNotExist("Parent does not exist")
         if parent.data is not None:
@@ -116,6 +117,7 @@ class CaseModel(BaseDataModel):
 
         :param dict data: the patches to apply.
         """
+        # TODO: review the behaviour of this method.
         if "data_patch" in data:
             self.data, self.data_hash = self.apply_patch(self.data, data["data_patch"])
         if "solution_patch" in data:

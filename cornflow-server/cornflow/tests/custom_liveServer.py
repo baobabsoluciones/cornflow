@@ -12,7 +12,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import db
 from cornflow.tests.const import PREFIX
 
 

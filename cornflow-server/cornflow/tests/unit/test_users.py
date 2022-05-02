@@ -15,7 +15,7 @@ from cornflow.models import (
 )
 
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
-from cornflow.shared.utils import db
+from cornflow_core.shared import db
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,
@@ -26,7 +26,6 @@ from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
     USER_URL,
-    RECOVER_PASSWORD_URL,
 )
 
 
@@ -279,13 +278,18 @@ class TestUserEndpoint(TestCase):
 
     def test_edit_info(self):
         payload = {
-            "username": "newtestname",
             "email": "newtest@test.com",
             "first_name": "FirstName",
             "last_name": "LastName",
         }
 
+        self.modifiable_items = ["email", "first_name", "last_name"]
+
         response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json["message"])
+
+        response = self.get_user(self.planner, self.planner)
         self.assertEqual(200, response.status_code)
 
         for item in self.modifiable_items:
@@ -302,6 +306,10 @@ class TestUserEndpoint(TestCase):
         }
 
         response = self.modify_info(self.admin, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json["message"])
+
+        response = self.get_user(self.admin, self.planner)
         self.assertEqual(200, response.status_code)
 
         for item in self.modifiable_items:
