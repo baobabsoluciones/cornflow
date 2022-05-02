@@ -98,6 +98,9 @@ class APIGenerator:
             model_name = self.new_model(table)
             schemas_names = self.new_schemas(table)
             self.new_endpoint(table, model_name, schemas_names)
+            init_file = os.path.join(self.endpoint_path, "__init__.py")
+            with open(init_file, "a") as file:
+                file.write("resources = []\n")
         print(
             f"The generated files will be stored in {os.path.join(os.getcwd(), self.output_path)}\n"
         )
@@ -260,7 +263,7 @@ class APIGenerator:
                     fd.write(eg.generate_endpoint_post())
                     fd.write("\n")
 
-            fd.write("\n\n")
+            fd.write("\n")
 
             if any(
                 m in self.options
@@ -292,6 +295,51 @@ class APIGenerator:
                 if "delete_detail" in self.options or "all" in self.options:
                     fd.write(eg.generate_endpoint_delete_one())
                     fd.write("\n")
+
+        init_file = os.path.join(self.endpoint_path, "__init__.py")
+        with open(init_file, "a") as file:
+            if any(m in self.options for m in ["get_list", "post_list", "all"]):
+                if any(
+                    m in self.options
+                    for m in [
+                        "get_detail",
+                        "put_detail",
+                        "patch_detail",
+                        "delete_detail",
+                        "all",
+                    ]
+                ):
+                    if self.name is None:
+                        file.write(
+                            f"from .{table_name} import {class_name_all}, {class_name_details}\n"
+                        )
+                    else:
+                        file.write(
+                            f"from .{self.name}_{table_name} import {class_name_all}, {class_name_details}\n"
+                        )
+                else:
+                    if self.name is None:
+                        file.write(f"from .{table_name} import {class_name_all}\n")
+                    else:
+                        file.write(
+                            f"from .{self.name}_{table_name} import {class_name_all}\n"
+                        )
+            elif any(
+                m in self.options
+                for m in [
+                    "get_detail",
+                    "put_detail",
+                    "patch_detail",
+                    "delete_detail",
+                    "all",
+                ]
+            ):
+                if self.name is None:
+                    file.write(f"from .{table_name} import {class_name_details}\n")
+                else:
+                    file.write(
+                        f"from .{self.name}_{table_name} import {class_name_details}\n"
+                    )
 
     @staticmethod
     def snake_to_camel(name: str) -> str:

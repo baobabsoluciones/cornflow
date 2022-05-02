@@ -45,10 +45,10 @@ class ModelGenerator:
             if key != "id":
                 if isinstance(val.get("description"), dict):
                     res += (
-                        f'    - **{key}**: {val["type"]}, {val["description"]["en"]}\n'
+                        f'    - **{key}**: {val["type"]}. {val["description"]["en"]}\n'
                     )
                 else:
-                    res += f'    - **{key}**: {val["type"]}, {val.get("description") or ""}\n'
+                    res += f'    - **{key}**: {val["type"]}. {val.get("description") or ""}\n'
             else:
                 if isinstance(val.get("description"), dict):
                     res += f'    - **{key}**: {val["type"]}. The primary key. {val["description"]["en"]}\n'
