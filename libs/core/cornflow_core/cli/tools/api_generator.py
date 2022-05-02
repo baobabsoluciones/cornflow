@@ -64,16 +64,20 @@ class APIGenerator:
             os.mkdir(self.output_path)
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
-        init_path = os.path.join(self.model_path, "../__init__.py")
-        open(init_path, "w").close()
+        init_path = os.path.join(self.model_path, "__init__.py")
+        print(f"Model path: {init_path}")
+        with open(init_path, "w") as file:
+            file.write(f'"""\nThis file exposes the models\n"""\n')
         if not os.path.isdir(self.endpoint_path):
             os.mkdir(self.endpoint_path)
-        init_path = os.path.join(self.endpoint_path, "../__init__.py")
-        open(init_path, "w").close()
+        init_path = os.path.join(self.endpoint_path, "__init__.py")
+        with open(init_path, "w") as file:
+            file.write(f'"""\nThis file exposes the endpoints\n"""\n')
         if not os.path.isdir(self.schema_path):
             os.mkdir(self.schema_path)
-        init_path = os.path.join(self.schema_path, "../__init__.py")
-        open(init_path, "w").close()
+        init_path = os.path.join(self.schema_path, "__init__.py")
+        with open(init_path, "w") as file:
+            file.write(f'"""\nThis file exposes the schemas\n"""\n')
 
     def main(self):
         """
@@ -130,6 +134,15 @@ class APIGenerator:
             fd.write("\n")
             fd.write(mg.generate_model_repr_str())
             fd.write("\n")
+
+        init_file = os.path.join(self.model_path, "__init__.py")
+
+        with open(init_file, "a") as file:
+            if self.name is None:
+                file.write(f"from .{table_name.split} import {class_name}\n")
+            else:
+                file.write(f"from .{self.name}_{table_name} import {class_name}\n")
+
         return class_name
 
     def new_schemas(self, table_name: str) -> dict:
