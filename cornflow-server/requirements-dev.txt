@@ -8,6 +8,7 @@ Flask-Testing
 imagesize
 orloge
 packaging
+pipreqs
 Pygments
 pyparsing
 snowballstemmer
@@ -21,3 +22,4 @@ sphinxcontrib-jsmath
 sphinxcontrib-qthelp
 sphinxcontrib-serializinghtml
 sphinxcontrib-redoc
+vulture

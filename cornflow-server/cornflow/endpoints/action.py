@@ -1,30 +1,28 @@
 """
 
 """
-# Import from libraries
+
+from cornflow_core.authentication import authenticate
+from cornflow_core.resources import BaseMetaResource
+from cornflow_core.schemas import ActionsResponse
 from flask_apispec import marshal_with, doc
-from flask_apispec.views import MethodResource
 
 # Import from internal modules
-from .meta_resource import MetaResource
-from ..models import ActionModel
-from ..schemas.action import ActionsResponse
+from cornflow_core.models import ActionBaseModel
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
 
 
-class ActionListEndpoint(MetaResource, MethodResource):
+class ActionListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 
     def __init__(self):
         super().__init__()
-        self.model = ActionModel
-        self.query = ActionModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = ActionBaseModel
 
     @doc(description="Get all the actions", tags=["Actions"])
-    @Auth.auth_required
+    @authenticate(auth_class=Auth())
     @marshal_with(ActionsResponse(many=True))
     def get(self):
         """
@@ -36,4 +34,4 @@ class ActionListEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return ActionModel.get_all_objects()
+        return self.get_list()

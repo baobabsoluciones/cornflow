@@ -1,19 +1,21 @@
 """
 
 """
-# Import from libraries
-from flask_apispec import marshal_with, doc
-from flask_apispec.views import MethodResource
+from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from .meta_resource import MetaResource
-from ..models import ApiViewModel
-from ..schemas.apiview import ApiViewResponse
+from cornflow_core.models import ViewBaseModel
+from cornflow_core.resources import BaseMetaResource
+from cornflow_core.schemas import ViewResponse
+
+# Import from libraries
+from flask_apispec import marshal_with, doc
+
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
 
 
-class ApiViewListEndpoint(MetaResource, MethodResource):
+class ApiViewListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of all the endpoints defined in cornflow and its url"
@@ -21,13 +23,11 @@ class ApiViewListEndpoint(MetaResource, MethodResource):
 
     def __init__(self):
         super().__init__()
-        self.model = ApiViewModel
-        self.query = ApiViewModel.get_all_objects
-        self.primary_key = "id"
+        self.data_model = ViewBaseModel
 
     @doc(description="Get all the api views", tags=["ApiViews"])
-    @Auth.auth_required
-    @marshal_with(ApiViewResponse(many=True))
+    @authenticate(auth_class=Auth())
+    @marshal_with(ViewResponse(many=True))
     def get(self):
         """
         API method to get the api views defined in cornflow.
@@ -38,4 +38,4 @@ class ApiViewListEndpoint(MetaResource, MethodResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        return ApiViewModel.get_all_objects()
+        return self.get_list()
