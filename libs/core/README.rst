@@ -2,28 +2,31 @@
 Cornflow-tools
 ==============
 
-Cornflow-tools is a library that contains modules to help you adapt cornflow to your needs
+Cornflow-core is a library that contains modules to help you create REST APIs in an easier and faster way.
+It includes a set of modules that can be used to start the creation of your flask REST API and some command line
+interface commands that let you create a full REST API from a JSONSchema file that represent your data or
+create a JSONSchema file representing your REST API.
 
 -----------------------------------
-Module :code:`generate_from_schema`
+Command line interface :code:`generate_from_schema`
 -----------------------------------
-The module :code:`generate_from_schema` allows you to automatically generate models, endpoints and schemas
-from a JSONSchema. The generated files can then be added to **cornflow-server**.
+The cli :code:`generate_from_schema` allows you to automatically generate models, endpoints and schemas
+from a JSONSchema. The generated files can then be added to your flask (RestFul) REST API.
 
 How to use?
 ===========
 
 To start, you need to have a json file containing the schema of the tables you want to create.
 Let's assume that this file is stored on your computer as :code:`C:/Users/User/instance.json`
-Open the terminal and navigate to the **cornflow-tools** directory. From there, run:
+Open the terminal, then run:
 
 .. code-block:: console
 
-    python generate_from_schema C:/Users/User/instance.json application_name
+    generate_from_schema -p C:/Users/User/instance.json -a application_name
 
 The argument :code:`application_name` will be the prefix of the name used for the generated files, classes
-and tables.
-This command will create a new :code:`output/` directory in **cornflow-tools**, containing three
+and tables. It is an optional argument
+This command will create a new :code:`output/` directory in the folder where is executed, containing three
 directories :code:`models/`, :code:`schemas/` and :code:`endpoints/`, in which the new files will be added.
 
 Optional arguments
@@ -32,15 +35,15 @@ Optional arguments
 Output path
 -----------
 
-Use the :code:`-op` or :code:`--output_path` options to set an output path for the files. The
+Use the :code:`-o` or :code:`--output-path` options to set an output path for the files. The
 directories :code:`models/`, :code:`endpoint/` and :code:`schemas/` will be created directly in that
-direction instead of the :code:`cornflow-tools/output/` directory.
+direction instead of the :code:`./output/` directory.
 
 Example:
 
 .. code-block:: console
 
-    python generate_from_schema C:/Users/User/instance.json application_name --output_path C:/Users/User/output_files
+    generate_from_schema -p C:/Users/User/instance.json -a application_name --output-path C:/Users/User/output_files
 
 
 Remove methods
@@ -49,15 +52,15 @@ Remove methods
 By default, two endpoints are created:
 
 - A global endpoint, with three methods:
-    - :code:`get()`, that returns all the element of the table
-    - :code:`post(**kwargs)`, that adds a new row to the table
-    - :code:`delete()`, that deletes all the rows of the table
+    - :code:`get()`, that returns all the element of the table.
+    - :code:`post(**kwargs)`, that adds a new row to the table.
 - A detail endpoint, with three methods:
-    - :code:`get(idx)`, that returns the entry with the given id
-    - :code:`put(idx, **kwargs)`, that updates the entry with the given id with the given data
-    - :code:`delete(idx)`, that deletes the entry with the given id
+    - :code:`get(idx)`, that returns the entry with the given id.
+    - :code:`put(idx, **kwargs)`, that updates the entry with the given id with the given data.
+    - :code:`patch(idx, **kwargs)` that patches the entry with the given id with the given oatch.
+    - :code:`delete(idx)`, that deletes the entry with the given id.
 
-If one or several of those methods are not necessary, the option :code:`--remove_methods` allows to not
+If one or several of those methods are not necessary, the option :code:`--remove-methods` or :code:`-r` allows to not
 generate some of those methods. Note that the method :code:`post()` is the only one that can not be
 removed.
 
@@ -65,11 +68,11 @@ Example:
 
 .. code-block:: console
 
-    python generate_from_schema C:/Users/User/instance.json application_name --remove_methods getOne deleteAll
+    generate_from_schema -p C:/Users/User/instance.json -a application_name --remove-methods get-list -r delete-detail
 
-In that example, for each table, the global endpoint will not contain the :code:`delete()` method and
-the detail endpoint will not contain the :code:`get()` method. The choices for this method are
-:code:`getOne`, :code:`getAll`, :code:`update`, :code:`deleteOne` and :code:`deleteAll`.
+In that example, for each table, the detail endpoint will not contain the :code:`delete()` method and
+the list endpoint will not contain the :code:`get()` method. The choices for this method are
+:code:`get-list`, :code:`get-detail`, :code:`put-detail`, :code:`delete-detail` and :code:`patch-detail`.
 
 One table
 ---------
@@ -110,7 +113,7 @@ Example:
 
 .. code-block:: console
 
-    python generate_from_schema C:/Users/User/instance.json application_name --one table_name
+    generate_from_schema -p C:/Users/User/instance.json -a application_name --one table_name
 
 In that case, only one table will be created.
 
@@ -150,7 +153,7 @@ If the property :code:`foreign_key` is left empty, it is assumed that the key is
 -----------------------------------
 Module :code:`schema_from_models`
 -----------------------------------
-The module :code:`schema_from_models` allows you to automatically generate a JSONSchema based on
+The cli :code:`schema_from_models` allows you to automatically generate a JSONSchema based on
 a set of models.
 
 How to use?
@@ -158,13 +161,13 @@ How to use?
 
 To start, you need to have a directory containing the SQLAlchemy models.
 Let's assume that this directory is stored on your computer as :code:`C:/Users/User/models`
-Open the terminal and navigate to the **cornflow-tools** directory. From there, run:
+Open the terminal and run:
 
 .. code-block:: console
 
-    python schema_from_models C:/Users/User/models
+    schema_from_models -p C:/Users/User/models
 
-This command will create a new :code:`output_schema.json` directory in **cornflow-tools**,
+This command will create a new :code:`output_schema.json` directory in the directory from where it was executed,
 containing the generated schema.
 
 
@@ -174,17 +177,17 @@ Optional arguments
 Output path
 -----------
 
-Specify an output path using the argument :code:`-op` or :code:`--output_path`.
+Specify an output path using the argument :code:`-o` or :code:`--output_path`.
 
 Ignore files
 ------------
 
 By default, all the python files that do not contain models will be ignored. However, if you
 need to specify that some model files need to be ignored, you can use the :code:`-i` or
-:code:`--ignore_files` option. This option takes as arguments the name of the files to ignore
+:code:`--ignore-files` option. This option takes as arguments the name of the files to ignore
 with their extension. Example:
 
 .. code-block:: console
 
-    python schema_from_models C:/Users/User/models -i instance.py execution.py
+    schema_from_models -p C:/Users/User/models --ignore-files instance.py -i execution.py
 
