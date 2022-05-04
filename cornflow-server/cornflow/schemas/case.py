@@ -6,8 +6,6 @@ and to serialize the response data given by the same endpoints.
 from cornflow_core.schemas import BasePatchOperation
 
 # Imports from marshmallow library
-import json
-
 from marshmallow import fields, Schema
 
 # Import from internal modules

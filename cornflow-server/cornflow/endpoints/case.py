@@ -197,7 +197,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
 
     @doc(description="Get one case", tags=["Cases"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(CaseListResponse)
+    @marshal_with(CaseListAllWithIndicators)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """

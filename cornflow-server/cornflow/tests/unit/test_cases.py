@@ -118,6 +118,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "solution",
             "solution_hash",
             "user_id",
+            "indicators",
         ]
 
         self.payload = {
@@ -141,6 +142,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         created_case = self.model.get_one_object(
             self.user_object, self.create_new_row(self.url, self.model, self.payload)
         )
+        self.get_one_row()
 
         self.payload["data"] = self.instance.data
         self.payload["data_hash"] = self.instance.data_hash
@@ -148,7 +150,6 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["solution"] = self.execution.data
         self.payload["solution_hash"] = self.execution.data_hash
         self.payload["user_id"] = self.user
-        self.payload["indicators"] = ""
 
         for key in self.response_items:
             self.assertEqual(self.payload[key], getattr(created_case, key))
@@ -310,6 +311,7 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "created_at",
             "updated_at",
             "user_id",
+            "indicators",
         }
         self.url = CASE_URL
 
