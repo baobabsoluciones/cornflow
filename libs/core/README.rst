@@ -61,8 +61,7 @@ By default, two endpoints are created:
     - :code:`delete(idx)`, that deletes the entry with the given id.
 
 If one or several of those methods are not necessary, the option :code:`--remove-methods` or :code:`-r` allows to not
-generate some of those methods. Note that the method :code:`post()` is the only one that can not be
-removed.
+generate some of those methods. 
 
 Example:
 
@@ -72,7 +71,7 @@ Example:
 
 In that example, for each table, the detail endpoint will not contain the :code:`delete()` method and
 the list endpoint will not contain the :code:`get()` method. The choices for this method are
-:code:`get-list`, :code:`get-detail`, :code:`put-detail`, :code:`delete-detail` and :code:`patch-detail`.
+:code:`get-list`, :code:`post-list`, :code:`get-detail`, :code:`put-detail`, :code:`delete-detail` and :code:`patch-detail`.
 
 One table
 ---------
