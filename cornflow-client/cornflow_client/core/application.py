@@ -217,17 +217,20 @@ class ApplicationCore(ABC):
         if inst_errors:
             instance_checks["schema_checks"] = inst_errors
 
-        sol = self.solution.from_dict(solution_data)
-        sol_errors = sol.check_schema()
-        if sol_errors:
-            solution_checks["schema_checks"] = sol_errors
-
         instance_checks.update(inst.check(*args, **kwargs))
 
-        algo = solver_class(inst, sol)
-        start = timer()
-        solution_checks.update(algo.check_solution(*args, **kwargs))
-
+        if solution_data is not None:
+            sol = self.solution.from_dict(solution_data)
+            sol_errors = sol.check_schema()
+            if sol_errors:
+                solution_checks["schema_checks"] = sol_errors
+            algo = solver_class(inst, sol)
+            start = timer()
+            solution_checks.update(algo.check_solution(*args, **kwargs))
+        else:
+            start = timer()
+            solution_checks = dict(no_data=True)
+            
         log = dict(
             time=timer() - start,
             solver=solver,
