@@ -82,13 +82,6 @@ def update_schemas(**kwargs):
     # we update all schemas that we found:
     for key, value in schemas.items():
         Variable.set(key=key, value=value, serialize_json=True)
-    # now we clean the variables that do not exist anymore:
-    with create_session() as session:
-        current_vars = set(var.key for var in session.query(Variable))
-        apps_to_delete = current_vars - schemas.keys()
-        print("About to delete old apps: {}".format(apps_to_delete))
-        for _var in apps_to_delete:
-            Variable.delete(_var, session)
 
 
 dag = DAG(
