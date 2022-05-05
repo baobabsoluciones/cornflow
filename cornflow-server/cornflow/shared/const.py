@@ -1,3 +1,23 @@
+"""
+In this files we import the values for different constants on cornflow server
+This constants can be inherited from cornflow-core or can be overridden here
+"""
+from cornflow_core.constants import (
+    AUTH_DB,
+    AUTH_LDAP,
+    AUTH_OID,
+    AUTH_OAUTH,
+    OID_NONE,
+    OID_AZURE,
+    OID_GOOGLE,
+    VIEWER_ROLE,
+    PLANNER_ROLE,
+    ADMIN_ROLE,
+    SERVICE_ROLE,
+    ALL_DEFAULT_ROLES,
+    ROLES_MAP,
+)
+
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
 STATUS_UNHEALTHY = "unhealthy"
@@ -37,17 +57,17 @@ AIRFLOW_TO_STATE_MAP = dict(
     queued=EXEC_STATE_RUNNING,
 )
 
-# These codes and names are inherited from flask appbuilder in order to have the same names and values
+# These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
-AUTH_DB = 1
-AUTH_LDAP = 2
-AUTH_OAUTH = 4
-AUTH_OID = 0
+AUTH_DB = AUTH_DB
+AUTH_LDAP = AUTH_LDAP
+AUTH_OAUTH = AUTH_OAUTH
+AUTH_OID = AUTH_OID
 
 # Providers of open ID:
-OID_NONE = 0
-OID_AZURE = 1
-OID_GOOGLE = 2
+OID_NONE = OID_NONE
+OID_AZURE = OID_AZURE
+OID_GOOGLE = OID_GOOGLE
 
 # AZURE OPEN ID URLS
 OID_AZURE_DISCOVERY_COMMON_URL = (
@@ -65,12 +85,12 @@ DELETE_ACTION = 5
 
 ALL_DEFAULT_ACTIONS = [GET_ACTION, PATCH_ACTION, POST_ACTION, PUT_ACTION, DELETE_ACTION]
 
-VIEWER_ROLE = 1
-PLANNER_ROLE = 2
-ADMIN_ROLE = 3
-SERVICE_ROLE = 4
+VIEWER_ROLE = VIEWER_ROLE
+PLANNER_ROLE = PLANNER_ROLE
+ADMIN_ROLE = ADMIN_ROLE
+SERVICE_ROLE = SERVICE_ROLE
 
-ALL_DEFAULT_ROLES = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE, SERVICE_ROLE]
+ALL_DEFAULT_ROLES = ALL_DEFAULT_ROLES
 
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
@@ -88,12 +108,7 @@ PERMISSION_METHOD_MAP = {
     "DELETE": DELETE_ACTION,
 }
 
-ROLES_MAP = {
-    PLANNER_ROLE: "planner",
-    VIEWER_ROLE: "viewer",
-    ADMIN_ROLE: "admin",
-    SERVICE_ROLE: "service",
-}
+ROLES_MAP = ROLES_MAP
 
 BASE_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, GET_ACTION),

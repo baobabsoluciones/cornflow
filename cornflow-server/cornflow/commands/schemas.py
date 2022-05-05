@@ -1,12 +1,7 @@
 def update_schemas_command(url, user, pwd, verbose):
     import time
 
-    #
     from cornflow_client.airflow.api import Airflow
-
-    from sqlalchemy.exc import IntegrityError
-    from ..models import DeployedDAG
-    from ..shared.utils import db
 
     af_client = Airflow(url, user, pwd)
     max_attempts = 20

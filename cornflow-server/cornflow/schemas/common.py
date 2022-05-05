@@ -2,20 +2,11 @@
 File with the common schemas used in cornflow
 """
 from marshmallow import fields, Schema
+from cornflow_core.schemas import BaseQueryFilters
 
 
-class QueryFilters(Schema):
-    limit = fields.Int(required=False, dump_default=20)
-    offset = fields.Int(required=False, dump_default=0)
-    creation_date_gte = fields.DateTime(required=False)
-    creation_date_lte = fields.DateTime(required=False)
+class QueryFilters(BaseQueryFilters):
     schema = fields.Str(required=False)
-
-
-class PatchOperation(Schema):
-    op = fields.Str(required=True)
-    path = fields.Str(required=True)
-    value = fields.Raw()
 
 
 class BaseDataEndpointResponse(Schema):

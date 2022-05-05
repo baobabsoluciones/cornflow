@@ -5,28 +5,29 @@ Unit test for the permissions table
 # Import from libraries
 import json
 
+from cornflow_core.models import (
+    ActionBaseModel,
+    PermissionViewRoleBaseModel,
+    RoleBaseModel,
+    ViewBaseModel,
+)
+
 # Import from internal modules
 from cornflow.app import create_app
 from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,
 )
-from cornflow.models import (
-    ActionModel,
-    ApiViewModel,
-    InstanceModel,
-    PermissionViewRoleModel,
-    RoleModel,
-)
+from cornflow.models import InstanceModel
 from cornflow.shared.const import GET_ACTION, ROLES_MAP, VIEWER_ROLE
-from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL, ROLES_URL
+from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
 class TestPermissionsViewRoleEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.model = PermissionViewRoleModel
+        self.model = PermissionViewRoleBaseModel
         self.roles_with_access = PermissionsViewRoleEndpoint.ROLES_WITH_ACCESS
         self.payload = {"role_id": 1, "permission_id": 1, "api_view_id": 1}
 
@@ -87,7 +88,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
 class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
-        self.model = PermissionViewRoleModel
+        self.model = PermissionViewRoleBaseModel
         self.roles_with_access = PermissionsViewRoleDetailEndpoint.ROLES_WITH_ACCESS
         self.payload = {"role_id": 1, "action_id": 3, "api_view_id": 1}
         self.items_to_check = []
@@ -222,22 +223,22 @@ class TestPermissionsViewModel(CustomTestCase):
         super().setUp()
 
     def test_permission_role_cascade_deletion(self):
-        before_permissions = PermissionViewRoleModel.get_all_objects()
-        role = RoleModel.get_one_object(VIEWER_ROLE)
+        before_permissions = PermissionViewRoleBaseModel.get_all_objects()
+        role = RoleBaseModel.get_one_object(VIEWER_ROLE)
         role.delete()
-        after_permissions = PermissionViewRoleModel.get_all_objects()
+        after_permissions = PermissionViewRoleBaseModel.get_all_objects()
         self.assertNotEqual(before_permissions, after_permissions)
 
     def test_permission_action_cascade_deletion(self):
-        before_permissions = PermissionViewRoleModel.get_all_objects()
-        action = ActionModel.get_one_object(GET_ACTION)
+        before_permissions = PermissionViewRoleBaseModel.get_all_objects()
+        action = ActionBaseModel.get_one_object(GET_ACTION)
         action.delete()
-        after_permissions = PermissionViewRoleModel.get_all_objects()
+        after_permissions = PermissionViewRoleBaseModel.get_all_objects()
         self.assertNotEqual(before_permissions, after_permissions)
 
     def test_permission_api_view_cascade_deletion(self):
-        before_permissions = PermissionViewRoleModel.get_all_objects()
-        api_view = ApiViewModel.get_one_by_name("instance")
+        before_permissions = PermissionViewRoleBaseModel.get_all_objects()
+        api_view = ViewBaseModel.get_one_by_name("instance")
         api_view.delete()
-        after_permissions = PermissionViewRoleModel.get_all_objects()
+        after_permissions = PermissionViewRoleBaseModel.get_all_objects()
         self.assertNotEqual(before_permissions, after_permissions)
