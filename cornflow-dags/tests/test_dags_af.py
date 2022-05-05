@@ -6,7 +6,7 @@ from cornflow_client.airflow.api import Airflow
 
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
-from DAG.update_all_schemas import get_new_apps
+from DAG.update_all_variables import get_new_apps
 
 existing_apps = [app.name for app in get_new_apps()]
 
@@ -22,22 +22,24 @@ class DAGTests(unittest.TestCase):
         print("Missing apps: {}".format(missing))
         self.assertEqual(len(missing), 0)
 
-    def run_update_all_schemas_until_finished(self):
+    def run_update_all_variables_until_finished(self):
         client = Airflow(url="http://localhost:8080", user="admin", pwd="admin")
-        response = client.consume_dag_run(dag_name="update_all_schemas", payload={})
+        response = client.consume_dag_run(dag_name="update_all_variables", payload={})
         self.assertEqual(response.status_code, 200)
         data = response.json()
         finished = False
         while not finished:
             time.sleep(2)
-            status = client.get_dag_run_status("update_all_schemas", data["dag_run_id"])
+            status = client.get_dag_run_status(
+                "update_all_variables", data["dag_run_id"]
+            )
             state = status.json()["state"]
             finished = state != "running"
-            print("STATUS OF update_all_schemas: {}".format(state))
+            print("STATUS OF update_all_variables: {}".format(state))
         return client
 
     def test_access_variables(self):
-        client = self.run_update_all_schemas_until_finished()
+        client = self.run_update_all_variables_until_finished()
         url = "{}/variables".format(client.url)
         response = client.request_headers_auth(method="GET", url=url)
         print(
@@ -53,6 +55,6 @@ class DAGTests(unittest.TestCase):
             self.assertIn("config", content)
 
     def test_access_all_variables(self):
-        client = self.run_update_all_schemas_until_finished()
+        client = self.run_update_all_variables_until_finished()
         apps = [app["name"] for app in client.get_all_schemas()]
         self.assertEqual(apps, existing_apps)
