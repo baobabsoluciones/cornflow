@@ -10,6 +10,9 @@ flask-cors
 Flask-Migrate
 flask-inflate
 Flask-RESTful
+gevent
+greenlet
+gunicorn
 jsonpatch
 marshmallow
 PuLP
