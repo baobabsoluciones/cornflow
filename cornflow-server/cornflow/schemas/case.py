@@ -48,7 +48,7 @@ class CaseListAllWithIndicators(CaseListResponse):
     indicators = fields.Method("get_indicators")
 
 
-class CaseBase(CaseListResponse):
+class CaseBase(CaseListAllWithIndicators):
     """ """
 
     data = fields.Raw()
