@@ -49,7 +49,7 @@ class ExampleDataDetailsEndpoint(MetaResource, MethodResource):
             # try airflow and see if dag_name exists
             af_client.get_dag_info(dag_name)
 
-            log.debug("User gets exampple data from {}".format(dag_name))
+            log.debug("User gets example data from {}".format(dag_name))
 
             variable_name = f"z_{dag_name}_examples"
             response = af_client.get_one_variable(variable_name)

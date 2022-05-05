@@ -28,6 +28,8 @@ default_args = {
     "catchup": False,
 }
 
+schemas = ["instance", "solution", "config"]
+
 
 def get_new_apps() -> List[ApplicationCore]:
     # we need to run this to be sure to import modules
@@ -57,6 +59,22 @@ def import_dags():
 
 def _import_file(filename):
     return il.import_module(filename)
+
+
+def get_schemas_dag_file(_module):
+    contents = {k: getattr(_module, k) for k in schemas}
+    return contents
+
+
+def get_all_schemas():
+    apps = get_new_apps()
+    if len(apps):
+        print("Found the following apps: {}".format([app.name for app in apps]))
+    else:
+        print("No apps were found to update")
+    schemas_new = {app.name: app.get_schemas() for app in apps}
+    print("Found the following new apps: {}".format([app.name for app in apps]))
+    return schemas_new
 
 
 def get_all_example_data():
@@ -90,31 +108,36 @@ def get_all_example_data():
     return example_data_new
 
 
-def update_example_data(**kwargs):
-    example_data = get_all_example_data()
-    # we update all examples that we found:
-    for key, value in example_data.items():
-        Variable.set(key=key, value=value, serialize_json=True)
-    # now we clean the variables that do not exist anymore:
+def update_all_variables(**kwargs):
+    # first we delete all variables (this helps to keep it clean)
     with create_session() as session:
         current_vars = set(var.key for var in session.query(Variable))
-        apps_to_delete = current_vars - example_data.keys()
-        print("About to delete old apps: {}".format(apps_to_delete))
-        for _var in apps_to_delete:
+        for _var in current_vars:
             Variable.delete(_var, session)
+
+    # we update all schemas that we found:
+    schemas = get_all_schemas()
+
+    for key, value in schemas.items():
+        Variable.set(key=key, value=value, serialize_json=True)
+
+    # we update all examples that we found:
+    example_data = get_all_example_data()
+    for key, value in example_data.items():
+        Variable.set(key=key, value=value, serialize_json=True)
 
 
 dag = DAG(
-    "update_example_data", default_args=default_args, catchup=False, tags=["internal"]
+    "update_all_variables", default_args=default_args, catchup=False, tags=["internal"]
 )
 
-update_example_data2 = PythonOperator(
-    task_id="update_example_data",
+update_schema2 = PythonOperator(
+    task_id="update_all_schemas",
     provide_context=True,
-    python_callable=update_example_data,
+    python_callable=update_all_variables,
     dag=dag,
 )
 
 
 if __name__ == "__main__":
-    update_example_data()
+    update_all_variables()
