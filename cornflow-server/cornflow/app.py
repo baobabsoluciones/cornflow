@@ -28,7 +28,7 @@ from .commands.users import (
     create_service_user_command,
 )
 from .commands.views import register_views_command
-from .config import app_config
+from .config import app_config, DefaultConfig
 from .endpoints import resources
 from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from .endpoints.signup import SignUpEndpoint
@@ -80,7 +80,8 @@ def create_app(env_name="development", dataconn=None):
     auth_type = app.config["AUTH_TYPE"]
 
     if auth_type == AUTH_DB:
-        api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
+        if DefaultConfig.SIGNUP_ACTIVATED:
+            api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")

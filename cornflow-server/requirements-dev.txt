@@ -23,3 +23,9 @@ sphinxcontrib-qthelp
 sphinxcontrib-serializinghtml
 sphinxcontrib-redoc
 vulture
+
+setuptools~=57.0.0
+pytups~=0.7
+Pyomo~=5.7.1
+numpy~=1.19.4
+pandas~=1.2.4
