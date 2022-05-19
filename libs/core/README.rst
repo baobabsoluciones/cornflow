@@ -7,9 +7,9 @@ It includes a set of modules that can be used to start the creation of your flas
 interface commands that let you create a full REST API from a JSONSchema file that represent your data or
 create a JSONSchema file representing your REST API.
 
------------------------------------
+----------------------------------------------------
 Command line interface :code:`generate_from_schema`
------------------------------------
+----------------------------------------------------
 The cli :code:`generate_from_schema` allows you to automatically generate models, endpoints and schemas
 from a JSONSchema. The generated files can then be added to your flask (RestFul) REST API.
 
