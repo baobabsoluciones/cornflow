@@ -41,6 +41,7 @@ from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
 from cornflow_core.compress import compressed
 
+
 # Initialize the schema that all endpoints are going to use
 # TODO: is it needed?
 execution_schema = ExecutionSchema()
@@ -95,6 +96,9 @@ class ExecutionEndpoint(BaseMetaResource):
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
         # TODO: review the order of these two operations
+        # Get dag config schema and validate it
+        marshmallow_obj = get_schema(config, kwargs["schema"], "config")
+        validate_and_continue(marshmallow_obj(), kwargs["config"])
 
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
@@ -125,10 +129,6 @@ class ExecutionEndpoint(BaseMetaResource):
         # ask airflow if dag_name exists
         schema = execution.schema
         schema_info = af_client.get_dag_info(schema)
-
-        # Get dag config schema and validate it
-        marshmallow_obj = get_schema(config, schema)
-        validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # Validate that instance and dag_name are compatible
         marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
