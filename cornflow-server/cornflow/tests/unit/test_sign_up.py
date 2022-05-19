@@ -88,3 +88,33 @@ class TestSignUp(TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json["error"]))
+
+
+class TestSignUpDeactivated(TestCase):
+    def create_app(self):
+        app = create_app("testing")
+        app.config["SIGNUP_ACTIVATED"] = 0
+        return app
+
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_signup_deactivated(self):
+        payload = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "Testpassword1!",
+        }
+
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(response.status_code, 400)
