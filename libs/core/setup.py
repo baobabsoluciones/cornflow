@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow-core",
-    version="0.0.2a1",
+    version="0.0.3a10",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="REST API flask backend components used by cornflow and other REST APIs",
@@ -26,4 +26,10 @@ setuptools.setup(
     python_requires=">=3.7",
     include_package_data=True,
     install_requires=required,
+    entry_points={
+        "console_scripts": [
+            "generate_from_schema = cornflow_core.cli.generate_from_schema:generate_from_schema",
+            "schema_from_models = cornflow_core.cli.schema_from_models:schema_from_models",
+        ]
+    },
 )
