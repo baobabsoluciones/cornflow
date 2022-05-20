@@ -96,6 +96,10 @@ class ExecutionEndpoint(BaseMetaResource):
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
         # TODO: review the order of these two operations
+        # Get dag config schema and validate it
+        marshmallow_obj = get_schema(config, kwargs["schema"], "config")
+        validate_and_continue(marshmallow_obj(), kwargs["config"])
+
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
