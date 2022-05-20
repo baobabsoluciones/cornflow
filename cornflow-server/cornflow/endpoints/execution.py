@@ -36,6 +36,7 @@ from ..shared.const import (
     EXECUTION_STATE_MESSAGE_DICT,
     AIRFLOW_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
+    EXEC_STATE_QUEUED,
 )
 from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
@@ -160,7 +161,7 @@ class ExecutionEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
-        execution.update_state(EXEC_STATE_RUNNING)
+        execution.update_state(EXEC_STATE_QUEUED)
         log.info(
             "User {} creates execution {}".format(self.get_user_id(), execution.id)
         )
