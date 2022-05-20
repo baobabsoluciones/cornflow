@@ -307,6 +307,19 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution.update_state(state)
         return execution, 200
 
+    def put(self, idx, **data):
+        """
+        Edit an existing execution
+
+        :param string idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        # MODIFICAR ESTA PARTE PARA QUE FUNCIONE
+        # log.info(f"User {self.get_user()} edits execution {idx}")
+        # return self.put_detail(data, user=self.get_user(), idx=idx)
+
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     """
