@@ -307,6 +307,8 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution.update_state(state)
         return execution, 200
 
+    @doc(description="Change status of an execution", tags=["Executions"])
+    @authenticate(auth_class=Auth())
     def put(self, idx, **data):
         """
         Edit an existing execution
@@ -316,9 +318,21 @@ class ExecutionStatusEndpoint(BaseMetaResource):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        # MODIFICAR ESTA PARTE PARA QUE FUNCIONE
-        # log.info(f"User {self.get_user()} edits execution {idx}")
-        # return self.put_detail(data, user=self.get_user(), idx=idx)
+
+        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist()
+        if execution.state not in [
+            EXEC_STATE_RUNNING,
+            EXEC_STATE_UNKNOWN,
+            EXEC_STATE_QUEUED,
+        ]:
+            # we only care on asking airflow if the status is unknown or is running.
+            return execution, 200
+        state = data
+        execution.update_state(state)
+        log.info(f"User {self.get_user()} edits execution {idx}")
+        return execution, 200
 
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):

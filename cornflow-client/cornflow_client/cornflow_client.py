@@ -474,6 +474,9 @@ class CornFlow(object):
         )
         return response.json()
 
+    @log_call
+    @ask_token
+    @prepare_encoding
     def update_status(self, execution_id, payload, encoding=None):
         """
         Updates the status of the execution from queued to running when solved
