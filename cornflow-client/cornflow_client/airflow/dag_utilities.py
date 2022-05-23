@@ -154,7 +154,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     client = connect_to_cornflow(secrets)
     exec_id = kwargs["dag_run"].conf["exec_id"]
     execution_data = client.get_data(exec_id)
-    execution_status = client.update_status(exec_id, 0)
+    execution_status = client.update_status(exec_id, {"status": 0})
     data = execution_data["data"]
     config = execution_data["config"]
     inst_id = execution_data["id"]
