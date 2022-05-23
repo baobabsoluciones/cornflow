@@ -21,6 +21,7 @@ from ..schemas.execution import (
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
+    ExecutionStatusEndpointUpdate,
     ExecutionRequest,
     ExecutionEditRequest,
     QueryFiltersExecution,
@@ -309,8 +310,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
     @doc(description="Change status of an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
-    @use_kwargs(ExecutionStatusEndpointResponse)
-    @marshal_with(ExecutionStatusEndpointResponse)
+    @use_kwargs(ExecutionStatusEndpointUpdate)
     def put(self, idx, **data):
         """
         Edit an existing execution
@@ -330,7 +330,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             EXEC_STATE_QUEUED,
         ]:
             # we only care on asking airflow if the status is unknown or is running.
-            return execution, 200
+            return {"message": f"execution {idx} updated correctly"}, 200
         state = data.get("status")
         if state is not None:
             execution.update_state(state)
@@ -338,9 +338,6 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             return execution, 200
         else:
             return {"error": "status code was missing"}, 400
-
-        log.info(f"User {self.get_user()} edits execution {idx}")
-        return execution, 200
 
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
