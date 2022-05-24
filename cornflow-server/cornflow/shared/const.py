@@ -44,6 +44,7 @@ EXECUTION_STATE_MESSAGE_DICT = {
     EXEC_STATE_UNKNOWN: "The execution has an unknown error.",
     EXEC_STATE_SAVING: "The execution executed ok but failed while saving it.",
     EXEC_STATE_MANUAL: "The execution was loaded manually.",
+    EXEC_STATE_QUEUED: "The execution is currently queued.",
 }
 
 # derived constants

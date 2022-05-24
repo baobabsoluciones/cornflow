@@ -92,7 +92,7 @@ class ExecutionEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         # TODO: should validation should be done even if the execution is not going to be run?
-        # TODO: should the schema field be cross valdiated with the instance schema field?
+        # TODO: should the schema field be cross validated with the instance schema field?
         config = current_app.config
 
         if "schema" not in kwargs:
