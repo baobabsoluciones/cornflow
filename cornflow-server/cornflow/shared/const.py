@@ -133,4 +133,6 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (PLANNER_ROLE, POST_ACTION, "dag-manual"),
     (SERVICE_ROLE, POST_ACTION, "dag-manual"),
     (SERVICE_ROLE, POST_ACTION, "deployed-dag"),
+    (SERVICE_ROLE, POST_ACTION, "instance"),
+    (SERVICE_ROLE, POST_ACTION, "execution"),
 ]
