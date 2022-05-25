@@ -485,7 +485,11 @@ class CornFlow(object):
         :param int payload: code of the updated status for the execution
         """
         response = self.put_api_for_id(
-            api="execution/", id=execution_id, payload=payload, encoding=encoding
+            api="execution/",
+            id=execution_id,
+            payload=payload,
+            encoding=encoding,
+            post_url="status",
         )
         return response.json
 
