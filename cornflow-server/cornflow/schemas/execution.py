@@ -95,7 +95,7 @@ class ExecutionStatusEndpointResponse(Schema):
 
 class ExecutionStatusEndpointUpdate(Schema):
     id = fields.Str()
-    state = fields.Int()
+    status = fields.Int()
 
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):

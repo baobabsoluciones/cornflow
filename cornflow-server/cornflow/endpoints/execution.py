@@ -335,7 +335,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         if state is not None:
             execution.update_state(state)
             log.info(f"User {self.get_user()} edits execution {idx}")
-            return execution, 200
+            return {"message": f"execution {idx} updated correctly"}, 200
         else:
             return {"error": "status code was missing"}, 400
 
