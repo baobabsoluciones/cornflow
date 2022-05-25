@@ -141,11 +141,11 @@ class Instance(InstanceCore):
                             data_dict[key] = list(map(float, data_dict[key]))
                         except ValueError:
                             pass
-                elif isinstance(data_dict[key][0], OrderedDict):
+                elif isinstance(data_dict[key][0], dict):
                     data_dict[key] = list(
                         map(Instance.dict_to_int_or_float, data_dict[key])
                     )
-            elif isinstance(data_dict[key], OrderedDict):
+            elif isinstance(data_dict[key], dict):
                 data_dict[key] = Instance.dict_to_int_or_float(data_dict[key])
         return dict(data_dict)
 
