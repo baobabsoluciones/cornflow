@@ -334,15 +334,20 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         execution = self.create_instance_and_execution()
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_QUEUED)
-        time.sleep(3)
+        time.sleep(10)
         status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_status_solving_timer(self):
         execution = self.create_timer_instance_and_execution(10)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_QUEUED)
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+        time.sleep(5)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_manual_execution(self):
 
