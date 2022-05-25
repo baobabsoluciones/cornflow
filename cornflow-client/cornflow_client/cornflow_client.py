@@ -479,10 +479,11 @@ class CornFlow(object):
     @prepare_encoding
     def update_status(self, execution_id, payload, encoding=None):
         """
-        Updates the status of the execution from queued to running when solved
+        Updates the status of the execution from queued to running when solved.
 
         :param str execution_id: id for the execution
         :param dict payload: code of the updated status for the execution
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
         response = self.put_api_for_id(
             api="execution/",
@@ -491,7 +492,7 @@ class CornFlow(object):
             encoding=encoding,
             post_url="status",
         )
-        return response
+        return response.json()
 
     @log_call
     @ask_token

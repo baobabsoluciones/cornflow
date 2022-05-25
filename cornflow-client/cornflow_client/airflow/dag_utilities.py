@@ -155,8 +155,6 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     exec_id = kwargs["dag_run"].conf["exec_id"]
     execution_data = client.get_data(exec_id)
     execution_status = client.update_status(exec_id, {"status": 0})
-    print(f"Response: {execution_status.json()}")
-    print(f"Status code: {execution_status.status_code}")
     data = execution_data["data"]
     config = execution_data["config"]
     inst_id = execution_data["id"]
