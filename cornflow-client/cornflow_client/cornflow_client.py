@@ -491,7 +491,7 @@ class CornFlow(object):
             encoding=encoding,
             post_url="status",
         )
-        return response.json
+        return response
 
     @log_call
     @ask_token
