@@ -85,7 +85,7 @@ def connect_to_cornflow(secrets):
         scheme = "http"
     url = f"{scheme}://{conn.hostname}"
     if conn.port:
-        url=f"{url}:{conn.port}"
+        url = f"{url}:{conn.port}"
     if conn.path:
         url = urljoin(url, conn.path)
     airflow_user = CornFlow(url=url)
@@ -154,6 +154,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     client = connect_to_cornflow(secrets)
     exec_id = kwargs["dag_run"].conf["exec_id"]
     execution_data = client.get_data(exec_id)
+    execution_status = client.update_status(exec_id, {"status": 0})
     data = execution_data["data"]
     config = execution_data["config"]
     inst_id = execution_data["id"]
