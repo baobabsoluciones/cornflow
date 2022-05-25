@@ -28,8 +28,8 @@ def call_cornflow(**kwargs):
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
 
     cwd = os.path.dirname(os.path.realpath(__file__))
-    PULP_EXAMPLE = os.path.join(cwd, './pulp_example_data.json')
-    with open(PULP_EXAMPLE) as fd:
+    pulp_example_data = os.path.join(cwd, './pulp_example_data.json')
+    with open(pulp_example_data) as fd:
         data = json.load(fd)
     instance = cf_client.create_instance(
         data=data,
