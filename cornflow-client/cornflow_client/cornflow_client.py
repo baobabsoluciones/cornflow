@@ -482,7 +482,7 @@ class CornFlow(object):
         Updates the status of the execution from queued to running when solved
 
         :param str execution_id: id for the execution
-        :param int payload: code of the updated status for the execution
+        :param dict payload: code of the updated status for the execution
         """
         response = self.put_api_for_id(
             api="execution/",
