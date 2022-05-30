@@ -151,14 +151,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    client = connect_to_cornflow(secrets)
-    exec_id = kwargs["dag_run"].conf["exec_id"]
-    execution_data = client.get_data(exec_id)
-    execution_status = client.update_status(exec_id, {"status": 0})
-    data = execution_data["data"]
-    config = execution_data["config"]
-    inst_id = execution_data["id"]
     try:
+        client = connect_to_cornflow(secrets)
+        exec_id = kwargs["dag_run"].conf["exec_id"]
+        execution_data = client.get_data(exec_id)
+        execution_status = client.update_status(exec_id, {"status": 0})
+        data = execution_data["data"]
+        config = execution_data["config"]
+        inst_id = execution_data["id"]
         solution, sol_checks, inst_checks, log, log_json = fun(data, config)
     except NoSolverException as e:
         if config.get("msg", True):
