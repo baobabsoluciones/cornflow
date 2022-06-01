@@ -93,6 +93,11 @@ class ExecutionStatusEndpointResponse(Schema):
     data_hash = fields.Str(dump_only=True)
 
 
+class ExecutionStatusEndpointUpdate(Schema):
+    id = fields.Str()
+    status = fields.Int()
+
+
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
