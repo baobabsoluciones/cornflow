@@ -21,6 +21,7 @@ from ..schemas.execution import (
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
+    ExecutionStatusEndpointUpdate,
     ExecutionRequest,
     ExecutionEditRequest,
     QueryFiltersExecution,
@@ -36,6 +37,7 @@ from ..shared.const import (
     EXECUTION_STATE_MESSAGE_DICT,
     AIRFLOW_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
+    EXEC_STATE_QUEUED,
 )
 from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
@@ -90,7 +92,7 @@ class ExecutionEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         # TODO: should validation should be done even if the execution is not going to be run?
-        # TODO: should the schema field be cross valdiated with the instance schema field?
+        # TODO: should the schema field be cross validated with the instance schema field?
         config = current_app.config
 
         if "schema" not in kwargs:
@@ -164,7 +166,7 @@ class ExecutionEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
-        execution.update_state(EXEC_STATE_RUNNING)
+        execution.update_state(EXEC_STATE_QUEUED)
         log.info(
             "User {} creates execution {}".format(self.get_user_id(), execution.id)
         )
@@ -309,6 +311,37 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
         execution.update_state(state)
         return execution, 200
+
+    @doc(description="Change status of an execution", tags=["Executions"])
+    @authenticate(auth_class=Auth())
+    @use_kwargs(ExecutionStatusEndpointUpdate)
+    def put(self, idx, **data):
+        """
+        Edit an existing execution
+
+        :param string idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+
+        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist()
+        if execution.state not in [
+            EXEC_STATE_RUNNING,
+            EXEC_STATE_UNKNOWN,
+            EXEC_STATE_QUEUED,
+        ]:
+            # we only care on asking airflow if the status is unknown or is running.
+            return {"message": f"execution {idx} updated correctly"}, 200
+        state = data.get("status")
+        if state is not None:
+            execution.update_state(state)
+            log.info(f"User {self.get_user()} edits execution {idx}")
+            return {"message": f"execution {idx} updated correctly"}, 200
+        else:
+            return {"error": "status code was missing"}, 400
 
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
