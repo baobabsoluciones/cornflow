@@ -75,10 +75,11 @@ jobs:
           source afvenv/bin/activate
           AIRFLOW_VERSION=2.2.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+          CLIENT_BRANCH="${{github.head_ref}}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           python -m pip install -U orloge pulp
-          python -m pip install -U git+https://github.com/baobabsoluciones/cornflow@master#subdirectory=cornflow-client
+          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=cornflow-client"
           python -m pip install -U -r airflow_config/requirements.txt
           airflow db init
           airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
@@ -101,6 +102,8 @@ jobs:
           python -m venv cfvenv
           source cfvenv/bin/activate
           python -m pip install -U -r requirements.txt
+          CLIENT_BRANCH="${{github.head_ref}}"
+          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=cornflow-client"
           flask db upgrade
           flask access_init -v 0
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin -v 0
