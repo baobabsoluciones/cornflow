@@ -83,6 +83,8 @@ class DAGDetailEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         solution_schema = req_data.pop("solution_schema", "pulp")
+        if solution_schema == '_data_checks':
+            solution_schema = None
         # TODO: the solution_schema maybe we should get it from the created execution_id?
         #  at least, check they have the same schema-name
         # Check data format

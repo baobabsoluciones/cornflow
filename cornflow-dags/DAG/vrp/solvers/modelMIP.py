@@ -13,37 +13,14 @@ from pyomo.environ import (
     Binary,
 )
 from cornflow_client.constants import (
-    STATUS_NOT_SOLVED,
-    STATUS_OPTIMAL,
     STATUS_INFEASIBLE,
-    STATUS_UNBOUNDED,
-    STATUS_UNDEFINED,
-    STATUS_TIME_LIMIT,
+    PYOMO_STOP_MAPPING,
+    SOLUTION_STATUS_INFEASIBLE,
+    SOLUTION_STATUS_FEASIBLE,
 )
 
 # Imports from internal modules
 from ..core import Experiment, Solution
-
-pyomo_status_mapping = dict(
-    unbounded=STATUS_UNBOUNDED,
-    infeasible=STATUS_INFEASIBLE,
-    invalidProblem=STATUS_NOT_SOLVED,
-    solverFailure=STATUS_NOT_SOLVED,
-    internalSolverError=STATUS_NOT_SOLVED,
-    error=STATUS_NOT_SOLVED,
-    userInterrupt=STATUS_NOT_SOLVED,
-    resourceInterrupt=STATUS_NOT_SOLVED,
-    licensingProblem=STATUS_NOT_SOLVED,
-    maxTimeLimit=STATUS_TIME_LIMIT,
-    maxIterations=STATUS_TIME_LIMIT,
-    maxEvaluations=STATUS_TIME_LIMIT,
-    globallyOptimal=STATUS_OPTIMAL,
-    locallyOptimal=STATUS_OPTIMAL,
-    optimal=STATUS_OPTIMAL,
-    minFunctionValue=STATUS_UNDEFINED,
-    minStepLength=STATUS_UNDEFINED,
-    other=STATUS_UNDEFINED,
-)
 
 
 class modelMIP(Experiment):
@@ -304,12 +281,11 @@ class modelMIP(Experiment):
 
             result = opt.solve(mip_vrp_instance)
 
-            status = result.solver.status
-            status_sol = pyomo_status_mapping[result.solver.termination_condition]
+            status = PYOMO_STOP_MAPPING[result.solver.termination_condition]
             # Check status
             if status == STATUS_INFEASIBLE:
                 self.log += "Infeasible, check data \n"
-                return dict(status=status, status_sol=status_sol)
+                return dict(status=status, status_sol=SOLUTION_STATUS_INFEASIBLE)
 
             solution_list = self.get_solution_data(mip_vrp_instance)
             tours = self.get_nodesubset(solution_list)
@@ -321,7 +297,7 @@ class modelMIP(Experiment):
 
         self.log += "Solving complete\n"
 
-        return dict(status=status, status_sol=status_sol)
+        return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def get_solution_data(self, model_instance):
         """

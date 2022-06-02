@@ -119,7 +119,7 @@ def try_to_write_solution(client, exec_id, payload):
         # attempt to update the execution with a failed status.
         raise AirflowDagException("The writing of the solution failed")
 
-    if payload["inst_checks"]:
+    if payload.get("inst_checks") is not None:
         checks_payload = dict()
         checks_payload["checks"] = payload["inst_checks"]
         try:
@@ -139,7 +139,10 @@ def get_schema(dag_name):
 
 
 def cf_solve_app(app, secrets, **kwargs):
-    return cf_solve(app.solve, app.name, secrets, **kwargs)
+    if kwargs["dag_run"].conf.get('checks_only'):
+        return cf_check(app.check, secrets, **kwargs)
+    else:
+        return cf_solve(app.solve, app.name, secrets, **kwargs)
 
 
 def cf_solve(fun, dag_name, secrets, **kwargs):
@@ -203,6 +206,54 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         raise AirflowDagException("There was an error during the solving")
+
+
+def cf_check(fun, secrets, **kwargs):
+    """
+    Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
+    :param fun: The function to use to check the data
+    :param secrets: Environment variables
+    :param kwargs: other kwargs passed to the dag task.
+    :return:
+    """
+    client = connect_to_cornflow(secrets)
+    exec_id = kwargs["dag_run"].conf["exec_id"]
+    current_exec_data = client.get_data(exec_id)
+    config = current_exec_data["config"]
+    exec_to_check_id = config["execution_id"]
+    instance_to_check_data = client.get_data(exec_to_check_id)
+    exec_to_check_data = client.get_solution(exec_to_check_id)
+    instance_data = instance_to_check_data["data"]
+    inst_id = instance_to_check_data["id"]
+    solution_data = exec_to_check_data["data"]
+    try:
+        inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
+    except Exception as e:
+        if config.get("msg", True):
+            print("Some unknown error happened")
+        try_to_save_error(client, exec_id, -1)
+        raise AirflowDagException("There was an error during the verification of the data")
+    payload = dict(
+        state=1,
+        log_json=log_json,
+        log_text="Instance and solution checked.",
+        solution_schema="_data_checks",
+        checks=sol_checks,
+        inst_checks=inst_checks,
+        inst_id=inst_id,
+        data=dict(solution_checks=sol_checks, instance_checks=inst_checks)
+    )
+
+    try_to_write_solution(client, exec_id, payload)
+    try:
+        client.write_solution(execution_id=exec_to_check_id, checks=sol_checks)
+    except CornFlowApiError:
+        try_to_save_error(client, exec_id, -6)
+        # attempt to update the execution with a failed status.
+        raise AirflowDagException("The writing of the solution failed")
+
+    # The validation went correctly: can save the solution without problem
+    return "Checks saved"
 
 
 class NoSolverException(Exception):
