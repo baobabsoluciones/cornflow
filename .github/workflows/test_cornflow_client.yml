@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Print refs
-      run: echo "$GITHUB_CONTEXT"
+      run: echo "${{ toJSON(github) }}"
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
