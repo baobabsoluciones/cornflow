@@ -14,7 +14,7 @@ from unittest import TestCase
 
 # Internal imports
 from cornflow_client import CornFlow
-from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED
+from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
 from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
 
@@ -166,7 +166,7 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(
             {"solver": "PULP_CBC_CMD", "timeLimit": 60}, response["config"]
         )
-        self.assertEqual(STATUS_NOT_SOLVED, response["state"])
+        self.assertEqual(STATUS_QUEUED, response["state"])
 
         return response
 
@@ -186,12 +186,12 @@ class TestCornflowClientUser(TestCase):
         execution = self.test_create_data_check_execution()
         time.sleep(10)
         results = self.client.get_solution(execution["id"])
-        self.assertEqual(results['state'], 1)
-        self.assertIn('data', results.keys())
-        self.assertIn('instance_checks', results['data'].keys())
-        self.assertIn('solution_checks', results['data'].keys())
-        self.assertIn('errors', results['data']['solution_checks'].keys())
-        self.assertEqual(len(results['data']['solution_checks']['errors']), 0)
+        self.assertEqual(results["state"], 1)
+        self.assertIn("data", results.keys())
+        self.assertIn("instance_checks", results["data"].keys())
+        self.assertIn("solution_checks", results["data"].keys())
+        self.assertIn("errors", results["data"]["solution_checks"].keys())
+        self.assertEqual(len(results["data"]["solution_checks"]["errors"]), 0)
 
     def test_execution_results(self):
         execution = self.test_create_execution()
@@ -220,11 +220,15 @@ class TestCornflowClientUser(TestCase):
 
     def test_execution_status(self):
         execution = self.test_create_execution()
+        self.assertEqual(STATUS_QUEUED, execution["state"])
+
+        time.sleep(5)
         response = self.client.get_status(execution["id"])
         items = ["id", "state", "message", "data_hash"]
         for item in items:
             self.assertIn(item, response.keys())
         self.assertEqual(STATUS_NOT_SOLVED, response["state"])
+
         time.sleep(10)
         response = self.client.get_status(execution["id"])
         for item in items:
