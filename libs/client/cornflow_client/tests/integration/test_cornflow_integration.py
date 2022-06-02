@@ -14,7 +14,7 @@ from unittest import TestCase
 
 # Internal imports
 from cornflow_client import CornFlow
-from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED
+from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
 from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
 
@@ -166,7 +166,7 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(
             {"solver": "PULP_CBC_CMD", "timeLimit": 60}, response["config"]
         )
-        self.assertEqual(STATUS_NOT_SOLVED, response["state"])
+        self.assertEqual(STATUS_QUEUED, response["state"])
 
         return response
 
