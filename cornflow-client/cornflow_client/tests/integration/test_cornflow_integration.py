@@ -184,7 +184,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_data_check_solution(self):
         execution = self.test_create_data_check_execution()
-        time.sleep(10)
+        time.sleep(15)
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
         self.assertIn("data", results.keys())
@@ -222,7 +222,7 @@ class TestCornflowClientUser(TestCase):
         execution = self.test_create_execution()
         self.assertEqual(STATUS_QUEUED, execution["state"])
 
-        time.sleep(5)
+        time.sleep(3)
         response = self.client.get_status(execution["id"])
         items = ["id", "state", "message", "data_hash"]
         for item in items:
@@ -265,7 +265,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
-        time.sleep(10)
+        time.sleep(15)
         response = self.client.get_solution(execution["id"])
         items = [
             "id",
