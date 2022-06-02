@@ -4,9 +4,9 @@ on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
     paths:
-      - 'cornflow-client/**'
-      - '!cornflow-client/README.rst'
-      - '!cornflow-client/setup.py'
+      - 'libs/client/**'
+      - '!libs/client/README.rst'
+      - '!libs/client/setup.py'
 
 jobs:
   unit:
@@ -14,7 +14,7 @@ jobs:
     name: Run unit test on cornflow-client
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/client
     strategy:
       max-parallel: 21
       matrix:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/client
     strategy:
       max-parallel: 21
       matrix:
@@ -60,6 +60,7 @@ jobs:
       - name: Copy DAG files
         run: |
           cd ..
+          cd ..
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
@@ -69,6 +70,7 @@ jobs:
           pip install .
       - name: Install airflow
         run: |
+          cd ..
           cd ..
           cd cornflow-server
           python -m venv afvenv
@@ -96,6 +98,7 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Run cornflow
         run: |
+          cd ..
           cd ..
           cd cornflow-server
           python -m venv cfvenv
