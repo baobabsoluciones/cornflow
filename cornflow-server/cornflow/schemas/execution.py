@@ -59,7 +59,7 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Nested(ConfigSchema, required=True)
+    config = fields.Raw(required=True)
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
@@ -97,6 +97,11 @@ class ExecutionStatusEndpointResponse(Schema):
     state = fields.Int()
     message = fields.Str(attribute="state_message")
     data_hash = fields.Str(dump_only=True)
+
+
+class ExecutionStatusEndpointUpdate(Schema):
+    id = fields.Str()
+    status = fields.Int()
 
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):

@@ -1,0 +1,38 @@
+name: cornflow-core tests
+
+on:
+  pull_request:
+    types: [ opened, edited, synchronize, reopened ]
+    paths:
+      - 'libs/core/**'
+      - '!libs/core/README.rst'
+      - '!libs/core/LICENSE'
+
+jobs:  
+  testing:
+
+    name: Run all test suites on cornflow-core
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./libs/core
+    strategy:
+      max-parallel: 21
+      matrix:
+        python-version: [3.7, 3.8]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -U -r requirements-dev.txt
+    - name: Run unit tests
+      run: |
+        coverage run --source=./cornflow_core/ --omit="*/tests/*" -m unittest discover -s cornflow_core/tests 
+        coverage report -m
