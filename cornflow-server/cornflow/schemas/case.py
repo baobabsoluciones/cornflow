@@ -35,7 +35,20 @@ class CaseListResponse(BaseDataEndpointResponse):
     )
 
 
-class CaseBase(CaseListResponse):
+class CaseListAllWithIndicators(CaseListResponse):
+    def get_indicators(self, obj):
+        indicators_string = ""
+        if obj.solution is not None and isinstance(obj.solution, dict):
+            if "indicators" in obj.solution.keys():
+                temp = obj.solution["indicators"]
+                for key, val in sorted(temp.items()):
+                    indicators_string = f"{indicators_string} {key}: {val};"
+        return indicators_string[1:-1]
+
+    indicators = fields.Method("get_indicators")
+
+
+class CaseBase(CaseListAllWithIndicators):
     """ """
 
     data = fields.Raw()

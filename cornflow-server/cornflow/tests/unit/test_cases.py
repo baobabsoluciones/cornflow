@@ -118,6 +118,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "solution",
             "solution_hash",
             "user_id",
+            "indicators",
         ]
 
         self.payload = {
@@ -138,8 +139,12 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
     def test_new_case_execution(self):
         self.payload.pop("instance_id")
 
-        created_case = self.model.get_one_object(
-            self.user_object, self.create_new_row(self.url, self.model, self.payload)
+        case_id = self.create_new_row(self.url, self.model, self.payload)
+
+        created_case = self.client.get(
+            f"{CASE_URL}{case_id}/data",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
         )
 
         self.payload["data"] = self.instance.data
@@ -148,14 +153,19 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["solution"] = self.execution.data
         self.payload["solution_hash"] = self.execution.data_hash
         self.payload["user_id"] = self.user
+        self.payload["indicators"] = ""
 
         for key in self.response_items:
-            self.assertEqual(self.payload[key], getattr(created_case, key))
+            self.assertEqual(self.payload[key], created_case.json[key])
 
     def test_new_case_instance(self):
         self.payload.pop("execution_id")
-        created_case = self.model.get_one_object(
-            self.user_object, self.create_new_row(self.url, self.model, self.payload)
+        case_id = self.create_new_row(self.url, self.model, self.payload)
+
+        created_case = self.client.get(
+            f"{CASE_URL}{case_id}/data",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
         )
 
         self.payload["data"] = self.instance.data
@@ -164,8 +174,9 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["user_id"] = self.user
         self.payload["solution"] = None
         self.payload["solution_hash"] = hash_json_256(None)
+        self.payload["indicators"] = ""
         for key in self.response_items:
-            self.assertEqual(self.payload[key], getattr(created_case, key))
+            self.assertEqual(self.payload[key], created_case.json[key])
 
     def test_case_not_created(self):
         self.create_new_row(
@@ -309,6 +320,7 @@ class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
             "created_at",
             "updated_at",
             "user_id",
+            "indicators",
         }
         self.url = CASE_URL
 

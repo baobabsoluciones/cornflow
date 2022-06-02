@@ -71,6 +71,7 @@ class MipModel(Experiment):
         )
 
         self.solution = Solution.from_dict(SuperDict(works=work_assignments))
+        self.solution.data["indicators"] = self.get_indicators()
 
         return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
 
