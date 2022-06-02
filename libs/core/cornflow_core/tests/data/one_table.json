@@ -1,0 +1,45 @@
+{
+  "type": "array",
+  "description": "Table with the employee master information",
+  "show": true,
+  "filterable": true,
+  "sortable": true,
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "description": "The unique identifier for each employee.",
+        "title": "Employee id.",
+        "type": "integer",
+        "sortable": true,
+        "filterable": true
+      },
+      "name": {
+        "description": "The name of each employee.",
+        "title": "Employee name",
+        "type": "string",
+        "sortable": true,
+        "filterable": true
+      },
+      "manager": {
+        "description": "If the employee is a manager or not.",
+        "title": "Manager",
+        "type": "boolean",
+        "sortable": true,
+        "filterable": true
+      },
+      "manager_tasks": {
+        "description": "If the employee can perform the tasks of a manager without being one. It is not required.",
+        "title": "Manager tasks",
+        "type": "boolean",
+        "sortable": true,
+        "filterable": false
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "manager"
+    ]
+  }
+}

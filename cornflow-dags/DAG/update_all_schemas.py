@@ -24,7 +24,6 @@ default_args = {
     "email_on_retry": False,
     "retries": -1,
     "retry_delay": timedelta(minutes=1),
-    "schedule_interval": "@hourly",
     "catchup": False,
 }
 
@@ -92,7 +91,7 @@ def update_schemas(**kwargs):
 
 
 dag = DAG(
-    "update_all_schemas", default_args=default_args, catchup=False, tags=["internal"]
+    "update_all_schemas", default_args=default_args, catchup=False, tags=["internal"], schedule_interval="@hourly",
 )
 
 update_schema2 = PythonOperator(

@@ -190,8 +190,7 @@ class CornFlow(object):
             return response.json()
         raise CornFlowApiError(
             f"Connection failed with status code: {response.status_code}: {response.text}"
-            )
-
+        )
 
     @prepare_encoding
     def login(self, username, pwd, encoding=None):
@@ -360,6 +359,42 @@ class CornFlow(object):
             )
         return response.json()
 
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def create_data_check_execution(
+        self,
+        execution_id,
+        name="test1",
+        config=None,
+        encoding=None,
+        run=True,
+    ):
+        """
+        Creates an execution to check the instance and solution of an execution
+
+        :param str execution_id: id for the execution to check
+        :param str name: name for the execution
+        :param dict config: execution configuration
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param bool run: if the execution should be run or not
+        """
+        config = config or dict()
+        api = "data-check/"
+        payload = dict(
+            config=config,
+            execution_id=execution_id,
+            name=name,
+        )
+        if not run:
+            api += "?run=0"
+        response = self.create_api(api, json=payload, encoding=encoding)
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
+            )
+        return response.json()
+
     @ask_token
     @prepare_encoding
     def get_data(self, execution_id, encoding=None):
@@ -472,6 +507,26 @@ class CornFlow(object):
         """
         response = self.get_api_for_id(
             api="execution/", id=execution_id, post_url="status", encoding=encoding
+        )
+        return response.json()
+
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def update_status(self, execution_id, payload, encoding=None):
+        """
+        Updates the status of the execution from queued to running when solved.
+
+        :param str execution_id: id for the execution
+        :param dict payload: code of the updated status for the execution
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        """
+        response = self.put_api_for_id(
+            api="execution/",
+            id=execution_id,
+            payload=payload,
+            encoding=encoding,
+            post_url="status",
         )
         return response.json()
 

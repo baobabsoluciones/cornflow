@@ -32,6 +32,7 @@ EXEC_STATE_ERROR_START = -3
 EXEC_STATE_NOT_RUN = -4
 EXEC_STATE_UNKNOWN = -5
 EXEC_STATE_SAVING = -6
+EXEC_STATE_QUEUED = -7
 
 EXECUTION_STATE_MESSAGE_DICT = {
     EXEC_STATE_CORRECT: "The execution has been solved correctly.",
@@ -43,6 +44,7 @@ EXECUTION_STATE_MESSAGE_DICT = {
     EXEC_STATE_UNKNOWN: "The execution has an unknown error.",
     EXEC_STATE_SAVING: "The execution executed ok but failed while saving it.",
     EXEC_STATE_MANUAL: "The execution was loaded manually.",
+    EXEC_STATE_QUEUED: "The execution is currently queued.",
 }
 
 # derived constants
@@ -133,4 +135,6 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (PLANNER_ROLE, POST_ACTION, "dag-manual"),
     (SERVICE_ROLE, POST_ACTION, "dag-manual"),
     (SERVICE_ROLE, POST_ACTION, "deployed-dag"),
+    (SERVICE_ROLE, POST_ACTION, "instance"),
+    (SERVICE_ROLE, POST_ACTION, "execution"),
 ]
