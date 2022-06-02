@@ -23,6 +23,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Print refs
+      run: echo "$GITHUB_CONTEXT"
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -75,7 +77,7 @@ jobs:
           source afvenv/bin/activate
           AIRFLOW_VERSION=2.2.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-          CLIENT_BRANCH="${GITHUB_REF##*/}"
+          CLIENT_BRANCH="${GITHUB_REF}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           python -m pip install -U orloge pulp
