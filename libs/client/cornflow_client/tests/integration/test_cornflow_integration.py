@@ -222,7 +222,7 @@ class TestCornflowClientUser(TestCase):
         execution = self.test_create_execution()
         self.assertEqual(STATUS_QUEUED, execution["state"])
 
-        time.sleep(3)
+        time.sleep(3.5)
         response = self.client.get_status(execution["id"])
         items = ["id", "state", "message", "data_hash"]
         for item in items:
