@@ -80,7 +80,9 @@ def create_app(env_name="development", dataconn=None):
     auth_type = app.config["AUTH_TYPE"]
 
     if auth_type == AUTH_DB:
-        api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
+        signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if signup_activated == 1:
+            api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")

@@ -17,6 +17,7 @@ from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,
     EXEC_STATE_RUNNING,
+    EXEC_STATE_QUEUED,
     STATUS_HEALTHY,
 )
 from cornflow.tests.const import INSTANCE_PATH
@@ -331,15 +332,22 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_status_solving(self):
         execution = self.create_instance_and_execution()
-        time.sleep(2)
         status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+        self.assertEqual(status["state"], EXEC_STATE_QUEUED)
+        time.sleep(10)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_status_solving_timer(self):
         execution = self.create_timer_instance_and_execution(10)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_QUEUED)
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
+        time.sleep(10)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_manual_execution(self):
 

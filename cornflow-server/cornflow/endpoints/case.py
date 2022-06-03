@@ -27,6 +27,7 @@ from ..schemas.case import (
     QueryFiltersCase,
     QueryCaseCompare,
     CaseCompareResponse,
+    CaseListAllWithIndicators,
 )
 
 from ..schemas.model_json import DataSchema
@@ -47,7 +48,7 @@ class CaseEndpoint(BaseMetaResource):
 
     @doc(description="Get all cases", tags=["Cases"])
     @authenticate(auth_class=Auth())
-    @marshal_with(CaseListResponse(many=True))
+    @marshal_with(CaseListAllWithIndicators(many=True))
     @use_kwargs(QueryFiltersCase, location="query")
     def get(self, **kwargs):
         """
@@ -196,7 +197,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
 
     @doc(description="Get one case", tags=["Cases"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(CaseListResponse)
+    @marshal_with(CaseListAllWithIndicators)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """

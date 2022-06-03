@@ -427,6 +427,7 @@ class BaseTestCases:
                 self.url_with_query_arguments(), self.model, self.payload
             )
             payload = {**self.payload, **dict(id=idx)}
+            payload["indicators"] = ""
             result = self.get_one_row(self.url + str(idx) + "/", payload)
             diff = self.response_items.symmetric_difference(result.keys())
             self.assertEqual(len(diff), 0)

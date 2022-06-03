@@ -20,7 +20,6 @@ default_args = {
     "email_on_retry": False,
     "retries": -1,
     "retry_delay": timedelta(minutes=1),
-    "schedule_interval": "@hourly",
     "catchup": False,
 }
 
@@ -49,7 +48,7 @@ def update_dag_registry(**kwargs):
 
 
 dag = DAG(
-    "update_dag_registry", default_args=default_args, catchup=False, tags=["internal"]
+    "update_dag_registry", default_args=default_args, catchup=False, tags=["internal"], schedule_interval="@hourly",
 )
 
 update_dag_registry_2 = PythonOperator(

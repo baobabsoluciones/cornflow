@@ -21,15 +21,24 @@ class Solution(SolutionCore):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Solution":
+
         data_p = {
             el: {(v["id_employee"], v["time_slot"]): v for v in data[el]}
             for el in ["works"]
         }
 
-        return cls(SuperDict(data_p))
+        if "indicators" not in data:
+            data["indicators"] = None
+
+        solution = {
+            "works": data_p["works"],
+            "indicators": data["indicators"],
+        }
+
+        return cls(SuperDict(solution))
 
     def to_dict(self) -> dict:
-        return {"works": pickle.loads(pickle.dumps(self.data["works"].values_l(), -1))}
+        return {"works": pickle.loads(pickle.dumps(self.data["works"].values_l(), -1)), "indicators": self.data["indicators"]}
 
     def get_time_slots(self) -> TupList[str]:
         """

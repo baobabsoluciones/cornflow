@@ -27,6 +27,12 @@ class ConfigSchema(Schema):
     logPath = fields.Str(required=False)
 
 
+class ConfigSchemaResponse(ConfigSchema):
+    checks_only = fields.Boolean(required=False)
+    execution_id = fields.Str(required=False)
+    schema = fields.Str(required=False)
+
+
 class ExecutionSchema(Schema):
     id = fields.Str(dump_only=True)
     user_id = fields.Int(required=False, load_only=True)
@@ -53,7 +59,7 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Nested(ConfigSchema, required=True)
+    config = fields.Raw(required=True)
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
@@ -80,7 +86,7 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
 
 
 class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
-    config = fields.Nested(ConfigSchema)
+    config = fields.Nested(ConfigSchemaResponse)
     instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
@@ -91,6 +97,11 @@ class ExecutionStatusEndpointResponse(Schema):
     state = fields.Int()
     message = fields.Str(attribute="state_message")
     data_hash = fields.Str(dump_only=True)
+
+
+class ExecutionStatusEndpointUpdate(Schema):
+    id = fields.Str()
+    status = fields.Int()
 
 
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):

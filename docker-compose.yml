@@ -37,9 +37,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - ./airflow_config/dags:/usr/local/airflow/dags
-      - ./airflow_config/requirements.txt:/requirements.txt
-      - ./airflow_config/plugins:/usr/local/airflow/plugins
+      - ./cornflow-dags/DAG:/usr/local/airflow/dags
+      - ./cornflow-dags/requirements.txt:/requirements.txt
+      - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
     environment:
       - AIRFLOW_USER=admin
       - AIRFLOW_PWD=admin

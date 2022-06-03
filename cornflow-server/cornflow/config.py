@@ -18,6 +18,7 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 30))
+    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)

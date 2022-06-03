@@ -40,6 +40,7 @@ from .instance import (
     InstanceDataEndpoint,
 )
 
+from .data_check import DataCheckEndpoint
 from .login import LoginOpenAuthEndpoint, LoginEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
@@ -72,6 +73,11 @@ resources = [
         resource=ExecutionDetailsEndpoint,
         urls="/execution/<string:idx>/",
         endpoint="execution-detail",
+    ),
+    dict(
+        resource=DataCheckEndpoint,
+        urls="/data-check/",
+        endpoint="data-check",
     ),
     dict(
         resource=ExecutionStatusEndpoint,
