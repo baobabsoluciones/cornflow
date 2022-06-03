@@ -24,7 +24,7 @@ class DAGTests(unittest.TestCase):
 
     def run_update_all_variables_until_finished(self):
         client = Airflow(url="http://localhost:8080", user="admin", pwd="admin")
-        response = client.consume_dag_run(dag_name="update_all_variables", payload={})
+        response = client.consume_dag_run(dag_name="update_all_schemas", payload={})
         self.assertEqual(response.status_code, 200)
         data = response.json()
         finished = False
