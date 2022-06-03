@@ -2,6 +2,475 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-
-    }
+        "lots": {
+            "type": "array",
+            "items": {
+                "description": "List of lots.",
+                "title": "lots",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "sites": {
+            "type": "array",
+            "items": {
+                "description": "List of all sites.",
+                "title": "sites",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "nodes": {
+            "type": "array",
+            "items": {
+                "description": "Nodes.",
+                "title": "nodes",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "cells": {
+            "type": "array",
+            "items": {
+                "description": "Cells.",
+                "title": "cells",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "existing_sites": {
+            "type": "array",
+            "items": {
+                "description": "Existing Sites.",
+                "title": "existing sites",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "potential_sites": {
+            "type": "array",
+            "items": {
+                "description": "Potential Sites.",
+                "title": "potential sites",
+                "type": "string",
+                "sortable": true,
+                "filterable": true
+            }
+        },
+        "initial_capacity": {
+            "type":"array",
+            "items": {
+                "type": "object",
+                "description": "Table with the initial capacity for the different sets of (site, node, cell)",
+                "show": true,
+                "sortable": true,
+                "filterable": true,
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "cell": {
+                        "description": "Identifier of the cell",
+                        "title": "cell",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "capacity": {
+                        "description": "Capacity.",
+                        "title": "capacity",
+                        "type":"integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node",
+                    "cell",
+                    "capacity"
+                ]
+            }
+        },
+        "max_capacity": {
+            "type":"array",
+            "items": {
+                "type": "object",
+                "description": "Table with the max capacity for the different sets of (site, node, cell)",
+                "show": true,
+                "sortable": true,
+                "filterable": true,
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "cell": {
+                        "description": "Identifier of the cell",
+                        "title": "cell",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "capacity": {
+                        "description": "Capacity.",
+                        "title": "capacity",
+                        "type":"integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node",
+                    "cell",
+                    "capacity"
+                ]
+            }
+        },
+        "demand": {
+            "type":"array",
+            "items": {
+                "type": "object",
+                "description": "Table with the demand for the different sets of (lot, node)",
+                "show": true,
+                "sortable": true,
+                "filterable": true,
+                "properties": {
+                    "lot": {
+                        "description": "Identifier of the lot",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "demand": {
+                        "description": "Demand.",
+                        "title": "demand",
+                        "type":"integer",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "lot",
+                    "node",
+                    "demand"
+                ]
+            }
+        },
+        "coverage": {
+            "type": "array",
+            "items":{
+                "type": "object",
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "cell": {
+                        "description": "Identifier of the cell",
+                        "title": "cell",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "lot": {
+                        "description": "Identifier of the lot",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node",
+                    "cell",
+                    "lot"
+                ]
+            }
+        },
+        "existing_node_in_site": {
+            "type": "array",
+            "items":{
+                "type": "object",
+                "description": "Table with the existing nodes in sites",
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node"
+                ]
+            }
+        },
+        "potential_node_in_site": {
+            "type": "array",
+            "items":{
+                "type": "object",
+                "description": "Table with the potential nodes in sites",
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node"
+                ]
+            }
+        },
+        "existing_cell_in_site_node": {
+            "type": "array",
+            "items":{
+                "type": "object",
+                "description": "Table with the existing nodes in sites nodes",
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "cell": {
+                        "description": "Identifier of the cell",
+                        "title": "cell",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node",
+                    "cell"
+                ]
+            }
+        },
+        "potential_cell_in_site_node": {
+            "type": "array",
+            "items":{
+                "type": "object",
+                "description": "Table with the potential nodes in sites nodes",
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "cell": {
+                        "description": "Identifier of the cell",
+                        "title": "cell",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "site",
+                    "node",
+                    "cell"
+                ]
+            }
+        },
+        "site_cells_lighting_lot_node": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "lot": {
+                        "description": "Identifier of the lot",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "site": {
+                                    "description": "Identifier of the site",
+                                    "title": "site",
+                                    "type": "string",
+                                    "sortable": true,
+                                    "filterable": true
+                                },
+                                "cell": {
+                                    "description": "Identifier of the cell",
+                                    "title": "cell",
+                                    "type": "string",
+                                    "sortable": true,
+                                    "filterable": true
+                                }
+                            },
+                            "required": [
+                                "site",
+                                "cell"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "lots_covered_by_site_node_cell": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "",
+                "show": true,
+                "filterable": true,
+                "sortable": true,
+                "properties": {
+                    "site": {
+                        "description": "Identifier of the site",
+                        "title": "site",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "node": {
+                        "description": "Identifier of the node",
+                        "title": "node",
+                        "type": "string",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "lot": {
+                                    "description": "Identifier of the lot",
+                                    "title": "site",
+                                    "type": "string",
+                                    "sortable": true,
+                                    "filterable": true
+                                    }
+                            },
+                            "required": [
+                                "lot"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "lots",
+        "sites",
+        "nodes",
+        "cells",
+        "existing_sites",
+        "potential_sites",
+        "initial_capacity",
+        "max_capacity",
+        "demand",
+        "coverage",
+        "existing_node_in_site",
+        "potential_node_in_site",
+        "existing_cell_in_site_node",
+        "potential_cell_in_site_node",
+        "site_cells_lighting_lot_node",
+        "lots_covered_by_site_node_cell"
+    ]
 }
