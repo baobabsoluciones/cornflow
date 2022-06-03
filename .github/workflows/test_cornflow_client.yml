@@ -100,7 +100,7 @@ jobs:
       - name: Run cornflow
         run: |
           cd ..
-          cd..
+          cd ..
           cd cornflow-server
           python -m venv cfvenv
           source cfvenv/bin/activate
