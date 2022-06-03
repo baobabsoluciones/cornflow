@@ -107,7 +107,7 @@ def get_all_example_data():
     return example_data_new
 
 
-def update_all_variables(**kwargs):
+def update_all_schemas(**kwargs):
     # first we delete all variables (this helps to keep it clean)
     with create_session() as session:
         current_vars = set(var.key for var in session.query(Variable))
@@ -133,10 +133,10 @@ dag = DAG(
 update_schema2 = PythonOperator(
     task_id="update_all_schemas",
     provide_context=True,
-    python_callable=update_all_variables,
+    python_callable=update_all_schemas,
     dag=dag,
 )
 
 
 if __name__ == "__main__":
-    update_all_variables()
+    update_all_schemas()
