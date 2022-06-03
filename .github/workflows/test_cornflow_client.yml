@@ -4,9 +4,9 @@ on:
   pull_request:
     types: [ opened, edited, synchronize, reopened ]
     paths:
-      - 'cornflow-client/**'
-      - '!cornflow-client/README.rst'
-      - '!cornflow-client/setup.py'
+      - 'libs/client/**'
+      - '!libs/client/README.rst'
+      - '!libs/client/setup.py'
 
 jobs:
   unit:
@@ -14,7 +14,7 @@ jobs:
     name: Run unit test on cornflow-client
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/client
     strategy:
       max-parallel: 21
       matrix:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/client
     strategy:
       max-parallel: 21
       matrix:
@@ -60,6 +60,7 @@ jobs:
       - name: Copy DAG files
         run: |
           cd ..
+          cd ..
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
@@ -70,6 +71,7 @@ jobs:
       - name: Install airflow
         run: |
           cd ..
+          cd ..
           cd cornflow-server
           python -m venv afvenv
           source afvenv/bin/activate
@@ -79,7 +81,7 @@ jobs:
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           python -m pip install -U orloge pulp
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=cornflow-client"
+          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U -r airflow_config/requirements.txt
           airflow db init
           airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
@@ -98,12 +100,13 @@ jobs:
       - name: Run cornflow
         run: |
           cd ..
+          cd..
           cd cornflow-server
           python -m venv cfvenv
           source cfvenv/bin/activate
           python -m pip install -U -r requirements.txt
           CLIENT_BRANCH="${{github.head_ref}}"
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=cornflow-client"
+          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           flask db upgrade
           flask access_init -v 0
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin -v 0
