@@ -2,7 +2,7 @@ import time
 from cornflow_client import get_empty_schema
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore, ExperimentCore
 from cornflow_client.constants import SOLUTION_STATUS_FEASIBLE, STATUS_OPTIMAL
-
+from typing import Dict, List
 
 class Instance(InstanceCore):
     schema = get_empty_schema()
@@ -40,5 +40,6 @@ class Timer(ApplicationCore):
         solvers=list(solvers.keys()),
     )
 
-    def test_cases(self):
-        return []
+    @property
+    def test_cases(self) -> List[Dict]:
+        return list()

@@ -41,6 +41,7 @@ USER_URL = PREFIX + "/user/"
 RECOVER_PASSWORD_URL = PREFIX + "/user/recover-password/"
 
 SCHEMA_URL = PREFIX + "/schema/"
+EXAMPLE_URL = PREFIX + "/example/"
 
 INSTANCE_FILE_URL = PREFIX + "/instancefile/"
 

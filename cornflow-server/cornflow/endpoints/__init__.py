@@ -48,6 +48,7 @@ from .roles import RolesListEndpoint, RoleDetailEndpoint
 
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .token import TokenEndpoint
+from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 from ..external_app.endpoint import external_resources
@@ -119,6 +120,11 @@ resources = [
         resource=SchemaDetailsEndpoint,
         urls="/schema/<string:dag_name>/",
         endpoint="schema-details",
+    ),
+    dict(
+        resource=ExampleDataDetailsEndpoint,
+        urls="/example/<string:dag_name>/",
+        endpoint="example-data",
     ),
     dict(resource=HealthEndpoint, urls="/health/", endpoint="health"),
     dict(
