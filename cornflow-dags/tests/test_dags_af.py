@@ -6,7 +6,7 @@ from cornflow_client.airflow.api import Airflow
 
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
-from DAG.update_all_variables import get_new_apps
+from DAG.update_all_schemas import get_new_apps
 
 existing_apps = [app.name for app in get_new_apps()]
 
