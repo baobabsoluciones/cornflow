@@ -10,7 +10,7 @@ jobs:
     name: Build and publish cornflow-client Python 🐍 distributions 📦 to PyPI
     defaults:
       run:
-        working-directory: ./cornflow-client
+        working-directory: ./libs/client
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
@@ -31,10 +31,10 @@ jobs:
       with:
         password: ${{ secrets.test_pypi_password }}
         repository_url: https://test.pypi.org/legacy/
-        packages_dir: cornflow-client/dist/
+        packages_dir: libs/client/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.pypi_password }}
-        packages_dir: cornflow-client/dist/
+        packages_dir: libs/client/dist/
 
