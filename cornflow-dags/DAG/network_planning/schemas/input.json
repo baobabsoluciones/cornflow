@@ -16,6 +16,7 @@
             "type": "array",
             "items": {
                 "description": "List of all sites.",
+
                 "title": "sites",
                 "type": "string",
                 "sortable": true,
