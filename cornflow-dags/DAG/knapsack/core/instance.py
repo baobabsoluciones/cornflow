@@ -1,10 +1,13 @@
-import numpy as np
-from ..schemas import instance_schema
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, get_empty_schema
+from cornflow_client.core.tools import load_json
+import os
 
 
 class Instance(InstanceCore):
-    schema = instance_schema
+    schema = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
+    )
+    schema_checks = get_empty_schema()
 
     @classmethod
     def from_file(cls, path):

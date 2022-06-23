@@ -4,6 +4,7 @@
 # Partial imports
 from abc import ABC, abstractmethod
 from jsonschema import Draft7Validator
+from pytups import SuperDict
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
@@ -142,8 +143,20 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
-        instance_checks = inst.check()
-        if instance_checks:
+        instance_checks = SuperDict(inst.check())
+
+        # TODO: REMOVE THIS ? Or leave it for developers ?
+        validator = Draft7Validator(inst.schema_checks)
+        if not validator.is_valid(instance_checks):
+            raise Exception("The instance checks have invalid format")
+
+        errors_tables = (
+            SuperDict.from_dict(inst.schema_checks)["properties"]
+            .vfilter(lambda v: not v["is_warning"])
+            .keys()
+        )
+        instance_errors = instance_checks.kfilter(lambda k: k in errors_tables)
+        if instance_errors:
             log = dict(
                 time=0,
                 solver=solver,
@@ -195,9 +208,16 @@ class ApplicationCore(ABC):
 
         checks = algo.check_solution()
 
-        return sol, checks, {}, log_txt, log
+        # TODO: REMOVE THIS ? Or leave it for developers ?
+        validator = Draft7Validator(algo.schema_checks)
+        if not validator.is_valid(checks):
+            raise Exception("The solution checks have invalid format")
 
-    def check(self, instance_data: dict, solution_data: dict, *args, **kwargs) -> Tuple[Dict, Dict, Dict]:
+        return sol, checks, instance_checks, log_txt, log
+
+    def check(
+        self, instance_data: dict, solution_data: dict, *args, **kwargs
+    ) -> Tuple[Dict, Dict, Dict]:
         """
         Checks the instance and solution data
         :param instance_data: json data of the instance
@@ -230,7 +250,7 @@ class ApplicationCore(ABC):
         else:
             start = timer()
             solution_checks = dict(no_data=True)
-            
+
         log = dict(
             time=timer() - start,
             solver=solver,
@@ -267,4 +287,6 @@ class ApplicationCore(ABC):
             instance=self.instance.schema,
             solution=self.solution.schema,
             config=self.schema,
+            instance_checks=self.instance.schema_checks,
+            solution_checks=list(self.solvers.values())[0].schema_checks,
         )

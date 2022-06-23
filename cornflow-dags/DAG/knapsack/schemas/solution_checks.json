@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "weight": {
+            "type": "object",
+            "title":  "Weight",
+            "description": "Table with a single value indicating the weight excess if the bag is heavier than its capacity",
+            "is_warning": false,
+            "properties": {
+                "weight_excess": {
+                    "type": "number",
+                    "title": "Weight excess",
+                    "description": "The weight excess in the bag"
+                }
+            },
+            "required": [],
+            "additionalProperties": false
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

@@ -9,7 +9,7 @@ from pytups import SuperDict, TupList
 from typing import Dict, Tuple
 
 # Imports from cornflow libraries
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 
 # Imports from internal modules
@@ -28,6 +28,7 @@ class Instance(InstanceCore):
     schema = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
     )
+    schema_checks = get_empty_schema()
 
     def __init__(self, data: dict):
         super().__init__(data)

@@ -6,6 +6,7 @@ from typing import Dict, List
 
 class Instance(InstanceCore):
     schema = get_empty_schema()
+    schema_checks = get_empty_schema()
 
 
 class Solution(SolutionCore):
@@ -13,6 +14,8 @@ class Solution(SolutionCore):
 
 
 class Solver(ExperimentCore):
+    schema_checks = get_empty_schema()
+
     def solve(self, options):
         seconds = options.get("seconds", 60)
         seconds = options.get("timeLimit", seconds)
@@ -27,7 +30,7 @@ class Solver(ExperimentCore):
         return 0
 
     def check_solution(self, *args, **kwargs):
-        return dict(errors=dict())
+        return dict()
 
 
 class Timer(ApplicationCore):

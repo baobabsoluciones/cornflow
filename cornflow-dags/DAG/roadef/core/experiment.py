@@ -1,12 +1,18 @@
 from .solution import Solution
 from .instance import Instance
 from cornflow_client import ExperimentCore
+from cornflow_client.core.tools import load_json
 from pytups import SuperDict, TupList
 from math import floor
 import numpy as np
+import os
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     def __init__(self, instance, solution):
         if solution is None:
             solution = Solution(dict())
@@ -47,26 +53,26 @@ class Experiment(ExperimentCore):
         result = SuperDict()
         for id_shift, shift in shifts.items():
             cumulated_driving_time = 0
-            for s, (stop, next_stop) in enumerate(zip(shift['route'], shift['route'][1:])):
+            for s, (stop, next_stop) in enumerate(
+                zip(shift["route"], shift["route"][1:])
+            ):
                 stop["cumulated_driving_time"] = cumulated_driving_time
                 cumulated_driving_time += self.instance.get_time_between(
-                        stop["location"],
-                        next_stop["location"],
-                    )
+                    stop["location"],
+                    next_stop["location"],
+                )
             shift["route"][-1]["cumulated_driving_time"] = cumulated_driving_time
             result[id_shift] = dict(
                 arrival_time=shift["route"][-1]["arrival"],
                 final_inventory=shift["initial_quantity"]
-                                + sum([step["quantity"] for step in shift["route"]]),
-                duration=shift["route"][-1]["arrival"]
-                         - shift["departure_time"],
-                driving_duration = sum(
+                + sum([step["quantity"] for step in shift["route"]]),
+                duration=shift["route"][-1]["arrival"] - shift["departure_time"],
+                driving_duration=sum(
                     self.instance.get_time_between(
-                        stop["location"],
-                        next_stop["location"]
+                        stop["location"], next_stop["location"]
                     )
                     for stop, next_stop in zip(shift["route"], shift["route"][1:])
-                )
+                ),
             )
         return result
 
@@ -173,19 +179,19 @@ class Experiment(ExperimentCore):
     # Verification of shifts constraints
     def check_shifts(self):
         check = SuperDict(
-            c_02_timeline=SuperDict(),
-            c_03_wrong_index=SuperDict(),
-            c_03_setup_times=SuperDict(),
-            c_04_customer_TW=SuperDict(),
-            c_05_sites_accessible=SuperDict(),
-            c_0607_inventory_trailer_negative=SuperDict(),
-            c_0607_inventory_trailer_above_capacity=SuperDict(),
-            c_0607_inventory_trailer_final_inventory=SuperDict(),
-            c_0607_inventory_trailer_initial_inventory=SuperDict(),
-            c_11_quantity_delivered=SuperDict(),
-            c_16_customer_tank_exceeds=SuperDict(),
-            c_16_customer_tank_too_low=SuperDict(),
-            driver_and_trailer=SuperDict(),
+            c_02_timeline=TupList(),
+            c_03_wrong_index=TupList(),
+            c_03_setup_times=TupList(),
+            c_04_customer_TW=TupList(),
+            c_05_sites_accessible=TupList(),
+            c_0607_inventory_trailer_negative=TupList(),
+            c_0607_inventory_trailer_above_capacity=TupList(),
+            c_0607_inventory_trailer_final_inventory=TupList(),
+            c_0607_inventory_trailer_initial_inventory=TupList(),
+            c_11_quantity_delivered=TupList(),
+            c_16_customer_tank_exceeds=TupList(),
+            c_16_customer_tank_too_low=TupList(),
+            driver_and_trailer=TupList(),
         )
 
         for shift in self.solution.get_all_shifts():
@@ -193,27 +199,31 @@ class Experiment(ExperimentCore):
             trailer = shift.get("trailer", None)
             id_shift = shift.get("id_shift", None)
             if driver is None or trailer is None:
-                check["driver_and_trailer"][id_shift] = 1
+                dr_tr = dict(
+                    id_shift=id_shift, missing_trailer=False, missing_driver=False
+                )
+                if driver is None:
+                    dr_tr["missing_driver"] = True
+                if trailer is None:
+                    dr_tr["missing_trailer"] = True
+                check["driver_and_trailer"].append(dr_tr)
                 continue
-            check["c_02_timeline"].update(self.check_shift_02(shift, id_shift, driver))
-
+            check["c_02_timeline"] += self.check_shift_02(shift, id_shift, driver)
             res_check_c03 = self.check_shift_03(shift, id_shift).vfilter(
                 lambda v: len(v) != 0
             )
-            check["c_03_wrong_index"].update(res_check_c03.get("wrong_index", []))
-            check["c_03_setup_times"].update(res_check_c03.get("setup_time", []))
-            check["c_04_customer_TW"].update(self.check_shift_04(shift, id_shift))
-            check["c_05_sites_accessible"].update(
-                self.check_shift_05(shift, id_shift, trailer)
+            check["c_03_wrong_index"] += res_check_c03.get("wrong_index", [])
+            check["c_03_setup_times"] += res_check_c03.get("setup_time", [])
+            check["c_04_customer_TW"] += self.check_shift_04(shift, id_shift)
+            check["c_05_sites_accessible"] += self.check_shift_05(
+                shift, id_shift, trailer
             )
-            check["c_11_quantity_delivered"].update(
-                self.check_shift_11(shift, id_shift)
-            )
+            check["c_11_quantity_delivered"] += self.check_shift_11(shift, id_shift)
             res_check_c16 = self.check_shift_16(shift, id_shift).vfilter(
                 lambda v: len(v) != 0
             )
-            check["c_16_customer_tank_exceeds"].update(res_check_c16.get("exceeds", []))
-            check["c_16_customer_tank_too_low"].update(res_check_c16.get("too_low", []))
+            check["c_16_customer_tank_exceeds"] += res_check_c16.get("exceeds", [])
+            check["c_16_customer_tank_too_low"] += res_check_c16.get("too_low", [])
 
         checks_0607 = self.check_shift_0607().vfilter(lambda v: len(v) != 0)
         check["c_0607_inventory_trailer_negative"] = checks_0607.get(
@@ -231,11 +241,11 @@ class Experiment(ExperimentCore):
         return check.vfilter(lambda v: len(v))
 
     # Checks that the timeline is coherent for each shift
-    def check_shift_02(self, shift, id_shift, driver):
+    def check_shift_02(self, shift, id_shift, driver) -> TupList:
         """
-        returns {(shift_id, location): 1, ... } for incoherent timeline at given location
+        returns [{"id_shift": shift_id, "id_location": location}, ...] for incoherent timeline at given location
         """
-        check = SuperDict()
+        check = TupList()
         last_point = self.instance.get_id_base()
         last_departure = shift["departure_time"]
 
@@ -249,7 +259,7 @@ class Experiment(ExperimentCore):
                 + travel_time
                 + operation["layover_before"] * layover_time
             ):
-                check[(id_shift, current_point)] = 1
+                check.append({"id_shift": id_shift, "id_location": current_point})
             last_point = current_point
             last_departure = operation["departure"]
         return check
@@ -257,31 +267,33 @@ class Experiment(ExperimentCore):
     # Checks the loading and delivery times
     def check_shift_03(self, shift, id_shift):
         """
-        returns {"wrong_index": {(id_shift, id_location): 1, ... } for non existent locations,
-                 "setup_time":  {(id_shift, id_location): 1, ... } for operation that does not respect setup time }
+        returns {"wrong_index": [{"id_shift": id_shift, "position": id_operation}, ... ] for non existent locations,
+                 "setup_time":  [{"id_shift": id_shift, "id_location": id_location}, ... ] for operation that does not respect setup time }
         """
-        check = SuperDict(wrong_index=SuperDict(), setup_time=SuperDict())
+        check = SuperDict(wrong_index=TupList(), setup_time=TupList())
         id_operation = 1
         for operation in shift["route"][:-1]:
             if not self.is_valid_location(operation["location"]):
-                check["wrong_index"][(id_shift, id_operation)] = 1
+                check["wrong_index"].append(
+                    {"id_shift": id_shift, "position": id_operation}
+                )
                 continue
             location = operation["location"]
             if location > 0:
-                setup_time = self.instance.get_location_property(
-                    location, "setupTime"
-                )
+                setup_time = self.instance.get_location_property(location, "setupTime")
                 if operation["departure"] < operation["arrival"] + setup_time:
-                    check["setup_time"][(id_shift, location)] = 1
-            id_operation += 1
+                    check["setup_time"].append(
+                        {"id_shift": id_shift, "id_location": location}
+                    )
+                    id_operation += 1
         return check
 
     # Checks that the operations are performed during customers'time windows
     def check_shift_04(self, shift, id_shift):
         """
-        returns {(shift_id, location): 1, ... } for operation out of customer's TW
+        returns [{"id_shift": shift_id, "id_location": location}, ... ] for operation out of customer's TW
         """
-        check = SuperDict()
+        check = TupList()
         for operation in shift["route"][:-1]:
             location = operation["location"]
             if not self.is_customer(location):
@@ -303,38 +315,54 @@ class Experiment(ExperimentCore):
                     tw_found = True
                 ind_tw += 1
             if not tw_found:
-                check[(id_shift, location)] = 1
+                check.append({"id_shift": id_shift, "id_location": location})
         return check
 
     # Checks that the loading and delivery sites are accessible for the vehicle
     def check_shift_05(self, shift, id_shift, trailer):
         """
-        returns {(shift_id, location): 1, ... } for incompatible shift-location combination
+        returns [{"id_shift": shift_id, "id_location": location, "id_trailer": trailer}, ... ] for incompatible shift-location combination
         """
-        check = SuperDict()
+        check = TupList()
         for operation in shift["route"][:-1]:
             location = operation["location"]
             if self.is_customer_or_source(location):
                 if trailer not in self.instance.get_location_property(
                     location, "allowedTrailers"
                 ):
-                    check[(id_shift, location)] = 1
+                    check.append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "id_trailer": trailer,
+                        }
+                    )
         return check
 
     # Checks that the trailer's inventory is not negative and does not exceed capacity (06)
     # Checks that the initial quantity of a trailer on a shift is the end quantity of its previous shift (07)
     def check_shift_0607(self):
         """
-        returns {"negative": {(id_shift, id_location): quantity, ... } for operation resulting in negative trailer inventory
-                 "above_capacity": {(id_shift, id_location): quantity, ... } for operation resulting in excessive trailer inventory
-                 "final_inventory": {id_shift: 1, ...} for shifts with inconsistent final inventory
-                 "initial_inventory": {id_shift: 1, ...} for shifts with inconsistent initial inventory }
+        returns {"negative": [{"id_shift": id_shift, "id_location": id_location, "quantity": quantity} ... ] for operation resulting in negative trailer inventory
+                 "above_capacity": [{"id_shift": id_shift,
+                                     "id_location": id_location,
+                                     "quantity": quantity,
+                                     "id_trailer": trailer,
+                                     "capacity": capacity}, ... ] for operation resulting in excessive trailer inventory
+                 "final_inventory": [{"id_shift": id_shift,
+                                      "final_inventory": final_inventory,
+                                      "calculated_final_inventory":  cfi}, ...] for shifts with inconsistent final inventory
+                 "initial_inventory": [{"id_shift": id_shift,
+                                        "initial_quantity": initial_quantity,
+                                        "last_shift_final_inventory": lsfi,
+                                        "id_trailer": id_trailer}, ...] for shifts with inconsistent initial inventory
+                }
         """
         check = SuperDict(
-            negative=SuperDict(),
-            above_capacity=SuperDict(),
-            final_inventory=SuperDict(),
-            initial_inventory=SuperDict(),
+            negative=TupList(),
+            above_capacity=TupList(),
+            final_inventory=TupList(),
+            initial_inventory=TupList(),
         )
         last_trailer_quantity = [0] * len(self.instance.get_id_trailers())
         aux_info_shift = self.get_aux_info_shift()
@@ -349,6 +377,7 @@ class Experiment(ExperimentCore):
         ):
             driver = shift.get("driver", None)
             trailer = shift.get("trailer", None)
+            trailer_capacity = self.instance.get_trailer_property(trailer, "Capacity")
             id_shift = shift.get("id_shift", None)
             if driver is None or trailer is None:
                 return check
@@ -359,22 +388,51 @@ class Experiment(ExperimentCore):
                 quantity = last_quantity + operation["quantity"]
                 location = operation["location"]
                 if round(quantity, 2) < 0:
-                    check["negative"][(id_shift, location)] = quantity
-                elif round(quantity, 2) > self.instance.get_trailer_property(
-                    trailer, "Capacity"
-                ):
-                    check["above_capacity"][(id_shift, location)] = quantity
+                    check["negative"].append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": quantity,
+                        }
+                    )
+                elif round(quantity, 2) > trailer_capacity:
+                    check["above_capacity"].append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": quantity,
+                            "id_trailer": trailer,
+                            "capacity": trailer_capacity,
+                        }
+                    )
 
                 last_quantity = quantity
             # Constraints (07)
             if round(aux_info_shift[id_shift]["final_inventory"], 2) != round(
                 last_quantity, 2
             ):
-                check["final_inventory"][id_shift] = 1
+                check["final_inventory"].append(
+                    {
+                        "id_shift": id_shift,
+                        "final_inventory": round(
+                            aux_info_shift[id_shift]["final_inventory"], 2
+                        ),
+                        "calculated_final_inventory": round(last_quantity, 2),
+                    }
+                )
             if round(last_trailer_quantity[trailer], 2) != round(
                 shift["initial_quantity"], 2
             ):
-                check["initial_inventory"][id_shift] = 1
+                check["initial_inventory"].append(
+                    {
+                        "id_shift": id_shift,
+                        "initial_quantity": round(shift["initial_quantity"], 2),
+                        "last_shift_final_inventory": round(
+                            last_trailer_quantity[trailer], 2
+                        ),
+                        "id_trailer": trailer,
+                    }
+                )
             last_trailer_quantity[trailer] = last_quantity
         check = check.vfilter(lambda v: len(v) != 0)
         return check
@@ -382,28 +440,42 @@ class Experiment(ExperimentCore):
     # Checks that the quantity delivered at a customer is positive and the quantity loaded at a source is also positive
     def check_shift_11(self, shift, id_shift):
         """
-        returns {(shift_id, location): quantity, ... } for operation with wrong sign
+        returns [{"id_shift": shift_id, "id_location": location, "quantity": quantity}, ... ] for operation with wrong sign
         """
-        check = SuperDict()
+        check = TupList()
         for i in range(1, len(shift["route"]) + 1):
             operation = shift["route"][i - 1]
             location = operation["location"]
             if self.is_source(location) and operation["quantity"] < 0:
-                check[(id_shift, location)] = operation["quantity"]
+                check.append(
+                    {
+                        "id_shift": id_shift,
+                        "id_location": location,
+                        "quantity": operation["quantity"],
+                    }
+                )
             elif self.is_customer(location) and operation["quantity"] > 0:
-                check[(id_shift, location)] = operation["quantity"]
+                check.append(
+                    {
+                        "id_shift": id_shift,
+                        "id_location": location,
+                        "quantity": operation["quantity"],
+                    }
+                )
         return check
 
     # For each delivery, the delivery must be smaller than the customer's tank's capacity
     def check_shift_16(self, shift, id_shift):
         """
-        returns {"exceeds": {(id_shift, id_location): quantity, ... } for
-                        operation with quantity above trailer's capacity
-                 "too_low": {(id_shift, id_location): quantity, ... } for
-                        operation with quantity < min_quantity
+        returns {"exceeds": [{"id_shift": id_shift, "id_location": id_location,
+                              "quantity": quantity, "capacity": capacity}, ... ]
+                        for operation with quantity above trailer's capacity
+                 "too_low": [{"id_shift": id_shift, "id_location": id_location,
+                              "quantity": quantity, "minimum_quantity": min_quantity}, ... ]
+                        for operation with quantity < min_quantity
                 }
         """
-        check = SuperDict(exceeds=SuperDict(), too_low=SuperDict())
+        check = SuperDict(exceeds=TupList(), too_low=TupList())
         for i in range(1, len(shift["route"]) + 1):
             operation = shift["route"][i - 1]
             location = operation["location"]
@@ -418,9 +490,23 @@ class Experiment(ExperimentCore):
                     "MinOperationQuantity", 0
                 )
                 if -operation["quantity"] > capacity:
-                    check["exceeds"][(id_shift, location)] = operation["quantity"]
+                    check["exceeds"].append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": operation["quantity"],
+                            "capacity": capacity,
+                        }
+                    )
                 elif -operation["quantity"] < min_ope_quantity:
-                    check["too_low"][(id_shift, location)] = operation["quantity"]
+                    check["exceeds"].append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": operation["quantity"],
+                            "minimum_quantity": min_ope_quantity,
+                        }
+                    )
         check = check.vfilter(lambda v: len(v) != 0)
         return check
 
@@ -428,15 +514,18 @@ class Experiment(ExperimentCore):
     # Verification of sites constraints
     def check_sites(self):
         """
-        returns {"site_inventory_negative": {(location, time): inventory, ... } for inventories > tank_capacity
-                 "site_inventory_exceeds": {(location, time): inventory, ... } for  negative inventories
-                 "site_doesntexist": {location: 1}   for nonexistent locations
+        returns {"site_inventory_negative": [{"id_location": location, "timeslot": time, "inventory": inventory}, ... ]
+                            for inventories > tank_capacity
+                 "site_inventory_exceeds": [{"id_location": location, "timeslot": time, "inventory": inventory,
+                                             "capacity": capacity}, ... ]
+                            for  negative inventories
+                 "site_doesnt_exist": [{"id_location": location}, ...] for nonexistent locations
                 }
         """
         check = SuperDict(
-            site_inventory_negative=SuperDict(),
-            site_inventory_exceeds=SuperDict(),
-            site_doesntexist=SuperDict(),
+            site_inventory_negative=TupList(),
+            site_inventory_exceeds=TupList(),
+            site_doesnt_exist=TupList(),
         )
         operation_quantities = []
 
@@ -447,7 +536,7 @@ class Experiment(ExperimentCore):
         for site_inventory in site_inventories.values():
             location = site_inventory["location"]
             if not self.is_valid_location(location):
-                check["site_doesntexist"][location] = 1
+                check["site_doesntexist"].append({"id_location": location})
                 continue
             if location <= 1 + self.nb_sources:
                 continue
@@ -456,29 +545,60 @@ class Experiment(ExperimentCore):
                 continue
             for i in range(self.horizon):
                 if round(site_inventory["tank_quantity"][i], 3) < 0:
-                    check["site_inventory_negative"][location, i] = site_inventory[
-                        "tank_quantity"
-                    ][i]
+                    check["site_inventory_negative"].append(
+                        {
+                            "id_location": location,
+                            "hour": i,
+                            "inventory": site_inventory["tank_quantity"][i],
+                        }
+                    )
                 if round(
                     site_inventory["tank_quantity"][i], 3
                 ) > self.instance.get_customer_property(location, "Capacity"):
-                    check["site_inventory_exceeds"][location, i] = site_inventory[
-                        "tank_quantity"
-                    ][i]
+                    check["site_inventory_exceeds"].append(
+                        {
+                            "id_location": location,
+                            "hour": i,
+                            "inventory": site_inventory["tank_quantity"][i],
+                            "capacity": self.instance.get_customer_property(location, "Capacity")
+                        }
+                    )
         check = check.vfilter(lambda v: len(v) != 0)
         return check
 
     # =====================================
     # Verification of resources constraints
     def check_resources(self):
+        """
+        returns:
+        {
+            "res_dr_01_intershift": [{"id_shift": id_shift, "id_driver": id_driver,
+                                      "duration": duration, "minimum_duration": minimum_duration
+                                      "last_shift": id_last_shift}, ...]
+                        for drivers not respecting minInterShiftDuration
+            "res_dr_03_max_duration": [{"id_shift": id_shift, "id_driver": id_driver,
+                                        "duration": duration, "maximum_duration": maximum_duration}, ...]
+                        for drivers not respecting max shift duration
+            "res_dr_08_driver_TW": [{"id_shift": id_shift, "id_driver": id_driver}, ...]
+                        for drivers not respecting driver's time windows
+            "res_tl_01_shift_overlaps": [{"id_shift": id_shift, "last_shift": id_last_shift,
+                                          "id_trailer": id_trailer}, ...]
+                        for trailers having shifts that overlap
+            "res_tl_03_compatibility_dr_tr": [{"id_shift": id_shift, "id_trailer": id_trailer,
+                                                "id_driver": id_driver}, ...]
+                        for shifts having drivers and trailers that are not compatibles
+        }
+        """
         check = SuperDict(
-            res_dr_01_intershift=SuperDict(),
-            res_dr_03_max_duration=SuperDict(),
-            res_dr_08_driver_TW=SuperDict(),
-            res_tl_01_shift_overlaps=SuperDict(),
-            res_tl_03_compatibility_dr_tr=SuperDict(),
+            res_dr_01_intershift=TupList(),
+            res_dr_03_max_duration=TupList(),
+            res_dr_08_driver_TW=TupList(),
+            res_tl_01_shift_overlaps=TupList(),
+            res_tl_03_compatibility_dr_tr=TupList(),
         )
+        last_shift_driver = dict()
         end_of_last_shifts_drivers = [0] * self.nb_drivers
+        last_shift_trailer = dict()
         end_of_last_shifts_trailer = [0] * self.nb_trailers
         aux_info_shift = self.get_aux_info_shift()
 
@@ -491,29 +611,34 @@ class Experiment(ExperimentCore):
             if driver is None or trailer is None:
                 continue
             # DRIVERS
-            if self.check_resources_dr_01(
+            duration, min_duration = self.check_resources_dr_01(
                 shift, driver, end_of_last_shifts_drivers[driver]
-            ):
-                check["res_dr_01_intershift"][id_shift, driver] = 1
+            )
+            if duration is not None:
+                last_shift = last_shift_driver[driver]
+                check["res_dr_01_intershift"].append({"id_shift": id_shift, "last_shift": last_shift, "id_driver": driver, "duration": duration, "minimum_duration": min_duration})
 
-            check_03 = self.check_resources_dr_03(shift, driver)
-            if check_03 is not None:
-                check["res_dr_03_max_duration"][id_shift, driver] = check_03
+            duration, max_duration = self.check_resources_dr_03(shift, driver)
+            if duration is not None:
+                check["res_dr_03_max_duration"].append({"id_shift": id_shift, "id_driver": driver, "duration": duration, "maximum_duration": max_duration})
 
             if self.check_resources_dr_08(shift, id_shift, driver):
-                check["res_dr_08_driver_TW"][id_shift] = 1
+                check["res_dr_08_driver_TW"].append({"id_shift": id_shift, "id_driver": driver})
 
             # TRAILERS
             if self.check_resources_tl_01(shift, end_of_last_shifts_trailer[trailer]):
-                check["res_tl_01_shift_overlaps"][id_shift] = 1
+                last_shift = last_shift_trailer[trailer]
+                check["res_tl_01_shift_overlaps"].append({"id_shift": id_shift, "last_shift": last_shift, "id_trailer": trailer})
 
             if self.check_resources_tl_03(driver, trailer):
-                check["res_tl_03_compatibility_dr_tr"][id_shift] = 1
+                check["res_tl_03_compatibility_dr_tr"].append({"id_shift": id_shift, "id_trailer": trailer, "id_driver": driver})
 
             #
+            last_shift_trailer[trailer] = id_shift
             end_of_last_shifts_trailer[trailer] = aux_info_shift[id_shift][
                 "arrival_time"
             ]
+            last_shift_driver[driver] = id_shift
             end_of_last_shifts_drivers[driver] = aux_info_shift[id_shift][
                 "arrival_time"
             ]
@@ -525,10 +650,13 @@ class Experiment(ExperimentCore):
         returns True for shifts not respecting minInterShiftDuration
         """
         min_delay = self.instance.get_driver_property(driver, "minInterSHIFTDURATION")
-        return (
+        duration = shift["departure_time"] - end_of_last_shift
+        if (
             end_of_last_shift != 0
-            and shift["departure_time"] < end_of_last_shift + min_delay
-        )
+            and duration < min_delay
+        ):
+            return duration, min_delay
+        return None, None
 
     # Checks that the shift respects maximum duration
     def check_resources_dr_03(self, shift, driver):
@@ -559,7 +687,7 @@ class Experiment(ExperimentCore):
                     )
             elif shift["route"][op]["cumulated_driving_time"] > max_driving_duration:
                 check = shift["route"][op]["cumulated_driving_time"]
-        return check
+        return check, max_driving_duration
 
     # Checks that the shift fits into the driver's time windows
     def check_resources_dr_08(self, shift, id_shift, driver):
@@ -607,9 +735,9 @@ class Experiment(ExperimentCore):
     # Checks that all orders having a time window ending before the planning horizon are satisfied
     def check_qs_01(self):
         """
-        returns {(customer, num_order): 1, ... } for not delivered orders
+        returns [{"id_customer": id_customer, "num_order": num_order}, ... ] for not delivered orders
         """
-        check = SuperDict()
+        check = TupList()
         nb_missed_orders = 0
         orders_customers = []
         delivered_orders_customers = []
@@ -675,7 +803,7 @@ class Experiment(ExperimentCore):
                 ):
                     orders_customers[c][o] = 1
                 else:
-                    check[c + offset_customer, o] = 1
+                    check.append({"id_customer": c + offset_customer, "num_order": o})
 
         for c in range(self.nb_customers):
             customer = self.instance.get_customer(c + offset_customer)
@@ -691,9 +819,9 @@ class Experiment(ExperimentCore):
     # Checks that there are no run outs
     def check_qs_02(self):
         """
-        returns {location: nb_run_outs, ... } for locations experiencing runouts
+        returns [{"id_location": location, "nb_run_outs": nb_run_outs}, ... ] for locations experiencing run-outs
         """
-        check = SuperDict()
+        check = TupList()
         nb_run_outs = 0
         site_inventories = self.calculate_inventories()
 
@@ -714,23 +842,23 @@ class Experiment(ExperimentCore):
                 )
             nb_run_outs += nb_inventory_run_out
             if nb_inventory_run_out != 0:
-                check[site] = nb_inventory_run_out
+                check.append({"id_location": site, "nb_run_outs": nb_inventory_run_out})
         return check
 
     # Checks that callIn customers only receive deliveries linked to an order
     def check_qs_03(self):
-        check = SuperDict()
+        check = TupList()
         for shift in self.solution.get_all_shifts():
             id_shift = shift["id_shift"]
-            check.update(self.sub_check_qs_03(shift, id_shift))
+            check += self.sub_check_qs_03(shift, id_shift)
         return check
 
     # Checks that the shift's operations on callIn customers are related to an order
     def sub_check_qs_03(self, shift, id_shift):
         """
-        returns {(shift_id, location): 1, ... } for deliveries not related to an order to callIn customer
+        returns [{"id_shift": shift_id, "id_location": location}, ... ] for deliveries not related to an order to callIn customer
         """
-        check = SuperDict()
+        check = TupList()
 
         for operation in shift["route"][:-1]:
             location = operation["location"]
@@ -749,7 +877,7 @@ class Experiment(ExperimentCore):
                     tw_found = True
                 ind_tw += 1
             if not tw_found:
-                check[(id_shift, location)] = 1
+                check.append({"id_shift": id_shift, "id_location": location})
         return check
 
     def generate_log(self, check_dict):
@@ -803,9 +931,7 @@ class Experiment(ExperimentCore):
             "c_0607_inventory_trailer_initial_inventory", dict()
         ):
             check_log += f"check_shift_07, shift {id_shift}. "
-            check_log += (
-                f"The initial inventory is not coherent with last shift of the trailer.\n"
-            )
+            check_log += f"The initial inventory is not coherent with last shift of the trailer.\n"
         for shift_id, location in check_dict.get("c_11_quantity_delivered", dict()):
             check_log += f"check_shift_11, shift {id_shift}. "
             check_log += f"Operation at location {location} has wrong sign.\n"

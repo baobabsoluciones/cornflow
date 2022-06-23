@@ -6,6 +6,7 @@ from cornflow_client import (
     SolutionCore,
     ExperimentCore,
     get_pulp_jsonschema,
+    get_empty_schema,
 )
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
@@ -25,6 +26,7 @@ config["properties"]["solver"]["default"] = "PULP_CBC_CMD"
 
 class Instance(InstanceCore):
     schema = get_pulp_jsonschema()
+    schema_checks = get_empty_schema()
 
 
 class Solution(SolutionCore):
@@ -32,6 +34,8 @@ class Solution(SolutionCore):
 
 
 class PuLPSolve(ExperimentCore):
+    schema_checks = get_empty_schema()
+
     def solve(self, options: dict):
         options = dict(options)
         options["msg"] = 0
@@ -57,7 +61,7 @@ class PuLPSolve(ExperimentCore):
         return model.objective
 
     def check_solution(self, *args, **kwargs) -> dict:
-        return dict(errors=dict())
+        return dict()
 
 
 class PuLP(ApplicationCore):

@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "pairs": {
+            "type": "array",
+            "title": "Pairs",
+            "description": "Table containing pairs of nodes that have the same color but shouldn't.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n1": {
+                        "type": "integer",
+                        "title": "Node 1",
+                        "description": "The first node of the pair"
+                    },
+                    "n2": {
+                        "type": "integer",
+                        "title": "Node 2",
+                        "description": "The second node of the pair"
+                    }
+                },
+                "required": ["n1", "n2"]
+            }
+        }
+    },
+    "required": []
+}

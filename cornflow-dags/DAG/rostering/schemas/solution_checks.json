@@ -1,0 +1,118 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "slots_without_workers": {
+            "type": "array",
+            "title": "Slots without workers",
+            "description": "Table containing the timeslots where no employees are working.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timeslot": {
+                        "type": "string",
+                        "title": "Timeslot",
+                        "description": "Timeslot where no employees are working"
+                    }
+                },
+                "required": ["timeslot"],
+                "additionalProperties": false
+            }
+        },
+        "slots_closed_with_workers": {
+            "type": "array",
+            "title": "Slots closed with workers",
+            "description": "Table containing the timeslots where some employees are working while the center is closed",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timeslot": {
+                        "type": "string",
+                        "title": "Timeslot",
+                        "description": "Timeslot where at least an employee is working while the center is closed"
+                    }
+                },
+                "required": ["timeslot"],
+                "additionalProperties": false
+            }
+        },
+        "difference_hours_worked": {
+            "type": "array",
+            "title": "Extra hours",
+            "description": "Table that contains information about the employees that work more hours than indicated in their contracts",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "week": {
+                        "type": "integer",
+                        "title": "Week",
+                        "description": "The number of the week"
+                    },
+                    "id_employee": {
+                        "type": "integer",
+                        "title": "Id employee",
+                        "description": "The unique identifier of the employee"
+                    },
+                    "extra_hours": {
+                        "type": "number",
+                        "title": "Extra hours",
+                        "description": "The number of extra hours"
+                    }
+                },
+                "required": ["week", "id_employee", "extra_hours"],
+                "additionalProperties": false
+            }
+        },
+        "manager_present": {
+            "type": "array",
+            "title": "Slots without managers",
+            "description": "Table containing the timeslots where no managers are working.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timeslot": {
+                        "type": "string",
+                        "title": "Timeslot",
+                        "description": "Timeslot where no managers are working"
+                    }
+                },
+                "required": ["timeslot"],
+                "additionalProperties": false
+            }
+        },
+        "skills_demand": {
+            "type": "array",
+            "title": "Uncovered skill demand",
+            "description": "Table containing the information about timeslots where the demand for skill is not respected.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timeslot": {
+                        "type": "string",
+                        "title": "Timeslot",
+                        "description": "The timeslot where the skill demand is not covered."
+                    },
+                    "id_skill": {
+                        "type": "integer",
+                        "title": "Id skill",
+                        "description": "The unique identifier of the skill."
+                    },
+                    "number_missing": {
+                        "type": "integer",
+                        "title": "Number missing",
+                        "description": "The number of employees mastering the skill that are missing."
+                    }
+                },
+                "required": ["timeslot", "id_skill", "number_missing"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

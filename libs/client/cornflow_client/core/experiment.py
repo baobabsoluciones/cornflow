@@ -72,3 +72,12 @@ class ExperimentCore(ABC):
           inside represents one error of that particular type.
         """
         pass
+
+    @property
+    @abstractmethod
+    def schema_checks(self) -> dict:
+        """
+        A dictionary representation of the json-schema for the dictionary returned by
+            the method ExperimentCore.check_solution()
+        """
+        raise NotImplementedError()

@@ -5,12 +5,13 @@ from pytups import SuperDict, TupList
 
 
 # Imports from cornflow libraries
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 
 
 class Instance(InstanceCore):
     schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
+    schema_checks = get_empty_schema()
 
     @classmethod
     def from_dict(cls, data: dict) -> "Instance":
