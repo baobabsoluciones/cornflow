@@ -68,7 +68,7 @@ class PuLP(ApplicationCore):
     name = "solve_model_dag"
     instance = Instance
     solution = Solution
-    solvers = dict()
+    solvers = dict(default=PuLPSolve)
     schema = config
 
     @property

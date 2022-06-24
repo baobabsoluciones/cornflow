@@ -150,12 +150,12 @@ class ApplicationCore(ABC):
         if not validator.is_valid(instance_checks):
             raise Exception("The instance checks have invalid format")
 
-        errors_tables = (
+        warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
-            .vfilter(lambda v: not v["is_warning"])
+            .vfilter(lambda v: v.get("is_warning", False))
             .keys()
         )
-        instance_errors = instance_checks.kfilter(lambda k: k in errors_tables)
+        instance_errors = instance_checks.kfilter(lambda k: k not in warnings_tables)
         if instance_errors:
             log = dict(
                 time=0,
