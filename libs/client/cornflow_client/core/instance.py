@@ -42,4 +42,4 @@ class InstanceCore(InstanceSolutionCore, ABC):
         is_feasible = self.check_feasibility(*args, **kwargs)
         if not is_feasible:
             inconsistencies["is_infeasible"] = True
-        return inconsistencies
+        return dict(errors=inconsistencies, warnings=dict())

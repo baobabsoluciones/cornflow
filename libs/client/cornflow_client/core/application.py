@@ -143,7 +143,9 @@ class ApplicationCore(ABC):
                 )
 
         instance_checks = inst.check()
-        if instance_checks:
+        if instance_checks and instance_checks.get('errors'):
+            # instance_checks has format {'errors': errors_dict, 'warnings': warnings_dict}
+            # and has errors
             log = dict(
                 time=0,
                 solver=solver,
@@ -152,6 +154,18 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             return dict(), None, instance_checks, "", log
+        if instance_checks and 'errors' not in instance_checks.keys() and 'warnings' not in instance_checks.keys():
+            # instance_checks doesn't have format 'errors'/'warnings',
+            #   so we consider it returns errors
+            log = dict(
+                time=0,
+                solver=solver,
+                status="Infeasible",
+                status_code=STATUS_INFEASIBLE,
+                sol_code=SOLUTION_STATUS_INFEASIBLE,
+            )
+            return dict(), None, instance_checks, "", log
+        # else, instance_checks is empty or only contains warnings
 
         algo = solver_class(inst, sol)
         start = timer()
@@ -195,7 +209,7 @@ class ApplicationCore(ABC):
 
         checks = algo.check_solution()
 
-        return sol, checks, {}, log_txt, log
+        return sol, checks, instance_checks, log_txt, log
 
     def check(self, instance_data: dict, solution_data: dict, *args, **kwargs) -> Tuple[Dict, Dict, Dict]:
         """
