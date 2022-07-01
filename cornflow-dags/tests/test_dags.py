@@ -14,6 +14,7 @@ sys.modules["airflow.secrets.environment_variables"] = mymodule
 
 from cornflow_client import SchemaManager, ApplicationCore
 from cornflow_client.airflow.dag_utilities import cf_solve
+from jsonschema import Draft7Validator
 from pytups import SuperDict
 
 
@@ -83,6 +84,14 @@ class BaseDAGTests:
                 experim = self.app.get_solver(s)(instance, solution)
                 experim.check_solution()
                 experim.get_objective()
+
+                validator = Draft7Validator(experim.schema_checks)
+                if not validator.is_valid(solution_check):
+                    raise Exception("The solution checks have invalid format")
+
+                validator = Draft7Validator(instance.schema_checks)
+                if not validator.is_valid(inst_check):
+                    raise Exception("The instance checks have invalid format")
 
         @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
         def test_complete_solve(self, connectCornflow, config=None):
