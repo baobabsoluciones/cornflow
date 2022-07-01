@@ -143,6 +143,7 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
+
         instance_checks = SuperDict(inst.check())
 
         # TODO: REMOVE THIS ? Or leave it for developers ?
@@ -165,6 +166,18 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             return dict(), None, instance_checks, "", log
+        if instance_checks and 'errors' not in instance_checks.keys() and 'warnings' not in instance_checks.keys():
+            # instance_checks doesn't have format 'errors'/'warnings',
+            #   so we consider it returns errors
+            log = dict(
+                time=0,
+                solver=solver,
+                status="Infeasible",
+                status_code=STATUS_INFEASIBLE,
+                sol_code=SOLUTION_STATUS_INFEASIBLE,
+            )
+            return dict(), None, instance_checks, "", log
+        # else, instance_checks is empty or only contains warnings
 
         algo = solver_class(inst, sol)
         start = timer()

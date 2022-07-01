@@ -29,3 +29,4 @@ class InstanceCore(InstanceSolutionCore, ABC):
         A dictionary representation of the json-schema for the dictionary returned by the method Instance.check()
         """
         raise NotImplementedError()
+
