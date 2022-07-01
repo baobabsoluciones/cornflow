@@ -59,7 +59,7 @@ class BaseDAGTests:
                     (
                         solution_data,
                         solution_check,
-                        inst_checks,
+                        inst_check,
                         log,
                         log_dict,
                     ) = self.app.solve(data, config, data_out)

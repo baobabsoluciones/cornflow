@@ -1,4 +1,4 @@
-from cornflow_client.tools import load_json
+from cornflow_client.core.tools import load_json
 from cornflow_client import ExperimentCore
 from .instance import Instance
 from .solution import Solution
