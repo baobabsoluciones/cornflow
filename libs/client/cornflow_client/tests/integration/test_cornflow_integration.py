@@ -190,8 +190,6 @@ class TestCornflowClientUser(TestCase):
         self.assertIn("data", results.keys())
         self.assertIn("instance_checks", results["data"].keys())
         self.assertIn("solution_checks", results["data"].keys())
-        self.assertIn("errors", results["data"]["solution_checks"].keys())
-        self.assertEqual(len(results["data"]["solution_checks"]["errors"]), 0)
 
     def test_execution_results(self):
         execution = self.test_create_execution()
