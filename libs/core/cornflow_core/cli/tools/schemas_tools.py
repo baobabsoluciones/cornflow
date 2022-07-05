@@ -6,6 +6,7 @@ JSON_TYPES_TO_FIELDS = {
     "string": "fields.Str",
     "number": "fields.Number",
     "boolean": "fields.Boolean",
+    "array": "fields.List",
 }
 
 
