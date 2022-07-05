@@ -887,105 +887,105 @@ class Experiment(ExperimentCore):
         check_log = ""
 
         # Shifts
-        for id_shift in check_dict.get("driver_and_trailer", dict()):
-            check_log += f"Shift : {id_shift} has no driver or no trailer.\n"
-        for id_shift, current_point in check_dict.get("c_02_timeline", dict()):
-            check_log += f"check_shift_02, shift {id_shift}. "
-            check_log += f"Operation at location {current_point} arrives too early.\n"
-        for id_shift, id_operation in check_dict.get("c_03_wrong_index", dict()):
-            check_log += f"check_shift_03, shift {id_shift}. "
-            check_log += f"Operation nº{id_operation} has a wrong location index.\n"
-        for id_shift, location in check_dict.get("c_03_setup_times", dict()):
-            check_log += f"check_shift_03, shift {id_shift}. "
+        for row in check_dict.get("driver_and_trailer", []):
+            check_log += f"Shift : {row['id_shift']} has no driver or no trailer.\n"
+        for row in check_dict.get("c_02_timeline", []):
+            check_log += f"check_shift_02, shift {row['id_shift']}. "
+            check_log += f"Operation at location {row['id_location']} arrives too early.\n"
+        for row in check_dict.get("c_03_wrong_index", []):
+            check_log += f"check_shift_03, shift {row['id_shift']}. "
+            check_log += f"Operation nº{row['position']} has a wrong location index.\n"
+        for row in check_dict.get("c_03_setup_times", []):
+            check_log += f"check_shift_03, shift {row['id_shift']}. "
             check_log += (
-                f"Departure of operation at location {location} is too early.\n"
+                f"Departure of operation at location {row['id_location']} is too early.\n"
             )
-        for id_shift, location in check_dict.get("c_04_customer_TW", dict()):
-            check_log += f"check_shift_04, shift {id_shift}. "
+        for row in check_dict.get("c_04_customer_TW", []):
+            check_log += f"check_shift_04, shift {row['id_shift']}. "
             check_log += (
-                f"Operation at location {location} is out of the time windows.\n"
+                f"Operation at location {row['id_location']} is out of the time windows.\n"
             )
-        for id_shift, location in check_dict.get("c_05_sites_accessible", dict()):
-            check_log += f"check_shift_05, shift {id_shift}. "
+        for row in check_dict.get("c_05_sites_accessible", []):
+            check_log += f"check_shift_05, shift {row['id_shift']}. "
             check_log += (
-                f"Operation at location {location} can't accept this trailer.\n"
+                f"Operation at location {row['id_location']} can't accept this trailer.\n"
             )
-        for id_shift, id_location in check_dict.get(
-            "c_0607_inventory_trailer_negative", dict()
+        for row in check_dict.get(
+            "c_0607_inventory_trailer_negative", []
         ):
-            check_log += f"check_shift_06, shift {id_shift}. "
-            check_log += f"Operation at location {location} makes the trailer's inventory negative.\n"
-        for id_shift, id_location in check_dict.get(
-            "c_0607_inventory_trailer_above_capacity", dict()
+            check_log += f"check_shift_06, shift {row['id_shift']}. "
+            check_log += f"Operation at location {row['id_location']} makes the trailer's inventory negative.\n"
+        for row in check_dict.get(
+            "c_0607_inventory_trailer_above_capacity", []
         ):
-            check_log += f"check_shift_06, shift {id_shift}. "
-            check_log += f"Operation at location {location} makes the trailer's inventory above its capacity.\n"
-        for id_shift in check_dict.get(
-            "c_0607_inventory_trailer_final_inventory", dict()
+            check_log += f"check_shift_06, shift {row['id_shift']}. "
+            check_log += f"Operation at location {row['id_location']} makes the trailer's inventory above its capacity.\n"
+        for row in check_dict.get(
+            "c_0607_inventory_trailer_final_inventory", []
         ):
-            check_log += f"check_shift_07, shift {id_shift}. "
+            check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += (
                 f"The trailer's operations do not correspond to its final inventory.\n"
             )
-        for id_shift in check_dict.get(
-            "c_0607_inventory_trailer_initial_inventory", dict()
+        for row in check_dict.get(
+            "c_0607_inventory_trailer_initial_inventory", []
         ):
-            check_log += f"check_shift_07, shift {id_shift}. "
+            check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += f"The initial inventory is not coherent with last shift of the trailer.\n"
-        for shift_id, location in check_dict.get("c_11_quantity_delivered", dict()):
-            check_log += f"check_shift_11, shift {id_shift}. "
-            check_log += f"Operation at location {location} has wrong sign.\n"
-        for id_shift, location in check_dict.get("c_16_customer_tank_exceeds", dict()):
-            check_log += f"check_shift_16, shift {id_shift}. "
-            check_log += f"Operation at customer {location} has quantity higher than tank's capacity.\n"
-        for id_shift, location in check_dict.get("c_16_customer_tank_too_low", dict()):
-            check_log += f"check_shift_16, shift {id_shift}. "
-            check_log += f"Operation at customer {location} has quantity lower than minimum quantity.\n"
+        for row in check_dict.get("c_11_quantity_delivered", []):
+            check_log += f"check_shift_11, shift {row['id_shift']}. "
+            check_log += f"Operation at location {row['id_location']} has wrong sign.\n"
+        for row in check_dict.get("c_16_customer_tank_exceeds", []):
+            check_log += f"check_shift_16, shift {row['id_shift']}. "
+            check_log += f"Operation at customer {row['id_location']} has quantity higher than tank's capacity.\n"
+        for row in check_dict.get("c_16_customer_tank_too_low", []):
+            check_log += f"check_shift_16, shift {row['id_shift']}. "
+            check_log += f"Operation at customer {row['id_location']} has quantity lower than minimum quantity.\n"
 
         # Sites
-        for location, i in check_dict.get("site_inventory_negative", dict()):
-            check_log += f"check_sites, site_inventory {location}. "
-            check_log += f"Tank quantity strictly negative  at step {i}. \n"
-        for location, i in check_dict.get("site_inventory_exceeds", dict()):
-            check_log += f"check_sites, site_inventory {location}. "
-            check_log += f"Tank quantity superior to tank_capacity at step {i}.\n"
-        for location in check_dict.get("site_doesntexist", dict()):
+        for row in check_dict.get("site_inventory_negative", []):
+            check_log += f"check_sites, site_inventory {row['id_location']}. "
+            check_log += f"Tank quantity strictly negative  at hour {row['hour']}. \n"
+        for row in check_dict.get("site_inventory_exceeds", []):
+            check_log += f"check_sites, site_inventory {row['id_location']}. "
+            check_log += f"Tank quantity superior to tank_capacity at hour {row['hour']}.\n"
+        for row in check_dict.get("site_doesntexist", []):
             check_log += f"check_sites."
             check_log += (
-                f"SiteInventory {location} does not correspond to a location.\n"
+                f"SiteInventory {row['id_location']} does not correspond to a location.\n"
             )
 
         # Resources
-        for id_shift, driver in check_dict.get("res_dr_01_intershift", dict()):
-            check_log += f"check_resources_dr_01, shift {id_shift}. "
-            check_log += f"Driver {driver} does not respect minInterSHIFTDURATION before this shift.\n"
-        for id_shift, driver in check_dict.get("res_dr_03_max_duration", dict()):
-            check_log += f"check_resources_dr_03, shift {id_shift}. "
-            check_log += f"Driver {driver} does not respect maxDrivingDuration.\n"
-        for id_shift in check_dict.get("res_dr_08_driver_TW", dict()):
-            check_log += f"check_resources_dr_08, shift {id_shift}. "
+        for row in check_dict.get("res_dr_01_intershift", []):
+            check_log += f"check_resources_dr_01, shift {row['id_shift']}. "
+            check_log += f"Driver {row['id_driver']} does not respect minInterSHIFTDURATION before this shift.\n"
+        for row in check_dict.get("res_dr_03_max_duration", []):
+            check_log += f"check_resources_dr_03, shift {row['id_shift']}. "
+            check_log += f"Driver {row['id_driver']} does not respect maxDrivingDuration.\n"
+        for row in check_dict.get("res_dr_08_driver_TW", []):
+            check_log += f"check_resources_dr_08, shift {row['id_shift']}. "
             check_log += f"Shift is out of the time windows of the driver.\n"
-        for id_shift in check_dict.get("res_tl_01_shift_overlaps", dict()):
-            check_log += f"check_resources_tl_01, shift {id_shift}. "
+        for row in check_dict.get("res_tl_01_shift_overlaps", []):
+            check_log += f"check_resources_tl_01, shift {row['id_shift']}. "
             check_log += (
                 f"Trailer doesn't respect shift separation before this shift.\n"
             )
-        for id_shift in check_dict.get("res_tl_03_compatibility_dr_tr", dict()):
-            check_log += f"check_resources_tl_03, shift {id_shift}. "
+        for row in check_dict.get("res_tl_03_compatibility_dr_tr", []):
+            check_log += f"check_resources_tl_03, shift {row['id_shift']}. "
             check_log += (
                 f"Trailer is not in the set of trailers compatible with the driver.\n"
             )
 
         # Quality of service
-        for customer, order in check_dict.get("qs_01_orders_satisfied", dict()):
+        for row in check_dict.get("qs_01_orders_satisfied", []):
             check_log += f"check_qs_01. "
-            check_log += f"Missed order nª{order} at customer {customer}. \n"
-        for site in check_dict.get("qs_02_runouts", dict()):
+            check_log += f"Missed order nª{row['num_order']} at customer {row['id_customer']}. \n"
+        for row in check_dict.get("qs_02_runouts", []):
             check_log += f"check_qs_02."
-            check_log += f"Customer {site} ran out.\n"
-        for id_shift, location in check_dict.get("qs_03_callins", dict()):
-            check_log += f"sub_check_qs_03, shift {id_shift}. "
-            check_log += f"Operation at location {location} is out of the time windows of orders.\n"
+            check_log += f"Customer {row['id_location']} ran out.\n"
+        for row in check_dict.get("qs_03_callins", []):
+            check_log += f"sub_check_qs_03, shift {row['id_shift']}. "
+            check_log += f"Operation at location {row['id_location']} is out of the time windows of orders.\n"
 
         return check_log
 
