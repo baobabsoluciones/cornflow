@@ -3,7 +3,7 @@ model_shared_imports = (
     "# Import from libraries\n"
     "from cornflow_core.shared import db\n"
     "from cornflow_core.models import TraceAttributesModel\n"
-    "from sqlachemy.dialects.postgresql import ARRAY\n\n"
+    "from sqlalchemy.dialects.postgresql import ARRAY\n\n"
 )
 SP8 = 8 * " "
 SP12 = 12 * " "
