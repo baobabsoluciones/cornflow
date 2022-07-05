@@ -143,13 +143,7 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
-
         instance_checks = SuperDict(inst.check())
-
-        # TODO: REMOVE THIS ? Or leave it for developers ?
-        validator = Draft7Validator(inst.schema_checks)
-        if not validator.is_valid(instance_checks):
-            raise Exception("The instance checks have invalid format")
 
         warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
@@ -208,11 +202,6 @@ class ApplicationCore(ABC):
             sol = algo.solution.to_dict()
 
         checks = algo.check_solution()
-
-        # TODO: REMOVE THIS ? Or leave it for developers ?
-        validator = Draft7Validator(algo.schema_checks)
-        if not validator.is_valid(checks):
-            raise Exception("The solution checks have invalid format")
 
         return sol, checks, instance_checks, log_txt, log
 
