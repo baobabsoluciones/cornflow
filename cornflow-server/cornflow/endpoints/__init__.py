@@ -29,6 +29,7 @@ from .execution import (
     ExecutionStatusEndpoint,
     ExecutionDataEndpoint,
     ExecutionLogEndpoint,
+    ExecutionRelaunchEndpoint,
 )
 
 from .health import HealthEndpoint
@@ -41,7 +42,6 @@ from .instance import (
 )
 
 from .data_check import DataCheckEndpoint
-from .login import LoginOpenAuthEndpoint, LoginEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
 from .roles import RolesListEndpoint, RoleDetailEndpoint
@@ -70,14 +70,14 @@ resources = [
         resource=InstanceFileEndpoint, urls="/instancefile/", endpoint="instance-file"
     ),
     dict(
-        resource=ExecutionDetailsEndpoint,
-        urls="/execution/<string:idx>/",
-        endpoint="execution-detail",
-    ),
-    dict(
         resource=DataCheckEndpoint,
         urls="/data-check/",
         endpoint="data-check",
+    ),
+    dict(
+        resource=ExecutionDetailsEndpoint,
+        urls="/execution/<string:idx>/",
+        endpoint="execution-detail",
     ),
     dict(
         resource=ExecutionStatusEndpoint,
@@ -93,6 +93,11 @@ resources = [
         resource=ExecutionLogEndpoint,
         urls="/execution/<string:idx>/log/",
         endpoint="execution-log",
+    ),
+    dict(
+        resource=ExecutionRelaunchEndpoint,
+        urls="/execution/<string:idx>/relaunch",
+        endpoint="execution-relaunch",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),

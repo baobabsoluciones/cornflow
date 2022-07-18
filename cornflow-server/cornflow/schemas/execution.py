@@ -59,16 +59,22 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Raw(required=True)
+    config = fields.Nested(ConfigSchema, required=True)
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
     schema = fields.Str(required=False)
+    data = fields.Raw(required=False)
+
+
+class ReLaunchExecutionRequest(Schema):
+    config = fields.Nested(ConfigSchema, required=True)
 
 
 class ExecutionEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
+    data = fields.Raw()
 
 
 class ExecutionDagRequest(Schema):

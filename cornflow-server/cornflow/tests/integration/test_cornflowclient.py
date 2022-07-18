@@ -321,6 +321,34 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
 
+    def test_solve_and_relaunch(self):
+        execution = self.create_instance_and_execution()
+        time.sleep(15)
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.assertEqual(results["state"], EXEC_STATE_CORRECT)
+        config = dict(solver="PULP_CBC_CMD", timeLimit=12)
+        self.client.relaunch_execution(execution["id"], config=config)
+        results = self.client.get_solution(execution["id"])
+        self.assertIsNone(results["checks"])
+        self.assertEqual(results["config"], config)
+        time.sleep(15)
+        status = self.client.get_status(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        results = self.client.get_solution(execution["id"])
+        self.assertEqual(results["checks"], dict())
+
+    def test_solve_and_relaunch_too_soon(self):
+        execution = self.create_instance_and_execution()
+        status = self.client.get_status(execution["id"])
+        results = self.client.get_results(execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.assertEqual(results["state"], EXEC_STATE_CORRECT)
+        config = dict(solver="PULP_CBC_CMD", timeLimit=15)
+        _launch_too_soon_func = lambda: self.client.relaunch_execution(execution["id"], config=config)
+        self.assertRaises(CornFlowApiError, _launch_too_soon_func)
+
     def test_interrupt(self):
         execution = self.create_timer_instance_and_execution(5)
         self.client.stop_execution(execution_id=execution["id"])

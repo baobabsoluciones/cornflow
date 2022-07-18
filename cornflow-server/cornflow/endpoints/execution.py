@@ -8,7 +8,7 @@ These endpoints hve different access url, but manage the same data entities
 from cornflow_client.airflow.api import Airflow, get_schema
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 import logging as log
@@ -25,6 +25,7 @@ from ..schemas.execution import (
     ExecutionRequest,
     ExecutionEditRequest,
     QueryFiltersExecution,
+    ReLaunchExecutionRequest
 )
 
 from ..shared.authentication import Auth
@@ -102,6 +103,11 @@ class ExecutionEndpoint(BaseMetaResource):
         marshmallow_obj = get_schema(config, kwargs["schema"], "config")
         validate_and_continue(marshmallow_obj(), kwargs["config"])
 
+        if kwargs.get("data") is not None:
+            # Get solution schema and validate it
+            marshmallow_obj = get_schema(config, kwargs["schema"], "solution")
+            validate_and_continue(marshmallow_obj(), kwargs["data"])
+
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
@@ -171,6 +177,117 @@ class ExecutionEndpoint(BaseMetaResource):
             "User {} creates execution {}".format(self.get_user_id(), execution.id)
         )
         return execution, 201
+
+
+class ExecutionRelaunchEndpoint(BaseMetaResource):
+    def __init__(self):
+        super().__init__()
+        self.model = ExecutionModel
+        self.data_model = ExecutionModel
+        self.foreign_data = {"instance_id": InstanceModel}
+
+    @doc(description="Re-launch an execution", tags=["Executions"])
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
+    @marshal_with(ExecutionDetailsEndpointResponse)
+    @use_kwargs(ReLaunchExecutionRequest, location="json")
+    def post(self, idx, **kwargs):
+        """
+        API method to re-launch an existing execution
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user
+
+        :return: A dictionary with a message (error if authentication failed, error if data is not validated or
+          the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        config = current_app.config
+
+        if "schema" not in kwargs:
+            kwargs["schema"] = "solve_model_dag"
+        # TODO: review the order of these two operations
+        # Get dag config schema and validate it
+        marshmallow_obj = get_schema(config, kwargs["schema"], "config")
+        validate_and_continue(marshmallow_obj(), kwargs["config"])
+
+        self.put_detail(
+            data=dict(config=kwargs["config"]),
+            user=self.get_user(),
+            idx=idx
+        )
+
+        execution = ExecutionModel.get_one_object(
+            user=self.get_user(),
+            idx=idx
+        )
+
+        # If the execution does not exist, raise an error
+        if execution is None:
+            raise ObjectDoesNotExist("The execution to re-solve does not exist")
+
+        execution.update({"checks": None})
+
+        # If the execution is still running, raise an error
+        if execution.state == 0:
+            return {"message": "This execution is still running"}, 400
+
+        # this allows testing without airflow interaction:
+        if request.args.get("run", "1") == "0":
+            execution.update_state(EXEC_STATE_NOT_RUN)
+            return {"message": "The execution was relaunched correctly"}, 201
+
+        # We now try to launch the task in airflow
+        af_client = Airflow.from_config(config)
+        if not af_client.is_alive():
+            err = "Airflow is not accessible"
+            log.error(err)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise AirflowError(
+                error=err,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+            )
+        # ask airflow if dag_name exists
+        schema = execution.schema
+        schema_info = af_client.get_dag_info(schema)
+
+        info = schema_info.json()
+        if info["is_paused"]:
+            err = "The dag exists but it is paused in airflow"
+            log.error(err)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise AirflowError(
+                error=err,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+            )
+
+        try:
+            response = af_client.run_dag(execution.id, dag_name=schema)
+        except AirflowError as err:
+            error = "Airflow responded with an error: {}".format(err)
+            log.error(error)
+            execution.update_state(EXEC_STATE_ERROR)
+            raise AirflowError(
+                error=error,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                    state=EXEC_STATE_ERROR,
+                ),
+            )
+
+        # if we succeed, we register the dag_run_id in the execution table:
+        af_data = response.json()
+        execution.dag_run_id = af_data["dag_run_id"]
+        execution.update_state(EXEC_STATE_QUEUED)
+        log.info(
+            "User {} creates execution {}".format(self.get_user_id(), execution.id)
+        )
+        return {"message": "The execution was relaunched correctly"}, 201
 
 
 class ExecutionDetailsEndpointBase(BaseMetaResource):

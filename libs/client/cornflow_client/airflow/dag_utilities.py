@@ -160,9 +160,10 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         execution_data = client.get_data(exec_id)
         execution_status = client.update_status(exec_id, {"status": 0})
         data = execution_data["data"]
+        solution_data = execution_data["solution_data"]
         config = execution_data["config"]
         inst_id = execution_data["id"]
-        solution, sol_checks, inst_checks, log, log_json = fun(data, config)
+        solution, sol_checks, inst_checks, log, log_json = fun(data, config, solution_data)
         payload = dict(
             state=1,
             log_json=log_json,

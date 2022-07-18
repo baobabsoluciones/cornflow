@@ -394,6 +394,14 @@
       },
       "type": "object"
     },
+    "ReLaunchExecutionRequest": {
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        }
+      },
+      "type": "object"
+    },
     "ExecutionEditRequest": {
       "properties": {
         "description": {
@@ -401,7 +409,8 @@
         },
         "name": {
           "type": "string"
-        }
+        },
+        "data": {}
       },
       "type": "object"
     },
@@ -463,7 +472,8 @@
         },
         "schema": {
           "type": "string"
-        }
+        },
+        "data": {}
       },
       "required": [
         "config",
@@ -608,7 +618,8 @@
         },
         "name": {
           "type": "string"
-        }
+        },
+        "data": {}
       },
       "type": "object"
     },

@@ -14,6 +14,7 @@ from cornflow.tests.const import (
     EXECUTION_URL,
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
+    DAG_URL,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 
@@ -65,6 +66,66 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
         )
         self.assertEqual(len(rows.json), len(self.payloads))
+
+
+class TestExecutionRelaunchEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.url = EXECUTION_URL_NORUN
+        self.model = ExecutionModel
+
+        def load_file_fk(_file):
+            with open(_file) as f:
+                temp = json.load(f)
+            temp["instance_id"] = fk_id
+            return temp
+
+        self.payload = load_file_fk(EXECUTION_PATH)
+
+    def test_relaunch_execution(self):
+        idx = self.create_new_row(self.url, self.model, payload=self.payload)
+        url = EXECUTION_URL + idx + "/relaunch?run=0"
+        self.payload["config"]["warmStart"] = False
+        response = self.client.post(
+            url,
+            data=json.dumps(self.payload),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        # Add solution checks to see if they are deleted correctly
+        token = self.create_service_user()
+        self.update_row(
+            url=DAG_URL + idx + "/",
+            payload_to_check=dict(),
+            change=dict(check=False),
+            token=token,
+            check_payload=False,
+        )
+
+        self.assertEqual(201, response.status_code)
+
+        row = self.model.query.get(response.json["id"])
+        self.assertEqual(row.id, response.json["id"])
+
+        self.assertEqual(row.config, self.payload["config"])
+        self.assertIsNone(row.checks)
+
+    def test_relaunch_invalid_execution(self):
+        idx = "thisIsAnInvalidExecutionId"
+        url = EXECUTION_URL + idx + "/relaunch?run=0"
+        self.payload["config"]["warmStart"] = False
+        response = self.client.post(
+            url,
+            data=json.dumps(self.payload),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(404, response.status_code)
 
 
 class TestExecutionsDetailEndpointMock(CustomTestCase):
@@ -144,6 +205,28 @@ class TestExecutionsDetailEndpoint(
         self.get_one_row(
             self.url + idx, payload={}, expected_status=404, check_payload=False
         )
+
+    def test_update_one_row_data(self):
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        payload['parameters']["name"] = "NewName"
+
+        url = self.url + str(idx) + "/"
+        payload = {**self.payload, **dict(id=idx, name="new_name", data=payload)}
+        self.update_row(
+            url,
+            dict(name="new_name", data=payload),
+            payload,
+        )
+
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(row.json["checks"], None)
 
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):

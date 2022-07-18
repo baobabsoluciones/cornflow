@@ -120,10 +120,15 @@ class CaseModel(BaseDataModel):
         # TODO: review the behaviour of this method.
         if "data_patch" in data:
             self.data, self.data_hash = self.apply_patch(self.data, data["data_patch"])
+            # Delete the checks if the data has been modified since they are probably no longer valid
+            self.checks = None
+            self.solution_checks = None
         if "solution_patch" in data:
             self.solution, self.solution_hash = self.apply_patch(
                 self.solution, data["solution_patch"]
             )
+            # Delete the solution checks if the solution has been modified since they are probably no longer valid
+            self.solution_checks = None
 
         self.user_id = data.get("user_id")
         super().update(data)

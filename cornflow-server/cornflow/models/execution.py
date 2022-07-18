@@ -89,6 +89,24 @@ class ExecutionModel(BaseDataModel):
         self.log_text = data.get("log_text")
         self.log_json = data.get("log_json")
 
+    def update(self, data):
+        """
+        Method used to update an execution from the database
+
+        :param dict data: the data of the object
+        :return: None
+        :rtype: None
+        """
+        for key, value in data.items():
+            setattr(self, key, value)
+
+        # Delete the checks if the data has been modified since they are probably not valid anymore
+        if "data" in data.keys():
+            self.checks = None
+
+        db.session.add(self)
+        self.commit_changes("updating")
+
     def update_state(self, code, message=None):
         """
         Method to update the state code and message of an execution
