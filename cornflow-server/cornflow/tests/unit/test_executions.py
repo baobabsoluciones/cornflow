@@ -102,7 +102,7 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.update_row(
             url=DAG_URL + idx + "/",
             payload_to_check=dict(),
-            change=dict(check=False),
+            change=dict(checks=dict(check_1=[])),
             token=token,
             check_payload=False,
         )
@@ -121,7 +121,7 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.payload["config"]["warmStart"] = False
         response = self.client.post(
             url,
-            data=json.dumps(self.payload),
+            data=json.dumps({"config": self.payload["config"]}),
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
@@ -222,6 +222,7 @@ class TestExecutionsDetailEndpoint(
             payload,
         )
 
+        url += "data/"
         row = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )

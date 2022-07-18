@@ -151,6 +151,7 @@ class TestInstancesDetailEndpoint(
             payload,
         )
 
+        url += "data/"
         row = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )
