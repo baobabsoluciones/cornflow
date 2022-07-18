@@ -96,7 +96,7 @@ resources = [
     ),
     dict(
         resource=ExecutionRelaunchEndpoint,
-        urls="/execution/<string:idx>/relaunch",
+        urls="/execution/<string:idx>/relaunch/",
         endpoint="execution-relaunch",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),

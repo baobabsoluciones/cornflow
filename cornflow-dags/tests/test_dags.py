@@ -103,7 +103,7 @@ class BaseDAGTests:
                     # sometimes we have input and output
                     data, data_out = data
                 mock = Mock()
-                mock.get_data.return_value = dict(data=data, config=config, id=1)
+                mock.get_data.return_value = dict(data=data, config=config, id=1, solution_data=None)
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")

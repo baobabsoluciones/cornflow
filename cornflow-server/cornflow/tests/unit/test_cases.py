@@ -442,8 +442,8 @@ class TestCaseJsonPatch(CustomTestCase):
         row = self.client.get(
             self.url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )
-        self.assertIsNone(row.json["checks"], None)
-        self.assertIsNone(row.json["solution_checks"], None)
+        self.assertIsNone(row.json["checks"])
+        self.assertIsNone(row.json["solution_checks"])
 
     def test_json_patch_file(self):
         self.patch_row(

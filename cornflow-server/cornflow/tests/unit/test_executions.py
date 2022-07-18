@@ -212,13 +212,13 @@ class TestExecutionsDetailEndpoint(
         )
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
-        payload['parameters']["name"] = "NewName"
+        payload["data"]["parameters"]["name"] = "NewName"
 
         url = self.url + str(idx) + "/"
-        payload = {**self.payload, **dict(id=idx, name="new_name", data=payload)}
+        payload = {**self.payload, **dict(id=idx, name="new_name", data=payload["data"])}
         self.update_row(
             url,
-            dict(name="new_name", data=payload),
+            dict(name="new_name", data=payload["data"]),
             payload,
         )
 

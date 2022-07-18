@@ -142,12 +142,12 @@ class TestInstancesDetailEndpoint(
         idx = self.create_new_row(
             self.url_with_query_arguments(), self.model, self.payload
         )
-        self.payload['parameters']["name"] = "NewName"
+        self.payload["data"]["parameters"]["name"] = "NewName"
         url = self.url + str(idx) + "/"
-        payload = {**self.payload, **dict(id=idx, name="new_name", data=self.payload)}
+        payload = {**self.payload, **dict(id=idx, name="new_name", data=self.payload["data"])}
         self.update_row(
             url,
-            dict(name="new_name", data=self.payload),
+            dict(name="new_name", data=self.payload["data"]),
             payload,
         )
 
