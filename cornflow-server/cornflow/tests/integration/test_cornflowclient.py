@@ -337,7 +337,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         results = self.client.get_solution(execution["id"])
-        self.assertEqual(results["checks"], dict())
+        self.assertIsNone(results["checks"])
 
     def test_solve_and_relaunch_too_soon(self):
         execution = self.create_instance_and_execution()
