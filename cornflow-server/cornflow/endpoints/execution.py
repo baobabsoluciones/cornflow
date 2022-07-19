@@ -227,8 +227,8 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
 
         execution.update({"checks": None})
 
-        # If the execution is still running, raise an error
-        if execution.state == 0:
+        # If the execution is still running or queued, raise an error
+        if execution.state == 0 or execution.state == -7:
             return {"message": "This execution is still running"}, 400
 
         # this allows testing without airflow interaction:
