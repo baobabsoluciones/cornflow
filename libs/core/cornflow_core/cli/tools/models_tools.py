@@ -2,7 +2,8 @@
 model_shared_imports = (
     "# Import from libraries\n"
     "from cornflow_core.shared import db\n"
-    "from cornflow_core.models import TraceAttributesModel\n\n"
+    "from cornflow_core.models import TraceAttributesModel\n"
+    "from sqlalchemy.dialects.postgresql import ARRAY\n\n"
 )
 SP8 = 8 * " "
 SP12 = 12 * " "
@@ -11,6 +12,7 @@ JSON_TYPES_TO_SQLALCHEMY = {
     "string": "db.String(256)",
     "number": "db.Float",
     "boolean": "db.Boolean",
+    "array": "ARRAY",
 }
 
 
