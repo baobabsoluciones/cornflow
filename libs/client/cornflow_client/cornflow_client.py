@@ -377,12 +377,12 @@ class CornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
         """
-        api = "execution/"
+        api = "execution/" + execution_id + "/relaunch/"
         payload = dict(
             config=config,
         )
         if not run:
-            api += execution_id + "/relaunch?run=0"
+            api += "?run=0"
         response = self.create_api(api, json=payload, encoding=encoding)
         if response.status_code != 201:
             raise CornFlowApiError(

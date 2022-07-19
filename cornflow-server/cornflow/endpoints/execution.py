@@ -189,7 +189,6 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
     @doc(description="Re-launch an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
-    @marshal_with(ExecutionDetailsEndpointResponse)
     @use_kwargs(ReLaunchExecutionRequest, location="json")
     def post(self, idx, **kwargs):
         """
