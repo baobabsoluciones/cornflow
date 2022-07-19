@@ -103,7 +103,7 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.payload["config"]["warmStart"] = False
         response = self.client.post(
             url,
-            data=json.dumps(self.payload),
+            data=json.dumps({"config": self.payload["config"]}),
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
