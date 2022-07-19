@@ -88,7 +88,18 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
 
     def test_relaunch_execution(self):
         idx = self.create_new_row(self.url, self.model, payload=self.payload)
-        url = EXECUTION_URL + idx + "/relaunch?run=0"
+
+        # Add solution checks to see if they are deleted correctly
+        token = self.create_service_user()
+        self.update_row(
+            url=DAG_URL + idx + "/",
+            payload_to_check=dict(),
+            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
+            token=token,
+            check_payload=False,
+        )
+
+        url = EXECUTION_URL + idx + "/relaunch/?run=0"
         self.payload["config"]["warmStart"] = False
         response = self.client.post(
             url,
@@ -96,28 +107,19 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-
-        # Add solution checks to see if they are deleted correctly
-        token = self.create_service_user()
-        self.update_row(
-            url=DAG_URL + idx + "/",
-            payload_to_check=dict(),
-            change=dict(checks=dict(check_1=[])),
-            token=token,
-            check_payload=False,
-        )
-
         self.assertEqual(201, response.status_code)
 
-        row = self.model.query.get(response.json["id"])
-        self.assertEqual(row.id, response.json["id"])
+        url = EXECUTION_URL + idx + "/data"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        ).json
 
-        self.assertEqual(row.config, self.payload["config"])
-        self.assertIsNone(row.checks)
+        self.assertEqual(row["config"], self.payload["config"])
+        self.assertIsNone(row["checks"])
 
     def test_relaunch_invalid_execution(self):
         idx = "thisIsAnInvalidExecutionId"
-        url = EXECUTION_URL + idx + "/relaunch?run=0"
+        url = EXECUTION_URL + idx + "/relaunch/?run=0"
         self.payload["config"]["warmStart"] = False
         response = self.client.post(
             url,
