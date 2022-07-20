@@ -221,12 +221,21 @@ def cf_check(fun, secrets, **kwargs):
     exec_id = kwargs["dag_run"].conf["exec_id"]
     current_exec_data = client.get_data(exec_id)
     config = current_exec_data["config"]
-    exec_to_check_id = config["execution_id"]
-    instance_to_check_data = client.get_data(exec_to_check_id)
-    exec_to_check_data = client.get_solution(exec_to_check_id)
-    instance_data = instance_to_check_data["data"]
-    inst_id = instance_to_check_data["id"]
-    solution_data = exec_to_check_data["data"]
+    exec_to_check_id = None
+
+    if config["data_type"] == "execution":
+        exec_to_check_id = config["execution_id"]
+        instance_to_check_data = client.get_data(exec_to_check_id)
+        exec_to_check_data = client.get_solution(exec_to_check_id)
+        instance_data = instance_to_check_data["data"]
+        inst_id = instance_to_check_data["id"]
+        solution_data = exec_to_check_data["data"]
+    else:
+        instance_to_check_data = client.get_data(exec_id)
+        inst_id = instance_to_check_data["id"]
+        instance_data = instance_to_check_data["data"]
+        solution_data = None
+
     try:
         inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
     except Exception as e:
@@ -234,24 +243,40 @@ def cf_check(fun, secrets, **kwargs):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         raise AirflowDagException("There was an error during the verification of the data")
-    payload = dict(
-        state=1,
-        log_json=log_json,
-        log_text="Instance and solution checked.",
-        solution_schema="_data_checks",
-        checks=sol_checks,
-        inst_checks=inst_checks,
-        inst_id=inst_id,
-        data=dict(solution_checks=sol_checks, instance_checks=inst_checks)
-    )
+
+    payload = dict()
+    if config["data_type"] == "execution":
+        payload = dict(
+            state=1,
+            log_json=log_json,
+            log_text="Instance and solution checked.",
+            solution_schema="_data_checks",
+            checks=sol_checks,
+            inst_checks=inst_checks,
+            inst_id=inst_id,
+            data=dict(solution_checks=sol_checks, instance_checks=inst_checks)
+        )
+    elif config["data_type"] == "instance":
+        payload = dict(
+            state=1,
+            log_json=log_json,
+            log_text="Instance checked.",
+            solution_schema="_data_checks",
+            checks=sol_checks,
+            inst_checks=inst_checks,
+            inst_id=inst_id,
+            data=dict(instance_checks=inst_checks)
+        )
 
     try_to_write_solution(client, exec_id, payload)
-    try:
-        client.write_solution(execution_id=exec_to_check_id, checks=sol_checks)
-    except CornFlowApiError:
-        try_to_save_error(client, exec_id, -6)
-        # attempt to update the execution with a failed status.
-        raise AirflowDagException("The writing of the solution failed")
+
+    if exec_to_check_id is not None:
+        try:
+            client.write_solution(execution_id=exec_to_check_id, checks=sol_checks)
+        except CornFlowApiError:
+            try_to_save_error(client, exec_id, -6)
+            # attempt to update the execution with a failed status.
+            raise AirflowDagException("The writing of the solution failed")
 
     # The validation went correctly: can save the solution without problem
     return "Checks saved"

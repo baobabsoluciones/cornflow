@@ -18,6 +18,7 @@ from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution import (
     ExecutionSchema,
     ExecutionDetailsEndpointResponse,
+    ExecutionDetailsEndpointWithIndicatorsResponse,
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
@@ -63,7 +64,7 @@ class ExecutionEndpoint(BaseMetaResource):
 
     @doc(description="Get all executions", tags=["Executions"])
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointResponse(many=True))
+    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse(many=True))
     @use_kwargs(QueryFiltersExecution, location="query")
     def get(self, **kwargs):
         """
@@ -303,7 +304,7 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointResponse)
+    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """

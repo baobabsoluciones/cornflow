@@ -239,7 +239,7 @@ class ApplicationCore(ABC):
             solution_checks.update(algo.check_solution(*args, **kwargs))
         else:
             start = timer()
-            solution_checks = dict(no_data=True)
+            solution_checks = None
 
         log = dict(
             time=timer() - start,

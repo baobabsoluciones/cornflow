@@ -31,6 +31,7 @@ class ConfigSchemaResponse(ConfigSchema):
     checks_only = fields.Boolean(required=False)
     execution_id = fields.Str(required=False)
     schema = fields.Str(required=False)
+    data_type = fields.Str(required=False)
 
 
 class ExecutionSchema(Schema):
@@ -98,6 +99,19 @@ class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
     message = fields.Str(attribute="state_message")
 
 
+class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointResponse):
+    def get_indicators(self, obj):
+        indicators_string = ""
+        if obj.data is not None and isinstance(obj.data, dict):
+            if "indicators" in obj.data.keys():
+                temp = obj.data["indicators"]
+                for key, val in sorted(temp.items()):
+                    indicators_string = f"{indicators_string} {key}: {val};"
+        return indicators_string[1:-1]
+
+    indicators = fields.Method("get_indicators")
+
+
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.Str()
     state = fields.Int()
@@ -115,6 +129,6 @@ class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     checks = fields.Raw()
 
 
-class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
+class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
     log_text = fields.Str(attribute="log_text")

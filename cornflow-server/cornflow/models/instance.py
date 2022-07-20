@@ -66,12 +66,16 @@ class InstanceModel(BaseDataModel):
         :return: None
         :rtype: None
         """
-        for key, value in data.items():
-            setattr(self, key, value)
-
         # Delete the checks if the data has been modified since they are probably not valid anymore
         if "data" in data.keys():
             self.checks = None
+            # Delete the checks of all the related executions since they are probably not valid anymore either
+            for execution in self.executions:
+                execution.checks = None
+                db.session.add(execution)
+
+        for key, value in data.items():
+            setattr(self, key, value)
 
         db.session.add(self)
         self.commit_changes("updating")

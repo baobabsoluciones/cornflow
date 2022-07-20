@@ -20,7 +20,8 @@ EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
 DAG_URL = PREFIX + "/dag/"
-DATA_CHECK_URL_NORUN = PREFIX + "/data-check/?run=0"
+DATA_CHECK_EXECUTION_URL_NORUN = PREFIX + "/data-check/execution/?run=0"
+DATA_CHECK_INSTANCE_URL_NORUN = PREFIX + "/data-check/instance/?run=0"
 
 CASE_PATH = _get_file("./data/new_case_raw.json")
 CASES_LIST = [CASE_PATH, _get_file("./data/new_case_raw_2.json")]

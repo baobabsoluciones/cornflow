@@ -393,11 +393,10 @@ class CornFlow(object):
     @log_call
     @ask_token
     @prepare_encoding
-    def create_data_check_execution(
+    def create_execution_data_check(
         self,
         execution_id,
-        name="test1",
-        config=None,
+        name="execution-check",
         encoding=None,
         run=True,
     ):
@@ -410,12 +409,43 @@ class CornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
         """
-        config = config or dict()
-        api = "data-check/"
+        api = "data-check/execution/"
         payload = dict(
-            config=config,
             execution_id=execution_id,
             name=name,
+        )
+        if not run:
+            api += "?run=0"
+        response = self.create_api(api, json=payload, encoding=encoding)
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
+            )
+        return response.json()
+
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def create_instance_data_check(
+        self,
+        instance_id,
+        name="instance-check",
+        encoding=None,
+        run=True,
+    ):
+        """
+        Creates an execution to check the instance and solution of an execution
+
+        :param str instance_id: id for the instance to check
+        :param str name: name for the new execution
+        :param dict config: execution configuration
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param bool run: if the execution should be run or not
+        """
+        api = "data-check/instance/"
+        payload = dict(
+            instance_id=instance_id,
+            name=name
         )
         if not run:
             api += "?run=0"

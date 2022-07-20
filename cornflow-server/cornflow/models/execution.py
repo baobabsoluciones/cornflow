@@ -97,12 +97,12 @@ class ExecutionModel(BaseDataModel):
         :return: None
         :rtype: None
         """
-        for key, value in data.items():
-            setattr(self, key, value)
-
         # Delete the checks if the data has been modified since they are probably not valid anymore
         if "data" in data.keys():
             self.checks = None
+
+        for key, value in data.items():
+            setattr(self, key, value)
 
         db.session.add(self)
         self.commit_changes("updating")

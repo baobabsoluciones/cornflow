@@ -149,6 +149,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "config",
             "schema",
             "user_id",
+            "indicators"
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -256,7 +257,7 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
 class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "log"}
+        self.response_items = {"id", "name", "log", "indicators"}
         self.items_to_check = ["name"]
 
     def test_get_one_execution(self):

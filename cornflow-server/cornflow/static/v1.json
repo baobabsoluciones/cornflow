@@ -394,6 +394,48 @@
       },
       "type": "object"
     },
+    "ExecutionDetailsEndpointWithIndicatorsResponse": {
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "data_hash": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "state": {
+          "type": "integer"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "indicators": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "ReLaunchExecutionRequest": {
       "properties": {
         "config": {
@@ -1669,7 +1711,7 @@
             "description": "",
             "schema": {
               "items": {
-                "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+                "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
               },
               "type": "array"
             }
@@ -1734,7 +1776,7 @@
           "default": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+              "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
             }
           }
         },

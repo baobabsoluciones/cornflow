@@ -133,6 +133,27 @@ class CaseModel(BaseDataModel):
         self.user_id = data.get("user_id")
         super().update(data)
 
+    def update(self, data):
+        """
+        Method used to update a case from the database
+
+        :param dict data: the data of the case
+        :return: None
+        :rtype: None
+        """
+        # Delete the checks if the data has been modified since they are probably not valid anymore
+        if "data" in data.keys():
+            self.checks = None
+            self.solution_checks = None
+        if "solution" in data.keys():
+            self.solution_checks = None
+
+        for key, value in data.items():
+            setattr(self, key, value)
+
+        db.session.add(self)
+        self.commit_changes("updating")
+
     def delete(self):
         try:
             children = [n for n in self.descendants]

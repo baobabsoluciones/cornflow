@@ -1,7 +1,17 @@
-from marshmallow import fields, Schema, validate
+from marshmallow import fields, Schema
 
 
 class DataCheckRequest(Schema):
-    execution_id = fields.Str(required=True)
     name = fields.Str(required=True)
-    config = fields.Raw(required=True)
+
+
+class DataCheckExecutionRequest(DataCheckRequest):
+    execution_id = fields.Str(required=True)
+
+
+class DataCheckInstanceRequest(DataCheckRequest):
+    instance_id = fields.Str(required=True)
+
+
+class DataCheckCaseRequest(DataCheckRequest):
+    case_id = fields.Int(required=True)
