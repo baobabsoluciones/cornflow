@@ -104,3 +104,8 @@ class QueryFiltersCase(QueryFilters):
 class QueryCaseCompare(Schema):
     data = fields.Boolean(required=False, dump_default=1)
     solution = fields.Boolean(required=False, dump_default=1)
+
+
+class CaseCheckRequest(Schema):
+    checks = fields.Raw()
+    solution_checks = fields.Raw()

@@ -76,7 +76,8 @@ class ExecutionEndpoint(BaseMetaResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return self.get_list(user=self.get_user(), **kwargs)
+        executions = self.get_list(user=self.get_user(), **kwargs)
+        return [execution for execution in executions if not execution.config.get("checks_only", False)]
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())

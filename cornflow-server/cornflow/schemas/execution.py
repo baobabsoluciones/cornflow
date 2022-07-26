@@ -29,9 +29,6 @@ class ConfigSchema(Schema):
 
 class ConfigSchemaResponse(ConfigSchema):
     checks_only = fields.Boolean(required=False)
-    execution_id = fields.Str(required=False)
-    schema = fields.Str(required=False)
-    data_type = fields.Str(required=False)
 
 
 class ExecutionSchema(Schema):

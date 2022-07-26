@@ -19,6 +19,7 @@ from .case import (
 from .dag import (
     DAGDetailEndpoint,
     DAGEndpointManual,
+    DAGCaseEndpoint,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
 )
@@ -41,7 +42,7 @@ from .instance import (
     InstanceDataEndpoint,
 )
 
-from .data_check import DataCheckExecutionEndpoint, DataCheckInstanceEndpoint
+from .data_check import DataCheckExecutionEndpoint, DataCheckInstanceEndpoint, DataCheckCaseEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
 from .roles import RolesListEndpoint, RoleDetailEndpoint
@@ -71,13 +72,18 @@ resources = [
     ),
     dict(
         resource=DataCheckExecutionEndpoint,
-        urls="/data-check/execution/",
+        urls="/data-check/execution/<string:idx>/",
         endpoint="data-check-execution",
     ),
     dict(
         resource=DataCheckInstanceEndpoint,
-        urls="/data-check/instance/",
+        urls="/data-check/instance/<string:idx>/",
         endpoint="data-check-instance"
+    ),
+    dict(
+        resource=DataCheckCaseEndpoint,
+        urls="/data-check/case/<int:idx>/",
+        endpoint="data-check-case"
     ),
     dict(
         resource=ExecutionDetailsEndpoint,
@@ -111,6 +117,11 @@ resources = [
         resource=DAGInstanceEndpoint,
         urls="/dag/instance/<string:idx>/",
         endpoint="dag-instance",
+    ),
+    dict(
+        resource=DAGCaseEndpoint,
+        urls="/dag/case/<int:idx>/",
+        endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),

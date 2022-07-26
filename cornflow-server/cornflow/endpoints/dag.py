@@ -11,8 +11,9 @@ from flask_apispec import use_kwargs, doc, marshal_with
 import logging as log
 
 # Import from internal modules
-from ..models import DeployedDAG, ExecutionModel, InstanceModel
+from ..models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
 from ..schemas import DeployedDAGSchema
+from ..schemas.case import CaseCheckRequest
 from ..schemas.instance import InstanceCheckRequest
 from ..schemas.execution import (
     ExecutionDagPostRequest,
@@ -83,8 +84,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         solution_schema = req_data.pop("solution_schema", "pulp")
-        if solution_schema == '_data_checks':
-            solution_schema = None
+
         # TODO: the solution_schema maybe we should get it from the created execution_id?
         #  at least, check they have the same schema-name
         # Check data format
@@ -142,6 +142,28 @@ class DAGInstanceEndpoint(BaseMetaResource):
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
         log.info(f"Instance checks saved for instance {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)
+
+
+class DAGCaseEndpoint(BaseMetaResource):
+    """
+    Endpoint used by airflow to write case checks
+    """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = CaseModel
+
+    @doc(
+        description="Endpoint to save case checks performed on the DAG",
+        tags=["DAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    @use_kwargs(CaseCheckRequest, location="json")
+    def put(self, idx, **req_data):
+        log.info(f"Case checks saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
