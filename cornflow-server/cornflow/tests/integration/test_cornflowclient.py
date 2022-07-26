@@ -20,7 +20,7 @@ from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
     STATUS_HEALTHY,
 )
-from cornflow.tests.const import INSTANCE_PATH
+from cornflow.tests.const import INSTANCE_PATH, CASE_PATH
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 
@@ -294,6 +294,47 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         config = dict(solver="PULP_CBC_CMD", timeLimit=15)
         _launch_too_soon_func = lambda: self.client.relaunch_execution(execution["id"], config=config)
         self.assertRaises(CornFlowApiError, _launch_too_soon_func)
+
+    def test_check_instance(self):
+        instance = self.test_new_instance()
+        data_check_execution = self.client.create_instance_data_check(instance["id"])
+        self.assertEqual(data_check_execution["instance_id"], instance["id"])
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertTrue(status["state"] == EXEC_STATE_RUNNING or status["state"] == EXEC_STATE_QUEUED)
+        time.sleep(10)
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        response = self.get_api_for_id(
+            api="instance", id=instance["id"], post_url="data", encoding="br"
+        ).json()
+        self.assertIsNotNone(response["checks"])
+
+    def test_check_execution(self):
+        execution = self.create_instance_and_execution()
+        time.sleep(15)
+        data_check_execution = self.client.create_execution_data_check(execution["id"])
+        self.assertEqual(data_check_execution["id"], execution["id"])
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertTrue(status["state"] == EXEC_STATE_RUNNING or status["state"] == EXEC_STATE_QUEUED)
+        time.sleep(10)
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+
+    def test_check_case(self):
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+        case = self.client.create_case(**payload)
+        data_check_execution = self.client.create_case_data_check(case["id"])
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertTrue(status["state"] == EXEC_STATE_RUNNING or status["state"] == EXEC_STATE_QUEUED)
+        time.sleep(10)
+        status = self.client.get_status(data_check_execution["id"])
+        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        response = self.get_api_for_id(
+            api="case", id=case["id"], post_url="data", encoding="br"
+        ).json()
+        self.assertIsNotNone(response["checks"])
+        self.assertIsNotNone(response["solution_checks"])
 
 
 class TestCornflowClientNotOpen(TestCornflowClientBasic):

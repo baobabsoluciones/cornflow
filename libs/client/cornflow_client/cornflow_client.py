@@ -436,7 +436,7 @@ class CornFlow(object):
         run=True,
     ):
         """
-        Creates an execution to check the instance and solution of an execution
+        Creates an execution to check an instance
 
         :param str instance_id: id for the instance to check
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
@@ -447,6 +447,42 @@ class CornFlow(object):
         if not run:
             post_url = "?run=0"
         url = urljoin(urljoin(self.url, api) + "/", str(instance_id) + "/" + post_url)
+        response = requests.request(
+            method="post",
+            url=url,
+            headers={
+                "Authorization": "access_token " + self.token,
+                "Content-Encoding": encoding,
+            }
+        )
+
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
+            )
+        return response.json()
+
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def create_case_data_check(
+            self,
+            case_id,
+            encoding=None,
+            run=True,
+    ):
+        """
+        Creates an execution to check the instance and solution of a case
+
+        :param str case_id: id for the case to check
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param bool run: if the execution should be run or not
+        """
+        api = "data-check/case/"
+        post_url = ""
+        if not run:
+            post_url = "?run=0"
+        url = urljoin(urljoin(self.url, api) + "/", str(case_id) + "/" + post_url)
         response = requests.request(
             method="post",
             url=url,

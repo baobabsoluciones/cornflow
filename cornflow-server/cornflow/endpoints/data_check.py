@@ -283,7 +283,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
             schema=instance.schema,
-            data=case.solution_data
+            data=case.solution
         )
 
         schema = instance.schema

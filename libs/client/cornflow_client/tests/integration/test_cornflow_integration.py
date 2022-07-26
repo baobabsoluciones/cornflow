@@ -202,7 +202,7 @@ class TestCornflowClientUser(TestCase):
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
         response = self.get_api_for_id(
-            api="instance", id=execution["instance_id"], encoding="br"
+            api="instance", id=execution["instance_id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
 
