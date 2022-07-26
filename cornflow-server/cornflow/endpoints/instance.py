@@ -147,6 +147,18 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        schema = InstanceModel.get_one_object(user=self.get_user(), idx=idx).schema
+
+        if kwargs.get("data") is not None and schema is not None:
+            if schema == "pulp" or schema == "solve_model_dag":
+                # this one we have the schema stored inside cornflow
+                validate_and_continue(DataSchema(), kwargs["data"])
+            else:
+                # for the rest of the schemas: we need to ask airflow for the schema
+                config = current_app.config
+                marshmallow_obj = get_schema(config, schema)
+                validate_and_continue(marshmallow_obj(), kwargs["data"])
+
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
         log.info(f"User {self.get_user()} edits instance {idx}")
         return response

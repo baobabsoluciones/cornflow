@@ -332,6 +332,15 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        config = current_app.config
+
+        schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
+
+        if data.get("data") is not None and schema is not None:
+            # Get solution schema and validate it
+            marshmallow_obj = get_schema(config, schema, "solution")
+            validate_and_continue(marshmallow_obj(), data["data"])
+
         log.info(f"User {self.get_user()} edits execution {idx}")
         return self.put_detail(data, user=self.get_user(), idx=idx)
 
