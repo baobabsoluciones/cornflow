@@ -100,7 +100,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
 
     def test_new_data_check_execution(self):
 
-        url = DATA_CHECK_CASE_URL + self.case_id + "/?run=0"
+        url = DATA_CHECK_CASE_URL + str(self.case_id) + "/?run=0"
         response = self.client.post(
             url,
             follow_redirects=True,
