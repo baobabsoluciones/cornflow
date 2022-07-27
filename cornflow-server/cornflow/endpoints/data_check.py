@@ -283,14 +283,16 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
             schema=schema,
-            data=case.solution
         )
+        if case.solution is not None:
+            payload["data"] = case.solution
+
+            marshmallow_obj = get_schema(config, schema, "solution")
+            validate_and_continue(marshmallow_obj(), payload["data"])
 
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
 
-        marshmallow_obj = get_schema(config, schema, "solution")
-        validate_and_continue(marshmallow_obj(), payload["data"])
         execution, _ = self.post_list(data=payload)
 
         # this allows testing without airflow interaction:
