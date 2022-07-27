@@ -323,6 +323,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_check_case(self):
         with open(CASE_PATH) as f:
             payload = json.load(f)
+        payload.pop("solution")
         case = self.client.create_case(**payload)
         data_check_execution = self.client.create_case_data_check(case["id"])
         status = self.client.get_status(data_check_execution["id"])
