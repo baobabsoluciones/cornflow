@@ -94,6 +94,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
 
         with open(CASE_PATH) as f:
             payload = json.load(f)
+        payload.pop("solution")
         case_id = self.create_new_row(CASE_URL, CaseModel, payload)
         self.case_id = case_id
         self.model = ExecutionModel
