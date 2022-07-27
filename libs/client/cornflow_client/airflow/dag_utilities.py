@@ -236,23 +236,31 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         try_to_save_error(client, exec_id, -1)
         raise AirflowDagException("There was an error during the verification of the data")
 
-    payload = dict(
-        state=1,
-        log_json=log_json,
-        log_text="Data checked.",
-        solution_schema=dag_name,
-        checks=sol_checks,
-        inst_checks=inst_checks,
-        inst_id=inst_id,
-    )
+    if config.get("checks_only"):
+        payload = dict(
+            state=1,
+            log_json=log_json,
+            log_text="Data checked.",
+            solution_schema=dag_name,
+            inst_checks=inst_checks,
+            inst_id=inst_id,
+        )
+    else:
+        payload = dict(
+            inst_checks=inst_checks,
+            inst_id=inst_id,
+        )
+
+    if sol_checks is not None:
+        payload["checks"] = sol_checks
 
     try_to_write_solution(client, exec_id, payload)
 
     case_id = kwargs["dag_run"].conf.get('case_id')
     if case_id is not None:
         checks_payload = dict(checks=payload["inst_checks"])
-        if solution_data:
-            checks_payload["solution_checks"] = payload["checks"]
+        if sol_checks is not None:
+            checks_payload["solution_checks"] = sol_checks
         try:
             client.write_case_checks(
                 case_id=case_id, **checks_payload

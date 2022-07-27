@@ -269,7 +269,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_solve_and_relaunch(self):
         execution = self.create_instance_and_execution()
-        time.sleep(15)
+        time.sleep(20)
         status = self.client.get_status(execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
@@ -311,7 +311,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_check_execution(self):
         execution = self.create_instance_and_execution()
-        time.sleep(15)
+        time.sleep(20)
         data_check_execution = self.client.create_execution_data_check(execution["id"])
         self.assertEqual(data_check_execution["id"], execution["id"])
         status = self.client.get_status(data_check_execution["id"])

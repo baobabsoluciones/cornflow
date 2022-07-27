@@ -258,23 +258,23 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         if case is None:
             raise ObjectDoesNotExist(error="The case to check does not exist")
 
-        case_schema = case.schema
+        schema = case.schema or "solve_model_dag"
 
         instance_payload = dict(
             data=case.data,
-            schema=case_schema,
+            schema=schema,
             name=f"data_check_case_{case.name}",
         )
 
         self.data_model = InstanceModel
         self.foreign_data = dict()
-        if case_schema is None:
+        if schema is None:
             instance, _ = self.post_list(data=instance_payload)
-        elif case_schema == "pulp" or case_schema == "solve_model_dag":
+        elif schema == "pulp" or schema == "solve_model_dag":
             validate_and_continue(DataSchema(), instance_payload["data"])
             instance, _ = self.post_list(data=instance_payload)
         else:
-            marshmallow_obj = get_schema(config, case_schema)
+            marshmallow_obj = get_schema(config, schema)
             validate_and_continue(marshmallow_obj(), instance_payload["data"])
             instance, _ = self.post_list(data=instance_payload)
 
@@ -282,15 +282,16 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             config=dict(checks_only=True),
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
-            schema=instance.schema,
+            schema=schema,
             data=case.solution
         )
 
-        schema = instance.schema
-
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        execution, status_code = self.post_list(data=payload)
+
+        marshmallow_obj = get_schema(config, schema, "solution")
+        validate_and_continue(marshmallow_obj(), payload["data"])
+        execution, _ = self.post_list(data=payload)
 
         # this allows testing without airflow interaction:
         if request.args.get("run", "1") == "0":
