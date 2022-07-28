@@ -233,7 +233,7 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
-        try_to_save_error(client, exec_id, -1)
+        try_to_save_error(client, exec_id, -2)
         raise AirflowDagException("There was an error during the verification of the data")
 
     if config.get("checks_only"):

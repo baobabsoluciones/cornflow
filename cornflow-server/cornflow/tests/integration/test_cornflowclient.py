@@ -298,13 +298,17 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_check_instance(self):
         instance = self.test_new_instance()
         data_check_execution = self.client.create_instance_data_check(instance["id"])
+        print(data_check_execution)
+        print(self.client.get_api_for_id(
+            api="instance", id=data_check_execution["instance_id"], post_url="data", encoding="br"
+        ).json())
         self.assertEqual(data_check_execution["instance_id"], instance["id"])
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(status["state"] == EXEC_STATE_RUNNING or status["state"] == EXEC_STATE_QUEUED)
         time.sleep(10)
         status = self.client.get_status(data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.get_api_for_id(
+        response = self.client.get_api_for_id(
             api="instance", id=instance["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
@@ -326,16 +330,19 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         payload.pop("solution")
         case = self.client.create_case(**payload)
         data_check_execution = self.client.create_case_data_check(case["id"])
+        print(data_check_execution)
+        print(self.client.get_api_for_id(
+            api="instance", id=data_check_execution["instance_id"], post_url="data", encoding="br"
+        ).json())
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(status["state"] == EXEC_STATE_RUNNING or status["state"] == EXEC_STATE_QUEUED)
         time.sleep(10)
         status = self.client.get_status(data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.get_api_for_id(
+        response = self.client.get_api_for_id(
             api="case", id=case["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
-        self.assertIsNotNone(response["solution_checks"])
 
 
 class TestCornflowClientNotOpen(TestCornflowClientBasic):
