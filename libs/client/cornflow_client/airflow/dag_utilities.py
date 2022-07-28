@@ -217,63 +217,67 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    client = connect_to_cornflow(secrets)
-    exec_id = kwargs["dag_run"].conf["exec_id"]
-    current_exec_data = client.get_data(exec_id)
-    config = current_exec_data["config"]
-
-    instance_to_check_data = client.get_data(exec_id)
-    exec_to_check_data = client.get_solution(exec_id)
-    instance_data = instance_to_check_data["data"]
-    inst_id = instance_to_check_data["id"]
-    solution_data = exec_to_check_data["data"]
-
+    x = -2
     try:
+        client = connect_to_cornflow(secrets)
+        exec_id = kwargs["dag_run"].conf["exec_id"]
+        execution_data = client.get_data(exec_id)
+        config = execution_data["config"]
+
+        x = -3
+
+        instance_data = execution_data["data"]
+        inst_id = execution_data["id"]
+        solution_data = execution_data["solution_data"]
+        x = -4
+
         inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
-        try_to_save_error(client, exec_id, -2)
-        raise AirflowDagException("There was an error during the verification of the data")
+        x = -5
+
+        if config.get("checks_only"):
+            payload = dict(
+                state=1,
+                log_json=log_json,
+                log_text="Data checked.",
+                solution_schema=dag_name,
+                inst_checks=inst_checks,
+                inst_id=inst_id,
+            )
+        else:
+            payload = dict(
+                inst_checks=inst_checks,
+                inst_id=inst_id,
+                state=1,
+            )
+
+        if sol_checks is not None:
+            payload["checks"] = sol_checks
+
+        try_to_write_solution(client, exec_id, payload)
+        x = -6
+
+        case_id = kwargs["dag_run"].conf.get('case_id')
+        if case_id is not None:
+            checks_payload = dict(checks=payload["inst_checks"])
+            if sol_checks is not None:
+                checks_payload["solution_checks"] = sol_checks
+            try:
+                client.write_case_checks(
+                    case_id=case_id, **checks_payload
+                )
+            except CornFlowApiError:
+                try_to_save_error(client, exec_id, -6)
+                raise AirflowDagException("The writing of the case checks failed")
+
+        # # The validation went correctly: can save the solution without problem
+        return "Checks saved"
+
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
-        try_to_save_error(client, exec_id, -3)
+        try_to_save_error(client, exec_id, x)
+        client.update_status(exec_id, {"status": x})
         raise AirflowDagException("There was an error during the verification of the data")
-
-    # if config.get("checks_only"):
-    #     payload = dict(
-    #         state=1,
-    #         log_json=log_json,
-    #         log_text="Data checked.",
-    #         solution_schema=dag_name,
-    #         inst_checks=inst_checks,
-    #         inst_id=inst_id,
-    #     )
-    # else:
-    #     payload = dict(
-    #         inst_checks=inst_checks,
-    #         inst_id=inst_id,
-    #         state=1,
-    #     )
-    #
-    # if sol_checks is not None:
-    #     payload["checks"] = sol_checks
-    #
-    # try_to_write_solution(client, exec_id, payload)
-    #
-    # case_id = kwargs["dag_run"].conf.get('case_id')
-    # if case_id is not None:
-    #     checks_payload = dict(checks=payload["inst_checks"])
-    #     if sol_checks is not None:
-    #         checks_payload["solution_checks"] = sol_checks
-    #     try:
-    #         client.write_case_checks(
-    #             case_id=case_id, **checks_payload
-    #         )
-    #     except CornFlowApiError:
-    #         try_to_save_error(client, exec_id, -6)
-    #         raise AirflowDagException("The writing of the case checks failed")
-    #
-    # # The validation went correctly: can save the solution without problem
-    # return "Checks saved"
 
 
 class NoSolverException(Exception):
