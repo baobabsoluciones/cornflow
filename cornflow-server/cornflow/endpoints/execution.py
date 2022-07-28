@@ -435,7 +435,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(execution, f"Airflow responded with an error: {err}")
 
         data = response.json()
-        state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
+        state = EXEC_STATE_UNKNOWN #AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
         execution.update_state(state)
         return execution, 200
 

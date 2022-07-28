@@ -230,47 +230,50 @@ def cf_check(fun, dag_name, secrets, **kwargs):
 
     try:
         inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
+        try_to_save_error(client, exec_id, -2)
+        raise AirflowDagException("There was an error during the verification of the data")
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
-        try_to_save_error(client, exec_id, -2)
+        try_to_save_error(client, exec_id, -3)
         raise AirflowDagException("There was an error during the verification of the data")
 
-    if config.get("checks_only"):
-        payload = dict(
-            state=1,
-            log_json=log_json,
-            log_text="Data checked.",
-            solution_schema=dag_name,
-            inst_checks=inst_checks,
-            inst_id=inst_id,
-        )
-    else:
-        payload = dict(
-            inst_checks=inst_checks,
-            inst_id=inst_id,
-        )
-
-    if sol_checks is not None:
-        payload["checks"] = sol_checks
-
-    try_to_write_solution(client, exec_id, payload)
-
-    case_id = kwargs["dag_run"].conf.get('case_id')
-    if case_id is not None:
-        checks_payload = dict(checks=payload["inst_checks"])
-        if sol_checks is not None:
-            checks_payload["solution_checks"] = sol_checks
-        try:
-            client.write_case_checks(
-                case_id=case_id, **checks_payload
-            )
-        except CornFlowApiError:
-            try_to_save_error(client, exec_id, -6)
-            raise AirflowDagException("The writing of the case checks failed")
-
-    # The validation went correctly: can save the solution without problem
-    return "Checks saved"
+    # if config.get("checks_only"):
+    #     payload = dict(
+    #         state=1,
+    #         log_json=log_json,
+    #         log_text="Data checked.",
+    #         solution_schema=dag_name,
+    #         inst_checks=inst_checks,
+    #         inst_id=inst_id,
+    #     )
+    # else:
+    #     payload = dict(
+    #         inst_checks=inst_checks,
+    #         inst_id=inst_id,
+    #         state=1,
+    #     )
+    #
+    # if sol_checks is not None:
+    #     payload["checks"] = sol_checks
+    #
+    # try_to_write_solution(client, exec_id, payload)
+    #
+    # case_id = kwargs["dag_run"].conf.get('case_id')
+    # if case_id is not None:
+    #     checks_payload = dict(checks=payload["inst_checks"])
+    #     if sol_checks is not None:
+    #         checks_payload["solution_checks"] = sol_checks
+    #     try:
+    #         client.write_case_checks(
+    #             case_id=case_id, **checks_payload
+    #         )
+    #     except CornFlowApiError:
+    #         try_to_save_error(client, exec_id, -6)
+    #         raise AirflowDagException("The writing of the case checks failed")
+    #
+    # # The validation went correctly: can save the solution without problem
+    # return "Checks saved"
 
 
 class NoSolverException(Exception):
