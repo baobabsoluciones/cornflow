@@ -52,7 +52,7 @@ def downgrade():
         batch_op.drop_column("first_name")
 
     with op.batch_alter_table("users") as batch_op:
-        batch_op.alter_table("username", nullable=True)
+        batch_op.alter_column("username", nullable=True)
 
     # Second change - add column "admin", nullable and False by default
     op.add_column(
