@@ -107,6 +107,7 @@ jobs:
           python -m pip install -U -r requirements.txt
           CLIENT_BRANCH="${{github.head_ref}}"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
           flask db upgrade
           flask access_init -v 0
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin -v 0
