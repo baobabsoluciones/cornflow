@@ -17,7 +17,7 @@ from ..schemas.model_json import DataSchema
 
 from ..shared.authentication import Auth
 from ..shared.const import (
-    EXEC_STATE_RUNNING,
+    EXEC_STATE_QUEUED,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
     EXEC_STATE_NOT_RUN,
@@ -118,7 +118,7 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
-        execution.update_state(EXEC_STATE_RUNNING)
+        execution.update_state(EXEC_STATE_QUEUED)
         log.info(
             "User {} launches checks of execution {}".format(self.get_user_id(), execution.id)
         )
@@ -218,7 +218,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
-        execution.update_state(EXEC_STATE_RUNNING)
+        execution.update_state(EXEC_STATE_QUEUED)
         log.info(
             "User {} creates instance check execution {}".format(self.get_user_id(), execution.id)
         )
@@ -347,7 +347,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         af_data = response.json()
         execution.dag_run_id = af_data["dag_run_id"]
-        execution.update_state(EXEC_STATE_RUNNING)
+        execution.update_state(EXEC_STATE_QUEUED)
         log.info(
             "User {} creates case check execution {}".format(self.get_user_id(), execution.id)
         )

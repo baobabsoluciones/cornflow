@@ -404,8 +404,8 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
-        if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_UNKNOWN]:
-            # we only care on asking airflow if the status is unknown or is running.
+        if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_QUEUED, EXEC_STATE_UNKNOWN]:
+            # we only care on asking airflow if the status is unknown, queued or running.
             return execution, 200
 
         def _raise_af_error(execution, error, state=EXEC_STATE_UNKNOWN):

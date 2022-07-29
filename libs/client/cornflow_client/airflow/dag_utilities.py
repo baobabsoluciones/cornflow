@@ -217,22 +217,17 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    x = -2
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
         execution_data = client.get_data(exec_id)
         config = execution_data["config"]
 
-        x = -3
-
         instance_data = execution_data["data"]
         inst_id = execution_data["id"]
         solution_data = execution_data["solution_data"]
-        x = -4
 
         inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
-        x = -5
 
         if config.get("checks_only"):
             payload = dict(
@@ -254,7 +249,6 @@ def cf_check(fun, dag_name, secrets, **kwargs):
             payload["checks"] = sol_checks
 
         try_to_write_solution(client, exec_id, payload)
-        x = -6
 
         case_id = kwargs["dag_run"].conf.get('case_id')
         if case_id is not None:
@@ -275,8 +269,8 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
-        try_to_save_error(client, exec_id, x)
-        client.update_status(exec_id, {"status": x})
+        try_to_save_error(client, exec_id, -1)
+        client.update_status(exec_id, {"status": -1})
         raise AirflowDagException("There was an error during the verification of the data")
 
 
