@@ -440,7 +440,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _launch_too_soon_func)
 
     def test_check_instance(self):
-        instance = self.test_new_instance()
+        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
         data_check_execution = self.client.create_instance_data_check(instance["id"])
         self.assertEqual(data_check_execution["instance_id"], instance["id"])
         status = self.client.get_status(data_check_execution["id"])
