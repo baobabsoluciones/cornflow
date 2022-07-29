@@ -172,7 +172,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
-        time.sleep(10)
+        time.sleep(15)
         exec_to_check_id = exec_to_check["id"]
         execution = self.client.create_execution_data_check(exec_to_check_id)
         self.assertEqual(STATUS_QUEUED, execution["state"])
