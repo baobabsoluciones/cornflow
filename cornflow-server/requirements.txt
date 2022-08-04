@@ -4,7 +4,7 @@ click
 cornflow-core
 cornflow-client
 cryptography
-Flask
+Flask==2.1.3
 flask-apispec
 flask-cors
 Flask-Migrate
