@@ -147,8 +147,8 @@ dist/
 build/
 *.egg-info/
 
-.idea/*
-*/.idea/*
+*.idea/
+
 
 # vagrant machine folder
 .vagrant
