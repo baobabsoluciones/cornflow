@@ -88,7 +88,7 @@ class EmptyBaseModel(db.Model):
     @classmethod
     def create_bulk(cls, data: List):
         instances = [cls(item) for item in data]
-        db.session.bulk_save_objects(instances)
+        db.session.add_all(instances)
         action = "buk create"
         try:
             db.session.commit()
