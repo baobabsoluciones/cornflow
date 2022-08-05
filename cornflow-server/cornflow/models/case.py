@@ -186,8 +186,11 @@ class CaseModel(BaseDataModel):
             raise InvalidPatch()
         return patched_data, hash_json_256(patched_data)
 
-    def move_to(self, new_parent):
-        new_path = new_parent.path + str(new_parent.id) + SEPARATOR
+    def move_to(self, new_parent=None):
+        if new_parent is None:
+            new_path = ""
+        else:
+            new_path = new_parent.path + str(new_parent.id) + SEPARATOR
         for n in self.descendants:
             n.path = new_path + n.path[len(self.path) :]
         self.path = new_path

@@ -90,6 +90,7 @@ class CaseToInstanceResponse(Schema):
 class CaseEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
+    parent_id = fields.Int(allow_none=True)
 
 
 class CaseCompareResponse(Schema):
