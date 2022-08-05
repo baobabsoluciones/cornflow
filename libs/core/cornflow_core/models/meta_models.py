@@ -82,9 +82,6 @@ class EmptyBaseModel(db.Model):
         db.session.add(self)
         self.commit_changes("updating")
 
-    def refresh(self):
-        db.session.refresh(self)
-
     @classmethod
     def create_bulk(cls, data: List):
         instances = [cls(item) for item in data]
