@@ -86,6 +86,8 @@ class BaseMetaResource(Resource, MethodResource):
             {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
         ]
         instances = self.data_model.create_bulk(data)
+        for instance in instances:
+            instance.refresh()
         return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
