@@ -3,6 +3,7 @@ This file contains the base abstract models from which the rest of the models in
 """
 import logging as log
 from datetime import datetime
+from typing import Dict, List
 
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
@@ -68,7 +69,7 @@ class EmptyBaseModel(db.Model):
         db.session.delete(self)
         self.commit_changes("deleting")
 
-    def update(self, data):
+    def update(self, data: Dict):
         """
         Method used to update an object from the database
 
@@ -80,6 +81,28 @@ class EmptyBaseModel(db.Model):
             setattr(self, key, value)
         db.session.add(self)
         self.commit_changes("updating")
+
+    @classmethod
+    def create_bulk(cls, data: List):
+        instances = [cls(item) for item in data]
+        db.session.bulk_save_objects(instances)
+        action = "buk create"
+        try:
+            db.session.commit()
+            log.debug(f"Transaction type: {action}, performed correctly on {cls}")
+        except IntegrityError as err:
+            db.session.rollback()
+            log.error(f"Integrity error on {action} data: {err}")
+            raise InvalidData(f"Integrity error on {action} with data {cls}")
+        except DBAPIError as err:
+            db.session.rollback()
+            log.error(f"Unknown database error on {action} data: {err}")
+            raise InvalidData(f"Unknown database error on {action} with data {cls}")
+        except Exception as err:
+            db.session.rollback()
+            log.error(f"Unknown error on {action} data: {err}")
+            raise InvalidData(f"Unknown error on {action} with data {cls}")
+        return instances
 
     @classmethod
     def get_all_objects(cls, **kwargs):
