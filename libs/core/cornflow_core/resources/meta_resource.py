@@ -3,6 +3,7 @@ This file has all the logic shared for all the resources
 """
 # Import from python standard libraries
 from functools import wraps
+from pytups import SuperDict, TupList
 
 # Import from external libraries
 from flask_restful import Resource
@@ -29,6 +30,7 @@ class BaseMetaResource(Resource, MethodResource):
         self.foreign_data = None
         self.auth_class = None
         self.dependents = None
+        self.unique = None
         pass
 
     """
@@ -85,7 +87,27 @@ class BaseMetaResource(Resource, MethodResource):
         data = [
             {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
         ]
+
         instances = self.data_model.create_bulk(data)
+        return instances, 201
+
+    def post_bulk_update(self, data, trace_field="user_id"):
+        """"""
+        data = [
+            {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
+        ]
+
+        instances = []
+        for el in data:
+            temp_el = SuperDict(el).kfilter(lambda v: v in self.unique)
+            temp_instance = self.data_model.query.filter_by(temp_el).first()
+            if temp_instance is not None:
+                temp_instance.update(el)
+                instances.append(temp_instance)
+            else:
+                instance = self.data_model(data)
+                instance.save()
+                instances.append(instance)
         return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
