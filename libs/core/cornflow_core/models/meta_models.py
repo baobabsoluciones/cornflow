@@ -210,6 +210,10 @@ class TraceAttributesModel(EmptyBaseModel):
         self.updated_at = datetime.utcnow()
         super().update(data)
 
+    def pre_update(self, data):
+        self.updated_at = datetime.utcnow()
+        super().pre_update(data)
+
     def disable(self):
         """
         Method used to deactivate an object on the database (set the deleted_at date to the actual time stamp)
