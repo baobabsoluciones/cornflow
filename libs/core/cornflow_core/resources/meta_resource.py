@@ -3,7 +3,7 @@ This file has all the logic shared for all the resources
 """
 # Import from python standard libraries
 from functools import wraps
-from pytups import SuperDict, TupList
+from pytups import SuperDict
 
 # Import from external libraries
 from flask_restful import Resource
@@ -13,7 +13,6 @@ from flask_apispec.views import MethodResource
 # Import from internal modules
 from cornflow_core.constants import ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
-from cornflow_core.shared import db
 
 
 class BaseMetaResource(Resource, MethodResource):
@@ -109,7 +108,7 @@ class BaseMetaResource(Resource, MethodResource):
                 instance = self.data_model(el)
                 instances.append(instance)
 
-        db.session.bulk_save_objects(instances)
+        self.data_model.create_bulk_update(instances)
         return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
