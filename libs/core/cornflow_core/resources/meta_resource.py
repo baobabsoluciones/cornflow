@@ -99,8 +99,8 @@ class BaseMetaResource(Resource, MethodResource):
 
         instances = []
         for el in data:
-            temp_el = SuperDict(el).kfilter(lambda v: v in self.unique)
-            temp_instance = self.data_model.query.filter_by(temp_el).first()
+            temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
+            temp_instance = self.data_model.query.filter_by(**temp_el).first()
             if temp_instance is not None:
                 temp_instance.update(el)
                 instances.append(temp_instance)
