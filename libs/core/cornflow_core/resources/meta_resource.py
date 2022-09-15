@@ -108,7 +108,7 @@ class BaseMetaResource(Resource, MethodResource):
                 instance = self.data_model(el)
                 instances.append(instance)
 
-        self.data_model.create_bulk_update(instances)
+        self.data_model.create_update_bulk(instances)
         return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
