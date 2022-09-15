@@ -62,7 +62,9 @@ class CornFlow(object):
     # def expect_200(func):
     #     return partial(expect_status, status=200)
 
-    def api_for_id(self, api, id, method, post_url="", encoding=None, **kwargs):
+    def api_for_id(
+        self, api, id, method, post_url=None, query_args=None, encoding=None, **kwargs
+    ):
         """
         :param api: the resource in the server
         :param id: the id of the particular object
@@ -74,9 +76,23 @@ class CornFlow(object):
 
         :return: requests.request
         """
-        if post_url and post_url[-1] != "/":
-            post_url += "/"
-        url = urljoin(urljoin(self.url, api) + "/", str(id) + "/" + post_url)
+        url = f"{urljoin(self.url, api)}/"
+
+        if id is not None:
+            url = f"{url}{id}/"
+
+        if post_url is not None:
+            if post_url[-1] != "/":
+                url = f"{url}{post_url}/"
+            else:
+                url = f"{url}{post_url}"
+
+        if query_args is not None:
+            url = f"{url}?"
+            for key, value in query_args:
+                url = f"{url}{key}={value}&"
+            url = url[:-1]
+
         return requests.request(
             method=method,
             url=url,
