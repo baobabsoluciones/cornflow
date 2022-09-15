@@ -127,7 +127,7 @@ class CornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def get_api_for_id(self, api, id, post_url="", encoding=None, **kwargs):
+    def get_api_for_id(self, api, id=None, post_url=None, encoding=None, **kwargs):
         """
         api_for_id with a GET request
         """
