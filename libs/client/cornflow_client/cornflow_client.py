@@ -63,13 +63,21 @@ class CornFlow(object):
     #     return partial(expect_status, status=200)
 
     def api_for_id(
-        self, api, id, method, post_url=None, query_args=None, encoding=None, **kwargs
+        self,
+        api,
+        id=None,
+        method="GET",
+        post_url=None,
+        query_args=None,
+        encoding=None,
+        **kwargs,
     ):
         """
         :param api: the resource in the server
         :param id: the id of the particular object
         :param method: HTTP method to apply
         :param post_url: optional action to apply
+        :param query_args: query arguments for the request
         :param encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
         options are: gzip, compress, deflate, br or identity
         :param kwargs: other arguments to requests.request
@@ -89,7 +97,7 @@ class CornFlow(object):
 
         if query_args is not None:
             url = f"{url}?"
-            for key, value in query_args:
+            for key, value in query_args.items():
                 url = f"{url}{key}={value}&"
             url = url[:-1]
 
