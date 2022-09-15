@@ -52,6 +52,15 @@ class ApplicationCore(ABC):
         return None
 
     @property
+    def default_args(self) -> Union[Dict, None]:
+        """
+        Optional property
+
+        :return: the default args for the DAG
+        """
+        return None
+
+    @property
     @abstractmethod
     def instance(self) -> Type[InstanceCore]:
         """
@@ -143,7 +152,7 @@ class ApplicationCore(ABC):
                 )
 
         instance_checks = inst.check()
-        if instance_checks and instance_checks.get('errors'):
+        if instance_checks and instance_checks.get("errors"):
             # instance_checks has format {'errors': errors_dict, 'warnings': warnings_dict}
             # and has errors
             log = dict(
@@ -154,7 +163,11 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             return dict(), None, instance_checks, "", log
-        if instance_checks and 'errors' not in instance_checks.keys() and 'warnings' not in instance_checks.keys():
+        if (
+            instance_checks
+            and "errors" not in instance_checks.keys()
+            and "warnings" not in instance_checks.keys()
+        ):
             # instance_checks doesn't have format 'errors'/'warnings',
             #   so we consider it returns errors
             log = dict(
@@ -211,7 +224,9 @@ class ApplicationCore(ABC):
 
         return sol, checks, instance_checks, log_txt, log
 
-    def check(self, instance_data: dict, solution_data: dict, *args, **kwargs) -> Tuple[Dict, Dict, Dict]:
+    def check(
+        self, instance_data: dict, solution_data: dict, *args, **kwargs
+    ) -> Tuple[Dict, Dict, Dict]:
         """
         Checks the instance and solution data
         :param instance_data: json data of the instance
@@ -244,7 +259,7 @@ class ApplicationCore(ABC):
         else:
             start = timer()
             solution_checks = dict(no_data=True)
-            
+
         log = dict(
             time=timer() - start,
             solver=solver,
