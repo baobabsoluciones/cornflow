@@ -105,7 +105,7 @@ class BaseMetaResource(Resource, MethodResource):
                 temp_instance.update(el)
                 instances.append(temp_instance)
             else:
-                instance = self.data_model(data)
+                instance = self.data_model(el)
                 instance.save()
                 instances.append(instance)
         return instances, 201
