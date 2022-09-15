@@ -77,10 +77,19 @@ class EmptyBaseModel(db.Model):
         :return: None
         :rtype: None
         """
-        for key, value in data.items():
-            setattr(self, key, value)
+        self.pre_update(data)
         db.session.add(self)
         self.commit_changes("updating")
+
+    def pre_update(self, data: Dict):
+        """
+        Method used to update the values of an object but not write it to the database
+        :param dict data: the data of the object
+        :return: None
+        :rtype: None
+        """
+        for key, value in data.items():
+            setattr(self, key, value)
 
     @classmethod
     def create_bulk(cls, data: List):

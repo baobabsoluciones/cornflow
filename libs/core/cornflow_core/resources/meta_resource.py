@@ -13,6 +13,7 @@ from flask_apispec.views import MethodResource
 # Import from internal modules
 from cornflow_core.constants import ALL_DEFAULT_ROLES
 from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from cornflow_core.shared import db
 
 
 class BaseMetaResource(Resource, MethodResource):
@@ -102,12 +103,13 @@ class BaseMetaResource(Resource, MethodResource):
             temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
             temp_instance = self.data_model.query.filter_by(**temp_el).first()
             if temp_instance is not None:
-                temp_instance.update(el)
+                temp_instance.pre_update(el)
                 instances.append(temp_instance)
             else:
                 instance = self.data_model(el)
-                instance.save()
                 instances.append(instance)
+
+        db.session.bulk_save_objects(instances)
         return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
