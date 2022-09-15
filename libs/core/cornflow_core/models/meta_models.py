@@ -77,16 +77,46 @@ class EmptyBaseModel(db.Model):
         :return: None
         :rtype: None
         """
-        for key, value in data.items():
-            setattr(self, key, value)
+        self.pre_update(data)
         db.session.add(self)
         self.commit_changes("updating")
+
+    def pre_update(self, data: Dict):
+        """
+        Method used to update the values of an object but not write it to the database
+        :param dict data: the data of the object
+        :return: None
+        :rtype: None
+        """
+        for key, value in data.items():
+            setattr(self, key, value)
 
     @classmethod
     def create_bulk(cls, data: List):
         instances = [cls(item) for item in data]
         db.session.add_all(instances)
-        action = "buk create"
+        action = "bulk create"
+        try:
+            db.session.commit()
+            log.debug(f"Transaction type: {action}, performed correctly on {cls}")
+        except IntegrityError as err:
+            db.session.rollback()
+            log.error(f"Integrity error on {action} data: {err}")
+            raise InvalidData(f"Integrity error on {action} with data {cls}")
+        except DBAPIError as err:
+            db.session.rollback()
+            log.error(f"Unknown database error on {action} data: {err}")
+            raise InvalidData(f"Unknown database error on {action} with data {cls}")
+        except Exception as err:
+            db.session.rollback()
+            log.error(f"Unknown error on {action} data: {err}")
+            raise InvalidData(f"Unknown error on {action} with data {cls}")
+        return instances
+
+    @classmethod
+    def create_update_bulk(cls, instances):
+        db.session.add_all(instances)
+        action = "bulk create update"
         try:
             db.session.commit()
             log.debug(f"Transaction type: {action}, performed correctly on {cls}")
@@ -179,6 +209,10 @@ class TraceAttributesModel(EmptyBaseModel):
         """
         self.updated_at = datetime.utcnow()
         super().update(data)
+
+    def pre_update(self, data):
+        self.updated_at = datetime.utcnow()
+        super().pre_update(data)
 
     def disable(self):
         """
