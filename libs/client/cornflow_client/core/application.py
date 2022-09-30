@@ -212,6 +212,7 @@ class ApplicationCore(ABC):
         # check if there is a solution
         # TODO: we need to extract the solution status too
         #  because there may be already an initial solution in the solver
+        # TODO: review whole status types and meaning
         if status_sol is not None:
             log["sol_code"] = status_sol
         elif algo.solution is not None and len(algo.solution.data):
