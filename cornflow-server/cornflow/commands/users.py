@@ -1,4 +1,5 @@
 def create_user_with_role(username, email, password, role_name, role, verbose=0):
+    import logging as log
     from ..models import UserModel, UserRoleModel
     from cornflow_core.models import RoleBaseModel
 
@@ -35,6 +36,7 @@ def create_user_with_role(username, email, password, role_name, role, verbose=0)
 
 def create_service_user_command(username, email, password, verbose):
     from ..shared.const import SERVICE_ROLE
+    import logging as log
 
     if username is None or email is None or password is None:
         log.info("Missing required arguments")
@@ -46,6 +48,7 @@ def create_service_user_command(username, email, password, verbose):
 
 def create_admin_user_command(username, email, password, verbose):
     from ..shared.const import ADMIN_ROLE
+    import logging as log
 
     if username is None or email is None or password is None:
         log.info("Missing required arguments")
