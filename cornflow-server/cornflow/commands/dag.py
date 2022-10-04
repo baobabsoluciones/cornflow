@@ -60,6 +60,7 @@ def register_deployed_dags_command(
 
 def register_deployed_dags_command_test(dags: list = None, verbose=0):
     from ..models import DeployedDAG
+    import logging as log
 
     if dags is None:
         dags = ["solve_model_dag", "gc", "timer"]
