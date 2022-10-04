@@ -45,8 +45,8 @@ def register_roles_command(verbose):
 
     if verbose:
         if len(roles_to_register) > 0:
-            print(f"Roles registered: {roles_to_register}")
+            log.info(f"Roles registered: {roles_to_register}")
         else:
-            print("No new roles to be registered")
+            log.info("No new roles to be registered")
 
     return True

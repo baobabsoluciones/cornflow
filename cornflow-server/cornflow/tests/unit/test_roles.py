@@ -313,7 +313,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "user": "testuser3",
             "user_id": 2,
         }
-        print("super set up done")
+        log.info("super set up done")
 
     def tearDown(self):
         super().tearDown()

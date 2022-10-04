@@ -19,12 +19,12 @@ def register_deployed_dags_command(
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
-            print(f"Airflow is not reachable (attempt {attempts})")
+            log.info(f"Airflow is not reachable (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
-            print("Airflow is not reachable")
+            log.info("Airflow is not reachable")
         return False
 
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
@@ -52,9 +52,9 @@ def register_deployed_dags_command(
 
     if verbose == 1:
         if len(processed_dags) > 0:
-            print(f"DAGs registered: {processed_dags}")
+            log.info(f"DAGs registered: {processed_dags}")
         else:
-            print("No new DAGs")
+            log.info("No new DAGs")
     return True
 
 
@@ -69,4 +69,4 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
         dag.save()
 
     if verbose == 1:
-        print("Registered DAGs")
+        log.info("Registered DAGs")
