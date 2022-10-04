@@ -2,7 +2,7 @@
 Unit test for the role endpoints
 """
 import json
-
+from logging import log
 from cornflow_core.models import PermissionViewRoleBaseModel, RoleBaseModel
 
 # Import from internal modules
