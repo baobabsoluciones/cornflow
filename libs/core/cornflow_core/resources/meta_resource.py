@@ -111,12 +111,13 @@ class BaseMetaResource(Resource, MethodResource):
         self.data_model.create_update_bulk(instances)
         return instances, 201
 
-    def put_detail(self, data, track_user: bool = True, **kwargs):
+    def put_detail(self, data, track_user: bool = True, user=None, **kwargs):
         """
         Method to PUT one object
 
         :param dict data: a dict with the data used for updating the object
         :param bool track_user: a control value if the user has to be updated or not
+        :param user: the current user.
         :param kwargs: the keyword arguments to identify the object
         :return: a message if everything went well and a status code.
         """
@@ -127,18 +128,19 @@ class BaseMetaResource(Resource, MethodResource):
         data = dict(data)
 
         if track_user:
-            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            user_id = user.get("id") if user else self.get_user_id()
             data["user_id"] = user_id
 
         item.update(data)
         return {"message": "Updated correctly"}, 200
 
-    def patch_detail(self, data, track_user: bool = True, **kwargs):
+    def patch_detail(self, data, track_user: bool = True, user=None, **kwargs):
         """
         Method to PATCH one object
 
         :param dict data: a dict with the data used for updating the object
         :param bool track_user: a control value if the user has to be updated or not
+        :param user: the current user.
         :param kwargs: the keyword arguments to identify the object
         :return: a message if everything went well and a status code.
         """
@@ -150,7 +152,7 @@ class BaseMetaResource(Resource, MethodResource):
         data = dict(data)
 
         if track_user:
-            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            user_id = user.get("id") if user else self.get_user_id()
             data["user_id"] = user_id
 
         item.patch(data)
