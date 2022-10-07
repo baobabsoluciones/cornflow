@@ -7,7 +7,7 @@ from pytups import SuperDict
 
 # Import from external libraries
 from flask_restful import Resource
-from flask import g, request
+from flask import g, request, current_app
 from flask_apispec.views import MethodResource
 
 # Import from internal modules
@@ -31,6 +31,7 @@ class BaseMetaResource(Resource, MethodResource):
         self.auth_class = None
         self.dependents = None
         self.unique = None
+        self.user_access_all_objects = current_app.config["USER_ACCESS_ALL_OBJECTS"]
         pass
 
     """
@@ -129,6 +130,10 @@ class BaseMetaResource(Resource, MethodResource):
 
         if track_user:
             user_id = user.get("id") if user else self.get_user_id()
+            if not self.user_access_all_objects and user_id != data["user_id"]:
+                raise NoPermission(
+                    "You have no permission to modify an object created by another user"
+                )
             data["user_id"] = user_id
 
         item.update(data)
@@ -153,21 +158,33 @@ class BaseMetaResource(Resource, MethodResource):
 
         if track_user:
             user_id = user.get("id") if user else self.get_user_id()
+            if not self.user_access_all_objects and user_id != data["user_id"]:
+                raise NoPermission(
+                    "You have no permission to modify an object created by another user"
+                )
             data["user_id"] = user_id
 
         item.patch(data)
         return {"message": "Patched correctly"}, 200
 
-    def delete_detail(self, **kwargs):
+    def delete_detail(self, user=None, **kwargs):
         """
         Method to DELETE an object from the database
 
+        :param user: the current user.
         :param kwargs: the keyword arguments to identify the object
         :return: a message if everything went well and a status code.
         """
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
             raise ObjectDoesNotExist("The data entity does not exist on the database")
+
+        user_id = user.get("id") if user else self.get_user_id()
+        if not self.user_access_all_objects and user_id != item.user_id:
+            raise NoPermission(
+                "You have no permission to modify an object created by another user"
+            )
+
         if self.dependents is not None:
             for element in getattr(item, self.dependents):
                 element.delete()
