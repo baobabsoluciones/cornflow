@@ -80,9 +80,9 @@ def register_base_permissions_command(verbose):
 
     if verbose == 1:
         if len(permissions_to_register) > 0:
-            print(f"Permissions registered: {permissions_to_register}")
+            log.info(f"Permissions registered: {permissions_to_register}")
         else:
-            print("No new permissions to register")
+            log.info("No new permissions to register")
 
     return True
 
@@ -155,8 +155,8 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
 
     if verbose == 1:
         if len(permissions) > 1:
-            print(f"DAG permissions registered: {permissions}")
+            log.info(f"DAG permissions registered: {permissions}")
         else:
-            print("No new DAG permissions")
+            log.info("No new DAG permissions")
 
     pass

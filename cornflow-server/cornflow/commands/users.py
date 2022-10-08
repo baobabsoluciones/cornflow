@@ -1,4 +1,5 @@
 def create_user_with_role(username, email, password, role_name, role, verbose=0):
+    import logging as log
     from ..models import UserModel, UserRoleModel
     from cornflow_core.models import RoleBaseModel
 
@@ -11,7 +12,7 @@ def create_user_with_role(username, email, password, role_name, role, verbose=0)
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
         user_role.save()
         if verbose == 1:
-            print(f"User {username} is created and assigned {role_name} role")
+            log.info(f"User {username} is created and assigned {role_name} role")
         return True
 
     user_roles = UserRoleModel.get_all_objects(user_id=user.id)
@@ -21,21 +22,24 @@ def create_user_with_role(username, email, password, role_name, role, verbose=0)
         and RoleBaseModel.get_one_object(role) in user_actual_roles
     ):
         if verbose == 1:
-            print(f"User {username} exists and already has {role_name} role assigned")
+            log.info(
+                f"User {username} exists and already has {role_name} role assigned"
+            )
         return True
 
     user_role = UserRoleModel({"user_id": user.id, "role_id": role})
     user_role.save()
     if verbose == 1:
-        print(f"User {username} already exists and is assigned a {role_name} role")
+        log.info(f"User {username} already exists and is assigned a {role_name} role")
     return True
 
 
 def create_service_user_command(username, email, password, verbose):
     from ..shared.const import SERVICE_ROLE
+    import logging as log
 
     if username is None or email is None or password is None:
-        print("Missing required arguments")
+        log.info("Missing required arguments")
         return False
     return create_user_with_role(
         username, email, password, "serviceuser", SERVICE_ROLE, verbose
@@ -44,9 +48,10 @@ def create_service_user_command(username, email, password, verbose):
 
 def create_admin_user_command(username, email, password, verbose):
     from ..shared.const import ADMIN_ROLE
+    import logging as log
 
     if username is None or email is None or password is None:
-        print("Missing required arguments")
+        log.info("Missing required arguments")
         return False
     return create_user_with_role(
         username, email, password, "admin", ADMIN_ROLE, verbose
@@ -57,7 +62,7 @@ def create_planner_user_command(username, email, password, verbose):
     from ..shared.const import PLANNER_ROLE
 
     if username is None or email is None or password is None:
-        print("Missing required arguments")
+        log.info("Missing required arguments")
         return False
     return create_user_with_role(
         username, email, password, "planner", PLANNER_ROLE, verbose
