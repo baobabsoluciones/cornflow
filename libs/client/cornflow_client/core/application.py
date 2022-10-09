@@ -221,7 +221,10 @@ class ApplicationCore(ABC):
         if log["sol_code"] > 0:
             sol = algo.solution.to_dict()
 
-        checks = algo.check_solution()
+        if sol != {} and sol is not None:
+            checks = algo.check_solution()
+        else:
+            checks = {}
 
         return sol, checks, instance_checks, log_txt, log
 

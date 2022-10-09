@@ -84,6 +84,9 @@ class CornFlow(object):
 
         :return: requests.request
         """
+        if api[0] == "/" and self.url[-1] == "/":
+            api = api[1:]
+
         url = f"{urljoin(self.url, api)}"
 
         if url[-1] != "/":

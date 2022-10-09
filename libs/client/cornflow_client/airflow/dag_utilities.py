@@ -139,7 +139,7 @@ def get_schema(dag_name):
 
 
 def cf_solve_app(app, secrets, **kwargs):
-    if kwargs["dag_run"].conf.get('checks_only'):
+    if kwargs["dag_run"].conf.get("checks_only"):
         return cf_check(app.check, secrets, **kwargs)
     else:
         return cf_solve(app.solve, app.name, secrets, **kwargs)
@@ -163,6 +163,11 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
         solution, sol_checks, inst_checks, log, log_json = fun(data, config)
+
+        # We connect again to cornflow in case that more than 24 hours
+        # have passed from the first time we connect
+        client = connect_to_cornflow(secrets)
+
         payload = dict(
             state=1,
             log_json=log_json,
@@ -232,7 +237,9 @@ def cf_check(fun, secrets, **kwargs):
         if config.get("msg", True):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
-        raise AirflowDagException("There was an error during the verification of the data")
+        raise AirflowDagException(
+            "There was an error during the verification of the data"
+        )
     payload = dict(
         state=1,
         log_json=log_json,
@@ -241,7 +248,7 @@ def cf_check(fun, secrets, **kwargs):
         checks=sol_checks,
         inst_checks=inst_checks,
         inst_id=inst_id,
-        data=dict(solution_checks=sol_checks, instance_checks=inst_checks)
+        data=dict(solution_checks=sol_checks, instance_checks=inst_checks),
     )
 
     try_to_write_solution(client, exec_id, payload)
