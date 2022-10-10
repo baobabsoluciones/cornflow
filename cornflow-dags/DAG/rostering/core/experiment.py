@@ -43,7 +43,7 @@ class Experiment(ExperimentCore):
             difference_hours_worked=self.check_hours_worked(),
             manager_present=self.check_manager_present(),
             skills_demand=self.check_skills_demand(),
-        )
+        ).vfilter(lambda v: len(v))
 
     def get_objective(self) -> float:
         return self.solution.get_working_hours()
