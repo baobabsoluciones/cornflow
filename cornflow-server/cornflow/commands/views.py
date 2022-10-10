@@ -51,8 +51,8 @@ def register_views_command(verbose):
 
     if verbose == 1:
         if len(views_to_register) > 0:
-            print(f"Endpoints registered: {views_to_register}")
+            log.info(f"Endpoints registered: {views_to_register}")
         else:
-            print("No new endpoints to be registered")
+            log.info("No new endpoints to be registered")
 
     return True

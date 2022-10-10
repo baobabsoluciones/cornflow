@@ -3,6 +3,7 @@ This file has all the logic shared for all the resources
 """
 # Import from python standard libraries
 from functools import wraps
+from pytups import SuperDict
 
 # Import from external libraries
 from flask_restful import Resource
@@ -29,6 +30,7 @@ class BaseMetaResource(Resource, MethodResource):
         self.foreign_data = None
         self.auth_class = None
         self.dependents = None
+        self.unique = None
         pass
 
     """
@@ -58,8 +60,8 @@ class BaseMetaResource(Resource, MethodResource):
         Method to POST one object
 
         :param dict data: the data to create a new object
-        :param str trace_field: the field that tracks the used that created the object
-        :return: the newly created item and a status code
+        :param str trace_field: the field that tracks the user that created the object
+        :return: the newly created item and a status code of the operation
         """
         data = dict(data)
         data[trace_field] = self.get_user_id()
@@ -73,6 +75,41 @@ class BaseMetaResource(Resource, MethodResource):
                     raise NoPermission()
         item.save()
         return item, 201
+
+    def post_bulk(self, data, trace_field="user_id"):
+        """
+        Method to POST a bulk of objects
+        :param dict data: a dictionary with key 'data' that holds a list with all the
+            objects that are going to be created
+        :param str trace_field: the field that tracks the user that created the object
+        :return: the newly created items and a status code of the operation
+        """
+        data = [
+            {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
+        ]
+
+        instances = self.data_model.create_bulk(data)
+        return instances, 201
+
+    def post_bulk_update(self, data, trace_field="user_id"):
+        """"""
+        data = [
+            {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
+        ]
+
+        instances = []
+        for el in data:
+            temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
+            temp_instance = self.data_model.query.filter_by(**temp_el).first()
+            if temp_instance is not None:
+                temp_instance.pre_update(el)
+                instances.append(temp_instance)
+            else:
+                instance = self.data_model(el)
+                instances.append(instance)
+
+        self.data_model.create_update_bulk(instances)
+        return instances, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
         """
