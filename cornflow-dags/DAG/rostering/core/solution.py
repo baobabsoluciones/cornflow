@@ -38,7 +38,10 @@ class Solution(SolutionCore):
         return cls(SuperDict(solution))
 
     def to_dict(self) -> dict:
-        return {"works": pickle.loads(pickle.dumps(self.data["works"].values_l(), -1)), "indicators": self.data["indicators"]}
+        data = {"works": pickle.loads(pickle.dumps(self.data["works"].values_l(), -1))}
+        if self.data["indicators"] is not None:
+            data["indicators"] = self.data["indicators"]
+        return data
 
     def get_time_slots(self) -> TupList[str]:
         """
