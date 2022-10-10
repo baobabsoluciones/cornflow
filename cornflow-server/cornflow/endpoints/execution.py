@@ -114,7 +114,7 @@ class ExecutionEndpoint(BaseMetaResource):
         if instance is None:
             raise ObjectDoesNotExist(error="The instance to solve does not exist")
 
-        print(f"The request is: {request.args.get('run')}")
+        log.debug(f"The request is: {request.args.get('run')}")
         # this allows testing without airflow interaction:
         if request.args.get("run", "1") == "0":
             execution.update_state(EXEC_STATE_NOT_RUN)

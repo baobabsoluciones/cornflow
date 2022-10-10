@@ -53,6 +53,15 @@ class ApplicationCore(ABC):
         return None
 
     @property
+    def default_args(self) -> Union[Dict, None]:
+        """
+        Optional property
+
+        :return: the default args for the DAG
+        """
+        return None
+
+    @property
     @abstractmethod
     def instance(self) -> Type[InstanceCore]:
         """
@@ -193,6 +202,7 @@ class ApplicationCore(ABC):
         # check if there is a solution
         # TODO: we need to extract the solution status too
         #  because there may be already an initial solution in the solver
+        # TODO: review whole status types and meaning
         if status_sol is not None:
             log["sol_code"] = status_sol
         elif algo.solution is not None and len(algo.solution.data):
@@ -201,7 +211,10 @@ class ApplicationCore(ABC):
         if log["sol_code"] > 0:
             sol = algo.solution.to_dict()
 
-        checks = algo.check_solution()
+        if sol != {} and sol is not None:
+            checks = algo.check_solution()
+        else:
+            checks = None
 
         return sol, checks, instance_checks, log_txt, log
 

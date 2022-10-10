@@ -1,7 +1,8 @@
 """
 Unit test for the role endpoints
 """
-
+import json
+import logging as log
 from cornflow_core.models import PermissionViewRoleBaseModel, RoleBaseModel
 
 # Import from internal modules
@@ -51,6 +52,35 @@ class TestRolesListEndpoint(CustomTestCase):
             )
             self.assertEqual(200, response.status_code)
             self.assertCountEqual(self.payloads, response.json)
+
+    def test_post_new_role(self):
+        role = self.roles_with_access[0]
+        self.token = self.create_user_with_role(role)
+        payload = {"name": "test_role_3"}
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+        self.assertEqual("test_role_3", response.json["name"])
+
+        response = self.client.get(
+            self.url,
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.token,
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(5, len(response.json))
 
     def test_get_no_roles(self):
         for role in ROLES_MAP:
@@ -283,7 +313,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             "user": "testuser3",
             "user_id": 2,
         }
-        print("super set up done")
+        log.info("super set up done")
 
     def tearDown(self):
         super().tearDown()

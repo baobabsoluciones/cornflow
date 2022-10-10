@@ -45,8 +45,8 @@ def register_actions_command(verbose):
 
     if verbose == 1:
         if len(actions_to_register) > 0:
-            print("Actions registered: ", actions_to_register)
+            log.info("Actions registered: ", actions_to_register)
         else:
-            print("No new actions to be registered")
+            log.info("No new actions to be registered")
 
     return True

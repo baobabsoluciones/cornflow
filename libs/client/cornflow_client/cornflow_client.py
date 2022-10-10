@@ -62,21 +62,51 @@ class CornFlow(object):
     # def expect_200(func):
     #     return partial(expect_status, status=200)
 
-    def api_for_id(self, api, id, method, post_url="", encoding=None, **kwargs):
+    def api_for_id(
+        self,
+        api,
+        id=None,
+        method="GET",
+        post_url=None,
+        query_args=None,
+        encoding=None,
+        **kwargs,
+    ):
         """
         :param api: the resource in the server
         :param id: the id of the particular object
         :param method: HTTP method to apply
         :param post_url: optional action to apply
+        :param query_args: query arguments for the request
         :param encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
         options are: gzip, compress, deflate, br or identity
         :param kwargs: other arguments to requests.request
 
         :return: requests.request
         """
-        if post_url and post_url[-1] != "/":
-            post_url += "/"
-        url = urljoin(urljoin(self.url, api) + "/", str(id) + "/" + post_url)
+        if api[0] == "/" and self.url[-1] == "/":
+            api = api[1:]
+
+        url = f"{urljoin(self.url, api)}"
+
+        if url[-1] != "/":
+            url = f"{url}/"
+
+        if id is not None:
+            url = f"{url}{id}/"
+
+        if post_url is not None:
+            if post_url[-1] != "/":
+                url = f"{url}{post_url}/"
+            else:
+                url = f"{url}{post_url}"
+
+        if query_args is not None:
+            url = f"{url}?"
+            for key, value in query_args.items():
+                url = f"{url}{key}={value}&"
+            url = url[:-1]
+
         return requests.request(
             method=method,
             url=url,
@@ -100,7 +130,7 @@ class CornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def get_api_for_id(self, api, id, post_url="", encoding=None, **kwargs):
+    def get_api_for_id(self, api, id=None, post_url=None, encoding=None, **kwargs):
         """
         api_for_id with a GET request
         """
