@@ -1,12 +1,11 @@
 # Imports from libraries
 import os
 import pickle
-from pytups import SuperDict, TupList
-
 
 # Imports from cornflow libraries
 from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
+from pytups import SuperDict, TupList
 
 
 class Instance(InstanceCore):

@@ -1,8 +1,9 @@
 import os
+
+import tsplib95 as tsp
 from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 from pytups import TupList, SuperDict
-import tsplib95 as tsp
 
 
 class Instance(InstanceCore):

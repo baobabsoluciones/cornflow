@@ -1,13 +1,16 @@
+import os
+
 from cornflow_client import ExperimentCore
 from cornflow_client.core.tools import load_json
+from pytups import TupList, SuperDict
 from .instance import Instance
 from .solution import Solution
-from pytups import TupList, SuperDict
-import os
 
 
 class Experiment(ExperimentCore):
-    schema_checks = load_json(os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json"))
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
 
     @property
     def instance(self) -> Instance:

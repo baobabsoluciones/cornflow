@@ -560,7 +560,9 @@ class Experiment(ExperimentCore):
                             "id_location": location,
                             "hour": i,
                             "inventory": site_inventory["tank_quantity"][i],
-                            "capacity": self.instance.get_customer_property(location, "Capacity")
+                            "capacity": self.instance.get_customer_property(
+                                location, "Capacity"
+                            ),
                         }
                     )
         check = check.vfilter(lambda v: len(v) != 0)
@@ -616,22 +618,47 @@ class Experiment(ExperimentCore):
             )
             if duration is not None:
                 last_shift = last_shift_driver[driver]
-                check["res_dr_01_intershift"].append({"id_shift": id_shift, "last_shift": last_shift, "id_driver": driver, "duration": duration, "minimum_duration": min_duration})
+                check["res_dr_01_intershift"].append(
+                    {
+                        "id_shift": id_shift,
+                        "last_shift": last_shift,
+                        "id_driver": driver,
+                        "duration": duration,
+                        "minimum_duration": min_duration,
+                    }
+                )
 
             duration, max_duration = self.check_resources_dr_03(shift, driver)
             if duration is not None:
-                check["res_dr_03_max_duration"].append({"id_shift": id_shift, "id_driver": driver, "duration": duration, "maximum_duration": max_duration})
+                check["res_dr_03_max_duration"].append(
+                    {
+                        "id_shift": id_shift,
+                        "id_driver": driver,
+                        "duration": duration,
+                        "maximum_duration": max_duration,
+                    }
+                )
 
             if self.check_resources_dr_08(shift, id_shift, driver):
-                check["res_dr_08_driver_TW"].append({"id_shift": id_shift, "id_driver": driver})
+                check["res_dr_08_driver_TW"].append(
+                    {"id_shift": id_shift, "id_driver": driver}
+                )
 
             # TRAILERS
             if self.check_resources_tl_01(shift, end_of_last_shifts_trailer[trailer]):
                 last_shift = last_shift_trailer[trailer]
-                check["res_tl_01_shift_overlaps"].append({"id_shift": id_shift, "last_shift": last_shift, "id_trailer": trailer})
+                check["res_tl_01_shift_overlaps"].append(
+                    {
+                        "id_shift": id_shift,
+                        "last_shift": last_shift,
+                        "id_trailer": trailer,
+                    }
+                )
 
             if self.check_resources_tl_03(driver, trailer):
-                check["res_tl_03_compatibility_dr_tr"].append({"id_shift": id_shift, "id_trailer": trailer, "id_driver": driver})
+                check["res_tl_03_compatibility_dr_tr"].append(
+                    {"id_shift": id_shift, "id_trailer": trailer, "id_driver": driver}
+                )
 
             #
             last_shift_trailer[trailer] = id_shift
@@ -651,10 +678,7 @@ class Experiment(ExperimentCore):
         """
         min_delay = self.instance.get_driver_property(driver, "minInterSHIFTDURATION")
         duration = shift["departure_time"] - end_of_last_shift
-        if (
-            end_of_last_shift != 0
-            and duration < min_delay
-        ):
+        if end_of_last_shift != 0 and duration < min_delay:
             return duration, min_delay
         return None, None
 
@@ -891,45 +915,33 @@ class Experiment(ExperimentCore):
             check_log += f"Shift : {row['id_shift']} has no driver or no trailer.\n"
         for row in check_dict.get("c_02_timeline", []):
             check_log += f"check_shift_02, shift {row['id_shift']}. "
-            check_log += f"Operation at location {row['id_location']} arrives too early.\n"
+            check_log += (
+                f"Operation at location {row['id_location']} arrives too early.\n"
+            )
         for row in check_dict.get("c_03_wrong_index", []):
             check_log += f"check_shift_03, shift {row['id_shift']}. "
             check_log += f"Operation nº{row['position']} has a wrong location index.\n"
         for row in check_dict.get("c_03_setup_times", []):
             check_log += f"check_shift_03, shift {row['id_shift']}. "
-            check_log += (
-                f"Departure of operation at location {row['id_location']} is too early.\n"
-            )
+            check_log += f"Departure of operation at location {row['id_location']} is too early.\n"
         for row in check_dict.get("c_04_customer_TW", []):
             check_log += f"check_shift_04, shift {row['id_shift']}. "
-            check_log += (
-                f"Operation at location {row['id_location']} is out of the time windows.\n"
-            )
+            check_log += f"Operation at location {row['id_location']} is out of the time windows.\n"
         for row in check_dict.get("c_05_sites_accessible", []):
             check_log += f"check_shift_05, shift {row['id_shift']}. "
-            check_log += (
-                f"Operation at location {row['id_location']} can't accept this trailer.\n"
-            )
-        for row in check_dict.get(
-            "c_0607_inventory_trailer_negative", []
-        ):
+            check_log += f"Operation at location {row['id_location']} can't accept this trailer.\n"
+        for row in check_dict.get("c_0607_inventory_trailer_negative", []):
             check_log += f"check_shift_06, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} makes the trailer's inventory negative.\n"
-        for row in check_dict.get(
-            "c_0607_inventory_trailer_above_capacity", []
-        ):
+        for row in check_dict.get("c_0607_inventory_trailer_above_capacity", []):
             check_log += f"check_shift_06, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} makes the trailer's inventory above its capacity.\n"
-        for row in check_dict.get(
-            "c_0607_inventory_trailer_final_inventory", []
-        ):
+        for row in check_dict.get("c_0607_inventory_trailer_final_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += (
                 f"The trailer's operations do not correspond to its final inventory.\n"
             )
-        for row in check_dict.get(
-            "c_0607_inventory_trailer_initial_inventory", []
-        ):
+        for row in check_dict.get("c_0607_inventory_trailer_initial_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += f"The initial inventory is not coherent with last shift of the trailer.\n"
         for row in check_dict.get("c_11_quantity_delivered", []):
@@ -948,12 +960,12 @@ class Experiment(ExperimentCore):
             check_log += f"Tank quantity strictly negative  at hour {row['hour']}. \n"
         for row in check_dict.get("site_inventory_exceeds", []):
             check_log += f"check_sites, site_inventory {row['id_location']}. "
-            check_log += f"Tank quantity superior to tank_capacity at hour {row['hour']}.\n"
+            check_log += (
+                f"Tank quantity superior to tank_capacity at hour {row['hour']}.\n"
+            )
         for row in check_dict.get("site_doesntexist", []):
             check_log += f"check_sites."
-            check_log += (
-                f"SiteInventory {row['id_location']} does not correspond to a location.\n"
-            )
+            check_log += f"SiteInventory {row['id_location']} does not correspond to a location.\n"
 
         # Resources
         for row in check_dict.get("res_dr_01_intershift", []):
@@ -961,7 +973,9 @@ class Experiment(ExperimentCore):
             check_log += f"Driver {row['id_driver']} does not respect minInterSHIFTDURATION before this shift.\n"
         for row in check_dict.get("res_dr_03_max_duration", []):
             check_log += f"check_resources_dr_03, shift {row['id_shift']}. "
-            check_log += f"Driver {row['id_driver']} does not respect maxDrivingDuration.\n"
+            check_log += (
+                f"Driver {row['id_driver']} does not respect maxDrivingDuration.\n"
+            )
         for row in check_dict.get("res_dr_08_driver_TW", []):
             check_log += f"check_resources_dr_08, shift {row['id_shift']}. "
             check_log += f"Shift is out of the time windows of the driver.\n"

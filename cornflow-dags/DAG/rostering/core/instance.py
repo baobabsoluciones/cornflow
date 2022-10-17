@@ -60,15 +60,14 @@ class Instance(InstanceCore):
 
         if data.get("skill_demand"):
             data_p["skill_demand"] = {
-                (el["day"], el["hour"], el["id_skill"]): el for el in data["skill_demand"]
+                (el["day"], el["hour"], el["id_skill"]): el
+                for el in data["skill_demand"]
             }
         else:
             data_p["skill_demand"] = {}
 
         if data.get("skills"):
-            data_p["skills"] = {
-                el["id"]: el for el in data["skills"]
-            }
+            data_p["skills"] = {el["id"]: el for el in data["skills"]}
         else:
             data_p["skills"] = {}
 
@@ -82,7 +81,14 @@ class Instance(InstanceCore):
         return cls(data_p)
 
     def to_dict(self) -> Dict:
-        tables = ["employees", "shifts", "contracts", "demand", "skill_demand", "skills"]
+        tables = [
+            "employees",
+            "shifts",
+            "contracts",
+            "demand",
+            "skill_demand",
+            "skills",
+        ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
 
@@ -586,7 +592,10 @@ class Instance(InstanceCore):
         """
         Returns a boolean indicating if the employee is available on the time slot or not
         """
-        return (self._get_time_slot_string(ts), id_employee) in self.get_employees_ts_availability()
+        return (
+            self._get_time_slot_string(ts),
+            id_employee,
+        ) in self.get_employees_ts_availability()
 
     def get_ts_demand_employees_skill(self) -> TupList:
         """
@@ -597,13 +606,17 @@ class Instance(InstanceCore):
          - Employees that master the skill and are available on the timeslot
         For example: [("2021-09-06T07:00", 1, 1, [2, 3]), ("2021-09-06T08:00", 2, 1, [1, 2]), ...]
         """
-        return TupList([
-            (
-                self._get_time_slot_string(ts),
-                id_skill,
-                self._filter_skills_demand(ts, id_skill),
-                self.get_employees_by_skill(id_skill).vfilter(lambda e: self._employee_available(ts, e))
-            )
-            for ts in self.time_slots
-            for id_skill in self._get_skills()
-        ])
+        return TupList(
+            [
+                (
+                    self._get_time_slot_string(ts),
+                    id_skill,
+                    self._filter_skills_demand(ts, id_skill),
+                    self.get_employees_by_skill(id_skill).vfilter(
+                        lambda e: self._employee_available(ts, e)
+                    ),
+                )
+                for ts in self.time_slots
+                for id_skill in self._get_skills()
+            ]
+        )

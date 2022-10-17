@@ -1,8 +1,9 @@
-import pytups as pt
-from cornflow_client.core.tools import load_json
-from cornflow_client import InstanceCore, get_empty_schema
 import os
 import pickle
+
+import pytups as pt
+from cornflow_client import InstanceCore, get_empty_schema
+from cornflow_client.core.tools import load_json
 from pytups import SuperDict
 
 

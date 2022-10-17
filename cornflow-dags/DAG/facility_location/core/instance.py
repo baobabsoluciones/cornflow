@@ -16,17 +16,19 @@ class Instance(InstanceCore):
     def from_file(cls, path):
         data = SuperDict(
             suppliers=dict(sheet_name="suppliers_L1", index_col=[0, 1, 2]),
-            products=dict(sheet_name="products", index_col=[0, 1,2]),
+            products=dict(sheet_name="products", index_col=[0, 1, 2]),
             clients=dict(sheet_name="clients", index_col=[0, 1]),
             warehouses=dict(sheet_name="warehouses", index_col=[0, 1, 2, 3]),
             distances=dict(sheet_name="distances", index_col=[0, 1, 2]),
-            restricted_flows=dict(sheet_name="not_allowed_flows", index_col=[0, 1])
+            restricted_flows=dict(sheet_name="not_allowed_flows", index_col=[0, 1]),
         )
 
         def read_table(**kwargs):
-            return pd.read_excel(filename=path, header=0, **kwargs).index.values.tolist()
+            return pd.read_excel(
+                filename=path, header=0, **kwargs
+            ).index.values.tolist()
 
-        return cls(data.vapply(lambda v:read_table(**v)))
+        return cls(data.vapply(lambda v: read_table(**v)))
 
     @classmethod
     def from_dict(cls, data: dict) -> "Instance":
@@ -67,11 +69,7 @@ class Instance(InstanceCore):
         return self.data["warehouses"].keys_tl()
 
     def get_all_locations(self):
-        return (
-            self.get_suppliers()
-            + self.get_clients()
-            + self.get_warehouses()
-        )
+        return self.get_suppliers() + self.get_clients() + self.get_warehouses()
 
     def get_restricted_flows(self):
         return self.data["restricted_flows"].keys_tl()

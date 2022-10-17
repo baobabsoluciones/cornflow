@@ -1,7 +1,7 @@
+import pytups as pt
+from cornflow_client import ExperimentCore, get_empty_schema
 from .instance import Instance
 from .solution import Solution
-from cornflow_client import ExperimentCore, get_empty_schema
-import pytups as pt
 
 
 class Experiment(ExperimentCore):
