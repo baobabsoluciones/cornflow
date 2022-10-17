@@ -100,12 +100,7 @@ class ExecutionModel(BaseDataModel):
         # Delete the checks if the data has been modified since they are probably not valid anymore
         if "data" in data.keys():
             self.checks = None
-
-        for key, value in data.items():
-            setattr(self, key, value)
-
-        db.session.add(self)
-        self.commit_changes("updating")
+        super().update(data)
 
     def update_state(self, code, message=None):
         """

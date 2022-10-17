@@ -149,7 +149,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "config",
             "schema",
             "user_id",
-            "indicators"
+            "indicators",
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -218,7 +218,10 @@ class TestExecutionsDetailEndpoint(
         payload["data"]["parameters"]["name"] = "NewName"
 
         url = self.url + str(idx) + "/"
-        payload = {**self.payload, **dict(id=idx, name="new_name", data=payload["data"])}
+        payload = {
+            **self.payload,
+            **dict(id=idx, name="new_name", data=payload["data"]),
+        }
         self.update_row(
             url,
             dict(name="new_name", data=payload["data"]),

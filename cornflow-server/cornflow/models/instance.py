@@ -74,11 +74,7 @@ class InstanceModel(BaseDataModel):
                 execution.checks = None
                 db.session.add(execution)
 
-        for key, value in data.items():
-            setattr(self, key, value)
-
-        db.session.add(self)
-        self.commit_changes("updating")
+        super().update(data)
 
     def __repr__(self):
         """

@@ -148,11 +148,7 @@ class CaseModel(BaseDataModel):
         if "solution" in data.keys():
             self.solution_checks = None
 
-        for key, value in data.items():
-            setattr(self, key, value)
-
-        db.session.add(self)
-        self.commit_changes("updating")
+        super().update(data)
 
     def delete(self):
         try:

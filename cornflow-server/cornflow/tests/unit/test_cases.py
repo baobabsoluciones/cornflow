@@ -420,7 +420,9 @@ class TestCaseJsonPatch(CustomTestCase):
         )
 
         row = self.client.get(
-            self.url + str(self.case_id) + "/data/", follow_redirects=True, headers=self.get_header_with_auth(self.token)
+            self.url + str(self.case_id) + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
         )
         self.assertIsNone(row.json["checks"])
 
@@ -442,7 +444,7 @@ class TestCaseJsonPatch(CustomTestCase):
         row = self.client.get(
             self.url + str(case_id) + "/data/",
             follow_redirects=True,
-            headers=self.get_header_with_auth(self.token)
+            headers=self.get_header_with_auth(self.token),
         )
         self.assertIsNone(row.json["checks"])
         self.assertIsNone(row.json["solution_checks"])

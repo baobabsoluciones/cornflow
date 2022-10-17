@@ -16,7 +16,7 @@ from cornflow.tests.const import (
     DATA_CHECK_INSTANCE_URL,
     DATA_CHECK_CASE_URL,
     INSTANCE_URL,
-    CASE_URL
+    CASE_URL,
 )
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -40,9 +40,7 @@ class TestDataChecksExecutionEndpoint(CustomTestCase):
 
     def test_check_execution(self):
         exec_to_check_id = self.create_new_row(
-            EXECUTION_URL_NORUN,
-            self.model,
-            payload=self.payload
+            EXECUTION_URL_NORUN, self.model, payload=self.payload
         )
         url = DATA_CHECK_EXECUTION_URL + exec_to_check_id + "/?run=0"
         response = self.client.post(

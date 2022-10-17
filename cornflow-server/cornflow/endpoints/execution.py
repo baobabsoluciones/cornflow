@@ -26,7 +26,7 @@ from ..schemas.execution import (
     ExecutionRequest,
     ExecutionEditRequest,
     QueryFiltersExecution,
-    ReLaunchExecutionRequest
+    ReLaunchExecutionRequest,
 )
 
 from ..shared.authentication import Auth
@@ -44,11 +44,6 @@ from ..shared.const import (
 from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
 from cornflow_core.compress import compressed
-
-
-# Initialize the schema that all endpoints are going to use
-# TODO: is it needed?
-execution_schema = ExecutionSchema()
 
 
 class ExecutionEndpoint(BaseMetaResource):
@@ -77,7 +72,11 @@ class ExecutionEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         executions = self.get_list(user=self.get_user(), **kwargs)
-        return [execution for execution in executions if not execution.config.get("checks_only", False)]
+        return [
+            execution
+            for execution in executions
+            if not execution.config.get("checks_only", False)
+        ]
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -209,15 +208,10 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             kwargs["schema"] = "solve_model_dag"
 
         self.put_detail(
-            data=dict(config=kwargs["config"]),
-            user=self.get_user(),
-            idx=idx
+            data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
         )
 
-        execution = ExecutionModel.get_one_object(
-            user=self.get_user(),
-            idx=idx
-        )
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
 
         # If the execution does not exist, raise an error
         if execution is None:
@@ -232,7 +226,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         # this allows testing without airflow interaction:
         if request.args.get("run", "1") == "0":
             execution.update_state(EXEC_STATE_NOT_RUN)
-            return {"message": "The execution was set for relaunch but was not launched"}, 201
+            return {
+                "message": "The execution was set for relaunch but was not launched"
+            }, 201
 
         # Get dag config schema and validate it
         marshmallow_obj = get_schema(config, kwargs["schema"], "config")
@@ -409,7 +405,11 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
-        if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_QUEUED, EXEC_STATE_UNKNOWN]:
+        if execution.state not in [
+            EXEC_STATE_RUNNING,
+            EXEC_STATE_QUEUED,
+            EXEC_STATE_UNKNOWN,
+        ]:
             # we only care on asking airflow if the status is unknown, queued or running.
             return execution, 200
 

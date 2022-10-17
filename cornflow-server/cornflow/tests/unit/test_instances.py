@@ -144,7 +144,10 @@ class TestInstancesDetailEndpoint(
         )
         self.payload["data"]["parameters"]["name"] = "NewName"
         url = self.url + str(idx) + "/"
-        payload = {**self.payload, **dict(id=idx, name="new_name", data=self.payload["data"])}
+        payload = {
+            **self.payload,
+            **dict(id=idx, name="new_name", data=self.payload["data"]),
+        }
         self.update_row(
             url,
             dict(name="new_name", data=self.payload["data"]),

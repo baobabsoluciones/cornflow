@@ -54,10 +54,7 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
         """
         config = current_app.config
 
-        execution = ExecutionModel.get_one_object(
-            user=self.get_user(),
-            idx=idx
-        )
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(error="The execution to check does not exist")
 
@@ -102,7 +99,9 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(execution.id, dag_name=schema, checks_only=True)
+            response = af_client.run_dag(
+                execution.id, dag_name=schema, checks_only=True
+            )
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)
@@ -120,7 +119,9 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
         execution.dag_run_id = af_data["dag_run_id"]
         execution.update_state(EXEC_STATE_QUEUED)
         log.info(
-            "User {} launches checks of execution {}".format(self.get_user_id(), execution.id)
+            "User {} launches checks of execution {}".format(
+                self.get_user_id(), execution.id
+            )
         )
         return execution, 201
 
@@ -136,7 +137,10 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
 
-    @doc(description="Create a data check execution for an existing instance", tags=["Data checks"])
+    @doc(
+        description="Create a data check execution for an existing instance",
+        tags=["Data checks"],
+    )
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @marshal_with(ExecutionDetailsEndpointResponse)
@@ -152,16 +156,14 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         """
         config = current_app.config
 
-        instance = InstanceModel.get_one_object(
-            user=self.get_user(), idx=idx
-        )
+        instance = InstanceModel.get_one_object(user=self.get_user(), idx=idx)
         if instance is None:
             raise ObjectDoesNotExist(error="The instance to check does not exist")
         payload = dict(
             config=dict(checks_only=True),
             instance_id=instance.id,
             name=f"data_check_instance_{instance.name}",
-            schema=instance.schema
+            schema=instance.schema,
         )
         schema = instance.schema
 
@@ -202,7 +204,9 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(execution.id, dag_name=schema, checks_only=True)
+            response = af_client.run_dag(
+                execution.id, dag_name=schema, checks_only=True
+            )
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             log.error(error)
@@ -220,7 +224,9 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         execution.dag_run_id = af_data["dag_run_id"]
         execution.update_state(EXEC_STATE_QUEUED)
         log.info(
-            "User {} creates instance check execution {}".format(self.get_user_id(), execution.id)
+            "User {} creates instance check execution {}".format(
+                self.get_user_id(), execution.id
+            )
         )
         return execution, 201
 
@@ -236,7 +242,10 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
 
-    @doc(description="Create a data check execution for an existing case", tags=["Data checks"])
+    @doc(
+        description="Create a data check execution for an existing case",
+        tags=["Data checks"],
+    )
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @marshal_with(ExecutionDetailsEndpointResponse)
@@ -252,9 +261,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         """
         config = current_app.config
 
-        case = CaseModel.get_one_object(
-            user=self.get_user(), idx=idx
-        )
+        case = CaseModel.get_one_object(user=self.get_user(), idx=idx)
         if case is None:
             raise ObjectDoesNotExist(error="The case to check does not exist")
 
@@ -330,7 +337,9 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(execution.id, dag_name=schema, checks_only=True, case_id=idx)
+            response = af_client.run_dag(
+                execution.id, dag_name=schema, checks_only=True, case_id=idx
+            )
 
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
@@ -349,8 +358,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         execution.dag_run_id = af_data["dag_run_id"]
         execution.update_state(EXEC_STATE_QUEUED)
         log.info(
-            "User {} creates case check execution {}".format(self.get_user_id(), execution.id)
+            "User {} creates case check execution {}".format(
+                self.get_user_id(), execution.id
+            )
         )
         return execution, 201
-
-
