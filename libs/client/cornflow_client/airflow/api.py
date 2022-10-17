@@ -65,7 +65,9 @@ class Airflow(object):
         url = f"{self.url}/dags/{dag_name}/updateTaskInstancesState"
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
-    def run_dag(self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None):
+    def run_dag(
+        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+    ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
             conf["case_id"] = case_id

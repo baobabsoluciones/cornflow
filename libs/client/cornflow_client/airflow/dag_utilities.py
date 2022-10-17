@@ -164,12 +164,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        solution, sol_checks, inst_checks, log, log_json = fun(data, config, solution_data)
+        solution, sol_checks, inst_checks, log, log_json = fun(
+            data, config, solution_data
+        )
 
         # We connect again to cornflow in case that more than 24 hours
         # have passed from the first time we connect
         client = connect_to_cornflow(secrets)
-        
+
         payload = dict(
             state=1,
             log_json=log_json,
@@ -256,15 +258,13 @@ def cf_check(fun, dag_name, secrets, **kwargs):
 
         try_to_write_solution(client, exec_id, payload)
 
-        case_id = kwargs["dag_run"].conf.get('case_id')
+        case_id = kwargs["dag_run"].conf.get("case_id")
         if case_id is not None:
             checks_payload = dict(checks=payload["inst_checks"])
             if sol_checks is not None:
                 checks_payload["solution_checks"] = sol_checks
             try:
-                client.write_case_checks(
-                    case_id=case_id, **checks_payload
-                )
+                client.write_case_checks(case_id=case_id, **checks_payload)
             except CornFlowApiError:
                 try_to_save_error(client, exec_id, -6)
                 raise AirflowDagException("The writing of the case checks failed")
