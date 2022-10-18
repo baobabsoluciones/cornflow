@@ -11,5 +11,3 @@ openpyxl
 pyomo
 acopy
 tsplib95
-simpy
-scipy
