@@ -1,10 +1,16 @@
+from cornflow_client.core.tools import load_json
 from cornflow_client import ExperimentCore
 from .instance import Instance
 from .solution import Solution
 from pytups import SuperDict, TupList
+import os
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     def __init__(self, instance, solution):
         if solution is None:
             solution = Solution(SuperDict(flows=SuperDict()))
@@ -34,16 +40,25 @@ class Experiment(ExperimentCore):
         )
 
     def check_availability(self):
+        """Checks that the supplier don't supply more product than what they theoretically have"""
         availability_dict = self.instance.get_availability()
         purchases_dict = self.solution.get_amount_supplied().kfilter(
             lambda k: k[0] in self.instance.get_suppliers()
         )
-        check_dict = SuperDict.from_dict(
-            {k: availability_dict[k] - purchases_dict[k] for k in availability_dict}
+        checks = TupList(
+            [
+                {
+                    "id_supplier": k[0],
+                    "id_product": k[1],
+                    "quantity": availability_dict[k] - purchases_dict[k],
+                }
+                for k in availability_dict
+            ]
         )
-        return check_dict.vfilter(lambda v: v < 0)
+        return checks.vfilter(lambda v: v["quantity"] < 0)
 
     def check_demand(self):
+        """Checks that the demand is covered"""
         demand = self.instance.get_demand()
         first_dose_received = (
             TupList(self.solution.data["flows"])
@@ -59,11 +74,16 @@ class Experiment(ExperimentCore):
                 )
             )
         )
-        return demand.kvapply(lambda k, v: first_dose_received[k] - v).vfilter(
-            lambda v: v < 0
+
+        return (
+            demand.kvapply(lambda k, v: first_dose_received[k] - v)
+            .vfilter(lambda v: v < 0)
+            .to_tuplist()
+            .vapply(lambda v: {"id_client": v[0], "missing_first_doses": v[1]})
         )
 
     def check_second_dose(self):
+        """Checks that every patient that receives a first dose also received a second dose"""
         nb_doses = self.instance.get_nb_doses()
         clients = self.instance.get_clients()
         first_doses = (
@@ -88,11 +108,21 @@ class Experiment(ExperimentCore):
             .to_dict(result_col=2, is_list=True)
             .vapply(lambda v: sum(v))
         )
-        return second_doses.kvapply(lambda k, v: v - first_doses.get(k, 0)).kvfilter(
-            lambda k, v: v < 0
+        return (
+            second_doses.kvapply(lambda k, v: v - first_doses.get(k, 0))
+            .kvfilter(lambda k, v: v < 0)
+            .to_tuplist()
+            .vapply(
+                lambda v: {
+                    "id_client": v[0],
+                    "id_product": v[1],
+                    "missing_second_doses": v[2],
+                }
+            )
         )
 
     def check_restricted_flows(self):
+        """Checks that no product is transported between pairs of nodes where it is not allowed"""
         restricted_flows = self.instance.get_restricted_flows()
         return (
             TupList(self.solution.data["flows"])
@@ -100,9 +130,12 @@ class Experiment(ExperimentCore):
             .take(["origin", "destination", "flow"])
             .to_dict(result_col=2, is_list=True)
             .vapply(lambda v: sum(v))
+            .to_tuplist()
+            .vapply(lambda v: {"origin": v[0], "destination": v[1], "total_flow": v[2]})
         )
 
     def check_warehouse_capacity(self):
+        """Checks that the quantity of product stored in the warehouses never exceeds their capacities"""
         warehouses = self.instance.get_warehouses()
         capacities = self.instance.get_capacity()
         return (
@@ -113,9 +146,14 @@ class Experiment(ExperimentCore):
             .vapply(lambda v: sum(v))
             .kvapply(lambda k, v: v - capacities[k[0]])
             .vfilter(lambda v: v > 0)
+            .to_tuplist()
+            .vapply(
+                lambda v: {"id_warehouse": v[0], "day": v[1], "excess_quantity": v[2]}
+            )
         )
 
     def check_consistency_warehouses(self):
+        """Checks that everything that arrives into a warehouse also leaves the warehouse"""
         warehouses = self.instance.get_warehouses()
         flows = TupList(self.solution.data["flows"])
         flow_in = (
@@ -134,9 +172,22 @@ class Experiment(ExperimentCore):
             flow_out.kvapply(lambda k, v: v - flow_in.get(k, 0))
             .update(flow_in.kvapply(lambda k, v: flow_out.get(k, 0) - v))
             .vfilter(lambda v: v != 0)
+            .to_tuplist()
+            .vapply(
+                lambda v: {
+                    "id_warehouse": v[0],
+                    "day": v[1],
+                    "id_product": v[2],
+                    "difference_flow": v[3],
+                }
+            )
         )
 
     def check_consistency_suppliers(self):
+        """
+        Checks that the quantity supplied by all the suppliers is
+        equal to the quantity received by all the clients
+        """
         suppliers = self.instance.get_suppliers()
         clients = self.instance.get_clients()
         flows = TupList(self.solution.data["flows"])
@@ -156,6 +207,10 @@ class Experiment(ExperimentCore):
             received.kvapply(lambda k, v: v - sent.get(k, 0))
             .update(sent.kvapply(lambda k, v: received.get(k, 0) - v))
             .vfilter(lambda v: v != 0)
+            .to_tuplist()
+            .vapply(
+                lambda v: {"day": v[0], "id_product": v[1], "difference_flow": v[2]}
+            )
         )
 
     def get_objective(self):

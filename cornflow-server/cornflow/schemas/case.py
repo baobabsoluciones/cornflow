@@ -90,6 +90,7 @@ class CaseToInstanceResponse(Schema):
 class CaseEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
+    parent_id = fields.Int(allow_none=True)
 
 
 class CaseCompareResponse(Schema):
@@ -104,3 +105,8 @@ class QueryFiltersCase(QueryFilters):
 class QueryCaseCompare(Schema):
     data = fields.Boolean(required=False, dump_default=1)
     solution = fields.Boolean(required=False, dump_default=1)
+
+
+class CaseCheckRequest(Schema):
+    checks = fields.Raw()
+    solution_checks = fields.Raw()

@@ -42,6 +42,7 @@ class InstanceFileRequest(Schema):
 class InstanceEditRequest(Schema):
     name = fields.Str(required=False)
     description = fields.Str(required=False)
+    data = fields.Raw(required=False)
 
 
 class InstanceCheckRequest(Schema):

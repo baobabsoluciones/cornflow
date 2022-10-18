@@ -120,12 +120,34 @@ class CaseModel(BaseDataModel):
         # TODO: review the behaviour of this method.
         if "data_patch" in data:
             self.data, self.data_hash = self.apply_patch(self.data, data["data_patch"])
+            # Delete the checks if the data has been modified since they are probably no longer valid
+            self.checks = None
+            self.solution_checks = None
         if "solution_patch" in data:
             self.solution, self.solution_hash = self.apply_patch(
                 self.solution, data["solution_patch"]
             )
+            # Delete the solution checks if the solution has been modified since they are probably no longer valid
+            self.solution_checks = None
 
         self.user_id = data.get("user_id")
+        super().update(data)
+
+    def update(self, data):
+        """
+        Method used to update a case from the database
+
+        :param dict data: the data of the case
+        :return: None
+        :rtype: None
+        """
+        # Delete the checks if the data has been modified since they are probably not valid anymore
+        if "data" in data.keys():
+            self.checks = None
+            self.solution_checks = None
+        if "solution" in data.keys():
+            self.solution_checks = None
+
         super().update(data)
 
     def delete(self):
@@ -160,8 +182,11 @@ class CaseModel(BaseDataModel):
             raise InvalidPatch()
         return patched_data, hash_json_256(patched_data)
 
-    def move_to(self, new_parent):
-        new_path = new_parent.path + str(new_parent.id) + SEPARATOR
+    def move_to(self, new_parent=None):
+        if new_parent is None:
+            new_path = ""
+        else:
+            new_path = new_parent.path + str(new_parent.id) + SEPARATOR
         for n in self.descendants:
             n.path = new_path + n.path[len(self.path) :]
         self.path = new_path

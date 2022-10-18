@@ -4,6 +4,7 @@
 # Partial imports
 from abc import ABC, abstractmethod
 from jsonschema import Draft7Validator
+from pytups import SuperDict
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
@@ -151,10 +152,15 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
-        instance_checks = inst.check()
-        if instance_checks and instance_checks.get("errors"):
-            # instance_checks has format {'errors': errors_dict, 'warnings': warnings_dict}
-            # and has errors
+        instance_checks = SuperDict(inst.check())
+
+        warnings_tables = (
+            SuperDict.from_dict(inst.schema_checks)["properties"]
+            .vfilter(lambda v: v.get("is_warning", False))
+            .keys()
+        )
+        instance_errors = instance_checks.kfilter(lambda k: k not in warnings_tables)
+        if any([len(error_table) for error_table in instance_errors.values()]):
             log = dict(
                 time=0,
                 solver=solver,
@@ -163,22 +169,6 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             return dict(), None, instance_checks, "", log
-        if (
-            instance_checks
-            and "errors" not in instance_checks.keys()
-            and "warnings" not in instance_checks.keys()
-        ):
-            # instance_checks doesn't have format 'errors'/'warnings',
-            #   so we consider it returns errors
-            log = dict(
-                time=0,
-                solver=solver,
-                status="Infeasible",
-                status_code=STATUS_INFEASIBLE,
-                sol_code=SOLUTION_STATUS_INFEASIBLE,
-            )
-            return dict(), None, instance_checks, "", log
-        # else, instance_checks is empty or only contains warnings
 
         algo = solver_class(inst, sol)
         start = timer()
@@ -224,7 +214,7 @@ class ApplicationCore(ABC):
         if sol != {} and sol is not None:
             checks = algo.check_solution()
         else:
-            checks = {}
+            checks = None
 
         return sol, checks, instance_checks, log_txt, log
 
@@ -243,26 +233,16 @@ class ApplicationCore(ABC):
             raise NoSolverException(f"No solver is available")
         inst = self.instance.from_dict(instance_data)
 
-        instance_checks = dict()
-        solution_checks = dict()
-
-        inst_errors = inst.check_schema()
-        if inst_errors:
-            instance_checks["schema_checks"] = inst_errors
-
-        instance_checks.update(inst.check(*args, **kwargs))
+        instance_checks = inst.check(*args, **kwargs)
 
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
-            sol_errors = sol.check_schema()
-            if sol_errors:
-                solution_checks["schema_checks"] = sol_errors
             algo = solver_class(inst, sol)
             start = timer()
-            solution_checks.update(algo.check_solution(*args, **kwargs))
+            solution_checks = algo.check_solution(*args, **kwargs)
         else:
             start = timer()
-            solution_checks = dict(no_data=True)
+            solution_checks = None
 
         log = dict(
             time=timer() - start,
@@ -300,4 +280,6 @@ class ApplicationCore(ABC):
             instance=self.instance.schema,
             solution=self.solution.schema,
             config=self.schema,
+            instance_checks=self.instance.schema_checks,
+            solution_checks=list(self.solvers.values())[0].schema_checks,
         )

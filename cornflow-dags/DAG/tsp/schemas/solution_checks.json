@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "missing_nodes": {
+            "type": "array",
+            "title": "Missing nodes",
+            "description": "Table indicating the nodes that have nodes been included in the solution.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "node": {
+                        "type": "integer",
+                        "title": "Node",
+                        "description": "The identifier of the missing node."
+                    }
+                },
+                "required": ["node"],
+                "additionalProperties": false
+            }
+        },
+        "missing_positions": {
+            "type": "array",
+            "title": "Missing positions",
+            "description": "Table indicating the positions that are missing from the solution route.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "type": "integer",
+                        "title": "Position",
+                        "description": "The position missing from the route."
+                    }
+                },
+                "required": ["position"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

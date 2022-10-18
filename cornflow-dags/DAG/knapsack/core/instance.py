@@ -1,10 +1,13 @@
-import numpy as np
-from ..schemas import instance_schema
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, get_empty_schema
+from cornflow_client.core.tools import load_json
+import os
 
 
 class Instance(InstanceCore):
-    schema = instance_schema
+    schema = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
+    )
+    schema_checks = get_empty_schema()
 
     @classmethod
     def from_file(cls, path):
@@ -59,10 +62,16 @@ class Instance(InstanceCore):
         return data_dict
 
     def get_objects_values(self):
-        return {self.data["ids"][i]: self.data["values"][i] for i in range(self.get_number_objects())}
+        return {
+            self.data["ids"][i]: self.data["values"][i]
+            for i in range(self.get_number_objects())
+        }
 
     def get_objects_weights(self):
-        return {self.data["ids"][i]: self.data["weights"][i] for i in range(self.get_number_objects())}
+        return {
+            self.data["ids"][i]: self.data["weights"][i]
+            for i in range(self.get_number_objects())
+        }
 
     def get_weight_capacity(self):
         return self.data["weight_capacity"]

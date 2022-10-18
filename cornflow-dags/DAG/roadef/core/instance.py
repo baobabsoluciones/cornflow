@@ -1,9 +1,8 @@
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 import pickle
 import xmltodict
 import os
-from collections import OrderedDict
 from pytups import SuperDict
 from .tools import (
     _index,
@@ -19,7 +18,7 @@ from .tools import (
     get_bases_from_file,
     get_sources_from_file,
     get_customers_from_file,
-    copy
+    copy,
 )
 
 
@@ -27,6 +26,7 @@ class Instance(InstanceCore):
     schema = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
     )
+    schema_checks = get_empty_schema()
 
     def __init__(self, data):
         super().__init__(data)
@@ -81,7 +81,7 @@ class Instance(InstanceCore):
             customers=customers,
             sources=sources,
             matrices=matrices,
-            coordinates=data_dict.get("coordinates", [])
+            coordinates=data_dict.get("coordinates", []),
         )
 
         # other parameters
@@ -98,7 +98,9 @@ class Instance(InstanceCore):
         customer_tables = customers_to_jsonschema(data_dict["customers"])
         sources_tables = sources_to_jsonschema(data_dict["sources"])
 
-        result = SuperDict({key: data_dict[key].values_tl() for key in ["trailers", "matrices"]})
+        result = SuperDict(
+            {key: data_dict[key].values_tl() for key in ["trailers", "matrices"]}
+        )
 
         result["parameters"] = dict(
             unit=data_dict["unit"], horizon=data_dict["horizon"]
@@ -162,93 +164,93 @@ class Instance(InstanceCore):
         return {int(el["index"]): el for el in element_or_list}
 
     def get_number_customers(self):
-        """ Returns the total number of customers """
+        """Returns the total number of customers"""
         return len(self.data["customers"])
 
     def get_number_drivers(self):
-        """ Returns the total number of drivers """
+        """Returns the total number of drivers"""
         return len(self.data["drivers"])
 
     def get_number_sources(self):
-        """ Returns the total number of sources """
+        """Returns the total number of sources"""
         return len(self.data["sources"])
 
     def get_number_locations(self):
-        """ Returns the total number of locations """
+        """Returns the total number of locations"""
         return len(self.data["sources"]) + len(self.data["customers"]) + 1
 
     def get_number_trailers(self):
-        """ Returns the total number of trailers """
+        """Returns the total number of trailers"""
         return len(self.data["trailers"])
 
     def get_horizon(self):
-        """ Returns the total number of hours in the time horizon """
+        """Returns the total number of hours in the time horizon"""
         return self.data["horizon"]
 
     def get_unit(self):
         return self.data["unit"]
 
     def get_distance_between(self, point1, point2):
-        """ Returns the distance between two locations """
+        """Returns the distance between two locations"""
         return self.data["matrices"][point1, point2]["dist"]
 
     def get_time_between(self, point1, point2):
-        """ Returns the travelling time between two locations """
+        """Returns the travelling time between two locations"""
         return self.data["matrices"][point1, point2]["time"]
 
     def get_id_customers(self):
-        """ Returns the indices of all the customers """
+        """Returns the indices of all the customers"""
         return self.data["customers"].keys_tl()
 
     def get_id_sources(self):
-        """ Returns the indices of all the sources """
+        """Returns the indices of all the sources"""
         return self.data["sources"].keys_tl()
 
     def get_id_trailers(self):
-        """ Returns the indices of all the trailers """
+        """Returns the indices of all the trailers"""
         return self._id_trailers
 
     def get_id_drivers(self):
-        """ Returns the indices of all the drivers """
+        """Returns the indices of all the drivers"""
         return self.data["drivers"].keys_tl()
 
     def get_id_base(self):
-        """ Returns the index of the base """
+        """Returns the index of the base"""
         return self.data["bases"]["index"]
 
     def get_customer(self, id_customer):
-        """ Returns the customer of given index """
+        """Returns the customer of given index"""
         return self.data["customers"][id_customer]
 
     def get_source(self, id_source):
-        """ Returns the source of given index """
+        """Returns the source of given index"""
         return self.data["sources"][id_source]
 
     def get_driver(self, id_driver):
-        """ Returns the driver of given index """
+        """Returns the driver of given index"""
         return self.data["drivers"][id_driver]
 
     def get_trailer(self, id_trailer):
-        """ Returns the trailer of given index """
+        """Returns the trailer of given index"""
         return self.data["trailers"][id_trailer]
 
     def get_property(self, key, prop):
         return self.data[key].get_property(prop)
 
     def get_trailer_property(self, id_trailer, prop):
-        """ Returns the property prop of the trailer of given index """
+        """Returns the property prop of the trailer of given index"""
         return self.data["trailers"][id_trailer][prop]
 
     def get_driver_property(self, id_driver, prop):
-        """ Returns the property prop of the driver of given index """
+        """Returns the property prop of the driver of given index"""
         return self.data["drivers"][id_driver][prop]
 
     def get_customer_property(self, id_customer, prop):
-        """ Returns the property prop of the customer of given index """
+        """Returns the property prop of the customer of given index"""
         return self.data["customers"][id_customer][prop]
 
     def get_source_property(self, id_source, prop):
-        """ Returns the property prop of the source of given index """
+        """Returns the property prop of the source of given index"""
         return self.data["sources"][id_source][prop]
 
     def get_location_property(self, id_location, prop):
@@ -269,23 +271,25 @@ class Instance(InstanceCore):
 
     @staticmethod
     def is_base(location):
-        """ Returns True if the location is a base """
+        """Returns True if the location is a base"""
         return location == 0
 
     def is_source(self, location):
-        """ Returns True if the location is a source """
+        """Returns True if the location is a source"""
         return 0 < location < 1 + self.get_number_sources()
 
     def is_customer(self, location):
-        """ Returns True if the location is a customer """
+        """Returns True if the location is a customer"""
         return location >= 1 + self.get_number_sources()
 
     def is_valid_location(self, location):
         """
         Return True if the input is a valid location index
         """
-        return 0 <= location < 1 + self.get_number_sources() + self.get_number_customers()
+        return (
+            0 <= location < 1 + self.get_number_sources() + self.get_number_customers()
+        )
 
     def is_customer_or_source(self, location):
-        """ Returns True if the location is customer or a source """
+        """Returns True if the location is customer or a source"""
         return self.is_customer(location) or self.is_source(location)

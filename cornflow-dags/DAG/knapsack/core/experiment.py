@@ -1,9 +1,15 @@
 from .solution import Solution
 from .instance import Instance
 from cornflow_client import ExperimentCore
+from cornflow_client.core.tools import load_json
+import os
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     def __init__(self, instance: Instance, solution: Solution):
         if solution is None:
             solution = Solution(dict(include=[]))
@@ -30,7 +36,7 @@ class Experiment(ExperimentCore):
         total_weight = sum(id_weight[el] for el in self.solution.get_ids())
         dif = capacity - total_weight
         if dif < 0:
-            return dict(weight=dif)
+            return dict(weight={"weight_excess": dif})
         return dict()
 
     def get_objective(self):

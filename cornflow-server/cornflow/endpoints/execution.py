@@ -8,7 +8,7 @@ These endpoints hve different access url, but manage the same data entities
 from cornflow_client.airflow.api import Airflow, get_schema
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 import logging as log
@@ -18,6 +18,7 @@ from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution import (
     ExecutionSchema,
     ExecutionDetailsEndpointResponse,
+    ExecutionDetailsEndpointWithIndicatorsResponse,
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
@@ -25,6 +26,7 @@ from ..schemas.execution import (
     ExecutionRequest,
     ExecutionEditRequest,
     QueryFiltersExecution,
+    ReLaunchExecutionRequest,
 )
 
 from ..shared.authentication import Auth
@@ -44,11 +46,6 @@ from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
 from cornflow_core.compress import compressed
 
 
-# Initialize the schema that all endpoints are going to use
-# TODO: is it needed?
-execution_schema = ExecutionSchema()
-
-
 class ExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
@@ -62,7 +59,7 @@ class ExecutionEndpoint(BaseMetaResource):
 
     @doc(description="Get all executions", tags=["Executions"])
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointResponse(many=True))
+    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse(many=True))
     @use_kwargs(QueryFiltersExecution, location="query")
     def get(self, **kwargs):
         """
@@ -74,7 +71,12 @@ class ExecutionEndpoint(BaseMetaResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        return self.get_list(user=self.get_user(), **kwargs)
+        executions = self.get_list(user=self.get_user(), **kwargs)
+        return [
+            execution
+            for execution in executions
+            if not execution.config.get("checks_only", False)
+        ]
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -97,6 +99,11 @@ class ExecutionEndpoint(BaseMetaResource):
 
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
+
+        if kwargs.get("data") is not None:
+            # Get solution schema and validate it
+            marshmallow_obj = get_schema(config, kwargs["schema"], "solution")
+            validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
@@ -174,6 +181,113 @@ class ExecutionEndpoint(BaseMetaResource):
         return execution, 201
 
 
+class ExecutionRelaunchEndpoint(BaseMetaResource):
+    def __init__(self):
+        super().__init__()
+        self.model = ExecutionModel
+        self.data_model = ExecutionModel
+        self.foreign_data = {"instance_id": InstanceModel}
+
+    @doc(description="Re-launch an execution", tags=["Executions"])
+    @authenticate(auth_class=Auth())
+    @Auth.dag_permission_required
+    @use_kwargs(ReLaunchExecutionRequest, location="json")
+    def post(self, idx, **kwargs):
+        """
+        API method to re-launch an existing execution
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user
+
+        :return: A dictionary with a message (error if authentication failed, error if data is not validated or
+          the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        config = current_app.config
+
+        if "schema" not in kwargs:
+            kwargs["schema"] = "solve_model_dag"
+
+        self.put_detail(
+            data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
+        )
+
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
+
+        # If the execution does not exist, raise an error
+        if execution is None:
+            raise ObjectDoesNotExist("The execution to re-solve does not exist")
+
+        execution.update({"checks": None})
+
+        # If the execution is still running or queued, raise an error
+        if execution.state == 0 or execution.state == -7:
+            return {"message": "This execution is still running"}, 400
+
+        # this allows testing without airflow interaction:
+        if request.args.get("run", "1") == "0":
+            execution.update_state(EXEC_STATE_NOT_RUN)
+            return {
+                "message": "The execution was set for relaunch but was not launched"
+            }, 201
+
+        # Get dag config schema and validate it
+        marshmallow_obj = get_schema(config, kwargs["schema"], "config")
+        validate_and_continue(marshmallow_obj(), kwargs["config"])
+
+        # We now try to launch the task in airflow
+        af_client = Airflow.from_config(config)
+        if not af_client.is_alive():
+            err = "Airflow is not accessible"
+            log.error(err)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise AirflowError(
+                error=err,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+            )
+        # ask airflow if dag_name exists
+        schema = execution.schema
+        schema_info = af_client.get_dag_info(schema)
+
+        info = schema_info.json()
+        if info["is_paused"]:
+            err = "The dag exists but it is paused in airflow"
+            log.error(err)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise AirflowError(
+                error=err,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+            )
+
+        try:
+            response = af_client.run_dag(execution.id, dag_name=schema)
+        except AirflowError as err:
+            error = "Airflow responded with an error: {}".format(err)
+            log.error(error)
+            execution.update_state(EXEC_STATE_ERROR)
+            raise AirflowError(
+                error=error,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                    state=EXEC_STATE_ERROR,
+                ),
+            )
+
+        # if we succeed, we register the dag_run_id in the execution table:
+        af_data = response.json()
+        execution.dag_run_id = af_data["dag_run_id"]
+        execution.update_state(EXEC_STATE_QUEUED)
+        log.info(
+            "User {} creates execution {}".format(self.get_user_id(), execution.id)
+        )
+        return {"message": "The execution was relaunched correctly"}, 201
+
+
 class ExecutionDetailsEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a certain execution. But not the data!
@@ -188,7 +302,7 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointResponse)
+    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -215,6 +329,19 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        config = current_app.config
+
+        schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
+
+        if data.get("data") is not None and schema is not None:
+            # Get solution schema and validate it
+            try:
+                marshmallow_obj = get_schema(config, schema, "solution")
+                validate_and_continue(marshmallow_obj(), data["data"])
+            except AirflowError:
+                # This is for the unit tests when we can't use Airflow
+                pass
+
         log.info(f"User {self.get_user()} edits execution {idx}")
         return self.put_detail(data, user=self.get_user(), idx=idx)
 
@@ -278,8 +405,12 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist()
-        if execution.state not in [EXEC_STATE_RUNNING, EXEC_STATE_UNKNOWN]:
-            # we only care on asking airflow if the status is unknown or is running.
+        if execution.state not in [
+            EXEC_STATE_RUNNING,
+            EXEC_STATE_QUEUED,
+            EXEC_STATE_UNKNOWN,
+        ]:
+            # we only care on asking airflow if the status is unknown, queued or running.
             return execution, 200
 
         def _raise_af_error(execution, error, state=EXEC_STATE_UNKNOWN):

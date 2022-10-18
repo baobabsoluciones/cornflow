@@ -14,6 +14,7 @@ sys.modules["airflow.secrets.environment_variables"] = mymodule
 
 from cornflow_client import SchemaManager, ApplicationCore
 from cornflow_client.airflow.dag_utilities import cf_solve
+from jsonschema import Draft7Validator
 from pytups import SuperDict
 
 
@@ -58,7 +59,7 @@ class BaseDAGTests:
                     (
                         solution_data,
                         solution_check,
-                        inst_checks,
+                        inst_check,
                         log,
                         log_dict,
                     ) = self.app.solve(data, config, data_out)
@@ -84,6 +85,14 @@ class BaseDAGTests:
                 experim.check_solution()
                 experim.get_objective()
 
+                validator = Draft7Validator(experim.schema_checks)
+                if not validator.is_valid(solution_check):
+                    raise Exception("The solution checks have invalid format")
+
+                validator = Draft7Validator(instance.schema_checks)
+                if not validator.is_valid(inst_check):
+                    raise Exception("The instance checks have invalid format")
+
         @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
         def test_complete_solve(self, connectCornflow, config=None):
             config = config or self.config
@@ -94,7 +103,9 @@ class BaseDAGTests:
                     # sometimes we have input and output
                     data, data_out = data
                 mock = Mock()
-                mock.get_data.return_value = dict(data=data, config=config, id=1)
+                mock.get_data.return_value = dict(
+                    data=data, config=config, id=1, solution_data=None
+                )
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")

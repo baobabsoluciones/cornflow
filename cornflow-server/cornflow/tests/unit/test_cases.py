@@ -419,6 +419,13 @@ class TestCaseJsonPatch(CustomTestCase):
             self.payloads[1],
         )
 
+        row = self.client.get(
+            self.url + str(self.case_id) + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertIsNone(row.json["checks"])
+
     def test_json_patch_complete(self):
         original = self.load_file(FULL_CASE_LIST[0])
         original["data"] = get_pulp_jsonschema("../tests/data/gc_input.json")
@@ -434,6 +441,13 @@ class TestCaseJsonPatch(CustomTestCase):
             payload,
             modified,
         )
+        row = self.client.get(
+            self.url + str(case_id) + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertIsNone(row.json["checks"])
+        self.assertIsNone(row.json["solution_checks"])
 
     def test_json_patch_file(self):
         self.patch_row(

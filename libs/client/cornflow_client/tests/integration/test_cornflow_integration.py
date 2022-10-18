@@ -170,28 +170,41 @@ class TestCornflowClientUser(TestCase):
 
         return response
 
-    def test_create_data_check_execution(self):
+    def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
-        time.sleep(10)
+        time.sleep(15)
         exec_to_check_id = exec_to_check["id"]
-        execution = self.client.create_data_check_execution(exec_to_check_id)
-        config = execution.get("config")
-        self.assertIsInstance(config, dict)
-        self.assertTrue(config.get("checks_only"))
-        self.assertEqual(config.get("execution_id"), exec_to_check_id)
-        self.assertEqual(config.get("schema"), "solve_model_dag")
+        execution = self.client.create_execution_data_check(exec_to_check_id)
+        self.assertEqual(STATUS_QUEUED, execution["state"])
         return execution
 
-    def test_data_check_solution(self):
-        execution = self.test_create_data_check_execution()
+    def test_execution_data_check_solution(self):
+        execution = self.test_create_execution_data_check()
         time.sleep(15)
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
-        self.assertIn("data", results.keys())
-        self.assertIn("instance_checks", results["data"].keys())
-        self.assertIn("solution_checks", results["data"].keys())
-        self.assertIn("errors", results["data"]["solution_checks"].keys())
-        self.assertEqual(len(results["data"]["solution_checks"]["errors"]), 0)
+
+    def test_create_instance_data_check(self):
+        inst_to_check = self.test_create_instance()
+        inst_to_check_id = inst_to_check["id"]
+        execution = self.client.create_instance_data_check(inst_to_check_id)
+        self.assertEqual(STATUS_QUEUED, execution["state"])
+        config = execution.get("config")
+        self.assertIsInstance(config, dict)
+        self.assertTrue(config.get("checks_only"))
+        self.assertEqual(execution.get("schema"), "solve_model_dag")
+        self.assertEqual(execution.get("instance_id"), inst_to_check_id)
+        return execution
+
+    def test_instance_data_check_solution(self):
+        execution = self.test_create_instance_data_check()
+        time.sleep(15)
+        results = self.client.get_solution(execution["id"])
+        self.assertEqual(results["state"], 1)
+        response = self.client.get_api_for_id(
+            api="instance", id=execution["instance_id"], post_url="data", encoding="br"
+        ).json()
+        self.assertIsNotNone(response["checks"])
 
     def test_execution_results(self):
         execution = self.test_create_execution()

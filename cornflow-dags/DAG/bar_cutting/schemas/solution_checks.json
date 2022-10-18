@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "demand_satisfaction": {
+			"type": "array",
+            "title": "Demand satisfaction",
+            "description": "Table with the id of the products for which the demand is not satisfied. Read: 'The demand for product {id_product} was not met'.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_product": {
+                        "type": "string",
+                        "title": "Id product",
+                        "description": "The unique identifier of the product"
+                    }
+                },
+                "required": ["id_product"]
+            }
+		}
+    },
+    "required": [],
+    "additionalProperties": false
+}

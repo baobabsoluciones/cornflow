@@ -6,18 +6,22 @@ Unit test for the data check endpoint
 import json
 
 # Import from internal modules
-from cornflow.models import ExecutionModel, InstanceModel
+from cornflow.models import ExecutionModel, InstanceModel, CaseModel
 from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
+    CASE_PATH,
     EXECUTION_URL_NORUN,
-    DATA_CHECK_URL_NORUN,
+    DATA_CHECK_EXECUTION_URL,
+    DATA_CHECK_INSTANCE_URL,
+    DATA_CHECK_CASE_URL,
     INSTANCE_URL,
+    CASE_URL,
 )
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
-class TestDataChecksEndpoint(CustomTestCase):
+class TestDataChecksExecutionEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
 
@@ -34,27 +38,77 @@ class TestDataChecksEndpoint(CustomTestCase):
 
         self.payload = load_file_fk(EXECUTION_PATH)
 
-    def test_new_data_check_execution(self):
+    def test_check_execution(self):
         exec_to_check_id = self.create_new_row(
-            EXECUTION_URL_NORUN,
-            self.model,
-            payload=self.payload
+            EXECUTION_URL_NORUN, self.model, payload=self.payload
         )
-        payload = dict(
-            name="test",
-            config=dict(),
-            execution_id=exec_to_check_id
+        url = DATA_CHECK_EXECUTION_URL + exec_to_check_id + "/?run=0"
+        response = self.client.post(
+            url,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
         )
-        response = self.create_new_row(
-            DATA_CHECK_URL_NORUN,
-            self.model,
-            payload=payload,
-            check_payload=False
+
+        self.assertEqual(201, response.status_code)
+        response = response.json
+
+        row = self.model.query.get(response["id"])
+        self.assertEqual(row.id, response["id"])
+        self.assertEqual(row.id, exec_to_check_id)
+
+
+class TestDataChecksInstanceEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.instance_id = fk_id
+        self.model = ExecutionModel
+
+    def test_new_data_check_execution(self):
+
+        url = DATA_CHECK_INSTANCE_URL + self.instance_id + "/?run=0"
+        response = self.client.post(
+            url,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
         )
+
+        self.assertEqual(201, response.status_code)
+        response = response.json
+
         row = self.model.query.get(response["id"])
         self.assertEqual(row.id, response["id"])
 
-        self.assertEqual(row.name, payload["name"])
-        self.assertEqual(row.config.get("execution_id"), exec_to_check_id)
+        self.assertEqual(row.instance_id, self.instance_id)
         self.assertTrue(row.config.get("checks_only"))
-        self.assertEqual(row.config.get("schema"), "solve_model_dag")
+
+
+class TestDataChecksCaseEndpoint(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+        payload.pop("solution")
+        case_id = self.create_new_row(CASE_URL, CaseModel, payload)
+        self.case_id = case_id
+        self.model = ExecutionModel
+
+    def test_new_data_check_execution(self):
+
+        url = DATA_CHECK_CASE_URL + str(self.case_id) + "/?run=0"
+        response = self.client.post(
+            url,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(201, response.status_code)
+        response = response.json
+
+        row = self.model.query.get(response["id"])
+        self.assertEqual(row.id, response["id"])
+        self.assertTrue(row.config.get("checks_only"))

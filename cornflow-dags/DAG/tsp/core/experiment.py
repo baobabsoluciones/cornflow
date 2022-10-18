@@ -1,10 +1,17 @@
+import os
+
 from cornflow_client import ExperimentCore
+from cornflow_client.core.tools import load_json
+from pytups import TupList, SuperDict
 from .instance import Instance
 from .solution import Solution
-from pytups import TupList, SuperDict
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     @property
     def instance(self) -> Instance:
         return super().instance
@@ -34,12 +41,12 @@ class Experiment(ExperimentCore):
     def check_missing_nodes(self):
         nodes_in = TupList(v["n1"] for v in self.instance.data["arcs"]).to_set()
         nodes_out = TupList(n["node"] for n in self.solution.data["route"]).to_set()
-        return {n: 1 for n in (nodes_in - nodes_out)}
+        return [{"node": n} for n in (nodes_in - nodes_out)]
 
     def check_missing_positions(self):
         nodes_in = TupList(v["n1"] for v in self.instance.data["arcs"]).to_set()
         positions = TupList(n["pos"] for n in self.solution.data["route"]).to_set()
-        return {p: 1 for p in set(range(len(nodes_in))) - positions}
+        return [{"position": p} for p in set(range(len(nodes_in))) - positions]
 
     def check_solution(self, *args, **kwargs) -> SuperDict:
         return SuperDict(

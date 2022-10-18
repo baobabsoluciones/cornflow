@@ -58,6 +58,24 @@ class InstanceModel(BaseDataModel):
             (str(self.created_at) + " " + str(self.user_id)).encode()
         ).hexdigest()
 
+    def update(self, data):
+        """
+        Method used to update an instance from the database
+
+        :param dict data: the data of the object
+        :return: None
+        :rtype: None
+        """
+        # Delete the checks if the data has been modified since they are probably not valid anymore
+        if "data" in data.keys():
+            self.checks = None
+            # Delete the checks of all the related executions since they are probably not valid anymore either
+            for execution in self.executions:
+                execution.checks = None
+                db.session.add(execution)
+
+        super().update(data)
+
     def __repr__(self):
         """
         Method to represent the class :class:`InstanceModel`
