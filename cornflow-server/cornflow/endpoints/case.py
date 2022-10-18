@@ -223,6 +223,26 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         log.info(f"User {self.get_user()} edits case {idx}")
+        if kwargs.get("parent_id", 0) != 0:
+            parent_id = kwargs.pop("parent_id")
+            case = self.data_model.get_one_object(idx=idx, user=self.get_user())
+            parent_case = None
+            if parent_id is not None:
+                parent_case = self.data_model.get_one_object(
+                    idx=parent_id, user=self.get_user()
+                )
+                if case is None or parent_case is None:
+                    raise ObjectDoesNotExist(
+                        "The data entity does not exist on the database"
+                    )
+            else:
+                if case is None:
+                    raise ObjectDoesNotExist(
+                        "The data entity does not exist on the database"
+                    )
+
+            case.move_to(parent_case)
+
         return self.put_detail(data=kwargs, idx=idx, user=self.get_user())
 
     @doc(description="Delete a case", tags=["Cases"])

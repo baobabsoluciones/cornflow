@@ -29,8 +29,6 @@ class ConfigSchema(Schema):
 
 class ConfigSchemaResponse(ConfigSchema):
     checks_only = fields.Boolean(required=False)
-    execution_id = fields.Str(required=False)
-    schema = fields.Str(required=False)
 
 
 class ExecutionSchema(Schema):
@@ -59,16 +57,22 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Raw(required=True)
+    config = fields.Nested(ConfigSchema, required=True)
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
     schema = fields.Str(required=False)
+    data = fields.Raw(required=False)
+
+
+class ReLaunchExecutionRequest(Schema):
+    config = fields.Nested(ConfigSchema, required=True)
 
 
 class ExecutionEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
+    data = fields.Raw()
 
 
 class ExecutionDagRequest(Schema):
@@ -92,6 +96,19 @@ class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
     message = fields.Str(attribute="state_message")
 
 
+class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointResponse):
+    def get_indicators(self, obj):
+        indicators_string = ""
+        if obj.data is not None and isinstance(obj.data, dict):
+            if "indicators" in obj.data.keys():
+                temp = obj.data["indicators"]
+                for key, val in sorted(temp.items()):
+                    indicators_string = f"{indicators_string} {key}: {val};"
+        return indicators_string[1:-1]
+
+    indicators = fields.Method("get_indicators")
+
+
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.Str()
     state = fields.Int()
@@ -109,6 +126,6 @@ class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     checks = fields.Raw()
 
 
-class ExecutionLogEndpointResponse(ExecutionDetailsEndpointResponse):
+class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
     log_text = fields.Str(attribute="log_text")

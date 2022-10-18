@@ -1,10 +1,13 @@
 import pickle
-from ..schemas import solution_schema
 from cornflow_client import SolutionCore
+from cornflow_client.core.tools import load_json
+import os
 
 
 class Solution(SolutionCore):
-    schema = solution_schema
+    schema = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution.json")
+    )
 
     def copy(self):
         return Solution(pickle.loads(pickle.dumps(self.data, -1)))

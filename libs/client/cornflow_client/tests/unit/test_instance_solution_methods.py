@@ -101,10 +101,12 @@ class TestCustomInstanceDag(TestSimpleApplicationDag):
 
 class SimpleInstance(InstanceCore):
     schema = get_empty_schema()
+    schema_checks = get_empty_schema()
 
 
 class Instance(InstanceCore):
     schema = _load_file(_get_file("../data/graph_coloring_input.json"))
+    schema_checks = get_empty_schema()
 
     @classmethod
     def from_dict(cls, data):

@@ -1,12 +1,14 @@
 import os
-from cornflow_client import InstanceCore
+
+import tsplib95 as tsp
+from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 from pytups import TupList, SuperDict
-import tsplib95 as tsp
 
 
 class Instance(InstanceCore):
     schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
+    schema_checks = get_empty_schema()
 
     def __init__(self, data):
         data = SuperDict(data)

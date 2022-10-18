@@ -138,7 +138,28 @@ class TestInstancesDetailEndpointBase(CustomTestCase):
 class TestInstancesDetailEndpoint(
     TestInstancesDetailEndpointBase, BaseTestCases.DetailEndpoint
 ):
-    pass
+    def test_update_one_row_data(self):
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+        self.payload["data"]["parameters"]["name"] = "NewName"
+        url = self.url + str(idx) + "/"
+        payload = {
+            **self.payload,
+            **dict(id=idx, name="new_name", data=self.payload["data"]),
+        }
+        self.update_row(
+            url,
+            dict(name="new_name", data=self.payload["data"]),
+            payload,
+        )
+
+        url += "data/"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertIsNone(row.json["checks"], None)
 
 
 class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):

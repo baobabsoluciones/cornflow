@@ -30,11 +30,11 @@ class Knapsack(ApplicationCore):
             solver_name = "Direct"
         return solver_name
 
-    def solve(self, data, conf):
+    def solve(self, data, conf, solution_data=None):
         solver_name = self.get_solver_name(data, conf)
         conf["solver"] = solver_name
 
-        return super().solve(data, conf)
+        return super().solve(data, conf, solution_data)
 
     @property
     def test_cases(self):

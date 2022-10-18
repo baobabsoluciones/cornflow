@@ -1,10 +1,12 @@
 import pytups as pt
-from .solution import Solution
-from cornflow_client import ExperimentCore
+from cornflow_client import ExperimentCore, get_empty_schema
 from .instance import Instance
+from .solution import Solution
 
 
 class Experiment(ExperimentCore):
+    schema_checks = get_empty_schema()
+
     def __init__(self, instance: Instance, solution: Solution):
         super().__init__(instance, solution)
         if self.solution is None:
@@ -35,4 +37,4 @@ class Experiment(ExperimentCore):
         pass
 
     def check_solution(self, *args, **kwargs):
-        return NotImplementedError()
+        return dict()

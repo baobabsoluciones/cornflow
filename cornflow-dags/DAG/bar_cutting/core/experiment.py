@@ -1,9 +1,11 @@
 # Imports from libraries
+import os
 from typing import Dict
-from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import ExperimentCore
+from cornflow_client.core.tools import load_json
+from pytups import SuperDict, TupList
 
 # Imports from internal modules
 from .instance import Instance
@@ -11,6 +13,10 @@ from .solution import Solution
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     def __init__(self, instance: Instance, solution: Solution = None) -> None:
         ExperimentCore.__init__(self, instance=instance, solution=solution)
         if solution is None:
@@ -67,7 +73,7 @@ class Experiment(ExperimentCore):
         total_number_cut_products = self.solution.get_total_number_cut_products()
         demand_satisfaction_problems = TupList(
             [
-                product
+                {"id_product": product}
                 for product in demand.keys_tl()
                 if demand[product] != total_number_cut_products[product]
             ]

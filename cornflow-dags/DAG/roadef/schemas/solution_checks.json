@@ -1,0 +1,651 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "c_02_timeline": {
+            "type": "array",
+            "title": "Shifts timeline",
+            "description": "Table with information about shifts with incoherent timelines. (C02). Read : 'Shift {Id shift} arrives at location {Id location} too soon.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift"
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                }
+            },
+            "required": ["id_shift", "id_location"],
+            "additionalProperties": false
+        },
+        "c_03_wrong_index": {
+            "type": "array",
+            "title": "Wrong location indices",
+            "description": "Table with information about shifts that have wrong location indices. (C03). Read 'The operation in position {position} in shift {Id shift} has incorrect index.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "position": {
+                    "type": "integer",
+                    "title": "Position",
+                    "description": "The position of the operation in the shift."
+                }
+            },
+            "required": ["id_shift", "position"],
+            "additionalProperties": false
+        },
+        "c_03_setup_times": {
+            "type": "array",
+            "title": "Setup times",
+            "description": "Table with information about shifts with operations that don't respect the location's setup time. (C03). Read : 'Shift {Id shift} leaves location {Id location} too soon and doesn't respect setup time.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift"
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                }
+            },
+            "required": ["id_shift", "id_location"],
+            "additionalProperties": false
+        },
+        "c_04_customer_TW": {
+            "type": "array",
+            "title": "Customers time windows",
+            "description": "Table with information about shifts with operations that don't respect the customers time windows. (C04). Read : 'Operation at location {Id location} in shift {Id shift} doesn't respect the customer's opening hours.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift"
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                }
+            },
+            "required": ["id_shift", "id_location"],
+            "additionalProperties": false
+        },
+        "c_05_sites_accessible": {
+            "type": "array",
+            "title": "Sites accessibility",
+            "description": "Table with information about shifts that access some locations with an authorized trailer. (C05). Read : 'Operation at location {Id location} in shift {Id shift} shouldn't be allowed because trailer {Id trailer} is not authorized at this location.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                },
+                "id_trailer": {
+                    "type": "integer",
+                    "title": "Id trailer",
+                    "description": "The unique identifier of the trailer."
+                }
+            },
+            "required": ["id_shift", "id_location", "id_trailer"],
+            "additionalProperties": false
+        },
+        "c_0607_inventory_trailer_negative": {
+            "type": "array",
+            "title": "Negative trailer's inventory",
+            "description": "Table with information about shifts where the trailer's inventory becomes negative at some point. (C06). Read: 'Operation at location {Id location} of shift {Id shift} makes the trailer's inventory negative: quantity = {quantity}.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                },
+                "quantity": {
+                    "type": "number",
+                    "title": "Quantity",
+                    "description": "The quantity of product in the trailer after the operation"
+                }
+            },
+            "required": ["id_shift", "id_location", "quantity"],
+            "additionalProperties": false
+        },
+        "c_0607_inventory_trailer_above_capacity": {
+            "type": "array",
+            "title": "Trailer's inventory above capacity",
+            "description": "Table with information about shifts where the trailer's inventory is above its capacity at some point. (C06). Read: 'Operation at location {Id location} of shift {Id shift} makes the trailer's inventory above trailer {id_trailer}'s capacity (capacity={trailer's capacity}): quantity = {quantity}.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "id_location": {
+                    "type": "integer",
+                    "title": "Id location",
+                    "description": "The unique identifier of the location."
+                },
+                "quantity": {
+                    "type": "number",
+                    "title": "Quantity",
+                    "description": "The quantity of product in the trailer after the operation."
+                },
+                "id_trailer": {
+                    "type": "integer",
+                    "title": "Id trailer",
+                    "description": "The unique identifier of the trailer."
+                },
+                "capacity": {
+                    "type": "number",
+                    "title": "Trailer's capacity",
+                    "description": "The capacity of the trailer."
+                }
+            },
+            "required": ["id_shift", "id_location", "quantity"],
+            "additionalProperties": false
+        },
+        "c_0607_inventory_trailer_final_inventory": {
+            "type": "array",
+            "title": "Incoherent final inventory",
+            "description": "Table with information about the shifts whose final inventory is incoherent with their calculated final inventory. (C07). Read 'Shift {Id shift}'s final inventory is incoherent with its operations.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "final_inventory": {
+                    "type": "number",
+                    "title": "Final inventory",
+                    "description": "The final inventory of the shift, indicated in the solution"
+                },
+                "calculated_final_inventory": {
+                    "type": "number",
+                    "title": "Calculated final inventory",
+                    "description": "The final inventory calculated from the shift's operations"
+                }
+            },
+            "required": ["id_shift", "final_inventory", "calculated_final_inventory"],
+            "additionalProperties": false
+        },
+        "c_0607_inventory_trailer_initial_inventory": {
+            "type": "array",
+            "title": "Incoherent initial inventory",
+            "description": "Table with information about the shifts whose initial inventory is incoherent with the final inventory of the trailer's last shift. (C07). Read 'Shift {Id shift}'s initial inventory is incoherent with trailer {Id trailer}'s last shift.'",
+            "is_warning": false,
+            "properties": {
+                "id_shift": {
+                    "type": "integer",
+                    "title": "Id shift",
+                    "description": "The unique identifier of the shift."
+                },
+                "initial_quantity": {
+                    "type": "number",
+                    "title": "Initial inventory",
+                    "description": "The initial quantity of product in the trailer at the beginning of the shift, indicated in the solution"
+                },
+                "last_shift_final_inventory": {
+                    "type": "number",
+                    "title": "Last shift's final inventory",
+                    "description": "The final inventory of the trailer's previous shift"
+                },
+                "id_trailer": {
+                    "type": "integer",
+                    "title": "Id trailer",
+                    "description": "The unique identifier of the trailer."
+                }
+            },
+            "required": ["id_shift", "initial_quantity", "last_shift_final_inventory", "id_trailer"],
+            "additionalProperties": false
+        },
+        "c_11_quantity_delivered": {
+            "type": "array",
+            "title": "Incoherent operations",
+            "description": "Table with information about the operations that have an incorrect sign. (C11).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "The quantity of product exchanged during the operation."
+                    }
+                },
+                "required": [
+                    "id_shift",
+                    "id_location",
+                    "quantity"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "c_16_customer_tank_exceeds": {
+            "type": "array",
+            "title": "Delivery above tank's capacity",
+            "description": "Table with the information about deliveries that exceed the customer's tank's capacity. (C16). Read 'Operation at location {id_location} on shift {id_shift} is invalid: {quantity} units were delivered, while the customer's capacity is {capacity}.'",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "The quantity of product exchanged during the operation."
+                    },
+                    "capacity": {
+                        "type": "number",
+                        "title": "Tank's capacity",
+                        "description": "The capacity of the customer's tank."
+                    }
+                },
+                "required": ["id_shift", "id_location", "quantity", "capacity"],
+                "additionalProperty": false
+            }
+        },
+        "c_16_customer_tank_too_low": {
+            "type": "array",
+            "title": "Delivery below minimum quantity",
+            "description": "Table with the information about deliveries that are below the customer's minimum quantity for resupplies. (C16). Read 'Operation at location {id_location} on shift {id_shift} is invalid: {quantity} units were delivered, while the customer's minimum allowed quantity is {minimum_quantity}.'",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "The quantity of product exchanged during the operation."
+                    },
+                    "minimum_quantity": {
+                        "type": "number",
+                        "title": "Minimum quantity",
+                        "description": "The minimum quantity for deliveries"
+                    }
+                },
+                "required": ["id_shift", "id_location", "quantity", "minimun_quantity"],
+                "additionalProperty": false
+            }
+        },
+        "driver_and_trailer": {
+            "type": "array",
+            "title": "No driver/trailer",
+            "description": "Table with information about the shifts that don't have a trailer and/or a driver assigned. ",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "missing_driver": {
+                        "type": "boolean",
+                        "title": "Missing driver",
+                        "description": "True if the shift doesn't have a driver."
+                    },
+                    "missing_trailer": {
+                        "type": "boolean",
+                        "title": "Missing trailer",
+                        "description": "True if the shift doesn't have a trailer."
+                    }
+                },
+                "required": ["id_shift", "missing_driver", "missing_trailer"],
+                "additionalProperty": false
+            }
+        },
+        "site_inventory_negative": {
+            "type": "array",
+            "title": "Site inventory negative",
+            "description": "Table containing the information about when customer's have a negative inventory.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    },
+                    "hour": {
+                        "type": "integer",
+                        "title": "Hour",
+                        "description": "The hour of the problem."
+                    },
+                    "inventory": {
+                        "type": "number",
+                        "title": "Inventory",
+                        "description": "The quantity of product in the customer's inventory."
+                    }
+                },
+                "required": ["id_location", "hour", "inventory"],
+                "additionalProperties": false
+            }
+        },
+        "site_inventory_exceeds": {
+            "type": "array",
+            "title": "Site inventory exceeds capacity",
+            "description": "Table containing the information about when customer's have a inventory that exceeds their capacity.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    },
+                    "hour": {
+                        "type": "integer",
+                        "title": "Hour",
+                        "description": "The hour of the problem."
+                    },
+                    "inventory": {
+                        "type": "number",
+                        "title": "Inventory",
+                        "description": "The quantity of product in the customer's inventory."
+                    },
+                    "capacity": {
+                        "type": "number",
+                        "title": "Capacity",
+                        "description": "The capacity of the customer's tank."
+                    }
+                },
+                "required": ["id_location", "hour", "inventory", "capacity"],
+                "additionalProperties": false
+            }
+        },
+        "site_doesnt_exist": {
+            "type": "array",
+            "title": "Non-existent sites",
+            "description": "Table that indicates if some of the locations of the solution are invalid.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location."
+                    }
+                },
+                "required": ["id_location"],
+                "additionalProperties": false
+            }
+        },
+        "res_dr_01_intershift": {
+            "type": "array",
+            "title": "Drivers' intershifts",
+            "description": "Table that contains information about drivers that don't respect minimum duration between two shifts. (DR01). Read 'Driver {id_driver} doesn't respect minInterShiftDuration before shift {id_shift}.'",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "last_shift": {
+                        "type": "integer",
+                        "title": "Id previous shift",
+                        "description": "The unique identifier of the driver's previous shift"
+                    },
+                    "id_driver": {
+                        "type": "integer",
+                        "title": "Id driver",
+                        "description": "The unique identifier of the driver."
+                    },
+                    "duration": {
+                        "type": "number",
+                        "title": "Duration",
+                        "description": "The total duration of the intershift."
+                    },
+                    "minimum_duration": {
+                        "type": "number",
+                        "title": "Min duration",
+                        "description": "The minimum allowed duration of an intershift."
+                    }
+                },
+                "required": ["id_driver", "id_shift", "duration", "minimum_duration"],
+                "additionalProperties": false
+            }
+        },
+        "res_dr_03_max_duration": {
+            "type": "array",
+            "title": "Shifts max duration",
+            "description": "Table that contains information about drivers that don't respect maximum shifts duration. (DR03).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_driver": {
+                        "type": "integer",
+                        "title": "Id driver",
+                        "description": "The unique identifier of the driver."
+                    },
+                    "duration": {
+                        "type": "number",
+                        "title": "Duration",
+                        "description": "The total duration of the shift."
+                    },
+                    "maximum_duration": {
+                        "type": "number",
+                        "title": "Max duration",
+                        "description": "The maximum allowed duration of a shift."
+                    }
+                },
+                "required": ["id_driver", "id_shift", "duration", "maximum_duration"],
+                "additionalProperties": false
+            }
+        },
+        "res_dr_08_driver_TW": {
+            "type": "array",
+            "title": "Driver's TW",
+            "description": "Table that contains information about shifts that don't respect the driver's time windows. (DR08).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_driver": {
+                        "type": "integer",
+                        "title": "Id driver",
+                        "description": "The unique identifier of the driver."
+                    }
+                },
+                "required": ["id_driver", "id_shift"],
+                "additionalProperties": false
+            }
+        },
+        "res_tl_01_shift_overlaps": {
+            "type": "array",
+            "title": "Overlaps trailer's shifts",
+            "description": "Table that contains information about shifts that use the same trailer but overlap. (TL01).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "last_shift": {
+                        "type": "integer",
+                        "title": "Id previous shift",
+                        "description": "The unique identifier of the trailer's previous shift"
+                    },
+                    "id_trailer": {
+                        "type": "integer",
+                        "title": "Id trailer",
+                        "description": "The unique identifier of the trailer"
+                    }
+                },
+                "required": ["id_shift", "last_shift", "id_trailer"],
+                "additionalProperties": false
+            }
+        },
+        "res_tl_03_compatibility_dr_tr": {
+            "type": "array",
+            "title": "Compatibility trailer/driver",
+            "description": "Table that contains information about shifts that have a trailer and a driver that are not compatible. (TL03).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    },
+                    "id_driver": {
+                        "type": "integer",
+                        "title": "Id driver",
+                        "description": "The unique identifier of the driver."
+                    },
+                    "id_trailer": {
+                        "type": "integer",
+                        "title": "Id trailer",
+                        "description": "The unique identifier of the trailer"
+                    }
+                },
+                "required": ["id_shift", "id_driver", "id_trailer"],
+                "additionalProperties": false
+            }
+        },
+        "qs_01_orders_satisfied": {
+            "type": "array",
+            "title": "Orders not satisfied",
+            "description": "Table containing information about customers' orders that have not been satisfied. (QS01).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_customer": {
+                        "type": "integer",
+                        "title": "Id customer",
+                        "description": "The unique identifier of the customer"
+                    },
+                    "num_order": {
+                        "type": "integer",
+                        "title": "Number order",
+                        "description": "The number of the order on the customer's orders list"
+                    }
+                },
+                "required": ["id_customer", "num_order"],
+                "additionalProperties": false
+            }
+        },
+        "qs_02_runouts": {
+            "type": "array",
+            "title": "Run-outs",
+            "description": "Table containing information about customers' experiencing run-outs. (QS02).",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location"
+                    },
+                    "nb_run_outs": {
+                        "type": "integer",
+                        "title": "Number run outs",
+                        "description": "The number of hours the customer experiences run-outs."
+                    }
+                },
+                "required": ["id_customer", "num_order"],
+                "additionalProperties": false
+            }
+        },
+        "qs_03_callins": {
+            "type": "array",
+            "title": "Call-in deliveries",
+            "description": "Table containing information about call-in customers receiving deliveries not related to an order. (QS03). Read 'Operation at call-in customer {id_location} in shift {id_shift} is not related to an order.'",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_location": {
+                        "type": "integer",
+                        "title": "Id location",
+                        "description": "The unique identifier of the location"
+                    },
+                    "id_shift": {
+                        "type": "integer",
+                        "title": "Id shift",
+                        "description": "The unique identifier of the shift."
+                    }
+                },
+                "required": ["id_location", "id_shift"]
+            }
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

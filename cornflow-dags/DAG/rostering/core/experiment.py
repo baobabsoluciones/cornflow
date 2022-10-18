@@ -2,10 +2,12 @@
 
 """
 # Imports from libraries
+import os
 from pytups import SuperDict
 
 # Imports from cornflow libraries
 from cornflow_client import ExperimentCore
+from cornflow_client.core.tools import load_json
 
 # Imports from internal modules
 from .instance import Instance
@@ -13,6 +15,10 @@ from .solution import Solution
 
 
 class Experiment(ExperimentCore):
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+    )
+
     def __init__(self, instance: Instance, solution: Solution = None) -> None:
         ExperimentCore.__init__(self, instance=instance, solution=solution)
         if solution is None:
@@ -37,7 +43,7 @@ class Experiment(ExperimentCore):
             difference_hours_worked=self.check_hours_worked(),
             manager_present=self.check_manager_present(),
             skills_demand=self.check_skills_demand(),
-        )
+        ).vfilter(lambda v: len(v))
 
     def get_objective(self) -> float:
         return self.solution.get_working_hours()
@@ -48,19 +54,19 @@ class Experiment(ExperimentCore):
     def solve(self, options: dict) -> dict:
         raise NotImplementedError()
 
-    def check_slots_without_workers(self) -> dict:
+    def check_slots_without_workers(self) -> list:
         """Checks if there is any time slot where no employees are working"""
         time_slots_open = self.instance.get_opening_time_slots_set()
         time_slots_assigned = self.solution.get_time_slots().to_set()
-        return {k: 1 for k in time_slots_open - time_slots_assigned}
+        return [{"timeslot": k} for k in time_slots_open - time_slots_assigned]
 
-    def check_working_without_opening(self) -> dict:
+    def check_working_without_opening(self) -> list:
         """Checks if there is any time slot where an employee is working but it shouldn't"""
         time_slots_open = self.instance.get_opening_time_slots_set()
         time_slots_assigned = self.solution.get_time_slots().to_set()
-        return {k: 1 for k in time_slots_assigned - time_slots_open}
+        return [{"timeslot": k} for k in time_slots_assigned - time_slots_open]
 
-    def check_hours_worked(self) -> dict:
+    def check_hours_worked(self) -> list:
         """Checks the difference between the hours in the contract and the worked hours for each employee and week"""
         max_slots = self.instance.get_max_working_slots_week()
         worked_slots = self.solution.get_hours_worked_per_week()
@@ -69,9 +75,11 @@ class Experiment(ExperimentCore):
             (worked_slots - max_slots)
             .vapply(self.instance.slot_to_hour)
             .vfilter(lambda v: v)
+            .to_tuplist()
+            .vapply(lambda v: {"week": v[0], "id_employee": v[1], "extra_hours": v[2]})
         )
 
-    def check_manager_present(self) -> dict:
+    def check_manager_present(self) -> list:
         """Checks if there is any time slot where no managers are working"""
         managers = self.instance.get_employees_managers()
         time_slots_managers = (
@@ -83,10 +91,10 @@ class Experiment(ExperimentCore):
         )
 
         time_slots_open = self.instance.get_opening_time_slots_set()
-        return {k: 1 for k in time_slots_open - time_slots_managers}
+        return [{"timeslot": k} for k in time_slots_open - time_slots_managers]
 
-    def check_skills_demand(self) -> dict:
-
+    def check_skills_demand(self) -> list:
+        """Checks if there are any time slot where the skill demand is not covered"""
         ts_employee = self.solution.get_ts_employee()
 
         ts_skill_demand = SuperDict(
@@ -112,4 +120,10 @@ class Experiment(ExperimentCore):
         )
 
         demand_minus_worked = ts_skill_demand - ts_skill_worked
-        return demand_minus_worked.vfilter(lambda v: v > 0)
+        return (
+            demand_minus_worked.vfilter(lambda v: v > 0)
+            .to_tuplist()
+            .vapply(
+                lambda v: {"timeslot": v[0], "id_skill": v[1], "number_missing": v[2]}
+            )
+        )

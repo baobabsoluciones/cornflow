@@ -42,7 +42,8 @@
           "title": "F.O",
           "description": "Objective function"
         }
-      }
+      },
+      "required": []
     }
   },
   "required": [

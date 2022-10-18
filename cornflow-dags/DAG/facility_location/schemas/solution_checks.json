@@ -1,0 +1,197 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "availability": {
+			"type": "array",
+            "title": "Availability",
+            "description": "Table with the id of the suppliers that supplied more product that they theoretically had.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_supplier": {
+                        "type": "string",
+                        "title": "Id supplier",
+                        "description": "The unique identifier of the supplier"
+                    },
+                    "id_product": {
+                        "type": "string",
+                        "title": "Id product",
+                        "description": "The unique identifier of the product"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "The difference between what the capacity of the supplier and what they actually sold"
+                    }
+                },
+                "required": ["id_supplier", "id_product", "quantity"]
+            }
+		},
+        "restricted_flows": {
+            "type": "array",
+            "title": "Restricted flows",
+            "description": "Table with the pairs of nodes where some product is transported while it is forbidden. ",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "origin": {
+                        "type": "string",
+                        "title": "Origin",
+                        "description": "The id of the origin node of the flow"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "title": "Destination",
+                        "description": "The id of the destination node of the flow"
+                    },
+                    "total_flow": {
+                        "type": "number",
+                        "title": "Total flow",
+                        "description": "The total quantity of product transported between those two nodes"
+                    }
+                },
+                "required": ["origin", "destination", "total_flow"]
+            }
+        },
+        "demand": {
+            "type": "array",
+            "title": "Demand",
+            "description": "Table with the clients that don't have their demand covered",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_client": {
+                        "type": "string",
+                        "title": "Id client",
+                        "description": "The unique identifier of the client"
+                    },
+                    "missing_first_doses": {
+                        "type": "number",
+                        "title": "Missing first doses",
+                        "description": "Number of missing first doses"
+                    }
+                },
+                "required": ["id_client", "missing_first_doses"]
+            }
+        },
+        "second_doses": {
+            "type": "array",
+            "title": "Second doses",
+            "description": "Table with the number of missing second doses, per client",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_client": {
+                        "type": "string",
+                        "title": "Id client",
+                        "description": "The unique identifier of the client"
+                    },
+                    "id_product": {
+                        "type": "string",
+                        "title": "Id product",
+                        "description": "The unique identifier of the product"
+                    },
+                    "missing_second_doses": {
+                        "type": "number",
+                        "title": "Missing second doses",
+                        "description": "Number of missing first doses"
+                    }
+                },
+                "required": ["id_client", "missing_second_doses"]
+            }
+        },
+        "warehouse_capacities": {
+            "type": "array",
+            "title": "Warehouses capacities",
+            "description": "Table with the warehouses that stock more than their capacities",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_warehouse": {
+                        "type": "string",
+                        "title": "Id warehouse",
+                        "description": "The unique identifier of the warehouse"
+                    },
+                    "day": {
+                        "type": "string",
+                        "title": "Day",
+                        "description": "The day of the excess"
+                    },
+                    "excess_quantity": {
+                        "type": "string",
+                        "title": "Excess quantity",
+                        "description": "The number of units of product that are in excess"
+                    }
+                },
+                "required": ["id_warehouse", "day", "excess_quantity"]
+            }
+        },
+        "consistency_warehouses": {
+            "type": "array",
+            "title": "Consistency warehouses",
+            "description": "Table with the inconsistencies between the warehouses input and output flows",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_warehouse": {
+                        "type": "string",
+                        "title": "Id warehouse",
+                        "description": "The unique identifier of the warehouse"
+                    },
+                    "day": {
+                        "type": "string",
+                        "title": "Day",
+                        "description": "The day of the inconsistency"
+                    },
+                    "id_product": {
+                        "type": "string",
+                        "title": "Id product",
+                        "description": "The unique identifier of the product"
+                    },
+                    "difference_flow": {
+                        "type": "number",
+                        "title": "Difference flow",
+                        "description": "Difference between in and out flows"
+                    }
+                },
+                "required": ["id_warehouse", "day", "id_product", "difference_flow"]
+            }
+        },
+        "consistency_suppliers": {
+            "type": "array",
+            "title": "Consistency suppliers",
+            "description": "Table with the inconsistencies between what is provided by the suppliers and what is received by the clients",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "day": {
+                        "type": "string",
+                        "title": "Day",
+                        "description": "The day of the inconsistency"
+                    },
+                    "id_product": {
+                        "type": "string",
+                        "title": "Id product",
+                        "description": "The unique identifier of the product"
+                    },
+                    "difference_flow": {
+                        "type": "number",
+                        "title": "Difference flow",
+                        "description": "Difference between sent and received quantities"
+                    }
+                },
+                "required": ["day", "id_product", "difference_flow"]
+            }
+        }
+    },
+    "required": [],
+    "additionalProperties":  false
+}

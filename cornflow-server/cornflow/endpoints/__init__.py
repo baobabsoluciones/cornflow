@@ -19,6 +19,7 @@ from .case import (
 from .dag import (
     DAGDetailEndpoint,
     DAGEndpointManual,
+    DAGCaseEndpoint,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
 )
@@ -29,6 +30,7 @@ from .execution import (
     ExecutionStatusEndpoint,
     ExecutionDataEndpoint,
     ExecutionLogEndpoint,
+    ExecutionRelaunchEndpoint,
 )
 
 from .health import HealthEndpoint
@@ -40,8 +42,11 @@ from .instance import (
     InstanceDataEndpoint,
 )
 
-from .data_check import DataCheckEndpoint
-from .login import LoginOpenAuthEndpoint, LoginEndpoint
+from .data_check import (
+    DataCheckExecutionEndpoint,
+    DataCheckInstanceEndpoint,
+    DataCheckCaseEndpoint,
+)
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
 from .roles import RolesListEndpoint, RoleDetailEndpoint
@@ -70,14 +75,24 @@ resources = [
         resource=InstanceFileEndpoint, urls="/instancefile/", endpoint="instance-file"
     ),
     dict(
+        resource=DataCheckExecutionEndpoint,
+        urls="/data-check/execution/<string:idx>/",
+        endpoint="data-check-execution",
+    ),
+    dict(
+        resource=DataCheckInstanceEndpoint,
+        urls="/data-check/instance/<string:idx>/",
+        endpoint="data-check-instance",
+    ),
+    dict(
+        resource=DataCheckCaseEndpoint,
+        urls="/data-check/case/<int:idx>/",
+        endpoint="data-check-case",
+    ),
+    dict(
         resource=ExecutionDetailsEndpoint,
         urls="/execution/<string:idx>/",
         endpoint="execution-detail",
-    ),
-    dict(
-        resource=DataCheckEndpoint,
-        urls="/data-check/",
-        endpoint="data-check",
     ),
     dict(
         resource=ExecutionStatusEndpoint,
@@ -94,6 +109,11 @@ resources = [
         urls="/execution/<string:idx>/log/",
         endpoint="execution-log",
     ),
+    dict(
+        resource=ExecutionRelaunchEndpoint,
+        urls="/execution/<string:idx>/relaunch/",
+        endpoint="execution-relaunch",
+    ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
@@ -101,6 +121,11 @@ resources = [
         resource=DAGInstanceEndpoint,
         urls="/dag/instance/<string:idx>/",
         endpoint="dag-instance",
+    ),
+    dict(
+        resource=DAGCaseEndpoint,
+        urls="/dag/case/<int:idx>/",
+        endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),

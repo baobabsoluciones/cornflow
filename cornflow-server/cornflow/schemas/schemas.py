@@ -9,6 +9,8 @@ class SchemaOneApp(SchemaListApp):
     instance = fields.Raw(required=True)
     solution = fields.Raw(required=True)
     config = fields.Raw(required=True)
+    instance_checks = fields.Raw(required=True)
+    solution_checks = fields.Raw(required=True)
 
 
 class SchemaRequest(Schema):

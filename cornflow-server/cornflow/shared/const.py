@@ -56,7 +56,7 @@ AIRFLOW_TO_STATE_MAP = dict(
     success=EXEC_STATE_CORRECT,
     running=EXEC_STATE_RUNNING,
     failed=EXEC_STATE_ERROR,
-    queued=EXEC_STATE_RUNNING,
+    queued=EXEC_STATE_QUEUED,
 )
 
 # These codes and names are inherited from flask app builder in order to have the same names and values
