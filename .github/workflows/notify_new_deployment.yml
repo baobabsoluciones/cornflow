@@ -1,0 +1,19 @@
+name: Notify slack channel of new deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  notify:
+    name: Notify slack channel
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Notify slack channel
+      uses: slackapi/slack-github-action@v1.23.0
+      with:
+        slack-message: "A new image of cornflow server is being built and should be deployed in around 30 minutes"
+        channel-id: ${{ secrets.SLACK_CHANNEL }}
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
