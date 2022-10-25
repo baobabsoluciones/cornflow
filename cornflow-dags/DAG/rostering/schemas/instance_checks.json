@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "incoherent_foreign_keys": {
+      "type": "array",
+      "title": "Incoherent foreign keys",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "primary_table": {
+            "type": "string"
+          },
+          "foreign_table": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": ["integer", "string"]
+          }
+        },
+        "required": ["primary_table", "foreign_table", "key", "value"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["incoherent_foreign_keys"]
+}
