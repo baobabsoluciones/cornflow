@@ -11,6 +11,7 @@ from typing import Dict, Tuple
 # Imports from cornflow libraries
 from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
+from .const import INSTANCE_KEYS_RELATION
 
 # Imports from internal modules
 from .tools import (
@@ -28,7 +29,9 @@ class Instance(InstanceCore):
     schema = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
     )
-    schema_checks = get_empty_schema()
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/instance_checks.json")
+    )
 
     def __init__(self, data: dict):
         super().__init__(data)
@@ -64,19 +67,19 @@ class Instance(InstanceCore):
                 for el in data["skill_demand"]
             }
         else:
-            data_p["skill_demand"] = {}
+            data_p["skill_demand"] = SuperDict({})
 
         if data.get("skills"):
             data_p["skills"] = {el["id"]: el for el in data["skills"]}
         else:
-            data_p["skills"] = {}
+            data_p["skills"] = SuperDict({})
 
         if data.get("skills_employees"):
             data_p["skills_employees"] = TupList(data["skills_employees"]).to_dict(
                 result_col=["id_employee"], is_list=True, indices=["id_skill"]
             )
         else:
-            data_p["skills_employees"] = TupList()
+            data_p["skills_employees"] = SuperDict({})
 
         return cls(data_p)
 
@@ -107,6 +110,27 @@ class Instance(InstanceCore):
         self.dates_properties = self._get_dates_properties()
         self.time_slots = self._get_time_slots()
         self.time_slots_properties = self._get_time_slots_properties()
+
+    def check(self) -> dict:
+        return dict(incoherent_foreign_keys=self.check_indexes_coherence())
+
+    def check_indexes_coherence(self) -> list:
+        errors = list()
+        for pk, fk_list in INSTANCE_KEYS_RELATION.items():
+            for fk_table, fk_column in fk_list:
+                fk_values = self._get_property(fk_table, fk_column).values_tl()
+                for fk in fk_values:
+                    if fk not in self._get_property(pk[0], pk[1]).values_tl():
+                        errors.append(
+                            {
+                                "primary_table": pk[0],
+                                "foreign_table": fk_table,
+                                "key": fk_column,
+                                "value": fk,
+                            }
+                        )
+
+        return errors
 
     def _get_weeks(self) -> TupList:
         """

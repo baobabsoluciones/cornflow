@@ -34,9 +34,6 @@ from ..schemas.user import (
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES, AUTH_OID
 
-# Initialize the schema that the endpoint uses
-user_schema = UserSchema()
-
 
 class UserEndpoint(BaseMetaResource):
     """
