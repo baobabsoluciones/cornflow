@@ -129,6 +129,7 @@ class Instance(InstanceCore):
                             }
                         )
 
+        print(errors)
         return errors
 
     def _get_weeks(self) -> TupList:
