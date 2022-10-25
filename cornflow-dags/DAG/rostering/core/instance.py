@@ -116,6 +116,7 @@ class Instance(InstanceCore):
         errors = list()
         for pk, fk_list in INSTANCE_KEYS_RELATION.items():
             for fk_table, fk_column in fk_list:
+                print(pk, fk_table, fk_column)
                 fk_values = self._get_property(fk_table, fk_column).values_tl()
                 for fk in fk_values:
                     if fk not in self._get_property(pk[0], pk[1]).values_tl():
