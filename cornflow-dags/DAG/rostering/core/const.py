@@ -1,6 +1,6 @@
 INSTANCE_KEYS_RELATION = {
     ("employees", "id"): [
-        ("contracts", "employee_id"),
+        ("contracts", "id_employee"),
         ("skills_employees", "id_employee"),
     ],
     ("shifts", "id"): [("contracts", "id_shift")],
