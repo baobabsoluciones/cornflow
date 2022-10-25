@@ -65,19 +65,19 @@ class Instance(InstanceCore):
                 for el in data["skill_demand"]
             }
         else:
-            data_p["skill_demand"] = {}
+            data_p["skill_demand"] = SuperDict({})
 
         if data.get("skills"):
             data_p["skills"] = {el["id"]: el for el in data["skills"]}
         else:
-            data_p["skills"] = {}
+            data_p["skills"] = SuperDict({})
 
         if data.get("skills_employees"):
             data_p["skills_employees"] = TupList(data["skills_employees"]).to_dict(
                 result_col=["id_employee"], is_list=True, indices=["id_skill"]
             )
         else:
-            data_p["skills_employees"] = TupList()
+            data_p["skills_employees"] = SuperDict({})
 
         return cls(data_p)
 
