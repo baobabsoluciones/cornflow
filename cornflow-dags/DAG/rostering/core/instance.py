@@ -29,7 +29,9 @@ class Instance(InstanceCore):
     schema = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/instance.json")
     )
-    schema_checks = get_empty_schema()
+    schema_checks = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/instance_checks.json")
+    )
 
     def __init__(self, data: dict):
         super().__init__(data)
