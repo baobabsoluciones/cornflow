@@ -7,7 +7,7 @@ flask-apispec
 Flask-Bcrypt
 Flask-Compress
 Flask-RESTful
-Flask-SQLAlchemy
+Flask-SQLAlchemy==2.5.1
 ldap3
 marshmallow
 PyJWT
