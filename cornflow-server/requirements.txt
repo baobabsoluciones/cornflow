@@ -10,6 +10,7 @@ flask-cors
 Flask-Migrate
 flask-inflate
 Flask-RESTful
+Flask-SQLAlchemy==2.5.1
 gevent
 greenlet
 gunicorn
