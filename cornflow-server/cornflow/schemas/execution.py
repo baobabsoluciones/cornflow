@@ -17,6 +17,7 @@ class ConfigSchema(Schema):
     msg = fields.Boolean(required=False)
     warmStart = fields.Boolean(required=False)
     timeLimit = fields.Int(required=False)
+    seconds = fields.Int(required=False)
     options = fields.List(fields.Str, required=False, many=True)
     keepFiles = fields.Boolean(required=False)
     gapRel = fields.Float(required=False)
@@ -25,6 +26,7 @@ class ConfigSchema(Schema):
     maxNodes = fields.Int(required=False)
     threads = fields.Int(required=False)
     logPath = fields.Str(required=False)
+    MIPGap = fields.Float(required=False)
 
 
 class ConfigSchemaResponse(ConfigSchema):
