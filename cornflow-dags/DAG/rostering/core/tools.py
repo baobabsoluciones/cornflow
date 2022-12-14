@@ -6,7 +6,7 @@ def get_date_from_string(string: str) -> datetime:
 
 
 def get_date_time_from_string(string: str) -> datetime:
-    return datetime.strptime(string, "%Y-%m-%dT%H:%M")
+    return datetime.strptime(string, "%Y-%m-%dT%H%M")
 
 
 def get_date_string_from_ts(ts: datetime) -> str:
@@ -39,7 +39,7 @@ def get_one_date_time(date: datetime, minutes: float = 0) -> datetime:
 
 def get_time_slot_string(ts: datetime) -> str:
     """Returns the string of a given time slot"""
-    return datetime.strftime(ts, "%Y-%m-%dT%H:%M")
+    return datetime.strftime(ts, "%Y-%m-%dT%H%M")
 
 
 def get_week_from_string(string: str) -> int:
