@@ -72,6 +72,16 @@ class Instance(InstanceCore):
         return self.get_bin_width() * self.get_bin_height()
 
     def get_cuts(self):
+        total_item_area = sum(
+            [
+                self.get_item_width(item) * self.get_item_height(item)
+                for item in self.get_items()
+            ]
+        )
+        if total_item_area <= self.get_bin_area():
+            print(f"No area valid cuts exist")
+            return [], 0
+
         t = datetime.utcnow()
         cuts = {
             1: self.get_biggest_cut(),

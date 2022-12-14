@@ -25,7 +25,8 @@
         "valid": {
           "type": "boolean"
         }
-      }
+      },
+      "required": ["valid"]
     }
   },
   "required": [
