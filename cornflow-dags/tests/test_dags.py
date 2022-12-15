@@ -269,3 +269,4 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
         from DAG.two_dimension_bin_packing import TwoDimensionBinPackingProblem
 
         self.app = TwoDimensionBinPackingProblem()
+        self.config.update(dict(solver="right_corner.cbc"))
