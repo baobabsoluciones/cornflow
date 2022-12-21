@@ -571,6 +571,17 @@ class LoginTestCases:
             self.assertEqual(200, self.response.status_code)
             self.assertEqual(str, type(self.response.json["token"]))
 
+        def test_failed_log_in(self):
+            payload = self.data
+            self.response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+
+            self.assertEqual(400, self.response.status_code)
+
         def test_validation_error(self):
             payload = self.data
             payload["email"] = "test"
