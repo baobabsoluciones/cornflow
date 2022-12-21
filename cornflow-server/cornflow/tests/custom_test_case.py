@@ -558,17 +558,6 @@ class LoginTestCases:
             db.session.remove()
             db.drop_all()
 
-        def failed_log_in(self):
-            payload = self.data
-            self.response = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            )
-
-            self.assertEqual(400, self.response.status_code)
-
         def test_successful_log_in(self):
             payload = self.data
 
