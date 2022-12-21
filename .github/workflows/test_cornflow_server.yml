@@ -123,6 +123,7 @@ jobs:
         LDAP_USE_TLS: False
         LDAP_USERNAME_ATTRIBUTE: cn
         LDAP_USER_BASE: ou=users,dc=example,dc=org
+        LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
         LDAP_EMAIL_ATTRIBUTE: mail
         LDAP_USER_OBJECT_CLASS: inetOrgPerson
         LDAP_GROUP_ATTRIBUTE: cn
@@ -131,6 +132,7 @@ jobs:
         LDAP_GROUP_TO_ROLE_VIEWER: viewers
         LDAP_GROUP_TO_ROLE_PLANNER: planners
         LOG_LEVEL: 30
+        CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
       run: | 
         coverage run -a --source=./cornflow/ -m unittest cornflow/tests/unit/test_commands.py
