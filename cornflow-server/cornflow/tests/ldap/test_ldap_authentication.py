@@ -62,7 +62,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         user_base = current_app.config["LDAP_SERVICE_BASE"]
         current_app.config["LDAP_SERVICE_BASE"] = user_base
         self.data = {"username": "cornflow", "password": "cornflow1234"}
-        super().test_failed_log_in()
+        super().failed_log_in()
         current_app.config["LDAP_SERVICE_BASE"] = service_base
 
     def test_user_table_registration(self):
