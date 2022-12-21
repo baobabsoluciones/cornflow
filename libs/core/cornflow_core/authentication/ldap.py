@@ -43,11 +43,11 @@ class LDAPBase:
         :return: the dn string
         :rtype: string
         """
-        return "%s=%s,%s" % (
-            self.config["LDAP_USERNAME_ATTRIBUTE"],
-            user,
-            self.config["LDAP_USER_BASE"],
-        )
+        if user == self.config["CORNFLOW_SERVICE_USER"]:
+            base = self.config["LDAP_SERVICE_BASE"]
+        else:
+            base = self.config["LDAP_USER_BASE"]
+        return f"{self.config['LDAP_USERNAME_ATTRIBUTE']}={user},{base}"
 
     def get_user_attribute(self, user, attribute):
         """
