@@ -19,6 +19,7 @@ class DefaultConfig(object):
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 30))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
+    CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
@@ -32,6 +33,7 @@ class DefaultConfig(object):
     LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD", "admin")
     LDAP_USERNAME_ATTRIBUTE = os.getenv("LDAP_USERNAME_ATTRIBUTE", "cn")
     LDAP_USER_BASE = os.getenv("LDAP_USER_BASE", "ou=users,dc=example,dc=org")
+    LDAP_SERVICE_BASE = os.getenv("LDAP_SERVICE_BASE", LDAP_USER_BASE)
     LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE", "mail")
     LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS", "inetOrgPerson")
 

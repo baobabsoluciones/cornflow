@@ -35,6 +35,12 @@ objectclass: organizationalUnit
 objectclass: top
 ou: users
 
+# Entry:
+dn: ou=service,dc=example,dc=org
+objectclass: organizationalUnit
+objectclass: top
+ou: service
+
 
 #
 # LDAP Groups
@@ -65,7 +71,7 @@ objectclass: posixGroup
 objectclass: top
 
 # Entry:
-dn: cn=services,ou=groups,dc=example,dc=org
+dn: cn=services,ou=service,dc=example,dc=org
 cn: services
 gidnumber: 503
 memberuid: cornflow
@@ -121,10 +127,10 @@ uidnumber: 1002
 userpassword: planner1234
 
 # Entry:
-dn: cn=cornflow,ou=users,dc=example,dc=org
+dn: cn=cornflow,ou=service,dc=example,dc=org
 cn:  cornflow
 gidnumber: 503
-homedirectory: /home/users/cornflow
+homedirectory: /home/service/cornflow
 mail: cornflow@example.org
 objectclass: inetOrgPerson
 objectclass: posixAccount

@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow-core",
-    version="0.0.8",
+    version="0.1.0",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="REST API flask backend components used by cornflow and other REST APIs",
@@ -21,7 +21,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
     ],
     python_requires=">=3.7",
     include_package_data=True,
