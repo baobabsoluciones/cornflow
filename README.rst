@@ -1,8 +1,9 @@
 Cornflow
 =========
 
-.. image:: https://github.com/baobabsoluciones/cornflow/workflows/docs/badge.svg?style=for-the-badge
-    :target: https://github.com/baobabsoluciones/cornflow/actions
+.. image:: https://img.shields.io/github/actions/workflow/status/baobabsoluciones/cornflow/build_docs.yml?label=docs&logo=github&style=for-the-badge
+   :alt: GitHub Workflow Status
+   :target: https://github.com/baobabsoluciones/cornflow/actions
 
 .. image:: https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&style=for-the-badge
    :alt: PyPI
