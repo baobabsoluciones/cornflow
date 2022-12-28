@@ -227,7 +227,7 @@ class Rostering(BaseDAGTests.SolvingTests):
         from DAG.rostering import Rostering
 
         self.app = Rostering()
-        self.config.update(dict(solver="mip"))
+        self.config.update(dict(solver="mip.PULP_CBC_CMD"))
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
