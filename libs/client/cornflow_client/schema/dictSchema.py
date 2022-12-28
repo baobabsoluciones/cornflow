@@ -209,6 +209,7 @@ class DictSchema:
             required=(item[0] in required_list),
             allow_none=("null" in item[1]["type"]),
             many=False,
+            strict=True,
         )
         return d
 
