@@ -61,11 +61,14 @@ PYOMO_STOP_MAPPING = {
     "minFunctionValue": STATUS_UNDEFINED,
     "minStepLength": STATUS_UNDEFINED,
     "other": STATUS_UNDEFINED,
+    "intermediateNonInteger": STATUS_TIME_LIMIT,
+    "feasible": STATUS_TIME_LIMIT,
+    "noSolution": STATUS_TIME_LIMIT,
 }
 
 PYOMO_STATUS_MAPPING = {
     "ok": SOLUTION_STATUS_FEASIBLE,
-    "warning": SOLUTION_STATUS_FEASIBLE,
+    "warning": SOLUTION_STATUS_INFEASIBLE,
     "error": SOLUTION_STATUS_INFEASIBLE,
     "aborted": SOLUTION_STATUS_INFEASIBLE,
     "unknown": SOLUTION_STATUS_INFEASIBLE,
