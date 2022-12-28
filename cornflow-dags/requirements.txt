@@ -11,3 +11,4 @@ openpyxl
 pyomo
 acopy
 tsplib95
+matplotlib

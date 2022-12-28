@@ -22,7 +22,7 @@ class BaseDAGTests:
     class SolvingTests(unittest.TestCase):
         def setUp(self) -> None:
             self.app = None
-            self.config = SuperDict(msg=False, timeLimit=1)
+            self.config = SuperDict(msg=False, timeLimit=1, seconds=1)
 
         @property
         def app(self) -> ApplicationCore:
@@ -260,3 +260,13 @@ class PuLP(BaseDAGTests.SolvingTests):
 
         self.app = PuLP()
         self.config.update(dict(solver="PULP_CBC_CMD"))
+        self.config.pop("seconds")
+
+
+class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.two_dimension_bin_packing import TwoDimensionBinPackingProblem
+
+        self.app = TwoDimensionBinPackingProblem()
+        self.config.update(dict(solver="right_corner.cbc"))
