@@ -7,8 +7,18 @@ These endpoints hve different access url, but manage the same data entities
 # Import from libraries
 from cornflow_client.airflow.api import Airflow, get_schema
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue
-from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
+from cornflow_core.shared import (
+    validate_and_continue,
+    jsonschema_validate,
+    marshmallow_validate_and_continue,
+    json_schema_validate,
+)
+from cornflow_client.constants import (
+    INSTANCE_SCHEMA,
+    SOLUTION_SCHEMA,
+    BadInstance,
+    CONFIG_SCHEMA,
+)
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 import logging as log
@@ -42,7 +52,7 @@ from ..shared.const import (
     EXEC_STATE_QUEUED,
 )
 from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist
+from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
 from cornflow_core.compress import compressed
 
 
@@ -103,7 +113,7 @@ class ExecutionEndpoint(BaseMetaResource):
         if kwargs.get("data") is not None:
             # Get solution schema and validate it
             marshmallow_obj = get_schema(config, kwargs["schema"], "solution")
-            validate_and_continue(marshmallow_obj(), kwargs["data"])
+            marshmallow_validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
@@ -136,13 +146,37 @@ class ExecutionEndpoint(BaseMetaResource):
         schema = execution.schema
         schema_info = af_client.get_dag_info(schema)
 
-        # Get dag config schema and validate it
-        marshmallow_obj = get_schema(config, schema, "config")
-        validate_and_continue(marshmallow_obj(), kwargs["config"])
+        # Validate config before running the dag
+        config_schema = af_client.get_one_schema(schema, CONFIG_SCHEMA)
+        config_errors = json_schema_validate(config_schema, kwargs["config"])
+        if config_errors:
+            execution.update_state(
+                EXEC_STATE_ERROR_START,
+                message="The execution could not be run because the config does not comply with the json schema. "
+                "Check the log for more details",
+            )
+            execution.update_log_txt(f"{config_errors}")
+            raise InvalidData(payload=config_errors)
 
-        # Validate that instance and dag_name are compatible
-        marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
-        validate_and_continue(marshmallow_obj(), instance.data)
+        # # Get dag config schema and validate it
+        # marshmallow_obj = get_schema(config, schema, "config")
+        # validate_and_continue(marshmallow_obj(), kwargs["config"])
+
+        # Validate instance data before running the dag
+        instance_schema = af_client.get_one_schema(schema, INSTANCE_SCHEMA)
+        instance_errors = json_schema_validate(instance_schema, instance.data)
+        if instance_errors:
+            execution.update_state(
+                EXEC_STATE_ERROR_START,
+                message="The execution could not be run because the instance data does not "
+                "comply with the json schema. Check the log for more details",
+            )
+            execution.update_log_txt(f"{instance_errors}")
+            raise InvalidData(payload=instance_errors)
+
+        # # Validate that instance and dag_name are compatible
+        # marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
+        # validate_and_continue(marshmallow_obj(), instance.data)
 
         info = schema_info.json()
         if info["is_paused"]:
