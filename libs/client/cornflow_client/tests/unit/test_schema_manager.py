@@ -74,6 +74,7 @@ class TestSchemaManager(TestCase):
                 "required": True,
                 "allow_none": False,
                 "many": False,
+                "strict": True,
             },
         )
         self.assertEqual(
