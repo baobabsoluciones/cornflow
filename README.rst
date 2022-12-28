@@ -1,22 +1,19 @@
 Cornflow
 =========
 
-.. image:: https://github.com/baobabsoluciones/cornflow/workflows/build/badge.svg?style=svg
+.. image:: https://github.com/baobabsoluciones/cornflow/workflows/docs/badge.svg?style=for-the-badge
     :target: https://github.com/baobabsoluciones/cornflow/actions
 
-.. image:: https://github.com/baobabsoluciones/cornflow/workflows/docs/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/cornflow/actions
-
-.. image:: https://github.com/baobabsoluciones/cornflow/workflows/integration/badge.svg?style=svg
-    :target: https://github.com/baobabsoluciones/cornflow/actions
-
-.. image:: https://img.shields.io/pypi/v/cornflow-client.svg?style=svg
+.. image:: https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&style=for-the-badge
+   :alt: PyPI
    :target: https://pypi.python.org/pypi/cornflow-client
 
-.. image:: https://img.shields.io/pypi/pyversions/cornflow-client.svg?style=svg
-   :target: https://pypi.python.org/pypi/cornflow-client
+.. image:: https://img.shields.io/pypi/v/cornflow-core?label=cornflow-core&style=for-the-badge
+  :alt: PyPI
+  :target: https://pypi.python.org/pypi/cornflow-core
 
-.. image:: https://img.shields.io/badge/License-Apache2.0-blue
+.. image:: https://img.shields.io/pypi/l/cornflow-client?color=blue&style=for-the-badge
+  :alt: PyPI - License
 
 Cornflow is a collection of projects (being this a monorepo) that allow for the rapid prototyping and deployment of optimization-based applications. Contrary to other existing deployment servers, Cornflow is centered around the applications and the problems, not in the techniques. It offers several other advantages such as being completely free (as in freedom) and very flexible.
 
