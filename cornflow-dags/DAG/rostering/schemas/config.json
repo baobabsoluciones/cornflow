@@ -4,7 +4,7 @@
   "properties": {
     "solver": {
       "type": "string",
-      "enum": ["mip"],
+      "enum": ["mip", "mip.PULP_CBC_CMD", "mip.GUROBI_CMD"],
       "default": "mip"
     },
     "timeLimit": {

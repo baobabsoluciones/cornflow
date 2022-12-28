@@ -50,15 +50,19 @@ class MipModel(Experiment):
         self.create_variables()
         # Constraints:
         model = self.create_constraints(model)
-        # print(model)
+
+        solver_name = options.pop("solver")
+        if "." in solver_name:
+            prefix, solver_name = solver_name.split(".")
+        else:
+            prefix = "mip"
+            solver_name = "PULP_CBC_CMD"
+
+        solver = pl.getSolver(solver_name, **options)
+        options["solver"] = f"{prefix}.{solver_name}"
 
         # Solver and solve
-        mat_solver = pl.PULP_CBC_CMD(
-            gapRel=0.001,
-            timeLimit=options.get("timeLimit", 240),
-            msg=options.get("msg", False),
-        )
-        status = model.solve(mat_solver)
+        status = model.solve(solver)
 
         # Check status
         if model.sol_status not in [pl.LpSolutionIntegerFeasible, pl.LpSolutionOptimal]:
