@@ -90,7 +90,6 @@ class DictSchema:
                     "type": self._get_ref(item),
                     "many": False,
                     "required": (name in required_list),
-                    "strict": True,
                 }
             else:
                 print(f"\nType missing for item: {name}")
@@ -210,6 +209,7 @@ class DictSchema:
             required=(item[0] in required_list),
             allow_none=("null" in item[1]["type"]),
             many=False,
+            strict=True,
         )
         return d
 
