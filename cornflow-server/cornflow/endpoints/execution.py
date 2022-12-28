@@ -9,14 +9,11 @@ from cornflow_client.airflow.api import Airflow, get_schema
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import (
     validate_and_continue,
-    jsonschema_validate,
     marshmallow_validate_and_continue,
     json_schema_validate,
 )
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
-    SOLUTION_SCHEMA,
-    BadInstance,
     CONFIG_SCHEMA,
 )
 from flask import request, current_app
@@ -26,7 +23,6 @@ import logging as log
 # Import from internal modules
 from ..models import InstanceModel, ExecutionModel
 from ..schemas.execution import (
-    ExecutionSchema,
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
     ExecutionDataEndpointResponse,
