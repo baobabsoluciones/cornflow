@@ -3,6 +3,7 @@
 """
 
 # Global imports
+import logging as log
 from functools import wraps
 
 from cornflow_core.authentication import BaseAuth
@@ -86,7 +87,13 @@ class Auth(BaseAuth):
             )
 
         action_id = PERMISSION_METHOD_MAP[method]
-        view_id = ViewBaseModel.query.filter_by(url_rule=url).first().id
+        try:
+            view_id = ViewBaseModel.query.filter_by(url_rule=url).first().id
+        except AttributeError:
+            log.error('The permission for this endpoint is not in the database.')
+            raise NoPermission(
+                error="You do not have permission to access this endpoint", status_code=403
+            )
 
         for role in user_roles:
             has_permission = PermissionViewRoleBaseModel.get_permission(
