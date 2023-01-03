@@ -38,7 +38,7 @@ class DefaultConfig(object):
     LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS", "inetOrgPerson")
     LDAP_GROUP_OBJECT_CLASS = os.getenv("LDAP_GROUP_OBJECT_CLASS", "groupOfNames")
     LDAP_GROUP_ATTRIBUTE = os.getenv("LDAP_GROUP_ATTRIBUTE", "cn")
-    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE", "ou=groups,dc=example,dc=org")
+    LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE", "dc=example,dc=org")
     LDAP_GROUP_TO_ROLE_SERVICE = os.getenv("LDAP_GROUP_TO_ROLE_SERVICE", "service")
     LDAP_GROUP_TO_ROLE_ADMIN = os.getenv("LDAP_GROUP_TO_ROLE_ADMIN", "administrators")
     LDAP_GROUP_TO_ROLE_VIEWER = os.getenv("LDAP_GROUP_TO_ROLE_VIEWER", "viewers")
