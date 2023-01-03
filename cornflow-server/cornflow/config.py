@@ -36,7 +36,6 @@ class DefaultConfig(object):
     LDAP_SERVICE_BASE = os.getenv("LDAP_SERVICE_BASE", LDAP_USER_BASE)
     LDAP_EMAIL_ATTRIBUTE = os.getenv("LDAP_EMAIL_ATTRIBUTE", "mail")
     LDAP_USER_OBJECT_CLASS = os.getenv("LDAP_USER_OBJECT_CLASS", "inetOrgPerson")
-
     LDAP_GROUP_OBJECT_CLASS = os.getenv("LDAP_GROUP_OBJECT_CLASS", "posixGroup")
     LDAP_GROUP_ATTRIBUTE = os.getenv("LDAP_GROUP_ATTRIBUTE", "cn")
     LDAP_GROUP_BASE = os.getenv("LDAP_GROUP_BASE", "ou=groups,dc=example,dc=org")
