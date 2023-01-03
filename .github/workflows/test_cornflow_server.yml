@@ -117,7 +117,7 @@ jobs:
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
         LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
-        LDAP_GROUP_OBJECT_CLASS: posixGroup
+        LDAP_GROUP_OBJECT_CLASS: groupOfNames
         LDAP_PROTOCOL_VERSION: 3
         LDAP_BIND_DN: cn=admin,dc=example,dc=org
         LDAP_USE_TLS: False
