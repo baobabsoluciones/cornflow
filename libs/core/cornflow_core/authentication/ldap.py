@@ -101,7 +101,7 @@ class LDAPBase:
         group_search = self.config["LDAP_GROUP_BASE"]
 
         search_filter = "(&(objectClass={})(member={}))".format(
-            self.config["LDAP_GROUP_OBJECT_CLASS"], user
+            self.config["LDAP_GROUP_OBJECT_CLASS"], user_search
         )
         conn.search(group_search, search_filter=search_filter, attributes=["cn"])
         if not len(conn.entries):
