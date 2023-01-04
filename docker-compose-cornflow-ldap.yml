@@ -84,7 +84,7 @@ services:
       - 389:389
       - 636:636
     volumes:
-      - ./airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
+      - ./cornflow-server/airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
     environment: 
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
 

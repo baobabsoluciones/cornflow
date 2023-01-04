@@ -99,9 +99,9 @@ class LDAPBase:
         conn = self.get_bound_connection()
         user_search = self.get_dn_from_user(user)
         group_search = self.config["LDAP_GROUP_BASE"]
-        # TODO: memberUid is not universal. For some objectClass it's "member"
-        search_filter = "(&(objectClass={})(memberUid={}))".format(
-            self.config["LDAP_GROUP_OBJECT_CLASS"], user
+
+        search_filter = "(&(objectClass={})(member={}))".format(
+            self.config["LDAP_GROUP_OBJECT_CLASS"], user_search
         )
         conn.search(group_search, search_filter=search_filter, attributes=["cn"])
         if not len(conn.entries):
