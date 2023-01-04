@@ -59,7 +59,7 @@ class ExecutionSchema(Schema):
 
 
 class ExecutionRequest(Schema):
-    config = fields.Nested(ConfigSchema, required=True)
+    config = fields.Raw(required=True)
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
