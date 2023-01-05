@@ -146,6 +146,7 @@ jobs:
       run: |
         coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
         coverage report -m
+        coverage xml
       env:
         FLASK_ENV: testing
         OPEN_DEPLOYMENT: 1
