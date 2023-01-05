@@ -47,6 +47,7 @@ from .data_check import (
     DataCheckInstanceEndpoint,
     DataCheckCaseEndpoint,
 )
+from .licenses import LicensesEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
 from .roles import RolesListEndpoint, RoleDetailEndpoint
@@ -198,6 +199,11 @@ resources = [
         urls="/user/recover-password/",
         endpoint="recover-password",
     ),
+    dict(
+        resource=LicensesEndpoint,
+        urls="/licences/",
+        endpoint="licences",
+    )
 ]
 
 if len(external_resources):
