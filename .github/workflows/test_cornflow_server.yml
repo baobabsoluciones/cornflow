@@ -154,3 +154,6 @@ jobs:
         LOG_LEVEL: 30
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v3
+      with:
+        flags: server-tests
+        name: cornflow-tests
