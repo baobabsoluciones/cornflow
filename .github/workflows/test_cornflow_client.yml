@@ -85,7 +85,7 @@ jobs:
           source afvenv/bin/activate
           AIRFLOW_VERSION=2.2.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-          CLIENT_BRANCH="${{github.head_ref}}"
+          CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           python -m pip install -U orloge pulp
@@ -113,7 +113,7 @@ jobs:
           python -m venv cfvenv
           source cfvenv/bin/activate
           python -m pip install -U -r requirements.txt
-          CLIENT_BRANCH="${{github.head_ref}}"
+          CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
           flask db upgrade
