@@ -7,6 +7,14 @@ on:
       - 'libs/client/**'
       - '!libs/client/README.rst'
       - '!libs/client/setup.py'
+  push:
+    branches:
+      - master
+    paths:
+      - 'libs/client/**'
+      - '!libs/client/README.rst'
+      - '!libs/client/setup.py'
+
 
 jobs:
   unit:
@@ -135,3 +143,8 @@ jobs:
         run: |
           coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
           coverage report -m
+          coverage xml
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: client-tests
