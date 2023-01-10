@@ -7,6 +7,13 @@ on:
       - 'cornflow-server/**'
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
+  push:
+    branches:
+      - master
+    paths: 
+      - 'cornflow-server/**'
+      - '!cornflow-server/docs/**'
+      - '!cornflow-server/README.rst'
 
 jobs:
   testing:
@@ -156,4 +163,4 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         flags: server-tests
-        name: cornflow-tests
+        name: cornflow
