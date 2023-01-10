@@ -19,7 +19,7 @@ class LicensesEndpoint(BaseMetaResource):
 
     @doc(
         description="Get list of all the libraries and their license information",
-        tags=["None"],
+        tags=["Licenses"],
     )
     @authenticate(auth_class=Auth())
     def get(self):
