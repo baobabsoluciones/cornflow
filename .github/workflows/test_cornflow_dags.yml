@@ -85,4 +85,3 @@ jobs:
       uses : codecov/codecov-action@v3
       with:
         flags: dags-tests
-        name: dags
