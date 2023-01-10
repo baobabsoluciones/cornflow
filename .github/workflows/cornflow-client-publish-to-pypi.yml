@@ -37,10 +37,16 @@ jobs:
       with:
         password: ${{ secrets.pypi_password }}
         packages_dir: libs/client/dist/
+    - name: Get version number
+      uses: jungwinter/split@v2
+      id: split
+      with:
+        msg : ${{ github.ref_name}}
+        separator: "t"
     - name: Notify slack channel
       uses: slackapi/slack-github-action@v1.23.0
       with:
-        slack-message: "A new version of cornflow client (${{ github.ref_name }}) has been deployed"
+        slack-message: "A new version of cornflow client (v${{ steps.split.outputs._1 }}) has been deployed"
         channel-id: ${{ secrets.SLACK_CHANNEL }}
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}

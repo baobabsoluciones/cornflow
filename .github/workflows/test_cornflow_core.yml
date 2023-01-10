@@ -7,6 +7,13 @@ on:
       - 'libs/core/**'
       - '!libs/core/README.rst'
       - '!libs/core/LICENSE'
+  push:
+    branches:
+      - master
+    paths:
+      - 'libs/core/**'
+      - '!libs/core/README.rst'
+      - '!libs/core/LICENSE'
 
 jobs:  
   testing:
@@ -36,3 +43,7 @@ jobs:
       run: |
         coverage run --source=./cornflow_core/ --omit="*/tests/*" -m unittest discover -s cornflow_core/tests 
         coverage report -m
+    - name: Upload coverage to codecov
+      uses: codecov/codecov-action@v3
+      with:
+        flags: core-tests
