@@ -90,6 +90,89 @@ PULP_STATUS_MAPPING = {
     pl.LpStatusUndefined: STATUS_UNDEFINED,
 }
 
+PYOMO_CBC_TRANSLATING_MAPPING = {
+    ('bar_iter_limit', 'pyomo', 'cbc') : 'barr' ,
+    ('best_obj_stop', 'pyomo', 'cbc') : 'primalT' ,
+    ('cutoff', 'pyomo', 'cbc') : 'cuts' ,
+    ('iteration_limit', 'pyomo', 'cbc') : 'maxIt' ,
+    ('solution_limit', 'pyomo', 'cbc') : 'maxSaved' ,
+    ('time_limit', 'pyomo', 'cbc') : 'sec' ,
+    ('mip_gap', 'pyomo', 'cbc') : 'allow' ,
+    ('optimality_tol', 'pyomo', 'cbc') : 'dualT' ,
+    ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
+    ('heuristics', 'pyomo', 'cbc') : 'heur' ,
+}
+
+PULP_CBC_TRANSLATING_MAPPING = {
+    ('is_mip', 'pulp', 'cbc') : 'mip' ,
+    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
+    ('cutoff', 'pulp', 'cbc') : 'cuts' ,
+    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+    ('threads', 'pulp', 'cbc') : 'threads' ,
+    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
+}
+
+# Considered Termination, Tolerance and MIP
+PYOMO_GUROBI_TRANSLATING_MAPPING = {
+    ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
+    ('best_obj_stop', 'pyomo', 'gurobi') : 'BestObjStop' ,
+    ('cutoff', 'pyomo', 'gurobi') : 'Cutoff' ,
+    ('iteration_limit', 'pyomo', 'gurobi') : 'IterationLimit' ,
+    ('mem_limit', 'pyomo', 'gurobi') : 'MemLimit' ,
+    ('solution_limit', 'pyomo', 'gurobi') : 'SolutionLimit' ,
+    ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
+    ('mip_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
+    ('optimality_tol', 'pyomo', 'gurobi') : 'OptimalityTol' ,
+    ('branch_dir', 'pyomo', 'gurobi') : 'BranchDir' ,
+    ('pump_passes', 'pyomo', 'gurobi') : 'PumpPasses' ,
+    ('heuristics', 'pyomo', 'gurobi') : 'Heuristics' ,
+    ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
+    ('threads', 'pyomo', 'gurobi') : 'threads' ,
+}
+
+PULP_GUROBI_TRANSLATING_MAPPING = {
+    ('is_mip', 'pulp', 'cbc') : 'mip' ,
+    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+}
+
+PYOMO_SCIP_TRANSLATING_MAPPING = {
+    ('bar_tol', 'pyomo', 'cbc') : 'numerics/barrierconvtol' ,
+    ('cutoff_breaker', 'pyomo', 'cbc') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
+    ('lp_iteration_limit', 'pyomo', 'cbc') : 'lp/iterlim' ,
+    ('mem_limit', 'pyomo', 'cbc') : 'limits/memory' ,
+    ('solution_limit', 'pyomo', 'cbc') : 'limits/maxsol' ,
+    ('time_limit', 'pyomo', 'cbc') : 'limits/time' ,
+    ('primal-dual_gap', 'pyomo', 'cbc') : 'limits/gap' ,
+    ('lp_optimality_tol', 'pyomo', 'cbc') : 'numerics/lpfeastol' ,
+    ('pump_passes', 'pyomo', 'cbc') : 'heuristics/feaspump/maxdepth' ,
+    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
+    ('threads', 'pyomo', 'cbc') : 'threads' ,
+}
+
+PULP_SCIP_TRANSLATING_MAPPING = {
+    ('is_mip', 'pulp', 'cbc') : 'mip' ,
+    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
+    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+    ('threads', 'pulp', 'cbc') : 'threads' ,
+    ('max_nodes', 'pyomo', 'cbc') : 'maxNodes' ,
+}
+
+PYOMO_HIGHS_TRANSLATING_MAPPING = {
+    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
+    ('parallel', 'pyomo', 'cbc') : 'parallel' ,
+    ('crossover', 'pyomo', 'cbc') : 'run_crossover' ,
+    ('time_limit', 'pyomo', 'cbc') : 'time_limit' ,
+}
+
+PULP_HIGHS_TRANSLATING_MAPPING = {
+    ('is_mip', 'pulp', 'cbc') : 'mip' ,
+    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
+    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+    ('threads', 'pulp', 'cbc') : 'threads' ,
+}
+
+
+
 
 class AirflowError(Exception):
     status_code = 400
