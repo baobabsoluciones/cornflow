@@ -53,8 +53,8 @@ class TestCornflowClientUser(TestCase):
         response = self.client.sign_up(
             "test_username", "test_username@cornflow.org", "TestPassword2!"
         )
-        self.assertIn("id", response.json().keys())
-        self.assertIn("token", response.json().keys())
+        self.assertIn("id", response.keys())
+        self.assertIn("token", response.keys())
         self.assertEqual(201, response.status_code)
 
     def test_create_instance(self):
@@ -542,11 +542,11 @@ class TestCornflowClientAdmin(TestCase):
 
         items = ["id", "first_name", "last_name", "username", "email"]
         for item in items:
-            self.assertIn(item, response.json().keys())
+            self.assertIn(item, response.keys())
 
-        self.assertEqual(self.base_user_id, response.json()["id"])
-        self.assertEqual("user", response.json()["username"])
-        self.assertEqual("user@cornflow.org", response.json()["email"])
+        self.assertEqual(self.base_user_id, response["id"])
+        self.assertEqual("user", response["username"])
+        self.assertEqual("user@cornflow.org", response["email"])
 
 
 class TestCornflowClientService(TestCase):

@@ -33,7 +33,7 @@ def _get_file(relative_path):
 
 
 # Testing suit classes
-class TestCornflowClientUser(TestCase):
+class TestRawCornflowClientUser(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.raw.login("user", "UserPassword1!")
@@ -55,7 +55,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_sign_up(self):
         response = self.client.raw.sign_up(
-            "test_username", "test_username@cornflow.org", "TestPassword2!"
+            "test_username_2", "test_username_2@cornflow.org", "TestPassword2!"
         )
         data = response.json()
         self.assertIn("id", data.keys())
@@ -570,7 +570,7 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(schema, read_schemas)
 
 
-class TestCornflowClientAdmin(TestCase):
+class TestRawCornflowClientAdmin(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.login("admin", "Adminpassword1!")
@@ -600,7 +600,7 @@ class TestCornflowClientAdmin(TestCase):
         self.assertEqual("user@cornflow.org", response.json()["email"])
 
 
-class TestCornflowClientService(TestCase):
+class TestRawCornflowClientService(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.login("airflow", "Airflow_test_password1")
@@ -676,7 +676,7 @@ class TestCornflowClientService(TestCase):
     def test_post_deployed_dag(self):
 
         response = self.client.raw.create_deployed_dag(
-            name="test_dag", description="test_dag_description"
+            name="test_dag_2", description="test_dag_2_description"
         )
         self.assertEqual(response.status_code, 200)
         response = response.json()
