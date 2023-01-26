@@ -678,12 +678,12 @@ class TestRawCornflowClientService(TestCase):
         response = self.client.raw.create_deployed_dag(
             name="test_dag_2", description="test_dag_2_description"
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         response = response.json()
 
         items = ["id", "description"]
 
         for item in items:
             self.assertIn(item, response.keys())
-        self.assertEqual("test_dag", response["id"])
-        self.assertEqual("test_dag_description", response["description"])
+        self.assertEqual("test_dag_2", response["id"])
+        self.assertEqual("test_dag_2_description", response["description"])

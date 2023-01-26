@@ -55,7 +55,6 @@ class TestCornflowClientUser(TestCase):
         )
         self.assertIn("id", response.keys())
         self.assertIn("token", response.keys())
-        self.assertEqual(201, response.status_code)
 
     def test_create_instance(self):
         data = _load_file(PULP_EXAMPLE)
