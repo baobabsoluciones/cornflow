@@ -8,14 +8,9 @@ import json
 import os
 import pulp as pl
 import time
-import sys
 
 # Partial imports
 from unittest import TestCase
-
-# TODO: Remove this
-path_to_cornflow_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
-sys.path.insert(1, path_to_cornflow_dir)
 
 # Internal imports
 from cornflow_client import CornFlow
