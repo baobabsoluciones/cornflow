@@ -35,7 +35,7 @@ def _get_file(relative_path):
 # Testing suit classes
 class TestCornflowClientUser(TestCase):
     def setUp(self):
-        self.client = CornFlow(url="http://127.0.0.1:5000/")
+        self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.raw.login("user", "UserPassword1!")
         data = login_result.json()
         self.assertEqual(login_result.status_code, 200)
@@ -330,6 +330,18 @@ class TestCornflowClientUser(TestCase):
 
         return response
 
+    def test_put_one_execution(self):
+        execution = self.test_create_execution()
+        response = self.client.raw.put_one_execution(execution["id"], {"name": "new_execution_name"})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json()["message"])
+
+    def test_delete_one_execution(self):
+        execution = self.test_create_execution()
+        response = self.client.raw.delete_one_execution(execution["id"])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("The object has been deleted", response.json()["message"])
+
     def test_create_case_execution(self):
         execution = self.test_get_execution_solution()
         response = self.client.raw.create_case(
@@ -416,6 +428,32 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
             self.assertEqual(instance[item], response[item])
 
+    def test_get_one_instance_data(self):
+        instance = self.test_create_instance()
+        response = self.client.raw.get_one_instance_data(instance["id"])
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        items = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema"
+        ]
+
+        self.assertIn("data", response.keys())
+        for item in items:
+            self.assertIn(item, response.keys())
+            self.assertEqual(instance[item], response[item])
+
+    def test_put_one_instance(self):
+        instance = self.test_create_instance()
+        response = self.client.raw.put_one_instance(instance["id"], {"name": "new_instance_name"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("Updated correctly", response.json()["message"])
+
     def test_get_one_case(self):
         case = self.test_create_case()
         response = self.client.raw.get_one_case(case["id"])
@@ -435,6 +473,30 @@ class TestCornflowClientUser(TestCase):
             "is_dir",
         ]
 
+        for item in items:
+            self.assertIn(item, response.keys())
+            self.assertEqual(case[item], response[item])
+
+    def test_get_one_case_data(self):
+        case = self.test_create_case()
+        response = self.client.raw.get_one_case_data(case["id"])
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        items = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema",
+            "solution_hash",
+            "path",
+            "updated_at",
+            "is_dir",
+        ]
+
+        self.assertIn("data", response.keys())
         for item in items:
             self.assertIn(item, response.keys())
             self.assertEqual(case[item], response[item])

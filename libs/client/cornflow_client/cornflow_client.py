@@ -5,6 +5,7 @@ class CornFlow:
     def __init__(self, url, token=None):
         self.raw = RawCornFlow(url, token)
 
+        self.sign_up = self.expect_status(self.raw.sign_up, 201)
         self.create_instance = self.expect_status(self.raw.create_instance, 201)
         self.create_case = self.expect_status(self.raw.create_case, 201)
         self.create_instance_file = self.expect_status(self.raw.create_instance_file, 201)
@@ -30,7 +31,9 @@ class CornFlow:
         self.get_all_users = self.expect_status(self.raw.get_all_users, 200)
         self.get_one_user = self.expect_status(self.raw.get_one_user, 200)
         self.get_one_instance = self.expect_status(self.raw.get_one_instance, 200)
+        self.get_one_instance_data = self.expect_status(self.raw.get_one_instance_data, 200)
         self.get_one_case = self.expect_status(self.raw.get_one_case, 200)
+        self.get_one_case_data = self.expect_status(self.raw.get_one_case_data, 200)
         self.put_one_case = self.expect_status(self.raw.put_one_case, 200)
         self.put_one_instance = self.expect_status(self.raw.put_one_instance, 200)
         self.put_one_execution = self.expect_status(self.raw.put_one_execution, 200)

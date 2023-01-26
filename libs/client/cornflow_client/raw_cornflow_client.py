@@ -106,7 +106,6 @@ class RawCornFlow(object):
             for key, value in query_args.items():
                 url = f"{url}{key}={value}&"
             url = url[:-1]
-
         return requests.request(
             method=method,
             url=url,
@@ -702,6 +701,21 @@ class RawCornFlow(object):
     @log_call
     @ask_token
     @prepare_encoding
+    def get_one_instance_data(self, reference_id, encoding=None):
+        """
+        Downloads instance data
+
+        :param str reference_id: id for the instance
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+
+        """
+        return self.get_api_for_id(
+            api="instance", id=reference_id, post_url="data", encoding=encoding
+        )
+
+    @log_call
+    @ask_token
+    @prepare_encoding
     def get_one_case(self, reference_id, encoding=None):
         """
         Downloads header of a case
@@ -710,6 +724,18 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
         return self.get_api_for_id(api="case", id=reference_id, encoding=encoding)
+
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def get_one_case_data(self, reference_id, encoding=None):
+        """
+        Downloads case data
+
+        :param str reference_id: id for the case
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        """
+        return self.get_api_for_id(api="case", id=reference_id, post_url="data", encoding=encoding)
 
     @log_call
     @ask_token
