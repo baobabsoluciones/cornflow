@@ -90,7 +90,7 @@ PULP_STATUS_MAPPING = {
     pl.LpStatusUndefined: STATUS_UNDEFINED,
 }
 
-PYOMO_CBC_TRANSLATING_MAPPING = {
+PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('bar_iter_limit', 'pyomo', 'cbc') : 'barr' ,
     ('best_obj_stop', 'pyomo', 'cbc') : 'primalT' ,
     ('cutoff', 'pyomo', 'cbc') : 'cuts' ,
@@ -101,19 +101,14 @@ PYOMO_CBC_TRANSLATING_MAPPING = {
     ('optimality_tol', 'pyomo', 'cbc') : 'dualT' ,
     ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
     ('heuristics', 'pyomo', 'cbc') : 'heur' ,
-}
 
-PULP_CBC_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'cbc') : 'mip' ,
     ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
     ('cutoff', 'pulp', 'cbc') : 'cuts' ,
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
     ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-}
 
-# Considered Termination, Tolerance and MIP
-PYOMO_GUROBI_TRANSLATING_MAPPING = {
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
     ('best_obj_stop', 'pyomo', 'gurobi') : 'BestObjStop' ,
     ('cutoff', 'pyomo', 'gurobi') : 'Cutoff' ,
@@ -128,14 +123,10 @@ PYOMO_GUROBI_TRANSLATING_MAPPING = {
     ('heuristics', 'pyomo', 'gurobi') : 'Heuristics' ,
     ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
     ('threads', 'pyomo', 'gurobi') : 'threads' ,
-}
 
-PULP_GUROBI_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
-}
 
-PYOMO_SCIP_TRANSLATING_MAPPING = {
     ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
     ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
     ('lp_iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
@@ -147,24 +138,18 @@ PYOMO_SCIP_TRANSLATING_MAPPING = {
     ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
     ('presolve', 'pyomo', 'scip') : 'presolve' ,
     ('threads', 'pyomo', 'scip') : 'threads' ,
-}
 
-PULP_SCIP_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
     ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
     ('max_nodes', 'pyomo', 'scip') : 'maxNodes' ,
-}
 
-PYOMO_HIGHS_TRANSLATING_MAPPING = {
     ('presolve', 'pyomo', 'highs') : 'presolve' ,
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
     ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
     ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
-}
 
-PULP_HIGHS_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
     ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
