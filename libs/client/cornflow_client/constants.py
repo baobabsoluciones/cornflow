@@ -131,44 +131,44 @@ PYOMO_GUROBI_TRANSLATING_MAPPING = {
 }
 
 PULP_GUROBI_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+    ('is_mip', 'pulp', 'gurobi') : 'mip' ,
+    ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
 }
 
 PYOMO_SCIP_TRANSLATING_MAPPING = {
-    ('bar_tol', 'pyomo', 'cbc') : 'numerics/barrierconvtol' ,
-    ('cutoff_breaker', 'pyomo', 'cbc') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
-    ('lp_iteration_limit', 'pyomo', 'cbc') : 'lp/iterlim' ,
-    ('mem_limit', 'pyomo', 'cbc') : 'limits/memory' ,
-    ('solution_limit', 'pyomo', 'cbc') : 'limits/maxsol' ,
-    ('time_limit', 'pyomo', 'cbc') : 'limits/time' ,
-    ('primal-dual_gap', 'pyomo', 'cbc') : 'limits/gap' ,
-    ('lp_optimality_tol', 'pyomo', 'cbc') : 'numerics/lpfeastol' ,
-    ('pump_passes', 'pyomo', 'cbc') : 'heuristics/feaspump/maxdepth' ,
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-    ('threads', 'pyomo', 'cbc') : 'threads' ,
+    ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
+    ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
+    ('lp_iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
+    ('mem_limit', 'pyomo', 'scip') : 'limits/memory' ,
+    ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
+    ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
+    ('primal-dual_gap', 'pyomo', 'scip') : 'limits/gap' ,
+    ('lp_optimality_tol', 'pyomo', 'scip') : 'numerics/lpfeastol' ,
+    ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
+    ('presolve', 'pyomo', 'scip') : 'presolve' ,
+    ('threads', 'pyomo', 'scip') : 'threads' ,
 }
 
 PULP_SCIP_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
-    ('threads', 'pulp', 'cbc') : 'threads' ,
-    ('max_nodes', 'pyomo', 'cbc') : 'maxNodes' ,
+    ('is_mip', 'pulp', 'scip') : 'mip' ,
+    ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
+    ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
+    ('threads', 'pulp', 'scip') : 'threads' ,
+    ('max_nodes', 'pyomo', 'scip') : 'maxNodes' ,
 }
 
 PYOMO_HIGHS_TRANSLATING_MAPPING = {
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-    ('parallel', 'pyomo', 'cbc') : 'parallel' ,
-    ('crossover', 'pyomo', 'cbc') : 'run_crossover' ,
-    ('time_limit', 'pyomo', 'cbc') : 'time_limit' ,
+    ('presolve', 'pyomo', 'highs') : 'presolve' ,
+    ('parallel', 'pyomo', 'highs') : 'parallel' ,
+    ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
+    ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
 }
 
 PULP_HIGHS_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
-    ('threads', 'pulp', 'cbc') : 'threads' ,
+    ('is_mip', 'pulp', 'highs') : 'mip' ,
+    ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
+    ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
+    ('threads', 'pulp', 'highs') : 'threads' ,
 }
 
 
