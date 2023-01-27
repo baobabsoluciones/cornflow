@@ -7,6 +7,7 @@ from ldap3 import Server, Connection, ALL
 
 # Import from internal modules
 from cornflow_core.constants import ALL_DEFAULT_ROLES, ROLES_MAP
+from cornflow_core.exceptions import InvalidCredentials
 
 
 class LDAPBase:
@@ -47,8 +48,19 @@ class LDAPBase:
             base = self.config["LDAP_SERVICE_BASE"]
         else:
             base = self.config["LDAP_USER_BASE"]
-        return f"{self.config['LDAP_USERNAME_ATTRIBUTE']}={user},{base}"
-
+        conn = self.get_bound_connection()
+        base_search = base
+        search_filter = "(&({}={}))".format(
+            self.config['LDAP_USERNAME_ATTRIBUTE'],
+            user
+        )
+        conn.search(base_search, search_filter=search_filter,attributes=['*'])
+        try:
+            user_dn = conn.response[0]['dn']
+        except KeyError:
+            raise InvalidCredentials()
+        return user_dn
+        
     def get_user_attribute(self, user, attribute):
         """
         Method to get one attribute from a user in ldap
