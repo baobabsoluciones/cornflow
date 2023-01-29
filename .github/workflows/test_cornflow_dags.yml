@@ -80,7 +80,7 @@ jobs:
       run: |
         coverage run -a --source=. -m unittest tests/test_dags_af.py
         coverage report -m
-        coverage report xml
+        coverage xml
     - name: Upload coverage to codecov
       uses : codecov/codecov-action@v3
       with:
