@@ -107,7 +107,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('cutoff', 'pulp', 'cbc') : 'cuts' ,
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
+    ('presolve', 'pulp', 'cbc') : 'presolve' ,
 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
     ('best_obj_stop', 'pyomo', 'gurobi') : 'BestObjStop' ,
@@ -143,7 +143,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
     ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
-    ('max_nodes', 'pyomo', 'scip') : 'maxNodes' ,
+    ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
 
     ('presolve', 'pyomo', 'highs') : 'presolve' ,
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
