@@ -143,7 +143,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('cutoff', 'pyomo', 'scip') : 'heuristics/subnlp/setcutoff' ,
     ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
     ('gap', 'pyomo', 'scip') : 'limits/gap ' ,
-    ('abs_gap', 'pyomo', 'scip') : 'limits/absgap ' ,
+    ('optimality_tol', 'pyomo', 'scip') : 'limits/absgap ' ,
 
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
@@ -155,11 +155,15 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
     ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
     ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
+    ('rel_optimality_tol', 'pyomo', 'highs') : 'mip_rel_gap' ,
 
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
     ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
     ('threads', 'pulp', 'highs') : 'threads' ,
+    ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
+    ('rel_optimality_tol', 'pulp', 'highs') : 'gapRel' ,
+
 }
 
 
