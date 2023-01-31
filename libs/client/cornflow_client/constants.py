@@ -125,8 +125,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
     ('threads', 'pyomo', 'gurobi') : 'threads' ,
     
-
-
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
 
@@ -144,7 +142,8 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('nlp_tol', 'pyomo', 'scip') : 'heuristics/subnlp/opttol' ,
     ('cutoff', 'pyomo', 'scip') : 'heuristics/subnlp/setcutoff' ,
     ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
-
+    ('gap', 'pyomo', 'scip') : 'limits/gap ' ,
+    ('abs_gap', 'pyomo', 'scip') : 'limits/absgap ' ,
 
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
