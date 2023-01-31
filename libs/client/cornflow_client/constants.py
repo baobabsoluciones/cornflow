@@ -118,11 +118,14 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
     ('mip_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
     ('optimality_tol', 'pyomo', 'gurobi') : 'OptimalityTol' ,
+    ('feasibility_tol', 'pyomo', 'gurobi') : 'FeasibilityTol' ,
     ('branch_dir', 'pyomo', 'gurobi') : 'BranchDir' ,
     ('pump_passes', 'pyomo', 'gurobi') : 'PumpPasses' ,
     ('heuristics', 'pyomo', 'gurobi') : 'Heuristics' ,
     ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
     ('threads', 'pyomo', 'gurobi') : 'threads' ,
+    
+
 
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
@@ -138,6 +141,10 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
     ('presolve', 'pyomo', 'scip') : 'presolve' ,
     ('threads', 'pyomo', 'scip') : 'threads' ,
+    ('nlp_tol', 'pyomo', 'scip') : 'heuristics/subnlp/opttol' ,
+    ('cutoff', 'pyomo', 'scip') : 'heuristics/subnlp/setcutoff' ,
+    ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
+
 
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
