@@ -155,9 +155,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    print(kwargs["conf"].__dict__)
-    print(secrets.__dict__)
-    print(secrets.get_variable("AIRFLOW_HOME"))
+    print(kwargs["conf"].get("logging", "base_log_folder"))
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
