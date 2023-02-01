@@ -105,6 +105,7 @@ def try_to_save_error(client, exec_id, state=-1):
 
 
 def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+    print("Trying to register log text")
     log_file = os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
@@ -112,10 +113,12 @@ def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
         f"{ti.run_id}",
         f"{ti.try_number}.log"
     )
+    print("Log file", log_file, os.path.exists(log_file))
     if os.path.exists(log_file):
-        with open(log_file, 'r') as fd:
+        """with open(log_file, 'r') as fd:
             log_file_txt = fd.read()
-            print(log_file_txt)
+            print(log_file_txt)"""
+        log_file_txt = "This is a test log. It doesn't contain any valuable information. \n " * 300
         try:
             response = client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
             print("Tried registered log_text, responded: ", response.status_code)
