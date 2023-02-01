@@ -155,6 +155,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
+    print([logging.getLogger(name) for name in logging.root.manager.loggerDict])
+    print(kwargs)
     airflow_logger = logging.getLogger("airflow.task")
     logger_handler = TextLogHandler()
     airflow_logger.addHandler(logger_handler)
