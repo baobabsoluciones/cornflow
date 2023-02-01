@@ -104,13 +104,13 @@ def try_to_save_error(client, exec_id, state=-1):
         print(f"An exception trying to register the failed status: {e}")
 
 
-def try_to_save_cornflow_log(client, exec_id, ti, base_log_folder):
+def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
     log_file = os.path.join(base_log_folder, f"{ti.dag_id}", f"{ti.task_id}", f"{ti.run_id}", f"{ti.try_number}.log")
     if os.path.isdir(log_file):
         with open(log_file, 'r') as fd:
             log_file_txt = fd.read()
     try:
-        client.put_api_for_id("dag/", id=exec_id, payload=dict(log_airflow=log_file_txt))
+        client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
     except Exception as e:
         print(f"An exception occurred while trying to register airflow log: {e}")
 
@@ -225,14 +225,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             print("No solver found !")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_cornflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(e)
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_cornflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException("There was an error during the solving")
 
 
