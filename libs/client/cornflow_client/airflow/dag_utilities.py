@@ -157,6 +157,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     """
     print([logging.getLogger(name) for name in logging.root.manager.loggerDict])
     print(kwargs)
+    print(secrets)
     airflow_logger = logging.getLogger("airflow.task")
     logger_handler = TextLogHandler()
     airflow_logger.addHandler(logger_handler)
@@ -222,9 +223,16 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client.update_status(exec_id, {"status": -1})
         raise AirflowDagException("There was an error during the solving")
     finally:
-        print("Here is the log that we got:")
+        print("Here is the log that we got from the handler:")
         print(logger_handler.log)
         print("End of the log")
+        """print("Here is the log we got from the log file")
+        ti = kwargs["ti"]
+        log_file = os.path.join("", f"{ti.dag_id}", f"{ti.task_id}", f"{ti.run_id}", f"{ti.try_number}.log")
+        with open(log_file, 'r') as fd:
+            log_file_txt = fd.read()
+        print(log_file_txt)
+        print("End of the second log")"""
         airflow_logger.removeHandler(logger_handler)
 
 
