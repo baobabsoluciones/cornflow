@@ -61,6 +61,7 @@ class ExecutionModel(BaseDataModel):
     dag_run_id = db.Column(db.String(256), nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
+    log_airflow = db.Column(TEXT, nullable=True)
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
     state_message = db.Column(
         TEXT,
