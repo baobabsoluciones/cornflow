@@ -3,6 +3,7 @@
 """
 # Full imports
 import json
+import logging
 import os
 
 # Partial imports
@@ -154,6 +155,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
+    airflow_logger = logging.getLogger("airflow.task")
+    logger_handler = TextLogHandler()
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
@@ -215,6 +218,11 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         raise AirflowDagException("There was an error during the solving")
+    finally:
+        print("Here is the log that we got:")
+        print(logger_handler.log)
+        print("End of the log")
+        airflow_logger.removeHandler(logger_handler)
 
 
 def cf_check(fun, dag_name, secrets, **kwargs):
@@ -288,3 +296,12 @@ class NoSolverException(Exception):
 
 class AirflowDagException(Exception):
     pass
+
+
+class TextLogHandler(logging.Handler):
+    def __init__(self):
+        super().__init__(self)
+        self.log = ''
+
+    def emit(self, record):
+        self.log += self.format(record) + "\n"
