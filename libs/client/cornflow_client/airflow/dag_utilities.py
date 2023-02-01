@@ -105,12 +105,20 @@ def try_to_save_error(client, exec_id, state=-1):
 
 
 def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
-    log_file = os.path.join(base_log_folder, f"{ti.dag_id}", f"{ti.task_id}", f"{ti.run_id}", f"{ti.try_number}.log")
+    log_file = os.path.join(
+        base_log_folder,
+        f"{ti.dag_id}",
+        f"{ti.task_id}",
+        f"{ti.run_id}",
+        f"{ti.try_number}.log"
+    )
     if os.path.exists(log_file):
         with open(log_file, 'r') as fd:
             log_file_txt = fd.read()
+            print(log_file_txt)
         try:
-            client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
+            response = client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
+            print("Tried registered log_text, responded: ", response.status_code)
         except Exception as e:
             print(f"An exception occurred while trying to register airflow log: {e}")
 
