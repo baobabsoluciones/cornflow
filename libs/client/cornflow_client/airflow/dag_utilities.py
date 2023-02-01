@@ -157,6 +157,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     """
     airflow_logger = logging.getLogger("airflow.task")
     logger_handler = TextLogHandler()
+    airflow_logger.addHandler(logger_handler)
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
