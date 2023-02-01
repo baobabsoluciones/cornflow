@@ -106,11 +106,12 @@ def try_to_save_error(client, exec_id, state=-1):
 
 def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
     print("Trying to register log text")
+    print("***" in base_log_folder)
     log_file = os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
         f"{ti.task_id}",
-        f"{ti.run_id}",
+        f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
         f"{ti.try_number}.log"
     )
     print("Log file", log_file, os.path.exists(log_file))
