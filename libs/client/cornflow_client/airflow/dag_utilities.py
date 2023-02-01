@@ -105,8 +105,6 @@ def try_to_save_error(client, exec_id, state=-1):
 
 
 def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
-    print("Trying to register log text")
-    print("***" in base_log_folder)
     log_file = os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
@@ -116,10 +114,8 @@ def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
     )
     print("Log file", log_file, os.path.exists(log_file))
     if os.path.exists(log_file):
-        """with open(log_file, 'r') as fd:
+        with open(log_file, 'r') as fd:
             log_file_txt = fd.read()
-            print(log_file_txt)"""
-        log_file_txt = "This is a test log. It doesn't contain any valuable information. \n " * 300
         try:
             response = client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
             print("Tried registered log_text, responded: ", response.status_code)
@@ -179,10 +175,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :return:
     """
     ti = kwargs["ti"]
-    # TODO: kwargs["conf"].get("logging", "base_log_folder") doesn't return the full path to the logs for some reason.
-    #   Is there a way to get it ?
-    # base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
-    base_log_folder = "/usr/local/airflow/logs"
+    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
