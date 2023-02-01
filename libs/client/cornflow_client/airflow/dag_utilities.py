@@ -300,8 +300,8 @@ class AirflowDagException(Exception):
 
 class TextLogHandler(logging.Handler):
     def __init__(self):
-        super().__init__(self)
+        logging.Handler.__init__(self, logging.DEBUG)
         self.log = ''
 
     def emit(self, record):
-        self.log += self.format(record) + "\n"
+        self.log += str(record) + "\n"
