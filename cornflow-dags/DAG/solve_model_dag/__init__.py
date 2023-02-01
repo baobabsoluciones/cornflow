@@ -11,6 +11,7 @@ from cornflow_client import (
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
+    PULP_STATUS_MAPPING
 )
 import cornflow_client.airflow.dag_utilities as utils
 
@@ -51,10 +52,16 @@ class PuLPSolve(ExperimentCore):
         _vars, model = pl.LpProblem.fromDict(self.instance.data)
         model.solve(solver)
         if model.status not in [pl.LpStatusOptimal]:
-            return dict(status=model.status, status_sol=SOLUTION_STATUS_INFEASIBLE)
+            return dict(
+                status=PULP_STATUS_MAPPING[model.status],
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
 
         self.solution = Solution(model.toDict())
-        return dict(status=model.status, status_sol=SOLUTION_STATUS_FEASIBLE)
+        return dict(
+            status=PULP_STATUS_MAPPING[model.status],
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def get_objective(self) -> float:
         _, model = pl.LpProblem.fromDict(self.solution.data)

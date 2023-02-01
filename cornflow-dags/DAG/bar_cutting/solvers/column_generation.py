@@ -19,47 +19,14 @@ from pyomo.environ import (
 
 # Imports from cornflow libraries
 from cornflow_client.constants import (
-    STATUS_NOT_SOLVED,
-    STATUS_OPTIMAL,
-    STATUS_INFEASIBLE,
-    STATUS_UNBOUNDED,
-    STATUS_UNDEFINED,
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
+    PYOMO_STOP_MAPPING
 )
 
 # Imports from internal modules
 from ..core import Experiment, Solution
-
-
-pyomo_stop_mapping = dict(
-    unbounded=STATUS_UNBOUNDED,
-    infeasible=STATUS_INFEASIBLE,
-    invalidProblem=STATUS_NOT_SOLVED,
-    solverFailure=STATUS_NOT_SOLVED,
-    internalSolverError=STATUS_NOT_SOLVED,
-    error=STATUS_NOT_SOLVED,
-    userInterrupt=STATUS_NOT_SOLVED,
-    resourceInterrupt=STATUS_NOT_SOLVED,
-    licensingProblem=STATUS_NOT_SOLVED,
-    maxTimeLimit=STATUS_TIME_LIMIT,
-    maxIterations=STATUS_TIME_LIMIT,
-    maxEvaluations=STATUS_TIME_LIMIT,
-    globallyOptimal=STATUS_OPTIMAL,
-    locallyOptimal=STATUS_OPTIMAL,
-    optimal=STATUS_OPTIMAL,
-    minFunctionValue=STATUS_UNDEFINED,
-    minStepLength=STATUS_UNDEFINED,
-    other=STATUS_UNDEFINED,
-)
-pyomo_status_mapping = dict(
-    ok=SOLUTION_STATUS_FEASIBLE,
-    warning=SOLUTION_STATUS_FEASIBLE,
-    error=SOLUTION_STATUS_INFEASIBLE,
-    aborted=SOLUTION_STATUS_INFEASIBLE,
-    unknown=SOLUTION_STATUS_INFEASIBLE,
-)
 
 
 class ColumnGeneration(Experiment):
@@ -366,13 +333,23 @@ class ColumnGeneration(Experiment):
 
         results = opt.solve(model_instance_original_problem)
 
-        status = pyomo_status_mapping[results.solver.status]
-        status_sol = pyomo_stop_mapping[results.solver.termination_condition]
+        status = results.solver.status
+        termination_condition = PYOMO_STOP_MAPPING[results.solver.termination_condition]
 
         # Check status
-        if status == SOLUTION_STATUS_INFEASIBLE:
+        if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
-            return dict(status=status, status_sol=status_sol)
+            return dict(
+                status=termination_condition,
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
+        elif status == "aborted":
+            self.log += "Aborted \n"
+            if termination_condition != STATUS_TIME_LIMIT:
+                return dict(
+                    status=termination_condition,
+                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
 
         solution_dict = dict()
         solution_dict["detail_cutting_patterns"] = [
@@ -414,6 +391,6 @@ class ColumnGeneration(Experiment):
         self.log += "Solving complete\n"
 
         return dict(
-            status=status,
-            status_sol=status_sol,
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
         )
