@@ -108,7 +108,9 @@ class MipModel(Experiment):
         self.max_working_days = self.instance.get_max_working_days()
 
         self.demand = self.instance.get_demand()
-        self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill()
+        self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill(
+            self.employee_ts_availability
+        )
 
     def create_variables(self):
 
@@ -193,7 +195,10 @@ class MipModel(Experiment):
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
         # RQ09: The demand for each skill should be covered
-        for ts, id_skill, skill_demand, _employees in self.ts_demand_employee_skill:
+        for (
+            (ts, id_skill, skill_demand),
+            _employees,
+        ) in self.ts_demand_employee_skill.items():
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
 
         return model

@@ -288,10 +288,14 @@ class RightCornerModel(Experiment):
         solution_dict["included"] = [
             {
                 "id": item,
-                "x": value(model_instance.XCoordinate[item])
-                - value(model_instance.ItemWidth[item]),
-                "y": value(model_instance.YCoordinate[item])
-                - value(model_instance.ItemHeight[item]),
+                "x": int(
+                    value(model_instance.XCoordinate[item])
+                    - value(model_instance.ItemWidth[item])
+                ),
+                "y": int(
+                    value(model_instance.YCoordinate[item])
+                    - value(model_instance.ItemHeight[item])
+                ),
             }
             for item in model_instance.Items
             if value(model_instance.ItemIn[item]) == 1
