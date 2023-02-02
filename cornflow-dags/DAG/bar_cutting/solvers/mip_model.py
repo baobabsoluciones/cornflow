@@ -197,8 +197,8 @@ class MipModel(Experiment):
                 id_bar=ba,
                 id_pattern=pa,
                 id_product=pr,
-                number_of_products=value(
-                    model_instance.pNumberProductsPerBarPattern[ba, pa, pr]
+                number_of_products=int(
+                    value(model_instance.pNumberProductsPerBarPattern[ba, pa, pr])
                 ),
             )
             for (
@@ -212,7 +212,9 @@ class MipModel(Experiment):
             dict(
                 id_bar=ba,
                 id_pattern=pa,
-                number_of_patterns=value(model_instance.vNumPatternsUsedPerBar[ba, pa]),
+                number_of_patterns=int(
+                    value(model_instance.vNumPatternsUsedPerBar[ba, pa])
+                ),
             )
             for (
                 ba,

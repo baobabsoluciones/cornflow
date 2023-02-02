@@ -37,7 +37,7 @@
       "description": "Indicators of solution",
       "show": true,
       "properties": {
-        "of": {
+        "fo": {
           "type": "number",
           "title": "F.O",
           "description": "Objective function"
