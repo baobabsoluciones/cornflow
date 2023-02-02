@@ -380,10 +380,12 @@ class ColumnGeneration(Experiment):
                 id_bar=ba,
                 id_pattern=pa,
                 id_product=pr,
-                number_of_products=value(
-                    model_instance_original_problem.pNumberProductsPerBarPattern[
-                        ba, pa, pr
-                    ]
+                number_of_products=int(
+                    value(
+                        model_instance_original_problem.pNumberProductsPerBarPattern[
+                            ba, pa, pr
+                        ]
+                    )
                 ),
             )
             for (
@@ -397,8 +399,10 @@ class ColumnGeneration(Experiment):
             dict(
                 id_bar=ba,
                 id_pattern=pa,
-                number_of_patterns=value(
-                    model_instance_original_problem.vNumPatternsUsedPerBar[ba, pa]
+                number_of_patterns=int(
+                    value(
+                        model_instance_original_problem.vNumPatternsUsedPerBar[ba, pa]
+                    )
                 ),
             )
             for (
