@@ -12,6 +12,8 @@ METHOD_OPTIONS = [
     "put_detail",
     "patch_detail",
     "delete_detail",
+    "post_bulk",
+    "put_bulk"
 ]
 
 

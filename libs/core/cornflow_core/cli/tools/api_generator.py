@@ -167,6 +167,9 @@ class APIGenerator:
             class_name_one = self.snake_to_camel(table_name + "_response")
             class_name_edit = self.snake_to_camel(table_name + "_edit_request")
             class_name_post = self.snake_to_camel(table_name + "_post_request")
+            class_name_post_bulk = self.snake_to_camel(table_name + "_post_bulk_request")
+            class_name_put_bulk = self.snake_to_camel(table_name + "_put_bulk_request")
+            class_name_put_bulk_one = class_name_put_bulk + "One"
         else:
             filename = os.path.join(
                 self.schema_path, self.name + "_" + table_name + ".py"
@@ -180,6 +183,13 @@ class APIGenerator:
             class_name_post = self.snake_to_camel(
                 self.name + "_" + table_name + "_post_request"
             )
+            class_name_post_bulk = self.snake_to_camel(
+                self.name + "_" + table_name + "_post_bulk_request"
+            )
+            class_name_put_bulk = self.snake_to_camel(
+                self.name + "_" + table_name + "_put_bulk_request"
+            )
+            class_name_put_bulk_one = class_name_put_bulk + "One"
 
         parents_class = ["Schema"]
         partial_schema = self.schema["properties"][table_name]["items"]
@@ -196,6 +206,20 @@ class APIGenerator:
             fd.write(sg.generate_post_schema())
             fd.write("\n\n")
 
+            fd.write(generate_class_def(class_name_post_bulk, parents_class))
+            fd.write(sg.generate_bulk_schema(class_name_post))
+            fd.write("\n\n")
+
+            parents_class = [class_name_edit]
+            fd.write(generate_class_def(class_name_put_bulk_one, parents_class))
+            fd.write(sg.generate_put_bulk_schema_one())
+            fd.write("\n\n")
+
+            parents_class = ["Schema"]
+            fd.write(generate_class_def(class_name_put_bulk, parents_class))
+            fd.write(sg.generate_bulk_schema(class_name_put_bulk_one))
+            fd.write("\n\n")
+
             parents_class = [class_name_post]
             fd.write(generate_class_def(class_name_one, parents_class))
             fd.write(sg.generate_schema())
@@ -205,18 +229,20 @@ class APIGenerator:
             if self.name is None:
                 file.write(
                     f"from .{table_name} import {class_name_one}, "
-                    f"{class_name_edit}, {class_name_post}\n"
+                    f"{class_name_edit}, {class_name_post}, {class_name_post_bulk}, {class_name_put_bulk}\n"
                 )
             else:
                 file.write(
                     f"from .{self.name}_{table_name} import {class_name_one}, "
-                    f"{class_name_edit}, {class_name_post}\n"
+                    f"{class_name_edit}, {class_name_post}, {class_name_post_bulk}, {class_name_put_bulk}\n"
                 )
 
         return {
             "one": class_name_one,
             "editRequest": class_name_edit,
             "postRequest": class_name_post,
+            "postBulkRequest": class_name_post_bulk,
+            "putBulkRequest": class_name_put_bulk
         }
 
     def new_endpoint(
@@ -236,6 +262,7 @@ class APIGenerator:
             filename = os.path.join(self.endpoint_path, table_name + ".py")
             class_name_all = self.snake_to_camel(table_name + "_endpoint")
             class_name_details = self.snake_to_camel(table_name + "_details_endpoint")
+            class_name_bulk = self.snake_to_camel(table_name + "_bulk_endpoint")
         else:
             filename = os.path.join(
                 self.endpoint_path, self.name + "_" + table_name + ".py"
@@ -245,6 +272,9 @@ class APIGenerator:
             )
             class_name_details = self.snake_to_camel(
                 self.name + "_" + table_name + "_details_endpoint"
+            )
+            class_name_bulk = self.snake_to_camel(
+                self.name + "_" + table_name + "_bulk_endpoint"
             )
 
         parents_class = ["BaseMetaResource"]
@@ -302,6 +332,30 @@ class APIGenerator:
                     fd.write(eg.generate_endpoint_delete_one())
                     fd.write("\n")
 
+            fd.write("\n")
+
+            if any(
+                m in self.options
+                for m in [
+                    "post_bulk",
+                    "put_bulk"
+                ]
+            ):
+                # Bulk post/put
+                fd.write(generate_class_def(class_name_bulk, parents_class))
+                fd.write(eg.generate_endpoint_description())
+                fd.write("\n")
+                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
+                fd.write("\n")
+                fd.write(eg.generate_endpoint_init())
+                fd.write("\n")
+                if "post_bulk" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_post_bulk())
+                    fd.write("\n")
+                if "put_bulk" in self.options or "all" in self.options:
+                    fd.write(eg.generate_endpoint_put_bulk())
+                    fd.write("\n")
+
         init_file = os.path.join(self.endpoint_path, "__init__.py")
         with open(init_file, "a") as file:
             if any(m in self.options for m in ["get_list", "post_list", "all"]):
@@ -345,6 +399,17 @@ class APIGenerator:
                 else:
                     file.write(
                         f"from .{self.name}_{table_name} import {class_name_details}\n"
+                    )
+
+            elif any(
+                m in self.options
+                for m in ["post_bulk", "put_bulk"]
+            ):
+                if self.name is None:
+                    file.write(f"from .{table_name} import {class_name_bulk}\n")
+                else:
+                    file.write(
+                        f"from .{self.name}_{table_name} import {class_name_bulk}\n"
                     )
 
     @staticmethod
