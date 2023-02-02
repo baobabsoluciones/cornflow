@@ -174,6 +174,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     """
     ti = kwargs["ti"]
     base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    config = dict()
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
@@ -249,6 +250,7 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     """
     ti = kwargs["ti"]
     base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    config = dict()
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]

@@ -32,6 +32,7 @@ class EndpointGenerator:
         res = "    def __init__(self):\n"
         res += SP8 + "super().__init__()\n"
         res += SP8 + f"self.data_model = {self.model_name}\n"
+        res += SP8 + f"self.unique = ['id']\n"
         return res
 
     def generate_endpoint_get_all(self):
@@ -190,4 +191,54 @@ class EndpointGenerator:
         res += SP8 + ":rtype: Tuple(dict, integer)\n"
         res += SP8 + '"""\n'
         res += SP8 + "return self.patch_detail(data=data, idx=idx)\n"
+        return res
+
+    def generate_endpoint_post_bulk(self):
+        schema_marshal = self.schemas_names["one"]
+        schema_kwargs = self.schemas_names["postBulkRequest"]
+        res = "    @doc(\n"
+        res += SP8 + 'description="Add several new rows to the table",\n'
+        res += SP8 + f'tags=["{self.app_name}"],\n'
+        res += "    )\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += f"    @marshal_with({schema_marshal}(many=True))\n"
+        res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
+        res += "    def post(self, **kwargs):\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "API method to add several new rows to the table.\n"
+        res += (
+            SP8
+            + "It requires authentication to be passed in the form of a token that has to be linked to\n"
+        )
+        res += SP8 + "an existing session (login) made by a user.\n\n"
+        res += SP8 + ":return: An object with the data for the created row,\n"
+        res += SP8 + "and an integer with the HTTP status code.\n"
+        res += SP8 + ":rtype: Tuple(dict, integer)\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "return self.post_bulk(data=kwargs)\n"
+        return res
+
+    def generate_endpoint_put_bulk(self):
+        schema_marshal = self.schemas_names["one"]
+        schema_kwargs = self.schemas_names["putBulkRequest"]
+        res = "    @doc(\n"
+        res += SP8 + 'description="Updates several rows of the table or adds them if they do not exist",\n'
+        res += SP8 + f'tags=["{self.app_name}"],\n'
+        res += "    )\n"
+        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += f"    @marshal_with({schema_marshal}(many=True))\n"
+        res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
+        res += "    def put(self, **kwargs):\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "API method to add several new rows to the table.\n"
+        res += (
+            SP8
+            + "It requires authentication to be passed in the form of a token that has to be linked to\n"
+        )
+        res += SP8 + "an existing session (login) made by a user.\n\n"
+        res += SP8 + ":return: An object with the data for the created row,\n"
+        res += SP8 + "and an integer with the HTTP status code.\n"
+        res += SP8 + ":rtype: Tuple(dict, integer)\n"
+        res += SP8 + '"""\n'
+        res += SP8 + "return self.post_bulk_update(data=kwargs)\n"
         return res
