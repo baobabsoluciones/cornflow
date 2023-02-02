@@ -1,0 +1,28 @@
+coverage:
+  status:
+    project: off
+    patch: off
+
+flag_management:
+  default_rules: 
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 5%
+      - type: patch
+        target: 90%
+  individual_flags: 
+    - name: server-tests  
+      paths: 
+        - cornflow-server/  
+    - name: core-tests 
+      paths: 
+        - libs/core/
+    - name: client-tests 
+      paths: 
+        - libs/client/
+    - name: dags-tests 
+      paths: 
+        - cornflow-dags/
+      
