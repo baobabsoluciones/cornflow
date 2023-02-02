@@ -1,37 +1,77 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Known problems &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Code documentation" href="../dev/index.html" />
     <link rel="prev" title="Logging and monitoring" href="logs.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 3.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +79,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
@@ -73,38 +124,80 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Deploy your own Cornflow-server</a> &raquo;</li>
+        
       <li>Known problems</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/deploy/problems.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="known-problems">
-<h1>Known problems<a class="headerlink" href="#known-problems" title="Permalink to this headline"></a></h1>
+<h1>Known problems<a class="headerlink" href="#known-problems" title="Permalink to this heading">¶</a></h1>
 <p>When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.</p>
 <section id="situations">
-<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this headline"></a></h2>
+<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this heading">¶</a></h2>
 <section id="development">
-<h3>Development<a class="headerlink" href="#development" title="Permalink to this headline"></a></h3>
+<h3>Development<a class="headerlink" href="#development" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Possible error with psycopg2</p>
 <blockquote>
 <div><p>Error: Error pg_config executable not found.</p>
@@ -112,7 +205,7 @@
 </div></blockquote>
 </section>
 <section id="docker-build">
-<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this headline"></a></h3>
+<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this heading">¶</a></h3>
 <p>Problem: The volume airflow_config can´t be mounted.</p>
 <blockquote>
 <div><p>Error: Unable to prepare context: path “local_path_to_docker-compose.yml/airflow_config”</p>
@@ -130,7 +223,7 @@
 </div></blockquote>
 </section>
 <section id="cornflow-database">
-<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this headline"></a></h3>
+<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Cornflow can´t reach postgres internal database</p>
 <blockquote>
 <div><p>Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name “host_database” to address: Name or service not known</p>
@@ -138,7 +231,7 @@
 </div></blockquote>
 </section>
 <section id="running-cornflow-server">
-<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this headline"></a></h3>
+<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Users were not created when cornflow started</p>
 <blockquote>
 <div><p>Error: usage: flask [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
@@ -146,7 +239,7 @@
 </div></blockquote>
 </section>
 <section id="flower">
-<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this headline"></a></h3>
+<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Can´t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
@@ -154,7 +247,7 @@
 </div></blockquote>
 </section>
 <section id="airflow">
-<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this headline"></a></h3>
+<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Can´t login to airflow GUI</p>
 <blockquote>
 <div><p>Error: Bad Request The CSRF session token is missing</p>
@@ -162,7 +255,7 @@
 </div></blockquote>
 </section>
 <section id="ldap-docker">
-<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this headline"></a></h3>
+<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this heading">¶</a></h3>
 <p>Problem: Can´t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
@@ -189,33 +282,50 @@
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="logs.html" class="btn btn-neutral float-left" title="Logging and monitoring" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../dev/index.html" class="btn btn-neutral float-right" title="Code documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="logs.html" class="btn btn-neutral float-left" title="Logging and monitoring" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

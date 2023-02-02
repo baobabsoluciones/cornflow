@@ -1,37 +1,77 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Concepts &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Cornflow-server architecture" href="architecture.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 3.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +79,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Main topics</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
@@ -69,35 +120,77 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Main topics</a> &raquo;</li>
+        
       <li>Concepts</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/main/concepts.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="concepts">
-<h1>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline"></a></h1>
+<h1>Concepts<a class="headerlink" href="#concepts" title="Permalink to this heading">¶</a></h1>
 <section id="decision-optimization-problem">
-<h2>Decision (Optimization) problem<a class="headerlink" href="#decision-optimization-problem" title="Permalink to this headline"></a></h2>
+<h2>Decision (Optimization) problem<a class="headerlink" href="#decision-optimization-problem" title="Permalink to this heading">¶</a></h2>
 <p>A quote from the first paragraph of the <a class="reference external" href="https://en.wikipedia.org/wiki/Decision_problem">Wikipedia article on Decision problem</a>:</p>
 <blockquote>
 <div><p>In computability theory and computational complexity theory, a decision problem is a problem that can be posed as a yes-no question of the input values. An example of a decision problem is deciding whether a given natural number is prime. Another is the problem “given two numbers x and y, does x evenly divide y?”. The answer is either ‘yes’ or ‘no’ depending upon the values of x and y. A method for solving a decision problem, given in the form of an algorithm, is called a decision procedure for that problem. A decision procedure for the decision problem “given two numbers x and y, does x evenly divide y?” would give the steps for determining whether x evenly divides y. One such algorithm is long division. If the remainder is zero the answer is ‘yes’, otherwise it is ‘no’. A decision problem which can be solved by an algorithm is called decidable.</p>
@@ -108,66 +201,66 @@
 <figure class="align-default" id="id1">
 <span id="concepts1"></span><img alt="../_images/concepts1.png" src="../_images/concepts1.png" />
 <figcaption>
-<p><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="instance">
-<h2>Instance<a class="headerlink" href="#instance" title="Permalink to this headline"></a></h2>
+<h2>Instance<a class="headerlink" href="#instance" title="Permalink to this heading">¶</a></h2>
 <p>An Instance represents all the data needed to completely formulate one case of a decision problem.</p>
 <p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “input data”. It needs to follow the input data schema.</p>
 </section>
 <section id="feasible-solution-space">
-<h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Permalink to this headline"></a></h2>
+<h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Permalink to this heading">¶</a></h2>
 <p>Is the set of all Solutions that are valid given an Instance of a Problem. In most problems this set is never calculated since it is too big to calculate or store.</p>
 </section>
 <section id="solution">
-<h2>Solution<a class="headerlink" href="#solution" title="Permalink to this headline"></a></h2>
+<h2>Solution<a class="headerlink" href="#solution" title="Permalink to this heading">¶</a></h2>
 <p>A Solution represents all data needed to completely represent a feasible solution to an Instance.</p>
 <p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”. It needs to follow the output data schema.</p>
 </section>
 <section id="experiment">
-<h2>Experiment<a class="headerlink" href="#experiment" title="Permalink to this headline"></a></h2>
+<h2>Experiment<a class="headerlink" href="#experiment" title="Permalink to this heading">¶</a></h2>
 <p>This is just a convenient way to tie an Instance and a Solution together to be able to validate and compare solutions. It represents a “solved Instance”.</p>
 </section>
 <section id="solution-method">
-<h2>Solution Method<a class="headerlink" href="#solution-method" title="Permalink to this headline"></a></h2>
+<h2>Solution Method<a class="headerlink" href="#solution-method" title="Permalink to this heading">¶</a></h2>
 <p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).</p>
 <p>In Cornflow, A Solution Method is a subclass of Experiment.</p>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
 <p>Each Solution Method has ways to configure certain characteristics. The solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.</p>
 </section>
 <section id="execution">
-<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline"></a></h2>
+<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this heading">¶</a></h2>
 <p>Consists of: (1) an Instance with (2) a Solve Configuration and (3) a Solution Method. It is the actual solving of the Decision Problem. It returns a Solution.</p>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
 <p>In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.</p>
 <figure class="align-default" id="id2">
 <span id="concepts2"></span><img alt="../_images/concepts2.png" src="../_images/concepts2.png" />
 <figcaption>
-<p><span class="caption-text">Implementation of main concepts</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Implementation of main concepts</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="an-example-with-tsp">
-<h2>An example with TSP<a class="headerlink" href="#an-example-with-tsp" title="Permalink to this headline"></a></h2>
+<h2>An example with TSP<a class="headerlink" href="#an-example-with-tsp" title="Permalink to this heading">¶</a></h2>
 <p>Let’s take the classical (and famous) problem of the TSP. We need to find the shortest path that joins all nodes in a graph and passes only once through each node. The input data is the distance matrix between each pair of nodes. The output data is an ordered list of nodes (to visit).</p>
 <p>Solution methods can be many: a MIP model, a CP model, a call to the <a class="reference external" href="https://www.math.uwaterloo.ca/tsp/concorde.html">Concorde solver</a>, a 2-opt heuristic implementation among many others.</p>
 <figure class="align-default" id="id3">
 <span id="concepts-tsp"></span><img alt="../_images/concepts_tsp.png" src="../_images/concepts_tsp.png" />
 <figcaption>
-<p><span class="caption-text">Implementation of concepts for a TSP</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Implementation of concepts for a TSP</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The following figure shows the schemas and python code required to build the smallest possible TSP Optimization Problem. The solve method consists of returning the nodes in an arbitrary order. Although the solution complies with the schema, the quality of this solution will probable be very low.</p>
 <figure class="align-default" id="id4">
 <span id="concepts-tsp2"></span><img alt="../_images/concepts_tsp2.png" src="../_images/concepts_tsp2.png" />
 <figcaption>
-<p><span class="caption-text">Schemas and solve method for TSP implementation</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Schemas and solve method for TSP implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>For more details on these schemas, check <a class="reference internal" href="../guides/jsonschema.html#write-a-json-schema"><span class="std std-ref">the json-schema section</span></a>. That section includes also the complete <a class="reference internal" href="../guides/jsonschema.html#example-with-tsp"><span class="std std-ref">TSP schemas in text form</span></a>.</p>
@@ -176,33 +269,50 @@
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="architecture.html" class="btn btn-neutral float-right" title="Cornflow-server architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

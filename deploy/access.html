@@ -1,37 +1,77 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Access control &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Logging and monitoring" href="logs.html" />
     <link rel="prev" title="Production deployment and security" href="production.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 3.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +79,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
@@ -80,41 +131,83 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Deploy your own Cornflow-server</a> &raquo;</li>
+        
       <li>Access control</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/deploy/access.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="access-control">
-<h1>Access control<a class="headerlink" href="#access-control" title="Permalink to this headline"></a></h1>
+<h1>Access control<a class="headerlink" href="#access-control" title="Permalink to this heading">¶</a></h1>
 <p>Cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
 In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.</p>
 <section id="user-access-data">
-<h2>User access data<a class="headerlink" href="#user-access-data" title="Permalink to this headline"></a></h2>
+<h2>User access data<a class="headerlink" href="#user-access-data" title="Permalink to this heading">¶</a></h2>
 <p>Right now cornflow has two valid user authentication methods. The first is AUTH_DB, which in addition to being the one that is activated by default, is the easiest to configure since the authentication is carried out against the application itself that stores the credentials in encrypted form.
 The second method is AUTH_LDAP. This method allows you to link cornflow with your own security directory and thus the application will delegate the authentication of the users.</p>
 <section id="with-auth-db-default">
-<h3>With Auth-DB (default)<a class="headerlink" href="#with-auth-db-default" title="Permalink to this headline"></a></h3>
+<h3>With Auth-DB (default)<a class="headerlink" href="#with-auth-db-default" title="Permalink to this heading">¶</a></h3>
 <p>Cornflow has an environment variable to control the type of authentication we want to activate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AUTH_TYPE</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">(</span><span class="n">Auth</span><span class="o">-</span><span class="n">DB</span> <span class="n">default</span> <span class="n">method</span><span class="p">)</span>
 </pre></div>
@@ -132,7 +225,7 @@ The second method is AUTH_LDAP. This method allows you to link cornflow with you
 <p>The password is stored encrypted in the database. If a user does not have a password an email will be sent with the temporary access password.</p>
 </section>
 <section id="with-auth-ldap">
-<h3>With Auth-LDAP<a class="headerlink" href="#with-auth-ldap" title="Permalink to this headline"></a></h3>
+<h3>With Auth-LDAP<a class="headerlink" href="#with-auth-ldap" title="Permalink to this heading">¶</a></h3>
 <p>As we saw previously cornflow has an environment variable to control the type of authentication we want to activate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AUTH_TYPE</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">(</span><span class="n">Auth</span><span class="o">-</span><span class="n">LDAP</span> <span class="n">authentication</span><span class="p">)</span>
 </pre></div>
@@ -171,7 +264,7 @@ In the event that you consult the connection through LDAP, the following informa
 </section>
 </section>
 <section id="roles-definition">
-<h2>Roles definition<a class="headerlink" href="#roles-definition" title="Permalink to this headline"></a></h2>
+<h2>Roles definition<a class="headerlink" href="#roles-definition" title="Permalink to this heading">¶</a></h2>
 <p>In cornflow there is a differentiation between three user roles with different characteristics:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Admin</span> <span class="o">-</span> <span class="n">admin</span> <span class="n">user</span> <span class="n">can</span> <span class="n">manage</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">cornflow</span> <span class="n">users</span> <span class="ow">and</span> <span class="n">also</span> <span class="n">has</span> <span class="n">access</span> <span class="n">to</span> <span class="n">make</span> <span class="n">changes</span> <span class="n">to</span> <span class="n">the</span> <span class="n">airflow</span> <span class="n">platform</span>
 <span class="n">Service</span> <span class="o">-</span> <span class="n">service</span> <span class="n">user</span> <span class="n">role</span> <span class="k">for</span> <span class="n">cornflow</span> <span class="ow">and</span> <span class="n">airflow</span> <span class="n">communication</span>
@@ -195,7 +288,7 @@ In addition, there is a temporary link between the user and his role that will n
 </pre></div>
 </div>
 <section id="roles-with-auth-ldap">
-<h3>Roles with Auth-LDAP<a class="headerlink" href="#roles-with-auth-ldap" title="Permalink to this headline"></a></h3>
+<h3>Roles with Auth-LDAP<a class="headerlink" href="#roles-with-auth-ldap" title="Permalink to this heading">¶</a></h3>
 <p>In the cornflow server deployment, the LDAP server roles will be configured through environment variables. Cornflow roles to bind to ldap server:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LDAP_GROUP_TO_ROLE_SERVICE</span>
 <span class="n">LDAP_GROUP_TO_ROLE_ADMIN</span>
@@ -207,9 +300,9 @@ In addition, there is a temporary link between the user and his role that will n
 </section>
 </section>
 <section id="cornflow-interactions-with-airflow-service-user">
-<h2>Cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Permalink to this headline"></a></h2>
+<h2>Cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Permalink to this heading">¶</a></h2>
 <section id="cornflow-airflow">
-<h3>Cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Permalink to this headline"></a></h3>
+<h3>Cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Permalink to this heading">¶</a></h3>
 <p>Not all cornflow users can access airflow. A role defined in the application will give access to perform actions that involve communication with airflow through the user defined in the previous point.
 If the user has access to airflow, in each communication, the username and password that provides access to the platform will be provided by this environment variables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">user</span> <span class="n">name</span> <span class="k">for</span> <span class="n">login</span> <span class="ow">in</span> <span class="n">airflow</span> <span class="ow">and</span> <span class="n">manage</span> <span class="n">dags</span>
@@ -231,7 +324,7 @@ The user who operates airflow through cornflow may not be the same user who has 
 <p>The user access to each dag in airflow can be controlled in cornflow. Cornflow store a table with dags and have roles that give access to each dag individually.</p>
 </section>
 <section id="airflow-cornflow">
-<h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Permalink to this headline"></a></h3>
+<h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Permalink to this heading">¶</a></h3>
 <p>Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
 Service user is a good solution for doing all the data interaction between applications. You have only to pay attention to one account for set permissions and key values on deployment:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
@@ -247,7 +340,7 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `Service_use
 </section>
 </section>
 <section id="manage-cornflow-users">
-<h2>Manage cornflow users<a class="headerlink" href="#manage-cornflow-users" title="Permalink to this headline"></a></h2>
+<h2>Manage cornflow users<a class="headerlink" href="#manage-cornflow-users" title="Permalink to this heading">¶</a></h2>
 <p>In the cornflow image, if no environment variables are set, an admin user is created with these credentials:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow_admin</span>
 <span class="n">CORNFLOW_ADMIN_EMAIL</span> <span class="o">-</span> <span class="n">cornflow_admin</span><span class="nd">@cornflow</span><span class="o">.</span><span class="n">com</span>
@@ -258,7 +351,7 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `Service_use
 <p>To create a user, you must interact with the cornflow application through an <a class="reference external" href="https://baobabsoluciones.github.io/cornflow/dev/endpoints.html#module-cornflow.endpoints.user">endpoint of its API</a>. Check the API docs for the users <a class="reference external" href="https://baobabsoluciones.github.io/corn/stable-rest-api-ref.html#tag/Users">here</a>. It is only possible to create new cornflow admin user using another one with those privileges.</p>
 </section>
 <section id="manage-airflow-users">
-<h2>Manage airflow users<a class="headerlink" href="#manage-airflow-users" title="Permalink to this headline"></a></h2>
+<h2>Manage airflow users<a class="headerlink" href="#manage-airflow-users" title="Permalink to this heading">¶</a></h2>
 <p>The default administrator user for airflow and flower will be:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">admin</span>
 <span class="n">AIRFLOW_PWD</span> <span class="o">-</span> <span class="n">admin</span>
@@ -269,7 +362,7 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `Service_use
 <p>Remember to configure all authentication, users and access before passing to production. Check the previous section for more information: <a class="reference internal" href="production.html#production-deployment-and-security"><span class="std std-ref">Production deployment and security</span></a>.</p>
 </section>
 <section id="external-ldap-authentication-server-requirements">
-<h2>External LDAP authentication server requirements<a class="headerlink" href="#external-ldap-authentication-server-requirements" title="Permalink to this headline"></a></h2>
+<h2>External LDAP authentication server requirements<a class="headerlink" href="#external-ldap-authentication-server-requirements" title="Permalink to this heading">¶</a></h2>
 <p>The requirements to communicate cornflow with an LDAP server are the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">An</span> <span class="n">authentication</span> <span class="n">server</span> <span class="k">with</span> <span class="n">support</span> <span class="k">for</span> <span class="n">the</span> <span class="n">LDAPv3</span> <span class="n">protocol</span><span class="o">.</span>
 <span class="n">The</span> <span class="n">LDAP</span> <span class="n">server</span> <span class="n">must</span> <span class="n">be</span> <span class="n">visible</span> <span class="n">at</span> <span class="nb">all</span> <span class="n">times</span> <span class="n">on</span> <span class="n">the</span> <span class="n">network</span> <span class="n">by</span> <span class="n">the</span> <span class="n">cornflow</span> <span class="n">server</span><span class="o">.</span>
@@ -291,33 +384,50 @@ CORNFLOW_SERVICE_PWD - service user account password (default value `Service_use
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="production.html" class="btn btn-neutral float-left" title="Production deployment and security" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="logs.html" class="btn btn-neutral float-right" title="Logging and monitoring" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="production.html" class="btn btn-neutral float-left" title="Production deployment and security" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

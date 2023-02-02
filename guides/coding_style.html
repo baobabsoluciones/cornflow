@@ -1,37 +1,77 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Coding style and rules &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Write a json-schema" href="jsonschema.html" />
     <link rel="prev" title="How to deploy a new solution method (2.0)" href="deploy_solver_new.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> Cornflow
+          
+
+          
           </a>
+
+          
+            
+            
               <div class="version">
                 3.0
               </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +79,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
@@ -69,36 +120,78 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
+    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">User guides and how-to</a> &raquo;</li>
+        
       <li>Coding style and rules</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/guides/coding_style.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="coding-style-and-rules">
-<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Permalink to this headline"></a></h1>
+<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Permalink to this heading">¶</a></h1>
 <p>The following rules and notation come from examples in PR-revisions that we think can become common rules. Each rule will have an example and a description.</p>
 <section id="commenting-out-code">
-<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Permalink to this headline"></a></h2>
+<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Permalink to this heading">¶</a></h2>
 <p>Having commented code makes no sense. It should be eliminated from the commit altogether. If for some reason you fear losing the piece of code in the future, remember that it will be present in the git history if it has taken part of the <strong>master branch</strong> at some point:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="cm">/* LMapPoints () {</span>
 <span class="cm">  var points = []</span>
@@ -121,33 +214,33 @@
 </div>
 </section>
 <section id="argument-type-checking">
-<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Permalink to this headline"></a></h2>
+<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Permalink to this heading">¶</a></h2>
 <p>Both python and javascript can be very lax with type validations in arguments and interfaces. This is usually very practical but it can sometimes lead to the following (incorrect) “runtime validations” inside a function:</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span> <span class="kd">class</span> <span class="nx">Experiment</span> <span class="k">extends</span> <span class="nx">ExperimentCore</span> <span class="p">{</span>
-  <span class="k">static</span> <span class="nx">MyInstance</span> <span class="o">=</span> <span class="nx">Instance</span>
-  <span class="k">static</span> <span class="nx">MySolution</span> <span class="o">=</span> <span class="nx">Solution</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Experiment</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">ExperimentCore</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">MyInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Instance</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">MySolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Solution</span>
 
-  <span class="kr">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">constructor</span><span class="w"> </span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span><span class="w"> </span><span class="nx">solution</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span><span class="w"> </span><span class="nx">solution</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">solution</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">colors</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="p">.</span><span class="nx">colors</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">colors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="p">.</span><span class="nx">colors</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeCustomerPoint</span> <span class="o">=</span> <span class="mf">10</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeBasePoint</span> <span class="o">=</span> <span class="mf">30</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeSourcePoint</span> <span class="o">=</span> <span class="mf">20</span>
-    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="mf">1</span>
-    <span class="p">}</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span> <span class="o">=</span> <span class="s1">&#39;#65A0D1&#39;</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span> <span class="o">=</span> <span class="s1">&#39;#D35A5A&#39;</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeCustomerPoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeBasePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">30</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeSourcePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#65A0D1&#39;</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#D35A5A&#39;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">horizon</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">unit</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">unit</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">horizon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
+<span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">unit</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>In the example, we’re checking for the existence of instance and solution when creating a new Experiment.</p>
@@ -155,30 +248,30 @@
 <p>The actual validations should be done outside (before) the creation of the Experiment so as to be sure to provide Experiment always with an instance and a solution.</p>
 <p>These kinds of validations can be done in javascript (python) with the use of TypeScript (python type-hints). While TypeScript is not yet present in Cornflow-app, python type-hints are very well present in cornflow-server and cornflow-client.</p>
 <p>In this case, the correct code would be the same but without ifs:</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span> <span class="kd">class</span> <span class="nx">Experiment</span> <span class="k">extends</span> <span class="nx">ExperimentCore</span> <span class="p">{</span>
-  <span class="k">static</span> <span class="nx">MyInstance</span> <span class="o">=</span> <span class="nx">Instance</span>
-  <span class="k">static</span> <span class="nx">MySolution</span> <span class="o">=</span> <span class="nx">Solution</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Experiment</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">ExperimentCore</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">MyInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Instance</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">MySolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Solution</span>
 
-  <span class="kr">constructor</span> <span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span> <span class="nx">solution</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">constructor</span><span class="w"> </span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span><span class="w"> </span><span class="nx">solution</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">super</span><span class="p">(</span><span class="nx">instance</span><span class="p">,</span><span class="w"> </span><span class="nx">solution</span><span class="p">)</span>
 
-    <span class="k">this</span><span class="p">.</span><span class="nx">colors</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="p">.</span><span class="nx">colors</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">solution</span><span class="p">.</span><span class="nx">colors</span>
 
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeCustomerPoint</span> <span class="o">=</span> <span class="mf">10</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeBasePoint</span> <span class="o">=</span> <span class="mf">30</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">sizeSourcePoint</span> <span class="o">=</span> <span class="mf">20</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="mf">1</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span> <span class="o">=</span> <span class="s1">&#39;#65A0D1&#39;</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span> <span class="o">=</span> <span class="s1">&#39;#D35A5A&#39;</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeCustomerPoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeBasePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">30</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeSourcePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span>
+<span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#65A0D1&#39;</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#D35A5A&#39;</span>
 
-    <span class="k">this</span><span class="p">.</span><span class="nx">horizon</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">unit</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">unit</span>
-  <span class="p">}</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">horizon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">unit</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="indentation">
-<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline"></a></h2>
+<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this heading">¶</a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
 <span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
@@ -274,7 +367,7 @@
 <p>Of course, this can be greatly improved with more tweaks.</p>
 </section>
 <section id="no-repetition">
-<h2>No repetition<a class="headerlink" href="#no-repetition" title="Permalink to this headline"></a></h2>
+<h2>No repetition<a class="headerlink" href="#no-repetition" title="Permalink to this heading">¶</a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -289,7 +382,7 @@
 </div>
 </section>
 <section id="filtering-lists-or-dictionaries">
-<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this headline"></a></h2>
+<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this heading">¶</a></h2>
 <p>Filtering lists with list comprehensions is the easiest way to filter one. With <cite>pytups</cite>, you make it a little shorter.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
@@ -303,9 +396,9 @@
 </div>
 </section>
 <section id="working-with-superdicts">
-<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this headline"></a></h2>
+<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this heading">¶</a></h2>
 <section id="accessing-properties">
-<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this headline"></a></h3>
+<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this heading">¶</a></h3>
 <p>If we have our data in <cite>SuperDicts</cite> there is a set of operations that can be done in a much simplier way.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
@@ -333,33 +426,50 @@
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="deploy_solver_new.html" class="btn btn-neutral float-left" title="How to deploy a new solution method (2.0)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="jsonschema.html" class="btn btn-neutral float-right" title="Write a json-schema" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="deploy_solver_new.html" class="btn btn-neutral float-left" title="How to deploy a new solution method (2.0)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
+    <p>
+        &#169; Copyright 2020-, cornflow documentation team..
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
