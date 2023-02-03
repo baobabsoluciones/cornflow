@@ -273,7 +273,7 @@ class TestDeployedDAG(TestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.json,
-            {"error": "{'json': {'id': ['Missing data for required field.']}}"},
+        self.assertIn(
+            "'id': ['Missing data for required field.']",
+            response.json.get("error", ""),
         )

@@ -45,6 +45,8 @@ class DeployedDAG(TraceAttributesModel):
         self.description = data.get("description", None)
         self.instance_schema = data.get("instance_schema", None)
         self.solution_schema = data.get("solution_schema", None)
+        self.instance_checks_schema = data.get("instance_checks_schema", None)
+        self.solution_checks_schema = data.get("solution_checks_schema", None)
         self.config_schema = data.get("config_schema", None)
 
     def __repr__(self):
