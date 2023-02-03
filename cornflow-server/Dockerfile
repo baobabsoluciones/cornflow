@@ -32,7 +32,7 @@ RUN pip install -r requirements.txt --force-reinstall
 # copy project
 COPY cornflow /usr/src/app/cornflow
 COPY docs /usr/src/app/docs
-COPY migrations /usr/src/app/migrations
+COPY cornflow/migrations /usr/src/app/migrations
 COPY examples /usr/src/app/examples
 COPY *.py /usr/src/app/
 RUN mkdir -p /usr/src/app/log

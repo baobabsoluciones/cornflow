@@ -3,4 +3,4 @@ include MANIFEST.in
 include README.rst
 include setup.py
 include init_cornflow_service.py
-include migrations/*
+include cornflow/migrations/*
