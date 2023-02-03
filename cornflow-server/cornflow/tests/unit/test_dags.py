@@ -192,13 +192,19 @@ class TestDeployedDAG(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json,
-            [
-                {"description": None, "id": "solve_model_dag"},
-                {"description": None, "id": "gc"},
-                {"description": None, "id": "timer"},
-            ],
+            response.json[0],
+            {
+                "description": None,
+                "id": "solve_model_dag",
+                "instance_schema": {},
+                "solution_schema": {},
+                "config_schema": {},
+                "instance_checks_schema": {},
+                "solution_checks_schema": {}
+            }
         )
+        self.assertEqual(response.json[1]["id"], "gc")
+        self.assertEqual(response.json[2]["id"], "timer")
 
     def test_endpoint_permissions(self):
         user_role = UserRoleModel.query.filter_by(
@@ -221,7 +227,15 @@ class TestDeployedDAG(TestCase):
         )
 
     def test_post_endpoint(self):
-        payload = {"description": None, "id": "test_dag"}
+        payload = {
+            "description": None,
+            "id": "test_dag",
+            "instance_schema": {},
+            "solution_schema": {},
+            "instance_checks_schema": {},
+            "solution_checks_schema": {},
+            "config_schema": {}
+        }
         response = self.client.post(
             DEPLOYED_DAG_URL,
             data=json.dumps(payload),

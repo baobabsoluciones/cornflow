@@ -85,6 +85,8 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
             "description": None,
             "instance_schema": dict(),
             "solution_schema": dict(),
+            "instance_checks_schema": dict(),
+            "solution_checks_schema": dict(),
             "config_schema": dict(),
         })
         for dag in dags]
