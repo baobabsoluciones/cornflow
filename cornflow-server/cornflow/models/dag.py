@@ -17,9 +17,9 @@ class DeployedDAG(TraceAttributesModel):
     __tablename__ = "deployed_dags"
     id = db.Column(db.String(128), primary_key=True)
     description = db.Column(TEXT, nullable=True)
-    #instance_schema = db.Column(JSON, nullable=False)
-    #solution_schema = db.Column(JSON, nullable=False)
-    #config_schema = db.Column(JSON, nullable=False)
+    instance_schema = db.Column(JSON, nullable=True)
+    solution_schema = db.Column(JSON, nullable=True)
+    config_schema = db.Column(JSON, nullable=True)
 
     dag_permissions = db.relationship(
         "PermissionsDAG",
@@ -32,6 +32,9 @@ class DeployedDAG(TraceAttributesModel):
         super().__init__()
         self.id = data.get("id")
         self.description = data.get("description", None)
+        self.instance_schema = data.get("instance_schema", None)
+        self.solution_schema = data.get("solution_schema", None)
+        self.config_schema = data.get("config_schema", None)
 
     def __repr__(self):
         return f"<DAG {self.id}>"

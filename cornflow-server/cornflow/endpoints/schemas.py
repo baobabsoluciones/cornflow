@@ -10,7 +10,7 @@ import logging as log
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import PermissionsDAG
+from ..models import PermissionsDAG, DeployedDAG
 from ..shared.authentication import Auth
 from cornflow_core.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
@@ -67,19 +67,12 @@ class SchemaDetailsEndpoint(BaseMetaResource):
         )
 
         if permission:
-            af_client = Airflow.from_config(current_app.config)
-            if not af_client.is_alive():
-                log.error(
-                    "Airflow not accessible when getting schema {}".format(dag_name)
-                )
-                raise AirflowError(error="Airflow is not accessible")
-
-            # try airflow and see if dag_name exists
-            af_client.get_dag_info(dag_name)
-
-            log.info("User gets schema {}".format(dag_name))
-            # it exists: we try to get its schemas
-            return af_client.get_schemas_for_dag_name(dag_name)
+            deployed_dag = DeployedDAG.get_one_object(dag_name)
+            return {
+                "instance": deployed_dag.instance_schema,
+                "solution": deployed_dag.solution_schema,
+                "config": deployed_dag.config_schema
+            }, 200
         else:
             raise NoPermission(
                 error="User does not have permission to access this dag",

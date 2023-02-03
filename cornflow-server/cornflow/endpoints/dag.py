@@ -12,7 +12,7 @@ import logging as log
 
 # Import from internal modules
 from ..models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
-from ..schemas import DeployedDAGSchema
+from ..schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from ..schemas.case import CaseCheckRequest
 from ..schemas.instance import InstanceCheckRequest
 from ..schemas.execution import (
@@ -230,7 +230,22 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        print(kwargs.get("instance_schema"))
-        kwargs.pop("solution_schema")
-        kwargs.pop("config_schema")
         return self.post_list(kwargs)
+
+
+class DeployedDagDetailEndpoint(BaseMetaResource):
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = DeployedDAG
+
+    @doc(
+        description="Endpoint to update the schemas of a deployed DAG",
+        tags=["DAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    @use_kwargs(DeployedDAGEditSchema, location="json")
+    def put(self, idx, **req_data):
+        log.info(f"Schemas saved for DAG {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)

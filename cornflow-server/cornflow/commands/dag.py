@@ -32,8 +32,20 @@ def register_deployed_dags_command(
     response = af_client.get_model_dags()
     dag_list = response.json()["dags"]
 
+    schemas = {
+        dag["dag_id"]: af_client.get_schemas_for_dag_name(dag["dag_id"])
+        for dag in dag_list
+        if dag["dag_id"] not in dags_registered
+    }
+
     processed_dags = [
-        DeployedDAG({"id": dag["dag_id"], "description": dag["description"]})
+        DeployedDAG({
+            "id": dag["dag_id"],
+            "description": dag["description"],
+            "instance_schema": schemas[dag["dag_id"]]["instance"],
+            "solution_schema": schemas[dag["dag_id"]]["solution"],
+            "config_schema": schemas[dag["dag_id"]]["config"]
+        })
         for dag in dag_list
         if dag["dag_id"] not in dags_registered
     ]
@@ -65,7 +77,15 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
     if dags is None:
         dags = ["solve_model_dag", "gc", "timer"]
 
-    deployed_dag = [DeployedDAG({"id": dag, "description": None}) for dag in dags]
+    deployed_dag = [
+        DeployedDAG({
+            "id": dag,
+            "description": None,
+            "instance_schema": dict(),
+            "solution_schema": dict(),
+            "config_schema": dict(),
+        })
+        for dag in dags]
     for dag in deployed_dag:
         dag.save()
 

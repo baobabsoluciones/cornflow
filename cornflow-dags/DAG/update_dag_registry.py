@@ -54,6 +54,19 @@ def update_dag_registry(**kwargs):
                     encoding="br"
                 )
                 print(f"DAG: {response['id']} registered")
+            else:
+                # Even if the dag is registered, we still update its schemas
+                response = cf_client.put_deployed_dag(
+                    id=model.dag_id,
+                    data=dict(
+                        description=model.description,
+                        instance_schema=all_apps[model.dag_id].instance.schema,
+                        solution_schema=all_apps[model.dag_id].solution.schema,
+                        config_schema=all_apps[model.dag_id].schema,
+                    ),
+                    encoding='br'
+                )
+                print(f"DAG: {response['id']} registered")
 
 
 dag = DAG(
