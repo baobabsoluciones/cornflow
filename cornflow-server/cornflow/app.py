@@ -5,6 +5,19 @@ Main file with the creation of the app logic
 import click
 import os
 
+from cornflow.commands import (
+    create_service_user_command,
+    create_admin_user_command,
+    create_planner_user_command,
+    register_roles_command,
+    register_actions_command,
+    register_views_command,
+    register_base_permissions_command,
+    access_init_command,
+    register_deployed_dags_command,
+    register_dag_permissions_command,
+)
+
 # Partial imports
 from flask import Flask
 from flask.cli import with_appcontext
@@ -14,20 +27,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 
 # Module imports
-from .commands.access import access_init_command
-from .commands.actions import register_actions_command
-from .commands.dag import register_deployed_dags_command
-from .commands.permissions import (
-    register_base_permissions_command,
-    register_dag_permissions_command,
-)
-from .commands.roles import register_roles_command
-from .commands.users import (
-    create_admin_user_command,
-    create_planner_user_command,
-    create_service_user_command,
-)
-from .commands.views import register_views_command
+
 from .config import app_config
 from .endpoints import resources
 from .endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
