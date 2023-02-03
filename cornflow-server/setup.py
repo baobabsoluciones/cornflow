@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow",
-    version="0.0.1a3",
+    version="0.0.1a4",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     url="http://github.com/baobabsoluciones/cornflow",
