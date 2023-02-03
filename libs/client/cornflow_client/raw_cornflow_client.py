@@ -875,11 +875,23 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def create_deployed_dag(
-        self, name: str = None, description: str = None, encoding=None
+        self,
+        name: str,
+        instance_schema: dict,
+        solution_schema: dict,
+        config_schema: dict,
+        description: str = None,
+        encoding=None
     ):
         if name is None:
             return {"error": "No dag name was given"}
-        payload = dict(id=name, description=description)
+        payload = dict(
+            id=name,
+            description=description,
+            instance_schema=instance_schema,
+            solution_schema=solution_schema,
+            config_schema=config_schema
+        )
         return self.create_api("dag/deployed/", json=payload, encoding=encoding)
 
 

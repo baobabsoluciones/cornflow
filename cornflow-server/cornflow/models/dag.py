@@ -2,7 +2,7 @@
 
 """
 # Import from libraries
-from sqlalchemy.dialects.postgresql import TEXT
+from sqlalchemy.dialects.postgresql import TEXT, JSON
 
 # Import from internal modules
 from cornflow_core.models import TraceAttributesModel
@@ -17,6 +17,9 @@ class DeployedDAG(TraceAttributesModel):
     __tablename__ = "deployed_dags"
     id = db.Column(db.String(128), primary_key=True)
     description = db.Column(TEXT, nullable=True)
+    #instance_schema = db.Column(JSON, nullable=False)
+    #solution_schema = db.Column(JSON, nullable=False)
+    #config_schema = db.Column(JSON, nullable=False)
 
     dag_permissions = db.relationship(
         "PermissionsDAG",

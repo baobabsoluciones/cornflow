@@ -230,4 +230,7 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
+        print(kwargs.get("instance_schema"))
+        kwargs.pop("solution_schema")
+        kwargs.pop("config_schema")
         return self.post_list(kwargs)
