@@ -72,9 +72,9 @@ def create_app(env_name="development", dataconn=None):
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
-    docs = FlaskApiSpec(app)
-    for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
+    # docs = FlaskApiSpec(app)
+    # for res in resources:
+    #     docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
