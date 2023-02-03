@@ -57,7 +57,7 @@ from .token import TokenEndpoint
 from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
-from ..external_app.endpoint import external_resources
+# from ..external_app.endpoint import external_resources
 
 
 resources = [
@@ -205,6 +205,6 @@ resources = [
         endpoint="licences",
     )
 ]
-
-if len(external_resources):
-    resources = resources + external_resources
+#
+# if len(external_resources):
+#     resources = resources + external_resources
