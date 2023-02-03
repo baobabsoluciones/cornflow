@@ -108,6 +108,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
     ('presolve', 'pulp', 'cbc') : 'presolve' ,
+    
 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
     ('best_obj_stop', 'pyomo', 'gurobi') : 'BestObjStop' ,
@@ -127,6 +128,12 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
+    ('presolve', 'pulp', 'gurobi') : 'presolve' ,
+    ('mip_gap', 'pulp', 'gurobi') : 'MIPGap' ,
+    ('optimality_tol', 'pulp', 'gurobi') : 'gapAbs' ,
+    ('feasibility_tol', 'pulp', 'gurobi') : 'FeasibilityTol' ,
+    ('iteration_limit', 'pulp', 'gurobi') : 'IterationLimit' ,
+
 
     ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
     ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
@@ -134,7 +141,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('mem_limit', 'pyomo', 'scip') : 'limits/memory' ,
     ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
     ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
-    ('primal-dual_gap', 'pyomo', 'scip') : 'limits/gap' ,
+    ('rel_optimality_tol', 'pyomo', 'scip') : 'limits/gap' ,
     ('lp_optimality_tol', 'pyomo', 'scip') : 'numerics/lpfeastol' ,
     ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
     ('presolve', 'pyomo', 'scip') : 'presolve' ,
@@ -142,14 +149,17 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('nlp_tol', 'pyomo', 'scip') : 'heuristics/subnlp/opttol' ,
     ('cutoff', 'pyomo', 'scip') : 'heuristics/subnlp/setcutoff' ,
     ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
-    ('gap', 'pyomo', 'scip') : 'limits/gap ' ,
     ('optimality_tol', 'pyomo', 'scip') : 'limits/absgap ' ,
 
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
+    ('rel_optimality_tol', 'pulp', 'scip') : 'gapRel' ,
     ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
     ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
+    ('lp_iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
+    ('mem_limit', 'pulp', 'scip') : 'limits/memory' ,
+
 
     ('presolve', 'pyomo', 'highs') : 'presolve' ,
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
