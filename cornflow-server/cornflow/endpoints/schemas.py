@@ -71,6 +71,8 @@ class SchemaDetailsEndpoint(BaseMetaResource):
             return {
                 "instance": deployed_dag.instance_schema,
                 "solution": deployed_dag.solution_schema,
+                "instance_checks": deployed_dag.instance_checks_schema,
+                "solution_checks": deployed_dag.solution_checks_schema,
                 "config": deployed_dag.config_schema
             }, 200
         else:

@@ -44,13 +44,16 @@ def update_dag_registry(**kwargs):
         for app in get_new_apps():
             all_apps[app.name] = app
         for model in model_dags:
+            app = all_apps[model.dag_id]
             if model.dag_id not in deployed_dags:
                 response = cf_client.create_deployed_dag(
                     name=model.dag_id,
                     description=model.description,
-                    instance_schema=all_apps[model.dag_id].instance.schema,
-                    solution_schema=all_apps[model.dag_id].solution.schema,
-                    config_schema=all_apps[model.dag_id].schema,
+                    instance_schema=app.instance.schema,
+                    instance_checks_schema=app.instance.schema_checks,
+                    solution_schema=app.solution.schema,
+                    solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                    config_schema=app.schema,
                     encoding="br"
                 )
                 print(f"DAG: {response['id']} registered")
@@ -60,9 +63,11 @@ def update_dag_registry(**kwargs):
                     id=model.dag_id,
                     data=dict(
                         description=model.description,
-                        instance_schema=all_apps[model.dag_id].instance.schema,
-                        solution_schema=all_apps[model.dag_id].solution.schema,
-                        config_schema=all_apps[model.dag_id].schema,
+                        instance_schema=app.instance.schema,
+                        instance_checks_schema=app.instance.schema_checks,
+                        solution_schema=app.solution.schema,
+                        solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                        config_schema=app.schema,
                     ),
                     encoding='br'
                 )

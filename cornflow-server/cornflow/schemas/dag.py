@@ -9,6 +9,8 @@ class DeployedDAGSchema(Schema):
     instance_schema = fields.Raw(required=True, allow_none=False)
     solution_schema = fields.Raw(required=True, allow_none=False)
     config_schema = fields.Raw(required=True, allow_none=False)
+    instance_checks_schema = fields.Raw(required=True, allow_none=False)
+    solution_checks_schema = fields.Raw(required=True, allow_none=False)
 
 
 class DeployedDAGEditSchema(Schema):
@@ -16,3 +18,5 @@ class DeployedDAGEditSchema(Schema):
     instance_schema = fields.Raw(required=False)
     solution_schema = fields.Raw(required=False)
     config_schema = fields.Raw(required=False)
+    instance_checks_schema = fields.Raw(required=True, allow_none=False)
+    solution_checks_schema = fields.Raw(required=True, allow_none=False)

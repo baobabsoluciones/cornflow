@@ -130,7 +130,7 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
-    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/"),
+    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,

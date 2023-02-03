@@ -44,6 +44,8 @@ def register_deployed_dags_command(
             "description": dag["description"],
             "instance_schema": schemas[dag["dag_id"]]["instance"],
             "solution_schema": schemas[dag["dag_id"]]["solution"],
+            "instance_checks_schema": schemas[dag["dag_id"]]["instance_checks"],
+            "solution_checks_schema": schemas[dag["dag_id"]]["solution_checks"],
             "config_schema": schemas[dag["dag_id"]]["config"]
         })
         for dag in dag_list

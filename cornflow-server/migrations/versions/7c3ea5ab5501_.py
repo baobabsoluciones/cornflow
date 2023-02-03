@@ -30,9 +30,19 @@ def upgrade():
         'deployed_dags',
         sa.Column('config_schema', postgresql.JSON(astext_type=sa.Text()), nullable=True)
     )
+    op.add_column(
+        'deployed_dags',
+        sa.Column('instance_checks_schema', postgresql.JSON(astext_type=sa.Text()), nullable=True)
+    )
+    op.add_column(
+        'deployed_dags',
+        sa.Column('solution_checks_schema', postgresql.JSON(astext_type=sa.Text()), nullable=True)
+    )
 
 
 def downgrade():
     op.drop_column("deployed_dags", "instance_schema")
     op.drop_column("deployed_dags", "solution_schema")
     op.drop_column("deployed_dags", "config_schema")
+    op.drop_column("deployed_dags", "instance_checks_schema")
+    op.drop_column("deployed_dags", "solution_checks_schema")

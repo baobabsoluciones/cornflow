@@ -102,7 +102,7 @@ class DAGDetailEndpoint(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
@@ -194,7 +194,7 @@ class DAGEndpointManual(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)
