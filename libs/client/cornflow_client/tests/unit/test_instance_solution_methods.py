@@ -6,7 +6,7 @@ import os
 import pickle
 from datetime import datetime, timedelta
 from unittest import TestCase
-from conrflow_client import InstanceSolutionCore
+from conrflow_client.core import InstanceSolutionCore
 
 from cornflow_client import InstanceCore
 
