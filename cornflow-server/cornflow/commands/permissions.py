@@ -55,6 +55,30 @@ def register_base_permissions_command(verbose):
         not in permissions_registered
     ]
 
+    """
+    permisos que estan base de datos y no estan definidos darlos de baja
+    permisos que estan bdd y definidos ok
+    permisos no bdd pero estan definidos darlos de alta
+    """
+
+    for to_reg_permission in permissions_to_register:
+        if to_reg_permission in permissions_registered:
+            log.info(f"The permission to be registered {to_reg_permission} is already in the database")
+        if to_reg_permission not in permissions_register:
+            log.info(f"The permission to be registered {to_reg_permission} is not registered. It will be registered")
+            XXXXX
+    
+    tb_removed = []
+    for i, reg_permission in enumerate(permissions_registered):
+        if reg_permission not in permissions_to_register:
+            log.warning(f"The permission {reg_permission} is not in the database. It will be *removed*")
+            tb_removed += [reg_permission]
+    
+    permissions_registered = list(set(permissions_registered) - set(tb_removed))
+
+
+
+
     if len(permissions_to_register) > 0:
         db.session.bulk_save_objects(permissions_to_register)
 
