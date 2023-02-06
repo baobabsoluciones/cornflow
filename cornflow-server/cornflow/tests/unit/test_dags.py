@@ -26,6 +26,7 @@ from cornflow.tests.const import (
     USER_URL,
 )
 from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
+from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
 
 class TestDagEndpoint(TestExecutionsDetailEndpointMock):
@@ -196,9 +197,9 @@ class TestDeployedDAG(TestCase):
             {
                 "description": None,
                 "id": "solve_model_dag",
-                "instance_schema": {},
-                "solution_schema": {},
-                "config_schema": {},
+                "instance_schema": get_pulp_jsonschema(),
+                "solution_schema": get_pulp_jsonschema(),
+                "config_schema": get_empty_schema(dict(timeLimit=1, solvers=["cbc"])),
                 "instance_checks_schema": {},
                 "solution_checks_schema": {}
             }
