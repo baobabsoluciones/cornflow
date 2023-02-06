@@ -33,8 +33,7 @@ class RawCornFlow(object):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            print(result)
-            # log.debug(result.json())
+            log.debug(result.json())
             return result
 
         return wrapper
