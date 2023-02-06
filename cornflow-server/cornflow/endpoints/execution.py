@@ -144,7 +144,8 @@ class ExecutionEndpoint(BaseMetaResource):
         schema_info = af_client.get_dag_info(schema)
 
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
+        config_schema = af_client.get_one_schema(schema, CONFIG_SCHEMA)
+        # config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
         config_errors = json_schema_validate(config_schema, kwargs["config"])
         if config_errors:
             execution.update_state(
@@ -172,7 +173,7 @@ class ExecutionEndpoint(BaseMetaResource):
             raise InvalidData(payload=instance_errors)
 
         # Validate solution data before running the dag (if it exists)
-        if kwargs.get("data") is not None:
+        """if kwargs.get("data") is not None:
             solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
             solution_errors = json_schema_validate(solution_schema, kwargs["data"])
             if solution_errors:
@@ -182,7 +183,7 @@ class ExecutionEndpoint(BaseMetaResource):
                     "comply with the json schema. Check the log for more details",
                 )
                 execution.update_log_txt(f"{solution_errors}")
-                raise InvalidData(payload=solution_errors)
+                raise InvalidData(payload=solution_errors)"""
 
         # # Validate that instance and dag_name are compatible
         # marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
