@@ -199,7 +199,7 @@ class TestDeployedDAG(TestCase):
                 "id": "solve_model_dag",
                 "instance_schema": get_pulp_jsonschema(),
                 "solution_schema": get_pulp_jsonschema(),
-                "config_schema": get_empty_schema(dict(timeLimit=1, solvers=["cbc"])),
+                "config_schema": get_empty_schema(solvers=["cbc"]),
                 "instance_checks_schema": {},
                 "solution_checks_schema": {}
             }
