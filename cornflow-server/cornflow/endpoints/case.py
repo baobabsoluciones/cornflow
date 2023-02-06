@@ -80,11 +80,12 @@ class CaseEndpoint(BaseMetaResource):
         schema = data["schema"]
         config = current_app.config
 
-        # We validate the instance data
-        data_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
-        data_errors = json_schema_validate(data_schema, kwargs["data"])
-        if data_errors:
-            raise InvalidData(payload=data_errors)
+        # We validate the instance data if it exists
+        if kwargs.get("data") is not None:
+            data_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            data_errors = json_schema_validate(data_schema, kwargs["data"])
+            if data_errors:
+                raise InvalidData(payload=data_errors)
 
         # And the solution data if it exists
         if kwargs.get("solution") is not None:

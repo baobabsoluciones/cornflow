@@ -54,6 +54,7 @@ class CustomTestCase(TestCase):
         log.root.setLevel(current_app.config["LOG_LEVEL"])
         db.create_all()
         access_init_command(0)
+        print("Setting up")
         register_deployed_dags_command_test(verbose=0)
         data = {
             "username": "testname",
@@ -147,6 +148,7 @@ class CustomTestCase(TestCase):
         return self.create_user_with_role(PLANNER_ROLE)
 
     def tearDown(self):
+        print("Tearing down")
         db.session.remove()
         db.drop_all()
 
