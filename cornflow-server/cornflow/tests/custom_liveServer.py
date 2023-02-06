@@ -30,7 +30,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         try:
             response = self.client.login(user_data["username"], user_data["pwd"])
         except cf.CornFlowApiError:
-            response = self.client.sign_up(**user_data).json()
+            response = self.client.sign_up(**user_data)
         return response
 
     def setUp(self, create_all=True):
