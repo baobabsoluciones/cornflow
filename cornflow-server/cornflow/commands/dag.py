@@ -75,6 +75,7 @@ def register_deployed_dags_command(
 def register_deployed_dags_command_test(dags: list = None, verbose=0):
     from ..models import DeployedDAG
     import logging as log
+    from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
         dags = ["solve_model_dag", "gc", "timer"]
@@ -89,7 +90,18 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
             "solution_checks_schema": dict(),
             "config_schema": dict(),
         })
-        for dag in dags]
+        for dag in dags[1:]
+    ] + [
+        DeployedDAG({
+            "id": "solve_model_dag",
+            "description": None,
+            "instance_schema": get_pulp_jsonschema(),
+            "solution_schema": get_pulp_jsonschema(),
+            "instance_checks_schema": dict(),
+            "solution_checks_schema": dict(),
+            "config_schema": get_empty_schema(dict(timeLimit=1, solvers=["cbc"]))
+        })
+    ]
     for dag in deployed_dag:
         dag.save()
 
