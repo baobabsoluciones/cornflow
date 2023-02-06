@@ -162,7 +162,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         instance = self.test_new_instance()
         response = self.client.raw.get_api_for_id("instance", instance["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.delete_api_for_id("instance", instance["id"])
+        response = self.client.raw.delete_api_for_id("instance", instance["id"])
         self.assertEqual(200, response.status_code)
         response = self.client.raw.get_api_for_id("instance", instance["id"])
         self.assertEqual(404, response.status_code)
@@ -174,7 +174,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         execution = self.test_new_execution()
         response = self.client.raw.get_api_for_id("execution/", execution["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.delete_api_for_id("execution/", execution["id"])
+        response = self.client.raw.delete_api_for_id("execution/", execution["id"])
         self.assertEqual(200, response.status_code)
         response = self.client.raw.get_api_for_id("execution/", execution["id"])
         self.assertEqual(404, response.status_code)
@@ -191,7 +191,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_get_dag_schema_no_schema(self):
         response = self.client.raw.get_schema("this_dag_does_not_exist")
-        self.assertTrue("error" in response)
+        self.assertTrue("error" in response.json())
 
     def test_new_execution_bad_dag_name(self):
         one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
@@ -282,7 +282,7 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
     def test_get_one_schema(self):
         response = self.client.raw.get_schema("solve_model_dag")
         self.assertEqual(
-            {"error": "User does not have permission to access this dag"}, response
+            {"error": "User does not have permission to access this dag"}, response.json()
         )
 
 
@@ -402,9 +402,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             instance_id=one_instance["id"],
             schema="solve_model_dag",
         )
-        execution = self.client.create_api("execution/?run=0", json=payload)
+        execution = self.client.raw.create_api("execution/?run=0", json=payload)
         payload = dict(log_text="")
-        response = self.client.put_api_for_id(
+        response = self.client.raw.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
         )
         self.assertEqual(response.status_code, 200)
