@@ -171,7 +171,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
     ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
     ('threads', 'pulp', 'highs') : 'threads' ,
-    ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
     ('rel_optimality_tol', 'pulp', 'highs') : 'gapRel' ,
 
 }
