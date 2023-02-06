@@ -86,11 +86,12 @@ class CaseEndpoint(BaseMetaResource):
         if data_errors:
             raise InvalidData(payload=data_errors)
 
-        # And the solution data
-        solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
-        solution_errors = json_schema_validate(solution_schema, kwargs["solution"])
-        if solution_errors:
-            raise InvalidData(payload=solution_errors)
+        # And the solution data if it exists
+        if kwargs.get("solution") is not None:
+            solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate(solution_schema, kwargs["solution"])
+            if solution_errors:
+                raise InvalidData(payload=solution_errors)
 
         # And if everything is okay: we create the case
         item = CaseModel.from_parent_id(self.get_user(), data)

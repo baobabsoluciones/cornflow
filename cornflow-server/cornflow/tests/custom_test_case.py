@@ -363,7 +363,7 @@ class BaseTestCases:
             self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
 
         # @patch("cornflow.endpoints.instance.get_schema")
-        def test_opt_filters_schema(self, get_schema):
+        def test_opt_filters_schema(self):
             # (we patch the request to airflow to check if the schema is valid)
             # we create 4 instances
             #mock = Mock()
