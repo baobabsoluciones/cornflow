@@ -88,7 +88,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
             "solution_schema": get_pulp_jsonschema(),
             "instance_checks_schema": dict(),
             "solution_checks_schema": dict(),
-            "config_schema": get_empty_schema(dict(timeLimit=1, solvers=["cbc"]))
+            "config_schema": get_empty_schema(solvers=["cbc"])
         })
     ] + [
         DeployedDAG({
