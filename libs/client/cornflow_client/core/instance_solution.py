@@ -309,7 +309,7 @@ class InstanceSolutionCore(ABC):
         """
         Returns the hour preceding the given hour, as a string
         """
-        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S.%f")
         return (date_t - timedelta(hours=1)).isoformat()
 
     @staticmethod
@@ -401,7 +401,7 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_hour_from_datetime_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M')
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
         return datetime_obj.hour
 
     @staticmethod
