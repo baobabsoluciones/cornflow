@@ -163,11 +163,26 @@ class TestSimpleApplicationDag(TestCase):
         expected_result = datetime(2022, 1, 1, 0)
         self.assertEqual(InstanceSolutionCore.get_datetime_from_date_hour(date, hour), expected_result)
 
-    # TODO to complete cases
-    def test_get_date_hour_from_string(self):
-        string = "2022-01-01T00:00:00"
-        expected_result = ("2022-01-01", 0)
-        self.assertEqual(InstanceSolutionCore.get_date_hour_from_string(string), expected_result)
+    def test_get_date_hour_from_string_with_zero_to_twenty_four(self):
+        # Test with zero_to_twenty_four set to True
+        string = "2021-01-01T00:00:00"
+        date, hour = InstanceSolutionCore.get_date_hour_from_string(string, True)
+        self.assertEqual(date, "2021-12-31")
+        self.assertEqual(hour, 24)
+
+    def test_get_date_hour_from_string_without_zero_to_twenty_four(self):
+        # Test with zero_to_twenty_four set to False
+        string = "2021-01-01T00:00:00"
+        date, hour = InstanceSolutionCore.get_date_hour_from_string(string, False)
+        self.assertEqual(date, "2021-01-01")
+        self.assertEqual(hour, 0)
+
+    def test_get_date_hour_from_string_with_noon_time(self):
+        # Test with a string representing noon time
+        string = "2021-01-01T12:00:00"
+        date, hour = InstanceSolutionCore.get_date_hour_from_string(string, False)
+        self.assertEqual(date, "2021-01-01")
+        self.assertEqual(hour, 12)
 
     def test_get_date_string_from_ts(self):
         ts = datetime(2022, 1, 1, 0, 0, 0)
