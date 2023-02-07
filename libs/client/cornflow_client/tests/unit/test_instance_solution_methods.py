@@ -154,13 +154,13 @@ class TestSimpleApplicationDag(TestCase):
 
     def test_get_datetimesec_from_string(self):
         string = "2022-01-01T00:00:00"
-        expected_result = datetime.datetime(2022, 1, 1, 0, 0, 0)
+        expected_result = datetime(2022, 1, 1, 0, 0, 0)
         self.assertEqual(InstanceSolutionCore.get_datetimesec_from_string(string), expected_result)
 
     def test_get_datetime_from_date_hour(self):
         date = "2022-01-01"
         hour = 0
-        expected_result = datetime.datetime(2022, 1, 1, 0)
+        expected_result = datetime(2022, 1, 1, 0)
         self.assertEqual(InstanceSolutionCore.get_datetime_from_date_hour(date, hour), expected_result)
 
     # TODO to complete cases
@@ -170,17 +170,17 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.get_date_hour_from_string(string), expected_result)
 
     def test_get_date_string_from_ts(self):
-        ts = datetime.datetime(2022, 1, 1, 0, 0, 0)
+        ts = datetime(2022, 1, 1, 0, 0, 0)
         expected_result = "2022-01-01"
         self.assertEqual(InstanceSolutionCore.get_date_string_from_ts(ts), expected_result)
 
     def test_get_datetime_string_from_ts(self):
-        ts = datetime.datetime(2022, 1, 1, 0, 0, 0)
+        ts = datetime(2022, 1, 1, 0, 0, 0)
         expected_result = "2022-01-01T00:00"
         self.assertEqual(InstanceSolutionCore.get_datetime_string_from_ts(ts), expected_result)
 
     def test_get_datetimesec_string_from_ts(self):
-        ts = datetime.datetime(2022, 1, 1, 0, 0, 0)
+        ts = datetime(2022, 1, 1, 0, 0, 0)
         expected_result = "2022-01-01T00:00:00"
         self.assertEqual(InstanceSolutionCore.get_datetimesec_string_from_ts(ts), expected_result)
 
@@ -195,8 +195,8 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.get_next_hour_datetimesec_string(string), expected_result)
 
     def test_get_next_hour(self):
-        ts = datetime.datetime(2022, 1, 1, 12)
-        expected = datetime.datetime(2022, 1, 1, 13)
+        ts = datetime(2022, 1, 1, 12)
+        expected = datetime(2022, 1, 1, 13)
         self.assertEqual(InstanceSolutionCore.get_next_hour(ts), expected)
 
     def test_get_previous_hour_datetime_string(self):
