@@ -245,11 +245,12 @@ class InstanceSolutionCore(ABC):
             hour = 0
         return datetime.strptime(f"{date}T{hour}", "%Y-%m-%dT%H")
 
-    def get_date_hour_from_string(self, string: str, zero_to_twenty_four=False):
+    @staticmethod
+    def get_date_hour_from_string(string: str, zero_to_twenty_four=False):
         """
         Returns a tuple (date, hour) from an hour-string
         """
-        date_t = self.get_datetime_from_string(string)
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
         hour = date_t.strftime("%H")
         if hour == "00" and zero_to_twenty_four:
             hour = "24"
@@ -272,19 +273,21 @@ class InstanceSolutionCore(ABC):
         """Returns the string of a given date as 'YYYY-MM-DDTh:m:s'"""
         return datetime.strftime(ts, "%Y-%m-%dT%H:%M:%S")
 
-    def get_next_hour_datetime_string(self, string: str) -> str:
+    @staticmethod
+    def get_next_hour_datetime_string(string: str) -> str:
         """
         Returns the hour following the given hour, as a string
         """
-        return (self.get_datetime_from_string(string) + timedelta(hours=1)).isoformat()
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (date_t + timedelta(hours=1)).isoformat()
 
-    def get_next_hour_datetimesec_string(self, string: str) -> str:
+    @staticmethod
+    def get_next_hour_datetimesec_string(string: str) -> str:
         """
         Returns the hour following the given hour, as a string
         """
-        return (
-            self.get_datetimesec_from_string(string) + timedelta(hours=1)
-        ).isoformat()
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (date_t + timedelta(hours=1)).isoformat()
 
     @staticmethod
     def get_next_hour(ts: datetime) -> datetime:
@@ -293,19 +296,21 @@ class InstanceSolutionCore(ABC):
         """
         return ts + timedelta(hours=1)
 
-    def get_previous_hour_datetime_string(self, string: str) -> str:
+    @staticmethod
+    def get_previous_hour_datetime_string(string: str) -> str:
         """
         Returns the hour preceding the given hour, as a string
         """
-        return (self.get_datetime_from_string(string) - timedelta(hours=1)).isoformat()
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (date_t - timedelta(hours=1)).isoformat()
 
-    def get_previous_hour_datetimesec_string(self, string: str) -> str:
+    @staticmethod
+    def get_previous_hour_datetimesec_string(string: str) -> str:
         """
         Returns the hour preceding the given hour, as a string
         """
-        return (
-            self.get_datetimesec_from_string(string) - timedelta(hours=1)
-        ).isoformat()
+        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (date_t - timedelta(hours=1)).isoformat()
 
     @staticmethod
     def get_previous_hour(ts: datetime) -> datetime:
@@ -329,74 +334,78 @@ class InstanceSolutionCore(ABC):
         """Adds time to a datetime"""
         return ts + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
 
-    def add_time_to_date_string(
-        self, string: str, weeks=0, days=0, minutes=0, seconds=0
-    ) -> str:
-        """Adds time to a datetime"""
-        return self.get_date_string_from_ts(
-            self.get_date_from_string(string)
-            + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
-        )
+    @staticmethod
+    def add_time_to_date_string(string: str, weeks=0, days=0, minutes=0, seconds=0) -> str:
+        """Adds time to a date string"""
+        date = datetime.strptime(string, "%Y-%m-%d").date()
+        return (date + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%d")
 
-    
-    def add_time_to_datetime_string(
-        self, string: str, weeks=0, days=0, minutes=0, seconds=0
-    ) -> str:
+    @staticmethod
+    def add_time_to_datetime_string(string: str, weeks=0, days=0, minutes=0, seconds=0) -> str:
         """Adds time to a datetime"""
-        return self.get_datetime_string_from_ts(
-            self.get_datetime_from_string(string)
-            + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
-        )
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (datetime_object + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%S")
 
-    def add_time_to_datetimesec_string(
-        self, string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0
-    ) -> str:
+    @staticmethod
+    def add_time_to_datetimesec_string(string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0) -> str:
         """Adds time to a datetime"""
-        return self.get_datetimesec_string_from_ts(
-            self.get_datetimesec_from_string(string)
-            + timedelta(
-                days=7 * weeks + days, hours=hours, minutes=minutes, seconds=seconds
-            )
-        )
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return (datetime_object + timedelta(weeks=weeks, days=7 * weeks + days, hours=hours, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%S")
 
     @staticmethod
     def get_week_from_ts(ts: datetime) -> int:
         """Returns the integer value of the week for the given time slot"""
         return ts.isocalendar()[1]
 
-    def get_week_from_date_string(self, string: str) -> int:
+    @staticmethod
+    def get_week_from_date_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        return self.get_week_from_ts(self.get_date_from_string(string))
+        date_object = datetime.strptime(string, "%Y-%m-%d").date()
+        return date_object.isocalendar()[1]
 
-    def get_week_from_datetime_string(self, string: str) -> int:
+    @staticmethod
+    def get_week_from_datetime_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        return self.get_week_from_ts(self.get_datetime_from_string(string))
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return datetime_object.isocalendar()[1]
 
-    def get_week_from_datetimesec_string(self, string: str) -> int:
+    @staticmethod
+    def get_week_from_datetimesec_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        return self.get_week_from_ts(self.get_datetimesec_from_string(string))
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return datetime_object.isocalendar()[1]
 
     @staticmethod
     def get_weekday_from_ts(ts: datetime) -> int:
         """Returns the number of the weekday from a ts"""
         return ts.isocalendar()[2]
 
-    def get_weekday_from_date_string(self, string: str) -> int:
+    @staticmethod
+    def get_weekday_from_date_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DD'"""
-        return self.get_date_from_string(string).isocalendar()[2]
+        date = datetime.strptime(string, '%Y-%m-%d').date()
+        return date.isocalendar()[2]
 
-    def get_weekday_from_datetime_string(self, string: str) -> int:
+    @staticmethod
+    def get_weekday_from_datetime_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDTh:m'"""
-        return self.get_datetime_from_string(string).isocalendar()[2]
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M')
+        return datetime_obj.isocalendar()[2]
 
-    def get_weekday_from_datetimesec_string(self, string: str) -> int:
+    @staticmethod
+    def get_weekday_from_datetimesec_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDT:h:m:s'"""
-        return self.get_datetimesec_from_string(string).isocalendar()[2]
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        return datetime_obj.isocalendar()[2]
 
-    def get_hour_from_datetime_string(self, string: str) -> float:
+    @staticmethod
+    def get_hour_from_datetime_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m'"""
-        return self.get_hour_from_ts(self.get_datetime_from_string(string))
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M')
+        return datetime_obj.hour
 
-    def get_hour_from_datetimesec_string(self, string: str) -> float:
+    @staticmethod
+    def get_hour_from_datetimesec_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m:s'"""
-        return self.get_hour_from_ts(self.get_datetimesec_from_string(string))
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        return datetime_obj.hour
