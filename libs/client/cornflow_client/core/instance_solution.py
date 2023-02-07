@@ -389,7 +389,7 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_weekday_from_datetime_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M')
+        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
         return datetime_obj.isocalendar()[2]
 
     @staticmethod
