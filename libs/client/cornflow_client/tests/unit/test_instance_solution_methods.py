@@ -238,7 +238,7 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(result, expected_date)
 
     def test_add_time_to_datetime_string(self):
-        initial_datetime = "2022-01-01 12:00:00"
+        initial_datetime = "2022-01-01T12:00:00"
         expected_datetime = (datetime.strptime(initial_datetime, "%Y-%m-%d %H:%M:%S")
                             + timedelta(weeks=2, days=3, minutes=45, seconds=30)).strftime("%Y-%m-%d %H:%M:%S")
         result = InstanceSolutionCore.add_time_to_datetime_string(initial_datetime, weeks=2, days=3, minutes=45, seconds=30)
