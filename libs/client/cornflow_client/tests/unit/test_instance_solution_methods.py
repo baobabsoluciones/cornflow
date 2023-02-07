@@ -167,7 +167,7 @@ class TestSimpleApplicationDag(TestCase):
         # Test with zero_to_twenty_four set to True
         string = "2021-01-01T00:00:00"
         date, hour = InstanceSolutionCore.get_date_hour_from_string(string, True)
-        self.assertEqual(date, "2021-12-31")
+        self.assertEqual(date, "2020-12-31")
         self.assertEqual(hour, 24)
 
     def test_get_date_hour_from_string_without_zero_to_twenty_four(self):
