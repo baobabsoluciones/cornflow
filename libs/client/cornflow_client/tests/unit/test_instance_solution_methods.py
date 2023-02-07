@@ -199,14 +199,16 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.get_next_hour(ts), expected)
 
     def test_get_previous_hour_datetime_string(self):
+        instance = self.class_to_use
         input_string = "2022-10-11T15:45:30"
         expected_output = "2022-10-11T14:45:30"
-        self.assertEqual(InstanceSolutionCore.get_previous_hour_datetime_string(input_string), expected_output)
+        self.assertEqual(instance.get_previous_hour_datetime_string(input_string), expected_output)
 
     def test_get_previous_hour_datetimesec_string(self):
+        instance = self.class_to_use
         input_string = "2022-10-11T15:45:30.123456"
         expected_output = "2022-10-11T14:45:30.123456"
-        self.assertEqual(InstanceSolutionCore.get_previous_hour_datetimesec_string(input_string), expected_output)
+        self.assertEqual(instance.get_previous_hour_datetimesec_string(input_string), expected_output)
 
     def test_get_previous_hour(self):
         input_ts = datetime(2022, 10, 11, 15, 45, 30)
@@ -219,9 +221,9 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.get_date_string_from_ts_string(input_ts), expected_output)
 
     def test_get_hour_from_ts(self):
-            input_ts = datetime(2022, 10, 11, 15, 45, 30)
-            expected_output = 15.75
-            self.assertEqual(InstanceSolutionCore.get_hour_from_ts(input_ts), expected_output)
+        input_ts = datetime(2022, 10, 11, 15, 45, 30)
+        expected_output = 15.75
+        self.assertEqual(InstanceSolutionCore.get_hour_from_ts(input_ts), expected_output)
 
     def test_add_time_to_ts(self):
         input_ts = datetime(2022, 10, 11, 15, 45, 30)
@@ -229,22 +231,25 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.add_time_to_ts(input_ts, days=7), expected_output)
 
     def test_add_time_to_date_string(self):
+        instance = self.class_to_use
         initial_date = "2022-10-11"
         expected_date = (datetime.strptime(initial_date, "%Y-%m-%d").date()
                         + timedelta(days=7)).strftime("%Y-%m-%d")
-        result = InstanceSolutionCore.add_time_to_date_string(initial_date, days=7)
+        result = instance.add_time_to_date_string(initial_date, days=7)
         self.assertEqual(result, expected_date)
 
     def test_add_time_to_datetime_string(self):
+        instance = self.class_to_use
         initial_datetime = "2022-01-01 12:00:00"
         expected_datetime = (datetime.strptime(initial_datetime, "%Y-%m-%d %H:%M:%S")
                             + timedelta(weeks=2, days=3, minutes=45, seconds=30)).strftime("%Y-%m-%d %H:%M:%S")
-        result = InstanceSolutionCore.add_time_to_datetime_string(initial_datetime, weeks=2, days=3, minutes=45, seconds=30)
+        result = instance.add_time_to_datetime_string(initial_datetime, weeks=2, days=3, minutes=45, seconds=30)
         self.assertEqual(result, expected_datetime)
 
     def test_add_time_to_datetimesec_string(self):
+        instance = self.class_to_use
         string = "2022-01-01T00:00:00"
-        result = InstanceSolutionCore.add_time_to_datetimesec_string(string, days=1)
+        result = instance.add_time_to_datetimesec_string(string, days=1)
         expected = "2022-01-02T00:00:00"
         self.assertEqual(result, expected)
 
