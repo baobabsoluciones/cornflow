@@ -271,25 +271,25 @@ class TestSimpleApplicationDag(TestCase):
     def test_get_weekday_from_ts(self):
         ts = datetime(2022, 1, 1)
         result = InstanceSolutionCore.get_weekday_from_ts(ts)
-        expected = 7
+        expected = 6
         self.assertEqual(result, expected)
 
     def test_get_weekday_from_date_string(self):
         string = "2022-01-01"
         result = InstanceSolutionCore.get_weekday_from_date_string(string)
-        expected = 7
+        expected = 6
         self.assertEqual(result, expected)
 
     def test_get_weekday_from_datetime_string(self):
         string = "2022-01-01T00:00"
         result = InstanceSolutionCore.get_weekday_from_datetime_string(string)
-        expected = 7
+        expected = 6
         self.assertEqual(result, expected)
 
     def test_get_weekday_from_datetimesec_string(self):
         string = "2022-01-01T00:00:00"
         result = InstanceSolutionCore.get_weekday_from_datetimesec_string(string)
-        expected = 7
+        expected = 6
         self.assertEqual(result, expected)
 
     def test_get_hour_from_datetime_string(self):
