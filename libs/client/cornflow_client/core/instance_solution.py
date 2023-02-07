@@ -329,7 +329,6 @@ class InstanceSolutionCore(ABC):
         """Adds time to a datetime"""
         return ts + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
 
-    @staticmethod
     def add_time_to_date_string(
         self, string: str, weeks=0, days=0, minutes=0, seconds=0
     ) -> str:
@@ -339,7 +338,7 @@ class InstanceSolutionCore(ABC):
             + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
         )
 
-    @staticmethod
+    
     def add_time_to_datetime_string(
         self, string: str, weeks=0, days=0, minutes=0, seconds=0
     ) -> str:
@@ -349,7 +348,6 @@ class InstanceSolutionCore(ABC):
             + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
         )
 
-    @staticmethod
     def add_time_to_datetimesec_string(
         self, string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0
     ) -> str:
@@ -366,17 +364,14 @@ class InstanceSolutionCore(ABC):
         """Returns the integer value of the week for the given time slot"""
         return ts.isocalendar()[1]
 
-    @staticmethod
     def get_week_from_date_string(self, string: str) -> int:
         """Returns the integer value of the week for the given string"""
         return self.get_week_from_ts(self.get_date_from_string(string))
 
-    @staticmethod
     def get_week_from_datetime_string(self, string: str) -> int:
         """Returns the integer value of the week for the given string"""
         return self.get_week_from_ts(self.get_datetime_from_string(string))
 
-    @staticmethod
     def get_week_from_datetimesec_string(self, string: str) -> int:
         """Returns the integer value of the week for the given string"""
         return self.get_week_from_ts(self.get_datetimesec_from_string(string))
@@ -386,27 +381,22 @@ class InstanceSolutionCore(ABC):
         """Returns the number of the weekday from a ts"""
         return ts.isocalendar()[2]
 
-    @staticmethod
     def get_weekday_from_date_string(self, string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DD'"""
         return self.get_date_from_string(string).isocalendar()[2]
 
-    @staticmethod
     def get_weekday_from_datetime_string(self, string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDTh:m'"""
         return self.get_datetime_from_string(string).isocalendar()[2]
 
-    @staticmethod
     def get_weekday_from_datetimesec_string(self, string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDT:h:m:s'"""
         return self.get_datetimesec_from_string(string).isocalendar()[2]
 
-    @staticmethod
     def get_hour_from_datetime_string(self, string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m'"""
         return self.get_hour_from_ts(self.get_datetime_from_string(string))
 
-    @staticmethod
     def get_hour_from_datetimesec_string(self, string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m:s'"""
         return self.get_hour_from_ts(self.get_datetimesec_from_string(string))

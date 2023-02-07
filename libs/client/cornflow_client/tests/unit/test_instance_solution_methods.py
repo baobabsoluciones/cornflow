@@ -229,14 +229,18 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(InstanceSolutionCore.add_time_to_ts(input_ts, days=7), expected_output)
 
     def test_add_time_to_date_string(self):
-        input_string = "2022-10-11"
-        expected_output = "2022-10-18"
-        self.assertEqual(InstanceSolutionCore.add_time_to_date_string(input_string, days=7), expected_output)
+        initial_date = "2022-10-11"
+        expected_date = (datetime.strptime(initial_date, "%Y-%m-%d").date()
+                        + timedelta(days=7)).strftime("%Y-%m-%d")
+        result = InstanceSolutionCore.add_time_to_date_string(initial_date, days=7)
+        self.assertEqual(result, expected_date)
 
     def test_add_time_to_datetime_string(self):
-        input_string = "2022-10-11T15:45:30"
-        expected_output = "2022-10-18T15:45:30"
-        self.assertEqual(InstanceSolutionCore.add_time_to_datetime_string(input_string, days=7), expected_output)
+        initial_datetime = "2022-01-01 12:00:00"
+        expected_datetime = (datetime.strptime(initial_datetime, "%Y-%m-%d %H:%M:%S")
+                            + timedelta(weeks=2, days=3, minutes=45, seconds=30)).strftime("%Y-%m-%d %H:%M:%S")
+        result = InstanceSolutionCore.add_time_to_datetime_string(initial_datetime, weeks=2, days=3, minutes=45, seconds=30)
+        self.assertEqual(result, expected_datetime)
 
     def test_add_time_to_datetimesec_string(self):
         string = "2022-01-01T00:00:00"
@@ -252,19 +256,19 @@ class TestSimpleApplicationDag(TestCase):
 
     def test_get_week_from_date_string(self):
         string = "2022-01-01"
-        result = InstanceSolutionCore.get_week_from_date_string(string)
+        result = InstanceSolutionCore().get_week_from_date_string(string)
         expected = 52
         self.assertEqual(result, expected)
 
     def test_get_week_from_datetime_string(self):
         string = "2022-01-01T00:00"
-        result = InstanceSolutionCore.get_week_from_datetime_string(string)
+        result = InstanceSolutionCore().get_week_from_datetime_string(string)
         expected = 52
         self.assertEqual(result, expected)
 
     def test_get_week_from_datetimesec_string(self):
         string = "2022-01-01T00:00:00"
-        result = InstanceSolutionCore.get_week_from_datetimesec_string(string)
+        result = InstanceSolutionCore().get_week_from_datetimesec_string(string)
         expected = 52
         self.assertEqual(result, expected)
 
@@ -276,32 +280,32 @@ class TestSimpleApplicationDag(TestCase):
 
     def test_get_weekday_from_date_string(self):
         string = "2022-01-01"
-        result = InstanceSolutionCore.get_weekday_from_date_string(string)
+        result = InstanceSolutionCore().get_weekday_from_date_string(string)
         expected = 6
         self.assertEqual(result, expected)
 
     def test_get_weekday_from_datetime_string(self):
         string = "2022-01-01T00:00"
-        result = InstanceSolutionCore.get_weekday_from_datetime_string(string)
+        result = InstanceSolutionCore().get_weekday_from_datetime_string(string)
         expected = 6
         self.assertEqual(result, expected)
 
     def test_get_weekday_from_datetimesec_string(self):
         string = "2022-01-01T00:00:00"
-        result = InstanceSolutionCore.get_weekday_from_datetimesec_string(string)
+        result = InstanceSolutionCore().get_weekday_from_datetimesec_string(string)
         expected = 6
         self.assertEqual(result, expected)
 
     def test_get_hour_from_datetime_string(self):
         datetime_string = "2023-01-01T12:00"
         expected_hour = 12
-        result = InstanceSolutionCore.get_hour_from_datetime_string(datetime_string)
+        result = InstanceSolutionCore().get_hour_from_datetime_string(datetime_string)
         self.assertEqual(result, expected_hour)
 
     def test_get_hour_from_datetimesec_string(self):
         datetime_string = "2023-01-01T12:00:00"
         expected_hour = 12
-        result = InstanceSolutionCore.get_hour_from_datetimesec_string(datetime_string)
+        result = InstanceSolutionCore().get_hour_from_datetimesec_string(datetime_string)
         self.assertEqual(result, expected_hour)
 
 
