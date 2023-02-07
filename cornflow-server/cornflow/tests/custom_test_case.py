@@ -9,7 +9,6 @@ from flask import current_app
 from flask_testing import TestCase
 import json
 import jwt
-from unittest.mock import patch, Mock
 
 # Import from internal modules
 from cornflow.app import create_app
@@ -362,13 +361,9 @@ class BaseTestCases:
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
 
-        # @patch("cornflow.endpoints.instance.get_schema")
         def test_opt_filters_schema(self):
             # (we patch the request to airflow to check if the schema is valid)
             # we create 4 instances
-            #mock = Mock()
-            #mock.load.return_value = True
-            #get_schema.return_value = lambda: mock
             data_many = [self.payload for _ in range(4)]
             data_many[-1] = {**data_many[-1], **dict(schema="timer")}
             allrows = self.get_rows(self.url, data_many)

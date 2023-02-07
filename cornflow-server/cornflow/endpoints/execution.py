@@ -144,8 +144,7 @@ class ExecutionEndpoint(BaseMetaResource):
         schema_info = af_client.get_dag_info(schema)
 
         # Validate config before running the dag
-        config_schema = af_client.get_one_schema(schema, CONFIG_SCHEMA)
-        # config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
+        config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             execution.update_state(
@@ -154,7 +153,6 @@ class ExecutionEndpoint(BaseMetaResource):
                 "Check the log for more details",
             )
             execution.update_log_txt(f"{config_errors}")
-            current_app.logger.warning(f"{config_errors}")
             raise InvalidData(payload=dict(jsonschema_errors=config_errors))
 
         # # Get dag config schema and validate it

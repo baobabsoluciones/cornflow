@@ -158,22 +158,7 @@ class TestSchemaEndpoint(CustomTestCase):
         self.url = SCHEMA_URL
         self.schema_name = "solve_model_dag"
 
-    def patch_af_client(self, Airflow_mock):
-        af_client = Airflow_mock.return_value
-        af_client.is_alive.return_value = True
-        af_client.get_dag_info.return_value = {}
-        af_client.get_schemas_for_dag_name.return_value = dict(
-            instance=self.schema,
-            solution=self.schema,
-            config=self.config,
-            name=self.schema_name,
-        )
-        af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
-        return af_client
-
-    @patch("cornflow.endpoints.schemas.Airflow.from_config")
-    def test_get_schema(self, airflow_init):
-        # af_client = self.patch_af_client(airflow_init)
+    def test_get_schema(self):
         schemas = self.get_one_row(
             self.url + "{}/".format(self.schema_name),
             {},
@@ -185,9 +170,6 @@ class TestSchemaEndpoint(CustomTestCase):
         self.assertEqual(schemas["instance"], self.schema)
         self.assertEqual(schemas["solution"], self.schema)
         self.assertEqual(schemas["config"], self.config)
-        # af_client.is_alive.assert_called_once()
-        # af_client.get_dag_info.assert_called_once()
-        # af_client.get_schemas_for_dag_name.assert_called_once()
 
 
 class TestNewSchemaEndpointOpen(CustomTestCase):
