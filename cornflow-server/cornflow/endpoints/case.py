@@ -6,7 +6,7 @@ These endpoints have different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue, json_schema_validate
+from cornflow_core.shared import validate_and_continue, json_schema_validate_as_string
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -83,16 +83,16 @@ class CaseEndpoint(BaseMetaResource):
         # We validate the instance data if it exists
         if kwargs.get("data") is not None:
             data_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
-            data_errors = json_schema_validate(data_schema, kwargs["data"])
+            data_errors = json_schema_validate_as_string(data_schema, kwargs["data"])
             if data_errors:
-                raise InvalidData(payload=data_errors)
+                raise InvalidData(payload=dict(jsonschema_errors=data_errors))
 
         # And the solution data if it exists
         if kwargs.get("solution") is not None:
             solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
-            solution_errors = json_schema_validate(solution_schema, kwargs["solution"])
+            solution_errors = json_schema_validate_as_string(solution_schema, kwargs["solution"])
             if solution_errors:
-                raise InvalidData(payload=solution_errors)
+                raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
 
         # And if everything is okay: we create the case
         item = CaseModel.from_parent_id(self.get_user(), data)

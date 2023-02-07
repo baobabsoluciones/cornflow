@@ -199,7 +199,7 @@ class TestDeployedDAG(TestCase):
                 "id": "solve_model_dag",
                 "instance_schema": get_pulp_jsonschema(),
                 "solution_schema": get_pulp_jsonschema(),
-                "config_schema": get_empty_schema(solvers=["cbc"]),
+                "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
                 "instance_checks_schema": {},
                 "solution_checks_schema": {}
             }

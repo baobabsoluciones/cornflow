@@ -154,7 +154,7 @@ class TestSchemaEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.schema = get_pulp_jsonschema()
-        self.config = get_empty_schema(solvers=["cbc"])
+        self.config = get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"])
         self.url = SCHEMA_URL
         self.schema_name = "solve_model_dag"
 
