@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 from logging import error
-
+import cornflow
 from cornflow.app import create_app, db
 from cornflow.commands import (
     access_init_command,
@@ -105,6 +105,7 @@ if CORNFLOW_LOGGING == "file":
 # make initdb, access control and/or migrations
 app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
+    path = f"{os.path.dirname(cornflow.__file__)}/migrations"
     migrate = Migrate(app=app, db=db, directory="./cornflow/migrations")
     upgrade()
     access_init_command(0)
