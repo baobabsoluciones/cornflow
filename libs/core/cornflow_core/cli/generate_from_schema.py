@@ -86,13 +86,13 @@ def generate_from_schema(
     name_table = None
     if one:
         name_table = one
-        
-    click.echo("test version of the function")
+
     click.echo("Generating REST API components from the provided JSONSchema")
     click.echo(f"The path to the JSONSchema is {path}")
     click.echo(f"The app_name is {app_name}")
     click.echo(f"The output_path is {output}")
-    click.echo(f"The methods to add is {methods_to_add}")
+    click.echo(f"The method to add are obtained from {endpoints_methods}")
+    click.echo(f"The methods to add are {methods_to_add}")
     click.echo(f"The name_table is {name_table}")
 
     APIGenerator(
