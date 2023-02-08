@@ -150,6 +150,7 @@ elif EXTERNAL_APP == 1:
         os.chdir("/usr/src/external_app")
         os.system("$(command -v pip) install --user -r requirements.txt")
         sys.path.append("/usr/src/external_app")
+        print(f"PATH: {sys.path}")
         from importlib import import_module
 
         external_app = import_module(os.getenv("EXTERNAL_APP_MODULE"))
@@ -160,7 +161,7 @@ elif EXTERNAL_APP == 1:
             upgrade()
 
         os.system(
-            f"/usr/local/bin/gunicorn -c {os.getenv('EXTERNAL_APP_MODULE')}/gunicorn.py "
+            f"/usr/local/bin/gunicorn -c /user/src/app/gunicorn.py "
             f"\"wsgi:create_app('$FLASK_ENV')\""
         )
     except:
