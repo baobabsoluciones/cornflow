@@ -74,7 +74,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
                 err = "Airflow is not accessible"
                 raise AirflowError(
                     error=err,
-                    log_txt=f"Error while user {self.get_user_id()} tries to get the schemas for dag {dag_name}. " + err
+                    log_txt=f"Error while user {self.get_user()} tries to get the schemas for dag {dag_name}. " + err
                 )
 
             # try airflow and see if dag_name exists
@@ -88,5 +88,5 @@ class SchemaDetailsEndpoint(BaseMetaResource):
             raise NoPermission(
                 error=err,
                 status_code=403,
-                log_txt=f"Error while user {self.get_user_id()} tries to get the schemas for dag {dag_name}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the schemas for dag {dag_name}. " + err
             )

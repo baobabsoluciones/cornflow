@@ -88,7 +88,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             raise InvalidUsage(
                 error="You have no permission to access given user",
                 status_code=400,
-                log_txt=f"Error while user {self.get_user_id()} tries to get the details of user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to get the details of user {user_id}. "
                         f"The user does not have permission."
 
             )
@@ -106,19 +106,19 @@ class UserDetailsEndpoint(BaseMetaResource):
         """
         if self.get_user_id() != user_id and not self.is_admin():
             raise NoPermission(
-                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
                         f"The user does not have permission."
             )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
                         f"The user to delete does not exists."
             )
         # Service user can not be deleted
         if user_obj.is_service_user():
             raise NoPermission(
-                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
                         f"The user to delete is a service user and therefore can not be deleted."
             )
         current_app.logger.info(f"User {user_obj.id} was deleted by user {self.get_user()}")
@@ -140,13 +140,13 @@ class UserDetailsEndpoint(BaseMetaResource):
         """
         if self.get_user_id() != user_id and not self.is_admin():
             raise NoPermission(
-                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                         f"The user does not have permission."
             )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                         f"The user to edit does not exist."
             )
         # working with a ldap service users cannot be edited.
@@ -156,7 +156,7 @@ class UserDetailsEndpoint(BaseMetaResource):
         ):
             raise EndpointNotImplemented(
                 "To edit a user, go to LDAP server",
-                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                         f"To edit a user, go to LDAP server."
             )
         # working with an OID provider users can not be edited
@@ -166,7 +166,7 @@ class UserDetailsEndpoint(BaseMetaResource):
         ):
             raise EndpointNotImplemented(
                 "To edit a user, go to the OID provider",
-                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                         f"To edit a user, go to the OID provider."
             )
 
@@ -175,7 +175,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             if not check:
                 raise InvalidCredentials(
                     msg,
-                    log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                    log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                     f"The new password is not valid."
                 )
 
@@ -184,7 +184,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             if not check:
                 raise InvalidCredentials(
                     msg,
-                    log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                    log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                     f"The new email is not valid."
                 )
 
@@ -217,7 +217,7 @@ class ToggleUserAdmin(BaseMetaResource):
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                 f"The user to edit does not exist."
             )
         if make_admin:

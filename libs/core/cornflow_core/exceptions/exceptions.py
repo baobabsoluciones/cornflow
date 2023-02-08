@@ -25,8 +25,8 @@ class InvalidUsage(Exception):
         self.payload = payload
         if log_txt is not None:
             self.log_txt = log_txt
-        elif error is not None:
-            self.log_txt = error
+        else:
+            self.log_txt = self.error
 
     def to_dict(self):
         """

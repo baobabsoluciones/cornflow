@@ -51,7 +51,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
             action_id=kwargs.get("action_id"),
         ):
             raise ObjectAlreadyExists(
-                log_txt=f"Error while user {self.get_user_id()} tries to create a new permission. "
+                log_txt=f"Error while user {self.get_user()} tries to create a new permission. "
                         f"The permission already exists."
             )
         else:

@@ -44,7 +44,7 @@ class Auth(BaseAuth):
                     raise InvalidData(
                         error="The request does not specify a schema to use",
                         status_code=400,
-                        log_txt=f"Error while user {user_id} tries to access a dag. "
+                        log_txt=f"Error while user {g.user} tries to access a dag. "
                                 f"The schema is not specified in the request."
                     )
                 else:
@@ -55,7 +55,7 @@ class Auth(BaseAuth):
                         raise NoPermission(
                             error="You do not have permission to use this DAG",
                             status_code=403,
-                            log_txt=f"Error while user {user_id} tries to access dag {dag_id}. "
+                            log_txt=f"Error while user {g.user} tries to access dag {dag_id}. "
                                     f"The user does not have permission to access the dag."
                         )
             else:

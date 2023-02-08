@@ -236,14 +236,14 @@ class InstanceFileEndpoint(BaseMetaResource):
             err = "No file was provided"
             raise InvalidUsage(
                 error=err,
-                log_txt=f"Error while user {self.get_user_id()} tries to create instance from mps file. " + err
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. " + err
             )
         file = request.files["file"]
         filename = secure_filename(file.filename)
         if not (file and allowed_file(filename)):
             raise InvalidUsage(
                 error=f"Could not open file to upload. Check the extension matches {ALLOWED_EXTENSIONS}",
-                log_txt=f"Error while user {self.get_user_id()} tries to create instance from mps file. "
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
                         f"Could not open the file to upload."
             )
         file.save(filename)
@@ -253,7 +253,7 @@ class InstanceFileEndpoint(BaseMetaResource):
         except:
             raise InvalidUsage(
                 error="There was an error reading the file",
-                log_txt=f"Error while user {self.get_user_id()} tries to create instance from mps file. "
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
                         f"There was an error reading the file."
             )
         try:

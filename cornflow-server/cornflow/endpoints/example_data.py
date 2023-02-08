@@ -66,5 +66,5 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
             raise NoPermission(
                 error=err,
                 status_code=403,
-                log_txt=f"Error while user {user.id} tries to get example data for dag {dag_name}. " + err
+                log_txt=f"Error while user {user} tries to get example data for dag {dag_name}. " + err
             )

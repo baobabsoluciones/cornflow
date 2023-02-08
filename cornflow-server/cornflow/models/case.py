@@ -108,13 +108,13 @@ class CaseModel(BaseDataModel):
         if parent is None:
             raise ObjectDoesNotExist(
                 "Parent does not exist",
-                log_txt=f"Error while user {user.id} tries to create a new case. "
+                log_txt=f"Error while user {user} tries to create a new case. "
                         f"The parent does not exist."
             )
         if parent.data is not None:
             raise InvalidData(
                 "Parent cannot be a case",
-                log_txt=f"Error while user {user.id} tries to create a new case. "
+                log_txt=f"Error while user {user} tries to create a new case. "
                         f"The parent is not a directory."
             )
         return cls(data, parent=parent)

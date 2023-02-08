@@ -70,7 +70,7 @@ class UserRoleListEndpoint(BaseMetaResource):
             err = "The role assignments have to be created in the directory"
             raise EndpointNotImplemented(
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to create a new role assignment. " + err
+                log_txt=f"Error while user {self.get_user()} tries to create a new role assignment. " + err
             )
 
         # Check if the assignation is disabled, or it does exist
@@ -79,7 +79,7 @@ class UserRoleListEndpoint(BaseMetaResource):
             return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
             raise ObjectAlreadyExists(
-                log_txt=f"Error while user {self.get_user_id()} tries to create a new role assignment. "
+                log_txt=f"Error while user {self.get_user()} tries to create a new role assignment. "
                         f"The role assignment already exists."
             )
         else:
@@ -138,7 +138,7 @@ class UserRoleDetailEndpoint(BaseMetaResource):
             err = "The roles have to be deleted in the directory."
             raise EndpointNotImplemented(
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to delete a user role assignment. " + err
+                log_txt=f"Error while user {self.get_user()} tries to delete a user role assignment. " + err
             )
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"

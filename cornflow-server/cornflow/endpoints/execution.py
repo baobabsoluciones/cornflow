@@ -120,7 +120,7 @@ class ExecutionEndpoint(BaseMetaResource):
             err = "The instance to solve does not exist"
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution "
+                log_txt=f"Error while user {self.get_user()} tries to create an execution "
                         f"for instance {execution.instance_id}. " + err
             )
 
@@ -145,7 +145,7 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution " + err
+                log_txt=f"Error while user {self.get_user()} tries to create an execution " + err
             )
         # ask airflow if dag_name exists
         schema = execution.schema
@@ -163,7 +163,7 @@ class ExecutionEndpoint(BaseMetaResource):
             execution.update_log_txt(f"{config_errors}")
             raise InvalidData(
                 payload=config_errors,
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution. "
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                         f"Configuration data does not match the jsonschema."
             )
 
@@ -183,7 +183,7 @@ class ExecutionEndpoint(BaseMetaResource):
             execution.update_log_txt(f"{instance_errors}")
             raise InvalidData(
                 payload=instance_errors,
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution. "
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                         f"Instance data does not match the jsonschema."
             )
 
@@ -202,7 +202,7 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution. " + err
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. " + err
             )
 
         try:
@@ -217,7 +217,7 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to create an execution. " + error
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. " + error
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -267,7 +267,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             err = "The execution to re-solve does not exist"
             raise ObjectDoesNotExist(
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to relaunch execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
             )
 
         execution.update({"checks": None})
@@ -299,7 +299,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to relaunch execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
 
             )
         # ask airflow if dag_name exists
@@ -317,7 +317,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to relaunch execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
             )
 
         try:
@@ -332,7 +332,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user_id()} tries to relaunch execution {idx}. " + error
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + error
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -426,7 +426,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user_id()} tries to stop execution {idx}. "
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
                         f"The execution does not exist."
             )
         af_client = Airflow.from_config(current_app.config)
@@ -434,7 +434,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             err = "Airflow is not accessible"
             raise AirflowError(
                 error=err,
-                log_txt=f"Error while user {self.get_user_id()} tries to stop execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. " + err
             )
         response = af_client.set_dag_run_to_fail(
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
@@ -470,7 +470,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user_id()} tries to get the status of execution {idx}. "
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
                         f"The execution does not exist."
             )
         if execution.state not in [
@@ -495,7 +495,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 execution,
                 state=EXEC_STATE_ERROR,
                 error="The execution has no dag_run associated",
-                log_txt=f"Error while user {self.get_user_id()} tries to get the status of execution {idx}. "
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
                         f"The execution has no associated dag run id."
             )
 
@@ -505,7 +505,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(
                 execution,
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to get the status of execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. " + err
             )
 
         try:
@@ -518,7 +518,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(
                 execution,
                 error,
-                log_txt=f"Error while user {self.get_user_id()} tries to get the status of execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. " + err
             )
 
         data = response.json()

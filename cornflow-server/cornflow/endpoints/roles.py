@@ -66,7 +66,7 @@ class RolesListEndpoint(BaseMetaResource):
             err = "The roles have to be created in the directory."
             raise EndpointNotImplemented(
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to create "
+                log_txt=f"Error while user {self.get_user()} tries to create "
                         f"a new role through the endpoint. " + err
             )
         current_app.logger.info(f"User {self.get_user()} creates a new role")
@@ -120,7 +120,7 @@ class RoleDetailEndpoint(BaseMetaResource):
             err = "The roles have to be modified in the directory."
             raise EndpointNotImplemented(
                 err,
-                log_txt=f"Error while user {self.get_user_id()} tries to edit "
+                log_txt=f"Error while user {self.get_user()} tries to edit "
                         f"a role through the endpoint. " + err
             )
         current_app.logger.info(f"User {self.get_user()} edits role {idx}")
@@ -145,5 +145,5 @@ class RoleDetailEndpoint(BaseMetaResource):
         err = "Roles can not be deleted"
         raise EndpointNotImplemented(
             err,
-            log_txt=f"Error while user {self.get_user_id()} tries to delete a role. " + err
+            log_txt=f"Error while user {self.get_user()} tries to delete a role. " + err
         )
