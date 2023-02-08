@@ -106,40 +106,39 @@ if CORNFLOW_LOGGING == "file":
         print(error)
 
 # make initdb, access control and/or migrations
-app = create_app(ENV, CORNFLOW_DB_CONN)
-with app.app_context():
-    path = f"{os.path.dirname(cornflow.__file__)}/migrations"
-    migrate = Migrate(app=app, db=db, directory=path)
-    upgrade()
-    access_init_command(0)
-    # create user if auth type is db or oid
-    if AUTH == 1 or AUTH == 0:
-        # create cornflow admin user
-        create_user_with_role(
-            CORNFLOW_ADMIN_USER,
-            CORNFLOW_ADMIN_EMAIL,
-            CORNFLOW_ADMIN_PWD,
-            "admin",
-            ADMIN_ROLE,
-            verbose=1,
-        )
-        # create cornflow service user
-        create_user_with_role(
-            CORNFLOW_SERVICE_USER,
-            CORNFLOW_SERVICE_EMAIL,
-            CORNFLOW_SERVICE_PWD,
-            "serviceuser",
-            SERVICE_ROLE,
-            verbose=1,
-        )
-    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-    register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
-    update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-
-
 EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
 info(f"EXTERNAL_APP: {EXTERNAL_APP}")
 if EXTERNAL_APP == 0:
+    app = create_app(ENV, CORNFLOW_DB_CONN)
+    with app.app_context():
+        path = f"{os.path.dirname(cornflow.__file__)}/migrations"
+        migrate = Migrate(app=app, db=db, directory=path)
+        upgrade()
+        access_init_command(0)
+        # create user if auth type is db or oid
+        if AUTH == 1 or AUTH == 0:
+            # create cornflow admin user
+            create_user_with_role(
+                CORNFLOW_ADMIN_USER,
+                CORNFLOW_ADMIN_EMAIL,
+                CORNFLOW_ADMIN_PWD,
+                "admin",
+                ADMIN_ROLE,
+                verbose=1,
+            )
+            # create cornflow service user
+            create_user_with_role(
+                CORNFLOW_SERVICE_USER,
+                CORNFLOW_SERVICE_EMAIL,
+                CORNFLOW_SERVICE_PWD,
+                "serviceuser",
+                SERVICE_ROLE,
+                verbose=1,
+            )
+        register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+        register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
+        update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+
     # execute gunicorn application
     os.system(
         "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
@@ -159,6 +158,29 @@ elif EXTERNAL_APP == 1:
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
+            access_init_command(0)
+            if AUTH == 1 or AUTH == 0:
+                # create cornflow admin user
+                create_user_with_role(
+                    CORNFLOW_ADMIN_USER,
+                    CORNFLOW_ADMIN_EMAIL,
+                    CORNFLOW_ADMIN_PWD,
+                    "admin",
+                    ADMIN_ROLE,
+                    verbose=1,
+                )
+                # create cornflow service user
+                create_user_with_role(
+                    CORNFLOW_SERVICE_USER,
+                    CORNFLOW_SERVICE_EMAIL,
+                    CORNFLOW_SERVICE_PWD,
+                    "serviceuser",
+                    SERVICE_ROLE,
+                    verbose=1,
+                )
+            register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+            register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
+            update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
         os.system(
             f"/usr/local/bin/gunicorn -c /user/src/app/gunicorn.py "
