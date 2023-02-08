@@ -29,7 +29,7 @@ ENV PYTHONUNBUFFERED 1
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt --force-reinstall
-RUN pip install "git+ssh://git@github.com/baobabsoluciones/cornflow/@feature/package#subdirectory=cornflow-server"
+RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/package#subdirectory=cornflow-server"
 
 # copy project
 # COPY cornflow /usr/src/app/cornflow
