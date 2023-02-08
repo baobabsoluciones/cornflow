@@ -160,9 +160,7 @@ elif EXTERNAL_APP == 1:
             f"\"wsgi:create_app('$FLASK_ENV')\""
         )
     except:
-        os.system(
-            "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
-        )
+        pass
 
 else:
     pass
