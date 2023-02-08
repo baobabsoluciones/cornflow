@@ -143,21 +143,26 @@ if EXTERNAL_APP == 0:
     )
 
 elif EXTERNAL_APP == 1:
-    os.chdir("/usr/src/external_app")
-    os.system("$(command -v pip) install --user -r /requirements.txt")
-    from importlib import import_module
+    try:
+        os.chdir("/usr/src/external_app")
+        os.system("$(command -v pip) install --user -r /requirements.txt")
+        from importlib import import_module
 
-    external_app = import_module(os.getenv("EXTERNAL_APP_MODULE"))
-    app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
-    with app.app_context():
-        path = f"{os.path.dirname(external_app.__file__)}/migrations"
-        migrate = Migrate(app=app, db=db, directory=path)
-        upgrade()
+        external_app = import_module(os.getenv("EXTERNAL_APP_MODULE"))
+        app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
+        with app.app_context():
+            path = f"{os.path.dirname(external_app.__file__)}/migrations"
+            migrate = Migrate(app=app, db=db, directory=path)
+            upgrade()
 
-    os.system(
-        f"/usr/local/bin/gunicorn -c {os.getenv('EXTERNAL_APP_MODULE')}/gunicorn.py "
-        f"\"wsgi:create_app('$FLASK_ENV')\""
-    )
+        os.system(
+            f"/usr/local/bin/gunicorn -c {os.getenv('EXTERNAL_APP_MODULE')}/gunicorn.py "
+            f"\"wsgi:create_app('$FLASK_ENV')\""
+        )
+    except:
+        os.system(
+            "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
+        )
 
 else:
     pass
