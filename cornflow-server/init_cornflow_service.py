@@ -106,7 +106,7 @@ if CORNFLOW_LOGGING == "file":
 app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
     path = f"{os.path.dirname(cornflow.__file__)}/migrations"
-    migrate = Migrate(app=app, db=db, directory="./cornflow/migrations")
+    migrate = Migrate(app=app, db=db, directory=path)
     upgrade()
     access_init_command(0)
     # create user if auth type is db or oid
