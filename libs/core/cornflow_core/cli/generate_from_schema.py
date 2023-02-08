@@ -3,7 +3,6 @@ File that implements the generate from schema cli command
 """
 import click
 import json
-from tools import load_json
 from cornflow_core.cli.tools.api_generator import APIGenerator
 
 METHOD_OPTIONS = [
