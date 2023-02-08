@@ -17,7 +17,10 @@ from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
+print(f"CURRENT WD: {os.getcwd()}")
+print(f"PATH: {sys.path}")
 os.chdir("/usr/src/app")
+print(f"CURRENT WD: {os.getcwd()}")
 ENV = os.getenv("FLASK_ENV", "development")
 os.environ["FLASK_ENV"] = ENV
 
