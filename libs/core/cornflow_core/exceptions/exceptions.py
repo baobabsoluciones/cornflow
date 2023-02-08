@@ -130,6 +130,7 @@ def initialize_errorhandlers(app):
 
     @app.errorhandler(InvalidUsage)
     @app.errorhandler(ObjectDoesNotExist)
+    @app.errorhandler(ObjectAlreadyExists)
     @app.errorhandler(NoPermission)
     @app.errorhandler(InvalidCredentials)
     @app.errorhandler(EndpointNotImplemented)
@@ -146,8 +147,7 @@ def initialize_errorhandlers(app):
         :return: an HTTP response
         :rtype: `Response`
         """
-        app.logger.error(f"Log txt {error.log_txt}")
-        app.logger.error(f"Error {error.error}")
+        app.logger.error(f"{error.log_txt}")
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
