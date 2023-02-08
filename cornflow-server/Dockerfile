@@ -37,7 +37,6 @@ RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/packag
 # COPY cornflow/migrations /usr/src/app/migrations
 # COPY examples /usr/src/app/examples
 COPY init_cornflow_service.py /usr/src/app/
-COPY /usr/src/extenal_app /usr/src/app
 RUN mkdir -p /usr/src/app/log
 
 EXPOSE 5000
