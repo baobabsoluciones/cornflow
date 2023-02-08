@@ -93,14 +93,19 @@ PULP_STATUS_MAPPING = {
 
 class AirflowError(Exception):
     status_code = 400
+    log_txt = "Unknown error"
 
-    def __init__(self, error=None, status_code=None, payload=None):
+    def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self)
         if error is not None:
             self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+        if log_txt is not None:
+            self.log_txt = log_txt
+        elif error is not None:
+            self.log_txt = error
 
     def to_dict(self):
         rv = dict(self.payload or ())

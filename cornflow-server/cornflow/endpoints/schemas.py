@@ -6,7 +6,6 @@ Endpoints to get the schemas
 from cornflow_client.airflow.api import Airflow
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
-import logging as log
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
@@ -40,7 +39,7 @@ class SchemaEndpoint(BaseMetaResource):
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
-        log.info("User gets list of schema")
+        current_app.logger.info("User gets list of schema")
         return available_dags
 
 
@@ -69,19 +68,25 @@ class SchemaDetailsEndpoint(BaseMetaResource):
         if permission:
             af_client = Airflow.from_config(current_app.config)
             if not af_client.is_alive():
-                log.error(
+                current_app.logger.error(
                     "Airflow not accessible when getting schema {}".format(dag_name)
                 )
-                raise AirflowError(error="Airflow is not accessible")
+                err = "Airflow is not accessible"
+                raise AirflowError(
+                    error=err,
+                    log_txt=f"Error while user {self.get_user_id()} tries to get the schemas for dag {dag_name}. " + err
+                )
 
             # try airflow and see if dag_name exists
             af_client.get_dag_info(dag_name)
 
-            log.info("User gets schema {}".format(dag_name))
+            current_app.logger.info("User gets schema {}".format(dag_name))
             # it exists: we try to get its schemas
             return af_client.get_schemas_for_dag_name(dag_name)
         else:
+            err = "User does not have permission to access this dag"
             raise NoPermission(
-                error="User does not have permission to access this dag",
+                error=err,
                 status_code=403,
+                log_txt=f"Error while user {self.get_user_id()} tries to get the schemas for dag {dag_name}. " + err
             )

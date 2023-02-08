@@ -45,6 +45,7 @@ class UserRoleListEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
 
         """
+        current_app.logger.info(f"User {self.get_user()} gets all user roles assignments")
         return self.get_list()
 
     @doc(description="Creates a new role assignment", tags=["User roles"])
@@ -66,18 +67,25 @@ class UserRoleListEndpoint(BaseMetaResource):
         """
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
+            err = "The role assignments have to be created in the directory"
             raise EndpointNotImplemented(
-                "The role assignments have to be created in the directory"
+                err,
+                log_txt=f"Error while user {self.get_user_id()} tries to create a new role assignment. " + err
             )
 
         # Check if the assignation is disabled, or it does exist
         if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
+            current_app.logger.info(f"User {self.get_user()} creates a new role assignment")
             return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
-            raise ObjectAlreadyExists()
+            raise ObjectAlreadyExists(
+                log_txt=f"Error while user {self.get_user_id()} tries to create a new role assignment. "
+                        f"The role assignment already exists."
+            )
         else:
             # Admin id so it does not override user_id that appear on the table based on the user that makes
             # the request that doesn't have to be the user that is getting a role
+            current_app.logger.info(f"User {self.get_user()} creates a new role assignment")
             return self.post_list(kwargs, trace_field="admin_id")
 
 
@@ -104,6 +112,9 @@ class UserRoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(
+            f"User {self.get_user()} gets details of user role assignment for user {user_id} and role {role_id}"
+        )
         return self.get_detail(user_id=user_id, role_id=role_id)
 
     @doc(description="Deletes one user role assignment", tags=["User roles"])
@@ -124,7 +135,12 @@ class UserRoleDetailEndpoint(BaseMetaResource):
         #  like in UserDetailsEndpoint.put
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
+            err = "The roles have to be deleted in the directory."
             raise EndpointNotImplemented(
-                "The roles have to be created in the directory."
+                err,
+                log_txt=f"Error while user {self.get_user_id()} tries to delete a user role assignment. " + err
             )
+        current_app.logger.info(
+            f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
+        )
         return self.delete_detail(user_id=user_id, role_id=role_id)

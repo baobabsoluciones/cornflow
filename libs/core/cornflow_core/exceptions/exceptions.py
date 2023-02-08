@@ -14,14 +14,19 @@ class InvalidUsage(Exception):
 
     status_code = 400
     error = "Unknown error"
+    log_txt = "Unknown error"
 
-    def __init__(self, error=None, status_code=None, payload=None):
+    def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self)
         if error is not None:
             self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+        if log_txt is not None:
+            self.log_txt = log_txt
+        elif error is not None:
+            self.log_txt = error
 
     def to_dict(self):
         """
@@ -141,7 +146,7 @@ def initialize_errorhandlers(app):
         :return: an HTTP response
         :rtype: `Response`
         """
-        app.logger.error(error.error)
+        app.logger.error(error.log_txt)
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response

@@ -2,11 +2,11 @@ def register_deployed_dags_command(
     url: str = None, user: str = None, pwd: str = None, verbose: int = 0
 ):
     # Full imports
-    import logging as log
     import time
 
     # Partial imports
     from sqlalchemy.exc import DBAPIError, IntegrityError
+    from flask import current_app
 
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
@@ -19,12 +19,12 @@ def register_deployed_dags_command(
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
-            log.info(f"Airflow is not reachable (attempt {attempts})")
+            current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
-            log.info("Airflow is not reachable")
+            current_app.logger.info("Airflow is not reachable")
         return False
 
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
@@ -45,16 +45,16 @@ def register_deployed_dags_command(
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        log.error(f"Integrity error on deployed dags register: {e}")
+        current_app.logger.error(f"Integrity error on deployed dags register: {e}")
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on deployed dags register: {e}")
+        current_app.logger.error(f"Unknown error on deployed dags register: {e}")
 
     if verbose == 1:
         if len(processed_dags) > 0:
-            log.info(f"DAGs registered: {processed_dags}")
+            current_app.logger.info(f"DAGs registered: {processed_dags}")
         else:
-            log.info("No new DAGs")
+            current_app.logger.info("No new DAGs")
     return True
 
 

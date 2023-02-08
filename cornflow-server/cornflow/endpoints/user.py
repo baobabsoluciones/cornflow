@@ -2,7 +2,6 @@
 Endpoints for the user profiles
 """
 # Full imports
-import logging as log
 
 from cornflow_core.authentication import authenticate
 from cornflow_core.exceptions import (
@@ -59,6 +58,7 @@ class UserEndpoint(BaseMetaResource):
         :return: A dictionary with the user data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets all users")
         return self.get_list()
 
 
@@ -86,9 +86,13 @@ class UserDetailsEndpoint(BaseMetaResource):
         """
         if self.get_user_id() != user_id and not self.is_admin():
             raise InvalidUsage(
-                error="You have no permission to access given user", status_code=400
-            )
+                error="You have no permission to access given user",
+                status_code=400,
+                log_txt=f"Error while user {self.get_user_id()} tries to get the details of user {user_id}. "
+                        f"The user does not have permission."
 
+            )
+        current_app.logger.info(f"User {self.get_user()} gets details of user {user_id}")
         return self.get_detail(idx=user_id)
 
     @doc(description="Delete a user", tags=["Users"])
@@ -101,14 +105,23 @@ class UserDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         if self.get_user_id() != user_id and not self.is_admin():
-            raise NoPermission()
+            raise NoPermission(
+                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                        f"The user does not have permission."
+            )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            raise ObjectDoesNotExist()
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                        f"The user to delete does not exists."
+            )
         # Service user can not be deleted
         if user_obj.is_service_user():
-            raise NoPermission()
-        log.info(f"User {user_obj.id} was deleted by user {self.get_user()}")
+            raise NoPermission(
+                log_txt=f"Error while user {self.get_user_id()} tries to delete user {user_id}. "
+                        f"The user to delete is a service user and therefore can not be deleted."
+            )
+        current_app.logger.info(f"User {user_obj.id} was deleted by user {self.get_user()}")
         return self.delete_detail(idx=user_id)
 
     @doc(description="Edit a user", tags=["Users"])
@@ -126,40 +139,62 @@ class UserDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         if self.get_user_id() != user_id and not self.is_admin():
-            raise NoPermission()
+            raise NoPermission(
+                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                        f"The user does not have permission."
+            )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            raise ObjectDoesNotExist()
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                        f"The user to edit does not exist."
+            )
         # working with a ldap service users cannot be edited.
         if (
             current_app.config["AUTH_TYPE"] == AUTH_LDAP
             and user_obj.comes_from_external_provider()
         ):
-            raise EndpointNotImplemented("To edit a user, go to LDAP server")
+            raise EndpointNotImplemented(
+                "To edit a user, go to LDAP server",
+                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                        f"To edit a user, go to LDAP server."
+            )
         # working with an OID provider users can not be edited
         if (
             current_app.config["AUTH_TYPE"] == AUTH_OID
             and user_obj.comes_from_external_provider()
         ):
-            raise EndpointNotImplemented("To edit a user, go to the OID provider")
+            raise EndpointNotImplemented(
+                "To edit a user, go to the OID provider",
+                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                        f"To edit a user, go to the OID provider."
+            )
 
         if data.get("password"):
             check, msg = check_password_pattern(data.get("password"))
             if not check:
-                raise InvalidCredentials(msg)
+                raise InvalidCredentials(
+                    msg,
+                    log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                    f"The new password is not valid."
+                )
 
         if data.get("email"):
             check, msg = check_email_pattern(data.get("email"))
             if not check:
-                raise InvalidCredentials(msg)
+                raise InvalidCredentials(
+                    msg,
+                    log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                    f"The new email is not valid."
+                )
 
-        log.info(f"User {user_id} was edited by user {self.get_user()}")
+        current_app.logger.info(f"User {user_id} was edited by user {self.get_user()}")
         return self.put_detail(data=data, idx=user_id, track_user=False)
 
 
 class ToggleUserAdmin(BaseMetaResource):
     """
-    Endpoint to convert a user into and admin or to revoke admin privileges from a suer
+    Endpoint to convert a user into and admin or to revoke admin privileges from a user
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
@@ -181,20 +216,24 @@ class ToggleUserAdmin(BaseMetaResource):
         """
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
-            raise ObjectDoesNotExist()
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user_id()} tries to edit user {user_id}. "
+                f"The user to edit does not exist."
+            )
         if make_admin:
             UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
+            current_app.logger.info(f"User {user_id} was made into an admin")
         else:
             UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
+            current_app.logger.info(f"User {user_id} was removed admin role")
             try:
                 db.session.commit()
             except IntegrityError as e:
                 db.session.rollback()
-                log.error(f"Integrity error on privileges: {e}")
+                current_app.logger.error(f"Integrity error on privileges: {e}")
             except DBAPIError as e:
                 db.session.rollback()
-                log.error(f"Unknown error on privileges: {e}")
-
+                current_app.logger.error(f"Unknown error on privileges: {e}")
         return user_obj, 200
 
 
@@ -221,5 +260,5 @@ class RecoverPassword(RecoverPasswordBaseEndpoint):
 
         response, status = self.recover_password(kwargs.get("email"))
 
-        log.info(f"User with email {kwargs.get('email')} has requested a new password")
+        current_app.logger.info(f"User with email {kwargs.get('email')} has requested a new password")
         return response, status

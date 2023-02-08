@@ -69,5 +69,5 @@ class SignupBaseEndpoint(BaseMetaResource):
             raise InvalidUsage(
                 error="Error in generating user token: " + str(e), status_code=400
             )
-
+        current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201

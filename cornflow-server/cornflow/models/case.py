@@ -4,7 +4,7 @@ Model for the cases
 
 # Import from libraries
 import jsonpatch
-import logging as log
+from flask import current_app
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
@@ -106,9 +106,17 @@ class CaseModel(BaseDataModel):
         # we look for the parent object
         parent = cls.get_one_object(user=user, idx=data["parent_id"])
         if parent is None:
-            raise ObjectDoesNotExist("Parent does not exist")
+            raise ObjectDoesNotExist(
+                "Parent does not exist",
+                log_txt=f"Error while user {user.id} tries to create a new case. "
+                        f"The parent does not exist."
+            )
         if parent.data is not None:
-            raise InvalidData("Parent cannot be a case")
+            raise InvalidData(
+                "Parent cannot be a case",
+                log_txt=f"Error while user {user.id} tries to create a new case. "
+                        f"The parent is not a directory."
+            )
         return cls(data, parent=parent)
 
     def patch(self, data):
@@ -159,10 +167,10 @@ class CaseModel(BaseDataModel):
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            log.error(f"Error on deletion of case and children cases: {e}")
+            current_app.logger.error(f"Error on deletion of case and children cases: {e}")
         except DBAPIError as e:
             db.session.rollback()
-            log.error(f"Unknown error on deletion of case and children cases: {e}")
+            current_app.logger.error(f"Unknown error on deletion of case and children cases: {e}")
 
     @staticmethod
     def apply_patch(original_data, data_patch):

@@ -12,6 +12,7 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
+from logging.config import dictConfig
 
 # Module imports
 from .commands.access import access_init_command
@@ -37,6 +38,7 @@ from cornflow_core.exceptions import initialize_errorhandlers
 from cornflow_core.shared import db, bcrypt
 
 from .shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
+from .shared.log_config import log_config
 
 
 def create_app(env_name="development", dataconn=None):
@@ -47,6 +49,7 @@ def create_app(env_name="development", dataconn=None):
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
+    dictConfig(log_config(app_config[env_name].LOG_LEVEL))
 
     app = Flask(__name__)
     app.config.from_object(app_config[env_name])

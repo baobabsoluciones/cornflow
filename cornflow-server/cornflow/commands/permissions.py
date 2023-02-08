@@ -1,5 +1,5 @@
 def register_base_permissions_command(verbose):
-    import logging as log
+    from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from ..endpoints import resources
@@ -16,7 +16,7 @@ def register_base_permissions_command(verbose):
         db.session.commit()
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on database commit: {e}")
+        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     views = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
 
@@ -62,10 +62,10 @@ def register_base_permissions_command(verbose):
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        log.error(f"Integrity error on base permissions register: {e}")
+        current_app.logger.error(f"Integrity error on base permissions register: {e}")
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on base permissions register: {e}")
+        current_app.logger.error(f"Unknown error on base permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
@@ -76,20 +76,18 @@ def register_base_permissions_command(verbose):
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            log.error(f"Unknown error on base permissions sequence updating: {e}")
+            current_app.logger.error(f"Unknown error on base permissions sequence updating: {e}")
 
     if verbose == 1:
         if len(permissions_to_register) > 0:
-            log.info(f"Permissions registered: {permissions_to_register}")
+            current_app.logger.info(f"Permissions registered: {permissions_to_register}")
         else:
-            log.info("No new permissions to register")
+            current_app.logger.info("No new permissions to register")
 
     return True
 
 
 def register_dag_permissions_command(open_deployment: int = None, verbose: int = 0):
-
-    import logging as log
 
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -109,7 +107,7 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
         db.session.commit()
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on database commit: {e}")
+        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users()
     all_dags = DeployedDAG.get_all_objects()
@@ -137,10 +135,10 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        log.error(f"Integrity error on dag permissions register: {e}")
+        current_app.logger.error(f"Integrity error on dag permissions register: {e}")
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on dag permissions register: {e}")
+        current_app.logger.error(f"Unknown error on dag permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
@@ -151,12 +149,12 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            log.error(f"Unknown error on dag permissions sequence updating: {e}")
+            current_app.logger.error(f"Unknown error on dag permissions sequence updating: {e}")
 
     if verbose == 1:
         if len(permissions) > 1:
-            log.info(f"DAG permissions registered: {permissions}")
+            current_app.logger.info(f"DAG permissions registered: {permissions}")
         else:
-            log.info("No new DAG permissions")
+            current_app.logger.info("No new DAG permissions")
 
     pass
