@@ -1,17 +1,21 @@
 # Cornflow init script for Dockerfile ENTRYPOINT
-from logging import error
-import subprocess
 import os
+import subprocess
 import sys
+from logging import error
+
+from cornflow.app import create_app, db
+from cornflow.commands import (
+    access_init_command,
+    create_user_with_role,
+    register_dag_permissions_command,
+    register_deployed_dags_command,
+    update_schemas_command,
+)
+
+from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
-from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
-from cornflow.app import create_app, db
-from cornflow.commands.access import access_init_command
-from cornflow.commands.dag import register_deployed_dags_command
-from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.commands.schemas import update_schemas_command
-from cornflow.commands.users import create_user_with_role
 
 os.chdir("/usr/src/app")
 ENV = os.getenv("FLASK_ENV", "development")
@@ -101,7 +105,7 @@ if CORNFLOW_LOGGING == "file":
 # make initdb, access control and/or migrations
 app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
-    migrate = Migrate(app=app, db=db)
+    migrate = Migrate(app=app, db=db, directory="./cornflow/migrations")
     upgrade()
     access_init_command(0)
     # create user if auth type is db or oid
@@ -128,7 +132,29 @@ with app.app_context():
     register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
     update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
-# execute gunicorn application
-os.system(
-    "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
-)
+
+EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
+if EXTERNAL_APP == 0:
+    # execute gunicorn application
+    os.system(
+        "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
+    )
+
+elif EXTERNAL_APP == 1:
+    os.chdir("/usr/src/external_app")
+    from importlib import import_module
+
+    external_app = import_module(os.getenv("EXTERNAL_APP_MODULE"))
+    app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
+    with app.app_context():
+        path = f"{os.path.dirname(external_app.__file__)}/migrations"
+        migrate = Migrate(app=app, db=db, directory=path)
+        upgrade()
+
+    os.system(
+        f"/usr/local/bin/gunicorn -c {os.getenv('EXTERNAL_APP_MODULE')}/gunicorn.py "
+        f"\"wsgi:create_app('$FLASK_ENV')\""
+    )
+
+else:
+    pass
