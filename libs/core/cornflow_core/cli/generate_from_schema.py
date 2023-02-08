@@ -67,7 +67,7 @@ def generate_from_schema(
     :return: a click status code
     :rtype: int
     """
-    print("test version of the function")
+
     path = path.replace("\\", "/")
     output = None
     if output_path != "output":
@@ -86,7 +86,8 @@ def generate_from_schema(
     name_table = None
     if one:
         name_table = one
-
+        
+    click.echo("test version of the function")
     click.echo("Generating REST API components from the provided JSONSchema")
     click.echo(f"The path to the JSONSchema is {path}")
     click.echo(f"The app_name is {app_name}")
