@@ -25,9 +25,9 @@ class APIGenerator:
     ):
         self.path = schema_path
         self.name = app_name
-        self.options = options
-        if not self.options:
-            self.options = ["all"]
+        if options is None:
+            options = {}
+        self.options = {**{"all": []}, **options}
         self.schema = self.import_schema()
         if self.schema["type"] == "array" and not name_table:
             self.schema = {"properties": {"data": self.schema}}
@@ -167,7 +167,9 @@ class APIGenerator:
             class_name_one = self.snake_to_camel(table_name + "_response")
             class_name_edit = self.snake_to_camel(table_name + "_edit_request")
             class_name_post = self.snake_to_camel(table_name + "_post_request")
-            class_name_post_bulk = self.snake_to_camel(table_name + "_post_bulk_request")
+            class_name_post_bulk = self.snake_to_camel(
+                table_name + "_post_bulk_request"
+            )
             class_name_put_bulk = self.snake_to_camel(table_name + "_put_bulk_request")
             class_name_put_bulk_one = class_name_put_bulk + "One"
         else:
@@ -242,7 +244,7 @@ class APIGenerator:
             "editRequest": class_name_edit,
             "postRequest": class_name_post,
             "postBulkRequest": class_name_post_bulk,
-            "putBulkRequest": class_name_put_bulk
+            "putBulkRequest": class_name_put_bulk,
         }
 
     def new_endpoint(
@@ -258,6 +260,7 @@ class APIGenerator:
         :return: None
         :rtype: None
         """
+        methods_to_add = methods = self.options[table_name] + self.options["all"]
         if self.name is None:
             filename = os.path.join(self.endpoint_path, table_name + ".py")
             class_name_all = self.snake_to_camel(table_name + "_endpoint")
@@ -282,7 +285,7 @@ class APIGenerator:
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
         with open(filename, "w") as fd:
             # Global
-            if any(m in self.options for m in ["get_list", "post_list", "all"]):
+            if any(m in methods_to_add for m in ["get_list", "post_list"]):
                 fd.write(eg.generate_endpoints_imports())
                 fd.write("\n")
                 fd.write(generate_class_def(class_name_all, parents_class))
@@ -292,24 +295,18 @@ class APIGenerator:
                 fd.write("\n")
                 fd.write(eg.generate_endpoint_init())
                 fd.write("\n")
-                if "get_list" in self.options or "all" in self.options:
+                if "get_list" in methods_to_add:
                     fd.write(eg.generate_endpoint_get_all())
                     fd.write("\n")
-                if "post_list" in self.options or "all" in self.options:
+                if "post_list" in methods_to_add:
                     fd.write(eg.generate_endpoint_post())
                     fd.write("\n")
 
             fd.write("\n")
 
             if any(
-                m in self.options
-                for m in [
-                    "get_detail",
-                    "put_detail",
-                    "patch_detail",
-                    "delete_detail",
-                    "all",
-                ]
+                m in methods_to_add
+                for m in ["get_detail", "put_detail", "patch_detail", "delete_detail"]
             ):
                 # Details
                 fd.write(generate_class_def(class_name_details, parents_class))
@@ -319,28 +316,22 @@ class APIGenerator:
                 fd.write("\n")
                 fd.write(eg.generate_endpoint_init())
                 fd.write("\n")
-                if "get_detail" in self.options or "all" in self.options:
+                if "get_detail" in methods_to_add:
                     fd.write(eg.generate_endpoint_get_one())
                     fd.write("\n")
-                if "put_detail" in self.options or "all" in self.options:
+                if "put_detail" in methods_to_add:
                     fd.write(eg.generate_endpoint_put())
                     fd.write("\n")
-                if "patch_detail" in self.options or "all" in self.options:
+                if "patch_detail" in methods_to_add:
                     fd.write(eg.generate_endpoint_patch())
                     fd.write("\n")
-                if "delete_detail" in self.options or "all" in self.options:
+                if "delete_detail" in methods_to_add:
                     fd.write(eg.generate_endpoint_delete_one())
                     fd.write("\n")
 
             fd.write("\n")
 
-            if any(
-                m in self.options
-                for m in [
-                    "post_bulk",
-                    "put_bulk"
-                ]
-            ):
+            if any(m in methods_to_add for m in ["post_bulk", "put_bulk"]):
                 # Bulk post/put
                 fd.write(generate_class_def(class_name_bulk, parents_class))
                 fd.write(eg.generate_endpoint_description())
@@ -349,24 +340,23 @@ class APIGenerator:
                 fd.write("\n")
                 fd.write(eg.generate_endpoint_init())
                 fd.write("\n")
-                if "post_bulk" in self.options or "all" in self.options:
+                if "post_bulk" in methods_to_add:
                     fd.write(eg.generate_endpoint_post_bulk())
                     fd.write("\n")
-                if "put_bulk" in self.options or "all" in self.options:
+                if "put_bulk" in methods_to_add:
                     fd.write(eg.generate_endpoint_put_bulk())
                     fd.write("\n")
 
         init_file = os.path.join(self.endpoint_path, "__init__.py")
         with open(init_file, "a") as file:
-            if any(m in self.options for m in ["get_list", "post_list", "all"]):
+            if any(m in methods_to_add for m in ["get_list", "post_list"]):
                 if any(
-                    m in self.options
+                    m in methods_to_add
                     for m in [
                         "get_detail",
                         "put_detail",
                         "patch_detail",
                         "delete_detail",
-                        "all",
                     ]
                 ):
                     if self.name is None:
@@ -385,13 +375,12 @@ class APIGenerator:
                             f"from .{self.name}_{table_name} import {class_name_all}\n"
                         )
             elif any(
-                m in self.options
+                m in methods_to_add
                 for m in [
                     "get_detail",
                     "put_detail",
                     "patch_detail",
                     "delete_detail",
-                    "all",
                 ]
             ):
                 if self.name is None:
@@ -401,10 +390,7 @@ class APIGenerator:
                         f"from .{self.name}_{table_name} import {class_name_details}\n"
                     )
 
-            elif any(
-                m in self.options
-                for m in ["post_bulk", "put_bulk"]
-            ):
+            elif any(m in methods_to_add for m in ["post_bulk", "put_bulk"]):
                 if self.name is None:
                     file.write(f"from .{table_name} import {class_name_bulk}\n")
                 else:

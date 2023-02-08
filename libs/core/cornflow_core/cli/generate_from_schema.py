@@ -2,7 +2,8 @@
 File that implements the generate from schema cli command
 """
 import click
-
+import json
+from tools import load_json
 from cornflow_core.cli.tools.api_generator import APIGenerator
 
 METHOD_OPTIONS = [
@@ -13,7 +14,7 @@ METHOD_OPTIONS = [
     "patch_detail",
     "delete_detail",
     "post_bulk",
-    "put_bulk"
+    "put_bulk",
 ]
 
 
@@ -39,12 +40,21 @@ METHOD_OPTIONS = [
     required=False,
 )
 @click.option(
+    "--endpoints_methods",
+    "-e",
+    type=str,
+    help="json file with dict of methods that will be added to each new endpoints",
+    required=False,
+)
+@click.option(
     "--one",
     type=str,
     help="If your schema describes only one table, use this option to indicate the name of the table",
     required=False,
 )
-def generate_from_schema(path, app_name, output_path, remove_methods, one):
+def generate_from_schema(
+    path, app_name, output_path, remove_methods, one, endpoints_methods
+):
     """
     This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
 
@@ -53,6 +63,7 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
     :param str output_path: the output path
     :param tuple remove_methods: the methods that will not be added to the new endpoints
     :param str one: if your schema describes only one table, use this option to indicate the name of the table
+    :param str endpoints_methods: "json file with dict of methods that will be added to each new endpoints"
     :return: a click status code
     :rtype: int
     """
@@ -62,9 +73,14 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
         output = output_path.replace("\\", "/")
 
     if remove_methods is not None:
-        methods_to_add = list(set(METHOD_OPTIONS) - set(remove_methods))
+        methods_to_add = {"all": list(set(METHOD_OPTIONS) - set(remove_methods))}
     else:
-        methods_to_add = []
+        methods_to_add = {"all": list(set(METHOD_OPTIONS))}
+
+    if endpoints_methods is not None:
+        endpoints_methods = endpoints_methods.replace("\\", "/")
+        with open(endpoints_methods, "r") as file:
+            methods_to_add = json.load(file)
 
     name_table = None
     if one:
