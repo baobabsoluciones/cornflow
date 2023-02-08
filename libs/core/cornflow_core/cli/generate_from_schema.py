@@ -42,6 +42,7 @@ METHOD_OPTIONS = [
     "--endpoints_methods",
     "-e",
     type=str,
+    default=None,
     help="json file with dict of methods that will be added to each new endpoints",
     required=False,
 )
@@ -66,6 +67,7 @@ def generate_from_schema(
     :return: a click status code
     :rtype: int
     """
+    print("test version of the function")
     path = path.replace("\\", "/")
     output = None
     if output_path != "output":
