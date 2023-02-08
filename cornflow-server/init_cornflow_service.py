@@ -183,7 +183,7 @@ elif EXTERNAL_APP == 1:
             update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
         os.system(
-            f"/usr/local/bin/gunicorn -c /user/src/app/gunicorn.py "
+            f"/usr/local/bin/gunicorn -c /usr/src/app/gunicorn.py "
             f"\"wsgi:create_app('$FLASK_ENV')\""
         )
     except:
