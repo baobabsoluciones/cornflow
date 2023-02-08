@@ -97,7 +97,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('iteration_limit', 'pyomo', 'cbc') : 'maxIt' ,
     ('solution_limit', 'pyomo', 'cbc') : 'maxSaved' ,
     ('time_limit', 'pyomo', 'cbc') : 'sec' ,
-    ('mip_gap', 'pyomo', 'cbc') : 'allow' ,
+    ('abs_gap', 'pyomo', 'cbc') : 'allow' ,
     ('optimality_tol', 'pyomo', 'cbc') : 'dualT' ,
     ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
     ('heuristics', 'pyomo', 'cbc') : 'heur' ,
@@ -108,7 +108,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
     ('presolve', 'pulp', 'cbc') : 'presolve' ,
-    ('rel_optimality_tol', 'pulp', 'cbc') : 'gapRel' ,
+    ('rel_gap', 'pulp', 'cbc') : 'gapRel' ,
     
 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
@@ -118,9 +118,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('mem_limit', 'pyomo', 'gurobi') : 'MemLimit' ,
     ('solution_limit', 'pyomo', 'gurobi') : 'SolutionLimit' ,
     ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
-    ('mip_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
-    ('optimality_tol', 'pyomo', 'gurobi') : 'OptimalityTol' ,
-    ('feasibility_tol', 'pyomo', 'gurobi') : 'FeasibilityTol' ,
+    ('abs_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
     ('branch_dir', 'pyomo', 'gurobi') : 'BranchDir' ,
     ('pump_passes', 'pyomo', 'gurobi') : 'PumpPasses' ,
     ('heuristics', 'pyomo', 'gurobi') : 'Heuristics' ,
@@ -130,8 +128,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
     ('presolve', 'pulp', 'gurobi') : 'presolve' ,
-    ('mip_gap', 'pulp', 'gurobi') : 'MIPGap' ,
-    ('optimality_tol', 'pulp', 'gurobi') : 'gapAbs' ,
+    ('abs_gap', 'pulp', 'gurobi') : 'gapAbs' ,
     ('feasibility_tol', 'pulp', 'gurobi') : 'FeasibilityTol' ,
     ('iteration_limit', 'pulp', 'gurobi') : 'IterationLimit' ,
 
@@ -142,7 +139,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('mem_limit', 'pyomo', 'scip') : 'limits/memory' ,
     ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
     ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
-    ('rel_optimality_tol', 'pyomo', 'scip') : 'limits/gap' ,
+    ('rel_gap', 'pyomo', 'scip') : 'limits/gap' ,
     ('lp_optimality_tol', 'pyomo', 'scip') : 'numerics/lpfeastol' ,
     ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
     ('presolve', 'pyomo', 'scip') : 'presolve' ,
@@ -153,8 +150,8 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('optimality_tol', 'pyomo', 'scip') : 'limits/absgap ' ,
 
     ('is_mip', 'pulp', 'scip') : 'mip' ,
-    ('optimality_tol', 'pulp', 'scip') : 'gapAbs' ,
-    ('rel_optimality_tol', 'pulp', 'scip') : 'gapRel' ,
+    ('abs_gap', 'pulp', 'scip') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'scip') : 'gapRel' ,
     ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
     ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
@@ -166,13 +163,13 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
     ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
     ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
-    ('rel_optimality_tol', 'pyomo', 'highs') : 'mip_rel_gap' ,
+    ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
 
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('optimality_tol', 'pulp', 'highs') : 'gapAbs' ,
     ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
     ('threads', 'pulp', 'highs') : 'threads' ,
-    ('rel_optimality_tol', 'pulp', 'highs') : 'gapRel' ,
+    ('rel_gap', 'pulp', 'highs') : 'gapRel' ,
 
 }
 
