@@ -20,6 +20,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		
 # set work directory
 WORKDIR /usr/src/app
+RUN mkdir -p /usr/src/external_app
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -37,6 +38,7 @@ RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/packag
 # COPY cornflow/migrations /usr/src/app/migrations
 # COPY examples /usr/src/app/examples
 COPY init_cornflow_service.py /usr/src/app/
+COPY /usr/local/external_app /usr/src/external_app
 RUN mkdir -p /usr/src/app/log
 
 EXPOSE 5000

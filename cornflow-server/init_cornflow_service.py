@@ -2,7 +2,7 @@
 import os
 import subprocess
 import sys
-from logging import error
+from logging import error, info
 import cornflow
 from cornflow.app import create_app, db
 from cornflow.commands import (
@@ -135,6 +135,7 @@ with app.app_context():
 
 
 EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
+info(f"EXTERNAL_APP: {EXTERNAL_APP}")
 if EXTERNAL_APP == 0:
     # execute gunicorn application
     os.system(
