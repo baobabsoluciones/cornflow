@@ -100,7 +100,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('abs_gap', 'pyomo', 'cbc') : 'allow' ,
     ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
     ('heuristics', 'pyomo', 'cbc') : 'heur' ,
-    ('rel_gap', 'pyomo', 'cbc'): 'ratio'
+    ('rel_gap', 'pyomo', 'cbc'): 'ratio' ,
 
     ('is_mip', 'pulp', 'cbc') : 'mip' ,
     ('abs_gap', 'pulp', 'cbc') : 'gapAbs' ,
