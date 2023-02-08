@@ -144,7 +144,6 @@ if EXTERNAL_APP == 0:
 
 elif EXTERNAL_APP == 1:
     try:
-        os.chdir("/usr/src/external_app")
         os.system("$(command -v pip) install --user -r requirements.txt")
         from importlib import import_module
 

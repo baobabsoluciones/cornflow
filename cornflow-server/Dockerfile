@@ -20,7 +20,6 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		
 # set work directory
 WORKDIR /usr/src/app
-RUN mkdir -p /usr/src/external_app
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
