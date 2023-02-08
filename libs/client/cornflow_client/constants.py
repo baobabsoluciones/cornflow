@@ -108,6 +108,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
     ('presolve', 'pulp', 'cbc') : 'presolve' ,
+    ('rel_optimality_tol', 'pulp', 'cbc') : 'gapRel' ,
     
 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
