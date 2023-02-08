@@ -147,7 +147,7 @@ def initialize_errorhandlers(app):
         :return: an HTTP response
         :rtype: `Response`
         """
-        app.logger.error(f"{error.log_txt}")
+        app.logger.error(error.log_txt)
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
