@@ -57,7 +57,7 @@ class LDAPBase:
         conn.search(base_search, search_filter=search_filter,attributes=['*'])
         try:
             user_dn = conn.response[0]['dn']
-        except KeyError:
+        except (KeyError, IndexError):
             raise InvalidCredentials(log_txt="Error while trying to authenticate a user. Invalid credentials.")
         return user_dn
         
