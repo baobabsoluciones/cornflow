@@ -96,6 +96,8 @@ def generate_from_schema(
         endpoints_access = endpoints_access.replace("\\", "/")
         with open(endpoints_access, "r") as file:
             endpoints_access = json.load(file)
+    else:
+        endpoints_access = {"default":["SERVICE_ROLE"]}
 
     name_table = None
     if one:
@@ -107,6 +109,7 @@ def generate_from_schema(
     click.echo(f"The output_path is {output}")
     click.echo(f"The method to add are obtained from {endpoints_methods}")
     click.echo(f"The methods to add are {methods_to_add}")
+    click.echo(f"The roles to add are {endpoints_access}")
     click.echo(f"The name_table is {name_table}")
 
     APIGenerator(
