@@ -10,10 +10,19 @@ class QueryFilters(BaseQueryFilters):
 
 
 class BaseDataEndpointResponse(Schema):
-    id = fields.Str()
+    id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
     created_at = fields.DateTime()
-    user_id = fields.Int()
+    user_id = fields.Int(required=True)
     data_hash = fields.Str()
     schema = fields.Str(required=False)
+    updated_at = fields.DateTime()
+    deleted_at = fields.DateTime()
+    user_name = fields.Str(required=True)
+    last_name = fields.Str(required=True)
+    email = fields.Str(required=True)
+    role_id = fields.Int(required=True)
+    url_rule = fields.Str(required=True)
+    description = fields.Str(required=True)
+
