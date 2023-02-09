@@ -9,22 +9,56 @@ class EndpointGenerator:
         self.app_name = app_name
         self.model_name = model_name
         self.schemas_names = schemas_names
+        self.descriptions = {
+            "base": "Endpoint used to manage the table",
+            "bulk": "Endpoint used to perform bulk operations on the table",
+            "detail": "Endpoint used to perform detail operations on the table"
+        }
 
-    def generate_endpoints_imports(self):
+    def generate_endpoints_imports(self, roles):
+        """
+        Generate the import text for an endpoint.
+
+        :param roles: list of roles to import
+        :return: import text
+        """
         return (
             "# Imports from libraries\n"
             "from flask_apispec import doc, marshal_with, use_kwargs\n"
             "from cornflow_core.authentication import authenticate, BaseAuth\n"
             "from cornflow_core.resources import BaseMetaResource\n\n"
-            "from cornflow_core.constants import SERVICE_ROLE\n"
+            f"from cornflow_core.constants import {', '.join(roles)}\n"
             "# Import from internal modules\n"
             f"from ..models import {self.model_name}\n"
             f"from ..schemas import {', '.join(self.schemas_names.values())}\n\n"
         )
 
-    def generate_endpoint_description(self):
+    def get_type_methods(self, methods, ep_type):
+        """
+        Select the methods of the table to use in the type of endpoint.
+
+        :param methods: list of methods used for this table
+        :param ep_type: type of endpoint (base, bulk or detail)
+        :return:
+        """
+        name_types = dict(base="list", bulk ="bulk", detail ="detail")
+        return [v[0] for v in [m.split("_") for m in methods] if v[1] == name_types[ep_type]]
+
+    def generate_endpoint_description(self, methods, ep_type="base"):
+        """
+        Generate the description of an endpoint.
+
+        :param methods: list of available methods.
+        :param ep_type: type of endpoint (base, bulk or detail)
+
+        :return: the description text
+        """
+        type_methods = self.get_type_methods(methods, ep_type)
+        description = self.descriptions[ep_type]
+        app_name = f' of app {self.app_name}' if self.app_name is not None else ""
         res = '    """\n'
-        res += f"    Endpoint used to manage the table {self.table_name} of app {self.app_name}\n"
+        res += f"    {description} {self.table_name}{app_name}.\n\n"
+        res += f"    Available methods: [{', '.join(type_methods)}]"
         res += '    """\n'
         return res
 

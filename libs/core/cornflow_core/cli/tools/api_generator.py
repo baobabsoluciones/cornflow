@@ -293,10 +293,10 @@ class APIGenerator:
         with open(filename, "w") as fd:
             # Global
             if any(m in methods_to_add for m in ["get_list", "post_list"]):
-                fd.write(eg.generate_endpoints_imports())
+                fd.write(eg.generate_endpoints_imports(roles_with_access))
                 fd.write("\n")
                 fd.write(generate_class_def(class_name_all, parents_class))
-                fd.write(eg.generate_endpoint_description())
+                fd.write(eg.generate_endpoint_description(methods_to_add, "base"))
                 fd.write("\n")
                 fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
                 fd.write("\n")
