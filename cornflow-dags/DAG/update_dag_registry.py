@@ -10,6 +10,7 @@ from airflow.utils.db import create_session
 from cornflow_client import CornFlow
 from cornflow_client.airflow.dag_utilities import connect_to_cornflow
 from datetime import datetime, timedelta
+from update_all_schemas import get_new_apps
 
 default_args = {
     "owner": "baobab",
@@ -39,10 +40,36 @@ def update_dag_registry(**kwargs):
             dag["id"] for dag in cf_client.get_deployed_dags(encoding="br")
         ]
         print(f"DEPLOYED DAGS: {deployed_dags}")
+        all_apps = dict()
+        for app in get_new_apps():
+            all_apps[app.name] = app
         for model in model_dags:
+            app = all_apps[model.dag_id]
             if model.dag_id not in deployed_dags:
                 response = cf_client.create_deployed_dag(
-                    name=model.dag_id, description=model.description, encoding="br"
+                    name=model.dag_id,
+                    description=model.description,
+                    instance_schema=app.instance.schema,
+                    instance_checks_schema=app.instance.schema_checks,
+                    solution_schema=app.solution.schema,
+                    solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                    config_schema=app.schema,
+                    encoding="br"
+                )
+                print(f"DAG: {response['id']} registered")
+            else:
+                # Even if the dag is registered, we still update its schemas
+                response = cf_client.put_deployed_dag(
+                    id=model.dag_id,
+                    data=dict(
+                        description=model.description,
+                        instance_schema=app.instance.schema,
+                        instance_checks_schema=app.instance.schema_checks,
+                        solution_schema=app.solution.schema,
+                        solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                        config_schema=app.schema,
+                    ),
+                    encoding='br'
                 )
                 print(f"DAG: {response['id']} registered")
 

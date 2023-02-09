@@ -620,7 +620,13 @@ class TestCornflowClientService(TestCase):
     def test_post_deployed_dag(self):
 
         response = self.client.create_deployed_dag(
-            name="test_dag", description="test_dag_description"
+            name="test_dag",
+            description="test_dag_description",
+            instance_schema=dict(),
+            instance_checks_schema=dict(),
+            solution_schema=dict(),
+            solution_checks_schema=dict(),
+            config_schema=dict()
         )
 
         items = ["id", "description"]
