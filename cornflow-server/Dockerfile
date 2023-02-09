@@ -35,5 +35,4 @@ RUN mkdir -p /usr/src/app/log
 EXPOSE 5000
 
 # execute python init script
-ENTRYPOINT [ "python" ]
-CMD ["cornflow init_service"]
+CMD ["init_service"]
