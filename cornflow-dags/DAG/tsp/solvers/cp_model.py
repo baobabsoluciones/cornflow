@@ -5,6 +5,7 @@ from cornflow_client.constants import (
     STATUS_UNDEFINED,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
+    ORTOOLS_STATUS_MAPPING
 )
 from pytups import TupList, SuperDict
 from ..core import Solution, Experiment
@@ -37,19 +38,14 @@ class OrToolsCP(Experiment):
         if "threads" in options:
             solver.parameters.num_search_workers = options["threads"]
 
-        status = solver.Solve(model)
+        termination_condition = solver.Solve(model)
         if options.get("msg", False):
             print(solver.ResponseStats())
 
-        status_conv = {
-            cp_model.OPTIMAL: STATUS_OPTIMAL,
-            cp_model.INFEASIBLE: STATUS_INFEASIBLE,
-            cp_model.UNKNOWN: STATUS_UNDEFINED,
-            cp_model.MODEL_INVALID: STATUS_UNDEFINED,
-        }
-        if status not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
+        if termination_condition not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
             return dict(
-                status=status_conv.get(status), status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
+                status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         next = (
             literals.vapply(solver.BooleanValue)
@@ -68,4 +64,7 @@ class OrToolsCP(Experiment):
         nodes = solution.kvapply(lambda k, v: SuperDict(pos=k, node=v))
         self.solution = Solution(dict(route=nodes))
 
-        return dict(status=status_conv.get(status), status_sol=SOLUTION_STATUS_FEASIBLE)
+        return dict(
+            status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
