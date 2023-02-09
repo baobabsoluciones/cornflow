@@ -265,8 +265,7 @@ class APIGenerator:
         :return: None
         :rtype: None
         """
-        methods_to_add = self.options.get(table_name, self.options["default"])
-        methods = self.sort_methods(methods_to_add)
+        methods_to_add = self.get_methods(table_name)
         roles_with_access = self.endpoints_access.get(
             table_name, self.endpoints_access["default"]
         )
@@ -290,124 +289,54 @@ class APIGenerator:
                 self.name + "_" + table_name + "_bulk_endpoint"
             )
 
-        parents_class = ["BaseMetaResource"]
-
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
-
+        class_imports = []
         with open(filename, "w") as fd:
-            if len(methods_to_add):
+            if any(len(v) for v in methods_to_add.values()):
                 fd.write(eg.generate_endpoints_imports(roles_with_access))
                 fd.write("\n")
             # Global
-            if any(m in methods_to_add for m in ["get_list", "post_list"]):
+            if len(methods_to_add["base"]):
                 self.create_endpoint_class(
-                    class_name_all, eg, fd, "base", methods["base"], roles_with_access
+                    class_name_all,
+                    eg,
+                    fd,
+                    "base",
+                    methods_to_add["base"],
+                    roles_with_access,
                 )
+                class_imports += [class_name_all]
+            # Details
+            if len(methods_to_add["detail"]):
+                self.create_endpoint_class(
+                    class_name_details,
+                    eg,
+                    fd,
+                    "detail",
+                    methods_to_add["detail"],
+                    roles_with_access,
+                )
+                class_imports += [class_name_details]
+            # Bulk
+            if len(methods_to_add["bulk"]):
+                self.create_endpoint_class(
+                    class_name_bulk,
+                    eg,
+                    fd,
+                    "bulk",
+                    methods_to_add["bulk"],
+                    roles_with_access,
+                )
+                class_imports += [class_name_bulk]
 
-            if any(
-                m in methods_to_add
-                for m in ["get_detail", "put_detail", "patch_detail", "delete_detail"]
-            ):
-                # Details
-                fd.write(generate_class_def(class_name_details, parents_class))
-                fd.write(eg.generate_endpoint_description(methods_to_add, "detail"))
-                fd.write("\n")
-                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
-                fd.write("\n")
-                fd.write(eg.generate_endpoint_init())
-                fd.write("\n")
-                if "get_detail" in methods_to_add:
-                    fd.write(eg.generate_endpoint_get_one())
-                    fd.write("\n")
-                if "put_detail" in methods_to_add:
-                    fd.write(eg.generate_endpoint_put())
-                    fd.write("\n")
-                if "patch_detail" in methods_to_add:
-                    fd.write(eg.generate_endpoint_patch())
-                    fd.write("\n")
-                if "delete_detail" in methods_to_add:
-                    fd.write(eg.generate_endpoint_delete_one())
-                    fd.write("\n")
-
-            fd.write("\n")
-
-            if any(m in methods_to_add for m in ["post_bulk", "put_bulk"]):
-                # Bulk post/put
-                fd.write(generate_class_def(class_name_bulk, parents_class))
-                fd.write(eg.generate_endpoint_description(methods_to_add, "bulk"))
-                fd.write("\n")
-                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
-                fd.write("\n")
-                fd.write(eg.generate_endpoint_init())
-                fd.write("\n")
-                if "post_bulk" in methods_to_add:
-                    fd.write(eg.generate_endpoint_post_bulk())
-                    fd.write("\n")
-                if "put_bulk" in methods_to_add:
-                    fd.write(eg.generate_endpoint_put_bulk())
-                    fd.write("\n")
-
-        init_file = os.path.join(self.endpoint_path, "__init__.py")
-        with open(init_file, "a") as file:
-            if any(m in methods_to_add for m in ["get_list", "post_list"]):
-                if any(
-                    m in methods_to_add
-                    for m in [
-                        "get_detail",
-                        "put_detail",
-                        "patch_detail",
-                        "delete_detail",
-                    ]
-                ):
-                    if self.name is None:
-                        file.write(
-                            f"from .{table_name} import {class_name_all}, {class_name_details}\n"
-                        )
-                    else:
-                        file.write(
-                            f"from .{self.name}_{table_name} import {class_name_all}, {class_name_details}\n"
-                        )
-                else:
-                    if self.name is None:
-                        file.write(f"from .{table_name} import {class_name_all}\n")
-                    else:
-                        file.write(
-                            f"from .{self.name}_{table_name} import {class_name_all}\n"
-                        )
-            elif any(
-                m in methods_to_add
-                for m in [
-                    "get_detail",
-                    "put_detail",
-                    "patch_detail",
-                    "delete_detail",
-                ]
-            ):
-                if self.name is None:
-                    file.write(f"from .{table_name} import {class_name_details}\n")
-                else:
-                    file.write(
-                        f"from .{self.name}_{table_name} import {class_name_details}\n"
-                    )
-
-            elif any(m in methods_to_add for m in ["post_bulk", "put_bulk"]):
-                if self.name is None:
-                    file.write(f"from .{table_name} import {class_name_bulk}\n")
-                else:
-                    file.write(
-                        f"from .{self.name}_{table_name} import {class_name_bulk}\n"
-                    )
-
-    @staticmethod
-    def snake_to_camel(name: str) -> str:
-        """
-        This static method takes a name with underscores in it and changes it to camelCase
-
-        :param str name: the name to mutate
-        :return: the mutated name
-        :rtype: str
-        """
-        return "".join(word.title() for word in name.split("_"))
+        if len(class_imports):
+            init_file = os.path.join(self.endpoint_path, "__init__.py")
+            if self.name is not None:
+                import_name = f"{self.name}_{table_name}"
+            else:
+                import_name = table_name
+            with open(init_file, "a") as file:
+                file.write(f"from .{import_name} import {', '.join(class_imports)}\n")
 
     def create_endpoint_class(
         self, class_name, eg, file, ep_type, methods, roles_with_access
@@ -426,14 +355,24 @@ class APIGenerator:
         file.write("\n")
 
     @staticmethod
-    def sort_methods(methods):
+    def snake_to_camel(name: str) -> str:
+        """
+        This static method takes a name with underscores in it and changes it to camelCase
+
+        :param str name: the name to mutate
+        :return: the mutated name
+        :rtype: str
+        """
+        return "".join(word.title() for word in name.split("_"))
+
+    def get_methods(self, table_name):
         """
         Select the methods of the table to use in the type of endpoint.
 
-        :param methods: list of methods used for this table
+        :param table_name
         :return:
         """
-        print(methods)
+        methods = self.options.get(table_name, self.options["default"])
         name_types = dict(base="list", bulk="bulk", detail="detail")
         return {
             t: [m for m in methods if m.split("_")[1] == ext]
