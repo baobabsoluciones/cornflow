@@ -31,7 +31,7 @@ class APIGenerator:
         self.options = {**{"default": []}, **options}
         if endpoints_access is None:
             endpoints_access = {}
-        self.endpoints_access = {**{"default": ["SERVICE_ROLE"]},**endpoints_access}
+        self.endpoints_access = {**{"default": ["SERVICE_ROLE"]}, **endpoints_access}
         self.schema = self.import_schema()
         if self.schema["type"] == "array" and not name_table:
             self.schema = {"properties": {"data": self.schema}}
@@ -266,7 +266,10 @@ class APIGenerator:
         :rtype: None
         """
         methods_to_add = self.options.get(table_name, self.options["default"])
-        roles_with_access = self.endpoints_access.get(table_name, self.endpoints_access["default"])
+        methods = self.sort_methods(methods_to_add)
+        roles_with_access = self.endpoints_access.get(
+            table_name, self.endpoints_access["default"]
+        )
 
         if self.name is None:
             filename = os.path.join(self.endpoint_path, table_name + ".py")
@@ -290,26 +293,16 @@ class APIGenerator:
         parents_class = ["BaseMetaResource"]
 
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
+
         with open(filename, "w") as fd:
-            # Global
-            if any(m in methods_to_add for m in ["get_list", "post_list"]):
+            if len(methods_to_add):
                 fd.write(eg.generate_endpoints_imports(roles_with_access))
                 fd.write("\n")
-                fd.write(generate_class_def(class_name_all, parents_class))
-                fd.write(eg.generate_endpoint_description(methods_to_add, "base"))
-                fd.write("\n")
-                fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
-                fd.write("\n")
-                fd.write(eg.generate_endpoint_init())
-                fd.write("\n")
-                if "get_list" in methods_to_add:
-                    fd.write(eg.generate_endpoint_get_all())
-                    fd.write("\n")
-                if "post_list" in methods_to_add:
-                    fd.write(eg.generate_endpoint_post())
-                    fd.write("\n")
-
-            fd.write("\n")
+            # Global
+            if any(m in methods_to_add for m in ["get_list", "post_list"]):
+                self.create_endpoint_class(
+                    class_name_all, eg, fd, "base", methods, roles_with_access
+                )
 
             if any(
                 m in methods_to_add
@@ -415,3 +408,32 @@ class APIGenerator:
         :rtype: str
         """
         return "".join(word.title() for word in name.split("_"))
+
+    def create_endpoint_class(
+        self, class_name, eg, file, ep_type, methods, roles_with_access
+    ):
+        parents_class = ["BaseMetaResource"]
+        file.write(generate_class_def(class_name, parents_class))
+        file.write(eg.generate_endpoint_description(methods, ep_type))
+        file.write("\n")
+        file.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
+        file.write("\n")
+        file.write(eg.generate_endpoint_init())
+        file.write("\n")
+        for m in methods:
+            file.write(eg.generate_endpoint(m))
+            file.write("\n")
+        fd.write("\n")
+
+    def sort_methods(self, methods):
+        """
+        Select the methods of the table to use in the type of endpoint.
+
+        :param methods: list of methods used for this table
+        :return:
+        """
+        name_types = dict(base="list", bulk="bulk", detail="detail")
+        return {
+            t: [m for m in methods if m.split("_")[1] == ext]
+            for t, ext in name_types
+        }

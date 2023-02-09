@@ -58,7 +58,7 @@ class EndpointGenerator:
         app_name = f' of app {self.app_name}' if self.app_name is not None else ""
         res = '    """\n'
         res += f"    {description} {self.table_name}{app_name}.\n\n"
-        res += f"    Available methods: [{', '.join(type_methods)}]"
+        res += f"    Available methods: [{', '.join(type_methods)}]\n"
         res += '    """\n'
         return res
 
@@ -276,3 +276,13 @@ class EndpointGenerator:
         res += SP8 + '"""\n'
         res += SP8 + "return self.post_bulk_update(data=kwargs)\n"
         return res
+
+    def generate_endpoint(self, method):
+        ep_map = dict(get_list=self.generate_endpoint_get_all, post_list=self.generate_endpoint_post, get_detail=self.generate_endpoint_get_one,
+                      put_detail=self.generate_endpoint_put,
+                      patch_detail=self.generate_endpoint_patch,
+                      delete_detail= self.generate_endpoint_delete_one,
+                      post_bulk=self.generate_endpoint_post_bulk,
+                      put_bulk=self.generate_endpoint_put_bulk
+        )
+        return ep_map[method]()
