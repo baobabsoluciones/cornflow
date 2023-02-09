@@ -11,7 +11,7 @@ from flask_apispec import marshal_with, doc
 import logging as log
 
 # Import from internal modules
-from ..models import InstanceModel, ExecutionModel, CaseModel
+from ..models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
 from ..schemas.execution import ExecutionDetailsEndpointResponse
 from ..schemas.model_json import DataSchema
 
@@ -281,7 +281,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             validate_and_continue(DataSchema(), instance_payload["data"])
             instance, _ = self.post_list(data=instance_payload)
         else:
-            marshmallow_obj = get_schema(config, schema)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
             validate_and_continue(marshmallow_obj(), instance_payload["data"])
             instance, _ = self.post_list(data=instance_payload)
 
@@ -294,7 +294,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         if case.solution is not None:
             payload["data"] = case.solution
 
-            marshmallow_obj = get_schema(config, schema, "solution")
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema, "solution")
             validate_and_continue(marshmallow_obj(), payload["data"])
 
         self.data_model = ExecutionModel

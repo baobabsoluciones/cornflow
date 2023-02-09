@@ -125,7 +125,7 @@ class ExecutionModel(BaseDataModel):
         :return: nothing
         """
         self.log_text = txt
-        super().udpate({})
+        super().update({})
 
     def __repr__(self):
         """

@@ -49,7 +49,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.assertEqual(instance["name"], name)
         self.assertEqual(instance["description"], description)
         payload = pulp.LpProblem.fromMPS(mps_file, sense=1)[1].toDict()
-        instance_data = self.client.get_api_for_id(
+        instance_data = self.client.raw.get_api_for_id(
             "instance", response["id"], "data"
         ).json()
         self.assertEqual(instance_data["data"], payload)
@@ -73,7 +73,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.assertEqual(instance["id"], response["id"])
         self.assertEqual(instance["name"], payload["name"])
         self.assertEqual(instance["description"], payload["description"])
-        instance_data = self.client.get_api_for_id(
+        instance_data = self.client.raw.get_api_for_id(
             "instance", response["id"], "data"
         ).json()
         self.assertEqual(instance_data["data"], payload["data"])
@@ -88,7 +88,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.assertEqual(case["id"], response["id"])
         self.assertEqual(case["name"], payload["name"])
         self.assertEqual(case["description"], payload["description"])
-        case_data = self.client.get_api_for_id("case", response["id"], "data").json()
+        case_data = self.client.raw.get_api_for_id("case", response["id"], "data").json()
         self.assertEqual(case_data["data"], payload["data"])
         return case
 
@@ -153,18 +153,18 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     #  optional arguments for the headers of the request
     # def test_get_instance__data(self):
     #     instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
-    #     response = self.client.get_api_for_id(
+    #     response = self.client.raw.get_api_for_id(
     #         "instance", instance["id"], "data", encoding="gzip"
     #     )
     #     self.assertEqual(response.headers["Content-Encoding"], "gzip")
 
     def test_delete_instance(self):
         instance = self.test_new_instance()
-        response = self.client.get_api_for_id("instance", instance["id"])
+        response = self.client.raw.get_api_for_id("instance", instance["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.delete_api_for_id("instance", instance["id"])
+        response = self.client.raw.delete_api_for_id("instance", instance["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.get_api_for_id("instance", instance["id"])
+        response = self.client.raw.get_api_for_id("instance", instance["id"])
         self.assertEqual(404, response.status_code)
 
     def test_new_execution(self):
@@ -172,11 +172,11 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_delete_execution(self):
         execution = self.test_new_execution()
-        response = self.client.get_api_for_id("execution/", execution["id"])
+        response = self.client.raw.get_api_for_id("execution/", execution["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.delete_api_for_id("execution/", execution["id"])
+        response = self.client.raw.delete_api_for_id("execution/", execution["id"])
         self.assertEqual(200, response.status_code)
-        response = self.client.get_api_for_id("execution/", execution["id"])
+        response = self.client.raw.get_api_for_id("execution/", execution["id"])
         self.assertEqual(404, response.status_code)
 
     def test_get_dag_schema_good(self):
@@ -190,8 +190,8 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertIn({"name": "solve_model_dag"}, response)
 
     def test_get_dag_schema_no_schema(self):
-        response = self.client.get_schema("this_dag_does_not_exist")
-        self.assertTrue("error" in response)
+        response = self.client.raw.get_schema("this_dag_does_not_exist")
+        self.assertTrue("error" in response.json())
 
     def test_new_execution_bad_dag_name(self):
         one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
@@ -280,9 +280,9 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
         self.assertEqual([], response)
 
     def test_get_one_schema(self):
-        response = self.client.get_schema("solve_model_dag")
+        response = self.client.raw.get_schema("solve_model_dag")
         self.assertEqual(
-            {"error": "User does not have permission to access this dag"}, response
+            {"error": "User does not have permission to access this dag"}, response.json()
         )
 
 
@@ -402,9 +402,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             instance_id=one_instance["id"],
             schema="solve_model_dag",
         )
-        execution = self.client.create_api("execution/?run=0", json=payload)
+        execution = self.client.raw.create_api("execution/?run=0", json=payload)
         payload = dict(log_text="")
-        response = self.client.put_api_for_id(
+        response = self.client.raw.put_api_for_id(
             api="dag/", id=execution.json()["id"], payload=payload
         )
         self.assertEqual(response.status_code, 200)
@@ -457,7 +457,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(10)
         status = self.client.get_status(data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.get_api_for_id(
+        response = self.client.raw.get_api_for_id(
             api="instance", id=instance["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
@@ -490,7 +490,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(10)
         status = self.client.get_status(data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.get_api_for_id(
+        response = self.client.raw.get_api_for_id(
             api="case", id=case["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])

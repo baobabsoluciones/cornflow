@@ -24,6 +24,8 @@ DATASCHEMA = "DataSchema"
 INSTANCE_SCHEMA = "instance"
 SOLUTION_SCHEMA = "solution"
 CONFIG_SCHEMA = "config"
+INSTANCE_CHECKS_SCHEMA = "instance_checks"
+SOLUTION_CHECKS_SCHEMA = "solution_checks"
 
 # why it stopped
 STATUS_NOT_SOLVED = 0
