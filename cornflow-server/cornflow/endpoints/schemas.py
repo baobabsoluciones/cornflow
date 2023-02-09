@@ -3,18 +3,16 @@ Endpoints to get the schemas
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow
+from cornflow_core.authentication import authenticate
+from cornflow_core.exceptions import NoPermission
+from cornflow_core.resources import BaseMetaResource
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
-from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from ..models import PermissionsDAG, DeployedDAG
-from ..shared.authentication import Auth
-from cornflow_core.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
-from cornflow_core.resources import BaseMetaResource
-
+from ..shared.authentication import Auth
 from ..shared.const import ALL_DEFAULT_ROLES
 
 

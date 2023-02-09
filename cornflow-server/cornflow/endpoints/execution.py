@@ -548,7 +548,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 execution,
                 error,
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                + err,
+                + str(err),
             )
 
         data = response.json()
