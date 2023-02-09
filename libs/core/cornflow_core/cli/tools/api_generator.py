@@ -349,7 +349,7 @@ class APIGenerator:
 
     def write_resources(self):
         with open(self.init_file, "a") as file:
-            file.write("\n".join(self.init_resources))
+            file.write(",\n".join(str(v) for v in self.init_resources))
 
     def create_endpoint_class(
         self, class_name, eg, file, ep_type, methods, roles_with_access
