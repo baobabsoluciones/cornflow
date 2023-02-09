@@ -73,12 +73,13 @@ class SchemaDetailsEndpoint(BaseMetaResource):
                 "solution": deployed_dag.solution_schema,
                 "instance_checks": deployed_dag.instance_checks_schema,
                 "solution_checks": deployed_dag.solution_checks_schema,
-                "config": deployed_dag.config_schema
+                "config": deployed_dag.config_schema,
             }, 200
         else:
             err = "User does not have permission to access this dag"
             raise NoPermission(
                 error=err,
                 status_code=403,
-                log_txt=f"Error while user {self.get_user()} tries to get the schemas for dag {dag_name}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the schemas for dag {dag_name}. "
+                + err,
             )

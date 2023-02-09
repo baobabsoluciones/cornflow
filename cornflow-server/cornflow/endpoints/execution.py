@@ -10,13 +10,9 @@ from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import (
     validate_and_continue,
     marshmallow_validate_and_continue,
-    json_schema_validate_as_string
+    json_schema_validate_as_string,
 )
-from cornflow_client.constants import (
-    INSTANCE_SCHEMA,
-    CONFIG_SCHEMA,
-    SOLUTION_SCHEMA
-)
+from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
@@ -122,7 +118,7 @@ class ExecutionEndpoint(BaseMetaResource):
             raise ObjectDoesNotExist(
                 error=err,
                 log_txt=f"Error while user {self.get_user()} tries to create an execution "
-                        f"for instance {execution.instance_id}. " + err
+                f"for instance {execution.instance_id}. " + err,
             )
 
         current_app.logger.debug(f"The request is: {request.args.get('run')}")
@@ -146,7 +142,8 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to create an execution " + err
+                log_txt=f"Error while user {self.get_user()} tries to create an execution "
+                + err,
             )
         # ask airflow if dag_name exists
         schema = execution.schema
@@ -165,7 +162,7 @@ class ExecutionEndpoint(BaseMetaResource):
             raise InvalidData(
                 payload=dict(jsonschema_errors=config_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
-                        f"Configuration data does not match the jsonschema."
+                f"Configuration data does not match the jsonschema.",
             )
 
         # # Get dag config schema and validate it
@@ -183,18 +180,22 @@ class ExecutionEndpoint(BaseMetaResource):
             )
             execution.update_log_txt(f"{instance_errors}")
             raise InvalidData(
-                payload=dict(jsonschema_errors=instance_errors)),
+                payload=dict(jsonschema_errors=instance_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
-                        f"Instance data does not match the jsonschema."
+                f"Instance data does not match the jsonschema.",
             )
         # Validate solution data before running the dag (if it exists)
         if kwargs.get("data") is not None:
-            solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
-            solution_errors = json_schema_validate_as_string(solution_schema, kwargs["data"])
+            solution_schema = DeployedDAG.get_one_schema(
+                config, schema, SOLUTION_SCHEMA
+            )
+            solution_errors = json_schema_validate_as_string(
+                solution_schema, kwargs["data"]
+            )
             if solution_errors:
                 execution.update_state(
-                    EXEC_STATE_ERROR_START,\
-                    message = "The execution could not be run because the solution data does not "
+                    EXEC_STATE_ERROR_START,
+                    message="The execution could not be run because the solution data does not "
                     "comply with the json schema. Check the log for more details",
                 )
                 execution.update_log_txt(f"{solution_errors}")
@@ -215,7 +216,8 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to create an execution. " + err
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
+                + err,
             )
 
         try:
@@ -230,7 +232,8 @@ class ExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to create an execution. " + error
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
+                + error,
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -280,7 +283,8 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             err = "The execution to re-solve does not exist"
             raise ObjectDoesNotExist(
                 err,
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                + err,
             )
 
         execution.update({"checks": None})
@@ -297,7 +301,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             }, 201
 
         # Get dag config schema and validate it
-        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, kwargs["schema"], "config")
+        marshmallow_obj = DeployedDAG.get_marshmallow_schema(
+            config, kwargs["schema"], "config"
+        )
         validate_and_continue(marshmallow_obj(), kwargs["config"])
 
         # We now try to launch the task in airflow
@@ -312,8 +318,8 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
-
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                + err,
             )
         # ask airflow if dag_name exists
         schema = execution.schema
@@ -330,7 +336,8 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                + err,
             )
 
         try:
@@ -345,7 +352,8 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. " + error
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                + error,
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -385,7 +393,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        current_app.logger.info(f"User {self.get_user()} gets details of execution {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets details of execution {idx}"
+        )
         return self.get_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
@@ -407,7 +417,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if data.get("data") is not None and schema is not None:
             # Get solution schema and validate it
             try:
-                marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema, "solution")
+                marshmallow_obj = DeployedDAG.get_marshmallow_schema(
+                    config, schema, "solution"
+                )
                 validate_and_continue(marshmallow_obj(), data["data"])
             except AirflowError:
                 # This is for the unit tests when we can't use Airflow
@@ -440,14 +452,15 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if execution is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
-                        f"The execution does not exist."
+                f"The execution does not exist."
             )
         af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
             err = "Airflow is not accessible"
             raise AirflowError(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
+                + err,
             )
         response = af_client.set_dag_run_to_fail(
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
@@ -484,7 +497,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         if execution is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                        f"The execution does not exist."
+                f"The execution does not exist."
             )
         if execution.state not in [
             EXEC_STATE_RUNNING,
@@ -499,7 +512,9 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 log_txt = error
             message = EXECUTION_STATE_MESSAGE_DICT[state]
             execution.update_state(state)
-            raise AirflowError(error=error, payload=dict(message=message, state=state), log_txt=log_txt)
+            raise AirflowError(
+                error=error, payload=dict(message=message, state=state), log_txt=log_txt
+            )
 
         dag_run_id = execution.dag_run_id
         if not dag_run_id:
@@ -509,7 +524,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 state=EXEC_STATE_ERROR,
                 error="The execution has no dag_run associated",
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                        f"The execution has no associated dag run id."
+                f"The execution has no associated dag run id.",
             )
 
         af_client = Airflow.from_config(current_app.config)
@@ -518,7 +533,8 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(
                 execution,
                 err,
-                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
+                + err,
             )
 
         try:
@@ -531,13 +547,16 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(
                 execution,
                 error,
-                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
+                + err,
             )
 
         data = response.json()
         state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
         execution.update_state(state)
-        current_app.logger.info(f"User {self.get_user()} gets status of execution {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets status of execution {idx}"
+        )
         return execution, 200
 
     @doc(description="Change status of an execution", tags=["Executions"])
