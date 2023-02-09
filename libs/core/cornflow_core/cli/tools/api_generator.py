@@ -423,7 +423,7 @@ class APIGenerator:
         for m in methods:
             file.write(eg.generate_endpoint(m))
             file.write("\n")
-        fd.write("\n")
+        file.write("\n")
 
     def sort_methods(self, methods):
         """
@@ -435,5 +435,5 @@ class APIGenerator:
         name_types = dict(base="list", bulk="bulk", detail="detail")
         return {
             t: [m for m in methods if m.split("_")[1] == ext]
-            for t, ext in name_types
+            for t, ext in name_types.items()
         }
