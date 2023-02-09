@@ -3,19 +3,16 @@ Endpoints to get the schemas
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow
+from cornflow_core.authentication import authenticate
+from cornflow_core.exceptions import NoPermission
+from cornflow_core.resources import BaseMetaResource
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
-import logging as log
-from cornflow_core.authentication import authenticate
 
 # Import from internal modules
 from ..models import PermissionsDAG, DeployedDAG
-from ..shared.authentication import Auth
-from cornflow_core.exceptions import AirflowError, NoPermission
 from ..schemas.schemas import SchemaOneApp, SchemaListApp
-from cornflow_core.resources import BaseMetaResource
-
+from ..shared.authentication import Auth
 from ..shared.const import ALL_DEFAULT_ROLES
 
 
@@ -40,7 +37,7 @@ class SchemaEndpoint(BaseMetaResource):
         dags = PermissionsDAG.get_user_dag_permissions(user.id)
         available_dags = [{"name": dag.dag_id} for dag in dags]
 
-        log.info("User gets list of schema")
+        current_app.logger.info("User gets list of schema")
         return available_dags
 
 
@@ -68,15 +65,19 @@ class SchemaDetailsEndpoint(BaseMetaResource):
 
         if permission:
             deployed_dag = DeployedDAG.get_one_object(dag_name)
+            current_app.logger.info("User gets schema {}".format(dag_name))
             return {
                 "instance": deployed_dag.instance_schema,
                 "solution": deployed_dag.solution_schema,
                 "instance_checks": deployed_dag.instance_checks_schema,
                 "solution_checks": deployed_dag.solution_checks_schema,
-                "config": deployed_dag.config_schema
+                "config": deployed_dag.config_schema,
             }, 200
         else:
+            err = "User does not have permission to access this dag"
             raise NoPermission(
-                error="User does not have permission to access this dag",
+                error=err,
                 status_code=403,
+                log_txt=f"Error while user {self.get_user()} tries to get the schemas for dag {dag_name}. "
+                + err,
             )

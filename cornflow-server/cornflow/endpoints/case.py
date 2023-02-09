@@ -11,7 +11,6 @@ from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
 import jsonpatch
-import logging as log
 
 
 # Import from internal modules
@@ -64,7 +63,7 @@ class CaseEndpoint(BaseMetaResource):
         """
 
         response = self.get_list(user=self.get_user(), **kwargs)
-        log.info(f"User {self.get_user()} gets all cases")
+        current_app.logger.info(f"User {self.get_user()} gets all cases")
         return response
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
@@ -97,7 +96,7 @@ class CaseEndpoint(BaseMetaResource):
         # And if everything is okay: we create the case
         item = CaseModel.from_parent_id(self.get_user(), data)
         item.save()
-        log.info(f"User {self.get_user()} creates case {item.id}")
+        current_app.logger.info(f"User {self.get_user()} creates case {item.id}")
         return item, 201
 
 
@@ -130,13 +129,20 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
             raise InvalidData(
                 error="You must provide a valid instance_id OR an execution_id",
                 status_code=400,
+                log_txt=f"Error while user {self.get_user()} tries to create case from instance and execution. "
+                        f"The instance id or execution id is not valid."
             )
         user = self.get_user()
 
         def get_instance_data(instance_id):
             instance = InstanceModel.get_one_object(user=user, idx=instance_id)
             if instance is None:
-                raise ObjectDoesNotExist("Instance does not exist")
+                err = "Instance does not exist."
+                raise ObjectDoesNotExist(
+                    err,
+                    log_txt=f"Error while user {self.get_user()} tries to create case "
+                            f"from instance and execution. " + err
+                )
             return dict(
                 data=instance.data, schema=instance.schema, checks=instance.checks
             )
@@ -144,7 +150,12 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
         def get_execution_data(execution_id):
             execution = ExecutionModel.get_one_object(user=user, idx=execution_id)
             if execution is None:
-                raise ObjectDoesNotExist("Execution does not exist")
+                err = "Execution does not exist."
+                raise ObjectDoesNotExist(
+                    err,
+                    log_txt=f"Error while user {self.get_user()} tries to create "
+                            f"case from instance and execution. " + err
+                )
             data = get_instance_data(execution.instance_id)
             data["solution"] = execution.data
             data["solution_checks"] = execution.checks
@@ -159,8 +170,8 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
         data["user_id"] = self.get_user_id()
         item = CaseModel.from_parent_id(user, data)
         item.save()
-        log.info(
-            f"User {self.get_user()} creates case {item.id} from instance/execution"
+        current_app.logger.info(
+            f"User {self.get_user()} creates case {item.id} from instance/execution."
         )
         return item, 201
 
@@ -203,7 +214,7 @@ class CaseCopyEndpoint(BaseMetaResource):
                 payload[key] = "Copy_" + data[key]
 
         response = self.post_list(payload)
-        log.info(f"User {self.get_user()} copied case {idx} into {response[0].id}")
+        current_app.logger.info(f"User {self.get_user()} copied case {idx} into {response[0].id}")
         return response
 
 
@@ -229,7 +240,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user()} gets case {idx}")
+        current_app.logger.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Edit a case", tags=["Cases"])
@@ -243,23 +254,27 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user()} edits case {idx}")
+        current_app.logger.info(f"User {self.get_user()} edits case {idx}")
         if kwargs.get("parent_id", 0) != 0:
             parent_id = kwargs.pop("parent_id")
             case = self.data_model.get_one_object(idx=idx, user=self.get_user())
             parent_case = None
+            if case is None:
+                err = "The data entity does not exist on the database."
+                raise ObjectDoesNotExist(
+                    err,
+                    log_txt=f"Error while user {self.get_user()} tries to edit case {idx}. " + err
+                )
             if parent_id is not None:
                 parent_case = self.data_model.get_one_object(
                     idx=parent_id, user=self.get_user()
                 )
                 if case is None or parent_case is None:
+                    err = "The data entity does not exist on the database."
                     raise ObjectDoesNotExist(
-                        "The data entity does not exist on the database"
-                    )
-            else:
-                if case is None:
-                    raise ObjectDoesNotExist(
-                        "The data entity does not exist on the database"
+                        err,
+                        log_txt=f"Error while user {self.get_user()} tries to move "
+                                f"case {idx} to directory {idx}. " + err
                     )
 
             case.move_to(parent_case)
@@ -278,7 +293,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user()} deletes case {idx}")
+        current_app.logger.info(f"User {self.get_user()} deletes case {idx}")
         return self.delete_detail(idx=idx, user=self.get_user())
 
 
@@ -304,7 +319,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user()} gets case {idx}")
+        current_app.logger.info(f"User {self.get_user()} gets case {idx}")
         return response
 
     @doc(description="Patches the data of a given case", tags=["Cases"], inherit=False)
@@ -313,7 +328,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     @use_kwargs(CaseCompareResponse, location="json")
     def patch(self, idx, **kwargs):
         response = self.patch_detail(data=kwargs, idx=idx, user=self.get_user())
-        log.info(f"User {self.get_user()} patches case {idx}")
+        current_app.logger.info(f"User {self.get_user()} patches case {idx}")
         return response
 
 
@@ -366,8 +381,8 @@ class CaseToInstance(BaseMetaResource):
         marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
         validate_and_continue(marshmallow_obj(), payload["data"])
         response = self.post_list(payload)
-        log.info(
-            f"User {self.get_user()} creates instance {response[0].id} from case {idx}"
+        current_app.logger.info(
+            f"User {self.get_user()} creates instance {response[0].id} from case {idx}."
         )
         return response
 
@@ -403,20 +418,33 @@ class CaseCompare(BaseMetaResource):
         :rtype: Tuple (dict, integer)
         """
         if idx1 == idx2:
-            raise InvalidData("The case identifiers should be different", 400)
+            raise InvalidData(
+                "The case identifiers should be different.",
+                400,
+                log_txt=f"Error while user {self.get_user()} tries to compare cases. "
+                        f"The cases to compare have the same identifier."
+            )
         case_1 = self.model.get_one_object(user=self.get_user(), idx=idx1)
         case_2 = self.model.get_one_object(user=self.get_user(), idx=idx2)
 
         if case_1 is None:
             raise ObjectDoesNotExist(
-                "You don't have access to the first case or it doesn't exist"
+                "You don't have access to the first case or it doesn't exist",
+                log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
+                        f"The user doesn't have access to case {idx1} or it does not exist."
             )
         elif case_2 is None:
             raise ObjectDoesNotExist(
-                "You don't have access to the second case or it doesn't exist"
+                "You don't have access to the second case or it doesn't exist",
+                log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
+                        f"The user doesn't have access to case {idx2} or it does not exist."
             )
         elif case_1.schema != case_2.schema:
-            raise InvalidData("The cases asked to compare do not share the same schema")
+            raise InvalidData(
+                "The cases asked to compare do not share the same schema",
+                log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
+                        f"The cases don't have the same schemas."
+            )
 
         data = kwargs.get("data", True)
         solution = kwargs.get("solution", True)
@@ -430,5 +458,5 @@ class CaseCompare(BaseMetaResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        log.info(f"User {self.get_user()} compared cases {idx1} and {idx2}")
+        current_app.logger.info(f"User {self.get_user()} compared cases {idx1} and {idx2}")
         return payload, 200
