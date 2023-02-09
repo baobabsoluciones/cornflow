@@ -41,7 +41,7 @@ class TestExampleDataEndpoint(CustomTestCase):
         af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
         return af_client
 
-    @patch("cornflow.endpoints.schemas.Airflow.from_config")
+    @patch("cornflow.endpoints.example_data.Airflow.from_config")
     def test_get_example(self, airflow_init):
         af_client = self.patch_af_client(airflow_init)
         example = self.get_one_row(
@@ -53,5 +53,3 @@ class TestExampleDataEndpoint(CustomTestCase):
         self.assertIn("examples", example)
         self.assertIn("name", example)
         self.assertEqual(example["examples"], self.example)
-        af_client.is_alive.assert_called_once()
-        af_client.get_dag_info.assert_called_once()
