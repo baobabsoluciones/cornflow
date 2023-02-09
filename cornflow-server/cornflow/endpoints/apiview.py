@@ -10,6 +10,7 @@ from cornflow_core.schemas import ViewResponse
 
 # Import from libraries
 from flask_apispec import marshal_with, doc
+from flask import current_app
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
@@ -38,4 +39,5 @@ class ApiViewListEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets all cases")
         return self.get_list()

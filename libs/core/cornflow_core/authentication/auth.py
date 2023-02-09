@@ -54,7 +54,11 @@ class BaseAuth:
         :rtype: str
         """
         if user_id is None:
-            raise InvalidUsage("The user id passed to generate the token is not valid.")
+            err = "The user id passed to generate the token is not valid."
+            raise InvalidUsage(
+                err,
+                log_txt="Error while trying to generate token. " + err
+            )
 
         payload = {
             "exp": datetime.utcnow() + timedelta(days=1),
@@ -74,16 +78,26 @@ class BaseAuth:
         :rtype: dict
         """
         if token is None:
-            raise InvalidUsage("The provided token is not valid")
+            err = "The provided token is not valid."
+            raise InvalidUsage(
+                err,
+                log_txt="Error while trying to decode token. " + err
+            )
         try:
             payload = decode(
                 token, current_app.config["SECRET_KEY"], algorithms="HS256"
             )
             return {"user_id": payload["sub"]}
         except ExpiredSignatureError:
-            raise InvalidCredentials("The token has expired, please login again")
+            raise InvalidCredentials(
+                "The token has expired, please login again",
+                log_txt="Error while trying to decode token. The token has expired."
+            )
         except InvalidTokenError:
-            raise InvalidCredentials("Invalid token, please try again with a new token")
+            raise InvalidCredentials(
+                "Invalid token, please try again with a new token",
+                log_txt="Error while trying to decode token. The token is invalid."
+            )
 
     def validate_oid_token(
         self, token: str, client_id: str, tenant_id: str, issuer: str, provider: int
@@ -113,9 +127,15 @@ class BaseAuth:
             )
             return decoded
         except jwt.ExpiredSignatureError:
-            raise InvalidCredentials("The token has expired, please login again")
+            raise InvalidCredentials(
+                "The token has expired, please login again",
+                log_txt="Error while trying to validate a token. The token has expired. "
+            )
         except jwt.InvalidTokenError:
-            raise InvalidCredentials("Invalid token, please try again with a new token")
+            raise InvalidCredentials(
+                "Invalid token, please try again with a new token",
+                log_txt="Error while trying to validate a token. The token is not valid. "
+            )
 
     @staticmethod
     def get_token_from_header(headers: Headers = None) -> str:
@@ -128,17 +148,24 @@ class BaseAuth:
         :rtype: str
         """
         if headers is None:
-            raise InvalidUsage
+            raise InvalidUsage(log_txt="Error while trying to get a token from header. The header is invalid.")
 
         if "Authorization" not in headers:
-            raise InvalidCredentials("Auth token is not available")
+            raise InvalidCredentials(
+                "Auth token is not available",
+                log_txt="Error while trying to get a token from header. The auth token is not available."
+            )
         auth_header = headers.get("Authorization")
         if not auth_header:
             return ""
         try:
             return auth_header.split(" ")[1]
         except Exception as e:
-            raise InvalidCredentials(f"The authorization header has a bad syntax: {e}")
+            err = f"The authorization header has a bad syntax: {e}"
+            raise InvalidCredentials(
+                err,
+                log_txt=f"Error while trying to get a token from header. " + err
+            )
 
     def get_user_from_header(self, headers: Headers = None) -> UserBaseModel:
         """
@@ -150,15 +177,21 @@ class BaseAuth:
         :rtype: `UserBaseModel`
         """
         if headers is None:
+            err = "Headers are missing from the request. Authentication was not possible to perform."
             raise InvalidUsage(
-                "Headers are missing from the request. Authentication was not possible to perform"
+                err,
+                log_txt="Error while trying to get user from header. " + err
             )
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
         user_id = data["user_id"]
         user = self.user_model.get_one_user(user_id)
         if user is None:
-            raise ObjectDoesNotExist("User does not exist, invalid token")
+            err = "User does not exist, invalid token."
+            raise ObjectDoesNotExist(
+                err,
+                log_txt="Error while trying to get user from header. " + err
+            )
         return user
 
     def authenticate(self):
