@@ -301,7 +301,7 @@ class APIGenerator:
             # Global
             if any(m in methods_to_add for m in ["get_list", "post_list"]):
                 self.create_endpoint_class(
-                    class_name_all, eg, fd, "base", methods, roles_with_access
+                    class_name_all, eg, fd, "base", methods["base"], roles_with_access
                 )
 
             if any(
