@@ -1,4 +1,8 @@
 from ..core import Experiment, Solution
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class Algorithm(Experiment):
@@ -11,4 +15,7 @@ class Algorithm(Experiment):
         input = self.instance.data
         solution = dict(routes={route: input["demand"].keys_l()})
         self.solution = Solution(solution)
-        return dict(status=2)
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )

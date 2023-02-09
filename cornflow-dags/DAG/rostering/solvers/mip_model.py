@@ -9,6 +9,7 @@ from pytups import SuperDict, TupList
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
+    PULP_STATUS_MAPPING
 )
 
 # Imports from internal modules
@@ -63,10 +64,14 @@ class MipModel(Experiment):
 
         # Solver and solve
         status = model.solve(solver)
+        termination_condition = PULP_STATUS_MAPPING[status]
 
         # Check status
-        if model.sol_status not in [pl.LpSolutionIntegerFeasible, pl.LpSolutionOptimal]:
-            return dict(status=status, status_sol=SOLUTION_STATUS_INFEASIBLE)
+        if model.status != pl.LpStatusOptimal:
+            return dict(
+                status=termination_condition,
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
 
         work_assignments = (
             self.works.vfilter(lambda v: pl.value(v))
@@ -77,7 +82,10 @@ class MipModel(Experiment):
         self.solution = Solution.from_dict(SuperDict(works=work_assignments))
         self.solution.data["indicators"] = self.get_indicators()
 
-        return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
+        return dict(
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def initialize(self):
         self.managers = self.instance.get_employees_managers()

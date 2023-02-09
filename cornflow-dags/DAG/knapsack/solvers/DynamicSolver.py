@@ -1,6 +1,10 @@
 from ..core import Solution
 from ..core import Experiment
 import numpy as np
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class DynamicSolver(Experiment):
@@ -32,7 +36,10 @@ class DynamicSolver(Experiment):
             if res["include"][i] == 1:
                 self.solution.data["include"].append({"id": i})
 
-        return 1
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def dyn_solver(self):  #
         U = np.zeros(

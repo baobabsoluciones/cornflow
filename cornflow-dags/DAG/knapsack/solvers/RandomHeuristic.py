@@ -3,7 +3,10 @@ from ..core import Experiment
 from timeit import default_timer as timer
 import numpy as np
 from random import shuffle
-
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 class RandomHeuristic(Heuristic):
     def solve(self, config):
@@ -79,4 +82,7 @@ class RandomHeuristic(Heuristic):
         self.solver = "RandomHeuristic"
         self.solution = best_res
 
-        return 0
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
