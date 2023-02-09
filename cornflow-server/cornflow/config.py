@@ -17,7 +17,7 @@ class DefaultConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
     TESTING = True
-    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 30))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
@@ -91,7 +91,7 @@ class Testing(DefaultConfig):
     AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
-    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
+    LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
 
 class Production(DefaultConfig):
