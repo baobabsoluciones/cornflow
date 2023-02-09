@@ -433,6 +433,7 @@ class APIGenerator:
         :param methods: list of methods used for this table
         :return:
         """
+        print(methods)
         name_types = dict(base="list", bulk="bulk", detail="detail")
         return {
             t: [m for m in methods if m.split("_")[1] == ext]
