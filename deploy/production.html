@@ -1,96 +1,49 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Production deployment and security &mdash; Cornflow 3.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Access control" href="access.html" />
     <link rel="prev" title="Deployment options" href="options.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> Cornflow
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Cornflow
           </a>
-
-          
-            
-            
               <div class="version">
                 3.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
@@ -119,78 +72,36 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">Deploy your own Cornflow-server</a> &raquo;</li>
-        
-      <li>Production deployment and security</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Deploy your own Cornflow-server</a></li>
+      <li class="breadcrumb-item active">Production deployment and security</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/deploy/production.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="production-deployment-and-security">
-<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this heading">¶</a></h1>
+<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this heading"></a></h1>
 <p>It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html">production-ready</a>.</p>
 <section id="database-backend">
-<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this heading">¶</a></h2>
+<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this heading"></a></h2>
 <p>Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
@@ -198,7 +109,7 @@ You can change the backend using the following config:</p>
 </div>
 </section>
 <section id="ssl">
-<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this heading">¶</a></h2>
+<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this heading"></a></h2>
 <p>At the moment cornflow does not have built-in <a class="reference external" href="https://en.wikipedia.org/wiki/Transport_Layer_Security">SSL</a> support. You can use a reverse proxy service such as <a class="reference external" href="http://nginx.org/">Nginx</a> to give adequate security to the connection with your server.
 Please go to the <a class="reference external" href="http://nginx.org/en/docs/http/configuring_https_servers.html">Nginx documentation page</a> to correctly configure your server’s certificates.</p>
 <p>This is a Nginx configuration template (<code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/mysite.conf</span></code>) that we can use to configure the ssl encryption with the cornflow service:</p>
@@ -233,7 +144,7 @@ Please go to the <a class="reference external" href="http://nginx.org/en/docs/ht
 </div>
 </section>
 <section id="enforce-security">
-<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this heading">¶</a></h2>
+<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this heading"></a></h2>
 <p>When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the <a class="reference external" href="https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose">docker secret manager</a>.</p>
 <p>It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key:</p>
@@ -243,7 +154,7 @@ If you are running docker services in production, it is also convenient to use t
 <p>Flower has by default a <a class="reference external" href="https://flower.readthedocs.io/en/latest/auth.html">basic authentication</a> shared with the airflow server in the deployment.</p>
 </section>
 <section id="ldap-authentication">
-<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this heading">¶</a></h2>
+<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this heading"></a></h2>
 <p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
 <p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
@@ -260,7 +171,7 @@ To activate the functionality that supports this type of access, it is necessary
 <p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
 </section>
 <section id="airflow-user">
-<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this heading">¶</a></h2>
+<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this heading"></a></h2>
 <p>It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow.
 A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.</p>
 </section>
@@ -268,50 +179,33 @@ A good start is to create a role for the cornflow application (cornflowrole) wit
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="access.html" class="btn btn-neutral float-right" title="Access control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="options.html" class="btn btn-neutral float-left" title="Deployment options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="access.html" class="btn btn-neutral float-right" title="Access control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020-, cornflow documentation team..
-
-    </p>
+    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

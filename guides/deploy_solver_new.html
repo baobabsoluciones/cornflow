@@ -1,96 +1,49 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>How to deploy a new solution method (2.0) &mdash; Cornflow 3.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Coding style and rules" href="coding_style.html" />
     <link rel="prev" title="User guides and how-to" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> Cornflow
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Cornflow
           </a>
-
-          
-            
-            
               <div class="version">
                 3.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User guides and how-to</a><ul class="current">
@@ -132,79 +85,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Cornflow</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">User guides and how-to</a> &raquo;</li>
-        
-      <li>How to deploy a new solution method (2.0)</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User guides and how-to</a></li>
+      <li class="breadcrumb-item active">How to deploy a new solution method (2.0)</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/guides/deploy_solver_new.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="how-to-deploy-a-new-solution-method-2-0">
-<h1>How to deploy a new solution method (2.0)<a class="headerlink" href="#how-to-deploy-a-new-solution-method-2-0" title="Permalink to this heading">¶</a></h1>
+<h1>How to deploy a new solution method (2.0)<a class="headerlink" href="#how-to-deploy-a-new-solution-method-2-0" title="Permalink to this heading"></a></h1>
 <p>The deployment of a solution method consists of sub-classing the class <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore" title="cornflow_client.core.application.ApplicationCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplicationCore</span></code></a> from the package <code class="docutils literal notranslate"><span class="pre">cornflow_client</span></code>. <code class="docutils literal notranslate"><span class="pre">ApplicationCore</span></code> serves as a template for apps and requires certain properties and methods to be defined.</p>
 <p>We will use as example the TSP problem defined here. At the end of the document, the complete code with all imports is available.</p>
 <section id="application-class">
-<h2>Application class<a class="headerlink" href="#application-class" title="Permalink to this heading">¶</a></h2>
+<h2>Application class<a class="headerlink" href="#application-class" title="Permalink to this heading"></a></h2>
 <p>First, we make a subclass of <cite>ApplicationCore</cite>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TspApp</span><span class="p">(</span><span class="n">ApplicationCore</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;tsp&quot;</span>
@@ -222,7 +133,7 @@
 <p>We will go over each of the required properties below.</p>
 </section>
 <section id="instance-class">
-<h2>Instance class<a class="headerlink" href="#instance-class" title="Permalink to this heading">¶</a></h2>
+<h2>Instance class<a class="headerlink" href="#instance-class" title="Permalink to this heading"></a></h2>
 <p>This is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceCore</span></code></a>. There are many default methods that can be overwritten (<code class="docutils literal notranslate"><span class="pre">to_dict</span></code>, <code class="docutils literal notranslate"><span class="pre">from_dict</span></code>, etc.). The only required property is the <code class="docutils literal notranslate"><span class="pre">schema</span></code>. Here we have just imported a file with the corresponding json-schema. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Instance</span><span class="p">(</span><span class="n">InstanceCore</span><span class="p">):</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;input.json&quot;</span><span class="p">))</span>
@@ -230,7 +141,7 @@
 </div>
 </section>
 <section id="solution-class">
-<h2>Solution class<a class="headerlink" href="#solution-class" title="Permalink to this heading">¶</a></h2>
+<h2>Solution class<a class="headerlink" href="#solution-class" title="Permalink to this heading"></a></h2>
 <p>Very similar to the Instance. The Solution is just a subclass of <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolutionCore</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span><span class="p">(</span><span class="n">SolutionCore</span><span class="p">):</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;output.json&quot;</span><span class="p">))</span>
@@ -238,14 +149,14 @@
 </div>
 </section>
 <section id="experiment-class">
-<h2>Experiment class<a class="headerlink" href="#experiment-class" title="Permalink to this heading">¶</a></h2>
+<h2>Experiment class<a class="headerlink" href="#experiment-class" title="Permalink to this heading"></a></h2>
 <p>Although not strictly necessary, it is usually good practice to define an Experiment class that subclasses <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentCore</span></code></a>. This class takes as input an <a class="reference internal" href="#instance-class"><span class="std std-ref">Instance class</span></a> and a <a class="reference internal" href="#solution-class"><span class="std std-ref">Solution class</span></a>. Its purpose is to evaluate and validate a given solution. To achieve this, the class should implement at least two methods <code class="docutils literal notranslate"><span class="pre">get_objective</span></code> and <code class="docutils literal notranslate"><span class="pre">check_solution</span></code>.</p>
 <section id="get-objective">
-<h3>get_objective<a class="headerlink" href="#get-objective" title="Permalink to this heading">¶</a></h3>
+<h3>get_objective<a class="headerlink" href="#get-objective" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">get_objective</span></code> returns a scalar number that represents the objective function value of the solution.</p>
 </section>
 <section id="check-solution">
-<h3>check_solution<a class="headerlink" href="#check-solution" title="Permalink to this heading">¶</a></h3>
+<h3>check_solution<a class="headerlink" href="#check-solution" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">check_solution</span></code> returns a dictionary of dictionaries. Each key in the first dictionary represents a specific validation. Each key in the second dictionary represents the domain of a given validation where the solution violates its requirement. The value of the second dictionary represents the extent of the violation.</p>
 <p>In the example below for the TSP, a possible value for <code class="docutils literal notranslate"><span class="pre">check_solution()</span></code> could be:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -265,7 +176,7 @@
 </div>
 </section>
 <section id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="n">ExperimentCore</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="c1"># we get a sorted list of nodes by position</span>
@@ -295,7 +206,7 @@
 </section>
 </section>
 <section id="solver-class">
-<h2>Solver class<a class="headerlink" href="#solver-class" title="Permalink to this heading">¶</a></h2>
+<h2>Solver class<a class="headerlink" href="#solver-class" title="Permalink to this heading"></a></h2>
 <p>Each solver is a subclass of the <a class="reference internal" href="#experiment-class"><span class="std std-ref">Experiment class</span></a> and should define one additional method: <code class="docutils literal notranslate"><span class="pre">solve</span></code>. Here is the implementation of a very very bad solver for the TSP:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TSPNaive</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
@@ -312,14 +223,14 @@
 <p>More than one solution method can be defined. This is why they are given in a dictionary to the <a class="reference internal" href="#application-class"><span class="std std-ref">Application class</span></a>. We use them as a catalogue when deciding to solve a problem.</p>
 </section>
 <section id="test-cases">
-<h2>Test cases<a class="headerlink" href="#test-cases" title="Permalink to this heading">¶</a></h2>
+<h2>Test cases<a class="headerlink" href="#test-cases" title="Permalink to this heading"></a></h2>
 <p>Test cases is a property that should return a list of datasets (in json-schema format). These tests are used to test the app in the unit-tests. More information on how to create the unit tests for your solution method in <a class="reference internal" href="testing_app.html#test-your-solution-method"><span class="std std-ref">Test your solution method</span></a>.</p>
 </section>
 <section id="schema-property">
-<h2>Schema property<a class="headerlink" href="#schema-property" title="Permalink to this heading">¶</a></h2>
+<h2>Schema property<a class="headerlink" href="#schema-property" title="Permalink to this heading"></a></h2>
 <p>The schema of an application is the configuration used to solve a problem. This schema needs to have at least the <cite>timeLimit</cite> and the <cite>solver</cite> properties. Besides that, it’s up to the developer to decide which configuration is needed. If you want to know how to define a json-schema, check the section <a class="reference internal" href="jsonschema.html#write-a-json-schema"><span class="std std-ref">Write a json-schema</span></a>.</p>
 <section id="conventions">
-<h3>Conventions<a class="headerlink" href="#conventions" title="Permalink to this heading">¶</a></h3>
+<h3>Conventions<a class="headerlink" href="#conventions" title="Permalink to this heading"></a></h3>
 <p>We follow some common conventions in the configuration schema so most apps share most of the main properties. Below is a list of known properties and what the usually represent.</p>
 <ol class="arabic simple">
 <li><p><strong>timeLimit</strong>: float. It indicates the amount of seconds before the method should stop.</p></li>
@@ -334,16 +245,16 @@
 <p>Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn’t make much sense to be creating a separated <code class="docutils literal notranslate"><span class="pre">config.json</span></code> schema file. For these cases, it’s possible to use <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.schema.tools.get_empty_schema" title="cornflow_client.schema.tools.get_empty_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">cornflow_client.schema.tools.get_empty_schema()</span></code></a>.</p>
 </section>
 <section id="instance-and-solution-schemas">
-<h3>Instance and solution schemas<a class="headerlink" href="#instance-and-solution-schemas" title="Permalink to this heading">¶</a></h3>
+<h3>Instance and solution schemas<a class="headerlink" href="#instance-and-solution-schemas" title="Permalink to this heading"></a></h3>
 <p>Instance and Solution classes also require their own schemas. See their own sections for more details on how to provide them: <a class="reference internal" href="#instance-class"><span class="std std-ref">Instance class</span></a> and <a class="reference internal" href="#solution-class"><span class="std std-ref">Solution class</span></a> respectively.</p>
 </section>
 </section>
 <section id="readme">
-<h2>README<a class="headerlink" href="#readme" title="Permalink to this heading">¶</a></h2>
+<h2>README<a class="headerlink" href="#readme" title="Permalink to this heading"></a></h2>
 <p>It is a good idea to have a description of the problem to be solved in text form. Even better if the text is accompanied by a mathematical formulation in LaTeX. This way, others can check the problem description and better understand the input data, output data and the solution methods.</p>
 </section>
 <section id="code-structure">
-<h2>Code structure<a class="headerlink" href="#code-structure" title="Permalink to this heading">¶</a></h2>
+<h2>Code structure<a class="headerlink" href="#code-structure" title="Permalink to this heading"></a></h2>
 <p>Assuming your solution is called <code class="docutils literal notranslate"><span class="pre">my_project</span></code>, the following is the official structure to organize an application:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_project</span><span class="o">/</span>
     <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
@@ -374,7 +285,7 @@
 <p>Schemas are stored in the <code class="docutils literal notranslate"><span class="pre">my_project/schemas</span></code> folder. Finally, <a class="reference internal" href="#test-cases"><span class="std std-ref">Test cases</span></a> are stored in the <code class="docutils literal notranslate"><span class="pre">my_project/data</span></code> directory.</p>
 </section>
 <section id="complete-init-py-code-for-the-tsp">
-<h2>Complete __init__.py code for the TSP<a class="headerlink" href="#complete-init-py-code-for-the-tsp" title="Permalink to this heading">¶</a></h2>
+<h2>Complete __init__.py code for the TSP<a class="headerlink" href="#complete-init-py-code-for-the-tsp" title="Permalink to this heading"></a></h2>
 <p>In this example we put everything inside the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> (except the json-schema files) for simplicity.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cornflow_client</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ApplicationCore</span><span class="p">,</span>
@@ -448,11 +359,11 @@
 </div>
 </section>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
 <p>The repository contains a file called requirements.txt. You will need to update this file with the name of the additional libraries that your code needs to run.</p>
 </section>
 <section id="pull-request">
-<h2>Pull request<a class="headerlink" href="#pull-request" title="Permalink to this heading">¶</a></h2>
+<h2>Pull request<a class="headerlink" href="#pull-request" title="Permalink to this heading"></a></h2>
 <p>Once that all the previous is done, that your code has been pushed to the remote repository, that none of the tests run by git fail (see <a class="reference internal" href="testing_app.html#test-your-solution-method"><span class="std std-ref">Test your solution method</span></a>), and your application seems complete, it is time to merge it into the main branch. Indeed, the dag won’t be running while your code is not on the main branch.</p>
 <p>In order to do so, you need to create a pull request on github’s web interface. Once the PR has been approved, your code will be on the main branch.</p>
 <p>From there, you will have to wait until the dag is running, which can take a few hours since the running dags are only updated once a day. To learn how to test your app, see <a class="reference internal" href="use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a>. To learn to debug your app in the airflow web interface, see <a class="reference internal" href="debug_with_airflow.html#debug-your-solution-method"><span class="std std-ref">Debug your solution method</span></a>.</p>
@@ -461,50 +372,33 @@
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="coding_style.html" class="btn btn-neutral float-right" title="Coding style and rules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="User guides and how-to" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="coding_style.html" class="btn btn-neutral float-right" title="Coding style and rules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020-, cornflow documentation team..
-
-    </p>
+    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
