@@ -17,10 +17,9 @@ from cornflow.shared.const import ADMIN_ROLE, AUTH_DB, SERVICE_ROLE
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
-print(f"CURRENT WD: {os.getcwd()}")
-print(f"PATH: {sys.path}")
+
 os.chdir("/usr/src/app")
-print(f"CURRENT WD: {os.getcwd()}")
+
 ENV = os.getenv("FLASK_ENV", "development")
 os.environ["FLASK_ENV"] = ENV
 
@@ -141,7 +140,7 @@ if EXTERNAL_APP == 0:
 
     # execute gunicorn application
     os.system(
-        "/usr/local/bin/gunicorn -c cornflow/gunicorn.py \"cornflow:create_app('$FLASK_ENV')\""
+        "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
     )
 
 elif EXTERNAL_APP == 1:
@@ -183,7 +182,7 @@ elif EXTERNAL_APP == 1:
             update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
 
         os.system(
-            f"/usr/local/bin/gunicorn -c /usr/src/app/gunicorn.py "
+            f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
             f"\"wsgi:create_app('$FLASK_ENV')\""
         )
     except:

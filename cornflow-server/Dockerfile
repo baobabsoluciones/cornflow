@@ -27,21 +27,13 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt /usr/src/app/requirements.txt
-RUN pip install -r requirements.txt --force-reinstall
 RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/package#subdirectory=cornflow-server"
 
-# copy project
-# COPY cornflow /usr/src/app/cornflow
-# COPY docs /usr/src/app/docs
-# COPY cornflow/migrations /usr/src/app/migrations
-# COPY examples /usr/src/app/examples
-COPY init_cornflow_service.py /usr/src/app/
-COPY cornflow/gunicorn.py /usr/src/app/gunicorn.py
+
 RUN mkdir -p /usr/src/app/log
 
 EXPOSE 5000
 
 # execute python init script
 ENTRYPOINT [ "python" ]
-CMD ["/usr/src/app/init_cornflow_service.py"]
+CMD ["cornflow init_service"]
