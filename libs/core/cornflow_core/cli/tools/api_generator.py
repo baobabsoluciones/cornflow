@@ -389,11 +389,13 @@ class APIGenerator:
 
     @staticmethod
     def camel_to_url(name: str) -> str:
-        return "/" + "/".join(s.lower() for s in re.findall("[A-Z][^A-Z]*", name)) + "/"
+        words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
+        return "/" + "/".join(w.lower() for w in words) + "/"
 
     @staticmethod
     def camel_to_ep(name: str) -> str:
-        return "-".join(s.lower() for s in re.findall("[A-Z][^A-Z]*", name))
+        words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
+        return "-".join(w.lower() for w in words)
 
     def get_methods(self, table_name):
         """
