@@ -425,7 +425,8 @@ class APIGenerator:
             file.write("\n")
         file.write("\n")
 
-    def sort_methods(self, methods):
+    @staticmethod
+    def sort_methods(methods):
         """
         Select the methods of the table to use in the type of endpoint.
 
@@ -437,3 +438,8 @@ class APIGenerator:
             t: [m for m in methods if m.split("_")[1] == ext]
             for t, ext in name_types.items()
         }
+
+
+# test =['get_list', 'post_list', 'get_detail', 'put_detail', 'patch_detail', 'delete_detail', 'post_bulk', 'put_bulk']
+# ag = APIGenerator.sort_methods([])
+# print(ag)
