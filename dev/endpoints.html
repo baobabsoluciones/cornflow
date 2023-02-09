@@ -69,6 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#cornflow.endpoints.dag.DAGCaseEndpoint"><code class="docutils literal notranslate"><span class="pre">DAGCaseEndpoint</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cornflow.endpoints.dag.DAGEndpointManual"><code class="docutils literal notranslate"><span class="pre">DAGEndpointManual</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cornflow.endpoints.dag.DeployedDAGEndpoint"><code class="docutils literal notranslate"><span class="pre">DeployedDAGEndpoint</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cornflow.endpoints.dag.DeployedDagDetailEndpoint"><code class="docutils literal notranslate"><span class="pre">DeployedDagDetailEndpoint</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-cornflow.endpoints.execution">Execution endpoints</a><ul>
@@ -536,6 +537,28 @@ an existing session (login) made by the superuser created for the airflow webser
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.dag.DeployedDAGEndpoint.methods">
 <span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#cornflow.endpoints.dag.DeployedDAGEndpoint.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cornflow.endpoints.dag.DeployedDagDetailEndpoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.dag.</span></span><span class="sig-name descname"><span class="pre">DeployedDagDetailEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.dag.DeployedDagDetailEndpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.dag.DeployedDagDetailEndpoint.ROLES_WITH_ACCESS">
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[4]</span></em><a class="headerlink" href="#cornflow.endpoints.dag.DeployedDagDetailEndpoint.ROLES_WITH_ACCESS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.dag.DeployedDagDetailEndpoint.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">req_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.dag.DeployedDagDetailEndpoint.put" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.dag.DeployedDagDetailEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'PUT'}</span></em><a class="headerlink" href="#cornflow.endpoints.dag.DeployedDagDetailEndpoint.methods" title="Permalink to this definition"></a></dt>
 <dd><p>A list of methods this view can handle.</p>
 </dd></dl>
 
