@@ -40,10 +40,18 @@ METHOD_OPTIONS = [
 )
 @click.option(
     "--endpoints_methods",
-    "-e",
+    "-m",
     type=str,
     default=None,
     help="json file with dict of methods that will be added to each new endpoints",
+    required=False,
+)
+@click.option(
+    "--endpoints_access",
+    "-a",
+    type=str,
+    default=None,
+    help="json file with dict of roles access that will be added to each new endpoints",
     required=False,
 )
 @click.option(
@@ -53,17 +61,18 @@ METHOD_OPTIONS = [
     required=False,
 )
 def generate_from_schema(
-    path, app_name, output_path, remove_methods, one, endpoints_methods
+    path, app_name, output_path, remove_methods, one, endpoints_methods, endpoints_access
 ):
     """
     This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
 
-    :param str path: the path to the JSONSchema file
-    :param str app_name: the name of the application
-    :param str output_path: the output path
-    :param tuple remove_methods: the methods that will not be added to the new endpoints
-    :param str one: if your schema describes only one table, use this option to indicate the name of the table
-    :param str endpoints_methods: "json file with dict of methods that will be added to each new endpoints"
+    :param str path: the path to the JSONSchema file.
+    :param str app_name: the name of the application.
+    :param str output_path: the output path.
+    :param tuple remove_methods: the methods that will not be added to the new endpoints.
+    :param str one: if your schema describes only one table, use this option to indicate the name of the table.
+    :param str endpoints_methods: json file with dict of methods that will be added to each new endpoints.
+    :param str endpoints_access: json file with dict of roles access that will be added to each new endpoints.
     :return: a click status code
     :rtype: int
     """
@@ -74,14 +83,19 @@ def generate_from_schema(
         output = output_path.replace("\\", "/")
 
     if remove_methods is not None:
-        methods_to_add = {"all": list(set(METHOD_OPTIONS) - set(remove_methods))}
+        methods_to_add = {"default": list(set(METHOD_OPTIONS) - set(remove_methods))}
     else:
-        methods_to_add = {"all": list(set(METHOD_OPTIONS))}
+        methods_to_add = {"default": list(set(METHOD_OPTIONS))}
 
     if endpoints_methods is not None:
         endpoints_methods = endpoints_methods.replace("\\", "/")
         with open(endpoints_methods, "r") as file:
             methods_to_add = json.load(file)
+
+    if endpoints_access is not None:
+        endpoints_access = endpoints_access.replace("\\", "/")
+        with open(endpoints_access, "r") as file:
+            endpoints_access = json.load(file)
 
     name_table = None
     if one:
@@ -101,4 +115,5 @@ def generate_from_schema(
         output_path=output_path,
         options=methods_to_add,
         name_table=name_table,
+        endpoints_access=endpoints_access
     ).main()

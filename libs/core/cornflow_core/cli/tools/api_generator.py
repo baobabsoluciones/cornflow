@@ -22,12 +22,16 @@ class APIGenerator:
         output_path=None,
         options=None,
         name_table=None,
+        endpoints_access=None,
     ):
         self.path = schema_path
         self.name = app_name
         if options is None:
             options = {}
-        self.options = {**{"all": []}, **options}
+        self.options = {**{"default": []}, **options}
+        if endpoints_access is None:
+            endpoints_access = {}
+        self.endpoints_access = {**{"default": ["SERVICE_ROLE"]},**endpoints_access}
         self.schema = self.import_schema()
         if self.schema["type"] == "array" and not name_table:
             self.schema = {"properties": {"data": self.schema}}
@@ -37,6 +41,7 @@ class APIGenerator:
             print(
                 "The JSONSchema does not contain only one table. The --one option will be ignored"
             )
+
         self.output_path = output_path or "output"
         self.model_path = os.path.join(self.output_path, "models")
         self.endpoint_path = os.path.join(self.output_path, "endpoints")
@@ -260,10 +265,9 @@ class APIGenerator:
         :return: None
         :rtype: None
         """
-        if table_name in self.options:
-            methods_to_add = self.options[table_name]
-        else:
-            methods_to_add = self.options["all"]
+        methods_to_add = self.options.get(table_name, self.options["default"])
+        roles_with_access = self.endpoints_access.get(table_name, self.endpoints_access["default"])
+
         if self.name is None:
             filename = os.path.join(self.endpoint_path, table_name + ".py")
             class_name_all = self.snake_to_camel(table_name + "_endpoint")
@@ -284,7 +288,7 @@ class APIGenerator:
             )
 
         parents_class = ["BaseMetaResource"]
-        roles_with_access = ["SERVICE_ROLE"]
+
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
         with open(filename, "w") as fd:
             # Global
