@@ -27,6 +27,10 @@ class APIGenerator:
     ):
         self.path = schema_path
         self.name = app_name
+        if self.name is not None:
+            self.prefix = self.name + "_"
+        else:
+            self.prefix = ""
         if options is None:
             options = {}
         self.options = {**{"default": []}, **options}
@@ -125,12 +129,9 @@ class APIGenerator:
         :return: the name of the created model
         :rtype: str
         """
-        if self.name is None:
-            filename = os.path.join(self.model_path, f"{table_name}.py")
-            class_name = self.snake_to_camel(table_name + "_model")
-        else:
-            filename = os.path.join(self.model_path, f"{self.name}_{table_name}.py")
-            class_name = self.snake_to_camel(self.name + "_" + table_name + "_model")
+        filename = os.path.join(self.model_path, f"{self.prefix}{table_name}.py")
+        class_name = self.format_name(table_name, "_model")
+
         parents_class = ["TraceAttributesModel"]
         mg = ModelGenerator(
             class_name, self.schema, parents_class, table_name, self.name
@@ -153,10 +154,7 @@ class APIGenerator:
         init_file = os.path.join(self.model_path, "__init__.py")
 
         with open(init_file, "a") as file:
-            if self.name is None:
-                file.write(f"from .{table_name} import {class_name}\n")
-            else:
-                file.write(f"from .{self.name}_{table_name} import {class_name}\n")
+            file.write(f"from .{self.prefix}{table_name} import {class_name}\n")
 
         return class_name
 
@@ -168,36 +166,13 @@ class APIGenerator:
         :return: the dictionary with the names of the schemas created
         :rtype: dict
         """
-        if self.name is None:
-            filename = os.path.join(self.schema_path, table_name + ".py")
-            class_name_one = self.snake_to_camel(table_name + "_response")
-            class_name_edit = self.snake_to_camel(table_name + "_edit_request")
-            class_name_post = self.snake_to_camel(table_name + "_post_request")
-            class_name_post_bulk = self.snake_to_camel(
-                table_name + "_post_bulk_request"
-            )
-            class_name_put_bulk = self.snake_to_camel(table_name + "_put_bulk_request")
-            class_name_put_bulk_one = class_name_put_bulk + "One"
-        else:
-            filename = os.path.join(
-                self.schema_path, self.name + "_" + table_name + ".py"
-            )
-            class_name_one = self.snake_to_camel(
-                self.name + "_" + table_name + "_response"
-            )
-            class_name_edit = self.snake_to_camel(
-                self.name + "_" + table_name + "_edit_request"
-            )
-            class_name_post = self.snake_to_camel(
-                self.name + "_" + table_name + "_post_request"
-            )
-            class_name_post_bulk = self.snake_to_camel(
-                self.name + "_" + table_name + "_post_bulk_request"
-            )
-            class_name_put_bulk = self.snake_to_camel(
-                self.name + "_" + table_name + "_put_bulk_request"
-            )
-            class_name_put_bulk_one = class_name_put_bulk + "One"
+        filename = os.path.join(self.schema_path, self.prefix + table_name + ".py")
+        class_name_one = self.format_name(table_name, "_response")
+        class_name_edit = self.format_name(table_name, "_edit_request")
+        class_name_post = self.format_name(table_name, "_post_request")
+        class_name_post_bulk = self.format_name(table_name, "_post_bulk_request")
+        class_name_put_bulk = self.format_name(table_name, "_put_bulk_request")
+        class_name_put_bulk_one = class_name_put_bulk + "One"
 
         parents_class = ["Schema"]
         partial_schema = self.schema["properties"][table_name]["items"]
@@ -234,16 +209,10 @@ class APIGenerator:
 
         init_file = os.path.join(self.schema_path, "__init__.py")
         with open(init_file, "a") as file:
-            if self.name is None:
-                file.write(
-                    f"from .{table_name} import {class_name_one}, "
-                    f"{class_name_edit}, {class_name_post}, {class_name_post_bulk}, {class_name_put_bulk}\n"
-                )
-            else:
-                file.write(
-                    f"from .{self.name}_{table_name} import {class_name_one}, "
-                    f"{class_name_edit}, {class_name_post}, {class_name_post_bulk}, {class_name_put_bulk}\n"
-                )
+            file.write(
+                f"from .{self.prefix}{table_name} import {class_name_one}, "
+                f"{class_name_edit}, {class_name_post}, {class_name_post_bulk}, {class_name_put_bulk}\n"
+            )
 
         return {
             "one": class_name_one,
@@ -271,24 +240,11 @@ class APIGenerator:
             table_name, self.endpoints_access["default"]
         )
 
-        if self.name is None:
-            filename = os.path.join(self.endpoint_path, table_name + ".py")
-            class_name_all = self.snake_to_camel(table_name + "_endpoint")
-            class_name_details = self.snake_to_camel(table_name + "_details_endpoint")
-            class_name_bulk = self.snake_to_camel(table_name + "_bulk_endpoint")
-        else:
-            filename = os.path.join(
-                self.endpoint_path, self.name + "_" + table_name + ".py"
-            )
-            class_name_all = self.snake_to_camel(
-                self.name + "_" + table_name + "_endpoint"
-            )
-            class_name_details = self.snake_to_camel(
-                self.name + "_" + table_name + "_details_endpoint"
-            )
-            class_name_bulk = self.snake_to_camel(
-                self.name + "_" + table_name + "_bulk_endpoint"
-            )
+        # set names
+        filename = os.path.join(self.endpoint_path, self.prefix + table_name + ".py")
+        class_name_all = self.format_name(table_name, "_endpoint")
+        class_name_details = self.format_name(table_name, "_details_endpoint")
+        class_name_bulk = self.format_name(table_name, "_bulk_endpoint")
 
         eg = EndpointGenerator(table_name, self.name, model_name, schemas_names)
         class_imports = []
@@ -330,39 +286,65 @@ class APIGenerator:
                 )
                 class_imports += [class_name_bulk]
 
+        # Write the imports in init
         if len(class_imports):
-            if self.name is not None:
-                import_name = f"{self.name}_{table_name}"
-            else:
-                import_name = table_name
             with open(self.init_file, "a") as file:
-                file.write(f"from .{import_name} import {', '.join(class_imports)}\n")
+                file.write(
+                    f"from .{self.prefix}{table_name} import {', '.join(class_imports)}\n"
+                )
 
-            for res in class_imports:
-                self.init_resources += [
-                    dict(
-                        ressource=res,
-                        urls=f'"{self.camel_to_url(res)}"',
-                        endpoint=f'"{self.camel_to_ep(res)}"'
-                    )
-                ]
+        for res in class_imports:
+            self.init_resources += [
+                dict(
+                    ressource=res,
+                    urls=f'"{self.camel_to_url(res)}"',
+                    endpoint=f'"{self.camel_to_ep(res)}"',
+                )
+            ]
 
     def write_resources(self):
+        """
+        Write the list of endpoints resources in __init__ file.
+
+        :return: Nothing
+        """
         with open(self.init_file, "a") as file:
             file.write("\n\n")
             file.write("external_resources = [\n    ")
             file.write(",\n    ".join(self.write_dict(d) for d in self.init_resources))
-            file.write("]\n")
-
+            file.write("\n]\n")
 
     @staticmethod
     def write_dict(dic):
-        content = ",\n        ".join([f'{k}={v}' for k, v in dic.items()])
+        """
+        Format a dict to be written in a python file.
+        Return dict {k1:v1, k2:v2} as the following string:
+        "dict(
+            k1 = v1,
+            k2 = v2
+            )"
+
+        :param dic: the dict
+        :return: a string
+        """
+        content = ",\n        ".join([f"{k}={v}" for k, v in dic.items()])
         return "dict(\n        " + content + "\n    )"
 
+    @staticmethod
     def create_endpoint_class(
-        self, class_name, eg, file, ep_type, methods, roles_with_access
+        class_name, eg, file, ep_type, methods, roles_with_access
     ):
+        """
+        Write an endpoint in a file
+
+        :param class_name: the name of the class of the endpoint
+        :param eg: an instance of EndpointGenerator
+        :param file: the file
+        :param ep_type: the type of endpoint (base, bulk, detail)
+        :param methods: the methods to add to the endpoint.
+        :param roles_with_access: the roles which can access this endpoint.
+        :return: nothing (write in the file)
+        """
         parents_class = ["BaseMetaResource"]
         file.write(generate_class_def(class_name, parents_class))
         file.write(eg.generate_endpoint_description(methods, ep_type))
@@ -389,20 +371,36 @@ class APIGenerator:
 
     @staticmethod
     def camel_to_url(name: str) -> str:
+        """
+        Transform a camelCase name into endpoint url:
+            NewTableEndpoint -> /new/table/
+        The endpoint word is always removed in the url.
+
+        :param name: name of the endpoint
+        :return: str url of the endpoint
+        """
         words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
         return "/" + "/".join(w.lower() for w in words) + "/"
 
     @staticmethod
     def camel_to_ep(name: str) -> str:
+        """
+        Transform a camelCase name into endpoint name:
+            NewTableEndpoint -> new-table
+        The endpoint word is always removed in the url.
+
+        :param name: name of the endpoint
+        :return: str url of the endpoint
+        """
         words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
         return "-".join(w.lower() for w in words)
 
     def get_methods(self, table_name):
         """
-        Select the methods of the table to use in the type of endpoint.
+        Get the methods which will be used in each type of endpoint for a given table.
 
-        :param table_name
-        :return:
+        :param str table_name: name of the table
+        :return: a dict in format {type: [list of methods]
         """
         methods = self.options.get(table_name, self.options["default"])
         name_types = dict(base="list", bulk="bulk", detail="detail")
@@ -410,3 +408,13 @@ class APIGenerator:
             t: [m for m in methods if m.split("_")[1] == ext]
             for t, ext in name_types.items()
         }
+
+    def format_name(self, table_name, extension):
+        """
+        Format the name of a schema, model or endpoint.
+
+        :param table_name: The name of the table.
+        :param extension: the extension for the name of the object.
+        :return: the object name.
+        """
+        return self.snake_to_camel(self.prefix + table_name + extension)
