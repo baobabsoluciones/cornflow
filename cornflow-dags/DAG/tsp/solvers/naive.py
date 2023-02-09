@@ -12,4 +12,7 @@ class TSPNaive(Experiment):
             .kvapply(lambda k, v: dict(pos=k, node=v))
         )
         self.solution = Solution(dict(route=nodes))
-        return dict(status_sol=SOLUTION_STATUS_FEASIBLE, status=STATUS_UNDEFINED)
+        return dict(
+            status_sol=SOLUTION_STATUS_FEASIBLE,
+            status=STATUS_UNDEFINED
+        )

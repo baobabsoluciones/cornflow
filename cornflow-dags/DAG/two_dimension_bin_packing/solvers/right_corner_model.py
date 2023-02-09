@@ -1,4 +1,9 @@
-from cornflow_client.constants import PYOMO_STOP_MAPPING, PYOMO_STATUS_MAPPING
+from cornflow_client.constants import (
+    STATUS_TIME_LIMIT,
+    SOLUTION_STATUS_FEASIBLE,
+    SOLUTION_STATUS_INFEASIBLE,
+    PYOMO_STOP_MAPPING
+)
 from pytups import SuperDict
 from two_dimension_bin_packing.core import Experiment, Solution
 from pyomo.environ import (
@@ -263,18 +268,21 @@ class RightCornerModel(Experiment):
             with open("model.log", "w") as of:
                 model_instance.pprint(of)
 
-        model.status = results.solver.status
-        status = PYOMO_STATUS_MAPPING[model.status]
-        status_sol = PYOMO_STOP_MAPPING[results.solver.termination_condition]
+        status = results.solver.status
+        termination_condition = PYOMO_STOP_MAPPING[results.solver.termination_condition]
 
         # Check status
-        if model.status in ["error", "unknown"]:
-            return dict(status=status, status_sol=status_sol)
-        elif model.status == "aborted":
-            if status_sol != 5:
-                return dict(status=status, status_sol=status_sol)
-            else:
-                pass
+        if status in ["error", "unknown", "warning"]:
+            return dict(
+                status=termination_condition,
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
+        elif status == "aborted":
+            if termination_condition != STATUS_TIME_LIMIT:
+                return dict(
+                    status=termination_condition,
+                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
 
         solution_dict = SuperDict()
         solution_dict["included"] = [
@@ -296,4 +304,7 @@ class RightCornerModel(Experiment):
         self.solution = Solution.from_dict(solution_dict)
         # self.plot_solution()
 
-        return dict(status=model.status, status_sol=status_sol)
+        return dict(
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )

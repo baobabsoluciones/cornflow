@@ -1,4 +1,4 @@
-cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/sprint6_t11#subdirectory=libs/client
+cornflow-client
 orloge>=0.13
 PuLP>=2.3
 pandas>=1.0
