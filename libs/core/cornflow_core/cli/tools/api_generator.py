@@ -317,7 +317,7 @@ class APIGenerator:
             ):
                 # Details
                 fd.write(generate_class_def(class_name_details, parents_class))
-                fd.write(eg.generate_endpoint_description())
+                fd.write(eg.generate_endpoint_description(methods_to_add, "detail"))
                 fd.write("\n")
                 fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
                 fd.write("\n")
@@ -341,7 +341,7 @@ class APIGenerator:
             if any(m in methods_to_add for m in ["post_bulk", "put_bulk"]):
                 # Bulk post/put
                 fd.write(generate_class_def(class_name_bulk, parents_class))
-                fd.write(eg.generate_endpoint_description())
+                fd.write(eg.generate_endpoint_description(methods_to_add, "bulk"))
                 fd.write("\n")
                 fd.write(f'    ROLES_WITH_ACCESS = [{", ".join(roles_with_access)}]\n')
                 fd.write("\n")
