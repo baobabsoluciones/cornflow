@@ -5,9 +5,8 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue
+from cornflow_core.shared import validate_and_continue, json_schema_validate_as_string
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -15,7 +14,7 @@ import jsonpatch
 
 
 # Import from internal modules
-from ..models import CaseModel, ExecutionModel, InstanceModel
+from ..models import CaseModel, ExecutionModel, DeployedDAG, InstanceModel
 from ..schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
@@ -34,6 +33,10 @@ from ..shared.authentication import Auth
 from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
 from cornflow_core.authentication import authenticate
+from cornflow_client.constants import (
+    INSTANCE_SCHEMA,
+    SOLUTION_SCHEMA
+)
 
 
 class CaseEndpoint(BaseMetaResource):
@@ -73,6 +76,24 @@ class CaseEndpoint(BaseMetaResource):
         """ """
         data = dict(kwargs)
         data["user_id"] = self.get_user_id()
+        schema = data["schema"]
+        config = current_app.config
+
+        # We validate the instance data if it exists
+        if kwargs.get("data") is not None:
+            data_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            data_errors = json_schema_validate_as_string(data_schema, kwargs["data"])
+            if data_errors:
+                raise InvalidData(payload=dict(jsonschema_errors=data_errors))
+
+        # And the solution data if it exists
+        if kwargs.get("solution") is not None:
+            solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, kwargs["solution"])
+            if solution_errors:
+                raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
+
+        # And if everything is okay: we create the case
         item = CaseModel.from_parent_id(self.get_user(), data)
         item.save()
         current_app.logger.info(f"User {self.get_user()} creates case {item.id}")
@@ -357,7 +378,7 @@ class CaseToInstance(BaseMetaResource):
             return self.post_list(payload)
 
         config = current_app.config
-        marshmallow_obj = get_schema(config, schema)
+        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
         validate_and_continue(marshmallow_obj(), payload["data"])
         response = self.post_list(payload)
         current_app.logger.info(

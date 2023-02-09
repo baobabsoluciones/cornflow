@@ -10,17 +10,18 @@ from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import (
     validate_and_continue,
     marshmallow_validate_and_continue,
-    json_schema_validate,
+    json_schema_validate_as_string
 )
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     CONFIG_SCHEMA,
+    SOLUTION_SCHEMA
 )
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
-from ..models import InstanceModel, ExecutionModel
+from ..models import InstanceModel, DeployedDAG, ExecutionModel
 from ..schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
@@ -152,8 +153,8 @@ class ExecutionEndpoint(BaseMetaResource):
         schema_info = af_client.get_dag_info(schema)
 
         # Validate config before running the dag
-        config_schema = af_client.get_one_schema(schema, CONFIG_SCHEMA)
-        config_errors = json_schema_validate(config_schema, kwargs["config"])
+        config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
+        config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             execution.update_state(
                 EXEC_STATE_ERROR_START,
@@ -162,7 +163,7 @@ class ExecutionEndpoint(BaseMetaResource):
             )
             execution.update_log_txt(f"{config_errors}")
             raise InvalidData(
-                payload=config_errors,
+                payload=dict(jsonschema_errors=config_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                         f"Configuration data does not match the jsonschema."
             )
@@ -172,8 +173,8 @@ class ExecutionEndpoint(BaseMetaResource):
         # validate_and_continue(marshmallow_obj(), kwargs["config"])
 
         # Validate instance data before running the dag
-        instance_schema = af_client.get_one_schema(schema, INSTANCE_SCHEMA)
-        instance_errors = json_schema_validate(instance_schema, instance.data)
+        instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        instance_errors = json_schema_validate_as_string(instance_schema, instance.data)
         if instance_errors:
             execution.update_state(
                 EXEC_STATE_ERROR_START,
@@ -182,10 +183,22 @@ class ExecutionEndpoint(BaseMetaResource):
             )
             execution.update_log_txt(f"{instance_errors}")
             raise InvalidData(
-                payload=instance_errors,
+                payload=dict(jsonschema_errors=instance_errors)),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                         f"Instance data does not match the jsonschema."
             )
+        # Validate solution data before running the dag (if it exists)
+        if kwargs.get("data") is not None:
+            solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, kwargs["data"])
+            if solution_errors:
+                execution.update_state(
+                    EXEC_STATE_ERROR_START,\
+                    message = "The execution could not be run because the solution data does not "
+                    "comply with the json schema. Check the log for more details",
+                )
+                execution.update_log_txt(f"{solution_errors}")
+                raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
 
         # # Validate that instance and dag_name are compatible
         # marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
@@ -284,7 +297,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             }, 201
 
         # Get dag config schema and validate it
-        marshmallow_obj = get_schema(config, kwargs["schema"], "config")
+        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, kwargs["schema"], "config")
         validate_and_continue(marshmallow_obj(), kwargs["config"])
 
         # We now try to launch the task in airflow
@@ -394,7 +407,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if data.get("data") is not None and schema is not None:
             # Get solution schema and validate it
             try:
-                marshmallow_obj = get_schema(config, schema, "solution")
+                marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema, "solution")
                 validate_and_continue(marshmallow_obj(), data["data"])
             except AirflowError:
                 # This is for the unit tests when we can't use Airflow

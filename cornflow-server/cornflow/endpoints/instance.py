@@ -5,7 +5,6 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
 from flask import request, current_app
@@ -18,7 +17,7 @@ from werkzeug.utils import secure_filename
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import InstanceModel
+from ..models import InstanceModel, DeployedDAG
 from ..schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
@@ -93,7 +92,8 @@ class InstanceEndpoint(BaseMetaResource):
 
         # for the rest of the schemas: we need to ask airflow for the schema
         config = current_app.config
-        marshmallow_obj = get_schema(config, data_schema)
+
+        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, data_schema)
         validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         # if we're here, we validated and the data seems to fit the schema
@@ -155,7 +155,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
             else:
                 # for the rest of the schemas: we need to ask airflow for the schema
                 config = current_app.config
-                marshmallow_obj = get_schema(config, schema)
+                marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
                 validate_and_continue(marshmallow_obj(), kwargs["data"])
 
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
