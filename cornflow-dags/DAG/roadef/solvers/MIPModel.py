@@ -8,6 +8,10 @@ import pickle
 import json
 from pytups import SuperDict, TupList
 import itertools
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class MIPModel(Experiment):
@@ -125,7 +129,10 @@ class MIPModel(Experiment):
             ) as fd:
                 json.dump(self.solution.to_dict(), fd)
 
-        return 1
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def solve_one_iteration(self, solver, used_routes, previous_value, current_round):
         if 0 < current_round <= self.limit_artificial_round + 1:

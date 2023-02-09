@@ -38,6 +38,21 @@ STATUS_TIME_LIMIT = 5
 STATUS_LICENSING_PROBLEM = -5
 STATUS_QUEUED = -7
 
+# Associated string
+STATUS_CONV = {
+    STATUS_OPTIMAL: "Optimal",
+    STATUS_TIME_LIMIT: "Time limit",
+    STATUS_INFEASIBLE: "Infeasible",
+    STATUS_UNDEFINED: "Unknown",
+    STATUS_NOT_SOLVED: "Not solved",
+    STATUS_UNBOUNDED: "Unbounded",
+    STATUS_FEASIBLE: "Feasible",
+    STATUS_MEMORY_LIMIT: "Memory limit",
+    STATUS_NODE_LIMIT: "Node limit",
+    STATUS_LICENSING_PROBLEM: "Licensing problem",
+    STATUS_QUEUED: "Queued"
+}
+
 # is there a solution?
 SOLUTION_STATUS_INFEASIBLE = 0
 SOLUTION_STATUS_FEASIBLE = 2
