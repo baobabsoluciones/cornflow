@@ -34,25 +34,96 @@ def get_empty_schema(properties=None, solvers=None):
     return schema
 
 
-def schema_from_excel(path_in, param_tables=None, path_out=None):
+def clean_none(dic):
     """
-    Create a jsonschema based on an excel data file.
+    Remove empty values from a dict
 
-    :param path_in: path of the excel file
+    :param dic: a dict
+    :return: the filtered dict
+    """
+    remove = ["NaT", "NaN", None]
+    return {k: v for k, v in dic.items() if not v in remove}
+
+
+def check_fk(fk_dic):
+    """
+    Check the format of foreign keys
+
+    :param fk_dic: a dict of foreign keys values
+    :return: None (raise an error if problems are detected)
+    """
+    problems = []
+    for table, fk in fk_dic.items():
+        for k, v in fk.items():
+            if "." not in v:
+                problems += [(table, k, v)]
+    if len(problems):
+        message = (
+            f'Foreign key format should be "table.key". '
+            f"Problem detected for the following table, keys and values: {problems}"
+        )
+        raise ValueError(message)
+
+
+def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
+    """
+    Create a jsonschema based on an Excel data file.
+
+    :param path_in: path of the Excel file
     :param param_tables: array containing the names of the parameter tables
     :param path_out: path where to save the json schema as a json file.
+    :param fk: True if foreign key are described in the second line.
     :return: the jsonschema
     """
     if not param_tables:
         param_tables = []
     xl_data = read_excel(path_in, param_tables)
-    data = {k: str_columns(v) if isinstance(v, list) else v for k, v in xl_data.items()}
+
+    # remove special tables
+    if "endpoints_methods" in xl_data:
+        endpoints_methods = {
+            e["endpoint"]: [k for k, v in e.items() if v and k != "endpoint"]
+            for e in xl_data["endpoints_methods"]
+        }
+        del xl_data["endpoints_methods"]
+        with open("endpoints_methods.json", "w") as f:
+            json.dump(endpoints_methods, f, indent=4, sort_keys=False)
+
+    if "endpoints_access" in xl_data:
+        endpoints_access = {
+            e["endpoint"]: [k for k, v in e.items() if v and k != "endpoint"]
+            for e in xl_data["endpoints_access"]
+        }
+        del xl_data["endpoints_access"]
+        with open("endpoints_access.json", "w") as f:
+            json.dump(endpoints_access, f, indent=4, sort_keys=False)
+
+    if fk:
+        fk_values = {
+            k: clean_none(v[0]) for k, v in xl_data.items() if isinstance(v, list)
+        }
+        check_fk(fk_values)
+        data = {
+            k: str_columns(v[1:]) if isinstance(v, list) else v
+            for k, v in xl_data.items()
+        }
+    else:
+        fk_values = {}
+        data = {
+            k: str_columns(v) if isinstance(v, list) else v for k, v in xl_data.items()
+        }
 
     class InstSol(InstanceSolutionCore):
         schema = {}
 
     instance = InstSol(data)
     schema = instance.generate_schema()
+    for table, fk in fk_values.items():
+        for k, v in fk.items():
+            if v is not None:
+                schema["properties"][table]["items"]["properties"][k].update(
+                    {"foreign_key": v}
+                )
 
     if path_out is not None:
         with open(path_out, "w") as f:
