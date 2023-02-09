@@ -228,6 +228,7 @@ class Rostering(BaseDAGTests.SolvingTests):
 
         self.app = Rostering()
         self.config.update(dict(solver="mip.PULP_CBC_CMD"))
+        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
