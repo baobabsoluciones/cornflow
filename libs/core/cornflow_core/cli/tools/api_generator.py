@@ -260,7 +260,7 @@ class APIGenerator:
         :return: None
         :rtype: None
         """
-        methods_to_add = methods = self.options[table_name] + self.options["all"]
+        methods_to_add = self.options[table_name] + self.options["all"]
         if self.name is None:
             filename = os.path.join(self.endpoint_path, table_name + ".py")
             class_name_all = self.snake_to_camel(table_name + "_endpoint")
