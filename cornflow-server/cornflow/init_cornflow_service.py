@@ -19,8 +19,8 @@ from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
 
-@click.command(name="init_service", help="Initialize the service")
-def init_service():
+@click.command(name="init_cornflow_service", help="Initialize the service")
+def init_cornflow_service():
     click.echo("Starting the service")
     os.chdir("/usr/src/app")
     ENV = os.getenv("FLASK_ENV", "development")

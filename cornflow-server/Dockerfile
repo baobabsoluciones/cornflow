@@ -15,8 +15,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 		python3-dev \
 		libffi-dev \
 		libpq-dev \
-		logrotate \
-        ssh
+		logrotate
 		
 # set work directory
 WORKDIR /usr/src/app
@@ -35,4 +34,4 @@ RUN mkdir -p /usr/src/app/log
 EXPOSE 5000
 
 # execute python init script
-CMD ["init_service"]
+CMD ["init_cornflow_service"]
