@@ -23,7 +23,7 @@ from flask_migrate import Migrate, upgrade
 def init_service():
     click.echo("Starting the service")
     os.chdir("/usr/src/app")
-    ENV = os.getenv("FLASK_ENV")
+    ENV = os.getenv("FLASK_ENV", "development")
     os.environ["FLASK_ENV"] = ENV
 
     ###################################
