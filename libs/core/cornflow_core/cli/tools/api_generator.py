@@ -3,6 +3,7 @@ This file has the class that creates the new API
 """
 import json
 import os
+import re
 
 from .endpoint_tools import EndpointGenerator
 from .models_tools import ModelGenerator, model_shared_imports
@@ -46,6 +47,8 @@ class APIGenerator:
         self.model_path = os.path.join(self.output_path, "models")
         self.endpoint_path = os.path.join(self.output_path, "endpoints")
         self.schema_path = os.path.join(self.output_path, "schemas")
+        self.init_resources = []
+        self.init_file = os.path.join(self.endpoint_path, "__init__.py")
 
     def import_schema(self) -> dict:
         """
@@ -108,9 +111,7 @@ class APIGenerator:
             schemas_names = self.new_schemas(table)
             self.new_endpoint(table, model_name, schemas_names)
 
-        init_file = os.path.join(self.endpoint_path, "__init__.py")
-        with open(init_file, "a") as file:
-            file.write("\nresources = []\n")
+        self.write_resources()
         print(
             f"The generated files will be stored in {os.path.join(os.getcwd(), self.output_path)}\n"
         )
@@ -330,13 +331,25 @@ class APIGenerator:
                 class_imports += [class_name_bulk]
 
         if len(class_imports):
-            init_file = os.path.join(self.endpoint_path, "__init__.py")
             if self.name is not None:
                 import_name = f"{self.name}_{table_name}"
             else:
                 import_name = table_name
-            with open(init_file, "a") as file:
+            with open(self.init_file, "a") as file:
                 file.write(f"from .{import_name} import {', '.join(class_imports)}\n")
+
+            for res in class_imports:
+                self.init_resources += [
+                    dict(
+                        ressource=res,
+                        urls=self.camel_to_url(res),
+                        endpoint=self.camel_to_ep(res),
+                    )
+                ]
+
+    def write_resources(self):
+        with open(self.init_file, "a") as file:
+            file.write("\n".join(self.init_resources))
 
     def create_endpoint_class(
         self, class_name, eg, file, ep_type, methods, roles_with_access
@@ -365,6 +378,14 @@ class APIGenerator:
         """
         return "".join(word.title() for word in name.split("_"))
 
+    @staticmethod
+    def camel_to_url(name: str) -> str:
+        return "/" + "/".join(s for s in re.findall("[A-Z][^A-Z]*", name)) + "/"
+
+    @staticmethod
+    def camel_to_ep(name: str) -> str:
+        return "-".join(s for s in re.findall("[A-Z][^A-Z]*", name))
+
     def get_methods(self, table_name):
         """
         Select the methods of the table to use in the type of endpoint.
@@ -378,8 +399,3 @@ class APIGenerator:
             t: [m for m in methods if m.split("_")[1] == ext]
             for t, ext in name_types.items()
         }
-
-
-# test =['get_list', 'post_list', 'get_detail', 'put_detail', 'patch_detail', 'delete_detail', 'post_bulk', 'put_bulk']
-# ag = APIGenerator.sort_methods([])
-# print(ag)
