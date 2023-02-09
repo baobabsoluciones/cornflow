@@ -350,15 +350,15 @@ class APIGenerator:
     def write_resources(self):
         with open(self.init_file, "a") as file:
             file.write("\n\n")
-            file.write("external_resources = [")
+            file.write("external_resources = [\n")
             file.write(",\n    ".join(self.write_dict(d) for d in self.init_resources))
             file.write("]\n")
 
 
     @staticmethod
     def write_dict(dic):
-        content = ",\n".join([f'{k}="{v}"' for k, v in dic.items()])
-        return f"dict({content})"
+        content = ",\n        ".join([f'{k}="{v}"' for k, v in dic.items()])
+        return "dict(\n" + content + "\n    ),\n"
 
     def create_endpoint_class(
         self, class_name, eg, file, ep_type, methods, roles_with_access
