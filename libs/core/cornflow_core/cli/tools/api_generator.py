@@ -342,8 +342,8 @@ class APIGenerator:
                 self.init_resources += [
                     dict(
                         ressource=res,
-                        urls=self.camel_to_url(res),
-                        endpoint=self.camel_to_ep(res),
+                        urls=f'"{self.camel_to_url(res)}"',
+                        endpoint=f'"{self.camel_to_ep(res)}"'
                     )
                 ]
 
@@ -357,7 +357,7 @@ class APIGenerator:
 
     @staticmethod
     def write_dict(dic):
-        content = ",\n        ".join([f'{k}="{v}"' for k, v in dic.items()])
+        content = ",\n        ".join([f'{k}={v}' for k, v in dic.items()])
         return "dict(\n        " + content + "\n    )"
 
     def create_endpoint_class(
