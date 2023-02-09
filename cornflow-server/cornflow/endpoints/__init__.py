@@ -58,6 +58,7 @@ from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 from ..external_app.endpoint import external_resources
+from .tables import TablesEndpoint, TablesDetailsEndpoint
 
 
 resources = [
@@ -203,6 +204,16 @@ resources = [
         resource=LicensesEndpoint,
         urls="/licences/",
         endpoint="licences",
+    ),
+    dict(
+        resource=TablesEndpoint,
+        urls="/table/<string:table_name>/",
+        endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail"
     )
 ]
 
