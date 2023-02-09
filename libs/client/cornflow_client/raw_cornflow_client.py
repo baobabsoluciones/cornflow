@@ -463,7 +463,7 @@ class RawCornFlow(object):
         if not run:
             post_url = "?run=0"
         url = urljoin(urljoin(self.url, api) + "/", str(case_id) + "/" + post_url)
-        response = requests.request(
+        return requests.request(
             method="post",
             url=url,
             headers={
@@ -471,12 +471,6 @@ class RawCornFlow(object):
                 "Content-Encoding": encoding,
             }
         )
-
-        if response.status_code != 201:
-            raise CornFlowApiError(
-                f"Expected a code 201, got a {response.status_code} error instead: {response.text}"
-            )
-        return response.json()
 
     @ask_token
     @prepare_encoding
