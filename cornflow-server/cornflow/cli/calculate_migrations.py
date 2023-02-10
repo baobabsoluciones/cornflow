@@ -14,7 +14,7 @@ from flask_migrate import Migrate, migrate, upgrade
     "-a",
     type=str,
     help="The name of the external app",
-    deafult="external_app",
+    default="external_app",
 )
 @click.option(
     "--data-conn",
