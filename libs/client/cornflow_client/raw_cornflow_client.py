@@ -869,12 +869,34 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def create_deployed_dag(
-        self, name: str = None, description: str = None, encoding=None
+        self,
+        name: str,
+        instance_schema: dict,
+        instance_checks_schema: dict,
+        solution_schema: dict,
+        solution_checks_schema: dict,
+        config_schema: dict,
+        description: str = None,
+        encoding=None
     ):
         if name is None:
             return {"error": "No dag name was given"}
-        payload = dict(id=name, description=description)
+        payload = dict(
+            id=name,
+            description=description,
+            instance_schema=instance_schema,
+            solution_schema=solution_schema,
+            instance_checks_schema=instance_checks_schema,
+            solution_checks_schema=solution_checks_schema,
+            config_schema=config_schema
+        )
         return self.create_api("dag/deployed/", json=payload, encoding=encoding)
+    
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def put_deployed_dag(self, dag_id, data, encoding=None):
+        return self.put_api_for_id("dag/deployed/", dag_id, json=data, encoding=encoding)
 
 
 class CornFlowApiError(Exception):

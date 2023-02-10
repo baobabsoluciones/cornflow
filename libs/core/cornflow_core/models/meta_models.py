@@ -1,11 +1,11 @@
 """
 This file contains the base abstract models from which the rest of the models inherit
 """
-import logging as log
 from datetime import datetime
 from typing import Dict, List
 
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from flask import current_app
 
 from cornflow_core.exceptions import InvalidData
 from cornflow_core.shared import db
@@ -32,21 +32,21 @@ class EmptyBaseModel(db.Model):
 
         try:
             db.session.commit()
-            log.debug(f"Transaction type: {action}, performed correctly on {self}")
+            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {self}")
         except IntegrityError as err:
             db.session.rollback()
-            log.error(f"Integrity error on {action} data: {err}")
-            log.error(f"Data: {self.__dict__}")
+            current_app.logger.error(f"Integrity error on {action} data: {err}")
+            current_app.logger.error(f"Data: {self.__dict__}")
             raise InvalidData(f"Integrity error on {action} with data {self}")
         except DBAPIError as err:
             db.session.rollback()
-            log.error(f"Unknown database error on {action} data: {err}")
-            log.error(f"Data: {self.__dict__}")
+            current_app.logger.error(f"Unknown database error on {action} data: {err}")
+            current_app.logger.error(f"Data: {self.__dict__}")
             raise InvalidData(f"Unknown database error on {action} with data {self}")
         except Exception as err:
             db.session.rollback()
-            log.error(f"Unknown error on {action} data: {err}")
-            log.error(f"Data: {self.__dict__}")
+            current_app.logger.error(f"Unknown error on {action} data: {err}")
+            current_app.logger.error(f"Data: {self.__dict__}")
             raise InvalidData(f"Unknown error on {action} with data {self}")
 
     def save(self):
@@ -98,18 +98,18 @@ class EmptyBaseModel(db.Model):
         action = "bulk create"
         try:
             db.session.commit()
-            log.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
         except IntegrityError as err:
             db.session.rollback()
-            log.error(f"Integrity error on {action} data: {err}")
+            current_app.logger.error(f"Integrity error on {action} data: {err}")
             raise InvalidData(f"Integrity error on {action} with data {cls}")
         except DBAPIError as err:
             db.session.rollback()
-            log.error(f"Unknown database error on {action} data: {err}")
+            current_app.logger.error(f"Unknown database error on {action} data: {err}")
             raise InvalidData(f"Unknown database error on {action} with data {cls}")
         except Exception as err:
             db.session.rollback()
-            log.error(f"Unknown error on {action} data: {err}")
+            current_app.logger.error(f"Unknown error on {action} data: {err}")
             raise InvalidData(f"Unknown error on {action} with data {cls}")
         return instances
 
@@ -119,18 +119,18 @@ class EmptyBaseModel(db.Model):
         action = "bulk create update"
         try:
             db.session.commit()
-            log.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
         except IntegrityError as err:
             db.session.rollback()
-            log.error(f"Integrity error on {action} data: {err}")
+            current_app.logger.error(f"Integrity error on {action} data: {err}")
             raise InvalidData(f"Integrity error on {action} with data {cls}")
         except DBAPIError as err:
             db.session.rollback()
-            log.error(f"Unknown database error on {action} data: {err}")
+            current_app.logger.error(f"Unknown database error on {action} data: {err}")
             raise InvalidData(f"Unknown database error on {action} with data {cls}")
         except Exception as err:
             db.session.rollback()
-            log.error(f"Unknown error on {action} data: {err}")
+            current_app.logger.error(f"Unknown error on {action} data: {err}")
             raise InvalidData(f"Unknown error on {action} with data {cls}")
         return instances
 

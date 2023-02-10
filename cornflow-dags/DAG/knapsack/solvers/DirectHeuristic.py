@@ -1,5 +1,9 @@
 from .Heuristic import Heuristic
 import numpy as np
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class DirectHeuristic(Heuristic):
@@ -28,4 +32,7 @@ class DirectHeuristic(Heuristic):
 
         self.solver = "Direct"
 
-        return 0
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )

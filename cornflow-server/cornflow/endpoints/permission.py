@@ -2,8 +2,6 @@
 
 """
 
-import logging as log
-
 # Import from internal modules
 from cornflow_core.authentication import authenticate
 from cornflow_core.compress import compressed
@@ -18,6 +16,7 @@ from cornflow_core.schemas import (
 
 # Import from libraries
 from flask_apispec import doc, marshal_with, use_kwargs
+from flask import current_app
 
 from ..shared.authentication import Auth
 from ..shared.const import ADMIN_ROLE
@@ -38,6 +37,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
     @marshal_with(PermissionViewRoleBaseResponse(many=True))
     @compressed
     def get(self):
+        current_app.logger.info(f"User {self.get_user()} gets all permissions assigned to the roles")
         return self.get_list()
 
     @doc(description="Create a new permission", tags=["PermissionViewRole"])
@@ -50,9 +50,12 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
             api_view_id=kwargs.get("api_view_id"),
             action_id=kwargs.get("action_id"),
         ):
-            raise ObjectAlreadyExists()
+            raise ObjectAlreadyExists(
+                log_txt=f"Error while user {self.get_user()} tries to create a new permission. "
+                        f"The permission already exists."
+            )
         else:
-            log.info(f"User {self.get_user()} creates permission")
+            current_app.logger.info(f"User {self.get_user()} creates permission")
             return self.post_list(kwargs)
 
 
@@ -78,6 +81,7 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets details of permission {idx}")
         return self.get_detail(idx=idx)
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])
@@ -85,12 +89,12 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
     @use_kwargs(PermissionViewRoleBaseEditRequest, location="json")
     def put(self, idx, **kwargs):
         response = self.put_detail(kwargs, idx=idx, track_user=False)
-        log.info(f"User {self.get_user()} edits permission {idx}")
+        current_app.logger.info(f"User {self.get_user()} edits permission {idx}")
         return response
 
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
     def delete(self, idx):
         response = self.delete_detail(idx=idx)
-        log.info(f"User {self.get_user()} deletes permission {idx}")
+        current_app.logger.info(f"User {self.get_user()} deletes permission {idx}")
         return response

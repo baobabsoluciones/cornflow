@@ -24,6 +24,8 @@ DATASCHEMA = "DataSchema"
 INSTANCE_SCHEMA = "instance"
 SOLUTION_SCHEMA = "solution"
 CONFIG_SCHEMA = "config"
+INSTANCE_CHECKS_SCHEMA = "instance_checks"
+SOLUTION_CHECKS_SCHEMA = "solution_checks"
 
 # why it stopped
 STATUS_NOT_SOLVED = 0
@@ -37,6 +39,21 @@ STATUS_NODE_LIMIT = 4
 STATUS_TIME_LIMIT = 5
 STATUS_LICENSING_PROBLEM = -5
 STATUS_QUEUED = -7
+
+# Associated string
+STATUS_CONV = {
+    STATUS_OPTIMAL: "Optimal",
+    STATUS_TIME_LIMIT: "Time limit",
+    STATUS_INFEASIBLE: "Infeasible",
+    STATUS_UNDEFINED: "Unknown",
+    STATUS_NOT_SOLVED: "Not solved",
+    STATUS_UNBOUNDED: "Unbounded",
+    STATUS_FEASIBLE: "Feasible",
+    STATUS_MEMORY_LIMIT: "Memory limit",
+    STATUS_NODE_LIMIT: "Node limit",
+    STATUS_LICENSING_PROBLEM: "Licensing problem",
+    STATUS_QUEUED: "Queued"
+}
 
 # is there a solution?
 SOLUTION_STATUS_INFEASIBLE = 0
@@ -93,14 +110,19 @@ PULP_STATUS_MAPPING = {
 
 class AirflowError(Exception):
     status_code = 400
+    log_txt = "Airflow error"
 
-    def __init__(self, error=None, status_code=None, payload=None):
+    def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
         if error is not None:
             self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+        if log_txt is not None:
+            self.log_txt = log_txt
+        else:
+            self.log_txt = self.error
 
     def to_dict(self):
         rv = dict(self.payload or ())
