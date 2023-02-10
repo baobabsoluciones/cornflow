@@ -31,7 +31,7 @@ METHOD_OPTIONS = [
     required=False,
 )
 @click.option(
-    "--remove_methods",
+    "--remove-methods",
     "-r",
     type=click.Choice(METHOD_OPTIONS, case_sensitive=False),
     help="Methods that will NOT be added to the new endpoints",
@@ -39,7 +39,13 @@ METHOD_OPTIONS = [
     required=False,
 )
 @click.option(
-    "--endpoints_methods",
+    "--one",
+    type=str,
+    help="If your schema describes only one table, use this option to indicate the name of the table",
+    required=False,
+)
+@click.option(
+    "--endpoints-methods",
     "-m",
     type=str,
     default=None,
@@ -47,17 +53,11 @@ METHOD_OPTIONS = [
     required=False,
 )
 @click.option(
-    "--endpoints_access",
-    "-a",
+    "--endpoints-access",
+    "-e",
     type=str,
     default=None,
     help="json file with dict of roles access that will be added to each new endpoints",
-    required=False,
-)
-@click.option(
-    "--one",
-    type=str,
-    help="If your schema describes only one table, use this option to indicate the name of the table",
     required=False,
 )
 def generate_from_schema(
