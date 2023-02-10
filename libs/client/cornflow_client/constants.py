@@ -166,13 +166,16 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
     ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
     ('abs_gap', 'pyomo', 'highs') : 'mip_abs_gap' ,
-
+    ('heuristics', 'pyomo', 'highs') : 'mip_heuristic_effort' ,
+    ('heuristics', 'pyomo', 'highs') : 'mip_heuristic_effort'
 
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('abs_gap', 'pulp', 'highs') : 'gapAbs' ,
     ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
     ('threads', 'pulp', 'highs') : 'threads' ,
     ('rel_gap', 'pulp', 'highs') : 'gapRel' ,
+    ('heuristics', 'pulp', 'highs') : 'mip_heuristic_effort' ,
+    ('presolve', 'pulp', 'highs') : 'presolve' ,
 
 }
 
