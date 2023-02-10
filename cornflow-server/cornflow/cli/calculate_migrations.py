@@ -3,6 +3,7 @@ import shutil
 from importlib import import_module
 import click
 from cornflow_core.shared import db
+import sys
 from flask_migrate import Migrate, migrate, upgrade
 
 
@@ -24,6 +25,8 @@ from flask_migrate import Migrate, migrate, upgrade
     default="postgresql://postgres:postgresadmin@localhost:5432/cornflow",
 )
 def calculate_migrations(app_name, data_conn):
+    sys.path.append("./")
+
     if os.path.exists(f"./{app_name}/migrations"):
         click.echo("The migrations folder already exists")
         click.echo(f"Location: {os.path.abspath(f'./{app_name}/migrations')}")
