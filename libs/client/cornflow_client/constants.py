@@ -130,13 +130,14 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
     ('presolve', 'pulp', 'gurobi') : 'presolve' ,
     ('abs_gap', 'pulp', 'gurobi') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'gurobi') : 'gapRel' ,
     ('feasibility_tol', 'pulp', 'gurobi') : 'FeasibilityTol' ,
     ('iteration_limit', 'pulp', 'gurobi') : 'IterationLimit' ,
 
 
     ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
     ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
-    ('lp_iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
+    ('iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
     ('mem_limit', 'pyomo', 'scip') : 'limits/memory' ,
     ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
     ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
@@ -155,7 +156,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
     ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
-    ('lp_iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
+    ('iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
     ('mem_limit', 'pulp', 'scip') : 'limits/memory' ,
 
 
