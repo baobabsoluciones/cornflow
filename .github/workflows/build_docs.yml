@@ -7,6 +7,8 @@ on:
     paths:
       - 'cornflow-server/docs/**'
       - 'cornflow-server/README.rst'
+      - 'cornflow-server/**'
+      - 'libs/client/**'
 
 jobs:
   build:
