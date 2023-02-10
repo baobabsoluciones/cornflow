@@ -22,41 +22,49 @@ def register_base_permissions_command(verbose):
 
     # Create base permissions
     permissions_to_register = [
-        PermissionViewRoleBaseModel(
-            {
-                "role_id": role,
-                "action_id": action,
-                "api_view_id": views[view["endpoint"]],
-            }
-        )
-        for role, action in BASE_PERMISSION_ASSIGNATION
-        for view in resources
-        if role in view["resource"].ROLES_WITH_ACCESS
-        and (
-            action,
-            views[view["endpoint"]],
-            role,
-        )
-        not in permissions_registered
-    ] + [
-        PermissionViewRoleBaseModel(
-            {
-                "role_id": role,
-                "action_id": action,
-                "api_view_id": views[endpoint],
-            }
-        )
-        for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
-        if (
+                                  PermissionViewRoleBaseModel(
+                                      {
+                                          "role_id": role,
+                                          "action_id": action,
+                                          "api_view_id": views[view["endpoint"]],
+                                      }
+                                  )
+                                  for role, action in BASE_PERMISSION_ASSIGNATION
+                                  for view in resources
+                                  if role in view["resource"].ROLES_WITH_ACCESS
+                                     and (
+                                         action,
+                                         views[view["endpoint"]],
+                                         role,
+                                     )
+                              ] + [
+                                  PermissionViewRoleBaseModel(
+                                      {
+                                          "role_id": role,
+                                          "action_id": action,
+                                          "api_view_id": views[endpoint],
+                                      }
+                                  )
+                                  for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
+                                  if (
             action,
             views[endpoint],
             role,
         )
-        not in permissions_registered
-    ]
+                              ]
 
-    if len(permissions_to_register) > 0:
-        db.session.bulk_save_objects(permissions_to_register)
+    permissions_to_register_filtered = [permission for permission in permissions_to_register
+                                      if permission not in permissions_registered]
+    permissions_to_delete_filtered = [permission for permission in permissions_registered
+                                      if permission not in permissions_to_register]
+
+    if len(permissions_to_register_filtered) > 0:
+        db.session.bulk_save_objects(permissions_to_register_filtered)
+
+    # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.delete
+    if len(permissions_to_delete_filtered) > 0:
+        for permission in permissions_to_delete_filtered:
+            db.session.delete(permission)
 
     try:
         db.session.commit()
@@ -88,7 +96,6 @@ def register_base_permissions_command(verbose):
 
 
 def register_dag_permissions_command(open_deployment: int = None, verbose: int = 0):
-
     import logging as log
 
     from flask import current_app
