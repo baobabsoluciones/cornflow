@@ -12,6 +12,9 @@
     },
     "msg": {
       "type": "boolean"
+    },
+    "seconds": {
+      "type": "number"
     }
   }
 }

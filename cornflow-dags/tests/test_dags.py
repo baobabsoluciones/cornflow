@@ -109,11 +109,19 @@ class BaseDAGTests:
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")
+                ti = Mock()
+                ti.run_id = "run_id"
+                ti.dag_id = "dag_id"
+                ti.try_number = 1
+                ti.task_id = "task_id"
+
                 cf_solve(
                     fun=self.app.solve,
                     dag_name=self.app.name,
                     secrets="",
                     dag_run=dag_run,
+                    ti=ti,
+                    conf=dict()
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
@@ -228,6 +236,7 @@ class Rostering(BaseDAGTests.SolvingTests):
 
         self.app = Rostering()
         self.config.update(dict(solver="mip.PULP_CBC_CMD"))
+        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
