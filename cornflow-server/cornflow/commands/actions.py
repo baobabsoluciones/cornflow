@@ -1,5 +1,5 @@
 def register_actions_command(verbose):
-    import logging as log
+    from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from cornflow_core.models import ActionBaseModel
@@ -12,7 +12,7 @@ def register_actions_command(verbose):
         db.session.commit()
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on database commit: {e}")
+        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     actions_to_register = [
         ActionBaseModel(id=key, name=value)
@@ -27,10 +27,10 @@ def register_actions_command(verbose):
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        log.error(f"Integrity error on actions register: {e}")
+        current_app.logger.error(f"Integrity error on actions register: {e}")
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on actions register: {e}")
+        current_app.logger.error(f"Unknown error on actions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
@@ -41,12 +41,12 @@ def register_actions_command(verbose):
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            log.error(f"Unknown error on actions sequence updating: {e}")
+            current_app.logger.error(f"Unknown error on actions sequence updating: {e}")
 
     if verbose == 1:
         if len(actions_to_register) > 0:
-            log.info("Actions registered: ", actions_to_register)
+            current_app.logger.info("Actions registered: ", actions_to_register)
         else:
-            log.info("No new actions to be registered")
+            current_app.logger.info("No new actions to be registered")
 
     return True

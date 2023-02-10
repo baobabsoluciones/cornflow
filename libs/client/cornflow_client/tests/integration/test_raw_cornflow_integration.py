@@ -676,7 +676,13 @@ class TestRawCornflowClientService(TestCase):
     def test_post_deployed_dag(self):
 
         response = self.client.raw.create_deployed_dag(
-            name="test_dag_2", description="test_dag_2_description"
+            name="test_dag_2",
+            description="test_dag_2_description",
+            instance_schema=dict(),
+            instance_checks_schema=dict(),
+            solution_schema=dict(),
+            solution_checks_schema=dict(),
+            config_schema=dict()
         )
         self.assertEqual(response.status_code, 201)
         response = response.json()
