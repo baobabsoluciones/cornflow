@@ -40,7 +40,8 @@ class GenerationTests(unittest.TestCase):
         self.all_methods = TupList(
             ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]
         )
-        self.endpoints_methods_path="./data/endpoints_methods.json"
+        self.endpoints_methods_path=self._get_path("./data/endpoints_methods.json")
+        self.endpoints_access_path = self._get_path("./data/endpoints_access.json")
 
     def tearDown(self):
         if os.path.isdir(self.last_path):
@@ -159,7 +160,7 @@ class GenerationTests(unittest.TestCase):
                 "-p",
                 self.full_inst_path,
                 "-a",
-                self.second_app_name,
+                "test3",
                 "-o",
                 self.other_output_path,
                 "-m",
@@ -167,6 +168,27 @@ class GenerationTests(unittest.TestCase):
             ],
         )
         self.assertEqual(result.exit_code, 0)
+        self.last_path = self.other_output_path
+        self.check(output_path=self.other_output_path, app_name="test3")
+
+    def test_endpoints_access(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            generate_from_schema,
+            [
+                "-p",
+                self.full_inst_path,
+                "-a",
+                "test4",
+                "-o",
+                self.other_output_path,
+                "-e",
+                self.endpoints_access_path
+            ],
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.last_path = self.other_output_path
+        self.check(output_path=self.other_output_path, app_name="test4")
 
     def check(
         self, instance=None, output_path=None, include_methods=None, app_name=None
@@ -313,6 +335,8 @@ class GenerationTests(unittest.TestCase):
                 "delete_detail": "DELETE",
                 "put_detail": "PUT",
                 "patch_detail": "PATCH",
+                "post_bulk":"POST",
+                "put_bulk":"PUT"
             }
             # Checks the methods of the first endpoint
             include_methods_e1 = [
@@ -334,6 +358,18 @@ class GenerationTests(unittest.TestCase):
                 ]
                 props_and_methods = mod.__dict__[class_names[1]].methods
                 for method_name in include_methods_e2:
+                    self.assertIn(api_methods[method_name], props_and_methods)
+
+            if len(class_names) >=3:
+                print(" test bulk")
+                include_methods_e3 = [
+                    method_name
+                    for method_name in include_methods
+                    if method_name
+                    in ["post_bulk", "put_bulk"]
+                ]
+                props_and_methods = mod.__dict__[class_names[2]].methods
+                for method_name in include_methods_e3:
                     self.assertIn(api_methods[method_name], props_and_methods)
 
     @staticmethod
