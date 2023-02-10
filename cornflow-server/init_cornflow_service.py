@@ -79,6 +79,24 @@ if os.getenv("DATABASE_URL") is None:
     sys.exit("FATAL: you need to provide a postgres database for Cornflow")
 
 # set logrotate config file
+if CORNFLOW_LOGGING == "file":
+    try:
+        conf = "/usr/src/app/log/*.log {\n\
+        rotate 30\n \
+        daily\n\
+        compress\n\
+        size 20M\n\
+        postrotate\n\
+         kill -HUP \$(cat /usr/src/app/gunicorn.pid)\n \
+        endscript}"
+        logrotate = subprocess.run(
+            f"cat > /etc/logrotate.d/cornflow <<EOF\n {conf} \nEOF", shell=True
+        )
+        out_logrotate = logrotate.stdout
+        print(out_logrotate)
+
+    except error:
+        print(error)
 
 # make initdb, access control and/or migrations
 app = create_app(ENV, CORNFLOW_DB_CONN)

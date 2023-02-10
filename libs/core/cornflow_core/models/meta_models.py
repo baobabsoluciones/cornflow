@@ -295,10 +295,11 @@ class TraceAttributesModel(EmptyBaseModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
 
-        query = query.offset(offset)
+        query = query.order_by(desc(cls.created_at)).offset(offset)
+
         if limit:
             query = query.limit(limit)
-        return query.order_by(desc(cls.created_at)).all()
+        return query.all()
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
