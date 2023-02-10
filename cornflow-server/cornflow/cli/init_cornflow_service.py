@@ -145,7 +145,7 @@ def init_cornflow_service():
             )
     elif EXTERNAL_APP == 1:
         click.echo(
-            f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE', 'external_app')}"
+            f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE', '../external_app')}"
         )
         os.chdir("/usr/src/external_app")
         os.system("$(command -v pip) install --user -r requirements.txt")
@@ -153,7 +153,7 @@ def init_cornflow_service():
         print(f"PATH: {sys.path}")
         from importlib import import_module
 
-        external_app = import_module(os.getenv("EXTERNAL_APP_MODULE", "external_app"))
+        external_app = import_module(os.getenv("EXTERNAL_APP_MODULE", "../external_app"))
         app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
         with app.app_context():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
