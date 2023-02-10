@@ -63,7 +63,6 @@ def register_base_permissions_command(verbose):
     if len(permissions_to_register_filtered) > 0:
         db.session.bulk_save_objects(permissions_to_register_filtered)
 
-    # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.delete
     if len(permissions_to_delete_filtered) > 0:
         for permission in permissions_to_delete_filtered:
             db.session.delete(permission)
