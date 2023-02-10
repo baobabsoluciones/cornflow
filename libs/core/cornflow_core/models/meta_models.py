@@ -139,7 +139,7 @@ class EmptyBaseModel(db.Model):
     def get_all_objects(
         cls,
         offset=0,
-        limit=10,
+        limit=None,
         **kwargs
     ):
         """
@@ -152,7 +152,12 @@ class EmptyBaseModel(db.Model):
         iterated through the results.
         :rtype: class:`Query`
         """
-        return cls.query.filter_by(**kwargs).offset(offset).limit(limit).all()
+        if "user" in kwargs:
+            kwargs.pop("user")
+        query = cls.query.filter_by(**kwargs).offset(offset)
+        if limit:
+            query = query.limit(limit)
+        return query.all()
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
