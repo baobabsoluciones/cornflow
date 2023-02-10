@@ -1,0 +1,4 @@
+{
+  "employees": ["get_list", "post_list"],
+  "shifts": ["delete_detail", "post_bulk", "put_bulk"]
+}

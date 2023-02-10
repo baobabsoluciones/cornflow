@@ -40,6 +40,7 @@ class GenerationTests(unittest.TestCase):
         self.all_methods = TupList(
             ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]
         )
+        self.endpoints_methods_path=""
 
     def tearDown(self):
         if os.path.isdir(self.last_path):
@@ -148,6 +149,25 @@ class GenerationTests(unittest.TestCase):
             include_methods=include_methods,
             app_name=self.second_app_name,
         )
+
+    def test_endpoints_methods(self):
+
+        runner = CliRunner()
+        result = runner.invoke(
+            generate_from_schema,
+            [
+                "-p",
+                self.full_inst_path,
+                "-a",
+                self.second_app_name,
+                "-o",
+                self.other_output_path,
+                "-m",
+                self.endpoints_methods_path
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 0)
 
     def check(
         self, instance=None, output_path=None, include_methods=None, app_name=None
