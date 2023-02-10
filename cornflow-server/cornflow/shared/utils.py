@@ -2,7 +2,7 @@
 
 """
 import hashlib
-import importlib as il
+from importlib import import_module
 import json
 import os
 import sys
@@ -19,7 +19,7 @@ def hash_json_256(data):
 
 
 def _import_file(filename):
-    return il.import_module(filename)
+    return import_module(filename)
 
 
 def import_models(models_paths):
