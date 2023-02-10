@@ -165,6 +165,8 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
     ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
     ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
+    ('abs_gap', 'pyomo', 'highs') : 'mip_abs_gap' ,
+
 
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('abs_gap', 'pulp', 'highs') : 'gapAbs' ,
