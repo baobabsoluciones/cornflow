@@ -158,6 +158,11 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
     ('iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
     ('mem_limit', 'pulp', 'scip') : 'limits/memory' ,
+    ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
+    ('iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
+    ('presolve', 'pyomo', 'scip') : 'presolve' ,
+    ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
+    ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
 
 
     ('presolve', 'pyomo', 'highs') : 'presolve' ,
@@ -167,7 +172,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
     ('abs_gap', 'pyomo', 'highs') : 'mip_abs_gap' ,
     ('heuristics', 'pyomo', 'highs') : 'mip_heuristic_effort' ,
-    ('heuristics', 'pyomo', 'highs') : 'mip_heuristic_effort'
 
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('abs_gap', 'pulp', 'highs') : 'gapAbs' ,
