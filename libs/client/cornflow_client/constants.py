@@ -180,7 +180,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('rel_gap', 'pulp', 'highs') : 'gapRel' ,
     ('heuristics', 'pulp', 'highs') : 'mip_heuristic_effort' ,
     ('presolve', 'pulp', 'highs') : 'presolve' ,
-
+ 
 }
 
 
