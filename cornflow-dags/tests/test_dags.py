@@ -22,7 +22,7 @@ class BaseDAGTests:
     class SolvingTests(unittest.TestCase):
         def setUp(self) -> None:
             self.app = None
-            self.config = SuperDict(msg=False, timeLimit=1)
+            self.config = SuperDict(msg=False, timeLimit=1, seconds=1)
 
         @property
         def app(self) -> ApplicationCore:
@@ -109,11 +109,19 @@ class BaseDAGTests:
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")
+                ti = Mock()
+                ti.run_id = "run_id"
+                ti.dag_id = "dag_id"
+                ti.try_number = 1
+                ti.task_id = "task_id"
+
                 cf_solve(
                     fun=self.app.solve,
                     dag_name=self.app.name,
                     secrets="",
                     dag_run=dag_run,
+                    ti=ti,
+                    conf=dict()
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
@@ -227,7 +235,8 @@ class Rostering(BaseDAGTests.SolvingTests):
         from DAG.rostering import Rostering
 
         self.app = Rostering()
-        self.config.update(dict(solver="mip"))
+        self.config.update(dict(solver="mip.PULP_CBC_CMD"))
+        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
@@ -260,3 +269,13 @@ class PuLP(BaseDAGTests.SolvingTests):
 
         self.app = PuLP()
         self.config.update(dict(solver="PULP_CBC_CMD"))
+        self.config.pop("seconds")
+
+
+class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.two_dimension_bin_packing import TwoDimensionBinPackingProblem
+
+        self.app = TwoDimensionBinPackingProblem()
+        self.config.update(dict(solver="right_corner.cbc"))

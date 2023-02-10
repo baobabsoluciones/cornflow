@@ -7,6 +7,7 @@ from ldap3 import Server, Connection, ALL
 
 # Import from internal modules
 from cornflow_core.constants import ALL_DEFAULT_ROLES, ROLES_MAP
+from cornflow_core.exceptions import InvalidCredentials
 
 
 class LDAPBase:
@@ -43,12 +44,23 @@ class LDAPBase:
         :return: the dn string
         :rtype: string
         """
-        return "%s=%s,%s" % (
-            self.config["LDAP_USERNAME_ATTRIBUTE"],
-            user,
-            self.config["LDAP_USER_BASE"],
+        if user == self.config["CORNFLOW_SERVICE_USER"]:
+            base = self.config["LDAP_SERVICE_BASE"]
+        else:
+            base = self.config["LDAP_USER_BASE"]
+        conn = self.get_bound_connection()
+        base_search = base
+        search_filter = "(&({}={}))".format(
+            self.config['LDAP_USERNAME_ATTRIBUTE'],
+            user
         )
-
+        conn.search(base_search, search_filter=search_filter,attributes=['*'])
+        try:
+            user_dn = conn.response[0]['dn']
+        except (KeyError, IndexError):
+            raise InvalidCredentials(log_txt="Error while trying to authenticate a user. Invalid credentials.")
+        return user_dn
+        
     def get_user_attribute(self, user, attribute):
         """
         Method to get one attribute from a user in ldap
@@ -99,9 +111,9 @@ class LDAPBase:
         conn = self.get_bound_connection()
         user_search = self.get_dn_from_user(user)
         group_search = self.config["LDAP_GROUP_BASE"]
-        # TODO: memberUid is not universal. For some objectClass it's "member"
-        search_filter = "(&(objectClass={})(memberUid={}))".format(
-            self.config["LDAP_GROUP_OBJECT_CLASS"], user
+
+        search_filter = "(&(objectClass={})(member={}))".format(
+            self.config["LDAP_GROUP_OBJECT_CLASS"], user_search
         )
         conn.search(group_search, search_filter=search_filter, attributes=["cn"])
         if not len(conn.entries):

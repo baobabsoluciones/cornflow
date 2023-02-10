@@ -14,6 +14,7 @@ from .solution import SolutionCore
 from .experiment import ExperimentCore
 
 from cornflow_client.constants import (
+    STATUS_CONV,
     STATUS_OPTIMAL,
     STATUS_NOT_SOLVED,
     STATUS_INFEASIBLE,
@@ -174,13 +175,6 @@ class ApplicationCore(ABC):
         start = timer()
         output = algo.solve(config)
         sol = None
-        status_conv = {
-            STATUS_OPTIMAL: "Optimal",
-            STATUS_TIME_LIMIT: "Time limit",
-            STATUS_INFEASIBLE: "Infeasible",
-            STATUS_UNDEFINED: "Unknown",
-            STATUS_NOT_SOLVED: "Not solved",
-        }
         # compatibility with previous format:
         if isinstance(output, int):
             output = dict(status=output)
@@ -189,7 +183,7 @@ class ApplicationCore(ABC):
         log = dict(
             time=timer() - start,
             solver=solver,
-            status=status_conv.get(status, "Unknown"),
+            status=STATUS_CONV.get(status, "Unknown"),
             status_code=status,
             sol_code=SOLUTION_STATUS_INFEASIBLE,
         )

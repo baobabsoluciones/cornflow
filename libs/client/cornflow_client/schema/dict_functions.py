@@ -24,6 +24,7 @@ class ParameterSchema(Schema):
     allow_none = fields.Bool(default=False)
     type = fields.String(required=True)
     valid_values = fields.List(fields.String, required=False)
+    strict = fields.Bool(default=True)
 
 
 def validator(valid_values, input):

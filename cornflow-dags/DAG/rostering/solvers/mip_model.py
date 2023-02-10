@@ -9,6 +9,7 @@ from pytups import SuperDict, TupList
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
+    PULP_STATUS_MAPPING
 )
 
 # Imports from internal modules
@@ -50,19 +51,27 @@ class MipModel(Experiment):
         self.create_variables()
         # Constraints:
         model = self.create_constraints(model)
-        # print(model)
+
+        solver_name = options.pop("solver")
+        if "." in solver_name:
+            prefix, solver_name = solver_name.split(".")
+        else:
+            prefix = "mip"
+            solver_name = "PULP_CBC_CMD"
+
+        solver = pl.getSolver(solver_name, **options)
+        options["solver"] = f"{prefix}.{solver_name}"
 
         # Solver and solve
-        mat_solver = pl.PULP_CBC_CMD(
-            gapRel=0.001,
-            timeLimit=options.get("timeLimit", 240),
-            msg=options.get("msg", False),
-        )
-        status = model.solve(mat_solver)
+        status = model.solve(solver)
+        termination_condition = PULP_STATUS_MAPPING[status]
 
         # Check status
-        if model.sol_status not in [pl.LpSolutionIntegerFeasible, pl.LpSolutionOptimal]:
-            return dict(status=status, status_sol=SOLUTION_STATUS_INFEASIBLE)
+        if model.status != pl.LpStatusOptimal:
+            return dict(
+                status=termination_condition,
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
 
         work_assignments = (
             self.works.vfilter(lambda v: pl.value(v))
@@ -73,7 +82,10 @@ class MipModel(Experiment):
         self.solution = Solution.from_dict(SuperDict(works=work_assignments))
         self.solution.data["indicators"] = self.get_indicators()
 
-        return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
+        return dict(
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def initialize(self):
         self.managers = self.instance.get_employees_managers()
@@ -96,7 +108,9 @@ class MipModel(Experiment):
         self.max_working_days = self.instance.get_max_working_days()
 
         self.demand = self.instance.get_demand()
-        self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill()
+        self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill(
+            self.employee_ts_availability
+        )
 
     def create_variables(self):
 
@@ -181,7 +195,10 @@ class MipModel(Experiment):
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
         # RQ09: The demand for each skill should be covered
-        for ts, id_skill, skill_demand, _employees in self.ts_demand_employee_skill:
+        for (
+            (ts, id_skill, skill_demand),
+            _employees,
+        ) in self.ts_demand_employee_skill.items():
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
 
         return model

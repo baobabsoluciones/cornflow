@@ -58,6 +58,14 @@ class SchemaGenerator:
             res += ")\n"
         return res
 
+    @staticmethod
+    def generate_bulk_schema(one_schema):
+        res = f"    data = fields.List(fields.Nested({one_schema}), required=True)\n"
+        return res
+
+    def generate_put_bulk_schema_one(self):
+        return "    id = fields.Int(required=True)\n"
+
     def generate_schema(self):
         if not self.schema["properties"].get("id"):
             return "    id = fields.Int(required=True)\n"

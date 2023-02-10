@@ -22,6 +22,7 @@ from .dag import (
     DAGCaseEndpoint,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
+    DeployedDagDetailEndpoint
 )
 
 from .execution import (
@@ -47,6 +48,7 @@ from .data_check import (
     DataCheckInstanceEndpoint,
     DataCheckCaseEndpoint,
 )
+from .licenses import LicensesEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 
 from .roles import RolesListEndpoint, RoleDetailEndpoint
@@ -128,6 +130,7 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
+    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -198,6 +201,11 @@ resources = [
         urls="/user/recover-password/",
         endpoint="recover-password",
     ),
+    dict(
+        resource=LicensesEndpoint,
+        urls="/licences/",
+        endpoint="licences",
+    )
 ]
 
 if len(external_resources):

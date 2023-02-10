@@ -53,9 +53,8 @@ class TestCornflowClientUser(TestCase):
         response = self.client.sign_up(
             "test_username", "test_username@cornflow.org", "TestPassword2!"
         )
-        self.assertIn("id", response.json().keys())
-        self.assertIn("token", response.json().keys())
-        self.assertEqual(201, response.status_code)
+        self.assertIn("id", response.keys())
+        self.assertIn("token", response.keys())
 
     def test_create_instance(self):
         data = _load_file(PULP_EXAMPLE)
@@ -201,9 +200,9 @@ class TestCornflowClientUser(TestCase):
         time.sleep(15)
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
-        response = self.client.get_api_for_id(
-            api="instance", id=execution["instance_id"], post_url="data", encoding="br"
-        ).json()
+        response = self.client.get_one_instance_data(
+            reference_id=execution["instance_id"], encoding="br"
+        )
         self.assertIsNotNone(response["checks"])
 
     def test_execution_results(self):
@@ -304,6 +303,16 @@ class TestCornflowClientUser(TestCase):
 
         return response
 
+    def test_put_one_execution(self):
+        execution = self.test_create_execution()
+        response = self.client.put_one_execution(execution["id"], {"name": "new_execution_name"})
+        self.assertEqual("Updated correctly", response["message"])
+
+    def test_delete_one_execution(self):
+        execution = self.test_create_execution()
+        response = self.client.delete_one_execution(execution["id"])
+        self.assertEqual("The object has been deleted", response["message"])
+
     def test_create_case_execution(self):
         execution = self.test_get_execution_solution()
         response = self.client.create_case(
@@ -355,15 +364,14 @@ class TestCornflowClientUser(TestCase):
 
     def test_get_one_user(self):
         response = self.client.get_one_user(self.user_id)
-        self.assertEqual(response.status_code, 200)
 
         items = ["id", "first_name", "last_name", "username", "email"]
         for item in items:
-            self.assertIn(item, response.json().keys())
+            self.assertIn(item, response.keys())
 
-        self.assertEqual(self.user_id, response.json()["id"])
-        self.assertEqual("user", response.json()["username"])
-        self.assertEqual("user@cornflow.org", response.json()["email"])
+        self.assertEqual(self.user_id, response["id"])
+        self.assertEqual("user", response["username"])
+        self.assertEqual("user@cornflow.org", response["email"])
 
     def test_get_one_instance(self):
         instance = self.test_create_instance()
@@ -382,6 +390,29 @@ class TestCornflowClientUser(TestCase):
         for item in items:
             self.assertIn(item, response.keys())
             self.assertEqual(instance[item], response[item])
+            
+    def test_get_one_instance_data(self):
+        instance = self.test_create_instance()
+        response = self.client.get_one_instance_data(instance["id"])
+        items = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema"
+        ]
+
+        self.assertIn("data", response.keys())
+        for item in items:
+            self.assertIn(item, response.keys())
+            self.assertEqual(instance[item], response[item])
+
+    def test_put_one_instance(self):
+        instance = self.test_create_instance()
+        response = self.client.put_one_instance(instance["id"], {"name": "new_instance_name"})
+        self.assertEqual("Updated correctly", response["message"])
 
     def test_get_one_case(self):
         case = self.test_create_case()
@@ -400,6 +431,28 @@ class TestCornflowClientUser(TestCase):
             "is_dir",
         ]
 
+        for item in items:
+            self.assertIn(item, response.keys())
+            self.assertEqual(case[item], response[item])
+            
+    def test_get_one_case_data(self):
+        case = self.test_create_case()
+        response = self.client.get_one_case_data(case["id"])
+        items = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema",
+            "solution_hash",
+            "path",
+            "updated_at",
+            "is_dir",
+        ]
+
+        self.assertIn("data", response.keys())
         for item in items:
             self.assertIn(item, response.keys())
             self.assertEqual(case[item], response[item])
@@ -442,8 +495,7 @@ class TestCornflowClientUser(TestCase):
     def test_delete_one_instance(self):
         instance = self.test_create_instance()
         response = self.client.delete_one_instance(instance["id"])
-        self.assertEqual(200, response.status_code)
-        self.assertEqual("The object has been deleted", response.json()["message"])
+        self.assertEqual("The object has been deleted", response["message"])
 
     def test_get_schema(self):
         response = self.client.get_schema("solve_model_dag")
@@ -489,11 +541,11 @@ class TestCornflowClientAdmin(TestCase):
 
         items = ["id", "first_name", "last_name", "username", "email"]
         for item in items:
-            self.assertIn(item, response.json().keys())
+            self.assertIn(item, response.keys())
 
-        self.assertEqual(self.base_user_id, response.json()["id"])
-        self.assertEqual("user", response.json()["username"])
-        self.assertEqual("user@cornflow.org", response.json()["email"])
+        self.assertEqual(self.base_user_id, response["id"])
+        self.assertEqual("user", response["username"])
+        self.assertEqual("user@cornflow.org", response["email"])
 
 
 class TestCornflowClientService(TestCase):
@@ -568,7 +620,13 @@ class TestCornflowClientService(TestCase):
     def test_post_deployed_dag(self):
 
         response = self.client.create_deployed_dag(
-            name="test_dag", description="test_dag_description"
+            name="test_dag",
+            description="test_dag_description",
+            instance_schema=dict(),
+            instance_checks_schema=dict(),
+            solution_schema=dict(),
+            solution_checks_schema=dict(),
+            config_schema=dict()
         )
 
         items = ["id", "description"]

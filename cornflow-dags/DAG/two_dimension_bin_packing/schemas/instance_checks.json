@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "non_valid_objects": {
+      "type": "array",
+      "title": "Items that are bigger than the container",
+      "is_warning": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "non_valid_data": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+    "non_valid_objects",
+    "non_valid_data"
+  ]
+}

@@ -18,6 +18,8 @@ services:
       - LDAP_HOST=ldap://openldap:389
       - LDAP_BIND_DN=cn=admin,dc=example,dc=org
       - LDAP_BIND_PASSWORD=admin
+      - LDAP_SERVICE_BASE=ou=service,dc=example,dc=org
+      - CORNFLOW_SERVICE_USER=cornflow
     depends_on:
       - cornflow_db
       - webserver
@@ -82,7 +84,7 @@ services:
       - 389:389
       - 636:636
     volumes:
-      - ./airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
+      - ./cornflow-server/airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
     environment: 
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
 

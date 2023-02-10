@@ -1,6 +1,6 @@
 def update_schemas_command(url, user, pwd, verbose):
     import time
-    import logging as log
+    from flask import current_app
 
     from cornflow_client.airflow.api import Airflow
 
@@ -10,20 +10,20 @@ def update_schemas_command(url, user, pwd, verbose):
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
-            log.info(f"Airflow is not reachable (attempt {attempts})")
+            current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
-            log.info("Airflow is not reachable")
+            current_app.logger.info("Airflow is not reachable")
         return False
 
     response = af_client.update_schemas()
     if response.status_code == 200:
         if verbose == 1:
-            log.info("DAGs schemas updated")
+            current_app.logger.info("DAGs schemas updated")
     else:
         if verbose == 1:
-            log.info("The DAGs schemas were not updated properly")
+            current_app.logger.info("The DAGs schemas were not updated properly")
 
     return True

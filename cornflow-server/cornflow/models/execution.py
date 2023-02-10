@@ -117,6 +117,16 @@ class ExecutionModel(BaseDataModel):
             self.state_message = message
         super().update({})
 
+    def update_log_txt(self, txt: str):
+        """
+        Method to update the log text of an execution
+
+        :param str txt: The log to store
+        :return: nothing
+        """
+        self.log_text = txt
+        super().update({})
+
     def __repr__(self):
         """
         Method to represent the class :class:`ExecutionModel`

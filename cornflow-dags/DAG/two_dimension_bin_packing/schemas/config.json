@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "solver": {
+      "type": "string",
+      "enum": ["right_corner.cbc", "right_corner.gurobi", "right_corner.scip"],
+      "default": "right_corner.cbc"
+    },
+    "seconds": {
+      "type": "number"
+    },
+    "timeLimit": {
+      "type": "number"
+    },
+    "msg": {
+      "type": "boolean"
+    }
+  }
+}

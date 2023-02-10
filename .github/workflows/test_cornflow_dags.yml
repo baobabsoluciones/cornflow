@@ -6,6 +6,12 @@ on:
     paths:
       - 'cornflow-dags/**'
       - '!cornflow-dags/README.rst'
+  push:
+    branches:
+      - master
+    paths:
+      - 'cornflow-dags/**'
+      - '!cornflow-dags/README.rst'
 
 jobs:  
   testing:
@@ -34,14 +40,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
-        CLIENT_BRANCH="${{github.head_ref}}"
+        CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         python -m pip uninstall cornflow-client -y
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
     - name: Install airflow
       run: |
         AIRFLOW_VERSION=2.1.0
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-        CLIENT_BRANCH="${{github.head_ref}}"
+        CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
         pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip uninstall cornflow-client -y
@@ -74,3 +80,8 @@ jobs:
       run: |
         coverage run -a --source=. -m unittest tests/test_dags_af.py
         coverage report -m
+        coverage xml
+    - name: Upload coverage to codecov
+      uses : codecov/codecov-action@v3
+      with:
+        flags: dags-tests

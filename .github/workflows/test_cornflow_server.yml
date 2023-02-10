@@ -7,6 +7,13 @@ on:
       - 'cornflow-server/**'
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
+  push:
+    branches:
+      - master
+    paths: 
+      - 'cornflow-server/**'
+      - '!cornflow-server/docs/**'
+      - '!cornflow-server/README.rst'
 
 jobs:
   testing:
@@ -54,7 +61,7 @@ jobs:
         -e SLAPD_DOMAIN=example.org \
         -e SLAPD_PASSWORD=admin \
         -d -p 389:389 dinkel/openldap
-        CLIENT_BRANCH="${{github.head_ref}}"
+        CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
         python -m pip uninstall cornflow-core -y
@@ -67,7 +74,7 @@ jobs:
         source afvenv/bin/activate
         AIRFLOW_VERSION=2.2.1
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-        CLIENT_BRANCH="${{github.head_ref}}"
+        CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
         python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip install -U orloge pulp
@@ -116,13 +123,14 @@ jobs:
         OPEN_DEPLOYMENT: 1
         LDAP_HOST: ldap://localhost:389
         LDAP_BIND_PASSWORD: admin
-        LDAP_GROUP_BASE: ou=groups,dc=example,dc=org
-        LDAP_GROUP_OBJECT_CLASS: posixGroup
+        LDAP_GROUP_BASE: dc=example,dc=org
+        LDAP_GROUP_OBJECT_CLASS: groupOfNames
         LDAP_PROTOCOL_VERSION: 3
         LDAP_BIND_DN: cn=admin,dc=example,dc=org
         LDAP_USE_TLS: False
         LDAP_USERNAME_ATTRIBUTE: cn
         LDAP_USER_BASE: ou=users,dc=example,dc=org
+        LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
         LDAP_EMAIL_ATTRIBUTE: mail
         LDAP_USER_OBJECT_CLASS: inetOrgPerson
         LDAP_GROUP_ATTRIBUTE: cn
@@ -131,6 +139,7 @@ jobs:
         LDAP_GROUP_TO_ROLE_VIEWER: viewers
         LDAP_GROUP_TO_ROLE_PLANNER: planners
         LOG_LEVEL: 30
+        CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
       run: | 
         coverage run -a --source=./cornflow/ -m unittest cornflow/tests/unit/test_commands.py
@@ -144,8 +153,13 @@ jobs:
       run: |
         coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
         coverage report -m
+        coverage xml
       env:
         FLASK_ENV: testing
         OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db
         LOG_LEVEL: 30
+    - name: Upload coverage to codecov
+      uses: codecov/codecov-action@v3
+      with:
+        flags: server-tests
