@@ -13,33 +13,10 @@ from pyomo.environ import (
     value,
 )
 from cornflow_client.constants import (
-    STATUS_NOT_SOLVED,
-    STATUS_OPTIMAL,
-    STATUS_INFEASIBLE,
-    STATUS_UNBOUNDED,
-    STATUS_UNDEFINED,
     STATUS_TIME_LIMIT,
-)
-
-pyomo_status_mapping = dict(
-    unbounded=STATUS_UNBOUNDED,
-    infeasible=STATUS_INFEASIBLE,
-    invalidProblem=STATUS_NOT_SOLVED,
-    solverFailure=STATUS_NOT_SOLVED,
-    internalSolverError=STATUS_NOT_SOLVED,
-    error=STATUS_NOT_SOLVED,
-    userInterrupt=STATUS_NOT_SOLVED,
-    resourceInterrupt=STATUS_NOT_SOLVED,
-    licensingProblem=STATUS_NOT_SOLVED,
-    maxTimeLimit=STATUS_TIME_LIMIT,
-    maxIterations=STATUS_TIME_LIMIT,
-    maxEvaluations=STATUS_TIME_LIMIT,
-    globallyOptimal=STATUS_OPTIMAL,
-    locallyOptimal=STATUS_OPTIMAL,
-    optimal=STATUS_OPTIMAL,
-    minFunctionValue=STATUS_UNDEFINED,
-    minStepLength=STATUS_UNDEFINED,
-    other=STATUS_UNDEFINED,
+    SOLUTION_STATUS_FEASIBLE,
+    SOLUTION_STATUS_INFEASIBLE,
+    PYOMO_STOP_MAPPING
 )
 
 
@@ -104,12 +81,24 @@ class MIPSolver(Experiment):
         opt = SolverFactory(solver_name)
         opt.options.update(config)
         results = opt.solve(model_instance)
-        model.status = results.solver.status
-        status_sol = pyomo_status_mapping[results.solver.termination_condition]
+
+        status = results.solver.status
+        termination_condition = PYOMO_STOP_MAPPING[results.solver.termination_condition]
 
         # Check status
-        if model.status not in ["ok", "warning"]:
-            return dict(status=model.status, status_sol=status_sol)
+        if status in ["error", "unknown", "warning"]:
+            self.log += "Infeasible, check data \n"
+            return dict(
+                status=termination_condition,
+                status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
+        elif status == "aborted":
+            self.log += "Aborted \n"
+            if termination_condition != STATUS_TIME_LIMIT:
+                return dict(
+                    status=termination_condition,
+                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
 
         self.solution.data["include"] = [
             {"id": i}
@@ -118,4 +107,7 @@ class MIPSolver(Experiment):
         ]
         self.log += "Solving complete\n"
 
-        return dict(status=model.status, status_sol=status_sol)
+        return dict(
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )

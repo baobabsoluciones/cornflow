@@ -97,6 +97,18 @@ def json_schema_validate(schema: dict, data: dict) -> list:
     return []
 
 
+def json_schema_validate_as_string(schema: dict, data: dict) -> list:
+    """
+    Method to validate some data against a json schema
+
+    :param dict schema:the json schema in dict format.
+    :param dict data: the data to validate in dict format
+    :return: a list with the errors found
+    :rtype: list
+    """
+    return [str(e) for e in json_schema_validate(schema, data)]
+
+
 """
 Aliases
 """

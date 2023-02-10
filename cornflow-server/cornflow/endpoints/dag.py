@@ -8,11 +8,10 @@ from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
-import logging as log
 
 # Import from internal modules
 from ..models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
-from ..schemas import DeployedDAGSchema
+from ..schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from ..schemas.case import CaseCheckRequest
 from ..schemas.instance import InstanceCheckRequest
 from ..schemas.execution import (
@@ -61,13 +60,23 @@ class DAGDetailEndpoint(BaseMetaResource):
         """
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
-            raise ObjectDoesNotExist(error="The execution does not exist")
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}." + err
+            )
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
         )
         if instance is None:
-            raise ObjectDoesNotExist(error="The instance does not exist")
+            err = "The instance does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}." + err
+
+            )
         config = execution.config
+        current_app.logger.info(f"User {self.get_user()} gets input data of execution {idx}")
         return {
             "id": instance.id,
             "data": instance.data,
@@ -102,12 +111,17 @@ class DAGDetailEndpoint(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
-            raise ObjectDoesNotExist()
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}." + err
+
+            )
         state = req_data.get("state", EXEC_STATE_CORRECT)
         new_data = dict(
             state=state,
@@ -125,6 +139,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         execution.update(req_data)
         # TODO: is this save necessary?
         execution.save()
+        current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
 
 
@@ -146,7 +161,7 @@ class DAGInstanceEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
-        log.info(f"Instance checks saved for instance {idx}")
+        current_app.logger.info(f"Instance checks saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
@@ -168,7 +183,7 @@ class DAGCaseEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(CaseCheckRequest, location="json")
     def put(self, idx, **req_data):
-        log.info(f"Case checks saved for instance {idx}")
+        current_app.logger.info(f"Case checks saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
@@ -194,7 +209,7 @@ class DAGEndpointManual(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
             validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)
@@ -205,7 +220,7 @@ class DAGEndpointManual(BaseMetaResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        log.info(f"User {self.get_user()} manually created the execution {item.id}")
+        current_app.logger.info(f"User {self.get_user()} manually created the execution {item.id}")
         return item, 201
 
 
@@ -231,3 +246,21 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
         return self.post_list(kwargs)
+
+
+class DeployedDagDetailEndpoint(BaseMetaResource):
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = DeployedDAG
+
+    @doc(
+        description="Endpoint to update the schemas of a deployed DAG",
+        tags=["DAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    @use_kwargs(DeployedDAGEditSchema, location="json")
+    def put(self, idx, **req_data):
+        log.info(f"Schemas saved for DAG {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)
