@@ -40,7 +40,7 @@ class GenerationTests(unittest.TestCase):
         self.all_methods = TupList(
             ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]
         )
-        self.endpoints_methods_path=""
+        self.endpoints_methods_path="./data/endpoints_methods.json"
 
     def tearDown(self):
         if os.path.isdir(self.last_path):
@@ -166,7 +166,6 @@ class GenerationTests(unittest.TestCase):
                 self.endpoints_methods_path
             ],
         )
-
         self.assertEqual(result.exit_code, 0)
 
     def check(

@@ -92,11 +92,11 @@ def generate_from_schema(
         with open(endpoints_methods, "r") as file:
             methods_to_add.update(json.load(file))
 
-    endpoints_access = {"default": ["SERVICE_ROLE"]}
+    dict_endpoints_access = {"default": ["SERVICE_ROLE"]}
     if endpoints_access is not None:
         endpoints_access = endpoints_access.replace("\\", "/")
         with open(endpoints_access, "r") as file:
-            endpoints_access.update(json.load(file))
+            dict_endpoints_access.update(json.load(file))
 
     name_table = None
     if one:
@@ -117,5 +117,5 @@ def generate_from_schema(
         output_path=output_path,
         options=methods_to_add,
         name_table=name_table,
-        endpoints_access=endpoints_access
+        endpoints_access=dict_endpoints_access
     ).main()
