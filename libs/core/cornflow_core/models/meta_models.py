@@ -255,7 +255,7 @@ class TraceAttributesModel(EmptyBaseModel):
         update_date_gte=None,
         update_date_lte=None,
         offset=0,
-        limit=10,
+        limit=None,
         **kwargs
     ):
         """
@@ -279,7 +279,7 @@ class TraceAttributesModel(EmptyBaseModel):
         if "schema" in kwargs:
             kwargs.pop("schema")
 
-        query = super().get_all_objects(limit=limit, offset=offset, **kwargs)
+        query = cls.query.filter_by(**kwargs)
         if deletion_date_gte:
             query = query.filter(cls.deleted_at >= deletion_date_gte)
         if deletion_date_lte:
@@ -295,6 +295,9 @@ class TraceAttributesModel(EmptyBaseModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
 
+        query = query.offset(offset)
+        if limit:
+            query = query.limit(limit)
         return query.order_by(desc(cls.created_at)).all()
 
     @classmethod
