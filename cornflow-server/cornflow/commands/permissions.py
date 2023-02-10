@@ -53,7 +53,7 @@ def register_base_permissions_command(verbose):
             role,
         )
         not in permissions_registered
-    ]W
+    ]
 
 
     if len(permissions_to_register) > 0:
