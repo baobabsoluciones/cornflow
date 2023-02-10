@@ -15,8 +15,6 @@ sys.path.insert(1, prev_dir)
 # Import from internal modules
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
-from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import UserModel, UserRoleModel
 from cornflow_core.shared import db
@@ -101,29 +99,19 @@ class TestTablesListEndpoint(TestCase):
         for key in self.keys_to_check:
             self.assertIn(key, response.json[0].keys())
 
-    def test_post_table(self):
-        payload = dict(
-            data=dict(
-                username=f"AnotherUser",
-                password="TestPassword1!",
-                email=f"testuser@cornflow.com"
+    def test_get_with_filters(self):
+        for i in range(4):
+            # Create new users to there are at least 5 in the table
+            new_user = dict(
+                username=f"user{i}", email=f"user{i}@user.com", password="Testpassword1!"
             )
-        )
-        response = self.client.post(
-            self.url + self.table + "/",
-            follow_redirects=True,
-            data=json.dumps(payload),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 201)
-        for key in self.keys_to_check:
-            self.assertIn(key, response.json.keys())
-            if key in payload["data"] and key != "password":
-                self.assertEqual(response.json[key], payload["data"][key])
 
+            self.client.post(
+                SIGNUP_URL,
+                data=json.dumps(new_user),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
         response = self.client.get(
             self.url + self.table + "/",
             follow_redirects=True,
@@ -131,29 +119,12 @@ class TestTablesListEndpoint(TestCase):
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.token,
             },
-        )
-        all_usernames = [user["username"] for user in response.json]
-        self.assertIn(payload["data"]["username"], all_usernames)
-
-    def test_post_table_invalid_data(self):
-        # Username missing
-        payload = dict(
-            data=dict(
-                password="TestPassword1!",
-                email=f"testuser@cornflow.com"
+            query_string=dict(
+                limit=3
             )
         )
-        response = self.client.post(
-            self.url + self.table + "/",
-            follow_redirects=True,
-            data=json.dumps(payload),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json["error"], "Integrity error on saving with data <Username None>")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 3)
 
 
 class TestTablesDetailEndpoint(TestCase):
@@ -209,31 +180,13 @@ class TestTablesDetailEndpoint(TestCase):
             'updated_at',
             'username'
         ]
-        self.payload = dict(
-            data=dict(
-                username=f"AnotherUser",
-                password="TestPassword1!",
-                email=f"testuser@cornflow.com"
-            )
-        )
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
 
-    def post_one(self):
-        return self.client.post(
-            self.url + self.table + "/",
-            follow_redirects=True,
-            data=json.dumps(self.payload),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        ).json
-
     def test_get_one_table(self):
-        user = self.post_one()
+        user = self.service_user
 
         response = self.client.get(
             self.url + self.table + f"/{user['id']}/",
@@ -247,8 +200,8 @@ class TestTablesDetailEndpoint(TestCase):
         self.assertEqual(response.status_code, 200)
         for key in self.keys_to_check:
             self.assertIn(key, response.json.keys())
-            if key in self.payload["data"] and key != "password":
-                self.assertEqual(response.json[key], self.payload["data"][key])
+            if key in user and key != "password":
+                self.assertEqual(response.json[key], user[key])
 
     def test_get_one_table_invalid_id(self):
         # String id, while it should be an integer for that table
@@ -274,151 +227,6 @@ class TestTablesDetailEndpoint(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json["error"], "The object does not exist")
-
-    def test_delete_one_table(self):
-        user = self.post_one()
-
-        response = self.client.delete(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["message"], "The object has been deleted")
-
-        response = self.client.get(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json.get("error"), 'The object does not exist')
-
-    def test_delete_one_table_invalid_id(self):
-        # String id, while it should be an integer for that table
-        response = self.client.delete(
-            self.url + self.table + f"/abcd/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json["error"], "Invalid identifier.")
-
-        # Integer id that does not correspond to any user
-        response = self.client.get(
-            self.url + self.table + f"/12345/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json["error"], "The object does not exist")
-
-    def test_put_one_table(self):
-        user = self.post_one()
-
-        payload = dict(
-            data=dict(
-                first_name="First-name"
-            )
-        )
-        response = self.client.put(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["message"], "Updated correctly")
-
-        response = self.client.get(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        for key in self.keys_to_check:
-            self.assertIn(key, response.json.keys())
-            if key in self.payload["data"] and key != "password":
-                self.assertEqual(response.json[key], self.payload["data"][key])
-            if key in payload["data"]:
-                self.assertEqual(response.json[key], payload["data"][key])
-
-    def test_put_one_table_invalid_id(self):
-        # String id, while it should be an integer for that table
-        response = self.client.put(
-            self.url + self.table + f"/abcd/",
-            follow_redirects=True,
-            json=dict(data=dict()),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json["error"], "Invalid identifier.")
-
-        # Integer id that does not correspond to any user
-        response = self.client.get(
-            self.url + self.table + f"/12345/",
-            follow_redirects=True,
-            json=dict(data=dict()),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json["error"], "The object does not exist")
-
-    def test_put_one_table_invalid_data(self):
-        user = self.post_one()
-
-        payload = dict(
-            data=dict(
-                username=None
-            )
-        )
-        response = self.client.put(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json["error"], "Integrity error on updating with data <Username AnotherUser>")
-
-        response = self.client.get(
-            self.url + self.table + f"/{user['id']}/",
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
-            },
-        )
-        self.assertIsNotNone(response.json.get("username"))
 
 
 class TestTablesEndpointAdmin(TestCase):

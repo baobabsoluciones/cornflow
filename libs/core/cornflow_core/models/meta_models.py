@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy import desc
 from flask import current_app
 
 from cornflow_core.exceptions import InvalidData
@@ -135,16 +136,23 @@ class EmptyBaseModel(db.Model):
         return instances
 
     @classmethod
-    def get_all_objects(cls, **kwargs):
+    def get_all_objects(
+        cls,
+        offset=0,
+        limit=10,
+        **kwargs
+    ):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
 
+        :param int offset: query offset for pagination
+        :param int limit: query size limit
         :param kwargs: the keyword arguments to be used as filters
         :return: the query without being performed until and object is going to be retrieved or
         iterated through the results.
         :rtype: class:`Query`
         """
-        return cls.query.filter_by(**kwargs)
+        return cls.query.filter_by(**kwargs).offset(offset).limit(limit).all()
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
@@ -238,17 +246,56 @@ class TraceAttributesModel(EmptyBaseModel):
         self.commit_changes("activating")
 
     @classmethod
-    def get_all_objects(cls, **kwargs):
+    def get_all_objects(
+        cls,
+        creation_date_gte=None,
+        creation_date_lte=None,
+        deletion_date_gte=None,
+        deletion_date_lte=None,
+        update_date_gte=None,
+        update_date_lte=None,
+        offset=0,
+        limit=10,
+        **kwargs
+    ):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
 
-        :param kwargs: the keyword arguments to be used as filters
-        :return: the query without being performed until and object is going to be retrieved or
-        iterated through the results.
-        :rtype: class:`Query`
+        :param string creation_date_gte: created_at needs to be larger or equal to this
+        :param string creation_date_lte: created_at needs to be smaller or equal to this
+        :param string deletion_date_gte: deleted_at needs to be larger or equal to this,
+        :param string deletion_date_lte: deleted_at needs to be smaller or equal to this,
+        :param string update_date_gte: update_date_gte needs to be larger or equal to this,
+        :param string update_date_lte: update_date_lte needs to be smaller or equal to this,
+        :param int offset: query offset for pagination
+        :param int limit: query size limit
+        :return: The objects
+        :rtype: list(:class:`TraceAttributesModel`)
         """
-        kwargs.update(deleted_at=None)
-        return super().get_all_objects(**kwargs)
+        if deletion_date_gte is None and deletion_date_lte is None:
+            kwargs.update(deleted_at=None)
+        if "user" in kwargs:
+            kwargs.pop("user")
+        if "schema" in kwargs:
+            kwargs.pop("schema")
+
+        query = super().get_all_objects(limit=limit, offset=offset, **kwargs)
+        if deletion_date_gte:
+            query = query.filter(cls.deleted_at >= deletion_date_gte)
+        if deletion_date_lte:
+            query = query.filter(cls.deleted_at <= deletion_date_lte)
+
+        if update_date_gte:
+            query = query.filter(cls.updated_at >= update_date_gte)
+        if update_date_lte:
+            query = query.filter(cls.updated_at <= update_date_lte)
+
+        if creation_date_gte:
+            query = query.filter(cls.created_at >= creation_date_gte)
+        if creation_date_lte:
+            query = query.filter(cls.created_at <= creation_date_lte)
+
+        return query.order_by(desc(cls.created_at)).all()
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
