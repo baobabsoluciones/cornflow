@@ -56,8 +56,8 @@ class TablesEndpoint(BaseMetaResource):
         except IntegrityError as e:
             raise InvalidData(
                 f"The data provided is not valid: {e}",
-                # log_txt=f"Error while user {self.get_user()} tries to add row to table {table_name}. "
-                #        f"The data provided is not valid: {e}"
+                log_txt=f"Error while user {self.get_user()} tries to add row to table {table_name}. "
+                        f"The data provided is not valid: {e}"
             )
 
 
@@ -88,16 +88,16 @@ class TablesDetailsEndpoint(BaseMetaResource):
             except (ValueError, TypeError):
                 raise InvalidUsage(
                     "Invalid identifier.",
-                    # log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                    #        f"Identifier is not valid."
+                    log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                            f"Identifier is not valid."
                 )
 
         current_app.logger.info(f"User {self.get_user()} gets row {idx} of table {table_name}.")
         res = self.get_detail(idx=conv_idx)
         if res is None:
             raise ObjectDoesNotExist(
-                # log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                #        "The object does not exist."
+                log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                        "The object does not exist."
             )
         return item_as_dict(res), 200
 
@@ -114,8 +114,8 @@ class TablesDetailsEndpoint(BaseMetaResource):
             except (ValueError, TypeError):
                 raise InvalidUsage(
                     "Invalid identifier.",
-                    # log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                    #        f"Identifier is not valid."
+                    log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                            f"Identifier is not valid."
                 )
         current_app.logger.info(f"Row {conv_idx} of table {table_name} was edited by user {self.get_user()}.")
         return self.put_detail(data=data["data"], idx=conv_idx, track_user=False)
@@ -138,8 +138,8 @@ class TablesDetailsEndpoint(BaseMetaResource):
             except (ValueError, TypeError):
                 raise InvalidUsage(
                     "Invalid identifier.",
-                    # log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                    #        f"Identifier is not valid."
+                    log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                            f"Identifier is not valid."
                 )
         current_app.logger.info(f"Row {conv_idx} of table {table_name} was deleted by user {self.get_user()}.")
         return self.delete_detail(idx=conv_idx)
