@@ -157,7 +157,7 @@ class EmptyBaseModel(db.Model):
         query = cls.query.filter_by(**kwargs).offset(offset)
         if limit:
             query = query.limit(limit)
-        return query.all()
+        return query
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
@@ -300,11 +300,10 @@ class TraceAttributesModel(EmptyBaseModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
 
-        query = query.order_by(desc(cls.created_at)).offset(offset)
-
+        query = query.offset(offset)
         if limit:
             query = query.limit(limit)
-        return query.all()
+        return query
 
     @classmethod
     def get_one_object(cls, idx=None, **kwargs):
