@@ -65,7 +65,14 @@ def check_fk(fk_dic):
         raise ValueError(message)
 
 
-def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
+def schema_from_excel(
+    path_in,
+    param_tables=None,
+    path_out=None,
+    fk=False,
+    path_methods=None,
+    path_access=None,
+):
     """
     Create a jsonschema based on an Excel data file.
 
@@ -73,21 +80,23 @@ def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
     :param param_tables: array containing the names of the parameter tables
     :param path_out: path where to save the json schema as a json file.
     :param fk: True if foreign key are described in the second line.
+    :param path_methods: path where to save the methods dict as a json file
+    :param path_access: path where to save the access dict as a json file
     :return: the jsonschema
     """
     if not param_tables:
         param_tables = []
     xl_data = read_excel(path_in, param_tables)
 
-    # remove special tables
+    # process and remove special tables
     if "endpoints_methods" in xl_data:
         endpoints_methods = {
             e["endpoint"]: [k for k, v in e.items() if v and k != "endpoint"]
             for e in xl_data["endpoints_methods"]
         }
         del xl_data["endpoints_methods"]
-        with open("endpoints_methods.json", "w") as f:
-            json.dump(endpoints_methods, f, indent=4, sort_keys=False)
+    else:
+        endpoints_methods = None
 
     if "endpoints_access" in xl_data:
         endpoints_access = {
@@ -95,9 +104,10 @@ def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
             for e in xl_data["endpoints_access"]
         }
         del xl_data["endpoints_access"]
-        with open("endpoints_access.json", "w") as f:
-            json.dump(endpoints_access, f, indent=4, sort_keys=False)
+    else:
+        endpoints_access = None
 
+    # process foreign keys
     if fk:
         fk_values = {
             k: clean_none(v[0]) for k, v in xl_data.items() if isinstance(v, list)
@@ -113,6 +123,7 @@ def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
             k: str_columns(v) if isinstance(v, list) else v for k, v in xl_data.items()
         }
 
+    # create the json schema
     class InstSol(InstanceSolutionCore):
         schema = {}
 
@@ -125,11 +136,18 @@ def schema_from_excel(path_in, param_tables=None, path_out=None, fk=False):
                     {"foreign_key": v}
                 )
 
+    # Save json files
     if path_out is not None:
         with open(path_out, "w") as f:
             json.dump(schema, f, indent=4, sort_keys=False)
+    if path_methods is not None:
+        with open(path_methods, "w") as f:
+            json.dump(endpoints_methods, f, indent=4, sort_keys=False)
+    if path_access is not None:
+        with open(path_access, "w") as f:
+            json.dump(endpoints_access, f, indent=4, sort_keys=False)
 
-    return schema
+    return schema, endpoints_methods, endpoints_access
 
 
 def str_key(dic):
