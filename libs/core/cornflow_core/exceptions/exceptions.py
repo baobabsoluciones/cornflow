@@ -17,7 +17,7 @@ class InvalidUsage(Exception):
     log_txt = "Unknown error"
 
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
-        Exception.__init__(self)
+        Exception.__init__(self, error)
         if error is not None:
             self.error = error
         if status_code is not None:
