@@ -37,7 +37,7 @@ def register_base_permissions_command(verbose):
             views[view["endpoint"]],
             role,
         )
-        not in permissions_registered
+    
     ] + [
         PermissionViewRoleBaseModel(
             {
@@ -52,11 +52,20 @@ def register_base_permissions_command(verbose):
             views[endpoint],
             role,
         )
-        not in permissions_registered
+        
     ]
+    
+    permissions_to_register_filtered = [permission for permission in permissions_to_register
+                                      if permission not in permissions_registered]
+    permissions_to_delete_filtered = [permission for permission in permissions_registered
+                                      if permission not in permissions_to_register]
 
-    if len(permissions_to_register) > 0:
-        db.session.bulk_save_objects(permissions_to_register)
+    if len(permissions_to_register_filtered) > 0:
+        db.session.bulk_save_objects(permissions_to_register_filtered)
+
+    if len(permissions_to_delete_filtered) > 0:
+        for permission in permissions_to_delete_filtered:
+            db.session.delete(permission)
 
     try:
         db.session.commit()
@@ -130,6 +139,8 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
 
     if len(permissions) > 1:
         db.session.bulk_save_objects(permissions)
+
+    
 
     try:
         db.session.commit()
