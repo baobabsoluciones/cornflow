@@ -293,11 +293,13 @@ class APIGenerator:
                     f"from .{self.prefix}{table_name} import {', '.join(class_imports)}\n"
                 )
 
+        id_type = self.get_id_type(table_name)
+
         for res in class_imports:
             self.init_resources += [
                 dict(
                     ressource=res,
-                    urls=f'"{self.camel_to_url(res)}"',
+                    urls=f'"{self.camel_to_url(res, id_type=id_type)}"',
                     endpoint=f'"{self.camel_to_ep(res)}"',
                 )
             ]
@@ -370,17 +372,20 @@ class APIGenerator:
         return "".join(word.title() for word in name.split("_"))
 
     @staticmethod
-    def camel_to_url(name: str) -> str:
+    def camel_to_url(name: str, id_type) -> str:
         """
         Transform a camelCase name into endpoint url:
             NewTableEndpoint -> /new/table/
         The endpoint word is always removed in the url.
 
-        :param name: name of the endpoint
+        :param name: name of the endpoint.
+        :param id_type: type of the rpimary key of the table.
         :return: str url of the endpoint
         """
         words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
-        return "/" + "/".join(w.lower() for w in words) + "/"
+        url = "/" + "/".join(w.lower() for w in words) + "/"
+        url.replace("details", id_type)
+        return url
 
     @staticmethod
     def camel_to_ep(name: str) -> str:
@@ -418,3 +423,21 @@ class APIGenerator:
         :return: the object name.
         """
         return self.snake_to_camel(self.prefix + table_name + extension)
+
+    def get_id_type(self, table_name):
+        """
+        Get the type of the primary key of the table (id)
+
+        :param table_name: name of the table in the schema.
+        :return: str: the type in format "<type:idx>"
+        """
+        schema_table = self.schema["properties"][table_name]["items"]
+        id_type=None
+        if id in schema_table:
+            id_type = schema_table["id"]["type"]
+        if id_type == "string":
+            return "<string:idx>"
+        elif id_type == "integer" or id_type is None:
+            return "<int:idx>"
+        else:
+            raise NotImplementedError(f"Unknown type for primary key: {id_type}")
