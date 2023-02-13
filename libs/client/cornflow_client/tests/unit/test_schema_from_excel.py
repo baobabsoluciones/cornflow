@@ -1,9 +1,8 @@
 import json
 import os
 from unittest import TestCase
-# from cornflow_client.schema.tools import schema_from_excel
+from cornflow_client.schema.tools import schema_from_excel
 from cornflow_client.core.tools import load_json
-from ...schema.tools import schema_from_excel
 
 
 class TestSchemaFromExcel(TestCase):
