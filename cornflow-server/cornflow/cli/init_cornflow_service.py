@@ -148,12 +148,22 @@ def init_cornflow_service():
             f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE', '../external_app')}"
         )
         os.chdir("/usr/src/external_app")
+
+        if register_key():
+            github_host = os.getenv("github_host", None)
+            register_ssh_host(github_host)
+
+            bitbucket_host = os.getenv("BITBUCKET_HOST", None)
+            register_ssh_host(bitbucket_host)
+
         os.system("$(command -v pip) install --user -r requirements.txt")
         sys.path.append("/usr/src/external_app")
         print(f"PATH: {sys.path}")
         from importlib import import_module
 
-        external_app = import_module(os.getenv("EXTERNAL_APP_MODULE", "../external_app"))
+        external_app = import_module(
+            os.getenv("EXTERNAL_APP_MODULE", "../external_app")
+        )
         app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
         with app.app_context():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
@@ -190,3 +200,24 @@ def init_cornflow_service():
 
     else:
         pass
+
+
+def register_ssh_host(host):
+    if host is not None:
+        add_host = f"ssh-keyscan {host} >> /usr/src/app/.ssh/known_hosts"
+        config_ssh_host = f"echo Host {host} > /usr/src/app/.ssh/config"
+        config_ssh_key = 'echo "   IdentityFile /usr/src/app/.ssh/id_rsa" >> /usr/src/app/.ssh/config'
+        os.system(add_host)
+        os.system(config_ssh_host)
+        os.system(config_ssh_key)
+
+
+def register_key():
+    if os.path.isfile("/usr/src/app/.ssh/id_rsa"):
+        add_key = (
+            "chmod 0600 /usr/src/app/.ssh/id_rsa && ssh-add /usr/src/app/.ssh/id_rsa"
+        )
+        os.system(add_key)
+        return True
+    else:
+        return False
