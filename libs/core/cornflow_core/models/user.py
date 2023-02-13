@@ -67,13 +67,19 @@ class UserBaseModel(TraceAttributesModel):
         if check_pass:
             self.password = self.__generate_hash(data.get("password"))
         else:
-            raise InvalidCredentials(msg)
+            raise InvalidCredentials(
+                msg,
+                log_txt="Error while trying to create a new user. " + msg
+            )
 
         check_email, msg = check_email_pattern(data.get("email"))
         if check_email:
             self.email = data.get("email")
         else:
-            raise InvalidCredentials(msg)
+            raise InvalidCredentials(
+                msg,
+                log_txt="Error while trying to create a new user. " + msg
+            )
 
     def update(self, data):
         """

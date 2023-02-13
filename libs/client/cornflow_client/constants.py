@@ -24,6 +24,8 @@ DATASCHEMA = "DataSchema"
 INSTANCE_SCHEMA = "instance"
 SOLUTION_SCHEMA = "solution"
 CONFIG_SCHEMA = "config"
+INSTANCE_CHECKS_SCHEMA = "instance_checks"
+SOLUTION_CHECKS_SCHEMA = "solution_checks"
 
 # why it stopped
 STATUS_NOT_SOLVED = 0
@@ -37,6 +39,21 @@ STATUS_NODE_LIMIT = 4
 STATUS_TIME_LIMIT = 5
 STATUS_LICENSING_PROBLEM = -5
 STATUS_QUEUED = -7
+
+# Associated string
+STATUS_CONV = {
+    STATUS_OPTIMAL: "Optimal",
+    STATUS_TIME_LIMIT: "Time limit",
+    STATUS_INFEASIBLE: "Infeasible",
+    STATUS_UNDEFINED: "Unknown",
+    STATUS_NOT_SOLVED: "Not solved",
+    STATUS_UNBOUNDED: "Unbounded",
+    STATUS_FEASIBLE: "Feasible",
+    STATUS_MEMORY_LIMIT: "Memory limit",
+    STATUS_NODE_LIMIT: "Node limit",
+    STATUS_LICENSING_PROBLEM: "Licensing problem",
+    STATUS_QUEUED: "Queued"
+}
 
 # is there a solution?
 SOLUTION_STATUS_INFEASIBLE = 0
@@ -90,85 +107,96 @@ PULP_STATUS_MAPPING = {
     pl.LpStatusUndefined: STATUS_UNDEFINED,
 }
 
-PYOMO_CBC_TRANSLATING_MAPPING = {
+PARAMETER_SOLVER_TRANSLATING_MAPPING = {
+    ('abs_gap', 'pyomo', 'cbc') : 'allow' ,
+    ('rel_gap', 'pyomo', 'cbc'): 'ratio' ,
+    ('cutoff', 'pyomo', 'cbc') : 'cuts' ,
     ('bar_iter_limit', 'pyomo', 'cbc') : 'barr' ,
     ('best_obj_stop', 'pyomo', 'cbc') : 'primalT' ,
-    ('cutoff', 'pyomo', 'cbc') : 'cuts' ,
     ('iteration_limit', 'pyomo', 'cbc') : 'maxIt' ,
     ('solution_limit', 'pyomo', 'cbc') : 'maxSaved' ,
     ('time_limit', 'pyomo', 'cbc') : 'sec' ,
-    ('mip_gap', 'pyomo', 'cbc') : 'allow' ,
-    ('optimality_tol', 'pyomo', 'cbc') : 'dualT' ,
     ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
     ('heuristics', 'pyomo', 'cbc') : 'heur' ,
-}
 
-PULP_CBC_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
+    ('abs_gap', 'pulp', 'cbc') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'cbc') : 'gapRel' ,
     ('cutoff', 'pulp', 'cbc') : 'cuts' ,
     ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-}
+    ('presolve', 'pulp', 'cbc') : 'presolve' ,
+    
 
-# Considered Termination, Tolerance and MIP
-PYOMO_GUROBI_TRANSLATING_MAPPING = {
+    ('abs_gap', 'pyomo', 'gurobi') : 'MIPGapAbs' ,
+    ('rel_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
+    ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
+    ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
+    ('iteration_limit', 'pyomo', 'gurobi') : 'IterationLimit' , 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
     ('best_obj_stop', 'pyomo', 'gurobi') : 'BestObjStop' ,
     ('cutoff', 'pyomo', 'gurobi') : 'Cutoff' ,
-    ('iteration_limit', 'pyomo', 'gurobi') : 'IterationLimit' ,
     ('mem_limit', 'pyomo', 'gurobi') : 'MemLimit' ,
     ('solution_limit', 'pyomo', 'gurobi') : 'SolutionLimit' ,
-    ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
-    ('mip_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
-    ('optimality_tol', 'pyomo', 'gurobi') : 'OptimalityTol' ,
     ('branch_dir', 'pyomo', 'gurobi') : 'BranchDir' ,
     ('pump_passes', 'pyomo', 'gurobi') : 'PumpPasses' ,
     ('heuristics', 'pyomo', 'gurobi') : 'Heuristics' ,
-    ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
     ('threads', 'pyomo', 'gurobi') : 'threads' ,
-}
+    
+    ('is_mip', 'pulp', 'gurobi') : 'mip' ,
+    ('abs_gap', 'pulp', 'gurobi') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'gurobi') : 'gapRel' ,
+    ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
+    ('presolve', 'pulp', 'gurobi') : 'presolve' ,
+    ('feasibility_tol', 'pulp', 'gurobi') : 'FeasibilityTol' ,
+    ('iteration_limit', 'pulp', 'gurobi') : 'IterationLimit' ,
 
-PULP_GUROBI_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
-}
 
-PYOMO_SCIP_TRANSLATING_MAPPING = {
-    ('bar_tol', 'pyomo', 'cbc') : 'numerics/barrierconvtol' ,
-    ('cutoff_breaker', 'pyomo', 'cbc') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
-    ('lp_iteration_limit', 'pyomo', 'cbc') : 'lp/iterlim' ,
-    ('mem_limit', 'pyomo', 'cbc') : 'limits/memory' ,
-    ('solution_limit', 'pyomo', 'cbc') : 'limits/maxsol' ,
-    ('time_limit', 'pyomo', 'cbc') : 'limits/time' ,
-    ('primal-dual_gap', 'pyomo', 'cbc') : 'limits/gap' ,
-    ('lp_optimality_tol', 'pyomo', 'cbc') : 'numerics/lpfeastol' ,
-    ('pump_passes', 'pyomo', 'cbc') : 'heuristics/feaspump/maxdepth' ,
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-    ('threads', 'pyomo', 'cbc') : 'threads' ,
-}
+    ('abs_gap', 'pyomo', 'scip') : 'limits/absgap ' ,
+    ('rel_gap', 'pyomo', 'scip') : 'limits/gap' ,
+    ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
+    ('threads', 'pyomo', 'scip') : 'threads' ,
+    ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
+    ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
+    ('iteration_limit', 'pyomo', 'scip') : 'lp/iterlim' ,
+    ('mem_limit', 'pyomo', 'scip') : 'limits/memory' ,
+    ('solution_limit', 'pyomo', 'scip') : 'limits/maxsol' ,
+    ('pump_passes', 'pyomo', 'scip') : 'heuristics/feaspump/maxdepth' ,
+    ('presolve', 'pyomo', 'scip') : 'presolve' ,
+    ('nlp_tol', 'pyomo', 'scip') : 'heuristics/subnlp/opttol' ,
+    ('cutoff', 'pyomo', 'scip') : 'heuristics/subnlp/setcutoff' ,
+    ('nlp_iteration_limit', 'pyomo', 'scip') : 'heuristics/subnlp/itermin' ,
 
-PULP_SCIP_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
-    ('threads', 'pulp', 'cbc') : 'threads' ,
-    ('max_nodes', 'pyomo', 'cbc') : 'maxNodes' ,
-}
+    ('is_mip', 'pulp', 'scip') : 'mip' ,
+    ('abs_gap', 'pulp', 'scip') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'scip') : 'gapRel' ,
+    ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
+    ('threads', 'pulp', 'scip') : 'threads' ,
+    ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
+    ('iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
+    ('mem_limit', 'pulp', 'scip') : 'limits/memory' ,
+    ('cutoff_breaker', 'pulp', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
+    ('presolve', 'pulp', 'scip') : 'presolve' ,
+    ('solution_limit', 'pulp', 'scip') : 'limits/maxsol' ,
+    ('nlp_iteration_limit', 'pulp', 'scip') : 'heuristics/subnlp/itermin' ,
 
-PYOMO_HIGHS_TRANSLATING_MAPPING = {
-    ('presolve', 'pyomo', 'cbc') : 'presolve' ,
-    ('parallel', 'pyomo', 'cbc') : 'parallel' ,
-    ('crossover', 'pyomo', 'cbc') : 'run_crossover' ,
-    ('time_limit', 'pyomo', 'cbc') : 'time_limit' ,
-}
 
-PULP_HIGHS_TRANSLATING_MAPPING = {
-    ('is_mip', 'pulp', 'cbc') : 'mip' ,
-    ('optimality_tol', 'pulp', 'cbc') : 'gapAbs' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
-    ('threads', 'pulp', 'cbc') : 'threads' ,
+    ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
+    ('abs_gap', 'pyomo', 'highs') : 'mip_abs_gap' ,
+    ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
+    ('presolve', 'pyomo', 'highs') : 'presolve' ,
+    ('parallel', 'pyomo', 'highs') : 'parallel' ,
+    ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
+    ('heuristics', 'pyomo', 'highs') : 'mip_heuristic_effort' ,
+
+    ('is_mip', 'pulp', 'highs') : 'mip' ,
+    ('abs_gap', 'pulp', 'highs') : 'gapAbs' ,
+    ('rel_gap', 'pulp', 'highs') : 'gapRel' ,
+    ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
+    ('presolve', 'pulp', 'highs') : 'presolve' ,
+    ('threads', 'pulp', 'highs') : 'threads' ,
+    ('heuristics', 'pulp', 'highs') : 'mip_heuristic_effort' ,
+
 }
 
 
@@ -176,14 +204,19 @@ PULP_HIGHS_TRANSLATING_MAPPING = {
 
 class AirflowError(Exception):
     status_code = 400
+    log_txt = "Airflow error"
 
-    def __init__(self, error=None, status_code=None, payload=None):
-        Exception.__init__(self)
+    def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
+        Exception.__init__(self, error)
         if error is not None:
             self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+        if log_txt is not None:
+            self.log_txt = log_txt
+        else:
+            self.log_txt = self.error
 
     def to_dict(self):
         rv = dict(self.payload or ())

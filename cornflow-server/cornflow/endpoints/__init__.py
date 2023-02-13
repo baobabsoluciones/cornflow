@@ -22,6 +22,7 @@ from .dag import (
     DAGCaseEndpoint,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
+    DeployedDagDetailEndpoint
 )
 
 from .execution import (
@@ -58,6 +59,7 @@ from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 from ..external_app.endpoint import external_resources
+from .tables import TablesEndpoint, TablesDetailsEndpoint
 
 
 resources = [
@@ -129,6 +131,7 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
+    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -203,6 +206,16 @@ resources = [
         resource=LicensesEndpoint,
         urls="/licences/",
         endpoint="licences",
+    ),
+    dict(
+        resource=TablesEndpoint,
+        urls="/table/<string:table_name>/",
+        endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail"
     )
 ]
 

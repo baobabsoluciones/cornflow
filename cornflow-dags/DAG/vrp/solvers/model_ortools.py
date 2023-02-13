@@ -1,5 +1,9 @@
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 from ..core import Experiment, Solution
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class Algorithm(Experiment):
@@ -142,4 +146,7 @@ class Algorithm(Experiment):
         if solution:
             self.solution = self.get_solution_ort(manager, routing, solution, nodes)
 
-        return dict(status=2)
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
