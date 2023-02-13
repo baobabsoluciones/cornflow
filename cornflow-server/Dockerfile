@@ -29,10 +29,14 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/package#subdirectory=cornflow-server"
+RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
 
+# create folder for logs
 RUN mkdir -p /usr/src/app/log
+
+# create folder for custom ssh keys
+RUN mkdir /usr/src/app/.ssh
 
 EXPOSE 5000
 
