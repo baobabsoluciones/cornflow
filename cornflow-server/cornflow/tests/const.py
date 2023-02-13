@@ -59,6 +59,8 @@ APIVIEW_URL = PREFIX + "/apiview/"
 
 DEPLOYED_DAG_URL = PREFIX + "/dag/deployed/"
 
+TABLES_URL = PREFIX + "/table/"
+
 PUBLIC_DAGS = [
     "solve_model_dag",
     "gc",
