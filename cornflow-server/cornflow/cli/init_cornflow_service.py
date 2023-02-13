@@ -23,60 +23,60 @@ from flask_migrate import Migrate, upgrade
 def init_cornflow_service():
     click.echo("Starting the service")
     os.chdir("/usr/src/app")
-    ENV = os.getenv("FLASK_ENV", "development")
-    os.environ["FLASK_ENV"] = ENV
+    environment = os.getenv("FLASK_ENV", "development")
+    os.environ["FLASK_ENV"] = environment
 
     ###################################
     # Global defaults and back-compat #
     ###################################
     # Airflow global default conn
-    AIRFLOW_USER = os.getenv("AIRFLOW_USER", "admin")
-    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
-    AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://webserver:8080")
-    CORNFLOW_URL = os.environ.setdefault("CORNFLOW_URL", "http://cornflow:5000")
-    os.environ["AIRFLOW_USER"] = AIRFLOW_USER
-    os.environ["AIRFLOW_PWD"] = AIRFLOW_PWD
-    os.environ["AIRFLOW_URL"] = AIRFLOW_URL
+    airflow_user = os.getenv("AIRFLOW_USER", "admin")
+    airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
+    airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
+    cornflow_url = os.environ.setdefault("cornflow_url", "http://cornflow:5000")
+    os.environ["AIRFLOW_USER"] = airflow_user
+    os.environ["AIRFLOW_PWD"] = airflow_pwd
+    os.environ["AIRFLOW_URL"] = airflow_url
     os.environ["FLASK_APP"] = "cornflow.app"
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
     # Cornflow db defaults
-    CORNFLOW_DB_HOST = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
-    CORNFLOW_DB_PORT = os.getenv("CORNFLOW_DB_PORT", "5432")
-    CORNFLOW_DB_USER = os.getenv("CORNFLOW_DB_USER", "cornflow")
-    CORNFLOW_DB_PASSWORD = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
-    CORNFLOW_DB = os.getenv("CORNFLOW_DB", "cornflow")
-    CORNFLOW_DB_CONN = os.getenv(
-        "CORNFLOW_DB_CONN",
-        f"postgresql://{CORNFLOW_DB_USER}:{CORNFLOW_DB_PASSWORD}@{CORNFLOW_DB_HOST}:{CORNFLOW_DB_PORT}/{CORNFLOW_DB}",
+    cornflow_db_host = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
+    cornflow_db_port = os.getenv("CORNFLOW_DB_PORT", "5432")
+    cornflow_db_user = os.getenv("CORNFLOW_DB_USER", "cornflow")
+    cornflow_db_password = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
+    cornflow_db = os.getenv("CORNFLOW_DB", "cornflow")
+    cornflow_db_conn = os.getenv(
+        "cornflow_db_conn",
+        f"postgresql://{cornflow_db_user}:{cornflow_db_password}@{cornflow_db_host}:{cornflow_db_port}/{cornflow_db}",
     )
-    os.environ["DATABASE_URL"] = CORNFLOW_DB_CONN
+    os.environ["DATABASE_URL"] = cornflow_db_conn
 
     # Platform auth config and service users
-    AUTH = int(os.getenv("AUTH_TYPE", AUTH_DB))
-    CORNFLOW_ADMIN_USER = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
-    CORNFLOW_ADMIN_EMAIL = os.getenv(
+    auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    cornflow_admin_user = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
+    cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
     )
-    CORNFLOW_ADMIN_PWD = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
-    CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
-    CORNFLOW_SERVICE_EMAIL = os.getenv(
+    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
+    cornflow_service_user = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
+    cornflow_service_email = os.getenv(
         "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
     )
-    CORNFLOW_SERVICE_PWD = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
+    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
 
     # Cornflow logging and storage config
-    CORNFLOW_LOGGING = os.getenv("CORNFLOW_LOGGING", "console")
-    os.environ["CORNFLOW_LOGGING"] = CORNFLOW_LOGGING
+    cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")
+    os.environ["CORNFLOW_LOGGING"] = cornflow_logging
 
-    OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
-    os.environ["OPEN_DEPLOYMENT"] = str(OPEN_DEPLOYMENT)
-    SIGNUP_ACTIVATED = os.getenv("SIGNUP_ACTIVATED", 1)
-    os.environ["SIGNUP_ACTIVATED"] = str(SIGNUP_ACTIVATED)
-    USER_ACCESS_ALL_OBJECTS = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
-    os.environ["USER_ACCESS_ALL_OBJECTS"] = str(USER_ACCESS_ALL_OBJECTS)
-    DEFAULT_ROLE = os.getenv("DEFAULT_ROLE", 2)
-    os.environ["DEFAULT_ROLE"] = str(DEFAULT_ROLE)
+    open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
+    os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
+    signup_activated = os.getenv("SIGNUP_ACTIVATED", 1)
+    os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
+    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+    os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
+    default_role = os.getenv("DEFAULT_ROLE", 2)
+    os.environ["DEFAULT_ROLE"] = str(default_role)
 
     # Check LDAP parameters for active directory and show message
     if os.getenv("AUTH_TYPE") == 2:
@@ -89,7 +89,7 @@ def init_cornflow_service():
         sys.exit("FATAL: you need to provide a postgres database for Cornflow")
 
     # set logrotate config file
-    if CORNFLOW_LOGGING == "file":
+    if cornflow_logging == "file":
         try:
             conf = "/usr/src/app/log/*.log {\n\
             rotate 30\n \
@@ -108,42 +108,42 @@ def init_cornflow_service():
         except error:
             print(error)
 
-    EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
-    if EXTERNAL_APP == 0:
+    external_application = int(os.getenv("EXTERNAL_APP", 0))
+    if external_application == 0:
         click.echo("Starting cornflow")
-        app = create_app(ENV, CORNFLOW_DB_CONN)
+        app = create_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(0)
-            if AUTH == 1 or AUTH == 0:
+            if auth == 1 or auth == 0:
                 create_user_with_role(
-                    CORNFLOW_ADMIN_USER,
-                    CORNFLOW_ADMIN_EMAIL,
-                    CORNFLOW_ADMIN_PWD,
+                    cornflow_admin_user,
+                    cornflow_admin_email,
+                    cornflow_admin_pwd,
                     "admin",
                     ADMIN_ROLE,
                     verbose=1,
                 )
                 # create cornflow service user
                 create_user_with_role(
-                    CORNFLOW_SERVICE_USER,
-                    CORNFLOW_SERVICE_EMAIL,
-                    CORNFLOW_SERVICE_PWD,
+                    cornflow_service_user,
+                    cornflow_service_email,
+                    cornflow_service_pwd,
                     "serviceuser",
                     SERVICE_ROLE,
                     verbose=1,
                 )
-            register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-            register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
-            update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+            register_deployed_dags_command(airflow_url, airflow_user, airflow_pwd, 1)
+            register_dag_permissions_command(open_deployment, 1)
+            update_schemas_command(airflow_url, airflow_user, airflow_pwd, 1)
 
             # execute gunicorn application
             os.system(
                 "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
             )
-    elif EXTERNAL_APP == 1:
+    elif external_application == 1:
         click.echo(
             f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE', '../external_app')}"
         )
@@ -164,34 +164,34 @@ def init_cornflow_service():
         external_app = import_module(
             os.getenv("EXTERNAL_APP_MODULE", "../external_app")
         )
-        app = external_app.create_app(ENV, CORNFLOW_DB_CONN)
+        app = external_app.create_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(0)
-            if AUTH == 1 or AUTH == 0:
+            if auth == 1 or auth == 0:
                 # create cornflow admin user
                 create_user_with_role(
-                    CORNFLOW_ADMIN_USER,
-                    CORNFLOW_ADMIN_EMAIL,
-                    CORNFLOW_ADMIN_PWD,
+                    cornflow_admin_user,
+                    cornflow_admin_email,
+                    cornflow_admin_pwd,
                     "admin",
                     ADMIN_ROLE,
                     verbose=1,
                 )
                 # create cornflow service user
                 create_user_with_role(
-                    CORNFLOW_SERVICE_USER,
-                    CORNFLOW_SERVICE_EMAIL,
-                    CORNFLOW_SERVICE_PWD,
+                    cornflow_service_user,
+                    cornflow_service_email,
+                    cornflow_service_pwd,
                     "serviceuser",
                     SERVICE_ROLE,
                     verbose=1,
                 )
-            register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-            register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
-            update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+            register_deployed_dags_command(airflow_url, airflow_user, airflow_pwd, 1)
+            register_dag_permissions_command(open_deployment, 1)
+            update_schemas_command(airflow_url, airflow_user, airflow_pwd, 1)
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
