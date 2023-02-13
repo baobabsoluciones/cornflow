@@ -379,13 +379,12 @@ class APIGenerator:
         The endpoint word is always removed in the url.
 
         :param name: name of the endpoint.
-        :param id_type: type of the rpimary key of the table.
+        :param id_type: type of the primary key of the table.
         :return: str url of the endpoint
         """
         words = [w for w in re.findall("[A-Z][^A-Z]*", name) if w != "Endpoint"]
         url = "/" + "/".join(w.lower() for w in words) + "/"
-        url.replace("details", id_type)
-        return url
+        return url.replace("details", id_type)
 
     @staticmethod
     def camel_to_ep(name: str) -> str:
