@@ -82,7 +82,7 @@ class Auth(BaseAuth):
     @staticmethod
     def _get_permission_for_request(req, user_id):
         method, url = Auth._get_request_info(req)
-        current_app.logger.debug(
+        current_app.logger.info(
             f"Checking permissions for user {user_id} and endpoint {url} with method {method}"
         )
         user_roles = UserModel.get_one_user(user_id).roles
