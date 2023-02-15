@@ -130,7 +130,11 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
-    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
+    dict(
+        resource=DeployedDagDetailEndpoint,
+        urls="/dag/deployed/<string:idx>/",
+        endpoint="deployed-dag-detail",
+    ),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -207,13 +211,11 @@ resources = [
         endpoint="licences",
     ),
     dict(
-        resource=TablesEndpoint,
-        urls="/table/<string:table_name>/",
-        endpoint="tables"
+        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
     ),
     dict(
         resource=TablesDetailsEndpoint,
         urls="/table/<string:table_name>/<string:idx>/",
-        endpoint="tables-detail"
-    )
+        endpoint="tables-detail",
+    ),
 ]
