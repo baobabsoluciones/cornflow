@@ -37,6 +37,7 @@ def calculate_migrations(app_name, data_conn):
             migration_client = Migrate(
                 app=app, db=db, directory=f"./{app_name}/migrations"
             )
+            upgrade()
             migrate()
             upgrade()
 
