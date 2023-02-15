@@ -58,6 +58,7 @@ from .token import TokenEndpoint
 from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+from .tables import TablesEndpoint, TablesDetailsEndpoint
 
 
 resources = [
@@ -129,11 +130,7 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
-    dict(
-        resource=DeployedDagDetailEndpoint,
-        urls="/dag/deployed/<string:idx>/",
-        endpoint="deployed-dag-detail",
-    ),
+    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -209,4 +206,14 @@ resources = [
         urls="/licences/",
         endpoint="licences",
     ),
+    dict(
+        resource=TablesEndpoint,
+        urls="/table/<string:table_name>/",
+        endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail"
+    )
 ]
