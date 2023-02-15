@@ -1,11 +1,20 @@
-def register_base_permissions_command(verbose):
+from types import ModuleType
+from typing import Union
+
+
+def register_base_permissions_command(
+    *, external_app: ModuleType = None, verbose: Union[bool, int] = False
+):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..endpoints import resources
+    from cornflow.endpoints import resources
     from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
-    from ..shared.const import BASE_PERMISSION_ASSIGNATION, EXTRA_PERMISSION_ASSIGNATION
     from cornflow_core.shared import db
+    from cornflow.shared.const import (
+        BASE_PERMISSION_ASSIGNATION,
+        EXTRA_PERMISSION_ASSIGNATION,
+    )
 
     permissions_registered = [
         (perm.action_id, perm.api_view_id, perm.role_id)
@@ -76,11 +85,15 @@ def register_base_permissions_command(verbose):
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on base permissions sequence updating: {e}")
+            current_app.logger.error(
+                f"Unknown error on base permissions sequence updating: {e}"
+            )
 
     if verbose == 1:
         if len(permissions_to_register) > 0:
-            current_app.logger.info(f"Permissions registered: {permissions_to_register}")
+            current_app.logger.info(
+                f"Permissions registered: {permissions_to_register}"
+            )
         else:
             current_app.logger.info("No new permissions to register")
 
@@ -149,7 +162,9 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on dag permissions sequence updating: {e}")
+            current_app.logger.error(
+                f"Unknown error on dag permissions sequence updating: {e}"
+            )
 
     if verbose == 1:
         if len(permissions) > 1:

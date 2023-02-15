@@ -4,7 +4,7 @@ def register_roles_command(verbose):
     from flask import current_app
 
     from cornflow_core.models import RoleBaseModel
-    from ..shared.const import ROLES_MAP
+    from cornflow.shared.const import ROLES_MAP
     from cornflow_core.shared import db
 
     roles_registered = [role.name for role in RoleBaseModel.get_all_objects()]

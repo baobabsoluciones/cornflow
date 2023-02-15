@@ -3,7 +3,7 @@ def register_actions_command(verbose):
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from cornflow_core.models import ActionBaseModel
-    from ..shared.const import ACTIONS_MAP
+    from cornflow.shared.const import ACTIONS_MAP
     from cornflow_core.shared import db
 
     actions_registered = [ac.name for ac in ActionBaseModel.get_all_objects()]

@@ -82,7 +82,6 @@ class Auth(BaseAuth):
     @staticmethod
     def _get_permission_for_request(req, user_id):
         method, url = Auth._get_request_info(req)
-        current_app.logger.info(f"{getattr(req, 'url_rule').__dict__}")
         user_roles = UserModel.get_one_user(user_id).roles
         if user_roles is None or user_roles == {}:
             raise NoPermission(
