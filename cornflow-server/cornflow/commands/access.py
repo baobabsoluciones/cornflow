@@ -1,4 +1,10 @@
-def access_init_command(verbose):
+from types import ModuleType
+from typing import Union
+
+
+def access_init_command(
+    external_app: ModuleType = None, verbose: Union[bool, int] = False
+):
     from .actions import register_actions_command
     from .permissions import register_base_permissions_command
     from .roles import register_roles_command
@@ -6,5 +12,9 @@ def access_init_command(verbose):
 
     register_actions_command(verbose)
     register_roles_command(verbose)
-    register_views_command(verbose)
-    register_base_permissions_command(verbose)
+    register_views_command(verbose=verbose)
+    if external_app is not None:
+        register_views_command(external_app=external_app, verbose=verbose)
+    register_base_permissions_command(verbose=verbose)
+    if external_app is not None:
+        register_base_permissions_command(external_app=external_app, verbose=verbose)

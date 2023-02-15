@@ -1,9 +1,18 @@
-def register_views_command(verbose):
+from types import ModuleType
+from typing import Union
 
-    from sqlalchemy.exc import DBAPIError, IntegrityError
+
+def register_views_command(
+    *, external_app: ModuleType = None, verbose: Union[bool, int] = False
+):
     from flask import current_app
+    from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..endpoints import resources
+    if external_app is None:
+        from cornflow.endpoints import resources
+    elif external_app is not None:
+        resources = external_app.endpoints.resources
+
     from cornflow_core.models import ViewBaseModel
     from cornflow_core.shared import db
 

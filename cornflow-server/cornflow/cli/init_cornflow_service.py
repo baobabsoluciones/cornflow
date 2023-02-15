@@ -116,7 +116,7 @@ def init_cornflow_service():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
-            access_init_command(0)
+            access_init_command(verbose=0)
             if auth == 1 or auth == 0:
                 create_user_with_role(
                     cornflow_admin_user,
@@ -169,7 +169,7 @@ def init_cornflow_service():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
-            access_init_command(0)
+            access_init_command(external_app=external_app, verbose=0)
             if auth == 1 or auth == 0:
                 # create cornflow admin user
                 create_user_with_role(

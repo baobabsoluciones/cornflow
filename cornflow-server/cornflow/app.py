@@ -159,21 +159,21 @@ def register_actions(verbose):
 @click.option("-v", "--verbose", type=int, default=0)
 @with_appcontext
 def register_views(verbose):
-    register_views_command(verbose)
+    register_views_command(verbose=verbose)
 
 
 @click.command("register_base_assignations")
 @click.option("-v", "--verbose", type=int, default=0)
 @with_appcontext
 def register_base_assignations(verbose):
-    register_base_permissions_command(verbose)
+    register_base_permissions_command(verbose=verbose)
 
 
 @click.command("access_init")
 @click.option("-v", "--verbose", type=int, default=0)
 @with_appcontext
 def access_init(verbose):
-    access_init_command(verbose)
+    access_init_command(verbose=verbose)
 
 
 @click.command("register_deployed_dags")
