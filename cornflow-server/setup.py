@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow",
-    version="1.0.0a4",
+    version="1.0.0a5",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     url="http://github.com/baobabsoluciones/cornflow",
@@ -20,6 +20,7 @@ setuptools.setup(
         "console_scripts": [
             "init_cornflow_service = cornflow.cli.init_cornflow_service:init_cornflow_service",
             "calculate_migrations= cornflow.cli.calculate_migrations:calculate_migrations",
+            "init_permissions = cornflow.cli.init_permissions:init_permissions",
         ]
     },
 )
