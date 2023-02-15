@@ -1,4 +1,4 @@
-def register_views_command(verbose):
+def register_views_command(verbose: bool = False):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app
@@ -49,7 +49,7 @@ def register_views_command(verbose):
             db.session.rollback()
             current_app.logger.error(f"Unknown error on views sequence updating: {e}")
 
-    if verbose == 1:
+    if verbose:
         if len(views_to_register) > 0:
             current_app.logger.info(f"Endpoints registered: {views_to_register}")
         else:

@@ -10,13 +10,13 @@ from cornflow_core.authentication import authenticate
 import json
 
 # Import from internal modules
-from ..models import PermissionsDAG
-from ..shared.authentication import Auth
+from cornflow.models import PermissionsDAG
+from cornflow.shared.authentication import Auth
 from cornflow_core.exceptions import AirflowError, NoPermission
-from ..schemas.example_data import ExampleData
+from cornflow.schemas.example_data import ExampleData
 from cornflow_core.resources import BaseMetaResource
 
-from ..shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
 
 
 class ExampleDataDetailsEndpoint(BaseMetaResource):
@@ -24,7 +24,7 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
     Endpoint used to obtain schemas for one app
     """
 
-    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     @doc(description="Get example data from DAG", tags=["DAG"])
     @authenticate(auth_class=Auth())

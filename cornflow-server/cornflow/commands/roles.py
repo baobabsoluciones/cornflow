@@ -1,4 +1,4 @@
-def register_roles_command(verbose):
+def register_roles_command(verbose: bool = True):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app

@@ -50,7 +50,7 @@ class TestCommands(TestCase):
         }
         self.resources = resources
         self.runner = self.create_app().test_cli_runner()
-        self.runner.invoke(register_roles, ["-v", 1])
+        self.runner.invoke(register_roles, ["-v"])
 
     def tearDown(self):
         db.session.remove()
@@ -237,9 +237,9 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         self.assertEqual(0, len(service_permissions))
 
-    def test_argument_parsing_correct_verbose(self):
+    def test_argument_parsing_incorrect(self):
         self.test_service_user_command()
-        result = self.runner.invoke(register_dag_permissions, ["-o", 1, "-v", "a"])
+        result = self.runner.invoke(register_dag_permissions, ["-o", "a"])
         self.assertEqual(2, result.exit_code)
         self.assertIn("is not a valid integer", result.output)
 

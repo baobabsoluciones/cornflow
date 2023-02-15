@@ -63,7 +63,8 @@ class DAGDetailEndpoint(BaseMetaResource):
             err = "The execution does not exist."
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}." + err
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
+                + err,
             )
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
@@ -72,11 +73,13 @@ class DAGDetailEndpoint(BaseMetaResource):
             err = "The instance does not exist."
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}." + err
-
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
+                + err,
             )
         config = execution.config
-        current_app.logger.info(f"User {self.get_user()} gets input data of execution {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets input data of execution {idx}"
+        )
         return {
             "id": instance.id,
             "data": instance.data,
@@ -111,7 +114,9 @@ class DAGDetailEndpoint(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             validate_and_continue(marshmallow_obj(), data)
             # marshmallow_obj().fields['jobs'].nested().fields['successors']
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
@@ -119,8 +124,8 @@ class DAGDetailEndpoint(BaseMetaResource):
             err = "The execution does not exist."
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}." + err
-
+                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}."
+                + err,
             )
         state = req_data.get("state", EXEC_STATE_CORRECT)
         new_data = dict(
@@ -209,7 +214,9 @@ class DAGEndpointManual(BaseMetaResource):
             validate_and_continue(DataSchema(), data)
         elif solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, solution_schema, SOLUTION_SCHEMA)
+            marshmallow_obj = DeployedDAG.get_marshmallow_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             validate_and_continue(marshmallow_obj(), data)
 
         kwargs_copy = dict(kwargs)
@@ -220,7 +227,9 @@ class DAGEndpointManual(BaseMetaResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        current_app.logger.info(f"User {self.get_user()} manually created the execution {item.id}")
+        current_app.logger.info(
+            f"User {self.get_user()} manually created the execution {item.id}"
+        )
         return item, 201
 
 

@@ -40,11 +40,13 @@ class UserEndpoint(BaseMetaResource):
     Including their instances and executions
     """
 
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.data_model = UserModel
 
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
 
     @doc(description="Get all users", tags=["Users"])
     @authenticate(auth_class=Auth())

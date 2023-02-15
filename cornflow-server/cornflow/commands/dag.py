@@ -1,5 +1,5 @@
 def register_deployed_dags_command(
-    url: str = None, user: str = None, pwd: str = None, verbose: int = 0
+    url: str = None, user: str = None, pwd: str = None, verbose: bool = False
 ):
     # Full imports
     import time
@@ -18,12 +18,12 @@ def register_deployed_dags_command(
     attempts = 0
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
-        if verbose == 1:
+        if verbose:
             current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
-        if verbose == 1:
+        if verbose:
             current_app.logger.info("Airflow is not reachable")
         return False
 
@@ -39,15 +39,17 @@ def register_deployed_dags_command(
     }
 
     processed_dags = [
-        DeployedDAG({
-            "id": dag["dag_id"],
-            "description": dag["description"],
-            "instance_schema": schemas[dag["dag_id"]]["instance"],
-            "solution_schema": schemas[dag["dag_id"]]["solution"],
-            "instance_checks_schema": schemas[dag["dag_id"]]["instance_checks"],
-            "solution_checks_schema": schemas[dag["dag_id"]]["solution_checks"],
-            "config_schema": schemas[dag["dag_id"]]["config"]
-        })
+        DeployedDAG(
+            {
+                "id": dag["dag_id"],
+                "description": dag["description"],
+                "instance_schema": schemas[dag["dag_id"]]["instance"],
+                "solution_schema": schemas[dag["dag_id"]]["solution"],
+                "instance_checks_schema": schemas[dag["dag_id"]]["instance_checks"],
+                "solution_checks_schema": schemas[dag["dag_id"]]["solution_checks"],
+                "config_schema": schemas[dag["dag_id"]]["config"],
+            }
+        )
         for dag in dag_list
         if dag["dag_id"] not in dags_registered
     ]
@@ -64,7 +66,7 @@ def register_deployed_dags_command(
         db.session.rollback()
         current_app.logger.error(f"Unknown error on deployed dags register: {e}")
 
-    if verbose == 1:
+    if verbose:
         if len(processed_dags) > 0:
             current_app.logger.info(f"DAGs registered: {processed_dags}")
         else:
@@ -72,7 +74,7 @@ def register_deployed_dags_command(
     return True
 
 
-def register_deployed_dags_command_test(dags: list = None, verbose=0):
+def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
     from ..models import DeployedDAG
     import logging as log
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
@@ -81,29 +83,33 @@ def register_deployed_dags_command_test(dags: list = None, verbose=0):
         dags = ["solve_model_dag", "gc", "timer"]
 
     deployed_dag = [
-        DeployedDAG({
-            "id": "solve_model_dag",
-            "description": None,
-            "instance_schema": get_pulp_jsonschema(),
-            "solution_schema": get_pulp_jsonschema(),
-            "instance_checks_schema": dict(),
-            "solution_checks_schema": dict(),
-            "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"])
-        })
+        DeployedDAG(
+            {
+                "id": "solve_model_dag",
+                "description": None,
+                "instance_schema": get_pulp_jsonschema(),
+                "solution_schema": get_pulp_jsonschema(),
+                "instance_checks_schema": dict(),
+                "solution_checks_schema": dict(),
+                "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
+            }
+        )
     ] + [
-        DeployedDAG({
-            "id": dag,
-            "description": None,
-            "instance_schema": dict(),
-            "solution_schema": dict(),
-            "instance_checks_schema": dict(),
-            "solution_checks_schema": dict(),
-            "config_schema": dict(),
-        })
+        DeployedDAG(
+            {
+                "id": dag,
+                "description": None,
+                "instance_schema": dict(),
+                "solution_schema": dict(),
+                "instance_checks_schema": dict(),
+                "solution_checks_schema": dict(),
+                "config_schema": dict(),
+            }
+        )
         for dag in dags[1:]
     ]
     for dag in deployed_dag:
         dag.save()
 
-    if verbose == 1:
+    if verbose:
         log.info("Registered DAGs")
