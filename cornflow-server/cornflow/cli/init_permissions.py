@@ -34,7 +34,7 @@ def init_permissions(app_name, data_conn, verbose):
     from cornflow.commands import access_init_command
 
     external_app = import_module(f"{app_name}")
-    app = external_app.create_app(environment="development", dataconn=data_conn)
+    app = external_app.create_app(env_name="development", dataconn=data_conn)
     with app.app_context():
         path = f"{os.path.dirname(external_app.__file__)}/migrations"
         migrate = Migrate(app=app, db=db, directory=path)
