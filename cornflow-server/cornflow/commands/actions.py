@@ -19,7 +19,6 @@ def register_actions_command(verbose: bool = True):
         for key, value in ACTIONS_MAP.items()
         if value not in actions_registered
     ]
-    print(f"Actions to register: {len(actions_to_register)}")
 
     if len(actions_to_register) > 0:
         db.session.bulk_save_objects(actions_to_register)

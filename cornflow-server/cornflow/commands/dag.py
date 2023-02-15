@@ -76,7 +76,7 @@ def register_deployed_dags_command(
 
 def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
     from ..models import DeployedDAG
-    import logging as log
+    from flask import current_app
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
@@ -112,4 +112,4 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
         dag.save()
 
     if verbose:
-        log.info("Registered DAGs")
+        current_app.logger.info("Registered DAGs")
