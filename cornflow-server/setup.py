@@ -21,7 +21,7 @@ setuptools.setup(
             "init_cornflow_service = cornflow.cli.init_cornflow_service:init_cornflow_service",
             "calculate_migrations= cornflow.cli.calculate_migrations:calculate_migrations",
             "init_permissions = cornflow.cli.init_permissions:init_permissions",
-            "config_list = cornflow.cli.config_list:config_list",
+            "config_list = cornflow.cli.config:config_list",
         ]
     },
 )
