@@ -2,6 +2,7 @@ import os
 from importlib import import_module
 import click
 from .arguments import username, password, email, verbose
+import sys
 
 
 @click.group(name="users", help="Commands to manage the users")
@@ -28,6 +29,7 @@ def create_service_user(username, password, email, verbose):
     if external == 0:
         from cornflow import create_app
     else:
+        sys.path.append("./")
         external_app = os.getenv("EXTERNAL_APP_MODULE", "external_app")
         external_module = import_module(external_app)
         create_app = external_module.wsgi.create_app
