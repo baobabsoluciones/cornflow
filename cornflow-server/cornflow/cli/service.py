@@ -18,8 +18,11 @@ from cornflow_core.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
+@click.group(name="service", help="Commands to run the cornflow service")
+def service():
+    pass
 
-@click.command(name="init_cornflow_service", help="Initialize the service")
+@service.command(name="init", help="Initialize the service")
 def init_cornflow_service():
     click.echo("Starting the service")
     os.chdir("/usr/src/app")

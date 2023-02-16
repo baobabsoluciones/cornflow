@@ -7,7 +7,11 @@ from cornflow_core.shared import db
 from flask_migrate import Migrate, upgrade
 
 
-@click.command(name="init_permissions", help="Initialize the permissions for the roles")
+@click.group(name="permissions", help="Commands to manage the permissions")
+def permissions():
+    pass
+
+@permissions.command(name="init", help="Initialize the permissions for the roles")
 @click.option(
     "--app-name",
     "-a",

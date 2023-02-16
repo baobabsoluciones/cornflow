@@ -7,8 +7,13 @@ import sys
 from flask_migrate import Migrate, migrate, upgrade
 
 
-@click.command(
-    name="calculate_migrations", help="Calculate the migrations for an external app"
+@click.group(name="migrations", help="Commands to manage the migrations")
+def migrations():
+    pass
+
+
+@migrations.command(
+    name="calculate", help="Calculate the migrations for an external app"
 )
 @click.option(
     "--app-name",
