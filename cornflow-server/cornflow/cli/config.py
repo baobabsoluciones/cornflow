@@ -5,7 +5,12 @@ from cornflow import create_app
 from flask import current_app
 
 
-@click.command(name="config_list", help="List the configuration variables")
+@click.group()
+def config():
+    pass
+
+
+@config.command(name="list", help="List the configuration variables")
 def config_list():
     env = os.getenv("FLASK_ENV", "development")
     if env is None:
@@ -20,7 +25,7 @@ def config_list():
     return 1
 
 
-@click.command(name="config_save", help="Save the configuration variables to a file")
+@config.command(name="save", help="Save the configuration variables to a file")
 @click.option(
     "--path",
     "-p",
@@ -45,7 +50,7 @@ def config_save(path):
     return 1
 
 
-@click.command(name="config_get", help="Get the value of a configuration variable")
+@config.command(name="get", help="Get the value of a configuration variable")
 @click.option("--key", "-k", type=str, help="The key of the configuration variable")
 def config_get(key):
     env = os.getenv("FLASK_ENV", "development")
