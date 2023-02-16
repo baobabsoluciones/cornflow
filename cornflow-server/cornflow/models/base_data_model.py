@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
-from ..shared.utils import hash_json_256
+from cornflow.shared.utils import hash_json_256
 
 
 class BaseDataModel(TraceAttributesModel):

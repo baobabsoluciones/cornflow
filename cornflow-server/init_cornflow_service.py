@@ -103,7 +103,7 @@ app = create_app(ENV, CORNFLOW_DB_CONN)
 with app.app_context():
     migrate = Migrate(app=app, db=db)
     upgrade()
-    access_init_command(0)
+    access_init_command(verbose=False)
     # create user if auth type is db or oid
     if AUTH == 1 or AUTH == 0:
         # create cornflow admin user
@@ -113,7 +113,7 @@ with app.app_context():
             CORNFLOW_ADMIN_PWD,
             "admin",
             ADMIN_ROLE,
-            verbose=1,
+            verbose=True,
         )
         # create cornflow service user
         create_user_with_role(
@@ -122,11 +122,11 @@ with app.app_context():
             CORNFLOW_SERVICE_PWD,
             "serviceuser",
             SERVICE_ROLE,
-            verbose=1,
+            verbose=True,
         )
-    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
-    register_dag_permissions_command(OPEN_DEPLOYMENT, 1)
-    update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, 1)
+    register_deployed_dags_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, verbose=True)
+    register_dag_permissions_command(OPEN_DEPLOYMENT, verbose=True)
+    update_schemas_command(AIRFLOW_URL, AIRFLOW_USER, AIRFLOW_PWD, verbose=True)
 
 # execute gunicorn application
 os.system(

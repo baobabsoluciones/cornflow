@@ -52,8 +52,8 @@ class CustomTestCase(TestCase):
     def setUp(self):
         log.root.setLevel(current_app.config["LOG_LEVEL"])
         db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
         data = {
             "username": "testname",
             "email": "test@test.com",
