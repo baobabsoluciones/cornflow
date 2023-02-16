@@ -41,4 +41,4 @@ RUN mkdir /usr/src/app/.ssh
 EXPOSE 5000
 
 # execute python init script
-CMD ["init_cornflow_service"]
+CMD ["cornflow init_cornflow_service"]
