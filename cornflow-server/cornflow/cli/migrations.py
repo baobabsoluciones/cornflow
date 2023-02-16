@@ -1,10 +1,12 @@
 import os.path
 import shutil
+import sys
 from importlib import import_module
+
 import click
 from cornflow_core.shared import db
-import sys
 from flask_migrate import Migrate, migrate, upgrade
+from .arguments import app_name
 
 
 @click.group(name="migrations", help="Commands to manage the migrations")
@@ -15,13 +17,7 @@ def migrations():
 @migrations.command(
     name="calculate", help="Calculate the migrations for an external app"
 )
-@click.option(
-    "--app-name",
-    "-a",
-    type=str,
-    help="The name of the external app",
-    default="external_app",
-)
+@app_name
 @click.option(
     "--data-conn",
     "-d",

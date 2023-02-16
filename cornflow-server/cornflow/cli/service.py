@@ -18,9 +18,11 @@ from cornflow_core.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
+
 @click.group(name="service", help="Commands to run the cornflow service")
 def service():
     pass
+
 
 @service.command(name="init", help="Initialize the service")
 def init_cornflow_service():
@@ -163,7 +165,7 @@ def init_cornflow_service():
 
         os.system("$(command -v pip) install --user -r requirements.txt")
         sys.path.append("/usr/src/external_app")
-        print(f"PATH: {sys.path}")
+
         from importlib import import_module
 
         external_app = import_module(
@@ -202,7 +204,7 @@ def init_cornflow_service():
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
-            f"\"wsgi:create_app('$FLASK_ENV')\""
+            f"\"'$EXTERNAL_APP_MODULE'.wsgi:create_app('$FLASK_ENV')\""
         )
 
     else:

@@ -5,20 +5,16 @@ from importlib import import_module
 import click
 from cornflow_core.shared import db
 from flask_migrate import Migrate, upgrade
+from .arguments import app_name
 
 
 @click.group(name="permissions", help="Commands to manage the permissions")
 def permissions():
     pass
 
+
 @permissions.command(name="init", help="Initialize the permissions for the roles")
-@click.option(
-    "--app-name",
-    "-a",
-    type=str,
-    help="The name of the external app",
-    default="external_app",
-)
+@app_name
 @click.option(
     "--data-conn",
     "-d",
