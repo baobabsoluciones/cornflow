@@ -176,7 +176,7 @@ class TestDeployedDAG(TestCase):
         user_role.save()
         db.session.commit()
 
-        register_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=False)
 
     def tearDown(self):
         db.session.remove()
