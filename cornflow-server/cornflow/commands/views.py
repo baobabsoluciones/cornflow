@@ -1,9 +1,7 @@
 from types import ModuleType
 
 
-def register_views_command(
-    *, external_app: ModuleType = None, verbose: bool = False
-):
+def register_views_command(*, external_app: ModuleType = None, verbose: bool = False):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
