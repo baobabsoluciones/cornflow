@@ -65,6 +65,6 @@ class UserModel(UserBaseModel):
 
     def is_service_user(self):
         """
-        Returns a boolean if a user is a super user or not
+        Returns a boolean if a user is a service user or not
         """
         return UserRoleModel.is_service_user(self.id)

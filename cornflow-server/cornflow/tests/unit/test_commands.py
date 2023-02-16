@@ -1,3 +1,7 @@
+import json
+
+from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
+from cornflow.tests.integration.test_cornflowclient import load_file
 from cornflow_core.models import (
     ActionBaseModel,
     PermissionViewRoleBaseModel,
@@ -50,7 +54,7 @@ class TestCommands(TestCase):
         }
         self.resources = resources
         self.runner = self.create_app().test_cli_runner()
-        self.runner.invoke(register_roles, ["-v", 1])
+        self.runner.invoke(register_roles, ["-v"])
 
     def tearDown(self):
         db.session.remove()
@@ -59,14 +63,7 @@ class TestCommands(TestCase):
     def user_command(self, command, username, email):
         self.runner.invoke(
             command,
-            [
-                "-u",
-                username,
-                "-e",
-                email,
-                "-p",
-                self.payload["password"],
-            ],
+            ["-u", username, "-e", email, "-p", self.payload["password"], "-v"],
         )
 
         user = UserModel.get_one_user_by_email(email)
@@ -147,7 +144,7 @@ class TestCommands(TestCase):
         return self.user_command(create_admin_user, "admin", "admin@test.org")
 
     def test_base_user_command(self):
-        return self.user_command(create_admin_user, "base", "base@test.org")
+        return self.user_command(create_base_user, "base", "base@test.org")
 
     def test_register_actions(self):
         self.runner.invoke(register_actions)
@@ -191,7 +188,7 @@ class TestCommands(TestCase):
                     self.assertEqual(True, permission)
 
     def test_deployed_dags_test_command(self):
-        register_deployed_dags_command_test()
+        register_deployed_dags_command_test(verbose=True)
         dags = DeployedDAG.get_all_objects()
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])
@@ -237,9 +234,9 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         self.assertEqual(0, len(service_permissions))
 
-    def test_argument_parsing_correct_verbose(self):
+    def test_argument_parsing_incorrect(self):
         self.test_service_user_command()
-        result = self.runner.invoke(register_dag_permissions, ["-o", 1, "-v", "a"])
+        result = self.runner.invoke(register_dag_permissions, ["-o", "a"])
         self.assertEqual(2, result.exit_code)
         self.assertIn("is not a valid integer", result.output)
 
@@ -251,3 +248,26 @@ class TestCommands(TestCase):
 
     def test_missing_required_argument_user(self):
         self.user_missing_arguments(create_base_user)
+
+    def test_error_no_views(self):
+        self.test_service_user_command()
+        token = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": "cornflow", "password": self.payload["password"]}
+            ),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        ).json["token"]
+
+        data = load_file(INSTANCE_PATH)
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+        self.assertEqual(403, response.status_code)

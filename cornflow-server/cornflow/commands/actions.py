@@ -1,4 +1,4 @@
-def register_actions_command(verbose):
+def register_actions_command(verbose: bool = True):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
@@ -7,12 +7,6 @@ def register_actions_command(verbose):
     from cornflow_core.shared import db
 
     actions_registered = [ac.name for ac in ActionBaseModel.get_all_objects()]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     actions_to_register = [
         ActionBaseModel(id=key, name=value)
@@ -43,7 +37,7 @@ def register_actions_command(verbose):
             db.session.rollback()
             current_app.logger.error(f"Unknown error on actions sequence updating: {e}")
 
-    if verbose == 1:
+    if verbose:
         if len(actions_to_register) > 0:
             current_app.logger.info("Actions registered: ", actions_to_register)
         else:

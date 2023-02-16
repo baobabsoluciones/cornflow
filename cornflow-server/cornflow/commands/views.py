@@ -1,9 +1,8 @@
 from types import ModuleType
-from typing import Union
 
 
 def register_views_command(
-    *, external_app: ModuleType = None, verbose: Union[bool, int] = False
+    *, external_app: ModuleType = None, verbose: bool = False
 ):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -17,12 +16,6 @@ def register_views_command(
     from cornflow_core.shared import db
 
     views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     views_to_register = [
         ViewBaseModel(
@@ -58,7 +51,7 @@ def register_views_command(
             db.session.rollback()
             current_app.logger.error(f"Unknown error on views sequence updating: {e}")
 
-    if verbose == 1:
+    if verbose:
         if len(views_to_register) > 0:
             current_app.logger.info(f"Endpoints registered: {views_to_register}")
         else:

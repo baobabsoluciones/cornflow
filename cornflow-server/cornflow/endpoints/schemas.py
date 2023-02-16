@@ -10,10 +10,10 @@ from flask import current_app, request
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
-from ..models import PermissionsDAG, DeployedDAG
-from ..schemas.schemas import SchemaOneApp, SchemaListApp
-from ..shared.authentication import Auth
-from ..shared.const import ALL_DEFAULT_ROLES
+from cornflow.models import PermissionsDAG, DeployedDAG
+from cornflow.schemas.schemas import SchemaOneApp, SchemaListApp
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ALL_DEFAULT_ROLES
 
 
 class SchemaEndpoint(BaseMetaResource):
