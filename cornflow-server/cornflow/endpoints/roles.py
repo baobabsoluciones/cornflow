@@ -17,8 +17,8 @@ from cornflow_core.schemas import (
     RolesRequest,
     RolesResponse,
 )
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
 
 
 class RolesListEndpoint(BaseMetaResource):

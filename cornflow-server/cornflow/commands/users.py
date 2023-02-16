@@ -1,7 +1,7 @@
 def create_user_with_role(
     username, email, password, role_name, role, verbose: bool = False
 ):
-    from ..models import UserModel, UserRoleModel
+    from cornflow.models import UserModel, UserRoleModel
     from cornflow_core.models import RoleBaseModel
     from flask import current_app
 
@@ -41,7 +41,7 @@ def create_user_with_role(
 
 
 def create_service_user_command(username, email, password, verbose: bool = True):
-    from ..shared.const import SERVICE_ROLE
+    from cornflow.shared.const import SERVICE_ROLE
     from flask import current_app
 
     if username is None or email is None or password is None:
@@ -53,7 +53,7 @@ def create_service_user_command(username, email, password, verbose: bool = True)
 
 
 def create_admin_user_command(username, email, password, verbose: bool = True):
-    from ..shared.const import ADMIN_ROLE
+    from cornflow.shared.const import ADMIN_ROLE
     from flask import current_app
 
     if username is None or email is None or password is None:
@@ -65,7 +65,7 @@ def create_admin_user_command(username, email, password, verbose: bool = True):
 
 
 def create_planner_user_command(username, email, password, verbose: bool = True):
-    from ..shared.const import PLANNER_ROLE
+    from cornflow.shared.const import PLANNER_ROLE
     from flask import current_app
 
     if username is None or email is None or password is None:

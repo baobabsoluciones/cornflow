@@ -12,7 +12,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from .base_data_model import BaseDataModel
 from cornflow_core.exceptions import InvalidPatch, ObjectDoesNotExist, InvalidData
 from cornflow_core.shared import db
-from ..shared.utils import hash_json_256
+from cornflow.shared.utils import hash_json_256
 
 
 # Originally inspired by this:
@@ -109,13 +109,13 @@ class CaseModel(BaseDataModel):
             raise ObjectDoesNotExist(
                 "Parent does not exist",
                 log_txt=f"Error while user {user} tries to create a new case. "
-                        f"The parent does not exist."
+                f"The parent does not exist.",
             )
         if parent.data is not None:
             raise InvalidData(
                 "Parent cannot be a case",
                 log_txt=f"Error while user {user} tries to create a new case. "
-                        f"The parent is not a directory."
+                f"The parent is not a directory.",
             )
         return cls(data, parent=parent)
 
@@ -167,10 +167,14 @@ class CaseModel(BaseDataModel):
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            current_app.logger.error(f"Error on deletion of case and children cases: {e}")
+            current_app.logger.error(
+                f"Error on deletion of case and children cases: {e}"
+            )
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on deletion of case and children cases: {e}")
+            current_app.logger.error(
+                f"Unknown error on deletion of case and children cases: {e}"
+            )
 
     @staticmethod
     def apply_patch(original_data, data_patch):

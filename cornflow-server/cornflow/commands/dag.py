@@ -10,7 +10,7 @@ def register_deployed_dags_command(
 
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
-    from ..models import DeployedDAG
+    from cornflow.models import DeployedDAG
     from cornflow_core.shared import db
 
     af_client = Airflow(url, user, pwd)
@@ -75,7 +75,7 @@ def register_deployed_dags_command(
 
 
 def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
-    from ..models import DeployedDAG
+    from cornflow.models import DeployedDAG
     from flask import current_app
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 

@@ -1,6 +1,6 @@
 from marshmallow import fields, Schema, validate
 from .solution_log import LogSchema
-from ..shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
+from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 from .common import QueryFilters, BaseDataEndpointResponse
 
 

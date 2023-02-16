@@ -3,17 +3,11 @@ def register_views_command(verbose: bool = False):
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app
 
-    from ..endpoints import resources
+    from cornflow.endpoints import resources
     from cornflow_core.models import ViewBaseModel
     from cornflow_core.shared import db
 
     views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     views_to_register = [
         ViewBaseModel(

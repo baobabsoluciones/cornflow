@@ -59,14 +59,7 @@ class TestCommands(TestCase):
     def user_command(self, command, username, email):
         self.runner.invoke(
             command,
-            [
-                "-u",
-                username,
-                "-e",
-                email,
-                "-p",
-                self.payload["password"],
-            ],
+            ["-u", username, "-e", email, "-p", self.payload["password"], "-v"],
         )
 
         user = UserModel.get_one_user_by_email(email)
@@ -191,7 +184,7 @@ class TestCommands(TestCase):
                     self.assertEqual(True, permission)
 
     def test_deployed_dags_test_command(self):
-        register_deployed_dags_command_test()
+        register_deployed_dags_command_test(verbose=True)
         dags = DeployedDAG.get_all_objects()
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])

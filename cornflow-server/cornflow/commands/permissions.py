@@ -17,12 +17,6 @@ def register_base_permissions_command(verbose: bool = False):
     ]
     resources_names = [resource["endpoint"] for resource in resources]
 
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
-
     # Create base permissions
     permissions_in_app = [
         PermissionViewRoleBaseModel(

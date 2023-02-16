@@ -8,12 +8,6 @@ def register_actions_command(verbose: bool = True):
 
     actions_registered = [ac.name for ac in ActionBaseModel.get_all_objects()]
 
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
-
     actions_to_register = [
         ActionBaseModel(id=key, name=value)
         for key, value in ACTIONS_MAP.items()

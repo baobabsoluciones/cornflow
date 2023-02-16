@@ -4,16 +4,10 @@ def register_roles_command(verbose: bool = True):
     from flask import current_app
 
     from cornflow_core.models import RoleBaseModel
-    from ..shared.const import ROLES_MAP
+    from cornflow.shared.const import ROLES_MAP
     from cornflow_core.shared import db
 
     roles_registered = [role.name for role in RoleBaseModel.get_all_objects()]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
 
     roles_to_register = [
         RoleBaseModel({"id": key, "name": value})

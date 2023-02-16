@@ -17,8 +17,8 @@ from werkzeug.utils import secure_filename
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import InstanceModel, DeployedDAG
-from ..schemas.instance import (
+from cornflow.models import InstanceModel, DeployedDAG
+from cornflow.schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
     InstanceDetailsEndpointResponse,
@@ -29,8 +29,8 @@ from ..schemas.instance import (
     QueryFiltersInstance,
 )
 
-from ..schemas.model_json import DataSchema
-from ..shared.authentication import Auth
+from cornflow.schemas.model_json import DataSchema
+from cornflow.shared.authentication import Auth
 from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidUsage
 

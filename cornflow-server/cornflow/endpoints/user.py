@@ -22,16 +22,16 @@ from flask_apispec import marshal_with, use_kwargs, doc
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 # Import from internal modules
-from ..models import UserModel, UserRoleModel
-from ..schemas.user import (
+from cornflow.models import UserModel, UserRoleModel
+from cornflow.schemas.user import (
     RecoverPasswordRequest,
     UserDetailsEndpointResponse,
     UserEditRequest,
     UserEndpointResponse,
     UserSchema,
 )
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES, AUTH_OID
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES, AUTH_OID
 
 
 class UserEndpoint(BaseMetaResource):
@@ -45,8 +45,6 @@ class UserEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = UserModel
-
-
 
     @doc(description="Get all users", tags=["Users"])
     @authenticate(auth_class=Auth())
@@ -91,10 +89,11 @@ class UserDetailsEndpoint(BaseMetaResource):
                 error="You have no permission to access given user",
                 status_code=400,
                 log_txt=f"Error while user {self.get_user()} tries to get the details of user {user_id}. "
-                        f"The user does not have permission."
-
+                f"The user does not have permission.",
             )
-        current_app.logger.info(f"User {self.get_user()} gets details of user {user_id}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets details of user {user_id}"
+        )
         return self.get_detail(idx=user_id)
 
     @doc(description="Delete a user", tags=["Users"])
@@ -109,21 +108,23 @@ class UserDetailsEndpoint(BaseMetaResource):
         if self.get_user_id() != user_id and not self.is_admin():
             raise NoPermission(
                 log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
-                        f"The user does not have permission."
+                f"The user does not have permission."
             )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
-                        f"The user to delete does not exists."
+                f"The user to delete does not exists."
             )
         # Service user can not be deleted
         if user_obj.is_service_user():
             raise NoPermission(
                 log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
-                        f"The user to delete is a service user and therefore can not be deleted."
+                f"The user to delete is a service user and therefore can not be deleted."
             )
-        current_app.logger.info(f"User {user_obj.id} was deleted by user {self.get_user()}")
+        current_app.logger.info(
+            f"User {user_obj.id} was deleted by user {self.get_user()}"
+        )
         return self.delete_detail(idx=user_id)
 
     @doc(description="Edit a user", tags=["Users"])
@@ -143,13 +144,13 @@ class UserDetailsEndpoint(BaseMetaResource):
         if self.get_user_id() != user_id and not self.is_admin():
             raise NoPermission(
                 log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                        f"The user does not have permission."
+                f"The user does not have permission."
             )
         user_obj = UserModel.get_one_user(user_id)
         if user_obj is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                        f"The user to edit does not exist."
+                f"The user to edit does not exist."
             )
         # working with a ldap service users cannot be edited.
         if (
@@ -159,7 +160,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             raise EndpointNotImplemented(
                 "To edit a user, go to LDAP server",
                 log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                        f"To edit a user, go to LDAP server."
+                f"To edit a user, go to LDAP server.",
             )
         # working with an OID provider users can not be edited
         if (
@@ -169,7 +170,7 @@ class UserDetailsEndpoint(BaseMetaResource):
             raise EndpointNotImplemented(
                 "To edit a user, go to the OID provider",
                 log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                        f"To edit a user, go to the OID provider."
+                f"To edit a user, go to the OID provider.",
             )
 
         if data.get("password"):
@@ -178,7 +179,7 @@ class UserDetailsEndpoint(BaseMetaResource):
                 raise InvalidCredentials(
                     msg,
                     log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                    f"The new password is not valid."
+                    f"The new password is not valid.",
                 )
 
         if data.get("email"):
@@ -187,7 +188,7 @@ class UserDetailsEndpoint(BaseMetaResource):
                 raise InvalidCredentials(
                     msg,
                     log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
-                    f"The new email is not valid."
+                    f"The new email is not valid.",
                 )
 
         current_app.logger.info(f"User {user_id} was edited by user {self.get_user()}")
@@ -262,5 +263,7 @@ class RecoverPassword(RecoverPasswordBaseEndpoint):
 
         response, status = self.recover_password(kwargs.get("email"))
 
-        current_app.logger.info(f"User with email {kwargs.get('email')} has requested a new password")
+        current_app.logger.info(
+            f"User with email {kwargs.get('email')} has requested a new password"
+        )
         return response, status
