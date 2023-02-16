@@ -312,7 +312,7 @@ class APIGenerator:
         """
         with open(self.init_file, "a") as file:
             file.write("\n\n")
-            file.write("external_resources = [\n    ")
+            file.write("resources = [\n    ")
             file.write(",\n    ".join(self.write_dict(d) for d in self.init_resources))
             file.write("\n]\n")
 
