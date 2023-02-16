@@ -39,9 +39,9 @@ Initialize the database::
     export FLASK_APP=cornflow.app
     export DATABASE_URL=sqlite:///cornflow.db
     flask db upgrade
-    flask access_init -v 0
-    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password -v 0
-    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password -v 0
+    flask access_init
+    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password
+    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
 
 Launch cornflow server
 ~~~~~~~~~~~~~~~~~~~~~~~
