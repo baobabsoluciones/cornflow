@@ -4,10 +4,10 @@ from flask import request
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
-from ..schemas.user import TokenEndpointResponse
+from cornflow.schemas.user import TokenEndpointResponse
 from cornflow_core.exceptions import InvalidCredentials, ObjectDoesNotExist
-from ..shared.authentication import Auth
-from ..shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ALL_DEFAULT_ROLES
 
 
 class TokenEndpoint(BaseMetaResource):

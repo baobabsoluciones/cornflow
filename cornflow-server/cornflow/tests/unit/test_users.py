@@ -36,8 +36,8 @@ class TestUserEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
 
         self.url = USER_URL
         self.model = UserModel
@@ -128,7 +128,7 @@ class TestUserEndpoint(TestCase):
                 user_role.save()
 
         db.session.commit()
-        register_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=False)
 
     def tearDown(self):
         db.session.remove()
@@ -367,8 +367,8 @@ class TestUserModel(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
 
         self.url = USER_URL
         self.model = UserModel
@@ -404,7 +404,7 @@ class TestUserModel(TestCase):
         )
 
         self.viewer["id"] = response.json["id"]
-        register_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=False)
 
     def tearDown(self):
         db.session.remove()

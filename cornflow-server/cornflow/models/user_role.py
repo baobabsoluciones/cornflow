@@ -4,7 +4,7 @@ a
 from cornflow_core.models import UserRoleBaseModel
 from cornflow_core.shared import db
 
-from ..shared.const import ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 
 
 class UserRoleModel(UserRoleBaseModel):
@@ -44,7 +44,7 @@ class UserRoleModel(UserRoleBaseModel):
         :return: a boolean indicating if the user has the service role assigned or not
         :rtype: boolean
         """
-        user_roles = cls.get_all_objects(user_id=user_id)
+        user_roles = cls.get_all_objects(user_id=user_id).all()
         for role in user_roles:
             if role.role_id == SERVICE_ROLE:
                 return True

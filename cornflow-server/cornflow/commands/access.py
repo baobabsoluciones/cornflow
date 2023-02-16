@@ -1,9 +1,8 @@
 from types import ModuleType
-from typing import Union
 
 
 def access_init_command(
-    external_app: ModuleType = None, verbose: Union[bool, int] = False
+    external_app: ModuleType = None, verbose: bool = False
 ):
     from .actions import register_actions_command
     from .permissions import register_base_permissions_command

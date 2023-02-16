@@ -18,11 +18,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import UserModel, UserRoleModel
 from cornflow_core.shared import db
-from cornflow.tests.const import (
-    LOGIN_URL,
-    SIGNUP_URL,
-    TABLES_URL
-)
+from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, TABLES_URL
 
 
 class TestTablesListEndpoint(TestCase):
@@ -32,7 +28,7 @@ class TestTablesListEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
+        access_init_command(verbose=False)
         self.service_user = dict(
             username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
@@ -55,7 +51,9 @@ class TestTablesListEndpoint(TestCase):
             headers={"Content-Type": "application/json"},
         ).json["token"]
 
-        user_role = UserRoleModel({"user_id": self.service_user["id"], "role_id": ADMIN_ROLE})
+        user_role = UserRoleModel(
+            {"user_id": self.service_user["id"], "role_id": ADMIN_ROLE}
+        )
         user_role.save()
         db.session.commit()
 
@@ -68,15 +66,15 @@ class TestTablesListEndpoint(TestCase):
         self.url = TABLES_URL
         self.table = "users"
         self.keys_to_check = [
-            'created_at',
-            'deleted_at',
-            'email',
-            'first_name',
-            'id',
-            'last_name',
-            'password',
-            'updated_at',
-            'username'
+            "created_at",
+            "deleted_at",
+            "email",
+            "first_name",
+            "id",
+            "last_name",
+            "password",
+            "updated_at",
+            "username",
         ]
 
     def tearDown(self):
@@ -103,7 +101,9 @@ class TestTablesListEndpoint(TestCase):
         for i in range(4):
             # Create new users to there are at least 5 in the table
             new_user = dict(
-                username=f"user{i}", email=f"user{i}@user.com", password="Testpassword1!"
+                username=f"user{i}",
+                email=f"user{i}@user.com",
+                password="Testpassword1!",
             )
 
             self.client.post(
@@ -119,9 +119,7 @@ class TestTablesListEndpoint(TestCase):
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.token,
             },
-            query_string=dict(
-                limit=3
-            )
+            query_string=dict(limit=3),
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 3)
@@ -134,7 +132,7 @@ class TestTablesDetailEndpoint(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
+        access_init_command(verbose=False)
         self.service_user = dict(
             username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
@@ -157,7 +155,9 @@ class TestTablesDetailEndpoint(TestCase):
             headers={"Content-Type": "application/json"},
         ).json["token"]
 
-        user_role = UserRoleModel({"user_id": self.service_user["id"], "role_id": ADMIN_ROLE})
+        user_role = UserRoleModel(
+            {"user_id": self.service_user["id"], "role_id": ADMIN_ROLE}
+        )
         user_role.save()
         db.session.commit()
 
@@ -170,15 +170,15 @@ class TestTablesDetailEndpoint(TestCase):
         self.url = TABLES_URL
         self.table = "users"
         self.keys_to_check = [
-            'created_at',
-            'deleted_at',
-            'email',
-            'first_name',
-            'id',
-            'last_name',
-            'password',
-            'updated_at',
-            'username'
+            "created_at",
+            "deleted_at",
+            "email",
+            "first_name",
+            "id",
+            "last_name",
+            "password",
+            "updated_at",
+            "username",
         ]
 
     def tearDown(self):
@@ -236,7 +236,7 @@ class TestTablesEndpointAdmin(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
+        access_init_command(verbose=False)
         self.user = dict(
             username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
         )
@@ -280,7 +280,9 @@ class TestTablesEndpointAdmin(TestCase):
             },
         )
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.json["error"], "You do not have permission to access this endpoint")
+        self.assertEqual(
+            response.json["error"], "You do not have permission to access this endpoint"
+        )
 
     def test_get_one_table(self):
         response = self.client.get(
@@ -293,4 +295,6 @@ class TestTablesEndpointAdmin(TestCase):
         )
 
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.json["error"], "You do not have permission to access this endpoint")
+        self.assertEqual(
+            response.json["error"], "You do not have permission to access this endpoint"
+        )

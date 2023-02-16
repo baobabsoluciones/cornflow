@@ -13,7 +13,7 @@ class TestCornflowCommands(CustomTestCaseLive):
     def test_dag_command(self):
         config = current_app.config
         register_deployed_dags_command(
-            config["AIRFLOW_URL"], config["AIRFLOW_USER"], config["AIRFLOW_PWD"], 0
+            config["AIRFLOW_URL"], config["AIRFLOW_USER"], config["AIRFLOW_PWD"], False
         )
         dags = DeployedDAG.get_all_objects()
 

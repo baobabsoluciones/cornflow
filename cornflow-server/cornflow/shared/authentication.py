@@ -14,7 +14,7 @@ from flask import request, g, current_app
 
 # Internal modules imports
 from .const import PERMISSION_METHOD_MAP
-from ..models import UserModel, PermissionsDAG
+from cornflow.models import UserModel, PermissionsDAG
 
 
 class Auth(BaseAuth):
