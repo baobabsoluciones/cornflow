@@ -5,7 +5,7 @@ from cornflow import create_app
 from flask import current_app
 
 
-@click.group()
+@click.group(name="config", help="Commands to manage the configuration variables")
 def config():
     pass
 

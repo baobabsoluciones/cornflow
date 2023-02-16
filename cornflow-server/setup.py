@@ -18,10 +18,7 @@ setuptools.setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "init_cornflow_service = cornflow.cli.init_cornflow_service:init_cornflow_service",
-            "calculate_migrations= cornflow.cli.calculate_migrations:calculate_migrations",
-            "init_permissions = cornflow.cli.init_permissions:init_permissions",
-            "cornflow = cornflow.cli.cli:cli",
+            "cornflow = cornflow.cli:cli",
         ]
     },
 )
