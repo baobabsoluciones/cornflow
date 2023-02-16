@@ -17,8 +17,8 @@ from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
-from ..models import InstanceModel, DeployedDAG, ExecutionModel
-from ..schemas.execution import (
+from cornflow.models import InstanceModel, DeployedDAG, ExecutionModel
+from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
     ExecutionDataEndpointResponse,
@@ -31,8 +31,8 @@ from ..schemas.execution import (
     ReLaunchExecutionRequest,
 )
 
-from ..shared.authentication import Auth
-from ..shared.const import (
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,

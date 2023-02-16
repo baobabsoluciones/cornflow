@@ -1,71 +1,72 @@
-def register_base_permissions_command(verbose):
+def register_base_permissions_command(verbose: bool = False):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..endpoints import resources
+    from cornflow.endpoints import resources
     from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
-    from ..shared.const import BASE_PERMISSION_ASSIGNATION, EXTRA_PERMISSION_ASSIGNATION
+    from cornflow.shared.const import (
+        BASE_PERMISSION_ASSIGNATION,
+        EXTRA_PERMISSION_ASSIGNATION,
+    )
     from cornflow_core.shared import db
 
-    permissions_registered = [
-        (perm.action_id, perm.api_view_id, perm.role_id)
-        for perm in PermissionViewRoleBaseModel.get_all_objects()
+    views_in_db = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
+    permissions_in_db = [perm for perm in PermissionViewRoleBaseModel.get_all_objects()]
+    permissions_in_db_keys = [
+        (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_db
     ]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        current_app.logger.error(f"Unknown error on database commit: {e}")
-
-    views = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
+    resources_names = [resource["endpoint"] for resource in resources]
 
     # Create base permissions
-    permissions_to_register = [
+    permissions_in_app = [
         PermissionViewRoleBaseModel(
             {
                 "role_id": role,
                 "action_id": action,
-                "api_view_id": views[view["endpoint"]],
+                "api_view_id": views_in_db[view["endpoint"]],
             }
         )
         for role, action in BASE_PERMISSION_ASSIGNATION
         for view in resources
         if role in view["resource"].ROLES_WITH_ACCESS
-        and (
-            action,
-            views[view["endpoint"]],
-            role,
-        )
-    
     ] + [
         PermissionViewRoleBaseModel(
             {
                 "role_id": role,
                 "action_id": action,
-                "api_view_id": views[endpoint],
+                "api_view_id": views_in_db[endpoint],
             }
         )
         for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
-        if (
-            action,
-            views[endpoint],
-            role,
-        )
-        
     ]
-    
-    permissions_to_register_filtered = [permission for permission in permissions_to_register
-                                      if permission not in permissions_registered]
-    permissions_to_delete_filtered = [permission for permission in permissions_registered
-                                      if permission not in permissions_to_register]
 
-    if len(permissions_to_register_filtered) > 0:
-        db.session.bulk_save_objects(permissions_to_register_filtered)
+    permissions_in_app_keys = [
+        (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_app
+    ]
 
-    if len(permissions_to_delete_filtered) > 0:
-        for permission in permissions_to_delete_filtered:
-            db.session.delete(permission)
+    permissions_to_register = [
+        permission
+        for permission in permissions_in_app
+        if (permission.role_id, permission.action_id, permission.api_view_id)
+        not in permissions_in_db_keys
+    ]
+
+    permissions_to_delete = [
+        permission
+        for permission in permissions_in_db
+        if (permission.role_id, permission.action_id, permission.api_view_id)
+        not in permissions_in_app_keys
+        and permission.api_view.name in resources_names
+    ]
+
+    if len(permissions_to_register) > 0:
+        db.session.bulk_save_objects(permissions_to_register)
+
+    # TODO: for now the permission are not going to get deleted just in case.
+    #  We are just going to register new permissions
+    # if len(permissions_to_delete) > 0:
+    #     for permission in permissions_to_delete:
+    #         db.session.delete(permission)
 
     try:
         db.session.commit()
@@ -85,23 +86,34 @@ def register_base_permissions_command(verbose):
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on base permissions sequence updating: {e}")
+            current_app.logger.error(
+                f"Unknown error on base permissions sequence updating: {e}"
+            )
 
-    if verbose == 1:
+    if verbose:
         if len(permissions_to_register) > 0:
-            current_app.logger.info(f"Permissions registered: {permissions_to_register}")
+            current_app.logger.info(
+                f"Permissions registered: {permissions_to_register}"
+            )
         else:
             current_app.logger.info("No new permissions to register")
+
+        if len(permissions_to_delete) > 0:
+            current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
+        else:
+            current_app.logger.info("No permissions to delete")
 
     return True
 
 
-def register_dag_permissions_command(open_deployment: int = None, verbose: int = 0):
+def register_dag_permissions_command(
+    open_deployment: int = None, verbose: bool = False
+):
 
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from ..models import DeployedDAG, PermissionsDAG, UserModel
+    from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
     from cornflow_core.shared import db
 
     if open_deployment is None:
@@ -118,8 +130,8 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
         db.session.rollback()
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
-    all_users = UserModel.get_all_users()
-    all_dags = DeployedDAG.get_all_objects()
+    all_users = UserModel.get_all_users().all()
+    all_dags = DeployedDAG.get_all_objects().all()
 
     if open_deployment == 1:
         permissions = [
@@ -140,8 +152,6 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
     if len(permissions) > 1:
         db.session.bulk_save_objects(permissions)
 
-    
-
     try:
         db.session.commit()
     except IntegrityError as e:
@@ -160,9 +170,11 @@ def register_dag_permissions_command(open_deployment: int = None, verbose: int =
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on dag permissions sequence updating: {e}")
+            current_app.logger.error(
+                f"Unknown error on dag permissions sequence updating: {e}"
+            )
 
-    if verbose == 1:
+    if verbose:
         if len(permissions) > 1:
             current_app.logger.info(f"DAG permissions registered: {permissions}")
         else:

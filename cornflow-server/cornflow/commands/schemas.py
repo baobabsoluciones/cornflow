@@ -1,4 +1,4 @@
-def update_schemas_command(url, user, pwd, verbose):
+def update_schemas_command(url, user, pwd, verbose: bool = False):
     import time
     from flask import current_app
 
@@ -20,10 +20,10 @@ def update_schemas_command(url, user, pwd, verbose):
 
     response = af_client.update_schemas()
     if response.status_code == 200:
-        if verbose == 1:
+        if verbose:
             current_app.logger.info("DAGs schemas updated")
     else:
-        if verbose == 1:
+        if verbose:
             current_app.logger.info("The DAGs schemas were not updated properly")
 
     return True

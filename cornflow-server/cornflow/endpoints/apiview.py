@@ -12,8 +12,8 @@ from cornflow_core.schemas import ViewResponse
 from flask_apispec import marshal_with, doc
 from flask import current_app
 
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE
 
 
 class ApiViewListEndpoint(BaseMetaResource):

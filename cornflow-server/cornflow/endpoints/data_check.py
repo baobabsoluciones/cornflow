@@ -3,33 +3,35 @@ External endpoints to launch the solution check on an execution
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow, get_schema
+from cornflow_client.airflow.api import Airflow
+from cornflow_core.authentication import authenticate
+from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidUsage
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import validate_and_continue
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
-from ..models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
-from ..schemas.execution import ExecutionDetailsEndpointResponse
-from ..schemas.model_json import DataSchema
+from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
+from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
+from cornflow.schemas.model_json import DataSchema
+from cornflow.shared.authentication import Auth
 
-from ..shared.authentication import Auth
-from ..shared.const import (
+from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
     EXEC_STATE_NOT_RUN,
-    EXECUTION_STATE_MESSAGE_DICT,
+    EXECUTION_STATE_MESSAGE_DICT, VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE,
 )
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidUsage
+
 
 
 class DataCheckExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -140,7 +142,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
-
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
@@ -254,7 +256,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
-
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
