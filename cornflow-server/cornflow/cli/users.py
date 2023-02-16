@@ -32,7 +32,7 @@ def create_service_user(username, password, email, verbose):
         sys.path.append("./")
         external_app = os.getenv("EXTERNAL_APP_MODULE", "external_app")
         external_module = import_module(external_app)
-        create_app = external_module.wsgi.create_app
+        create_app = external_module.create_wsgi_app
 
     app = create_app(env)
     with app.app_context():
