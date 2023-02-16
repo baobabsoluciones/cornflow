@@ -43,9 +43,9 @@ def config_save(path):
     path = f"{path}config.cfg"
     with app.app_context():
         with open(path, "w") as f:
-            f.write("[configuration]\n")
+            f.write("[configuration]\n\n")
             for key, value in current_app.config.items():
-                f.write(f"{key} = {value}")
+                f.write(f"{key} = {value}\n")
 
     return 1
 
