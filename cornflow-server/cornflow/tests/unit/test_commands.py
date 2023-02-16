@@ -1,3 +1,7 @@
+import json
+
+from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
+from cornflow.tests.integration.test_cornflowclient import load_file
 from cornflow_core.models import (
     ActionBaseModel,
     PermissionViewRoleBaseModel,
@@ -140,7 +144,7 @@ class TestCommands(TestCase):
         return self.user_command(create_admin_user, "admin", "admin@test.org")
 
     def test_base_user_command(self):
-        return self.user_command(create_admin_user, "base", "base@test.org")
+        return self.user_command(create_base_user, "base", "base@test.org")
 
     def test_register_actions(self):
         self.runner.invoke(register_actions)
@@ -244,3 +248,26 @@ class TestCommands(TestCase):
 
     def test_missing_required_argument_user(self):
         self.user_missing_arguments(create_base_user)
+
+    def test_error_no_views(self):
+        self.test_service_user_command()
+        token = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": "cornflow", "password": self.payload["password"]}
+            ),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        ).json["token"]
+
+        data = load_file(INSTANCE_PATH)
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+        self.assertEqual(403, response.status_code)

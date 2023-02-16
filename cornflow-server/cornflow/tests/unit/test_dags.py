@@ -122,6 +122,16 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.assertEqual(data["config"], self.payload["config"])
         return
 
+    def test_get_no_dag(self):
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        data = self.get_one_row(
+            url=DAG_URL + idx + "/",
+            token=self.token,
+            check_payload=False,
+            payload=self.payload,
+            expected_status=403,
+        )
+
 
 class TestDeployedDAG(TestCase):
     def create_app(self):
@@ -130,8 +140,8 @@ class TestDeployedDAG(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
         self.url = USER_URL
         self.model = UserModel
         self.admin = dict(
@@ -201,8 +211,8 @@ class TestDeployedDAG(TestCase):
                 "solution_schema": get_pulp_jsonschema(),
                 "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
                 "instance_checks_schema": {},
-                "solution_checks_schema": {}
-            }
+                "solution_checks_schema": {},
+            },
         )
         self.assertEqual(response.json[1]["id"], "gc")
         self.assertEqual(response.json[2]["id"], "timer")
@@ -235,7 +245,7 @@ class TestDeployedDAG(TestCase):
             "solution_schema": {},
             "instance_checks_schema": {},
             "solution_checks_schema": {},
-            "config_schema": {}
+            "config_schema": {},
         }
         response = self.client.post(
             DEPLOYED_DAG_URL,
