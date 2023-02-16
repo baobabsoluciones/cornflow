@@ -6,6 +6,11 @@ import sys
 import json
 import shutil
 
+import sys, os
+prev_dir = os.path.join(os.path.dirname(__file__), "..", "..")
+print(prev_dir)
+sys.path.insert(1, prev_dir)
+
 from click.testing import CliRunner
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import TEXT, JSON
@@ -39,14 +44,14 @@ class GenerationTests(unittest.TestCase):
         self.last_path = self.default_output_path
         self.all_methods = TupList(
             [
-                "getOne",
-                "getAll",
-                "deleteOne",
-                "deleteAll",
-                "update",
-                "post",
-                "updateBulk",
-                "postBulk",
+                "get_detail",
+                "get_list",
+                "delete_detail",
+                "put_detail",
+                "patch_detail",
+                "post_list",
+                "put_bulk",
+                "post_bulk",
             ]
         )
         self.endpoints_methods_path = self._get_path("./data/endpoints_methods.json")
@@ -151,7 +156,7 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
         include_methods = self.all_methods.vfilter(
-            lambda v: v not in ["deleteOne", "update", "getOne"]
+            lambda v: v not in ["delete_detail", "put_detail", "get_detail", "patch_detail"]
         )
         self.last_path = self.other_output_path
         self.check(
@@ -323,11 +328,11 @@ class GenerationTests(unittest.TestCase):
             base = self.snake_to_camel(app_name + "_" + table + "_endpoint")
             details = self.snake_to_camel(app_name + "_" + table + "_details_endpoint")
             bulk = self.snake_to_camel(app_name + "_" + table + "_bulk_endpoint")
-            if any(m in include_methods for m in ["getAll", "post", "deleteAll"]):
+            if any(m in include_methods for m in ["get_list", "post_list"]):
                 class_names += [base]
-            if any(m in include_methods for m in ["getOne", "deleteOne", "update"]):
+            if any(m in include_methods for m in ["get_detail", "delete_detail", "put_detail", "patch_detail"]):
                 class_names += [details]
-            if any(m in include_methods for m in ["updateBulk", "postBulk"]):
+            if any(m in include_methods for m in ["put_bulk", "post_bulk"]):
                 class_names += [bulk]
             file_path = os.path.join(endpoints_dir, file)
             spec = importlib.util.spec_from_file_location(mod_name, file_path)
