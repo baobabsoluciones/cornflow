@@ -3,6 +3,7 @@ import os
 import click
 from cornflow import create_app
 from flask import current_app
+import warnings
 
 
 @click.group(name="config", help="Commands to manage the configuration variables")
@@ -16,6 +17,9 @@ def config_list():
     if env is None:
         click.echo("The environment variables are not set")
         return 0
+
+    if env == "production":
+        warnings.filterwarnings("ignore")
 
     app = create_app(env)
     with app.app_context():
