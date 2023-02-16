@@ -18,8 +18,8 @@ from cornflow_core.schemas import (
 from flask_apispec import doc, marshal_with, use_kwargs
 from flask import current_app
 
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE
 
 
 class PermissionsViewRoleEndpoint(BaseMetaResource):
@@ -37,7 +37,9 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
     @marshal_with(PermissionViewRoleBaseResponse(many=True))
     @compressed
     def get(self):
-        current_app.logger.info(f"User {self.get_user()} gets all permissions assigned to the roles")
+        current_app.logger.info(
+            f"User {self.get_user()} gets all permissions assigned to the roles"
+        )
         return self.get_list()
 
     @doc(description="Create a new permission", tags=["PermissionViewRole"])
@@ -52,7 +54,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
         ):
             raise ObjectAlreadyExists(
                 log_txt=f"Error while user {self.get_user()} tries to create a new permission. "
-                        f"The permission already exists."
+                f"The permission already exists."
             )
         else:
             current_app.logger.info(f"User {self.get_user()} creates permission")
@@ -81,7 +83,9 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        current_app.logger.info(f"User {self.get_user()} gets details of permission {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets details of permission {idx}"
+        )
         return self.get_detail(idx=idx)
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])

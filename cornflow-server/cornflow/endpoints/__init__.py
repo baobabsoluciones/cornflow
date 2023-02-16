@@ -22,7 +22,7 @@ from .dag import (
     DAGCaseEndpoint,
     DAGInstanceEndpoint,
     DeployedDAGEndpoint,
-    DeployedDagDetailEndpoint
+    DeployedDagDetailEndpoint,
 )
 
 from .execution import (
@@ -58,7 +58,7 @@ from .token import TokenEndpoint
 from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
-from ..external_app.endpoint import external_resources
+from cornflow.external_app.endpoint import external_resources
 from .tables import TablesEndpoint, TablesDetailsEndpoint
 
 
@@ -131,7 +131,11 @@ resources = [
         endpoint="dag-case",
     ),
     dict(resource=DeployedDAGEndpoint, urls="/dag/deployed/", endpoint="deployed-dag"),
-    dict(resource=DeployedDagDetailEndpoint, urls="/dag/deployed/<string:idx>/", endpoint="deployed-dag-detail"),
+    dict(
+        resource=DeployedDagDetailEndpoint,
+        urls="/dag/deployed/<string:idx>/",
+        endpoint="deployed-dag-detail",
+    ),
     dict(resource=UserEndpoint, urls="/user/", endpoint="user"),
     dict(
         resource=UserDetailsEndpoint,
@@ -208,15 +212,13 @@ resources = [
         endpoint="licences",
     ),
     dict(
-        resource=TablesEndpoint,
-        urls="/table/<string:table_name>/",
-        endpoint="tables"
+        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
     ),
     dict(
         resource=TablesDetailsEndpoint,
         urls="/table/<string:table_name>/<string:idx>/",
-        endpoint="tables-detail"
-    )
+        endpoint="tables-detail",
+    ),
 ]
 
 if len(external_resources):

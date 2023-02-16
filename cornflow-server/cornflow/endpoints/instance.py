@@ -17,8 +17,8 @@ from werkzeug.utils import secure_filename
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import InstanceModel, DeployedDAG
-from ..schemas.instance import (
+from cornflow.models import InstanceModel, DeployedDAG
+from cornflow.schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
     InstanceDetailsEndpointResponse,
@@ -29,8 +29,8 @@ from ..schemas.instance import (
     QueryFiltersInstance,
 )
 
-from ..schemas.model_json import DataSchema
-from ..shared.authentication import Auth
+from cornflow.schemas.model_json import DataSchema
+from cornflow.shared.authentication import Auth
 from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidUsage
 
@@ -98,7 +98,9 @@ class InstanceEndpoint(BaseMetaResource):
 
         # if we're here, we validated and the data seems to fit the schema
         response = self.post_list(data=kwargs)
-        current_app.logger.info(f"User {self.get_user()} creates instance {response[0].id}")
+        current_app.logger.info(
+            f"User {self.get_user()} creates instance {response[0].id}"
+        )
         return response
 
 
@@ -206,7 +208,9 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(user=self.get_user(), idx=idx)
-        current_app.logger.info(f"User {self.get_user()} gets the data of instance {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets the data of instance {idx}"
+        )
         return response
 
 
@@ -229,14 +233,15 @@ class InstanceFileEndpoint(BaseMetaResource):
         :param str name:
         :param str description:
         :param int minimize:
-        :return: a tuple with the created instance and a integer with the status code
+        :return: a tuple with the created instance and an integer with the status code
         :rtype: Tuple(:class:`InstanceModel`, 201)
         """
         if "file" not in request.files:
             err = "No file was provided"
             raise InvalidUsage(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. " + err
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
+                + err,
             )
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -244,7 +249,7 @@ class InstanceFileEndpoint(BaseMetaResource):
             raise InvalidUsage(
                 error=f"Could not open file to upload. Check the extension matches {ALLOWED_EXTENSIONS}",
                 log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
-                        f"Could not open the file to upload."
+                f"Could not open the file to upload.",
             )
         file.save(filename)
         sense = 1 if minimize else -1
@@ -254,7 +259,7 @@ class InstanceFileEndpoint(BaseMetaResource):
             raise InvalidUsage(
                 error="There was an error reading the file",
                 log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
-                        f"There was an error reading the file."
+                f"There was an error reading the file.",
             )
         try:
             os.remove(filename)
@@ -276,7 +281,9 @@ class InstanceFileEndpoint(BaseMetaResource):
         item = InstanceModel(data)
         item.schema = "solve_model_dag"
         item.save()
-        current_app.logger.info(f"User {self.get_user()} creates instance {item.id} from mps file")
+        current_app.logger.info(
+            f"User {self.get_user()} creates instance {item.id} from mps file"
+        )
         return item, 201
 
 

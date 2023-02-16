@@ -1,4 +1,4 @@
-def access_init_command(verbose):
+def access_init_command(verbose: bool = False):
     from .actions import register_actions_command
     from .permissions import register_base_permissions_command
     from .roles import register_roles_command

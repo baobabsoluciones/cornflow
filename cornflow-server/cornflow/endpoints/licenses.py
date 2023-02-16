@@ -2,8 +2,9 @@
 from cornflow_core.authentication import authenticate
 from cornflow_core.resources import BaseMetaResource
 from flask_apispec import doc
-from ..shared.licenses import get_licenses_summary
-from ..shared.authentication import Auth
+from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
+from cornflow.shared.licenses import get_licenses_summary
+from cornflow.shared.authentication import Auth
 
 
 class LicensesEndpoint(BaseMetaResource):
@@ -13,6 +14,7 @@ class LicensesEndpoint(BaseMetaResource):
     Available methods: [get]
     Endpoint used by: the user interface.
     """
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()

@@ -7,10 +7,10 @@ from flask import current_app
 import os
 
 # Import from internal modules
-from ..shared.const import SERVICE_ROLE
-from ..shared.authentication import Auth
-from ..shared.utils import get_all_tables, item_as_dict, items_as_dict_list
-from ..schemas.common import QueryFilters
+from cornflow.shared.const import SERVICE_ROLE
+from cornflow.shared.authentication import Auth
+from cornflow.shared.utils import get_all_tables, item_as_dict, items_as_dict_list
+from cornflow.schemas.common import QueryFilters
 
 
 models_paths = [
@@ -39,7 +39,9 @@ class TablesEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         self.data_model = self.tables[table_name]["model"]
-        current_app.logger.info(f"User {self.get_user()} gets all rows of table {table_name}.")
+        current_app.logger.info(
+            f"User {self.get_user()} gets all rows of table {table_name}."
+        )
         res = self.get_list(user=self.get_user(), **kwargs)
         return items_as_dict_list(res), 200
 
@@ -72,14 +74,16 @@ class TablesDetailsEndpoint(BaseMetaResource):
                 raise InvalidUsage(
                     "Invalid identifier.",
                     log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                            f"Identifier is not valid."
+                    f"Identifier is not valid.",
                 )
 
-        current_app.logger.info(f"User {self.get_user()} gets row {idx} of table {table_name}.")
+        current_app.logger.info(
+            f"User {self.get_user()} gets row {idx} of table {table_name}."
+        )
         res = self.get_detail(idx=conv_idx)
         if res is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
-                        "The object does not exist."
+                "The object does not exist."
             )
         return item_as_dict(res), 200

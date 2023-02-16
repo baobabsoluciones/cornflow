@@ -3,10 +3,7 @@ External endpoints to manage the cases: create new cases from raw data, from an 
 or from an existing case, update the case info, patch its data, get all of them or one, move them and delete them.
 These endpoints have different access url, but manage the same data entities
 """
-
 # Import from libraries
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue, json_schema_validate_as_string
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -14,8 +11,9 @@ import jsonpatch
 
 
 # Import from internal modules
-from ..models import CaseModel, ExecutionModel, DeployedDAG, InstanceModel
-from ..schemas.case import (
+from cornflow.models import CaseModel, ExecutionModel, DeployedDAG, InstanceModel
+
+from cornflow.schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
     CaseRawRequest,
@@ -28,21 +26,28 @@ from ..schemas.case import (
     CaseListAllWithIndicators,
 )
 
-from ..schemas.model_json import DataSchema
-from ..shared.authentication import Auth
-from cornflow_core.compress import compressed
-from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
-from cornflow_core.authentication import authenticate
+from cornflow.schemas.model_json import DataSchema
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
+
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     SOLUTION_SCHEMA
 )
+
+from cornflow_core.authentication import authenticate
+from cornflow_core.compress import compressed
+from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow_core.resources import BaseMetaResource
+from cornflow_core.shared import validate_and_continue, json_schema_validate_as_string
+
 
 
 class CaseEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case or get all the cases and their related information
     """
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -104,6 +109,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case from an already existing instance and execution
     """
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -180,6 +186,7 @@ class CaseCopyEndpoint(BaseMetaResource):
     """
     Copies the case to a new case. Original case id goes in the url
     """
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -222,6 +229,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
     """
     Endpoint used to get the information of a single case, edit it or delete it
     """
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -301,6 +309,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     """
     Endpoint used to get the data of a given case
     """
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -336,6 +345,7 @@ class CaseToInstance(BaseMetaResource):
     """
     Endpoint used to create a new instance or instance and execution from a stored case
     """
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -391,6 +401,7 @@ class CaseCompare(BaseMetaResource):
     """
     Endpoint used to generate the json patch of two given cases
     """
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()

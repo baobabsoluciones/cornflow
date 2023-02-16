@@ -10,8 +10,8 @@ from flask import current_app
 
 # Import from internal modules
 from cornflow_core.models import ActionBaseModel
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE
 
 
 class ActionListEndpoint(BaseMetaResource):
