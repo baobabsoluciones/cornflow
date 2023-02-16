@@ -2,7 +2,7 @@ from types import ModuleType
 
 
 def register_base_permissions_command(
-    *, external_app: ModuleType = None, verbose: bool= False
+    *, external_app: ModuleType = None, verbose: bool = False
 ):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError

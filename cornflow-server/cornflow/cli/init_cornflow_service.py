@@ -116,7 +116,7 @@ def init_cornflow_service():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
-            access_init_command(verbose=0)
+            access_init_command(verbose=False)
             if auth == 1 or auth == 0:
                 create_user_with_role(
                     cornflow_admin_user,
@@ -124,7 +124,7 @@ def init_cornflow_service():
                     cornflow_admin_pwd,
                     "admin",
                     ADMIN_ROLE,
-                    verbose=1,
+                    verbose=True,
                 )
                 # create cornflow service user
                 create_user_with_role(
@@ -133,11 +133,13 @@ def init_cornflow_service():
                     cornflow_service_pwd,
                     "serviceuser",
                     SERVICE_ROLE,
-                    verbose=1,
+                    verbose=True,
                 )
-            register_deployed_dags_command(airflow_url, airflow_user, airflow_pwd, 1)
-            register_dag_permissions_command(open_deployment, 1)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, 1)
+            register_deployed_dags_command(
+                airflow_url, airflow_user, airflow_pwd, verbose=True
+            )
+            register_dag_permissions_command(open_deployment, verbose=True)
+            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
 
             # execute gunicorn application
             os.system(
@@ -169,7 +171,7 @@ def init_cornflow_service():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
-            access_init_command(external_app=external_app, verbose=0)
+            access_init_command(external_app=external_app, verbose=False)
             if auth == 1 or auth == 0:
                 # create cornflow admin user
                 create_user_with_role(
@@ -178,7 +180,7 @@ def init_cornflow_service():
                     cornflow_admin_pwd,
                     "admin",
                     ADMIN_ROLE,
-                    verbose=1,
+                    verbose=True,
                 )
                 # create cornflow service user
                 create_user_with_role(
@@ -187,11 +189,13 @@ def init_cornflow_service():
                     cornflow_service_pwd,
                     "serviceuser",
                     SERVICE_ROLE,
-                    verbose=1,
+                    verbose=True,
                 )
-            register_deployed_dags_command(airflow_url, airflow_user, airflow_pwd, 1)
-            register_dag_permissions_command(open_deployment, 1)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, 1)
+            register_deployed_dags_command(
+                airflow_url, airflow_user, airflow_pwd, verbose=True
+            )
+            register_dag_permissions_command(open_deployment, verbose=True)
+            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
