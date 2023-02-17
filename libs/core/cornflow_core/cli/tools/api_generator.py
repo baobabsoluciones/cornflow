@@ -298,7 +298,7 @@ class APIGenerator:
         for res in class_imports:
             self.init_resources += [
                 dict(
-                    ressource=res,
+                    resource=res,
                     urls=f'"{self.camel_to_url(res, id_type=id_type)}"',
                     endpoint=f'"{self.camel_to_ep(res)}"',
                 )
