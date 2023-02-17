@@ -38,6 +38,15 @@ def create_service_user(username, password, email, verbose):
     with app.app_context():
         from cornflow.commands import create_user_with_role
         from cornflow.shared.const import SERVICE_ROLE
+        from flask import current_app
+
+        print(f"SERVICE NAME: {current_app.config.get('SERVICE_NAME')}")
+        print(f"DEFAULT ROLE: {current_app.config.get('DEFAULT_ROLE')}")
+        print(
+            f"SQLALCHEMY_TRACK_MODIFICATIONS: {current_app.config.get('SQLALCHEMY_TRACK_MODIFICATIONS')}"
+        )
+        print(f"LOG_LEVEL: {current_app.config.get('LOG_LEVEL')}")
+        print(f"TESTING: {current_app.config.get('TESTING')}")
 
         create_user_with_role(
             username, email, password, "service user", SERVICE_ROLE, verbose=verbose
