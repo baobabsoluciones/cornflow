@@ -60,7 +60,7 @@ def update_dag_registry(**kwargs):
             else:
                 # Even if the dag is registered, we still update its schemas
                 response = cf_client.put_deployed_dag(
-                    id=model.dag_id,
+                    dag_id=model.dag_id,
                     data=dict(
                         description=model.description,
                         instance_schema=app.instance.schema,
