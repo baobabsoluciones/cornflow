@@ -13,6 +13,7 @@ from sqlalchemy.sql.sqltypes import Integer
 from pytups import TupList, SuperDict
 from cornflow_core.models import TraceAttributesModel
 from cornflow_core.cli.generate_from_schema import generate_from_schema
+from cornflow_core.cli.tools.api_generator import APIGenerator
 
 sys.modules["mockedpackage"] = MagicMock()
 path_to_tests = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,7 @@ class GenerationTests(unittest.TestCase):
         super().setUp()
 
         self.full_inst_path = self._get_path("./data/instance.json")
+        self.inst_path2 = self._get_path("./data/instance2.json")
         self.full_inst = SuperDict.from_dict(self.import_schema(self.full_inst_path))
         # Removing parameter tables
         self.full_inst["properties"] = self.full_inst["properties"].vfilter(
@@ -380,6 +382,13 @@ class GenerationTests(unittest.TestCase):
                 props_and_methods = mod.__dict__[bulk].methods
                 for method_name in include_methods_bulk:
                     self.assertIn(api_methods[method_name], props_and_methods)
+
+    def test_get_id_type(self):
+        api_gen = APIGenerator(schema_path=self.inst_path2, app_name=None)
+        schema_table = api_gen.schema["properties"]["employees"]["items"]["properties"]
+        self.assertEqual(api_gen.get_id_type("employees"), "<string:idx>")
+        self.assertEqual(api_gen.get_id_type("shifts"), "<int:idx>")
+        self.assertEqual(api_gen.get_id_type("demand"), "<int:idx>")
 
     @staticmethod
     def snake_to_camel(name):

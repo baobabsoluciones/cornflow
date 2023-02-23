@@ -432,7 +432,7 @@ class APIGenerator:
         """
         schema_table = self.schema["properties"][table_name]["items"]["properties"]
         id_type=None
-        if id in schema_table:
+        if "id" in schema_table.keys():
             id_type = schema_table["id"]["type"]
         if id_type == "string":
             return "<string:idx>"
