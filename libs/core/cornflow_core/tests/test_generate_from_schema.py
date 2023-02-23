@@ -385,7 +385,6 @@ class GenerationTests(unittest.TestCase):
 
     def test_get_id_type(self):
         api_gen = APIGenerator(schema_path=self.inst_path2, app_name=None)
-        schema_table = api_gen.schema["properties"]["employees"]["items"]["properties"]
         self.assertEqual(api_gen.get_id_type("employees"), "<string:idx>")
         self.assertEqual(api_gen.get_id_type("shifts"), "<int:idx>")
         self.assertEqual(api_gen.get_id_type("demand"), "<int:idx>")
