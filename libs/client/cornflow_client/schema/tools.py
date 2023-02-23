@@ -70,6 +70,7 @@ def schema_from_excel(
     param_tables=None,
     path_out=None,
     fk=False,
+    format=False,
     path_methods=None,
     path_access=None,
 ):
@@ -108,20 +109,27 @@ def schema_from_excel(
         endpoints_access = None
 
     # process foreign keys
+    next_row = -1
     if fk:
+        next_row += 1
         fk_values = {
-            k: clean_none(v[0]) for k, v in xl_data.items() if isinstance(v, list)
+            k: clean_none(v[next_row]) for k, v in xl_data.items() if isinstance(v, list)
         }
         check_fk(fk_values)
-        data = {
-            k: str_columns(v[1:]) if isinstance(v, list) else v
-            for k, v in xl_data.items()
-        }
     else:
         fk_values = {}
-        data = {
-            k: str_columns(v) if isinstance(v, list) else v for k, v in xl_data.items()
+    if format:
+        next_row += 1
+        format_values = {
+            k: clean_none(v[next_row]) for k, v in xl_data.items() if isinstance(v, list)
         }
+    else:
+        format_values = {}
+    next_row += 1
+    data = {
+        k: str_columns(v[next_row:]) if isinstance(v, list) else v
+        for k, v in xl_data.items()
+    }
 
     # create the json schema
     class InstSol(InstanceSolutionCore):
@@ -129,12 +137,8 @@ def schema_from_excel(
 
     instance = InstSol(data)
     schema = instance.generate_schema()
-    for table, fk in fk_values.items():
-        for k, v in fk.items():
-            if v is not None:
-                schema["properties"][table]["items"]["properties"][k].update(
-                    {"foreign_key": v}
-                )
+    add_details("foreign_key", fk_values, schema)
+    add_details("format", format_values, schema)
 
     # Save json files
     if path_out is not None:
@@ -148,6 +152,30 @@ def schema_from_excel(
             json.dump(endpoints_access, f, indent=4, sort_keys=False)
 
     return schema, endpoints_methods, endpoints_access
+
+
+def add_details(name, details, schema):
+    """
+    Add a detail attribute to a json schema property.
+        Example:
+        add_details("foreign_key", {first_table:{"name":"other_table.name"}}, schema)
+        # generate:
+            "name": {
+                "type": "string"
+                "foreign_key": "other_table.name"
+            }
+
+    :param name: name of the attribute to add
+    :param details: dict of dict in format {table:{column_name:value}}
+    :param schema: schema to update
+    :return: None
+    """
+    for table, val in details.items():
+        for k, v in val.items():
+            if v is not None:
+                schema["properties"][table]["items"]["properties"][k].update(
+                    {name: v}
+                )
 
 
 def str_key(dic):

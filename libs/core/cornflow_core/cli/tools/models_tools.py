@@ -16,6 +16,8 @@ JSON_TYPES_TO_SQLALCHEMY = {
     "number": "db.Float",
     "boolean": "db.Boolean",
     "array": "ARRAY",
+    "date": "db.Date",
+    "datetime": "db.DateTime"
 }
 
 
