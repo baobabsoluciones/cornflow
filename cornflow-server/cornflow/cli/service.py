@@ -171,12 +171,12 @@ def init_cornflow_service():
         external_app = import_module(
             os.getenv("EXTERNAL_APP_MODULE", "../external_app")
         )
-        app = external_app.create_app(environment, cornflow_db_conn)
+        app = external_app.create_wsgi_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
-            access_init_command(external_app=external_app, verbose=False)
+            access_init_command(verbose=False)
             if auth == 1 or auth == 0:
                 # create cornflow admin user
                 create_user_with_role(
@@ -204,7 +204,7 @@ def init_cornflow_service():
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
-            f"\"'$EXTERNAL_APP_MODULE'.wsgi:create_app('$FLASK_ENV')\""
+            f"\"'$EXTERNAL_APP_MODULE':create_wsgi_app('$FLASK_ENV')\""
         )
 
     else:
