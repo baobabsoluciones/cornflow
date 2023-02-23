@@ -14,15 +14,8 @@ def migrations():
 
 
 @migrations.command(name="migrate", help="Calculate the migrations")
-@click.option(
-    "--data-conn",
-    "-d",
-    type=str,
-    help="The data connection for cornflow",
-    default=None,
-)
-def migrate_migrations(data_conn):
-    app = get_app(data_conn)
+def migrate_migrations():
+    app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
         path = "./cornflow/migrations"
@@ -35,15 +28,8 @@ def migrate_migrations(data_conn):
 
 
 @migrations.command(name="upgrade", help="Apply migrations")
-@click.option(
-    "--data-conn",
-    "-d",
-    type=str,
-    help="The data connection for cornflow",
-    default=None,
-)
-def upgrade_migrations(data_conn):
-    app = get_app(data_conn)
+def upgrade_migrations():
+    app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
         path = "./cornflow/migrations"
@@ -59,15 +45,8 @@ def upgrade_migrations(data_conn):
     name="init",
     help="Initialize the migrations for an external app. Creates the folder and copies the migrations from cornflow",
 )
-@click.option(
-    "--data-conn",
-    "-d",
-    type=str,
-    help="The data connection for cornflow",
-    default=None,
-)
-def init_migrations(data_conn):
-    app = get_app(data_conn)
+def init_migrations():
+    app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
         path = "./cornflow/migrations"

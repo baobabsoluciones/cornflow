@@ -1,19 +1,26 @@
-from types import ModuleType
+import sys
+from importlib import import_module
+
+from cornflow.shared.const import (
+    BASE_PERMISSION_ASSIGNATION,
+    EXTRA_PERMISSION_ASSIGNATION,
+)
+from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
+from cornflow_core.shared import db
+from flask import current_app
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 
-def register_base_permissions_command(
-    *, external_app: ModuleType = None, verbose: bool = False
-):
-    from flask import current_app
-    from sqlalchemy.exc import DBAPIError, IntegrityError
-
-    from cornflow.endpoints import resources
-    from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
-    from cornflow.shared.const import (
-        BASE_PERMISSION_ASSIGNATION,
-        EXTRA_PERMISSION_ASSIGNATION,
-    )
-    from cornflow_core.shared import db
+def register_base_permissions_command(external_app: str = None, verbose: bool = False):
+    if external_app is None:
+        from cornflow.endpoints import resources
+    elif external_app is not None:
+        sys.path.append("./")
+        external_module = import_module(external_app)
+        resources = external_module.endpoints.resources
+    else:
+        resources = []
+        exit()
 
     views_in_db = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
     permissions_in_db = [perm for perm in PermissionViewRoleBaseModel.get_all_objects()]

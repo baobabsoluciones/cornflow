@@ -4,8 +4,9 @@ from importlib import import_module
 import warnings
 
 
-def get_app(data_conn=None):
+def get_app():
     env = os.getenv("FLASK_ENV", "development")
+    data_conn = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
     if env == "production":
         warnings.filterwarnings("ignore")
     external = int(os.getenv("EXTERNAL_APP", 0))

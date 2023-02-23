@@ -1,11 +1,6 @@
-import os.path
-import sys
-from importlib import import_module
-
 import click
-from cornflow_core.shared import db
-from flask_migrate import Migrate, upgrade
-from .arguments import app_name
+from cornflow.commands import access_init_command
+from .utils import get_app
 
 
 @click.group(name="permissions", help="Commands to manage the permissions")
@@ -14,14 +9,6 @@ def permissions():
 
 
 @permissions.command(name="init", help="Initialize the permissions for the roles")
-@app_name
-@click.option(
-    "--data-conn",
-    "-d",
-    type=str,
-    help="The data connection for cornflow",
-    default="postgresql://postgres:postgresadmin@localhost:5432/cornflow",
-)
 @click.option(
     "--verbose",
     "-v",
@@ -29,14 +16,7 @@ def permissions():
     help="If the command has to be run verbose or not",
     default=0,
 )
-def init_permissions(app_name, data_conn, verbose):
-    sys.path.append("./")
-    from cornflow.commands import access_init_command
-
-    external_app = import_module(f"{app_name}")
-    app = external_app.create_app(env_name="development", dataconn=data_conn)
+def init_permissions(verbose):
+    app = get_app()
     with app.app_context():
-        path = f"{os.path.dirname(external_app.__file__)}/migrations"
-        migrate = Migrate(app=app, db=db, directory=path)
-        upgrade()
-        access_init_command(external_app=external_app, verbose=verbose)
+        access_init_command(verbose=verbose)

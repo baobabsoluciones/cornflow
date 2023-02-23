@@ -1,9 +1,6 @@
-import os
-import sys
-from importlib import import_module
-from .arguments import verbose
 import click
 from cornflow.commands import register_roles_command
+from .arguments import verbose
 from .utils import get_app
 
 
