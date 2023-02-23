@@ -437,7 +437,7 @@ class APIGenerator:
             id_type = schema_table["id"]["type"]
         if id_type == "string" or isinstance(id_type, list):
             return "<string:idx>"
-        elif id_type == "integer" or id_type is None:
+        elif id_type == "integer" or id_type == "number" or id_type is None:
             return "<int:idx>"
         else:
             raise NotImplementedError(f"Unknown type for primary key: {id_type}")
