@@ -19,3 +19,6 @@ password = click.option(
 email = click.option(
     "-e", "--email", required=True, type=str, help="The email of the user"
 )
+path = click.option(
+    "-p", "--path", type=str, help="The path to the file to save the file"
+)
