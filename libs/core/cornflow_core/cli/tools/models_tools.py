@@ -1,4 +1,3 @@
-
 from .tools import get_main_type
 
 # Models
@@ -17,7 +16,8 @@ JSON_TYPES_TO_SQLALCHEMY = {
     "boolean": "db.Boolean",
     "array": "ARRAY",
     "date": "db.Date",
-    "datetime": "db.DateTime"
+    "datetime": "db.DateTime",
+    "time": "db.Time",
 }
 
 
@@ -88,10 +88,13 @@ class ModelGenerator:
             nullable = False
             res += f"    {key} = db.Column("
             types = val["type"]
+            format = val.get("format", None)
             if isinstance(types, list):
                 if "null" in types:
                     nullable = True
                 types = get_main_type(types)
+                if types == "string" and format in ["date", "datetime", "time"]:
+                    types = format
             res += JSON_TYPES_TO_SQLALCHEMY[types]
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
