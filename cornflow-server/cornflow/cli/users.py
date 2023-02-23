@@ -1,8 +1,5 @@
-import os
-from importlib import import_module
 import click
 from .arguments import username, password, email, verbose
-import sys
 
 from .utils import get_app
 
