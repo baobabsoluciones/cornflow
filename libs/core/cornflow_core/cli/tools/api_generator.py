@@ -294,7 +294,7 @@ class APIGenerator:
                 )
 
         id_type = self.get_id_type(table_name)
-
+        print(class_imports)
         for res in class_imports:
             self.init_resources += [
                 dict(
@@ -303,6 +303,7 @@ class APIGenerator:
                     endpoint=f'"{self.camel_to_ep(res)}"',
                 )
             ]
+        print(self.init_resources)
 
     def write_resources(self):
         """

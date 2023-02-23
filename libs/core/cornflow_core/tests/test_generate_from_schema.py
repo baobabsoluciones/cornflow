@@ -389,6 +389,7 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(api_gen.get_id_type("shifts"), "<int:idx>")
         self.assertEqual(api_gen.get_id_type("demand"), "<int:idx>")
 
+
     @staticmethod
     def snake_to_camel(name):
         return "".join(word.title() for word in name.split("_"))
