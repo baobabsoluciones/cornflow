@@ -1,3 +1,6 @@
+
+from .tools import get_main_type
+
 # Models
 model_shared_imports = (
     "# Import from libraries\n"
@@ -84,11 +87,9 @@ class ModelGenerator:
             res += f"    {key} = db.Column("
             types = val["type"]
             if isinstance(types, list):
-                nullable = True
-                if types[0] == "null":
-                    types = types[1]
-                else:
-                    types = types[0]
+                if "null" in types:
+                    nullable = True
+                types = get_main_type(types)
             res += JSON_TYPES_TO_SQLALCHEMY[types]
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
