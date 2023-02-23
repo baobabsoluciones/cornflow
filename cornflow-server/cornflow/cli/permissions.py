@@ -1,5 +1,11 @@
+import os
+
 import click
-from cornflow.commands import access_init_command
+from cornflow.commands import (
+    access_init_command,
+    register_base_permissions_command,
+)
+from .arguments import verbose
 from .utils import get_app
 
 
@@ -8,15 +14,25 @@ def permissions():
     pass
 
 
-@permissions.command(name="init", help="Initialize the permissions for the roles")
-@click.option(
-    "--verbose",
-    "-v",
-    type=bool,
-    help="If the command has to be run verbose or not",
-    default=0,
+@permissions.command(
+    name="init", help="Creates the actions, views, roles and permissions"
 )
+@verbose
 def init_permissions(verbose):
     app = get_app()
     with app.app_context():
         access_init_command(verbose=verbose)
+
+
+@permissions.command(name="base", help="Initialize the base permissions")
+@verbose
+def init_base(verbose):
+    app = get_app()
+    with app.app_context():
+        external = int(os.getenv("EXTERNAL_APP", 0))
+        external_app = os.getenv("EXTERNAL_APP_MODULE", "external_app")
+        register_base_permissions_command(verbose=verbose)
+        if external != 0:
+            register_base_permissions_command(
+                external_app=external_app, verbose=verbose
+            )
