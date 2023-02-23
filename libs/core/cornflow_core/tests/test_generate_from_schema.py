@@ -6,11 +6,6 @@ import sys
 import json
 import shutil
 
-import sys, os
-prev_dir = os.path.join(os.path.dirname(__file__), "..", "..")
-print(prev_dir)
-sys.path.insert(1, prev_dir)
-
 from click.testing import CliRunner
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import TEXT, JSON
