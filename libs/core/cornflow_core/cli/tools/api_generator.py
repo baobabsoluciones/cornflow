@@ -430,7 +430,7 @@ class APIGenerator:
         :param table_name: name of the table in the schema.
         :return: str: the type in format "<type:idx>"
         """
-        schema_table = self.schema["properties"][table_name]["items"]
+        schema_table = self.schema["properties"][table_name]["items"]["properties"]
         id_type=None
         if id in schema_table:
             id_type = schema_table["id"]["type"]
