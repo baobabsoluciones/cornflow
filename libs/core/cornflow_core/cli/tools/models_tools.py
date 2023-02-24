@@ -1,4 +1,4 @@
-from .tools import get_main_type
+from .tools import get_type
 
 # Models
 model_shared_imports = (
@@ -85,17 +85,9 @@ class ModelGenerator:
         if not has_id(schema_table["properties"]):
             res += f"    id = db.Column(db.Integer, primary_key=True, autoincrement=True)\n"
         for key, val in schema_table["properties"].items():
-            nullable = False
             res += f"    {key} = db.Column("
-            types = val["type"]
-            format = val.get("format", None)
-            if isinstance(types, list):
-                if "null" in types:
-                    nullable = True
-                types = get_main_type(types)
-                if types == "string" and format in ["date", "datetime", "time"]:
-                    types = format
-            res += JSON_TYPES_TO_SQLALCHEMY[types]
+            ty, nullable = get_type(val)
+            res += JSON_TYPES_TO_SQLALCHEMY[ty]
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
                 if self.app_name is not None:
