@@ -201,6 +201,25 @@ as follows:
 
 If the property :code:`foreign_key` is left empty, it is assumed that the key is not a foreign key.
 
+Date formats
+-------------
+By default, json doesn't accept datetimes formats, they must be passed as strings.
+However, it is possible to pass this information through the format property and have flask models created
+with date columns.
+You only need to add the property :code:`format` in the information about the property.
+The formats which are currently taken into account are "date", "time" and "datetime".
+
+.. code-block::
+
+    {
+        ...,
+        "current_date": {
+            "type": "string",
+            "format": "datetime",
+        },
+        ...
+    }
+
 -----------------------------------
 Module :code:`schema_from_models`
 -----------------------------------
@@ -241,4 +260,43 @@ with their extension. Example:
 .. code-block:: console
 
     schema_from_models -p C:/Users/User/models --ignore-files instance.py -i execution.py
+
+----------------------------------------------------
+Generating endpoints, models and schemas from Excel
+----------------------------------------------------
+
+cornflow_client library include a function to generate schema from an Excel file containing example data.
+Using this function in combination with :code`generate_from_schema` it is possible to generate all the
+database structure directly from Excel.
+This can be achieved using the following script:
+
+.. code-block::
+
+    from click.testing import CliRunner
+    from cornflow_client.schema.tools import schema_from_excel
+    from cornflow_core.cli.generate_from_schema import generate_from_schema
+
+    path = "../data/"
+    excel_path = path + "table_structure.xlsx"
+    schema_path = path + "data_schema.json"
+    path_methods = path + "endpoints_methods.json"
+    path_access = path + "endpoints_access.json"
+    path_output = "../project_name/"
+
+    # create schema from excel
+    schema = schema_from_excel(
+        excel_path,
+        path_out=schema_path,
+        fk=True,
+        format=True,
+        path_access=path_access,
+        path_methods=path_methods,
+    )
+
+    # create endpoints from schema
+    runner = CliRunner()
+    result = runner.invoke(
+        generate_from_schema,
+        ["-p", schema_path, "-o", path_output, "-m", path_methods, "-e", path_access],
+    )
 
