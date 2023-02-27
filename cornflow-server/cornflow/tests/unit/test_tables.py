@@ -5,12 +5,6 @@ Unit test for the instances endpoints
 # Import from libraries
 import json
 from flask_testing import TestCase
-import sys
-import os
-
-prev_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..")
-print(prev_dir)
-sys.path.insert(1, prev_dir)
 
 # Import from internal modules
 from cornflow.app import create_app
