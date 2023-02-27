@@ -1,13 +1,15 @@
 """
-Unit test for the sign up endpoint
+Unit test for the sign-up endpoint
 """
+from cornflow.commands import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
 
 # Import from libraries
 from flask_testing import TestCase
 import json
 
 # Import from internal modules
-from cornflow.app import create_app, access_init
+from cornflow.app import create_app
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow_core.shared import db
@@ -22,8 +24,8 @@ class TestSignUp(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.runner = self.create_app().test_cli_runner()
-        self.runner.invoke(access_init)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
         self.data = {
             "username": "testname",
             "email": "test@test.com",
