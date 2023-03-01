@@ -39,7 +39,7 @@ from cornflow_core.authentication import authenticate
 from cornflow_core.compress import compressed
 from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue, json_schema_validate_as_string
+from cornflow_core.shared import json_schema_validate_as_string
 
 
 
@@ -383,13 +383,22 @@ class CaseToInstance(BaseMetaResource):
         if schema is None:
             return self.post_list(payload)
 
-        if schema == "pulp" or schema == "solve_model_dag":
-            validate_and_continue(DataSchema(), payload["data"])
-            return self.post_list(payload)
+        if schema == "pulp":
+            # The dag name is solve_model_dag
+            schema = "solve_model_dag"
 
         config = current_app.config
-        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
-        validate_and_continue(marshmallow_obj(), payload["data"])
+
+        # Data validation
+        jsonschema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        data_errors = json_schema_validate_as_string(jsonschema, payload["data"])
+        if data_errors:
+            raise InvalidData(
+                payload=dict(jsonschema_errors=data_errors),
+                log_txt=f"Error while user {self.get_user()} tries to create instance from case {idx}. "
+                        f"Data do not match the jsonschema.",
+            )
+
         response = self.post_list(payload)
         current_app.logger.info(
             f"User {self.get_user()} creates instance {response[0].id} from case {idx}."
