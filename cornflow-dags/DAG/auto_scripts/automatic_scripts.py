@@ -20,11 +20,9 @@ default_args = {
     "catchup": False,
 }
 # Folder path
-SCRIPT_FOLDER = "/usr/local/airflow/dags/automatic_scripts/scripts_to_execute"
-DESTINATION_FOLDER = "/usr/local/airflow/dags/automatic_scripts/executed_scripts"
-CONN = os.environ.get(
-    "CORNFLOW_DB_URI", "postgresql://{uid}:{pwd}@{hostname}:{port}/{database}"
-)
+SCRIPT_FOLDER = "/usr/local/airflow/dags/auto_scripts/scripts_to_execute"
+DESTINATION_FOLDER = "/usr/local/airflow/dags/auto_scripts/executed_scripts"
+CONN = os.environ.get("CORNFLOW_DB_URI", "NA")
 
 
 def move_script(auto_script, log="", error=0):
@@ -91,14 +89,20 @@ def execute_scripts():
                     query = f.read()
 
                 try:
+                    # Check por URI
+
                     # Connect to the database
                     engine = create_engine(CONN)
 
-                except SQLAlchemyError as e:
-
+                except Exception as e:
                     # Print the error message
-                    print(f"Error: {e}")
-                    log += str(e)
+                    if CONN == "NA":
+                        message = "If there is no database connection no queries can be performed"
+                        print(message)
+                        log += str(e)
+                    else:
+                        print(f"Error: {e}")
+                        log += str(e)
                     error = 1
                     move_script(auto_script, log, error)
                     continue
