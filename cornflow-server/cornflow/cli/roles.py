@@ -4,7 +4,7 @@ from .arguments import verbose
 from .utils import get_app
 
 
-@click.group()
+@click.group(name="roles", help="Commands to manage the roles")
 def roles():
     pass
 
