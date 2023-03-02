@@ -3,9 +3,11 @@ Main file with the creation of the app logic
 """
 # Full imports
 import os
+import click
 
 # Partial imports
 from flask import Flask
+from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -13,6 +15,18 @@ from flask_restful import Api
 from logging.config import dictConfig
 
 # Module imports
+from cornflow.commands import (
+    create_service_user_command,
+    create_admin_user_command,
+    create_planner_user_command,
+    register_roles_command,
+    register_actions_command,
+    register_views_command,
+    register_base_permissions_command,
+    access_init_command,
+    register_deployed_dags_command,
+    register_dag_permissions_command,
+)
 from cornflow.config import app_config
 from cornflow.endpoints import resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
@@ -80,11 +94,104 @@ def create_app(env_name="development", dataconn=None):
     initialize_errorhandlers(app)
     init_compress(app)
 
+    app.cli.add_command(create_service_user)
+    app.cli.add_command(create_admin_user)
+    app.cli.add_command(register_roles)
+    app.cli.add_command(create_base_user)
+    app.cli.add_command(register_actions)
+    app.cli.add_command(register_views)
+    app.cli.add_command(register_base_assignations)
+    app.cli.add_command(access_init)
+    app.cli.add_command(register_deployed_dags)
+    app.cli.add_command(register_dag_permissions)
+
     return app
+
+
+@click.command("create_service_user")
+@click.option("-u", "--username", required=True, type=str)
+@click.option("-e", "--email", required=True, type=str)
+@click.option("-p", "--password", required=True, type=str)
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def create_service_user(username, email, password, verbose):
+    create_service_user_command(username, email, password, verbose)
+
+
+@click.command("create_admin_user")
+@click.option("-u", "--username", required=True, type=str)
+@click.option("-e", "--email", required=True, type=str)
+@click.option("-p", "--password", required=True, type=str)
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def create_admin_user(username, email, password, verbose):
+    create_admin_user_command(username, email, password, verbose)
+
+
+@click.command("create_base_user")
+@click.option("-u", "--username", required=True, type=str)
+@click.option("-e", "--email", required=True, type=str)
+@click.option("-p", "--password", required=True, type=str)
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def create_base_user(username, email, password, verbose):
+    create_planner_user_command(username, email, password, verbose)
+
+
+@click.command("register_roles")
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_roles(verbose):
+    register_roles_command(verbose)
+
+
+@click.command("register_actions")
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_actions(verbose):
+    register_actions_command(verbose)
+
+
+@click.command("register_views")
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_views(verbose):
+    register_views_command(verbose=verbose)
+
+
+@click.command("register_base_assignations")
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_base_assignations(verbose):
+    register_base_permissions_command(verbose=verbose)
+
+
+@click.command("access_init")
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def access_init(verbose):
+    access_init_command(verbose=verbose)
+
+
+@click.command("register_deployed_dags")
+@click.option("-r", "--url", type=str)
+@click.option("-u", "--username", type=str)
+@click.option("-p", "--password", type=str)
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_deployed_dags(url, username, password, verbose):
+    register_deployed_dags_command(url, username, password, verbose)
+
+
+@click.command("register_dag_permissions")
+@click.option("-o", "--open_deployment", default=0, type=int)
+@click.option("-v", "--verbose", is_flag=True, default=False)
+@with_appcontext
+def register_dag_permissions(open_deployment, verbose):
+    register_dag_permissions_command(open_deployment=open_deployment, verbose=verbose)
 
 
 if __name__ == "__main__":
     environment_name = os.getenv("FLASK_ENV", "development")
-    # env_name = 'development'
     flask_app = create_app(environment_name)
     flask_app.run()
