@@ -50,9 +50,6 @@ jobs:
     name: Run all test suites on cornflow-client
     needs: unit
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: ./libs/client
     strategy:
       max-parallel: 21
       matrix:
@@ -67,8 +64,6 @@ jobs:
           python-version:  ${{ matrix.python-version }}
       - name: Copy DAG files
         run: |
-          cd ..
-          cd ..
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
@@ -78,8 +73,6 @@ jobs:
           pip install .
       - name: Install airflow
         run: |
-          cd ..
-          cd ..
           cd cornflow-server
           python -m venv afvenv
           source afvenv/bin/activate
@@ -107,8 +100,6 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Run cornflow
         run: |
-          cd ..
-          cd ..
           cd cornflow-server
           python -m venv cfvenv
           source cfvenv/bin/activate
@@ -137,14 +128,14 @@ jobs:
           AUTH_TYPE: 1
       - name: Run unit tests
         run: |
-          coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+          coverage run -m unittest discover -s libs/client/cornflow_client/tests/unit
           coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
+          coverage run -a -m unittest discover -s libs/client/cornflow_client/tests/integration
           coverage report -m
           coverage xml
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
-          flags: client-tests
+          flags: client-tests,server-tests
