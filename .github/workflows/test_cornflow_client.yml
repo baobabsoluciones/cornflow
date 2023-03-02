@@ -108,12 +108,12 @@ jobs:
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
           flask db upgrade
-          flask access_init -v 0
-          flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin -v 0
-          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1! -v 0
-          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1 -v 0
-          flask create_base_user -u user -e user@cornflow.org -p UserPassword1! -v 0
-          flask register_dag_permissions -o 1 -v 0
+          flask access_init
+          flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
+          flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
+          flask register_dag_permissions -o 1
           flask run -p 5050 &
           deactivate
           sleep 5s
