@@ -5,7 +5,7 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow, get_schema
+from cornflow_client.airflow.api import Airflow
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import (
     json_schema_validate_as_string,
