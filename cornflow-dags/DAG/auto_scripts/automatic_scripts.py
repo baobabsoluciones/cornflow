@@ -70,17 +70,17 @@ def execute_scripts():
 
             # Check if python file
             if ".py" in auto_script:
-                try:
-                    # Execute script
-                    stream = os.popen(f"python {script_path}")
-                    log = stream.read()
-                    # Print the results
-                    print(log)
+                error = os.system(f"python {script_path} > output.txt 2>&1")
 
-                except Exception as e:
-                    print(f"Something went wrong: {str(e)}")
-                    log = str(e)
-                    error = 1
+                with open("output.txt", "r") as f:
+                    log = f.read()
+
+                os.remove("output.txt")
+
+                if error != 0:
+                    print(f"Something went wrong: {str(log)}")
+
+                error = 1
 
             elif ".sql" in auto_script:
                 log = ""
@@ -89,8 +89,6 @@ def execute_scripts():
                     query = f.read()
 
                 try:
-                    # Check por URI
-
                     # Connect to the database
                     engine = create_engine(CONN)
 
