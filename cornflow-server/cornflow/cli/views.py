@@ -6,7 +6,7 @@ from .arguments import verbose
 from .utils import get_app
 
 
-@click.group()
+@click.group(name="views", help="Commands to manage the views")
 def views():
     pass
 

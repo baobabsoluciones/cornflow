@@ -6,7 +6,7 @@ from cornflow.commands import register_actions_command
 from .arguments import verbose
 
 
-@click.group()
+@click.group(name="actions", help="Commands to manage the actions")
 def actions():
     pass
 
