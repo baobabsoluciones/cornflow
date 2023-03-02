@@ -165,10 +165,6 @@ class ExecutionEndpoint(BaseMetaResource):
                 f"Configuration data does not match the jsonschema.",
             )
 
-        # # Get dag config schema and validate it
-        # marshmallow_obj = get_schema(config, schema, "config")
-        # validate_and_continue(marshmallow_obj(), kwargs["config"])
-
         # Validate instance data before running the dag
         instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
         instance_errors = json_schema_validate_as_string(instance_schema, instance.data)

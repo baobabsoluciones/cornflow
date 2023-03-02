@@ -74,7 +74,7 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
     click.echo(f"The path to the JSONSchema is {path}")
     click.echo(f"The app_name is {app_name}")
     click.echo(f"The output_path is {output}")
-    click.echo(f"The methods to add is {methods_to_add}")
+    click.echo(f"The methods to add are {methods_to_add}")
     click.echo(f"The name_table is {name_table}")
 
     APIGenerator(

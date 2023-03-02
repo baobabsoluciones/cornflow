@@ -52,7 +52,7 @@ def import_dags():
             continue
         try:
             _import_file(filename)
-        except Exception as e:
+        except Exception:
             continue
 
 
