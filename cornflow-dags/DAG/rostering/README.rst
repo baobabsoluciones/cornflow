@@ -18,6 +18,7 @@ This decision is subject to:
 - RQ06: employees at least work the minimum amount of hours every day.
 - RQ07: employees rest the minimum amount of hours between working days.
 - RQ08: at least one manager is at the work center at all times.
+- RQ09: the demand for each skill should be covered
 
 Parameters
 ----------
@@ -25,6 +26,10 @@ Parameters
 - Contracts: the contracts that the employees have, with the number of days that have to be worked, the weekly hours and the shift.
 - Employees: each employee can be a manager or not.
 - Shifts: minimum starting hour and maximum ending hour of each shift.
+- Demand: the higher the value, the greater the need for employees for each shift (date and hour).
+- Employee holidays: the days in which an employee is on holiday and therefore can not work.
+- Employee downtime: the days in which an employee can not work due an illness.
+
 - Parameters:
 
   - Ending hour: the hour the work center closes.

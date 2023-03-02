@@ -81,6 +81,22 @@ class Instance(InstanceCore):
         else:
             data_p["skills_employees"] = SuperDict({})
 
+        if data.get("employee_holidays"):
+            data_p["employee_holidays"] = {
+                (el["id_employee"], el["day"]): el
+                for el in data["employee_holidays"]
+            }
+        else:
+            data_p["employee_holidays"] = SuperDict({})
+
+        if data.get("store_holidays"):
+            data_p["store_holidays"] = {
+                (el["day"]): el
+                for el in data["store_holidays"]
+            }
+        else:
+            data_p["store_holidays"] = SuperDict({})
+
         return cls(data_p)
 
     def to_dict(self) -> Dict:
@@ -91,6 +107,8 @@ class Instance(InstanceCore):
             "demand",
             "skill_demand",
             "skills",
+            "employee_holidays",
+            #"store_holidays"
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -100,6 +118,11 @@ class Instance(InstanceCore):
             dict(id_employee=id_employee, id_skill=id_skill)
             for id_skill in self.data["skills_employees"]
             for id_employee in self.data["skills_employees"][id_skill]
+        ]
+        data_p["employee_holidays"] = [
+            dict(id_employee=id_employee, day=day)
+            for id_employee in self.data["employee_holidays"]
+            for day in self.data["employee_holidays"][id_employee]
         ]
         return pickle.loads(pickle.dumps(data_p, -1))
 
@@ -399,6 +422,7 @@ class Instance(InstanceCore):
             for (w, e) in start
             if self._get_week_from_ts(ts) == w
             and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
+            and (e, self._get_date_string_from_ts(ts)) not in self._get_employee_holidays()
         )
 
     def get_employees_time_slots_week(self) -> SuperDict:
@@ -472,6 +496,7 @@ class Instance(InstanceCore):
                 for d in self.dates
                 for (w, e), hours in self._get_employees_contract_hours().items()
                 if self._get_week_from_date(d) == w
+                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays()
             }
         )
 
@@ -488,6 +513,7 @@ class Instance(InstanceCore):
                 )
                 for d in self.dates
                 for e in self._get_employees("id")
+                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays()
             }
         )
 
@@ -643,4 +669,24 @@ class Instance(InstanceCore):
                 for ts in self.time_slots
                 for id_skill in self._get_skills()
             ]
+        )
+
+    def _get_employee_holidays(self) -> TupList:
+        """
+        Returns a TupList with the combinations of employees and holiday days.
+        For example: [(1, "2021-09-06"),
+            (2, "2021-09-07"), ...]
+        """
+        return TupList(
+            (self.data["employee_holidays"].keys_tl())
+        )
+
+    def _get_store_holidays(self) -> TupList:
+        """
+        Returns a TupList with the store holiday days.
+        For example: [("2021-09-06"),
+            ("2021-09-07"), ...]
+        """
+        return TupList(
+            (self.data["store_holidays"].keys_tl())
         )
