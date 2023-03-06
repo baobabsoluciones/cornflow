@@ -12,7 +12,7 @@ extra_required = {"excel": ["openpyxl", "pandas"]}
 
 setuptools.setup(
     name="cornflow-client",
-    version="1.0.8",
+    version="1.0.9",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="Client to connect to a cornflow server",
