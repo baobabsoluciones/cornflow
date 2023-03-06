@@ -5,11 +5,9 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow, get_schema
+from cornflow_client.airflow.api import Airflow
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.shared import (
-    validate_and_continue,
-    marshmallow_validate_and_continue,
     json_schema_validate_as_string,
 )
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
@@ -103,11 +101,6 @@ class ExecutionEndpoint(BaseMetaResource):
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
 
-        if kwargs.get("data") is not None:
-            # Get solution schema and validate it
-            marshmallow_obj = get_schema(config, kwargs["schema"], "solution")
-            marshmallow_validate_and_continue(marshmallow_obj(), kwargs["data"])
-
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
@@ -165,10 +158,6 @@ class ExecutionEndpoint(BaseMetaResource):
                 f"Configuration data does not match the jsonschema.",
             )
 
-        # # Get dag config schema and validate it
-        # marshmallow_obj = get_schema(config, schema, "config")
-        # validate_and_continue(marshmallow_obj(), kwargs["config"])
-
         # Validate instance data before running the dag
         instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
         instance_errors = json_schema_validate_as_string(instance_schema, instance.data)
@@ -200,10 +189,6 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
                 execution.update_log_txt(f"{solution_errors}")
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
-
-        # # Validate that instance and dag_name are compatible
-        # marshmallow_obj = get_schema(config, schema, INSTANCE_SCHEMA)
-        # validate_and_continue(marshmallow_obj(), instance.data)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -300,11 +285,15 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 "message": "The execution was set for relaunch but was not launched"
             }, 201
 
-        # Get dag config schema and validate it
-        marshmallow_obj = DeployedDAG.get_marshmallow_schema(
-            config, kwargs["schema"], "config"
-        )
-        validate_and_continue(marshmallow_obj(), kwargs["config"])
+        # Validate config before running the dag
+        config_schema = DeployedDAG.get_one_schema(config, kwargs["schema"], CONFIG_SCHEMA)
+        config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
+        if config_errors:
+            raise InvalidData(
+                payload=dict(jsonschema_errors=config_errors),
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                f"Configuration data does not match the jsonschema.",
+            )
 
         # We now try to launch the task in airflow
         af_client = Airflow.from_config(config)
@@ -415,15 +404,15 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if data.get("data") is not None and schema is not None:
-            # Get solution schema and validate it
-            try:
-                marshmallow_obj = DeployedDAG.get_marshmallow_schema(
-                    config, schema, "solution"
+            data_jsonschema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
+            validation_errors = json_schema_validate_as_string(data_jsonschema, data["data"])
+
+            if validation_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=validation_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
+                            f"Solution data does not match the jsonschema.",
                 )
-                validate_and_continue(marshmallow_obj(), data["data"])
-            except AirflowError:
-                # This is for the unit tests when we can't use Airflow
-                pass
 
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return self.put_detail(data, user=self.get_user(), idx=idx)

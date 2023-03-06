@@ -6,7 +6,7 @@ These endpoints have different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue
+from cornflow_core.shared import json_schema_validate_as_string
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -29,10 +29,10 @@ from cornflow.schemas.instance import (
     QueryFiltersInstance,
 )
 
-from cornflow.schemas.model_json import DataSchema
 from cornflow.shared.authentication import Auth
 from cornflow_core.compress import compressed
-from cornflow_core.exceptions import InvalidUsage
+from cornflow_core.exceptions import InvalidUsage, InvalidData
+from cornflow_client.constants import INSTANCE_SCHEMA
 
 
 # Initialize the schema that all endpoints are going to use
@@ -85,16 +85,22 @@ class InstanceEndpoint(BaseMetaResource):
             # no schema provided, no validation to do
             return self.post_list(data=kwargs)
 
-        if data_schema == "pulp" or data_schema == "solve_model_dag":
-            # this one we have the schema stored inside cornflow
-            validate_and_continue(DataSchema(), kwargs["data"])
-            return self.post_list(data=kwargs)
+        if data_schema == "pulp":
+            # The dag name is solve_model_dag
+            data_schema = "solve_model_dag"
 
-        # for the rest of the schemas: we need to ask airflow for the schema
+        # We validate the instance data
         config = current_app.config
 
-        marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, data_schema)
-        validate_and_continue(marshmallow_obj(), kwargs["data"])
+        instance_schema = DeployedDAG.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
+        instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+
+        if instance_errors:
+            raise InvalidData(
+                payload=dict(jsonschema_errors=instance_errors),
+                log_txt=f"Error while user {self.get_user()} tries to create an instance. "
+                        f"Instance data do not match the jsonschema.",
+            )
 
         # if we're here, we validated and the data seems to fit the schema
         response = self.post_list(data=kwargs)
@@ -151,14 +157,21 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         schema = InstanceModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if kwargs.get("data") is not None and schema is not None:
-            if schema == "pulp" or schema == "solve_model_dag":
-                # this one we have the schema stored inside cornflow
-                validate_and_continue(DataSchema(), kwargs["data"])
-            else:
-                # for the rest of the schemas: we need to ask airflow for the schema
-                config = current_app.config
-                marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
-                validate_and_continue(marshmallow_obj(), kwargs["data"])
+            if schema == "pulp":
+                # The dag name is solve_model_dag
+                schema = "solve_model_dag"
+
+            config = current_app.config
+
+            instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+
+            if instance_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=instance_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to create an instance. "
+                            f"Instance data do not match the jsonschema.",
+                )
 
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
         current_app.logger.info(f"User {self.get_user()} edits instance {idx}")

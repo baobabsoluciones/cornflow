@@ -7,12 +7,10 @@ import json
 import requests
 
 # Partial imports
-from marshmallow import ValidationError
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
-from cornflow_client import SchemaManager
 from cornflow_client.constants import AirflowError
 
 
@@ -146,18 +144,3 @@ class Airflow(object):
     def get_model_dags(self, method="GET"):
         url = f"{self.url}/dags?tags=model"
         return self.request_headers_auth(method=method, url=url)
-
-
-def get_schema(config, dag_name, schema="instance"):
-    """
-    Gets a schema by name from airflow server. We use the variable api.
-    We transform the jsonschema into a marshmallow class
-
-    """
-    af_client = Airflow.from_config(config)
-    if not af_client.is_alive():
-        raise AirflowError(error="Airflow is not accessible")
-
-    schema_json = af_client.get_one_schema(dag_name, schema)
-    manager = SchemaManager(schema_json)
-    return manager.jsonschema_to_flask()
