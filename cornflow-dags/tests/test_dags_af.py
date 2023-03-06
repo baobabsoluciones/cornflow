@@ -7,6 +7,7 @@ from cornflow_client.airflow.api import Airflow
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
 from DAG.update_all_schemas import get_new_apps
+from DAG.auto_scripts.automatic_scripts import execute_scripts
 
 existing_apps = [app.name for app in get_new_apps()]
 
@@ -30,9 +31,7 @@ class DAGTests(unittest.TestCase):
         finished = False
         while not finished:
             time.sleep(2)
-            status = client.get_dag_run_status(
-                "update_all_schemas", data["dag_run_id"]
-            )
+            status = client.get_dag_run_status("update_all_schemas", data["dag_run_id"])
             state = status.json()["state"]
             finished = state != "running"
             print("STATUS OF update_all_variables: {}".format(state))
@@ -66,3 +65,12 @@ class DAGTests(unittest.TestCase):
             variable["key"] for variable in client.get_all_variables()["variables"]
         ]
         self.assertEqual(len(variables), len(existing_apps) * 2)
+
+    def test_auto_scripts(self):
+        print(os.getcwd())
+
+        script_folder = os.path.join(os.path.dirname(__file__), "./data/auto_scripts/")
+        destination_folder = script_folder
+
+        results = execute_scripts(script_folder, destination_folder)
+        self.assertEqual(results, 200)

@@ -20,12 +20,10 @@ default_args = {
     "catchup": False,
 }
 # Folder path
-SCRIPT_FOLDER = "/usr/local/airflow/dags/auto_scripts/scripts_to_execute"
-DESTINATION_FOLDER = "/usr/local/airflow/dags/auto_scripts/executed_scripts"
 CONN = os.environ.get("CORNFLOW_DB_URI", "NA")
 
 
-def move_script(auto_script, log="", error=0):
+def move_script(script_folder, destination_folder, auto_script, log="", error=0):
     # Get current date and time
     now = datetime.now()
 
@@ -39,7 +37,7 @@ def move_script(auto_script, log="", error=0):
         folder_name = f"{os.path.splitext(auto_script)[0]}_{datetime_str}"
 
     # Full path of folder to create
-    folder_path = os.path.join(DESTINATION_FOLDER, folder_name)
+    folder_path = os.path.join(destination_folder, folder_name)
 
     # Create folder if it doesn't exist
     if not os.path.exists(folder_path):
@@ -49,7 +47,7 @@ def move_script(auto_script, log="", error=0):
         print(f"Folder '{folder_path}' already exists.")
 
     # Move script to folder
-    script_path = os.path.join(SCRIPT_FOLDER, auto_script)
+    script_path = os.path.join(script_folder, auto_script)
     shutil.move(script_path, folder_path)
     # Export log
     log_path = os.path.join(folder_path, "log.txt")
@@ -59,14 +57,18 @@ def move_script(auto_script, log="", error=0):
     print(f"Script {auto_script} moved out of folder")
 
 
-def execute_scripts():
+def execute_scripts(
+    script_folder="/usr/local/airflow/dags/auto_scripts/scripts_to_execute",
+    destination_folder="/usr/local/airflow/dags/auto_scripts/executed_scripts",
+):
+    print(os.getcwd())
     # Iterate directory
-    for auto_script in os.listdir(SCRIPT_FOLDER):
+    for auto_script in os.listdir(script_folder):
         error = 0
         print(f"Executing {auto_script}")
         # Check if current path is a file
-        if os.path.isfile(os.path.join(SCRIPT_FOLDER, auto_script)):
-            script_path = os.path.join(SCRIPT_FOLDER, auto_script)
+        if os.path.isfile(os.path.join(script_folder, auto_script)):
+            script_path = os.path.join(script_folder, auto_script)
 
             # Check if python file
             if ".py" in auto_script:
@@ -79,8 +81,8 @@ def execute_scripts():
 
                 if error != 0:
                     print(f"Something went wrong: {str(log)}")
-
-                error = 1
+                else:
+                    print(f"Script executed successfully: {str(log)}")
 
             elif ".sql" in auto_script:
                 log = ""
@@ -102,7 +104,9 @@ def execute_scripts():
                         print(f"Error: {e}")
                         log += str(e)
                     error = 1
-                    move_script(auto_script, log, error)
+                    move_script(
+                        script_folder, destination_folder, auto_script, log, error
+                    )
                     continue
 
                 # All SQL commands (split on ';')
@@ -140,10 +144,12 @@ def execute_scripts():
                 # We do nothing with the file
                 continue
             # Move script and create log
-            move_script(auto_script, log, error)
+            move_script(script_folder, destination_folder, auto_script, log, error)
             print(f"End of {auto_script} execution.")
         else:
             print(f"{auto_script} is not a file")
+
+    return 200
 
 
 dag = DAG(
@@ -154,7 +160,7 @@ dag = DAG(
     schedule_interval="@hourly",
 )
 
-update_schema2 = PythonOperator(
+execute_scripts2 = PythonOperator(
     task_id="execute_scripts",
     provide_context=True,
     python_callable=execute_scripts,
