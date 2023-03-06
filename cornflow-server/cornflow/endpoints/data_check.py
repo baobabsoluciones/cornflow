@@ -4,17 +4,17 @@ External endpoints to launch the solution check on an execution
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidUsage
+from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidUsage, InvalidData
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue
+from cornflow_core.shared import json_schema_validate_as_string
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
-from cornflow.schemas.model_json import DataSchema
 from cornflow.shared.authentication import Auth
 
 from cornflow.shared.const import (
@@ -302,12 +302,21 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         self.foreign_data = dict()
         if schema is None:
             instance, _ = self.post_list(data=instance_payload)
-        elif schema == "pulp" or schema == "solve_model_dag":
-            validate_and_continue(DataSchema(), instance_payload["data"])
-            instance, _ = self.post_list(data=instance_payload)
         else:
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema)
-            validate_and_continue(marshmallow_obj(), instance_payload["data"])
+            validation_schema = schema
+            if schema == "pulp":
+                validation_schema = "solve_model_dag"
+
+            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, INSTANCE_SCHEMA)
+            validation_errors = json_schema_validate_as_string(data_jsonschema, instance_payload["data"])
+
+            if validation_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=validation_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}.  "
+                            f"Instance data does not match the jsonschema.",
+                )
+
             instance, _ = self.post_list(data=instance_payload)
 
         payload = dict(
@@ -317,10 +326,21 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             schema=schema,
         )
         if case.solution is not None:
+            validation_schema = schema
+            if schema == "pulp":
+                validation_schema = "solve_model_dag"
+
             payload["data"] = case.solution
 
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(config, schema, "solution")
-            validate_and_continue(marshmallow_obj(), payload["data"])
+            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, SOLUTION_SCHEMA)
+            validation_errors = json_schema_validate_as_string(data_jsonschema, payload["data"])
+
+            if validation_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=validation_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}.  "
+                            f"Solution data does not match the jsonschema.",
+                )
 
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
