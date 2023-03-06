@@ -5,9 +5,8 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import get_schema
 from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import validate_and_continue
+from cornflow_core.shared import json_schema_validate_as_string
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -15,12 +14,11 @@ from marshmallow.exceptions import ValidationError
 import os
 import pulp
 from werkzeug.utils import secure_filename
-import logging as log
 from cornflow_core.authentication import authenticate
 
 # Import from internal modules
-from ..models import InstanceModel
-from ..schemas.instance import (
+from cornflow.models import InstanceModel, DeployedDAG
+from cornflow.schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
     InstanceDetailsEndpointResponse,
@@ -31,10 +29,10 @@ from ..schemas.instance import (
     QueryFiltersInstance,
 )
 
-from ..schemas.model_json import DataSchema
-from ..shared.authentication import Auth
+from cornflow.shared.authentication import Auth
 from cornflow_core.compress import compressed
-from cornflow_core.exceptions import InvalidUsage
+from cornflow_core.exceptions import InvalidUsage, InvalidData
+from cornflow_client.constants import INSTANCE_SCHEMA
 
 
 # Initialize the schema that all endpoints are going to use
@@ -63,7 +61,7 @@ class InstanceEndpoint(BaseMetaResource):
         :return: a list of objects with the data and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user()} gets all the instances")
+        current_app.logger.info(f"User {self.get_user()} gets all the instances")
         return self.get_list(user=self.get_user(), **kwargs)
 
     @doc(description="Create an instance", tags=["Instances"])
@@ -87,19 +85,28 @@ class InstanceEndpoint(BaseMetaResource):
             # no schema provided, no validation to do
             return self.post_list(data=kwargs)
 
-        if data_schema == "pulp" or data_schema == "solve_model_dag":
-            # this one we have the schema stored inside cornflow
-            validate_and_continue(DataSchema(), kwargs["data"])
-            return self.post_list(data=kwargs)
+        if data_schema == "pulp":
+            # The dag name is solve_model_dag
+            data_schema = "solve_model_dag"
 
-        # for the rest of the schemas: we need to ask airflow for the schema
+        # We validate the instance data
         config = current_app.config
-        marshmallow_obj = get_schema(config, data_schema)
-        validate_and_continue(marshmallow_obj(), kwargs["data"])
+
+        instance_schema = DeployedDAG.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
+        instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+
+        if instance_errors:
+            raise InvalidData(
+                payload=dict(jsonschema_errors=instance_errors),
+                log_txt=f"Error while user {self.get_user()} tries to create an instance. "
+                        f"Instance data do not match the jsonschema.",
+            )
 
         # if we're here, we validated and the data seems to fit the schema
         response = self.post_list(data=kwargs)
-        log.info(f"User {self.get_user()} creates instance {response[0].id}")
+        current_app.logger.info(
+            f"User {self.get_user()} creates instance {response[0].id}"
+        )
         return response
 
 
@@ -128,7 +135,7 @@ class InstanceDetailsEndpointBase(BaseMetaResource):
           the data of the instance) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        log.info(f"User {self.get_user()} gets instance {idx}")
+        current_app.logger.info(f"User {self.get_user()} gets instance {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
 
 
@@ -150,17 +157,24 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         schema = InstanceModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if kwargs.get("data") is not None and schema is not None:
-            if schema == "pulp" or schema == "solve_model_dag":
-                # this one we have the schema stored inside cornflow
-                validate_and_continue(DataSchema(), kwargs["data"])
-            else:
-                # for the rest of the schemas: we need to ask airflow for the schema
-                config = current_app.config
-                marshmallow_obj = get_schema(config, schema)
-                validate_and_continue(marshmallow_obj(), kwargs["data"])
+            if schema == "pulp":
+                # The dag name is solve_model_dag
+                schema = "solve_model_dag"
+
+            config = current_app.config
+
+            instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+
+            if instance_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=instance_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to create an instance. "
+                            f"Instance data do not match the jsonschema.",
+                )
 
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
-        log.info(f"User {self.get_user()} edits instance {idx}")
+        current_app.logger.info(f"User {self.get_user()} edits instance {idx}")
         return response
 
     @doc(description="Delete an instance", tags=["Instances"])
@@ -177,7 +191,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.delete_detail(user=self.get_user(), idx=idx)
-        log.info(f"User {self.get_user()} deletes instance {idx}")
+        current_app.logger.info(f"User {self.get_user()} deletes instance {idx}")
         return response
 
 
@@ -207,7 +221,9 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         response = self.get_detail(user=self.get_user(), idx=idx)
-        log.info(f"User {self.get_user()} gets the data of case {idx}")
+        current_app.logger.info(
+            f"User {self.get_user()} gets the data of instance {idx}"
+        )
         return response
 
 
@@ -230,23 +246,34 @@ class InstanceFileEndpoint(BaseMetaResource):
         :param str name:
         :param str description:
         :param int minimize:
-        :return: a tuple with the created instance and a integer with the status code
+        :return: a tuple with the created instance and an integer with the status code
         :rtype: Tuple(:class:`InstanceModel`, 201)
         """
         if "file" not in request.files:
-            raise InvalidUsage(error="No file was provided")
+            err = "No file was provided"
+            raise InvalidUsage(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
+                + err,
+            )
         file = request.files["file"]
         filename = secure_filename(file.filename)
         if not (file and allowed_file(filename)):
             raise InvalidUsage(
-                error=f"Could not open file to upload. Check the extension matches {ALLOWED_EXTENSIONS}"
+                error=f"Could not open file to upload. Check the extension matches {ALLOWED_EXTENSIONS}",
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
+                f"Could not open the file to upload.",
             )
         file.save(filename)
         sense = 1 if minimize else -1
         try:
             _vars, problem = pulp.LpProblem.fromMPS(filename, sense=sense)
         except:
-            raise InvalidUsage(error="There was an error reading the file")
+            raise InvalidUsage(
+                error="There was an error reading the file",
+                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
+                f"There was an error reading the file.",
+            )
         try:
             os.remove(filename)
         except:
@@ -267,7 +294,9 @@ class InstanceFileEndpoint(BaseMetaResource):
         item = InstanceModel(data)
         item.schema = "solve_model_dag"
         item.save()
-        log.info(f"User {self.get_user()} creates instance {item.id} from mps file")
+        current_app.logger.info(
+            f"User {self.get_user()} creates instance {item.id} from mps file"
+        )
         return item, 201
 
 

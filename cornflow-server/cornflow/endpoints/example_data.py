@@ -6,18 +6,17 @@ Endpoints to get the example data from a DAG
 from cornflow_client.airflow.api import Airflow
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
-import logging as log
 from cornflow_core.authentication import authenticate
 import json
 
 # Import from internal modules
-from ..models import PermissionsDAG
-from ..shared.authentication import Auth
+from cornflow.models import PermissionsDAG
+from cornflow.shared.authentication import Auth
 from cornflow_core.exceptions import AirflowError, NoPermission
-from ..schemas.example_data import ExampleData
+from cornflow.schemas.example_data import ExampleData
 from cornflow_core.resources import BaseMetaResource
 
-from ..shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
 
 
 class ExampleDataDetailsEndpoint(BaseMetaResource):
@@ -25,7 +24,7 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
     Endpoint used to obtain schemas for one app
     """
 
-    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     @doc(description="Get example data from DAG", tags=["DAG"])
     @authenticate(auth_class=Auth())
@@ -45,7 +44,7 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
         if permission:
             af_client = Airflow.from_config(current_app.config)
             if not af_client.is_alive():
-                log.error(
+                current_app.logger.error(
                     "Airflow not accessible when getting data {}".format(dag_name)
                 )
                 raise AirflowError(error="Airflow is not accessible")
@@ -53,7 +52,7 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
             # try airflow and see if dag_name exists
             af_client.get_dag_info(dag_name)
 
-            log.debug("User gets example data from {}".format(dag_name))
+            current_app.logger.info("User gets example data from {}".format(dag_name))
 
             variable_name = f"z_{dag_name}_examples"
             response = af_client.get_one_variable(variable_name)
@@ -63,7 +62,9 @@ class ExampleDataDetailsEndpoint(BaseMetaResource):
 
             return result
         else:
+            err = "User does not have permission to access this dag."
             raise NoPermission(
-                error="User does not have permission to access this dag",
+                error=err,
                 status_code=403,
+                log_txt=f"Error while user {user} tries to get example data for dag {dag_name}. " + err
             )

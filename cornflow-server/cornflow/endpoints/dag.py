@@ -3,38 +3,38 @@ Internal endpoint for getting and posting execution data
 These are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from cornflow_client.airflow.api import get_schema
-from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
-import logging as log
 
 # Import from internal modules
-from ..models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
-from ..schemas import DeployedDAGSchema
-from ..schemas.case import CaseCheckRequest
-from ..schemas.instance import InstanceCheckRequest
-from ..schemas.execution import (
+from cornflow.models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
+from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
+from cornflow.schemas.case import CaseCheckRequest
+from cornflow.schemas.instance import InstanceCheckRequest
+from cornflow.schemas.execution import (
     ExecutionDagPostRequest,
     ExecutionDagRequest,
     ExecutionDetailsEndpointResponse,
     ExecutionSchema,
 )
 
-from ..schemas.model_json import DataSchema
-from ..shared.authentication import Auth
-from ..shared.const import (
+from cornflow.schemas.model_json import DataSchema
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import (
     ADMIN_ROLE,
     EXEC_STATE_CORRECT,
     EXEC_STATE_MANUAL,
     EXECUTION_STATE_MESSAGE_DICT,
     SERVICE_ROLE,
+    PLANNER_ROLE,
 )
 
-from cornflow_core.exceptions import ObjectDoesNotExist
+from cornflow_core.exceptions import ObjectDoesNotExist, InvalidData
 from cornflow_core.authentication import authenticate
 from cornflow_core.resources import BaseMetaResource
+from cornflow_core.shared import json_schema_validate_as_string
+
 
 execution_schema = ExecutionSchema()
 
@@ -61,13 +61,26 @@ class DAGDetailEndpoint(BaseMetaResource):
         """
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
-            raise ObjectDoesNotExist(error="The execution does not exist")
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
+                + err,
+            )
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
         )
         if instance is None:
-            raise ObjectDoesNotExist(error="The instance does not exist")
+            err = "The instance does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
+                + err,
+            )
         config = execution.config
+        current_app.logger.info(
+            f"User {self.get_user()} gets input data of execution {idx}"
+        )
         return {
             "id": instance.id,
             "data": instance.data,
@@ -99,15 +112,28 @@ class DAGDetailEndpoint(BaseMetaResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == "pulp":
-            validate_and_continue(DataSchema(), data)
-        elif solution_schema is not None:
+            # The dag name is solve_model_dag
+            solution_schema = "solve_model_dag"
+        if solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
-            validate_and_continue(marshmallow_obj(), data)
-            # marshmallow_obj().fields['jobs'].nested().fields['successors']
+
+            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, data)
+
+            if solution_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=solution_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
+                            f"Solution data do not match the jsonschema.",
+                )
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
-            raise ObjectDoesNotExist()
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}."
+                + err,
+            )
         state = req_data.get("state", EXEC_STATE_CORRECT)
         new_data = dict(
             state=state,
@@ -125,6 +151,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         execution.update(req_data)
         # TODO: is this save necessary?
         execution.save()
+        current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
 
 
@@ -146,7 +173,7 @@ class DAGInstanceEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(InstanceCheckRequest, location="json")
     def put(self, idx, **req_data):
-        log.info(f"Instance checks saved for instance {idx}")
+        current_app.logger.info(f"Instance checks saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
@@ -168,14 +195,14 @@ class DAGCaseEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(CaseCheckRequest, location="json")
     def put(self, idx, **req_data):
-        log.info(f"Case checks saved for instance {idx}")
+        current_app.logger.info(f"Case checks saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
 class DAGEndpointManual(BaseMetaResource):
     """ """
 
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE, SERVICE_ROLE]
 
     @doc(description="Create an execution manually.", tags=["DAGs"])
     @authenticate(auth_class=Auth())
@@ -191,11 +218,18 @@ class DAGEndpointManual(BaseMetaResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == "pulp":
-            validate_and_continue(DataSchema(), data)
-        elif solution_schema is not None:
+            solution_schema = "solve_model_dag"
+        if solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = get_schema(config, solution_schema, SOLUTION_SCHEMA)
-            validate_and_continue(marshmallow_obj(), data)
+            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, data)
+
+            if solution_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=solution_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to manually create an execution. "
+                            f"Solution data do not match the jsonschema.",
+                )
 
         kwargs_copy = dict(kwargs)
         # we force the state to manual
@@ -205,7 +239,9 @@ class DAGEndpointManual(BaseMetaResource):
             kwargs_copy["data"] = data
         item = ExecutionModel(kwargs_copy)
         item.save()
-        log.info(f"User {self.get_user()} manually created the execution {item.id}")
+        current_app.logger.info(
+            f"User {self.get_user()} manually created the execution {item.id}"
+        )
         return item, 201
 
 
@@ -231,3 +267,21 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
         return self.post_list(kwargs)
+
+
+class DeployedDagDetailEndpoint(BaseMetaResource):
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = DeployedDAG
+
+    @doc(
+        description="Endpoint to update the schemas of a deployed DAG",
+        tags=["DAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    @use_kwargs(DeployedDAGEditSchema, location="json")
+    def put(self, idx, **req_data):
+        current_app.logger.info(f"Schemas saved for DAG {idx}")
+        return self.put_detail(data=req_data, idx=idx, track_user=False)

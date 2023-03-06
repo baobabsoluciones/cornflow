@@ -26,6 +26,7 @@ from cornflow.tests.const import (
     USER_URL,
 )
 from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
+from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
 
 class TestDagEndpoint(TestExecutionsDetailEndpointMock):
@@ -121,6 +122,16 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.assertEqual(data["config"], self.payload["config"])
         return
 
+    def test_get_no_dag(self):
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        data = self.get_one_row(
+            url=DAG_URL + idx + "/",
+            token=self.token,
+            check_payload=False,
+            payload=self.payload,
+            expected_status=403,
+        )
+
 
 class TestDeployedDAG(TestCase):
     def create_app(self):
@@ -129,8 +140,8 @@ class TestDeployedDAG(TestCase):
 
     def setUp(self):
         db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
         self.url = USER_URL
         self.model = UserModel
         self.admin = dict(
@@ -165,7 +176,7 @@ class TestDeployedDAG(TestCase):
         user_role.save()
         db.session.commit()
 
-        register_dag_permissions_command(verbose=0)
+        register_dag_permissions_command(verbose=False)
 
     def tearDown(self):
         db.session.remove()
@@ -192,13 +203,19 @@ class TestDeployedDAG(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.json,
-            [
-                {"description": None, "id": "solve_model_dag"},
-                {"description": None, "id": "gc"},
-                {"description": None, "id": "timer"},
-            ],
+            response.json[0],
+            {
+                "description": None,
+                "id": "solve_model_dag",
+                "instance_schema": get_pulp_jsonschema(),
+                "solution_schema": get_pulp_jsonschema(),
+                "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
+                "instance_checks_schema": {},
+                "solution_checks_schema": {},
+            },
         )
+        self.assertEqual(response.json[1]["id"], "gc")
+        self.assertEqual(response.json[2]["id"], "timer")
 
     def test_endpoint_permissions(self):
         user_role = UserRoleModel.query.filter_by(
@@ -221,7 +238,15 @@ class TestDeployedDAG(TestCase):
         )
 
     def test_post_endpoint(self):
-        payload = {"description": None, "id": "test_dag"}
+        payload = {
+            "description": None,
+            "id": "test_dag",
+            "instance_schema": {},
+            "solution_schema": {},
+            "instance_checks_schema": {},
+            "solution_checks_schema": {},
+            "config_schema": {},
+        }
         response = self.client.post(
             DEPLOYED_DAG_URL,
             data=json.dumps(payload),
@@ -259,7 +284,7 @@ class TestDeployedDAG(TestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.json,
-            {"error": "{'json': {'id': ['Missing data for required field.']}}"},
+        self.assertIn(
+            "'id': ['Missing data for required field.']",
+            response.json.get("error", ""),
         )

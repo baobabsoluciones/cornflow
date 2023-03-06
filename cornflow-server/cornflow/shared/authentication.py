@@ -3,7 +3,6 @@
 """
 
 # Global imports
-import logging as log
 from functools import wraps
 
 from cornflow_core.authentication import BaseAuth
@@ -15,7 +14,7 @@ from flask import request, g, current_app
 
 # Internal modules imports
 from .const import PERMISSION_METHOD_MAP
-from ..models import UserModel, PermissionsDAG
+from cornflow.models import UserModel, PermissionsDAG
 
 
 class Auth(BaseAuth):
@@ -45,6 +44,8 @@ class Auth(BaseAuth):
                     raise InvalidData(
                         error="The request does not specify a schema to use",
                         status_code=400,
+                        log_txt=f"Error while user {g.user} tries to access a dag. "
+                        f"The schema is not specified in the request.",
                     )
                 else:
                     if PermissionsDAG.check_if_has_permissions(user_id, dag_id):
@@ -54,6 +55,8 @@ class Auth(BaseAuth):
                         raise NoPermission(
                             error="You do not have permission to use this DAG",
                             status_code=403,
+                            log_txt=f"Error while user {g.user} tries to access dag {dag_id}. "
+                            f"The user does not have permission to access the dag.",
                         )
             else:
                 return func(*args, **kwargs)
@@ -84,15 +87,22 @@ class Auth(BaseAuth):
             raise NoPermission(
                 error="You do not have permission to access this endpoint",
                 status_code=403,
+                log_txt=f"Error while user {user_id} tries to access an endpoint. "
+                f"The user does not have any role assigned. ",
             )
 
         action_id = PERMISSION_METHOD_MAP[method]
         try:
             view_id = ViewBaseModel.query.filter_by(url_rule=url).first().id
         except AttributeError:
-            log.error('The permission for this endpoint is not in the database.')
+            current_app.logger.error(
+                "The permission for this endpoint is not in the database."
+            )
             raise NoPermission(
-                error="You do not have permission to access this endpoint", status_code=403
+                error="You do not have permission to access this endpoint",
+                status_code=403,
+                log_txt=f"Error while user {user_id} tries to access endpoint. "
+                f"The user does not permission to access. ",
             )
 
         for role in user_roles:
@@ -104,5 +114,8 @@ class Auth(BaseAuth):
                 return True
 
         raise NoPermission(
-            error="You do not have permission to access this endpoint", status_code=403
+            error="You do not have permission to access this endpoint",
+            status_code=403,
+            log_txt=f"Error while user {user_id} tries to access endpoint {view_id} with action {action_id}. "
+            f"The user does not permission to access. ",
         )

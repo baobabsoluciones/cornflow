@@ -1,19 +1,13 @@
-def register_roles_command(verbose):
-    import logging as log
+def register_roles_command(verbose: bool = True):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
+    from flask import current_app
 
     from cornflow_core.models import RoleBaseModel
-    from ..shared.const import ROLES_MAP
+    from cornflow.shared.const import ROLES_MAP
     from cornflow_core.shared import db
 
     roles_registered = [role.name for role in RoleBaseModel.get_all_objects()]
-
-    try:
-        db.session.commit()
-    except DBAPIError as e:
-        db.session.rollback()
-        log.error(f"Unknown error on database commit: {e}")
 
     roles_to_register = [
         RoleBaseModel({"id": key, "name": value})
@@ -28,10 +22,10 @@ def register_roles_command(verbose):
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        log.error(f"Integrity error on roles register: {e}")
+        current_app.logger.error(f"Integrity error on roles register: {e}")
     except DBAPIError as e:
         db.session.rollback()
-        log.error(f"Unknown error on roles register: {e}")
+        current_app.logger.error(f"Unknown error on roles register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
@@ -41,12 +35,12 @@ def register_roles_command(verbose):
             db.session.commit()
         except DBAPIError as e:
             db.session.rollback()
-            log.error(f"Unknown error on roles sequence updating: {e}")
+            current_app.logger.error(f"Unknown error on roles sequence updating: {e}")
 
     if verbose:
         if len(roles_to_register) > 0:
-            log.info(f"Roles registered: {roles_to_register}")
+            current_app.logger.info(f"Roles registered: {roles_to_register}")
         else:
-            log.info("No new roles to be registered")
+            current_app.logger.info("No new roles to be registered")
 
     return True

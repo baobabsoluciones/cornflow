@@ -9,7 +9,7 @@ from pytups import SuperDict, TupList
 from typing import Dict, Tuple
 
 # Imports from cornflow libraries
-from cornflow_client import InstanceCore, get_empty_schema
+from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
 from .const import INSTANCE_KEYS_RELATION
 
@@ -679,7 +679,7 @@ class Instance(InstanceCore):
             id_employee,
         ) in self.get_employees_ts_availability()
 
-    def get_ts_demand_employees_skill(self) -> TupList:
+    def get_ts_demand_employees_skill(self, e_availability) -> TupList:
         """
         Returns a TupList with the combinations of:
          - Time slots
@@ -688,20 +688,18 @@ class Instance(InstanceCore):
          - Employees that master the skill and are available on the timeslot
         For example: [("2021-09-06T07:00", 1, 1, [2, 3]), ("2021-09-06T08:00", 2, 1, [1, 2]), ...]
         """
-        return TupList(
-            [
+
+        return SuperDict(
+            {
                 (
                     self._get_time_slot_string(ts),
                     id_skill,
                     self._filter_skills_demand(ts, id_skill),
-                    self.get_employees_by_skill(id_skill).vfilter(
-                        lambda e: self._employee_available(ts, e)
-                    ),
-                )
+                ): self.get_employees_by_skill(id_skill)
                 for ts in self.time_slots
                 for id_skill in self._get_skills()
-            ]
-        )
+            }
+        ).kvapply(lambda k, v: [e for e in v if (k[0], e) in e_availability])
 
     def _get_employee_holidays(self) -> TupList:
         """

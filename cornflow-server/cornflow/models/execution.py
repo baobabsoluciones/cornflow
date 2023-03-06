@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import TEXT
 # Imports from internal modules
 from cornflow_core.shared import db
 from .base_data_model import BaseDataModel
-from ..shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
+from cornflow.shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
 
 
 class ExecutionModel(BaseDataModel):
@@ -125,7 +125,7 @@ class ExecutionModel(BaseDataModel):
         :return: nothing
         """
         self.log_text = txt
-        super().udpate({})
+        super().update({})
 
     def __repr__(self):
         """
