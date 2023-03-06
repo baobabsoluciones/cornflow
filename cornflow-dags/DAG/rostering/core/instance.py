@@ -108,7 +108,7 @@ class Instance(InstanceCore):
             "skill_demand",
             "skills",
             "employee_holidays",
-            #"store_holidays"
+            "store_holidays"
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -121,8 +121,11 @@ class Instance(InstanceCore):
         ]
         data_p["employee_holidays"] = [
             dict(id_employee=id_employee, day=day)
-            for id_employee in self.data["employee_holidays"]
-            for day in self.data["employee_holidays"][id_employee]
+            for (id_employee, day) in self.data["employee_holidays"]
+        ]
+        data_p["store_holidays"] = [
+            dict(day=day)
+            for (day) in self.data["store_holidays"]
         ]
         return pickle.loads(pickle.dumps(data_p, -1))
 
@@ -354,7 +357,7 @@ class Instance(InstanceCore):
             }
         )
 
-    def _get_employees_contract_hours(self) -> SuperDict[Tuple[int, int], int]:
+    def _get_employees_normal_contract_hours(self) -> SuperDict[Tuple[int, int], int]:
         """
         Returns a SuperDict with the week and employee tuple as key
         and the weekly hours of the contract as the value
@@ -366,7 +369,21 @@ class Instance(InstanceCore):
             lambda c: self._hour_to_slot(contract_hours[c])
         )
 
-    def _get_employees_contract_days(self) -> SuperDict[Tuple[int, int], int]:
+    def _get_employees_contract_hours(self) -> SuperDict[Tuple[int, int], int]:
+        """
+        Returns a SuperDict with the week and employee tuple as key
+        and the weekly hours of the contract taking holidays into acount
+        Contracts are supposed to start on Monday and end on Sunday
+        For example: {(36, 1): 40, ...}
+        """
+        contract_hours = self._get_employees_normal_contract_hours()
+        employee_holiday_hours = self._get_employee_holiday_hours()
+        store_holiday_hours = self._get_store_holiday_hours()
+
+        return SuperDict({key: contract_hours[key] - employee_holiday_hours.get(key, 0)
+                               - store_holiday_hours.get(key,0) for key in contract_hours})
+
+    def _get_employees_normal_contract_days(self) -> SuperDict[Tuple[int, int], int]:
         """
         Returns a SuperDict with the week and employee tuple as key and
         the max days worked weekly of the contract as the value
@@ -375,6 +392,18 @@ class Instance(InstanceCore):
         """
         contract_days = self._get_contracts("days_worked")
         return self._get_employees_contracts().vapply(lambda c: contract_days[c])
+
+    def _get_employees_contract_days(self) -> SuperDict[Tuple[int, int], int]:
+        """
+        Returns a SuperDict with the week and employee tuple as key and
+        the max days worked weekly of the contract taking holidays into acount
+        For example: {(36, 1): 5, ...}
+        """
+        contract_days = self._get_employees_normal_contract_days()
+        employee_holiday_days = self._get_employee_holiday_days()
+        store_holiday_days = self._get_store_holiday_days()
+        return SuperDict({key: contract_days[key] - employee_holiday_days.get(key, 0) -
+                               store_holiday_days.get(key, 0) for key in contract_days})
 
     def _get_employees_contract_shift(self) -> SuperDict[Tuple[int, int], int]:
         """
@@ -422,7 +451,8 @@ class Instance(InstanceCore):
             for (w, e) in start
             if self._get_week_from_ts(ts) == w
             and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
-            and (e, self._get_date_string_from_ts(ts)) not in self._get_employee_holidays()
+            and (e, self._get_date_string_from_ts(ts)) not in self._get_employee_holidays().take([0, 1])
+            if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
         )
 
     def get_employees_time_slots_week(self) -> SuperDict:
@@ -496,7 +526,8 @@ class Instance(InstanceCore):
                 for d in self.dates
                 for (w, e), hours in self._get_employees_contract_hours().items()
                 if self._get_week_from_date(d) == w
-                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays()
+                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays().take([0, 1])
+                if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
 
@@ -513,7 +544,8 @@ class Instance(InstanceCore):
                 )
                 for d in self.dates
                 for e in self._get_employees("id")
-                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays()
+                if (e, self._get_date_string_from_date(d)) not in self._get_employee_holidays().take([0, 1])
+                if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
 
@@ -681,6 +713,32 @@ class Instance(InstanceCore):
             (self.data["employee_holidays"].keys_tl())
         )
 
+    def _get_employee_holiday_hours(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly holiday hours as value.
+        For example: {(36, 1): 8,
+            (36, 2): 16, ...]
+        """
+        holiday_hours = TupList(
+            (self._get_week_from_date(self.get_date_from_string(d)), e,
+             round((self._get_employees_normal_contract_hours()[(self._get_week_from_date(self.get_date_from_string(d))), e] /
+              self._get_employees_normal_contract_days()[(self._get_week_from_date(self.get_date_from_string(d))), e])))
+                                     for (e, d) in self._get_employee_holidays())
+        holiday_hours_week = holiday_hours.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_hours_week.items()})
+
+    def _get_employee_holiday_days(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly holiday days as value.
+        For example: {(36, 1): 1,
+            (36, 2): 2, ...]
+        """
+        holiday_days = TupList((self._get_week_from_date(self.get_date_from_string(d)), e, 1)
+                                     for (e, d) in self._get_employee_holidays().take([0,1]))
+        holiday_days_week = holiday_days.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_days_week.items()})
+
+
     def _get_store_holidays(self) -> TupList:
         """
         Returns a TupList with the store holiday days.
@@ -690,3 +748,28 @@ class Instance(InstanceCore):
         return TupList(
             (self.data["store_holidays"].keys_tl())
         )
+
+    def _get_store_holiday_hours(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly store holiday hours as value.
+        For example: {(36, 1): 8,
+            (36, 2): 16, ...]
+        """
+        store_holiday_hours = TupList(
+            (self._get_week_from_date(self.get_date_from_string(d)), e,
+             round((self._get_employees_normal_contract_hours()[(self._get_week_from_date(self.get_date_from_string(d))), e] /
+              self._get_employees_normal_contract_days()[(self._get_week_from_date(self.get_date_from_string(d))), e])))
+                                     for d in self._get_store_holidays() for e in self._get_employees("id"))
+        holiday_hours_week = store_holiday_hours.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_hours_week.items()})
+
+    def _get_store_holiday_days(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly store holiday days as value.
+        For example: {(36, 1): 1,
+            (36, 2): 2, ...]
+        """
+        store_holiday_days = TupList((self._get_week_from_date(self.get_date_from_string(d)), e, 1)
+                                     for e in self._get_employees("id") for d in self._get_store_holidays())
+        holiday_days_week = store_holiday_days.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_days_week.items()})

@@ -53,8 +53,8 @@
       "id_shift": 3,
       "start_contract": "2021-09-06",
       "end_contract": null,
-      "weekly_hours": 32,
-      "days_worked": 4
+      "weekly_hours": 40,
+      "days_worked": 5
     },
     {
       "id": 12,
@@ -412,7 +412,10 @@
   ],
     "store_holidays": [
     {
-      "day": "2021-09-07"
+      "day": "2021-09-08"
+    },
+    {
+      "day": "2021-09-09"
     }
   ],
   "parameters": {
