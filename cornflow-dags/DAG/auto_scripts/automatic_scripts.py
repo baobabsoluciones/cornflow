@@ -61,7 +61,7 @@ def execute_scripts(
     script_folder="/usr/local/airflow/dags/auto_scripts/scripts_to_execute",
     destination_folder="/usr/local/airflow/dags/auto_scripts/executed_scripts",
 ):
-    print(os.getcwd())
+
     # Iterate directory
     for auto_script in os.listdir(script_folder):
         error = 0

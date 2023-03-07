@@ -67,7 +67,6 @@ class DAGTests(unittest.TestCase):
         self.assertEqual(len(variables), len(existing_apps) * 2)
 
     def test_auto_scripts(self):
-        print(os.getcwd())
 
         script_folder = os.path.join(os.path.dirname(__file__), "./data/auto_scripts/")
         destination_folder = script_folder
