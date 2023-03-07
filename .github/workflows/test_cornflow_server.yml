@@ -151,7 +151,8 @@ jobs:
         LOG_LEVEL: 30
     - name: Run integration tests
       run: |
-        coverage run -a --concurrency=multiprocessing --rcfile=cornflow/tests/integration/.coveragerc -m unittest discover -s cornflow/tests/integration
+        coverage run --rcfile=cornflow/tests/integration/.coveragerc -m unittest discover -s cornflow/tests/integration
+        coverage combine
         coverage report -m
         coverage xml
       env:

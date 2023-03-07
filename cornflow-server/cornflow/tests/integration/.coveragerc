@@ -1,3 +1,5 @@
 # .coveragerc for cornflow-server integration tests
 [run]
 source = ./cornflow/
+concurrency = multiprocessing
+parallel = true
