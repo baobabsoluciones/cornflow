@@ -896,7 +896,7 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def put_deployed_dag(self, dag_id, data, encoding=None):
-        return self.put_api_for_id("dag/deployed/", dag_id, json=data, encoding=encoding)
+        return self.put_api_for_id("dag/deployed/", dag_id, payload=data, encoding=encoding)
 
 
 class CornFlowApiError(Exception):

@@ -7,11 +7,9 @@ from sqlalchemy.dialects.postgresql import TEXT, JSON
 # Import from internal modules
 from cornflow_core.models import TraceAttributesModel
 from cornflow_core.shared import db
-from cornflow_client.airflow.api import get_schema, Airflow
-from cornflow_client import SchemaManager
+from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
-    CONFIG_SCHEMA,
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
     SOLUTION_CHECKS_SCHEMA
@@ -51,31 +49,6 @@ class DeployedDAG(TraceAttributesModel):
 
     def __repr__(self):
         return f"<DAG {self.id}>"
-
-    @staticmethod
-    def get_marshmallow_schema(config, dag_name, schema=INSTANCE_SCHEMA):
-        """
-        Gets a schema by name from airflow server. We use the variable api.
-        We transform the jsonschema into a marshmallow class
-
-        """
-        item = DeployedDAG.get_one_object(dag_name)
-
-        # If the DAG is not up-to-date in the database, we ask Airflow
-        if item is None:
-            return get_schema(config, dag_name, schema)
-
-        if schema == INSTANCE_SCHEMA:
-            json_schema = item.instance_schema
-        elif schema == SOLUTION_SCHEMA:
-            json_schema = item.solution_schema
-        elif schema == INSTANCE_CHECKS_SCHEMA:
-            json_schema = item.instance_checks_schema
-        elif schema == SOLUTION_CHECKS_SCHEMA:
-            json_schema = item.solution_checks_schema
-        else:           # schema == CONFIG_SCHEMA
-            json_schema = item.config_schema
-        return SchemaManager(json_schema).jsonschema_to_flask()
 
     @staticmethod
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
