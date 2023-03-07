@@ -362,6 +362,55 @@
       }
     }
   },
+  "employee_holidays": {
+      "type": "array",
+      "description": "Table with the holidays of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the holiday. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["id_employee","day"]
+      }
+    },
+  "store_holidays": {
+      "type": "array",
+      "description": "Table with the store holidays",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "description": "The date of the skill demand. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["day"]
+      }
+    },
   "required": [
     "employees",
     "shifts",
