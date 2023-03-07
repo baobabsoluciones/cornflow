@@ -7,6 +7,7 @@ import os
 import pickle
 from pytups import SuperDict, TupList
 from typing import Dict, Tuple
+from math import ceil
 
 # Imports from cornflow libraries
 from cornflow_client import InstanceCore
@@ -731,7 +732,7 @@ class Instance(InstanceCore):
             (
                 self._get_week_from_date(self.get_date_from_string(d)),
                 e,
-                round(
+                ceil(
                     (
                         self._get_employees_normal_contract_hours()[
                             (self._get_week_from_date(self.get_date_from_string(d))), e
@@ -778,7 +779,7 @@ class Instance(InstanceCore):
             (
                 self._get_week_from_date(self.get_date_from_string(d)),
                 e,
-                round(
+                ceil(
                     (
                         self._get_employees_normal_contract_hours()[
                             (self._get_week_from_date(self.get_date_from_string(d))), e
