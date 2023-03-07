@@ -1,5 +1,8 @@
 # Full imports
 import cornflow_client as cf
+import time
+import multiprocessing
+import socketserver
 
 # External libraries
 from coverage import process_startup
@@ -19,7 +22,6 @@ from cornflow.tests.const import PREFIX
 
 class CustomTestCaseLive(LiveServerTestCase):
     def create_app(self):
-        process_startup()
         app = create_app("testing")
         app.config["LIVESERVER_PORT"] = 5050
         return app
@@ -88,3 +90,49 @@ class CustomTestCaseLive(LiveServerTestCase):
         if prefix:
             prefix += "/"
         return "http://localhost:%s" % self._port_value.value + prefix
+
+    def _spawn_live_server(self):
+        self._process = None
+        port_value = self._port_value
+
+        def worker(app, port):
+            # Based on solution: http://stackoverflow.com/a/27598916
+            # Monkey-patch the server_bind so we can determine the port bound by Flask.
+            # This handles the case where the port specified is `0`, which means that
+            # the OS chooses the port. This is the only known way (currently) of getting
+            # the port out of Flask once we call `run`.
+            original_socket_bind = socketserver.TCPServer.server_bind
+            def socket_bind_wrapper(self):
+                ret = original_socket_bind(self)
+
+                # Get the port and save it into the port_value, so the parent process
+                # can read it.
+                (_, port) = self.socket.getsockname()
+                port_value.value = port
+                socketserver.TCPServer.server_bind = original_socket_bind
+                return ret
+
+            socketserver.TCPServer.server_bind = socket_bind_wrapper
+            app.run(port=port, use_reloader=False)
+
+        process_startup()
+        self._process = multiprocessing.Process(
+            target=worker, args=(self.app, self._configured_port)
+        )
+
+        self._process.start()
+
+        # We must wait for the server to start listening, but give up
+        # after a specified maximum timeout
+        timeout = self.app.config.get('LIVESERVER_TIMEOUT', 5)
+        start_time = time.time()
+
+        while True:
+            elapsed_time = (time.time() - start_time)
+            if elapsed_time > timeout:
+                raise RuntimeError(
+                    "Failed to start the server after %d seconds. " % timeout
+                )
+
+            if self._can_ping_server():
+                break
