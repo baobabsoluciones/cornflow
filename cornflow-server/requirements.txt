@@ -1,4 +1,4 @@
-alembic
+alembic==1.9.4
 apispec
 click
 cornflow-core
