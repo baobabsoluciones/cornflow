@@ -101,6 +101,7 @@ class CustomTestCaseLive(LiveServerTestCase):
             # This handles the case where the port specified is `0`, which means that
             # the OS chooses the port. This is the only known way (currently) of getting
             # the port out of Flask once we call `run`.
+            process_startup()
             original_socket_bind = socketserver.TCPServer.server_bind
             def socket_bind_wrapper(self):
                 ret = original_socket_bind(self)
@@ -115,7 +116,6 @@ class CustomTestCaseLive(LiveServerTestCase):
             socketserver.TCPServer.server_bind = socket_bind_wrapper
             app.run(port=port, use_reloader=False)
 
-        process_startup()
         self._process = multiprocessing.Process(
             target=worker, args=(self.app, self._configured_port)
         )
