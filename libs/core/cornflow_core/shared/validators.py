@@ -5,8 +5,6 @@ import re
 from typing import Tuple, Union
 
 from jsonschema import Draft7Validator
-from marshmallow import ValidationError
-from cornflow_core.exceptions import InvalidUsage
 from disposable_email_domains import blocklist
 
 
@@ -68,20 +66,6 @@ def check_email_pattern(email: str) -> Tuple[bool, Union[str, None]]:
     return True, None
 
 
-def validate_and_continue(obj, data):
-    """
-    Method to validate data against an object
-    """
-    try:
-        validate = obj.load(data)
-    except ValidationError as e:
-        raise InvalidUsage(error=f"Bad data format: {e}")
-    err = ""
-    if validate is None:
-        raise InvalidUsage(error=f"Bad data format: {err}")
-    return validate
-
-
 def json_schema_validate(schema: dict, data: dict) -> list:
     """
     Method to validate some data against a json schema
@@ -107,9 +91,3 @@ def json_schema_validate_as_string(schema: dict, data: dict) -> list:
     :rtype: list
     """
     return [str(e) for e in json_schema_validate(schema, data)]
-
-
-"""
-Aliases
-"""
-marshmallow_validate_and_continue = validate_and_continue
