@@ -160,6 +160,7 @@ jobs:
         OPEN_DEPLOYMENT: 1
         DATABASE_URL: sqlite:///cornflow_test.db
         LOG_LEVEL: 30
+        COVERAGE_PROCESS_START: /home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration/.coveragerc
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v3
       with:

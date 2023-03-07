@@ -2,6 +2,7 @@
 import cornflow_client as cf
 
 # External libraries
+from coverage import process_startup
 from flask import current_app
 from flask_testing import LiveServerTestCase
 
@@ -18,6 +19,7 @@ from cornflow.tests.const import PREFIX
 
 class CustomTestCaseLive(LiveServerTestCase):
     def create_app(self):
+        process_startup()
         app = create_app("testing")
         app.config["LIVESERVER_PORT"] = 5050
         return app
