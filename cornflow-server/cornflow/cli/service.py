@@ -1,8 +1,9 @@
 import os
 import subprocess
 import sys
-from logging import error
 import time
+from logging import error
+
 
 import click
 import cornflow
@@ -169,6 +170,7 @@ def init_cornflow_service():
             register_ssh_host(bitbucket_host)
 
         os.system("$(command -v pip) install --user -r requirements.txt")
+        time.sleep(5)
         sys.path.append("/usr/src/app")
 
         from importlib import import_module
