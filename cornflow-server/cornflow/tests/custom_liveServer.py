@@ -154,5 +154,7 @@ class CoverageProcess(multiprocessing.Process):
             finally:
                 cov.stop()
                 cov.save()
+                print("Saving coverage")
+                print(os.listdir())
         else:
             super().run()
