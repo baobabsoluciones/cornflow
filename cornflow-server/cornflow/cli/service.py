@@ -116,7 +116,7 @@ def init_cornflow_service():
     if external_application == 0:
         os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
     elif external_application == 1:
-        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app/external_app"
+        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/external_app"
     else:
         raise Exception("No external application found")
 
