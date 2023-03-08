@@ -22,6 +22,8 @@ This decision is subject to:
 - RQ10: employee holidays are taken into account. Employees do not work when on holiday.
 - RQ11: store holidays are taken into account. Employees do not work on store holidays.
 - RQ12: employees can not work during downtime.
+- RQ13: employee starting hour preference.
+- RQ14: employee max preference hours.
 
 Parameters
 ----------
@@ -33,6 +35,7 @@ Parameters
 - Employee holidays: the days in which an employee is on holiday and therefore can not work.
 - Store holidays: the days in which the store is closed and therefore nobody works.
 - Employee downtime: the days in which an employee can not work due an illness.
+- Employee preferences: starting and number of hours preferences for one day.
 
 - Parameters:
 

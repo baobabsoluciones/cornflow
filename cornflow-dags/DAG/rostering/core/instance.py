@@ -103,6 +103,14 @@ class Instance(InstanceCore):
         else:
             data_p["employee_downtime"] = SuperDict({})
 
+        if data.get("employee_preferences"):
+            data_p["employee_preferences"] = {
+                (el["id_employee"], el["day"], el["hours"], el["start"]): el
+                for el in data["employee_preferences"]
+            }
+        else:
+            data_p["employee_preferences"] = SuperDict({})
+
         return cls(data_p)
 
     def to_dict(self) -> Dict:
@@ -116,6 +124,7 @@ class Instance(InstanceCore):
             "employee_holidays",
             "employee_downtime",
             "store_holidays",
+            "employee_preferences",
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -136,6 +145,10 @@ class Instance(InstanceCore):
         data_p["employee_downtime"] = [
             dict(id_employee=id_employee, day=day)
             for (id_employee, day) in self.data["employee_downtime"]
+        ]
+        data_p["employee_preferences"] = [
+            dict(id_employee=id_employee, day=day, hours=hours, start=start)
+            for (id_employee, day, hours, start) in self.data["employee_preferences"]
         ]
         return pickle.loads(pickle.dumps(data_p, -1))
 
@@ -876,3 +889,59 @@ class Instance(InstanceCore):
         )
         downtime_days_week = downtime_days.take([0, 1, 2]).to_dict(2)
         return SuperDict({k: sum(v) for k, v in downtime_days_week.items()})
+
+    def _get_employee_preferences(self) -> TupList:
+        """
+        Returns a TupList with the employee preferences
+        For example: [(1, "2021-09-09", 5, 15),
+        (1, "2021-09-09", 5, 15), ...]
+        """
+        return TupList(
+            (self.data["employee_preferences"].keys_tl())
+        )
+
+    def _get_employee_time_slots_preferences(self) -> TupList:
+        """
+        Returns a TupList with the combinations of employees, dates and time slots
+        prefered by employees.
+        For example: [("2021-09-06T07:00", "2021-09-06", 1),
+            ("2021-09-06T08:00", "2021-09-06", 1), ...]
+        """
+        preferences = self._get_employee_preferences()
+        availability = self.get_employees_ts_availability()
+
+        return TupList(
+            (self._get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
+            for ts in self.time_slots
+            for e in self._get_employees("id")
+            if (e, self._get_date_string_from_ts(ts)) in preferences.take([0, 1])
+            if (self._get_time_slot_string(ts), e) in availability
+        )
+
+    def get_employees_time_slots_preferences(self) -> SuperDict:
+        """
+        Returns a SuperDict with the date and employee tuple as key
+        and a list of time slots as value where the employee wants to work.
+        For example: {("2021-09-06", 1): ["2021-09-06T07:00", "2021-09-06T08:00", ...], ...}
+        """
+
+        return self._get_employee_time_slots_preferences().take([0, 1, 2]).to_dict(0)
+
+    def get_employee_preference_start_ts(self) -> SuperDict:
+
+        preferences = self._get_employee_preferences()
+        availability = self.get_employees_ts_availability()
+
+        starts_ts = TupList(
+            (self._get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
+            for ts in self.time_slots
+            for e in self._get_employees("id")
+            if (e, self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts)) in preferences.take([0, 1, 3])
+            if (self._get_time_slot_string(ts), e) in availability
+        )
+
+        return starts_ts.take([0, 1, 2]).to_dict(0)
+
+    def get_employe_prefererence_hours(self) -> SuperDict:
+
+        return self._get_employee_preferences().take([1, 0, 2]).to_dict(2, is_list=False)
