@@ -38,10 +38,7 @@
       },
       "required": [
         "horizon",
-        "opening_days",
         "slot_length",
-        "starting_hour",
-        "ending_hour",
         "starting_date",
         "min_working_hours",
         "min_resting_hours"
@@ -479,6 +476,7 @@
     "shifts",
     "contracts",
     "demand",
+    "weekly_schedule",
     "parameters"
   ]
 }
