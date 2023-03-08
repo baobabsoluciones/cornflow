@@ -206,6 +206,7 @@ def init_cornflow_service():
             update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
 
         click.echo("Starting long sleep")
+        click.echo(f"Gunicorn command: /usr/local/bin/gunicorn -c python:cornflow.gunicorn \"'$EXTERNAL_APP_MODULE':create_wsgi_app('$FLASK_ENV')\"")
 
         time.sleep(100000)
         
