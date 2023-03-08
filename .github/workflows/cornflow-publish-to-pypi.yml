@@ -29,13 +29,13 @@ jobs:
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.test_pypi_password }}
+        password: ${{ secrets.CORNFLOW_TEST_PYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
         packages_dir: cornflow-server/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        password: ${{ secrets.pypi_password }}
+        password: ${{ secrets.CORNFLOW_PYPI_TOKEN }}
         packages_dir: cornflow-server/dist/
     - name: Get version number
       uses: jungwinter/split@v2
