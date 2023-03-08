@@ -2097,12 +2097,53 @@
       "demand": 30
     }
   ],
+  "weekly_schedule": [
+    {
+      "week_day": "Monday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+    {
+      "week_day": "Tuesday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+    {
+      "week_day": "Wednesday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+    {
+      "week_day": "Thursday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+    {
+      "week_day": "Friday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+        {
+      "week_day": "Saturday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    },
+    {
+      "week_day": "Sunday",
+      "starting_hour": 7,
+      "ending_hour": 21
+    }
+  ],
+  "schedule_exceptions":  [
+    {
+      "date": "2021-09-07",
+      "starting_hour": 7,
+      "ending_hour": 21
+    }
+  ],
   "parameters": {
     "horizon": 4,
-    "opening_days": 7,
     "slot_length": 60,
-    "starting_hour": 7,
-    "ending_hour": 21,
     "starting_date": "2021-09-06",
     "min_working_hours": 4,
     "min_resting_hours": 12
