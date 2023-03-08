@@ -114,6 +114,13 @@ def init_cornflow_service():
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     if external_application == 0:
+        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
+    elif external_application == 1:
+        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app/external_app"
+    else:
+        raise Exception("No external application found")
+
+    if external_application == 0:
         click.echo("Starting cornflow")
         app = cornflow.create_app(environment, cornflow_db_conn)
         with app.app_context():
@@ -207,7 +214,7 @@ def init_cornflow_service():
         )
 
     else:
-        pass
+        raise Exception("No external application found")
 
 
 def register_ssh_host(host):
