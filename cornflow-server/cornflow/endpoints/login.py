@@ -10,9 +10,9 @@ from flask import current_app
 from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
-from ..models import PermissionsDAG, UserModel, UserRoleModel
+from cornflow.models import PermissionsDAG, UserModel, UserRoleModel
 from cornflow_core.schemas import LoginEndpointRequest, LoginOpenAuthRequest
-from ..shared.authentication import Auth
+from cornflow.shared.authentication import Auth
 
 
 class LoginEndpoint(LoginBaseEndpoint):

@@ -6,11 +6,12 @@ from cornflow_core.authentication import authenticate
 from cornflow_core.resources import BaseMetaResource
 from cornflow_core.schemas import ActionsResponse
 from flask_apispec import marshal_with, doc
+from flask import current_app
 
 # Import from internal modules
 from cornflow_core.models import ActionBaseModel
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE
 
 
 class ActionListEndpoint(BaseMetaResource):
@@ -34,4 +35,5 @@ class ActionListEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets all actions")
         return self.get_list()

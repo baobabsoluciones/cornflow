@@ -10,7 +10,7 @@ from typing import Dict, Tuple
 from math import ceil
 
 # Imports from cornflow libraries
-from cornflow_client import InstanceCore, get_empty_schema
+from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
 from .const import INSTANCE_KEYS_RELATION
 
@@ -82,6 +82,20 @@ class Instance(InstanceCore):
         else:
             data_p["skills_employees"] = SuperDict({})
 
+        if data.get("employee_holidays"):
+            data_p["employee_holidays"] = {
+                (el["id_employee"], el["day"]): el for el in data["employee_holidays"]
+            }
+        else:
+            data_p["employee_holidays"] = SuperDict({})
+
+        if data.get("store_holidays"):
+            data_p["store_holidays"] = {
+                (el["day"]): el for el in data["store_holidays"]
+            }
+        else:
+            data_p["store_holidays"] = SuperDict({})
+
         if data.get("employee_downtime"):
             data_p["employee_downtime"] = {
                 (el["id_employee"], el["day"]): el for el in data["employee_downtime"]
@@ -99,7 +113,9 @@ class Instance(InstanceCore):
             "demand",
             "skill_demand",
             "skills",
+            "employee_holidays",
             "employee_downtime",
+            "store_holidays",
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -109,6 +125,13 @@ class Instance(InstanceCore):
             dict(id_employee=id_employee, id_skill=id_skill)
             for id_skill in self.data["skills_employees"]
             for id_employee in self.data["skills_employees"][id_skill]
+        ]
+        data_p["employee_holidays"] = [
+            dict(id_employee=id_employee, day=day)
+            for (id_employee, day) in self.data["employee_holidays"]
+        ]
+        data_p["store_holidays"] = [
+            dict(day=day) for (day) in self.data["store_holidays"]
         ]
         data_p["employee_downtime"] = [
             dict(id_employee=id_employee, day=day)
@@ -364,10 +387,16 @@ class Instance(InstanceCore):
         For example: {(36, 1): 40, ...}
         """
         contract_hours = self._get_employees_normal_contract_hours()
+        employee_holiday_hours = self._get_employee_holiday_hours()
         downtime_hours = self._get_employee_downtime_hours()
+        store_holiday_hours = self._get_store_holiday_hours()
+
         return SuperDict(
             {
-                key: contract_hours[key] - downtime_hours.get(key, 0)
+                key: contract_hours[key]
+                - employee_holiday_hours.get(key, 0)
+                - store_holiday_hours.get(key, 0)
+				- downtime_hours.get(key, 0)
                 for key in contract_hours
             }
         )
@@ -389,10 +418,15 @@ class Instance(InstanceCore):
         For example: {(36, 1): 5, ...}
         """
         contract_days = self._get_employees_normal_contract_days()
-        downtime_days = self._get_employee_downtime_days()
+        employee_holiday_days = self._get_employee_holiday_days()
+        store_holiday_days = self._get_store_holiday_days()
+		downtime_days = self._get_employee_downtime_days()
         return SuperDict(
             {
-                key: contract_days[key] - downtime_days.get(key, 0)
+                key: contract_days[key]
+                - employee_holiday_days.get(key, 0)
+                - store_holiday_days.get(key, 0)
+				- downtime_days.get(key, 0)
                 for key in contract_days
             }
         )
@@ -444,7 +478,9 @@ class Instance(InstanceCore):
             if self._get_week_from_ts(ts) == w
             and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
             and (e, self._get_date_string_from_ts(ts))
+            not in self._get_employee_holidays().take([0, 1])
             not in self._get_employee_downtime().take([0, 1])
+            if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
         )
 
     def get_employees_time_slots_week(self) -> SuperDict:
@@ -519,7 +555,10 @@ class Instance(InstanceCore):
                 for (w, e), hours in self._get_employees_contract_hours().items()
                 if self._get_week_from_date(d) == w
                 if (e, self._get_date_string_from_date(d))
+
+                not in self._get_employee_holidays().take([0, 1])
                 not in self._get_employee_downtime().take([0, 1])
+                if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
 
@@ -537,7 +576,9 @@ class Instance(InstanceCore):
                 for d in self.dates
                 for e in self._get_employees("id")
                 if (e, self._get_date_string_from_date(d))
+                not in self._get_employee_holidays().take([0, 1])
                 not in self._get_employee_downtime().take([0, 1])
+                if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
 
@@ -671,7 +712,7 @@ class Instance(InstanceCore):
             id_employee,
         ) in self.get_employees_ts_availability()
 
-    def get_ts_demand_employees_skill(self) -> TupList:
+    def get_ts_demand_employees_skill(self, e_availability) -> TupList:
         """
         Returns a TupList with the combinations of:
          - Time slots
@@ -680,20 +721,114 @@ class Instance(InstanceCore):
          - Employees that master the skill and are available on the timeslot
         For example: [("2021-09-06T07:00", 1, 1, [2, 3]), ("2021-09-06T08:00", 2, 1, [1, 2]), ...]
         """
-        return TupList(
-            [
+
+        return SuperDict(
+            {
                 (
                     self._get_time_slot_string(ts),
                     id_skill,
                     self._filter_skills_demand(ts, id_skill),
-                    self.get_employees_by_skill(id_skill).vfilter(
-                        lambda e: self._employee_available(ts, e)
-                    ),
-                )
+                ): self.get_employees_by_skill(id_skill)
                 for ts in self.time_slots
                 for id_skill in self._get_skills()
-            ]
+            }
+        ).kvapply(lambda k, v: [e for e in v if (k[0], e) in e_availability])
+
+    def _get_employee_holidays(self) -> TupList:
+        """
+        Returns a TupList with the combinations of employees and holiday days.
+        For example: [(1, "2021-09-06"),
+            (2, "2021-09-07"), ...]
+        """
+        return TupList((self.data["employee_holidays"].keys_tl()))
+
+    def _get_employee_holiday_hours(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly holiday hours as value.
+        For example: {(36, 1): 8,
+            (36, 2): 16, ...]
+        """
+        holiday_hours = TupList(
+            (
+                self._get_week_from_date(self.get_date_from_string(d)),
+                e,
+                ceil(
+                    (
+                        self._get_employees_normal_contract_hours()[
+                            (self._get_week_from_date(self.get_date_from_string(d))), e
+                        ]
+                        / self._get_employees_normal_contract_days()[
+                            (self._get_week_from_date(self.get_date_from_string(d))), e
+                        ]
+                    )
+                ),
+            )
+            for (e, d) in self._get_employee_holidays()
         )
+        holiday_hours_week = holiday_hours.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_hours_week.items()})
+
+    def _get_employee_holiday_days(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly holiday days as value.
+        For example: {(36, 1): 1,
+            (36, 2): 2, ...]
+        """
+        holiday_days = TupList(
+            (self._get_week_from_date(self.get_date_from_string(d)), e, 1)
+            for (e, d) in self._get_employee_holidays().take([0, 1])
+        )
+        holiday_days_week = holiday_days.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_days_week.items()})
+
+    def _get_store_holidays(self) -> TupList:
+        """
+        Returns a TupList with the store holiday days.
+        For example: [("2021-09-06"),
+            ("2021-09-07"), ...]
+        """
+        return TupList((self.data["store_holidays"].keys_tl()))
+
+    def _get_store_holiday_hours(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly store holiday hours as value.
+        For example: {(36, 1): 8,
+            (36, 2): 16, ...]
+        """
+        store_holiday_hours = TupList(
+            (
+                self._get_week_from_date(self.get_date_from_string(d)),
+                e,
+                ceil(
+                    (
+                        self._get_employees_normal_contract_hours()[
+                            (self._get_week_from_date(self.get_date_from_string(d))), e
+                        ]
+                        / self._get_employees_normal_contract_days()[
+                            (self._get_week_from_date(self.get_date_from_string(d))), e
+                        ]
+                    )
+                ),
+            )
+            for d in self._get_store_holidays()
+            for e in self._get_employees("id")
+        )
+        holiday_hours_week = store_holiday_hours.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_hours_week.items()})
+
+    def _get_store_holiday_days(self) -> SuperDict:
+        """
+        Returns a SuperDict with week and employee as key and weekly store holiday days as value.
+        For example: {(36, 1): 1,
+            (36, 2): 2, ...]
+        """
+        store_holiday_days = TupList(
+            (self._get_week_from_date(self.get_date_from_string(d)), e, 1)
+            for e in self._get_employees("id")
+            for d in self._get_store_holidays()
+        )
+        holiday_days_week = store_holiday_days.take([0, 1, 2]).to_dict(2)
+        return SuperDict({k: sum(v) for k, v in holiday_days_week.items()})
 
     def _get_employee_downtime(self) -> TupList:
         """

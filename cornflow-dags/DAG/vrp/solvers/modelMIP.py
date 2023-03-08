@@ -13,7 +13,8 @@ from pyomo.environ import (
     Binary,
 )
 from cornflow_client.constants import (
-    STATUS_INFEASIBLE,
+    STATUS_TIME_LIMIT,
+    STATUS_NOT_SOLVED,
     PYOMO_STOP_MAPPING,
     SOLUTION_STATUS_INFEASIBLE,
     SOLUTION_STATUS_FEASIBLE,
@@ -274,6 +275,7 @@ class modelMIP(Experiment):
         mip_vrp = self.get_mip_model()
         opt = SolverFactory("cbc")
         opt.options.update(SOLVER_PARAMETERS)
+        termination_condition = STATUS_NOT_SOLVED
 
         tours = [1] * (self.instance.get_num_vehicles() + 1)
         while len(tours) > self.instance.get_num_vehicles():
@@ -281,11 +283,22 @@ class modelMIP(Experiment):
 
             result = opt.solve(mip_vrp_instance)
 
-            status = PYOMO_STOP_MAPPING[result.solver.termination_condition]
+            status = result.solver.status
+            termination_condition = PYOMO_STOP_MAPPING[result.solver.termination_condition]
             # Check status
-            if status == STATUS_INFEASIBLE:
+            if status in ["error", "unknown", "warning"]:
                 self.log += "Infeasible, check data \n"
-                return dict(status=status, status_sol=SOLUTION_STATUS_INFEASIBLE)
+                return dict(
+                    status=termination_condition,
+                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
+            elif status == "aborted":
+                if termination_condition != STATUS_TIME_LIMIT:
+                    self.log += "Infeasible, check data \n"
+                    return dict(
+                        status=termination_condition,
+                        status_sol=SOLUTION_STATUS_INFEASIBLE
+                    )
 
             solution_list = self.get_solution_data(mip_vrp_instance)
             tours = self.get_nodesubset(solution_list)
@@ -297,7 +310,10 @@ class modelMIP(Experiment):
 
         self.log += "Solving complete\n"
 
-        return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
+        return dict(
+            status=termination_condition,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )
 
     def get_solution_data(self, model_instance):
         """

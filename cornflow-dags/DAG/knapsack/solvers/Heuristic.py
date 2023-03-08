@@ -1,6 +1,10 @@
 from ..core import Solution
 from ..core import Experiment
 import numpy as np
+from cornflow_client.constants import (
+    STATUS_FEASIBLE,
+    SOLUTION_STATUS_FEASIBLE
+)
 
 
 class Heuristic(Experiment):
@@ -30,4 +34,7 @@ class Heuristic(Experiment):
             i += 1
 
         self.log += "Solving complete\n"
-        return 0
+        return dict(
+            status=STATUS_FEASIBLE,
+            status_sol=SOLUTION_STATUS_FEASIBLE
+        )

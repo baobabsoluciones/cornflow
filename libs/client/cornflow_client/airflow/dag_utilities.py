@@ -3,6 +3,7 @@
 """
 # Full imports
 import json
+import logging
 import os
 
 # Partial imports
@@ -103,6 +104,23 @@ def try_to_save_error(client, exec_id, state=-1):
         print(f"An exception trying to register the failed status: {e}")
 
 
+def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+    log_file = os.path.join(
+        base_log_folder,
+        f"{ti.dag_id}",
+        f"{ti.task_id}",
+        f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
+        f"{ti.try_number}.log"
+    )
+    if os.path.exists(log_file):
+        with open(log_file, 'r') as fd:
+            log_file_txt = fd.read()
+        try:
+            client.put_api_for_id("dag/", id=exec_id, payload=dict(log_text=log_file_txt))
+        except Exception as e:
+            print(f"An exception occurred while trying to register airflow log: {e}")
+
+
 def try_to_write_solution(client, exec_id, payload):
     """
     Tries to write the payload into cornflow
@@ -154,6 +172,9 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
+    ti = kwargs["ti"]
+    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    config = dict()
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
@@ -208,12 +229,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             print("No solver found !")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(e)
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException("There was an error during the solving")
 
 
@@ -225,6 +248,9 @@ def cf_check(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
+    ti = kwargs["ti"]
+    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    config = dict()
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
@@ -267,6 +293,9 @@ def cf_check(fun, dag_name, secrets, **kwargs):
                 client.write_case_checks(case_id=case_id, **checks_payload)
             except CornFlowApiError:
                 try_to_save_error(client, exec_id, -6)
+                if config.get("msg", True):
+                    print("An error occurred while trying to save the checks")
+                try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
                 raise AirflowDagException("The writing of the case checks failed")
 
         # # The validation went correctly: can save the solution without problem
@@ -277,6 +306,7 @@ def cf_check(fun, dag_name, secrets, **kwargs):
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )

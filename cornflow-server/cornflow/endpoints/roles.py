@@ -17,8 +17,8 @@ from cornflow_core.schemas import (
     RolesRequest,
     RolesResponse,
 )
-from ..shared.authentication import Auth
-from ..shared.const import ADMIN_ROLE, AUTH_LDAP
+from cornflow.shared.authentication import Auth
+from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
 
 
 class RolesListEndpoint(BaseMetaResource):
@@ -42,6 +42,7 @@ class RolesListEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets all the roles")
         return self.get_list()
 
     @doc(description="Creates a new role", tags=["Roles"])
@@ -62,9 +63,13 @@ class RolesListEndpoint(BaseMetaResource):
         """
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
+            err = "The roles have to be created in the directory."
             raise EndpointNotImplemented(
-                "The roles have to be created in the directory."
+                err,
+                log_txt=f"Error while user {self.get_user()} tries to create "
+                        f"a new role through the endpoint. " + err
             )
+        current_app.logger.info(f"User {self.get_user()} creates a new role")
         return self.post_list(kwargs)
 
 
@@ -91,6 +96,7 @@ class RoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        current_app.logger.info(f"User {self.get_user()} gets details of role {idx}")
         return self.get_detail(idx=idx)
 
     @doc(description="Modifies one role", tags=["Roles"])
@@ -111,9 +117,13 @@ class RoleDetailEndpoint(BaseMetaResource):
         """
         AUTH_TYPE = current_app.config["AUTH_TYPE"]
         if AUTH_TYPE == AUTH_LDAP:
+            err = "The roles have to be modified in the directory."
             raise EndpointNotImplemented(
-                "The roles have to be modified in the directory."
+                err,
+                log_txt=f"Error while user {self.get_user()} tries to edit "
+                        f"a role through the endpoint. " + err
             )
+        current_app.logger.info(f"User {self.get_user()} edits role {idx}")
         return self.put_detail(kwargs, idx=idx, track_user=False)
 
     @doc(description="Deletes one role", tags=["Roles"])
@@ -131,4 +141,9 @@ class RoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        raise EndpointNotImplemented("Roles can not be deleted")
+        current_app.logger.error(f"User {self.get_user()} tries to delete role {idx}")
+        err = "Roles can not be deleted"
+        raise EndpointNotImplemented(
+            err,
+            log_txt=f"Error while user {self.get_user()} tries to delete a role. " + err
+        )

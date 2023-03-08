@@ -7,9 +7,9 @@ from flask import current_app
 from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
-from ..models import PermissionsDAG, UserRoleModel, UserModel
+from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow_core.schemas import SignupRequest
-from ..shared.authentication import Auth
+from cornflow.shared.authentication import Auth
 
 
 class SignUpEndpoint(SignupBaseEndpoint):

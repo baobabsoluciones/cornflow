@@ -6,6 +6,5 @@ from .validators import (
     check_email_pattern,
     check_password_pattern,
     json_schema_validate,
-    marshmallow_validate_and_continue,
-    validate_and_continue,
+    json_schema_validate_as_string,
 )

@@ -75,8 +75,10 @@ class BaseDAGTests:
                 if solution_data is None:
                     raise ValueError("No solution found")
                 marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
-                marshm().load(solution_data)
-                marshm().validate(solution_data)
+                validator = Draft7Validator(self.app.solution.schema)
+                if not validator.is_valid(solution_data):
+                    raise Exception("The solution has invalid format")
+
                 self.assertTrue(len(solution_data) > 0)
                 instance = self.app.instance.from_dict(data)
                 solution = self.app.solution.from_dict(solution_data)
@@ -109,11 +111,19 @@ class BaseDAGTests:
                 connectCornflow.return_value = mock
                 dag_run = Mock()
                 dag_run.conf = dict(exec_id="exec_id")
+                ti = Mock()
+                ti.run_id = "run_id"
+                ti.dag_id = "dag_id"
+                ti.try_number = 1
+                ti.task_id = "task_id"
+
                 cf_solve(
                     fun=self.app.solve,
                     dag_name=self.app.name,
                     secrets="",
                     dag_run=dag_run,
+                    ti=ti,
+                    conf=dict(),
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
@@ -199,6 +209,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         super().setUp()
         from DAG.roadef import Roadef
 
+        self.config.update({"timeLimit": 10, "seconds": 10})
         self.app = Roadef()
 
     def test_solve_mip(self):
@@ -228,6 +239,7 @@ class Rostering(BaseDAGTests.SolvingTests):
 
         self.app = Rostering()
         self.config.update(dict(solver="mip.PULP_CBC_CMD"))
+        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):

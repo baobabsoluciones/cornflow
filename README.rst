@@ -15,6 +15,24 @@ Cornflow
 
 .. image:: https://img.shields.io/pypi/l/cornflow-client?color=blue&style=for-the-badge
   :alt: PyPI - License
+  :target: https://github.com/baobabsoluciones/cornflow/blob/master/LICENSE
+  
+.. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=server-tests&label=cornflow&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
+   :alt: Codecov
+   :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
+
+.. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=client-tests&label=client&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
+   :alt: Codecov
+   :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
+
+.. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=core-tests&label=Core&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
+   :alt: Codecov
+   :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
+
+.. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=dags-tests&label=dags&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
+   :alt: Codecov
+   :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
+
 
 Cornflow is a collection of projects (being this a monorepo) that allow for the rapid prototyping and deployment of optimization-based applications. Contrary to other existing deployment servers, Cornflow is centered around the applications and the problems, not in the techniques. It offers several other advantages such as being completely free (as in freedom) and very flexible.
 

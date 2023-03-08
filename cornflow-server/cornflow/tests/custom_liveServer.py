@@ -30,14 +30,14 @@ class CustomTestCaseLive(LiveServerTestCase):
         try:
             response = self.client.login(user_data["username"], user_data["pwd"])
         except cf.CornFlowApiError:
-            response = self.client.sign_up(**user_data).json()
+            response = self.client.sign_up(**user_data)
         return response
 
     def setUp(self, create_all=True):
         if create_all:
             db.create_all()
-        access_init_command(0)
-        register_deployed_dags_command_test(verbose=0)
+        access_init_command(False)
+        register_deployed_dags_command_test(verbose=False)
         user_data = dict(
             username="testname",
             email="test@test.com",
@@ -50,7 +50,7 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.model = None
         self.items_to_check = []
         register_dag_permissions_command(
-            open_deployment=current_app.config["OPEN_DEPLOYMENT"], verbose=0
+            open_deployment=current_app.config["OPEN_DEPLOYMENT"], verbose=False
         )
 
     def tearDown(self):
