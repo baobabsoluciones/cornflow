@@ -159,7 +159,7 @@ class CoverageProcess(multiprocessing.Process):
 
             try:
                 super().run()
-            except Exception:
+            finally:
                 self.cov.stop()
                 self.cov.save()
                 self.cov_running = False
@@ -171,10 +171,10 @@ class CoverageProcess(multiprocessing.Process):
 
     def terminate(self) -> None:
         print(os.listdir())
+        print(os.listdir("/home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration/"))
         if self.cov_running:
             self.cov.stop()
             self.cov.save()
             print("Saving in terminate")
-            print(os.listdir())
-            print(os.listdir("/home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration/"))
+
         super().terminate()
