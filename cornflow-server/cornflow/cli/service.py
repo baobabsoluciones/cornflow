@@ -116,7 +116,7 @@ def init_cornflow_service():
     if external_application == 0:
         os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
     elif external_application == 1:
-        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/external_app"
+        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
     else:
         raise Exception("No external application found")
 
@@ -157,10 +157,8 @@ def init_cornflow_service():
                 "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
             )
     elif external_application == 1:
-        click.echo(
-            f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE', '../external_app')}"
-        )
-        os.chdir("/usr/src/external_app")
+        click.echo(f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE')}")
+        os.chdir("/usr/src/app")
 
         if register_key():
             github_host = os.getenv("github_host", None)
@@ -170,13 +168,11 @@ def init_cornflow_service():
             register_ssh_host(bitbucket_host)
 
         os.system("$(command -v pip) install --user -r requirements.txt")
-        sys.path.append("/usr/src/external_app")
+        sys.path.append("/usr/src/app")
 
         from importlib import import_module
 
-        external_app = import_module(
-            os.getenv("EXTERNAL_APP_MODULE", "../external_app")
-        )
+        external_app = import_module(os.getenv("EXTERNAL_APP_MODULE"))
         app = external_app.create_wsgi_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(external_app.__file__)}/migrations"
