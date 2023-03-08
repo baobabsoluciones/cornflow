@@ -37,10 +37,30 @@
       "description": "Indicators of solution",
       "show": true,
       "properties": {
-        "fo": {
+        "objective_function": {
           "type": "number",
-          "title": "F.O",
+          "title": "OF",
           "description": "Objective function"
+        },
+        "one_employee": {
+          "type": "number",
+          "title": "One employee %",
+          "description": "Percentage of time slots with only one employee"
+        },
+        "mean_demand": {
+          "type": "number",
+          "title": "Mean demand",
+          "description": "Mean demand attended by employees"
+        },
+        "max_demand": {
+          "type": "number",
+          "title": "Max demand",
+          "description": "Max demand attended by employees"
+        },
+        "min_demand": {
+          "type": "number",
+          "title": "Min demand",
+          "description": "Min demand attended by employees"
         }
       },
       "required": []
