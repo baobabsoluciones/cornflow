@@ -37,6 +37,7 @@ class Instance(InstanceCore):
         super().__init__(data)
 
         # Stores a list of the starting date of each week ordered
+        self.opening_days = set()
         self.weeks = TupList()
 
         # First object stores a list of the dates ordered,
@@ -136,6 +137,11 @@ class Instance(InstanceCore):
 
     def cache_properties(self):
         """Caches the list of weeks, dates and time slots and its associated properties"""
+
+        # We check if the the slot lenght is coherent
+        if not self._get_slot_length() % 5:
+            print("WARNING, SLOT LENGTH MUST BE MULTIPLES OF 5")
+
         self.weeks = self._get_weeks()
         self.opening_days = self._get_opening_days()
         self.dates = self._get_dates()
