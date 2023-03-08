@@ -471,6 +471,33 @@
         "required": ["day"]
       }
     },
+  "employee_downtime": {
+      "type": "array",
+      "description": "Table with the downtime days of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the downtime. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        }
+      }
+    },
   "required": [
     "employees",
     "shifts",
