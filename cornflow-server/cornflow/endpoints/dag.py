@@ -3,8 +3,6 @@ Internal endpoint for getting and posting execution data
 These are the endpoints used by airflow in its communication with cornflow
 """
 # Import from libraries
-from cornflow_client.airflow.api import get_schema
-from cornflow_core.shared import validate_and_continue
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
@@ -32,9 +30,11 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
 )
 
-from cornflow_core.exceptions import ObjectDoesNotExist
+from cornflow_core.exceptions import ObjectDoesNotExist, InvalidData
 from cornflow_core.authentication import authenticate
 from cornflow_core.resources import BaseMetaResource
+from cornflow_core.shared import json_schema_validate_as_string
+
 
 execution_schema = ExecutionSchema()
 
@@ -112,14 +112,20 @@ class DAGDetailEndpoint(BaseMetaResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == "pulp":
-            validate_and_continue(DataSchema(), data)
-        elif solution_schema is not None:
+            # The dag name is solve_model_dag
+            solution_schema = "solve_model_dag"
+        if solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(
-                config, solution_schema, SOLUTION_SCHEMA
-            )
-            validate_and_continue(marshmallow_obj(), data)
-            # marshmallow_obj().fields['jobs'].nested().fields['successors']
+
+            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, data)
+
+            if solution_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=solution_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
+                            f"Solution data do not match the jsonschema.",
+                )
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             err = "The execution does not exist."
@@ -212,13 +218,18 @@ class DAGEndpointManual(BaseMetaResource):
             # only check format if executions_results exist
             solution_schema = None
         if solution_schema == "pulp":
-            validate_and_continue(DataSchema(), data)
-        elif solution_schema is not None:
+            solution_schema = "solve_model_dag"
+        if solution_schema is not None:
             config = current_app.config
-            marshmallow_obj = DeployedDAG.get_marshmallow_schema(
-                config, solution_schema, SOLUTION_SCHEMA
-            )
-            validate_and_continue(marshmallow_obj(), data)
+            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_errors = json_schema_validate_as_string(solution_schema, data)
+
+            if solution_errors:
+                raise InvalidData(
+                    payload=dict(jsonschema_errors=solution_errors),
+                    log_txt=f"Error while user {self.get_user()} tries to manually create an execution. "
+                            f"Solution data do not match the jsonschema.",
+                )
 
         kwargs_copy = dict(kwargs)
         # we force the state to manual
