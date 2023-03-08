@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.0.0a5
+ARG CORNFLOW_VERSION=1.0.0a6
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
@@ -29,7 +29,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "git+https://github.com/baobabsoluciones/cornflow@feature/multiapp#subdirectory=cornflow-server"
+RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
 
 # create folder for logs
