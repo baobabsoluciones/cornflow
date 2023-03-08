@@ -146,7 +146,7 @@ class CoverageProcess(multiprocessing.Process):
         self.cov_running = False
         self.cov = None
         if self.config_file:
-            self.cov = Coverage(config_file=self.config_file, data_suffix=True, auto_data=True)
+            self.cov = Coverage(config_file=self.config_file, data_suffix=True)
             self.cov._warn_no_data = False
         super().__init__(*args, **kwargs)
 
@@ -170,9 +170,8 @@ class CoverageProcess(multiprocessing.Process):
             super().run()
 
     def terminate(self) -> None:
+        print(os.listdir())
         if self.cov_running:
-            print("Saving coverage in terminate")
-            print(os.listdir())
             self.cov.stop()
             self.cov.save()
         super().terminate()
