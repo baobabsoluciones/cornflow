@@ -8,7 +8,7 @@ def max_workers():
 
 
 pidfile = "/usr/src/app/gunicorn.pid"
-chdir = "/usr/src/app"
+chdir = os.getenv("GUNICORN_WORKING_DIR", "/usr/src/app")
 bind = "0.0.0.0:5000"
 max_requests = 1000
 worker_class = "gevent"
