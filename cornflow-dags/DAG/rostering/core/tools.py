@@ -32,11 +32,6 @@ def get_one_date(starting_date: datetime, weeks: int = 0, days: int = 0) -> date
     return starting_date + timedelta(days=weeks * 7 + days)
 
 
-def get_one_date_time(date: datetime, minutes: float = 0) -> datetime:
-    """Returns a datetime from a date adding minutes"""
-    return date + timedelta(minutes=minutes)
-
-
 def get_time_slot_string(ts: datetime) -> str:
     """Returns the string of a given time slot"""
     return datetime.strftime(ts, "%Y-%m-%dT%H%M")
