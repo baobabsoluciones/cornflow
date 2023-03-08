@@ -121,6 +121,19 @@ class Instance(InstanceCore):
         data_p = {el: self.data[el].values_l() for el in tables}
 
         data_p["parameters"] = self.data["parameters"]
+
+        data_p["weekly_schedule"] = [
+            {"week_day": d, "starting_hour": h_ini, "ending_hour": h_end}
+            for d, value in self.data["weekly_schedule"].items()
+            for (h_ini, h_end) in value
+        ]
+
+        data_p["schedule_exceptions"] = [
+            {"date": d, "starting_hour": h_ini, "ending_hour": h_end}
+            for d, value in self.data["schedule_exceptions"].items()
+            for (h_ini, h_end) in value
+        ]
+
         data_p["skills_employees"] = [
             dict(id_employee=id_employee, id_skill=id_skill)
             for id_skill in self.data["skills_employees"]
@@ -139,7 +152,7 @@ class Instance(InstanceCore):
         """Caches the list of weeks, dates and time slots and its associated properties"""
 
         # We check if the the slot lenght is coherent
-        if not self._get_slot_length() % 5:
+        if self._get_slot_length() % 5:
             print("WARNING, SLOT LENGTH MUST BE MULTIPLES OF 5")
 
         self.weeks = self._get_weeks()
