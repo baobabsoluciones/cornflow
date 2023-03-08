@@ -143,27 +143,30 @@ class Experiment(ExperimentCore):
 
     def get_mean_demand_employee(self) -> float:
         """Returns the mean demand of employees"""
+        demand = self.instance.get_demand()
         return sum(
             [
-                self.instance.get_demand()[ts] / len(employees)
+                demand[ts] / len(employees)
                 for ts, employees in self.solution.get_ts_employee().items()
             ]
         ) / len(self.solution.get_ts_employee().keys_l())
 
     def get_max_demand_employee(self) -> float:
         """Returns the max demand of employees"""
+        demand = self.instance.get_demand()
         return max(
             [
-                self.instance.get_demand()[ts] / len(employees)
+                demand[ts] / len(employees)
                 for ts, employees in self.solution.get_ts_employee().items()
             ]
         )
 
     def get_min_demand_employee(self) -> float:
         """Returns the min demand of employees"""
+        demand = self.instance.get_demand()
         return min(
             [
-                self.instance.get_demand()[ts] / len(employees)
+                demand[ts] / len(employees)
                 for ts, employees in self.solution.get_ts_employee().items()
             ]
         )
