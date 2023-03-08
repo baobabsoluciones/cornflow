@@ -104,7 +104,7 @@ class MipModel(Experiment):
 
         self.demand = self.instance.get_demand()
         self.ts_demand_employee_skill = \
-            self.instance.get_ts_demand_employees_skill(self.instance.get_employees_ts_availability())
+            self.instance.get_ts_demand_employees_skill(self.employee_ts_availability)
         self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
         self.preference_hours_employee = self.instance.get_employe_prefererence_hours()
         self.preference_slots = self.instance.get_employees_time_slots_preferences()
@@ -193,7 +193,7 @@ class MipModel(Experiment):
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
         # RQ09: The demand for each skill should be covered
-        for ts, id_skill, skill_demand, _employees in self.ts_demand_employee_skill:
+        for (ts, id_skill, skill_demand), _employees in self.ts_demand_employee_skill.items():
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
 
         # RQ13: Starting hour preference
