@@ -141,20 +141,37 @@ class CustomTestCaseLive(LiveServerTestCase):
 
 
 class CoverageProcess(multiprocessing.Process):
+    def __init__(self, *args, **kwargs):
+        self.config_file = os.getenv("COVERAGE_PROCESS_START", None)
+        self.cov_running = False
+        self.cov = None
+        if self.config_file:
+            self.cov = Coverage(config_file=self.config_file, data_suffix=True, auto_data=True)
+            self.cov._warn_no_data = False
+        super().__init__(*args, **kwargs)
+
     def run(self):
-        config_file = os.getenv("COVERAGE_PROCESS_START", None)
-        if config_file:
+
+        if self.config_file:
             print("Running coverage in CoverageProcess")
-            cov = Coverage(config_file=config_file, data_suffix=True, auto_data=True)
-            cov._warn_no_data = False
-            cov.start()
+            self.cov.start()
+            self.cov_running = True
 
             try:
                 super().run()
             finally:
-                cov.stop()
-                cov.save()
-                print("Saving coverage")
+                self.cov.stop()
+                self.cov.save()
+                self.cov_running = False
+
+                print("Saving coverage in run")
                 print(os.listdir())
         else:
             super().run()
+
+    def terminate(self) -> None:
+        print("Saving coverage in terminate")
+        if self.cov_running:
+            self.cov.stop()
+            self.cov.save()
+        super().terminate()

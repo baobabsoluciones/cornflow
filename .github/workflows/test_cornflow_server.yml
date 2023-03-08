@@ -152,7 +152,7 @@ jobs:
     - name: Run integration tests
       run: |
         coverage run --rcfile=cornflow/tests/integration/.coveragerc -m unittest discover -s cornflow/tests/integration
-        coverage combine /home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration
+        coverage combine ./cornflow/tests/integration/
         coverage report -m
         coverage xml
       env:
