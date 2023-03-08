@@ -45,6 +45,7 @@ class CornFlow:
         self.get_all_schemas = self.expect_status(self.raw.get_all_schemas, 200)
         self.get_deployed_dags = self.expect_status(self.raw.get_deployed_dags, 200)
         self.create_deployed_dag = self.expect_status(self.raw.create_deployed_dag, 201)
+        self.put_deployed_dag = self.expect_status(self.raw.put_deployed_dag, 200)
 
     @property
     def url(self):
