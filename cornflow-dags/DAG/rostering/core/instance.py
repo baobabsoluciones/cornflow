@@ -63,10 +63,14 @@ class Instance(InstanceCore):
             (el["week_day"], el["starting_hour"], el["ending_hour"])
             for el in data["weekly_schedule"]
         ).to_dict(indices=[0], result_col=[1, 2])
-        data_p["schedule_exceptions"] = TupList(
-            (el["date"], el["starting_hour"], el["ending_hour"])
-            for el in data["schedule_exceptions"]
-        ).to_dict(indices=[0], result_col=[1, 2])
+
+        if "schedule_exceptions" in data:
+            data_p["schedule_exceptions"] = TupList(
+                (el["date"], el["starting_hour"], el["ending_hour"])
+                for el in data["schedule_exceptions"]
+            ).to_dict(indices=[0], result_col=[1, 2])
+        else:
+            data_p["schedule_exceptions"] = SuperDict({})
 
         data_p["parameters"] = pickle.loads(pickle.dumps(data["parameters"], -1))
 
