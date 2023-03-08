@@ -352,6 +352,10 @@ class Instance(InstanceCore):
         """Returns the datetime object of the starting date"""
         return get_date_from_string(self.data["parameters"]["starting_date"])
 
+    def _get_end_date(self) -> datetime:
+        """Returns the last date in the hotizon"""
+        return max(self.dates)
+
     def _get_skills(self) -> TupList:
         """Returns a TupList containing the id of the skills"""
         return self.data["skills"].keys_tl()
@@ -383,7 +387,7 @@ class Instance(InstanceCore):
         Contracts are supposed to start on Monday and end on Sunday
         For example: {(36, 1): 10, ...}
         """
-        default_date = get_date_string_from_ts(self.dates[-1])
+        default_date = get_date_string_from_ts(self._get_end_date())
 
         contract_start = self._get_contracts("start_contract")
         contract_end = self._get_contracts("end_contract").vapply(
