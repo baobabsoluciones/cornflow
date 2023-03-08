@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from logging import error
+import time
 
 import click
 import cornflow
@@ -204,6 +205,10 @@ def init_cornflow_service():
             register_dag_permissions_command(open_deployment, verbose=True)
             update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
 
+        click.echo("Starting long sleep")
+
+        time.sleep(100000)
+        
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
             f"\"'$EXTERNAL_APP_MODULE':create_wsgi_app('$FLASK_ENV')\""
