@@ -30,6 +30,11 @@ class Rostering(ApplicationCore):
         data_out1 = load_json(
             os.path.join(os.path.dirname(__file__), "data/test_solution_1.json")
         )
+
+        data_2 = load_json(
+            os.path.join(os.path.dirname(__file__), "data/test_instance_2.json")
+        )
+
         data3 = load_json(
             os.path.join(os.path.dirname(__file__), "data/test_instance_3.json")
         )
@@ -37,14 +42,7 @@ class Rostering(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/test_solution_3.json")
         )
 
-        data5 = load_json(
-            os.path.join(os.path.dirname(__file__), "data/test_instance_5.json")
-        )
-        data_out5 = load_json(
-            os.path.join(os.path.dirname(__file__), "data/test_solution_5.json")
-        )
-
-        return [(data1, data_out1), (data3, data_out3), (data5, data_out5)]
+        return [(data1, data_out1), data_2, (data3, data_out3)]
 
     def get_solver(self, name: str = "mip"):
         if "." in name:
