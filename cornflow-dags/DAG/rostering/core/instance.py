@@ -213,7 +213,7 @@ class Instance(InstanceCore):
                 self._get_start_date() + timedelta(days=d)
                 for d in range(self._get_horizon() * 7)
             )
-            .vfilter(lambda v: v.strftime("%A") in self.opening_days)
+            .vfilter(lambda v: v.isoweekday() in self.opening_days)
             .sorted()
         )
 
@@ -246,7 +246,7 @@ class Instance(InstanceCore):
         For example: [datetime(2021, 9, 6, 7, 0, 0), datetime(2021, 9, 6, 8, 0, 0), ...]
         """
         weekly_schedule = self._get_weekly_schedule()
-        date_shift = {date: weekly_schedule[date.strftime("%A")] for date in self.dates}
+        date_shift = {date: weekly_schedule[date.isoweekday()] for date in self.dates}
         ts = TupList(
             key + timedelta(hours=h_start, minutes=self._get_slot_length() * x)
             for key, value in date_shift.items()
@@ -380,7 +380,7 @@ class Instance(InstanceCore):
                 for week in self.weeks
                 for c, e in self._get_contracts("id_employee").items()
                 if contract_start[c]
-                <= self._get_date_string_from_date(week)
+                <= self.get_date_string_from_ts(week)
                 <= contract_end[c]
             }
         )

@@ -258,10 +258,10 @@
         "type": "object",
         "properties": {
           "week_day": {
-            "description": "Day of the week",
+            "description": "Day of the week in number. 1 is Monday",
             "title": "Day of week",
-            "type": "string",
-            "$comment": "day",
+            "type": "number",
+            "$comment": "Day. Monday 1",
             "sortable": true,
             "filterable": true
           },

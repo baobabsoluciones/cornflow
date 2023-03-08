@@ -22735,27 +22735,27 @@
   ],
   "weekly_schedule": [
     {
-      "week_day": "Monday",
+      "week_day": 1,
       "starting_hour": 8,
       "ending_hour": 20
     },
     {
-      "week_day": "Tuesday",
+      "week_day": 2,
       "starting_hour": 8,
       "ending_hour": 20
     },
     {
-      "week_day": "Wednesday",
+      "week_day": 3,
       "starting_hour": 8,
       "ending_hour": 20
     },
     {
-      "week_day": "Thursday",
+      "week_day": 4,
       "starting_hour": 8,
       "ending_hour": 20
     },
     {
-      "week_day": "Friday",
+      "week_day": 5,
       "starting_hour": 8,
       "ending_hour": 20
     }
