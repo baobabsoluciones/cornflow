@@ -21,6 +21,7 @@ This decision is subject to:
 - RQ09: the demand for each skill should be covered
 - RQ10: employee holidays are taken into account. Employees do not work when on holiday.
 - RQ11: store holidays are taken into account. Employees do not work on store holidays.
+- RQ12: employees can not work during downtime.
 
 Parameters
 ----------
