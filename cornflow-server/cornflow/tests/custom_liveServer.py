@@ -170,8 +170,9 @@ class CoverageProcess(multiprocessing.Process):
             super().run()
 
     def terminate(self) -> None:
-        print("Saving coverage in terminate")
         if self.cov_running:
+            print("Saving coverage in terminate")
+            print(os.listdir())
             self.cov.stop()
             self.cov.save()
         super().terminate()
