@@ -396,7 +396,7 @@ class Instance(InstanceCore):
                 key: contract_hours[key]
                 - employee_holiday_hours.get(key, 0)
                 - store_holiday_hours.get(key, 0)
-				- downtime_hours.get(key, 0)
+                - downtime_hours.get(key, 0)
                 for key in contract_hours
             }
         )
@@ -420,13 +420,14 @@ class Instance(InstanceCore):
         contract_days = self._get_employees_normal_contract_days()
         employee_holiday_days = self._get_employee_holiday_days()
         store_holiday_days = self._get_store_holiday_days()
-		downtime_days = self._get_employee_downtime_days()
+        downtime_days = self._get_employee_downtime_days()
+
         return SuperDict(
             {
                 key: contract_days[key]
                 - employee_holiday_days.get(key, 0)
                 - store_holiday_days.get(key, 0)
-				- downtime_days.get(key, 0)
+                - downtime_days.get(key, 0)
                 for key in contract_days
             }
         )
@@ -555,7 +556,6 @@ class Instance(InstanceCore):
                 for (w, e), hours in self._get_employees_contract_hours().items()
                 if self._get_week_from_date(d) == w
                 if (e, self._get_date_string_from_date(d))
-
                 not in self._get_employee_holidays().take([0, 1])
                 not in self._get_employee_downtime().take([0, 1])
                 if self._get_date_string_from_date(d) not in self._get_store_holidays()
