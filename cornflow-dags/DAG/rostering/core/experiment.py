@@ -51,7 +51,7 @@ class Experiment(ExperimentCore):
     def get_indicators(self) -> dict:
         return {
             "objective_function": self.get_objective(),
-            "one_employee": self.get_one_employee_percentage(),
+            "only_one_employee_percentage": self.get_one_employee_percentage(),
             "mean_demand": self.get_mean_demand_employee(),
             "max_demand": self.get_max_demand_employee(),
             "min_demand": self.get_min_demand_employee(),

@@ -42,7 +42,7 @@
           "title": "OF",
           "description": "Objective function"
         },
-        "one_employee": {
+        "only_one_employee_percentage": {
           "type": "number",
           "title": "One employee %",
           "description": "Percentage of time slots with only one employee"
