@@ -159,12 +159,12 @@ class CoverageProcess(multiprocessing.Process):
 
             try:
                 super().run()
-            finally:
+            except Exception:
                 self.cov.stop()
                 self.cov.save()
                 self.cov_running = False
 
-                print("Saving coverage in run")
+                print("Saving coverage after exception")
                 print(os.listdir())
         else:
             super().run()
@@ -174,4 +174,7 @@ class CoverageProcess(multiprocessing.Process):
         if self.cov_running:
             self.cov.stop()
             self.cov.save()
+            print("Saving in terminate")
+            print(os.listdir())
+            print(os.listdir("/home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration/"))
         super().terminate()
