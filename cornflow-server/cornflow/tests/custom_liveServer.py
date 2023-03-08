@@ -147,7 +147,7 @@ class CoverageProcess(multiprocessing.Process):
         self.cov = None
         if self.config_file:
             self.cov = Coverage(config_file=self.config_file, data_suffix=True)
-            self.cov._warn_no_data = False
+            # self.cov._warn_no_data = False
         super().__init__(*args, **kwargs)
 
     def run(self):
@@ -170,7 +170,7 @@ class CoverageProcess(multiprocessing.Process):
             super().run()
 
     def terminate(self) -> None:
-        print(os.listdir("/home/runner/work/cornflow/cornflow/cornflow-server/cornflow/tests/integration/"))
+        print(os.listdir())
         if self.cov_running:
             self.cov.stop()
             self.cov.save()
