@@ -930,17 +930,16 @@ class Instance(InstanceCore):
             (self.data["employee_preferences"].keys_tl())
         )
 
-    def _get_employee_time_slots_preferences(self) -> TupList:
+    def get_employee_time_slots_preferences(self) -> SuperDict:
         """
-        Returns a TupList with the combinations of employees, dates and time slots
-        prefered by employees.
-        For example: [("2021-09-06T07:00", "2021-09-06", 1),
-            ("2021-09-06T08:00", "2021-09-06", 1), ...]
+        Returns a SuperDict with the date and employee tuple as key
+        and a list of time slots as value where the employee wants to work.
+        For example: {("2021-09-06", 1): ["2021-09-06T07:00", "2021-09-06T08:00", ...], ...}
         """
         preferences = self._get_employee_preferences()
         availability = self.get_employees_ts_availability()
 
-        return TupList(
+        ts_preferences = TupList(
             (self._get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
             for ts in self.time_slots
             for e in self._get_employees("id")
@@ -948,16 +947,15 @@ class Instance(InstanceCore):
             if (self._get_time_slot_string(ts), e) in availability
         )
 
-    def get_employees_time_slots_preferences(self) -> SuperDict:
-        """
-        Returns a SuperDict with the date and employee tuple as key
-        and a list of time slots as value where the employee wants to work.
-        For example: {("2021-09-06", 1): ["2021-09-06T07:00", "2021-09-06T08:00", ...], ...}
-        """
+        return ts_preferences.to_dict(0)
 
-        return self._get_employee_time_slots_preferences().take([0, 1, 2]).to_dict(0)
 
     def get_employee_preference_start_ts(self) -> SuperDict:
+        """
+        Returns a SuperDict with the date and employee tuple as key
+        and a time slot in which the employee wants to start work.
+        For example: {("2021-09-06", 1): ["2021-09-06T07:00"], ...}
+        """
 
         preferences = self._get_employee_preferences()
         availability = self.get_employees_ts_availability()
@@ -970,8 +968,13 @@ class Instance(InstanceCore):
             if (self._get_time_slot_string(ts), e) in availability
         )
 
-        return starts_ts.take([0, 1, 2]).to_dict(0)
+        return starts_ts.to_dict(0)
 
     def get_employe_prefererence_hours(self) -> SuperDict:
+        """
+        Returns a SuperDict with the date and employee tuple as key
+        and the max hours the employee wants to work for a specific day.
+        For example: {("2021-09-06", 1): 6, ("2021-09-08", 2): 7...}
+        """
 
-        return self._get_employee_preferences().take([1, 0, 2]).to_dict(2, is_list=False)
+        return self._get_employee_preferences().to_dict(2, indices=[1, 0], is_list=False)

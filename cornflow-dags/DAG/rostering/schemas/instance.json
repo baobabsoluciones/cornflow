@@ -500,7 +500,7 @@
     },
   "employee_preferences": {
       "type": "array",
-      "description": "Table with the downtime days of each employee",
+      "description": "Table with the preferences of each employee",
       "show": true,
       "filterable": true,
       "sortable": true,
@@ -515,7 +515,7 @@
             "filterable": true
           },
           "day": {
-            "description": "The date of the downtime. Has to have format YYYY-MM-DD.",
+            "description": "The date of the preference. Has to have format YYYY-MM-DD.",
             "title": "Day",
             "type": "string",
             "$comment": "date",
@@ -523,7 +523,7 @@
             "filterable": true
           },
           "hours": {
-            "description": "Number of hours prefered to work.",
+            "description": "Number of hours to work.",
             "title": "Hours",
             "type": "integer",
             "sortable": true,

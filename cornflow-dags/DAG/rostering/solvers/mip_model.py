@@ -107,7 +107,7 @@ class MipModel(Experiment):
             self.instance.get_ts_demand_employees_skill(self.employee_ts_availability)
         self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
         self.preference_hours_employee = self.instance.get_employe_prefererence_hours()
-        self.preference_slots = self.instance.get_employees_time_slots_preferences()
+        self.preference_slots = self.instance.get_employee_time_slots_preferences()
 
 
     def create_variables(self):
@@ -202,6 +202,6 @@ class MipModel(Experiment):
 
         # RQ14: max preference hours
         for (d, e), slots in self.preference_slots.items():
-            model += pl.lpSum(self.works[ts, e] for ts in slots) == self.preference_hours_employee[d, e]
+            model += pl.lpSum(self.works[ts, e] for ts in slots) <= self.preference_hours_employee[d, e]
 
         return model
