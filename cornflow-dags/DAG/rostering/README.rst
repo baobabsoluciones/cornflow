@@ -36,6 +36,8 @@ Parameters
 - Store holidays: the days in which the store is closed and therefore nobody works.
 - Employee downtime: the days in which an employee can not work due an illness.
 - Employee preferences: starting and number of hours preferences for one day.
+- Weekly schedule: starting and ending hours for each week day.
+- Schedule exceptions: starting and ending hours for a specific date.
 
 - Parameters:
 
@@ -46,4 +48,15 @@ Parameters
   - Opening days: the number of days that the work center opens, the first day is always considered to be a Monday.
   - Slot length: the length of each time slot in minutes.
   - Starting date: the first day that has to be solved.
-  - Starting hour: the hour the work center opens. 
+  - Starting hour: the hour the work center opens.
+
+- Requirements: table indicating which requirements should be complied and which not
+
+    - Skills: true or false
+    - Skills employees: true or false
+    - Skill demand: true or false
+    - Employee holidays: true or false
+    - Store holidays: true or false
+    - Employee downtime: true or false
+    - Employee preferences: true or false
+

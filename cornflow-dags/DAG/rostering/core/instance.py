@@ -59,6 +59,7 @@ class Instance(InstanceCore):
         data_p = {el: {v["id"]: v for v in data[el]} for el in tables}
 
         data_p["demand"] = {(el["day"], el["hour"]): el for el in data["demand"]}
+        data_p["requirements"] = pickle.loads(pickle.dumps(data["requirements"], -1))
         data_p["weekly_schedule"] = TupList(
             (el["week_day"], el["starting_hour"], el["ending_hour"])
             for el in data["weekly_schedule"]
@@ -74,7 +75,7 @@ class Instance(InstanceCore):
 
         data_p["parameters"] = pickle.loads(pickle.dumps(data["parameters"], -1))
 
-        if data.get("skill_demand"):
+        if data.get("skill_demand") and data_p["requirements"]["skill_demand"] == True:
             data_p["skill_demand"] = {
                 (el["day"], el["hour"], el["id_skill"]): el
                 for el in data["skill_demand"]
@@ -82,40 +83,40 @@ class Instance(InstanceCore):
         else:
             data_p["skill_demand"] = SuperDict({})
 
-        if data.get("skills"):
+        if data.get("skills") and data_p["requirements"]["skills"] == True:
             data_p["skills"] = {el["id"]: el for el in data["skills"]}
         else:
             data_p["skills"] = SuperDict({})
 
-        if data.get("skills_employees"):
+        if data.get("skills_employees") and data_p["requirements"]["skills_employees"] == True:
             data_p["skills_employees"] = TupList(data["skills_employees"]).to_dict(
                 result_col=["id_employee"], is_list=True, indices=["id_skill"]
             )
         else:
             data_p["skills_employees"] = SuperDict({})
 
-        if data.get("employee_holidays"):
+        if data.get("employee_holidays") and data_p["requirements"]["employee_holidays"] == True:
             data_p["employee_holidays"] = {
                 (el["id_employee"], el["day"]): el for el in data["employee_holidays"]
             }
         else:
             data_p["employee_holidays"] = SuperDict({})
 
-        if data.get("store_holidays"):
+        if data.get("store_holidays") and data_p["requirements"]["store_holidays"] == True:
             data_p["store_holidays"] = {
                 (el["day"]): el for el in data["store_holidays"]
             }
         else:
             data_p["store_holidays"] = SuperDict({})
 
-        if data.get("employee_downtime"):
+        if data.get("employee_downtime") and data_p["requirements"]["employee_downtime"] == True:
             data_p["employee_downtime"] = {
                 (el["id_employee"], el["day"]): el for el in data["employee_downtime"]
             }
         else:
             data_p["employee_downtime"] = SuperDict({})
 
-        if data.get("employee_preferences"):
+        if data.get("employee_preferences") and data_p["requirements"]["employee_preferences"] == True:
             data_p["employee_preferences"] = {
                 (el["id_employee"], el["day"], el["hours"], el["start"]): el
                 for el in data["employee_preferences"]
@@ -142,6 +143,8 @@ class Instance(InstanceCore):
         data_p = {el: self.data[el].values_l() for el in tables}
 
         data_p["parameters"] = self.data["parameters"]
+
+        data_p["requirements"] = self.data["requirements"]
 
         data_p["weekly_schedule"] = [
             {"week_day": d, "starting_hour": h_ini, "ending_hour": h_end}
@@ -527,9 +530,8 @@ class Instance(InstanceCore):
             for (w, e) in start
             if self._get_week_from_ts(ts) == w
             and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
-            and (e, self._get_date_string_from_ts(ts))
-            not in self._get_employee_holidays().take([0, 1])
-            not in self._get_employee_downtime().take([0, 1])
+            and (e, self._get_date_string_from_ts(ts)) not in self._get_employee_holidays().take([0, 1])
+            and (e, self._get_date_string_from_ts(ts)) not in self._get_employee_downtime().take([0, 1])
             if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
         )
 
