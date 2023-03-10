@@ -77,3 +77,4 @@ class DeployedDAG(TraceAttributesModel):
         if jsonschema is None:
             # If the DAG is not up-to-date in the database, we ask Airflow
             return Airflow.from_config(config).get_one_schema(dag_name, schema)
+        return jsonschema
