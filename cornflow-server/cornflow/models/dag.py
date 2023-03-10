@@ -14,6 +14,7 @@ from cornflow_client.constants import (
     INSTANCE_CHECKS_SCHEMA,
     SOLUTION_CHECKS_SCHEMA
 )
+from cornflow_core.exceptions import ObjectDoesNotExist
 
 
 class DeployedDAG(TraceAttributesModel):
@@ -54,18 +55,25 @@ class DeployedDAG(TraceAttributesModel):
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
         item = DeployedDAG.get_one_object(dag_name)
 
-        # If the DAG is not up-to-date in the database, we ask Airflow
         if item is None:
-            return Airflow.from_config(config).get_one_schema(dag_name, schema)
+            err = f"The DAG {dag_name} does not exist in the database."
+            raise ObjectDoesNotExist(
+                err,
+                log_txt=f"Error while user tries to register data for DAG {dag_name} "
+                            f"from instance and execution. " + err
+            )
 
         if schema == INSTANCE_SCHEMA:
-            return item.instance_schema
+            jsonschema = item.instance_schema
         elif schema == SOLUTION_SCHEMA:
-            return item.solution_schema
+            jsonschema = item.solution_schema
         elif schema == INSTANCE_CHECKS_SCHEMA:
-            return item.instance_checks_schema
+            jsonschema = item.instance_checks_schema
         elif schema == SOLUTION_CHECKS_SCHEMA:
-            return item.solution_checks_schema
+            jsonschema = item.solution_checks_schema
         else:           # schema == CONFIG_SCHEMA
-            return item.config_schema
+            jsonschema = item.config_schema
 
+        if jsonschema is None:
+            # If the DAG is not up-to-date in the database, we ask Airflow
+            return Airflow.from_config(config).get_one_schema(dag_name, schema)
