@@ -4,6 +4,7 @@ Unit test for the executions endpoints
 
 # Import from libraries
 import json
+from unittest.mock import patch
 
 # Import from internal modules
 from cornflow.models import ExecutionModel, InstanceModel
@@ -17,6 +18,7 @@ from cornflow.tests.const import (
     DAG_URL,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
+from cornflow.tests.unit.tools import patch_af_client
 
 
 class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
@@ -40,6 +42,12 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
 
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_run(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
     def test_new_execution_no_instance(self):
         payload = dict(self.payload)
@@ -100,6 +108,40 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         )
 
         url = EXECUTION_URL + idx + "/relaunch/?run=0"
+        self.payload["config"]["warmStart"] = False
+        response = self.client.post(
+            url,
+            data=json.dumps({"config": self.payload["config"]}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(201, response.status_code)
+
+        url = EXECUTION_URL + idx + "/data"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        ).json
+
+        self.assertEqual(row["config"], self.payload["config"])
+        self.assertIsNone(row["checks"])
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_relaunch_execution_run(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(self.url, self.model, payload=self.payload)
+
+        # Add solution checks to see if they are deleted correctly
+        token = self.create_service_user()
+        self.update_row(
+            url=DAG_URL + idx + "/",
+            payload_to_check=dict(),
+            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
+            token=token,
+            check_payload=False,
+        )
+
+        url = EXECUTION_URL + idx + "/relaunch/"
         self.payload["config"]["warmStart"] = False
         response = self.client.post(
             url,
@@ -235,6 +277,25 @@ class TestExecutionsDetailEndpoint(
 
         self.assertEqual(row.json["checks"], None)
 
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_stop_execution(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload
+        )
+
+        response = self.client.post(
+            self.url + str(idx) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.json["message"], "The execution has been stopped")
+
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
     def setUp(self):
@@ -275,6 +336,40 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         payload["id"] = idx
         token = self.create_service_user()
         self.get_one_row(EXECUTION_URL + idx + "/log/", payload, token=token)
+
+
+class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
+    def setUp(self):
+        super().setUp()
+        self.response_items = {"id", "name", "status"}
+        self.items_to_check = []
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_get_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+    
+        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        data = self.get_one_row(EXECUTION_URL + idx + "/status/", payload, check_payload=False)
+        self.assertEqual(data["state"], 1)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_put_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        response = self.client.put(
+            EXECUTION_URL + idx + "/status/",
+            data=json.dumps({"status": 0}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
