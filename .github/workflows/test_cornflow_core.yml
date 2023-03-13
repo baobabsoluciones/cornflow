@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+      - development
     paths:
       - 'libs/core/**'
       - '!libs/core/README.rst'

@@ -75,8 +75,10 @@ class BaseDAGTests:
                 if solution_data is None:
                     raise ValueError("No solution found")
                 marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
-                marshm().load(solution_data)
-                marshm().validate(solution_data)
+                validator = Draft7Validator(self.app.solution.schema)
+                if not validator.is_valid(solution_data):
+                    raise Exception("The solution has invalid format")
+
                 self.assertTrue(len(solution_data) > 0)
                 instance = self.app.instance.from_dict(data)
                 solution = self.app.solution.from_dict(solution_data)
@@ -121,7 +123,7 @@ class BaseDAGTests:
                     secrets="",
                     dag_run=dag_run,
                     ti=ti,
-                    conf=dict()
+                    conf=dict(),
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
@@ -207,6 +209,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         super().setUp()
         from DAG.roadef import Roadef
 
+        self.config.update({"timeLimit": 10, "seconds": 10})
         self.app = Roadef()
 
     def test_solve_mip(self):
