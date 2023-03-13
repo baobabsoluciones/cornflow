@@ -49,7 +49,13 @@ class Experiment(ExperimentCore):
         return self.solution.get_working_hours()
 
     def get_indicators(self) -> dict:
-        return {"fo": self.get_objective()}
+        return {
+            "objective_function": self.get_objective(),
+            "only_one_employee_percentage": self.get_one_employee_percentage(),
+            "mean_demand": self.get_mean_demand_employee(),
+            "max_demand": self.get_max_demand_employee(),
+            "min_demand": self.get_min_demand_employee(),
+        }
 
     def solve(self, options: dict) -> dict:
         raise NotImplementedError()
@@ -126,4 +132,43 @@ class Experiment(ExperimentCore):
             .vapply(
                 lambda v: {"timeslot": v[0], "id_skill": v[1], "number_missing": v[2]}
             )
+        )
+
+    def get_one_employee_percentage(self) -> float:
+        """Returns the percentage of time slots where only one employee is working"""
+        ts_employee = self.solution.get_ts_employee()
+        return (
+            sum(1 for e in ts_employee.values() if len(e) == 1)
+            / len(self.instance.time_slots)
+            * 100
+        )
+
+    def get_mean_demand_employee(self) -> float:
+        """Returns the mean demand of employees"""
+        demand = self.instance.get_demand()
+        return sum(
+            [
+                demand[ts] / len(employees)
+                for ts, employees in self.solution.get_ts_employee().items()
+            ]
+        ) / len(self.solution.get_ts_employee().keys_l())
+
+    def get_max_demand_employee(self) -> float:
+        """Returns the max demand of employees"""
+        demand = self.instance.get_demand()
+        return max(
+            [
+                demand[ts] / len(employees)
+                for ts, employees in self.solution.get_ts_employee().items()
+            ]
+        )
+
+    def get_min_demand_employee(self) -> float:
+        """Returns the min demand of employees"""
+        demand = self.instance.get_demand()
+        return min(
+            [
+                demand[ts] / len(employees)
+                for ts, employees in self.solution.get_ts_employee().items()
+            ]
         )
