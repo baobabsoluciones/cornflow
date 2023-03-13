@@ -72,6 +72,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
                 "instance_checks": deployed_dag.instance_checks_schema,
                 "solution_checks": deployed_dag.solution_checks_schema,
                 "config": deployed_dag.config_schema,
+                "name": dag_name
             }, 200
         else:
             err = "User does not have permission to access this dag"
