@@ -498,6 +498,47 @@
         }
       }
     },
+  "employee_preferences": {
+      "type": "array",
+      "description": "Table with the preferences of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the preference. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "hours": {
+            "description": "Number of hours to work.",
+            "title": "Hours",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "start": {
+            "description": "The start hour time.",
+            "title": "Start",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          }
+        }
+      }
+    },
   "required": [
     "employees",
     "shifts",
