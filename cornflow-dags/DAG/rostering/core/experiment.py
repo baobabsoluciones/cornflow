@@ -138,7 +138,9 @@ class Experiment(ExperimentCore):
         """Returns the percentage of time slots where only one employee is working"""
         ts_employee = self.solution.get_ts_employee()
         return (
-            sum(1 for e in ts_employee.values() if len(e) == 1) / len(ts_employee) * 100
+            sum(1 for e in ts_employee.values() if len(e) == 1)
+            / len(self.instance.time_slots)
+            * 100
         )
 
     def get_mean_demand_employee(self) -> float:
