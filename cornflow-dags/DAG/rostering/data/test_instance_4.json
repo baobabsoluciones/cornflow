@@ -2147,5 +2147,15 @@
     "starting_date": "2021-09-06",
     "min_working_hours": 4,
     "min_resting_hours": 12
+  },
+
+  "requirements": {
+    "skills": true,
+    "skills_employees": false,
+    "skill_demand": true,
+    "employee_holidays": true,
+    "store_holidays": false,
+    "employee_downtime": true,
+    "employee_preferences": false
   }
 }
