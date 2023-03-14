@@ -4,7 +4,13 @@ import os
 from click.testing import CliRunner
 from cornflow import create_app
 from cornflow.cli import cli
-from cornflow_core.models import ActionBaseModel
+from cornflow.models import UserModel
+from cornflow_core.models import (
+    ActionBaseModel,
+    RoleBaseModel,
+    ViewBaseModel,
+    PermissionViewRoleBaseModel,
+)
 from cornflow_core.shared import db
 from flask_testing import TestCase
 
@@ -95,4 +101,128 @@ class CLITests(TestCase):
 
         os.remove("config.cfg")
 
-        pass
+    def test_roles_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["roles", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Commands to manage the roles", result.output)
+        self.assertIn("init", result.output)
+        self.assertIn("Initializes the roles with the default roles", result.output)
+
+    def test_roles_init_command(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["roles", "init", "-v"])
+        self.assertEqual(result.exit_code, 0)
+        roles = RoleBaseModel.get_all_objects().all()
+        self.assertEqual(len(roles), 4)
+
+    def test_views_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["views", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Commands to manage the views", result.output)
+        self.assertIn("init", result.output)
+        self.assertIn("Initialize the views", result.output)
+
+    def test_views_init_command(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["views", "init", "-v"])
+        self.assertEqual(result.exit_code, 0)
+        views = ViewBaseModel.get_all_objects().all()
+        self.assertEqual(len(views), 44)
+
+    def test_permissions_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["permissions", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Commands to manage the permissions", result.output)
+        self.assertIn("init", result.output)
+        self.assertIn(
+            "Creates the actions, views, roles and permissions", result.output
+        )
+        self.assertIn("base", result.output)
+        self.assertIn("Initialize the base permissions", result.output)
+
+    def test_permissions_init(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["permissions", "init", "-v"])
+        self.assertEqual(result.exit_code, 0)
+        actions = ActionBaseModel.get_all_objects().all()
+        roles = RoleBaseModel.get_all_objects().all()
+        views = ViewBaseModel.get_all_objects().all()
+        permissions = PermissionViewRoleBaseModel.get_all_objects().all()
+        self.assertEqual(len(actions), 5)
+        self.assertEqual(len(roles), 4)
+        self.assertEqual(len(views), 44)
+        self.assertEqual(len(permissions), 488)
+
+    def test_permissions_base_command(self):
+        runner = CliRunner()
+        runner.invoke(cli, ["actions", "init", "-v"])
+        runner.invoke(cli, ["roles", "init", "-v"])
+        runner.invoke(cli, ["views", "init", "-v"])
+        result = runner.invoke(cli, ["permissions", "base", "-v"])
+        self.assertEqual(result.exit_code, 0)
+        actions = ActionBaseModel.get_all_objects().all()
+        roles = RoleBaseModel.get_all_objects().all()
+        views = ViewBaseModel.get_all_objects().all()
+        permissions = PermissionViewRoleBaseModel.get_all_objects().all()
+        self.assertEqual(len(actions), 5)
+        self.assertEqual(len(roles), 4)
+        self.assertEqual(len(views), 44)
+        self.assertEqual(len(permissions), 488)
+
+    def test_service_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["service", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Commands to run the cornflow service", result.output)
+        self.assertIn("init", result.output)
+        self.assertIn("Initialize the service", result.output)
+
+    def test_users_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Commands to manage the users", result.output)
+        self.assertIn("create", result.output)
+        self.assertIn("Create a user", result.output)
+
+    def test_users_create_entrypoint(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "create", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("service", result.output)
+        self.assertIn("Create a service user", result.output)
+
+    def test_service_user_help(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "create", "service", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("The username of the user", result.output)
+        self.assertIn("username", result.output)
+        self.assertIn("The password of the user", result.output)
+        self.assertIn("password", result.output)
+        self.assertIn("The email of the user", result.output)
+        self.assertIn("email", result.output)
+
+    def test_service_user_command(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "service",
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "test@test.org",
+            ],
+        )
+        self.assertEqual(result.exit_code, 1)
+        user = UserModel.get_one_user_by_email("test@test.org")
+        self.assertEqual(user.username, "test")
+        self.assertEqual(user.email, "test@test.org")
