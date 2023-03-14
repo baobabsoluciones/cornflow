@@ -9,12 +9,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.0.0a6
+ARG CORNFLOW_VERSION=1.0.0
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		gcc \
 		git \
+        ssh \
 		python3-dev \
 		libffi-dev \
 		libpq-dev \
