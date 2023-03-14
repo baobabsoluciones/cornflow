@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - master
+      - development
     paths: 
       - 'cornflow-server/**'
       - '!cornflow-server/docs/**'
