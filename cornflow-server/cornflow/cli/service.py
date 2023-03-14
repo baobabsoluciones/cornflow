@@ -163,11 +163,14 @@ def init_cornflow_service():
         os.chdir("/usr/src/app")
 
         if register_key():
-            github_host = os.getenv("github_host", None)
-            register_ssh_host(github_host)
+            prefix = "CUSTOM_SSH_"
+            env_variables = {}
+            for key, value in os.environ.items():
+                if key.startswith(prefix):
+                    env_variables[key] = value
 
-            bitbucket_host = os.getenv("BITBUCKET_HOST", None)
-            register_ssh_host(bitbucket_host)
+            for _, value in env_variables.items():
+                register_ssh_host(value)
 
         os.system("$(command -v pip) install --user -r requirements.txt")
         time.sleep(5)
@@ -219,7 +222,7 @@ def init_cornflow_service():
 def register_ssh_host(host):
     if host is not None:
         add_host = f"ssh-keyscan {host} >> /usr/src/app/.ssh/known_hosts"
-        config_ssh_host = f"echo Host {host} > /usr/src/app/.ssh/config"
+        config_ssh_host = f"echo Host {host} >> /usr/src/app/.ssh/config"
         config_ssh_key = 'echo "   IdentityFile /usr/src/app/.ssh/id_rsa" >> /usr/src/app/.ssh/config'
         os.system(add_host)
         os.system(config_ssh_host)
