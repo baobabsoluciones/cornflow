@@ -3,7 +3,7 @@ name: Publish cornflow Python 🐍 distributions 📦 to PyPI
 on:
   push:
     tags:
-      - "v*"
+      - "cornflow*"
 
 jobs:
   build-n-publish:
@@ -42,7 +42,7 @@ jobs:
       id: split
       with:
         msg : ${{ github.ref_name}}
-        separator: "v"
+        separator: "w"
     - name: Notify slack channel
       uses: slackapi/slack-github-action@v1.23.0
       with:
@@ -50,4 +50,11 @@ jobs:
         channel-id: ${{ secrets.SLACK_CHANNEL }}
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+    - name: Tag published version for docker hub trigger
+      run: |
+        git tag -a v${{ steps.split.outputs_1}} -m "Published cornflow version v${{ steps.split.outputs._1 }}"
+        git push origin v${{ steps.split.outputs_1}}
+    - name: Delete tag to launch release
+      run: git push --delete origin ${{ github.ref_name }}
+
 
