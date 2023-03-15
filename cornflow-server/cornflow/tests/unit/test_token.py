@@ -10,7 +10,7 @@ import json
 from cornflow.models import UserModel
 from cornflow_core.shared import db
 from cornflow.tests.custom_test_case import CheckTokenTestCase
-from cornflow.tests.const import LOGIN_URL, TOKEN_URL
+from cornflow.tests.const import LOGIN_URL
 
 
 class TestCheckToken(CheckTokenTestCase.TokenEndpoint):

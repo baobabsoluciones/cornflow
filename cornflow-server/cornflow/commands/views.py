@@ -1,11 +1,23 @@
-def register_views_command(verbose: bool = False):
+import sys
+from importlib import import_module
 
-    from sqlalchemy.exc import DBAPIError, IntegrityError
-    from flask import current_app
+from cornflow_core.models import ViewBaseModel
+from cornflow_core.shared import db
+from flask import current_app
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.endpoints import resources
-    from cornflow_core.models import ViewBaseModel
-    from cornflow_core.shared import db
+
+def register_views_command(external_app: str = None, verbose: bool = False):
+
+    if external_app is None:
+        from cornflow.endpoints import resources
+    elif external_app is not None:
+        sys.path.append("./")
+        external_module = import_module(external_app)
+        resources = external_module.endpoints.resources
+    else:
+        resources = []
+        exit()
 
     views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
 
