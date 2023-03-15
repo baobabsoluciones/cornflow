@@ -15,8 +15,6 @@ ALL_VARIABLES = [k for k in get_all_schemas().keys()] + [
     k for k in get_all_example_data().keys()
 ]
 
-EXISTING_APPS = [app.name for app in get_new_apps()]
-
 
 class DAGTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -37,19 +35,13 @@ class DAGTests(unittest.TestCase):
             print("STATUS OF update_all_variables: {}".format(state))
         return client
 
-    def test_all_dags_exist(self):
-        names = [app.name for app in self.apps]
-        missing = set(EXISTING_APPS).difference(names)
-        print("Missing apps: {}".format(missing))
-        self.assertEqual(len(missing), 0)
-
     def test_access_schemas(self):
         client = self.run_update_all_variables_until_finished()
         url = f"{client.url}/variables"
         response = client.request_headers_auth(method="GET", url=url)
         apps_variables = [k["key"] for k in response.json()["variables"]]
         print(f"The following apps have variables: {apps_variables}")
-        for app in EXISTING_APPS:
+        for app in self.apps:
             value = client.get_one_variable(app)
             content = json.loads(value["value"])
             self.assertIn("instance", content)

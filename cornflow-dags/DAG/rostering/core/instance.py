@@ -342,10 +342,6 @@ class Instance(InstanceCore):
         """Returns the hour of a given time slot"""
         return self.time_slots_properties[ts]["hour"]
 
-    def _get_property(self, key, prop) -> SuperDict:
-        """Returns a SuperDict with the key of a given 'table' and the prop as value"""
-        return self.data[key].get_property(prop)
-
     def _get_employees(self, prop) -> SuperDict:
         """Returns a SuperDict with the employee id as key and the prop as value"""
         return self._get_property("employees", prop)
@@ -537,8 +533,9 @@ class Instance(InstanceCore):
             if self._get_week_from_ts(ts) == w
             and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
             and (e, self._get_date_string_from_ts(ts))
-            not in self._get_employee_holidays().take([0, 1])
-            not in self._get_employee_downtime().take([0, 1])
+            not in self._get_employee_holidays()
+            and (e, self._get_date_string_from_ts(ts))
+            not in self._get_employee_downtime()
             if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
         )
 
@@ -617,8 +614,9 @@ class Instance(InstanceCore):
                 for (w, e), hours in self._get_employees_contract_hours().items()
                 if self._get_week_from_date(d) == w
                 if (e, self._get_date_string_from_date(d))
-                not in self._get_employee_holidays().take([0, 1])
-                not in self._get_employee_downtime().take([0, 1])
+                not in self._get_employee_holidays()
+                and (e, self._get_date_string_from_date(d))
+                not in self._get_employee_downtime()
                 if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
@@ -637,8 +635,9 @@ class Instance(InstanceCore):
                 for d in self.dates
                 for e in self._get_employees("id")
                 if (e, self._get_date_string_from_date(d))
-                not in self._get_employee_holidays().take([0, 1])
-                not in self._get_employee_downtime().take([0, 1])
+                not in self._get_employee_holidays()
+                and (e, self._get_date_string_from_date(d))
+                not in self._get_employee_downtime()
                 if self._get_date_string_from_date(d) not in self._get_store_holidays()
             }
         )
@@ -754,7 +753,6 @@ class Instance(InstanceCore):
         return self._get_property("skill_demand", "demand").get(
             (self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts), id_skill), 0
         )
-
 
     def get_ts_demand_employees_skill(self, e_availability) -> TupList:
         """
