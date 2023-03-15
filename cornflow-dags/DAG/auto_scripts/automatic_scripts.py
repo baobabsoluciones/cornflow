@@ -150,7 +150,7 @@ def execute_scripts(
         else:
             logging.info(f"{auto_script} is not a file")
 
-    return 200
+    return True
 
 
 dag = DAG(
