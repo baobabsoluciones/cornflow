@@ -75,7 +75,7 @@ class Instance(InstanceCore):
 
         data_p["parameters"] = pickle.loads(pickle.dumps(data["parameters"], -1))
 
-        if data.get("skill_demand") and data_p["requirements"]["skill_demand"]:
+        if data.get("skill_demand"):
             data_p["skill_demand"] = {
                 (el["day"], el["hour"], el["id_skill"]): el
                 for el in data["skill_demand"]
@@ -83,40 +83,40 @@ class Instance(InstanceCore):
         else:
             data_p["skill_demand"] = SuperDict({})
 
-        if data.get("skills") and data_p["requirements"]["skills"]:
+        if data.get("skills"):
             data_p["skills"] = {el["id"]: el for el in data["skills"]}
         else:
             data_p["skills"] = SuperDict({})
 
-        if data.get("skills_employees") and data_p["requirements"]["skills_employees"]:
+        if data.get("skills_employees"):
             data_p["skills_employees"] = TupList(data["skills_employees"]).to_dict(
                 result_col=["id_employee"], is_list=True, indices=["id_skill"]
             )
         else:
             data_p["skills_employees"] = SuperDict({})
 
-        if data.get("employee_holidays") and data_p["requirements"]["employee_holidays"]:
+        if data.get("employee_holidays"):
             data_p["employee_holidays"] = {
                 (el["id_employee"], el["day"]): el for el in data["employee_holidays"]
             }
         else:
             data_p["employee_holidays"] = SuperDict({})
 
-        if data.get("store_holidays") and data_p["requirements"]["store_holidays"]:
+        if data.get("store_holidays"):
             data_p["store_holidays"] = {
                 (el["day"]): el for el in data["store_holidays"]
             }
         else:
             data_p["store_holidays"] = SuperDict({})
 
-        if data.get("employee_downtime") and data_p["requirements"]["employee_downtime"]:
+        if data.get("employee_downtime"):
             data_p["employee_downtime"] = {
                 (el["id_employee"], el["day"]): el for el in data["employee_downtime"]
             }
         else:
             data_p["employee_downtime"] = SuperDict({})
 
-        if data.get("employee_preferences") and data_p["requirements"]["employee_preferences"]:
+        if data.get("employee_preferences"):
             data_p["employee_preferences"] = {
                 (el["id_employee"], el["day"], el["hours"], el["start"]): el
                 for el in data["employee_preferences"]
@@ -163,21 +163,30 @@ class Instance(InstanceCore):
             for id_skill in self.data["skills_employees"]
             for id_employee in self.data["skills_employees"][id_skill]
         ]
-        data_p["employee_holidays"] = [
-            dict(id_employee=id_employee, day=day)
-            for (id_employee, day) in self.data["employee_holidays"]
-        ]
-        data_p["store_holidays"] = [
-            dict(day=day) for (day) in self.data["store_holidays"]
-        ]
-        data_p["employee_downtime"] = [
-            dict(id_employee=id_employee, day=day)
-            for (id_employee, day) in self.data["employee_downtime"]
-        ]
-        data_p["employee_preferences"] = [
-            dict(id_employee=id_employee, day=day, hours=hours, start=start)
-            for (id_employee, day, hours, start) in self.data["employee_preferences"]
-        ]
+
+        if self.get_requirements("employee_holidays"):
+            data_p["employee_holidays"] = [
+                dict(id_employee=id_employee, day=day)
+                for (id_employee, day) in self.data["employee_holidays"]
+            ]
+
+        if self.get_requirements("employee_holidays"):
+            data_p["store_holidays"] = [
+                dict(day=day) for (day) in self.data["store_holidays"]
+            ]
+
+        if self.get_requirements("employee_holidays"):
+            data_p["employee_downtime"] = [
+                dict(id_employee=id_employee, day=day)
+                for (id_employee, day) in self.data["employee_downtime"]
+            ]
+
+        if self.get_requirements("employee_holidays"):
+            data_p["employee_preferences"] = [
+                dict(id_employee=id_employee, day=day, hours=hours, start=start)
+                for (id_employee, day, hours, start) in self.data["employee_preferences"]
+            ]
+
         return pickle.loads(pickle.dumps(data_p, -1))
 
     def cache_properties(self):
@@ -980,3 +989,6 @@ class Instance(InstanceCore):
         """
 
         return self._get_employee_preferences().to_dict(2, indices=[1, 0], is_list=False)
+
+    def get_requirements(self, param):
+        return self.data["requirements"][param]
