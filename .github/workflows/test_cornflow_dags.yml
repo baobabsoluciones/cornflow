@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - master
+      - development
     paths:
       - 'cornflow-dags/**'
       - '!cornflow-dags/README.rst'

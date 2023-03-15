@@ -9,10 +9,15 @@ def create_dag(app):
     def solve(**kwargs):
         return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
 
+    if app.default_args is not None:
+        default_args = app.default_args
+    else:
+        default_args = utils.default_args
+
     dag = DAG(
         app.name,
         description=app.description,
-        default_args=utils.default_args,
+        default_args=default_args,
         schedule_interval=None,
         tags=["model"],
     )

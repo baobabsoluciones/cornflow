@@ -75,14 +75,22 @@ class BaseDAGTests:
                 if solution_data is None:
                     raise ValueError("No solution found")
                 marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
-                marshm().load(solution_data)
-                marshm().validate(solution_data)
+                validator = Draft7Validator(self.app.solution.schema)
+                if not validator.is_valid(solution_data):
+                    raise Exception("The solution has invalid format")
+
                 self.assertTrue(len(solution_data) > 0)
                 instance = self.app.instance.from_dict(data)
                 solution = self.app.solution.from_dict(solution_data)
                 s = self.app.get_default_solver_name()
                 experim = self.app.get_solver(s)(instance, solution)
-                experim.check_solution()
+                checks = experim.check_solution()
+                if len(checks) > 0:
+                    print(
+                        f"Test instance with position {pos} failed with the following checks:"
+                    )
+                    for check in checks:
+                        print(check)
                 experim.get_objective()
 
                 validator = Draft7Validator(experim.schema_checks)
@@ -121,7 +129,7 @@ class BaseDAGTests:
                     secrets="",
                     dag_run=dag_run,
                     ti=ti,
-                    conf=dict()
+                    conf=dict(),
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
@@ -207,6 +215,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         super().setUp()
         from DAG.roadef import Roadef
 
+        self.config.update({"timeLimit": 10, "seconds": 10})
         self.app = Roadef()
 
     def test_solve_mip(self):
@@ -279,3 +288,12 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
 
         self.app = TwoDimensionBinPackingProblem()
         self.config.update(dict(solver="right_corner.cbc"))
+
+
+class Timer(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.dag_timer import Timer
+
+        self.app = Timer()
+        self.config.update(dict(solver="default", seconds=10))

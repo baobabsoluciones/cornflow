@@ -9,7 +9,6 @@ from pytups import SuperDict, TupList
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PULP_STATUS_MAPPING
 )
 
 # Imports from internal modules
@@ -37,6 +36,9 @@ class MipModel(Experiment):
         self.first_ts_day_employee = SuperDict()
         self.demand = SuperDict()
         self.ts_demand_employee_skill = SuperDict()
+        self.preference_starts_ts = SuperDict()
+        self.preference_hours_employee = SuperDict()
+        self.preference_slots = SuperDict()
 
         # Variables
         self.works = SuperDict()
@@ -64,14 +66,10 @@ class MipModel(Experiment):
 
         # Solver and solve
         status = model.solve(solver)
-        termination_condition = PULP_STATUS_MAPPING[status]
 
         # Check status
-        if model.status != pl.LpStatusOptimal:
-            return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
-            )
+        if model.sol_status not in [pl.LpSolutionIntegerFeasible, pl.LpSolutionOptimal]:
+            return dict(status=status, status_sol=SOLUTION_STATUS_INFEASIBLE)
 
         work_assignments = (
             self.works.vfilter(lambda v: pl.value(v))
@@ -82,10 +80,7 @@ class MipModel(Experiment):
         self.solution = Solution.from_dict(SuperDict(works=work_assignments))
         self.solution.data["indicators"] = self.get_indicators()
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=status, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def initialize(self):
         self.managers = self.instance.get_employees_managers()
@@ -111,6 +106,9 @@ class MipModel(Experiment):
         self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill(
             self.employee_ts_availability
         )
+        self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
+        self.preference_hours_employee = self.instance.get_employee_preference_hours()
+        self.preference_slots = self.instance.get_employee_time_slots_preferences()
 
     def create_variables(self):
 
@@ -194,11 +192,26 @@ class MipModel(Experiment):
         for ts, _employees in self.ts_managers.items():
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
-        # RQ09: The demand for each skill should be covered
-        for (
-            (ts, id_skill, skill_demand),
-            _employees,
-        ) in self.ts_demand_employee_skill.items():
-            model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
+        # RQ09: The demand for each skill is covered
+        if self.instance.get_requirement("rq09"):
+            for (
+                ts,
+                id_skill,
+                skill_demand,
+            ), employees in self.ts_demand_employee_skill.items():
+                model += pl.lpSum(self.works[ts, e] for e in employees) >= skill_demand
+
+        # RQ13: Starting hour preference
+        if self.instance.get_requirement("rq13"):
+            for (d, e), slots in self.preference_starts_ts.items():
+                model += pl.lpSum(self.starts[ts, e] for ts in slots) == 1
+
+        # RQ14: max preference hours
+        if self.instance.get_requirement("rq14"):
+            for (d, e), slots in self.preference_slots.items():
+                model += (
+                    pl.lpSum(self.works[ts, e] for ts in slots)
+                    <= self.preference_hours_employee[d, e]
+                )
 
         return model
