@@ -2150,8 +2150,6 @@
   },
   "requirements": {
     "skills": true,
-    "skills_employees": false,
-    "skill_demand": true,
     "employee_holidays": true,
     "store_holidays": false,
     "employee_downtime": true,

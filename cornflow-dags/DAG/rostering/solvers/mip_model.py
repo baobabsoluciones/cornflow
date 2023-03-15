@@ -195,7 +195,7 @@ class MipModel(Experiment):
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
         # RQ09: The demand for each skill should be covered
-        if self.instance.get_requirements("skill_demand"):
+        if self.instance.get_requirements("skills"):
             for (ts, id_skill, skill_demand), _employees in self.ts_demand_employee_skill.items():
                 model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
 

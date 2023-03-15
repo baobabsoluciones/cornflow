@@ -443,8 +443,6 @@
   },
   "requirements": {
     "skills": false,
-    "skills_employees": false,
-    "skill_demand": false,
     "employee_holidays": false,
     "store_holidays": false,
     "employee_downtime": false,

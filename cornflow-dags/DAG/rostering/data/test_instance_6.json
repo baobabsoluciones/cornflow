@@ -22776,8 +22776,6 @@
   },
   "requirements": {
     "skills": true,
-    "skills_employees": true,
-    "skill_demand": true,
     "employee_holidays": true,
     "store_holidays": true,
     "employee_downtime": true,

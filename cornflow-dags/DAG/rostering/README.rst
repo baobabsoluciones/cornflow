@@ -53,8 +53,6 @@ Parameters
 - Requirements: table indicating which requirements should be complied and which not
 
     - Skills: true or false
-    - Skills employees: true or false
-    - Skill demand: true or false
     - Employee holidays: true or false
     - Store holidays: true or false
     - Employee downtime: true or false
