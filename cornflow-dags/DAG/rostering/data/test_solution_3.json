@@ -4,15 +4,15 @@
     },
     "works": [
         {
-            "id_employee": 4,
+            "id_employee": 1,
             "time_slot": "2021-09-06T0800"
         },
         {
-            "id_employee": 4,
+            "id_employee": 1,
             "time_slot": "2021-09-06T0900"
         },
         {
-            "id_employee": 4,
+            "id_employee": 1,
             "time_slot": "2021-09-06T1000"
         },
         {
@@ -84,23 +84,27 @@
             "time_slot": "2021-09-06T1500"
         },
         {
-            "id_employee": 1,
-            "time_slot": "2021-09-06T1600"
-        },
-        {
             "id_employee": 3,
             "time_slot": "2021-09-06T1600"
         },
         {
-            "id_employee": 1,
+            "id_employee": 4,
+            "time_slot": "2021-09-06T1600"
+        },
+        {
+            "id_employee": 3,
             "time_slot": "2021-09-06T1700"
         },
         {
-            "id_employee": 1,
+            "id_employee": 4,
+            "time_slot": "2021-09-06T1700"
+        },
+        {
+            "id_employee": 4,
             "time_slot": "2021-09-06T1800"
         },
         {
-            "id_employee": 1,
+            "id_employee": 4,
             "time_slot": "2021-09-06T1900"
         },
         {
@@ -148,10 +152,6 @@
             "time_slot": "2021-09-07T1300"
         },
         {
-            "id_employee": 3,
-            "time_slot": "2021-09-07T1300"
-        },
-        {
             "id_employee": 4,
             "time_slot": "2021-09-07T1300"
         },
@@ -164,10 +164,6 @@
             "time_slot": "2021-09-07T1400"
         },
         {
-            "id_employee": 3,
-            "time_slot": "2021-09-07T1400"
-        },
-        {
             "id_employee": 4,
             "time_slot": "2021-09-07T1400"
         },
@@ -208,11 +204,15 @@
             "time_slot": "2021-09-07T1700"
         },
         {
-            "id_employee": 1,
+            "id_employee": 3,
             "time_slot": "2021-09-07T1800"
         },
         {
-            "id_employee": 1,
+            "id_employee": 4,
+            "time_slot": "2021-09-07T1800"
+        },
+        {
+            "id_employee": 3,
             "time_slot": "2021-09-07T1900"
         },
         {
@@ -412,7 +412,7 @@
             "time_slot": "2021-09-09T1600"
         },
         {
-            "id_employee": 3,
+            "id_employee": 1,
             "time_slot": "2021-09-09T1700"
         },
         {
@@ -420,11 +420,11 @@
             "time_slot": "2021-09-09T1700"
         },
         {
-            "id_employee": 4,
+            "id_employee": 1,
             "time_slot": "2021-09-09T1800"
         },
         {
-            "id_employee": 4,
+            "id_employee": 1,
             "time_slot": "2021-09-09T1900"
         },
         {

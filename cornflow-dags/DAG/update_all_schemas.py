@@ -86,7 +86,7 @@ def get_all_example_data():
 
     for app in apps:
         tests = app.test_cases
-        print(app, tests)
+        print(f"App: {app.name} has {len(tests)} examples")
         n = 1
         example = dict()
         for t in tests:
@@ -101,7 +101,8 @@ def get_all_example_data():
                 example[solution] = t[1]
             n = n + 1
 
-        example_data_new[f"z_{app.name}_examples"] = example
+        if len(tests) > 0:
+            example_data_new[f"z_{app.name}_examples"] = example
 
     print("Found the following new apps: {}".format([app.name for app in apps]))
     return example_data_new
@@ -127,7 +128,11 @@ def update_all_schemas(**kwargs):
 
 
 dag = DAG(
-    "update_all_schemas", default_args=default_args, catchup=False, tags=["internal"], schedule_interval="@hourly"
+    "update_all_schemas",
+    default_args=default_args,
+    catchup=False,
+    tags=["internal"],
+    schedule_interval="@hourly",
 )
 
 update_schema2 = PythonOperator(
