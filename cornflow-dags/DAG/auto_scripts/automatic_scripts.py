@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+import logging
 
 # Default arguments of DAG
 default_args = {
@@ -42,9 +43,9 @@ def move_script(script_folder, destination_folder, auto_script, log="", error=0)
     # Create folder if it doesn't exist
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
-        print(f"Folder created successfully at {folder_path}")
+        logging.info(f"Folder created successfully at {folder_path}")
     else:
-        print(f"Folder '{folder_path}' already exists.")
+        logging.info(f"Folder '{folder_path}' already exists.")
 
     # Move script to folder
     script_path = os.path.join(script_folder, auto_script)
@@ -54,7 +55,7 @@ def move_script(script_folder, destination_folder, auto_script, log="", error=0)
     with open(log_path, "w") as file:
         # Write log
         file.write(log)
-    print(f"Script {auto_script} moved out of folder")
+    logging.info(f"Script {auto_script} moved out of folder")
 
 
 def execute_scripts(
@@ -65,7 +66,7 @@ def execute_scripts(
     # Iterate directory
     for auto_script in os.listdir(script_folder):
         error = 0
-        print(f"Executing {auto_script}")
+        logging.info(f"Executing {auto_script}")
         # Check if current path is a file
         if os.path.isfile(os.path.join(script_folder, auto_script)):
             script_path = os.path.join(script_folder, auto_script)
@@ -80,9 +81,9 @@ def execute_scripts(
                 os.remove("output.txt")
 
                 if error != 0:
-                    print(f"Something went wrong: {str(log)}")
+                    logging.error(f"Something went wrong: {str(log)}")
                 else:
-                    print(f"Script executed successfully: {str(log)}")
+                    logging.info(f"Script executed successfully: {str(log)}")
 
             elif ".sql" in auto_script:
                 log = ""
@@ -98,10 +99,10 @@ def execute_scripts(
                     # Print the error message
                     if CONN == "NA":
                         message = "If there is no database connection no queries can be performed"
-                        print(message)
+                        logging.error(message)
                         log += str(e)
                     else:
-                        print(f"Error: {e}")
+                        logging.error(f"Error: {e}")
                         log += str(e)
                     error = 1
                     move_script(
@@ -110,8 +111,8 @@ def execute_scripts(
                     continue
 
                 # All SQL commands (split on ';')
-                sqlCommands = query.split(";")
-                for command in sqlCommands:
+                sql_commands = query.split(";")
+                for command in sql_commands:
                     # Check empty query
                     if command == "":
                         continue
@@ -120,13 +121,13 @@ def execute_scripts(
                         transaction = connection.begin()
                         try:
                             # Execute the SQL query
-                            print(f"Query: {command}")
+                            logging.info(f"Query: {command}")
                             connection.execute(command)
                             # Commit the transaction
                             transaction.commit()
                             message = "Query executed successfully!"
                             log += message
-                            print(message)
+                            logging.info(message)
 
                         except SQLAlchemyError as e:
                             # Rollback the transaction if the query is not successful
@@ -138,18 +139,18 @@ def execute_scripts(
                             error = 1
 
             else:
-                print(
+                logging.info(
                     f"The script {auto_script} is not recognized as either a python file or a sql file"
                 )
                 # We do nothing with the file
                 continue
             # Move script and create log
             move_script(script_folder, destination_folder, auto_script, log, error)
-            print(f"End of {auto_script} execution.")
+            logging.info(f"End of {auto_script} execution.")
         else:
-            print(f"{auto_script} is not a file")
+            logging.info(f"{auto_script} is not a file")
 
-    return 200
+    return True
 
 
 dag = DAG(

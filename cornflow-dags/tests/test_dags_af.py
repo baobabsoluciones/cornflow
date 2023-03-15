@@ -1,6 +1,8 @@
 import json
+import os
+import sys
+import time
 import unittest
-import os, sys, time
 
 from cornflow_client.airflow.api import Airflow
 
@@ -63,4 +65,4 @@ class DAGTests(unittest.TestCase):
         script_folder = os.path.join(os.path.dirname(__file__), "./data/auto_scripts/")
         destination_folder = script_folder
         results = execute_scripts(script_folder, destination_folder)
-        self.assertEqual(results, 200)
+        self.assertTrue(results)
