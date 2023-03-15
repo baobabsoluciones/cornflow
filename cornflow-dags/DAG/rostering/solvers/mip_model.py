@@ -103,12 +103,12 @@ class MipModel(Experiment):
         self.max_working_days = self.instance.get_max_working_days()
 
         self.demand = self.instance.get_demand()
-        self.ts_demand_employee_skill = \
-            self.instance.get_ts_demand_employees_skill(self.employee_ts_availability)
+        self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill(
+            self.employee_ts_availability
+        )
         self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
-        self.preference_hours_employee = self.instance.get_employe_prefererence_hours()
+        self.preference_hours_employee = self.instance.get_employee_preference_hours()
         self.preference_slots = self.instance.get_employee_time_slots_preferences()
-
 
     def create_variables(self):
 
@@ -192,16 +192,26 @@ class MipModel(Experiment):
         for ts, _employees in self.ts_managers.items():
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
-        # RQ09: The demand for each skill should be covered
-        for (ts, id_skill, skill_demand), _employees in self.ts_demand_employee_skill.items():
-            model += pl.lpSum(self.works[ts, e] for e in _employees) >= skill_demand
+        # RQ09: The demand for each skill is covered
+        if self.instance.get_requirement("rq09"):
+            for (
+                ts,
+                id_skill,
+                skill_demand,
+            ), employees in self.ts_demand_employee_skill.items():
+                model += pl.lpSum(self.works[ts, e] for e in employees) >= skill_demand
 
         # RQ13: Starting hour preference
-        for (d, e), slots in self.preference_starts_ts.items():
-            model += pl.lpSum(self.starts[ts, e] for ts in slots) == 1
+        if self.instance.get_requirement("rq13"):
+            for (d, e), slots in self.preference_starts_ts.items():
+                model += pl.lpSum(self.starts[ts, e] for ts in slots) == 1
 
         # RQ14: max preference hours
-        for (d, e), slots in self.preference_slots.items():
-            model += pl.lpSum(self.works[ts, e] for ts in slots) <= self.preference_hours_employee[d, e]
+        if self.instance.get_requirement("rq14"):
+            for (d, e), slots in self.preference_slots.items():
+                model += (
+                    pl.lpSum(self.works[ts, e] for ts in slots)
+                    <= self.preference_hours_employee[d, e]
+                )
 
         return model
