@@ -49,9 +49,9 @@ Parameters
 
 - Requirements: table indicating which requirements should be complied and which not
 
-    - rq09: true or false
-    - rq10: true or false
-    - rq11: true or false
-    - rq12: true or false
-    - rq13: true or false
-    - rq14: true or false
+    - rq09: true or false if the skills requirement has to be applied
+    - rq10: true or false if the employee holidays requirement has to be applied
+    - rq11: true or false if the store holidays requirement has to be applied
+    - rq12: true or false if the employee downtime requirement has to be applied
+    - rq13: true or false if the employee preferences requirement has to be applied
+    - rq14: true or false if the employee max preference hours requirement has to be applied
