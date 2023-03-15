@@ -73,6 +73,7 @@ class Instance(InstanceCore):
             data_p["schedule_exceptions"] = SuperDict({})
 
         data_p["parameters"] = pickle.loads(pickle.dumps(data["parameters"], -1))
+        data_p["requirements"] = pickle.loads(pickle.dumps(data["requirements"], -1))
 
         if data.get("skill_demand"):
             data_p["skill_demand"] = {
@@ -142,6 +143,7 @@ class Instance(InstanceCore):
         data_p = {el: self.data[el].values_l() for el in tables}
 
         data_p["parameters"] = self.data["parameters"]
+        data_p["requirements"] = self.data["requirements"]
 
         data_p["weekly_schedule"] = [
             {"week_day": d, "starting_hour": h_ini, "ending_hour": h_end}
@@ -180,7 +182,7 @@ class Instance(InstanceCore):
     def cache_properties(self):
         """Caches the list of weeks, dates and time slots and its associated properties"""
 
-        # We check if the the slot lenght is coherent
+        # We check if the slot length is coherent
         if self._get_slot_length() % 5:
             print("WARNING, SLOT LENGTH MUST BE MULTIPLES OF 5")
 
@@ -276,15 +278,22 @@ class Instance(InstanceCore):
         """
         weekly_schedule = self._get_weekly_schedule()
         date_shift = {date: weekly_schedule[date.isoweekday()] for date in self.dates}
-        ts = TupList(
-            key + timedelta(hours=h_start, minutes=self._get_slot_length() * x)
-            for key, value in date_shift.items()
-            for (h_start, h_end) in value
-            for x in range(int(self._hour_to_slot(h_end - h_start)))
-        ).vfilter(
-            # Remove schedule exceptions.
-            lambda v: get_date_string_from_ts(v)
-            not in self._get_schedule_exceptions()
+
+        ts = (
+            TupList(
+                key + timedelta(hours=h_start, minutes=self._get_slot_length() * x)
+                for key, value in date_shift.items()
+                for (h_start, h_end) in value
+                for x in range(int(self._hour_to_slot(h_end - h_start)))
+            )
+            .vfilter(
+                # Remove schedule exceptions.
+                lambda v: get_date_string_from_ts(v)
+                not in self._get_schedule_exceptions()
+            )
+            .vfilter(
+                lambda v: get_date_string_from_ts(v) not in self._get_store_holidays()
+            )
         )
 
         ts_schedule_exceptions = TupList(
@@ -317,7 +326,7 @@ class Instance(InstanceCore):
             }
         )
 
-    def _get_time_slot_string(self, ts):
+    def get_time_slot_string(self, ts):
         """Returns the time slot string of a given time slot"""
         return self.time_slots_properties[ts]["string"]
 
@@ -354,11 +363,11 @@ class Instance(InstanceCore):
         return self.data["parameters"]["horizon"]
 
     def _get_weekly_schedule(self):
-        """Returns a SuperDict of days and the openning hours"""
+        """Returns a SuperDict of days and the opening hours"""
         return self.data["weekly_schedule"]
 
     def _get_schedule_exceptions(self):
-        """Returns a SuperDict of days and the openning hours"""
+        """Returns a SuperDict of days and the opening hours"""
         return self.data["schedule_exceptions"]
 
     def _get_start_date(self) -> datetime:
@@ -366,10 +375,10 @@ class Instance(InstanceCore):
         return get_date_from_string(self.data["parameters"]["starting_date"])
 
     def _get_end_date(self) -> datetime:
-        """Returns the last date in the hotizon"""
+        """Returns the last date in the horizon"""
         return max(self.dates)
 
-    def _get_skills(self) -> TupList:
+    def get_skills(self) -> TupList:
         """Returns a TupList containing the id of the skills"""
         return self.data["skills"].keys_tl()
 
@@ -431,7 +440,7 @@ class Instance(InstanceCore):
     def _get_employees_contract_hours(self) -> SuperDict[Tuple[int, int], int]:
         """
         Returns a SuperDict with the week and employee tuple as key
-        and the weekly hours of the contract taking holidays into acount
+        and the weekly hours of the contract taking holidays into account
         Contracts are supposed to start on Monday and end on Sunday
         For example: {(36, 1): 40, ...}
         """
@@ -463,7 +472,7 @@ class Instance(InstanceCore):
     def _get_employees_contract_days(self) -> SuperDict[Tuple[int, int], int]:
         """
         Returns a SuperDict with the week and employee tuple as key and
-        the max days worked weekly of the contract taking holidays into acount
+        the max days worked weekly of the contract taking holidays into account
         For example: {(36, 1): 5, ...}
         """
         contract_days = self._get_employees_normal_contract_days()
@@ -522,7 +531,7 @@ class Instance(InstanceCore):
         end = self._get_employees_contract_ending_hour()
 
         return TupList(
-            (self._get_time_slot_string(ts), w, self._get_date_string_from_ts(ts), e)
+            (self.get_time_slot_string(ts), w, self._get_date_string_from_ts(ts), e)
             for ts in self.time_slots
             for (w, e) in start
             if self._get_week_from_ts(ts) == w
@@ -568,7 +577,7 @@ class Instance(InstanceCore):
         Returns a TupList with the time slots strings
         For example: ["2021-09-06T07:00", "2021-09-06T08:00", ...]
         """
-        return self.time_slots.vapply(lambda v: self._get_time_slot_string(v)).to_set()
+        return self.time_slots.vapply(lambda v: self.get_time_slot_string(v)).to_set()
 
     def get_employees_ts_availability(self) -> TupList[Tuple[str, int]]:
         """
@@ -689,8 +698,8 @@ class Instance(InstanceCore):
             .vfilter(lambda v: check_one_day_apart(v[0], v[1]))
             .vapply(
                 lambda v: (
-                    self._get_time_slot_string(v[0]),
-                    self._get_time_slot_string(v[1]),
+                    self.get_time_slot_string(v[0]),
+                    self.get_time_slot_string(v[1]),
                 )
             )
         )
@@ -733,12 +742,12 @@ class Instance(InstanceCore):
         """
         return SuperDict(
             {
-                self._get_time_slot_string(ts): self._filter_demand(ts)
+                self.get_time_slot_string(ts): self._filter_demand(ts)
                 for ts in self.time_slots
             }
         )
 
-    def _filter_skills_demand(self, ts, id_skill) -> int:
+    def filter_skills_demand(self, ts, id_skill) -> int:
         """
         Given a time slot (date time) and the id of a skill, returns the skill demand if it exists, zero otherwise
         """
@@ -746,14 +755,6 @@ class Instance(InstanceCore):
             (self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts), id_skill), 0
         )
 
-    def _employee_available(self, ts, id_employee) -> bool:
-        """
-        Returns a boolean indicating if the employee is available on the time slot or not
-        """
-        return (
-            self._get_time_slot_string(ts),
-            id_employee,
-        ) in self.get_employees_ts_availability()
 
     def get_ts_demand_employees_skill(self, e_availability) -> TupList:
         """
@@ -768,12 +769,12 @@ class Instance(InstanceCore):
         return SuperDict(
             {
                 (
-                    self._get_time_slot_string(ts),
+                    self.get_time_slot_string(ts),
                     id_skill,
-                    self._filter_skills_demand(ts, id_skill),
+                    self.filter_skills_demand(ts, id_skill),
                 ): self.get_employees_by_skill(id_skill)
                 for ts in self.time_slots
-                for id_skill in self._get_skills()
+                for id_skill in self.get_skills()
             }
         ).kvapply(lambda k, v: [e for e in v if (k[0], e) in e_availability])
 
@@ -783,7 +784,10 @@ class Instance(InstanceCore):
         For example: [(1, "2021-09-06"),
             (2, "2021-09-07"), ...]
         """
-        return TupList((self.data["employee_holidays"].keys_tl()))
+        if self.get_requirement("rq10"):
+            return TupList(self.data["employee_holidays"].keys_tl())
+        else:
+            return TupList([])
 
     def _get_employee_holiday_hours(self) -> SuperDict:
         """
@@ -830,7 +834,10 @@ class Instance(InstanceCore):
         For example: [("2021-09-06"),
             ("2021-09-07"), ...]
         """
-        return TupList((self.data["store_holidays"].keys_tl()))
+        if self.get_requirement("rq11"):
+            return TupList(self.data["store_holidays"].keys_tl())
+        else:
+            return TupList([])
 
     def _get_store_holiday_hours(self) -> SuperDict:
         """
@@ -879,7 +886,10 @@ class Instance(InstanceCore):
         For example: [(1, "2021-09-06"),
             (2, "2021-09-07"), ...]
         """
-        return TupList((self.data["employee_downtime"].keys_tl()))
+        if self.get_requirement("rq12"):
+            return TupList(self.data["employee_downtime"].keys_tl())
+        else:
+            return TupList([])
 
     def _get_employee_downtime_hours(self) -> SuperDict:
         """
@@ -926,9 +936,7 @@ class Instance(InstanceCore):
         For example: [(1, "2021-09-09", 5, 15),
         (1, "2021-09-09", 5, 15), ...]
         """
-        return TupList(
-            (self.data["employee_preferences"].keys_tl())
-        )
+        return TupList((self.data["employee_preferences"].keys_tl()))
 
     def get_employee_time_slots_preferences(self) -> SuperDict:
         """
@@ -940,15 +948,14 @@ class Instance(InstanceCore):
         availability = self.get_employees_ts_availability()
 
         ts_preferences = TupList(
-            (self._get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
+            (self.get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
             for ts in self.time_slots
             for e in self._get_employees("id")
             if (e, self._get_date_string_from_ts(ts)) in preferences.take([0, 1])
-            if (self._get_time_slot_string(ts), e) in availability
+            if (self.get_time_slot_string(ts), e) in availability
         )
 
         return ts_preferences.to_dict(0)
-
 
     def get_employee_preference_start_ts(self) -> SuperDict:
         """
@@ -961,20 +968,29 @@ class Instance(InstanceCore):
         availability = self.get_employees_ts_availability()
 
         starts_ts = TupList(
-            (self._get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
+            (self.get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
             for ts in self.time_slots
             for e in self._get_employees("id")
-            if (e, self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts)) in preferences.take([0, 1, 3])
-            if (self._get_time_slot_string(ts), e) in availability
+            if (e, self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts))
+            in preferences.take([0, 1, 3])
+            if (self.get_time_slot_string(ts), e) in availability
         )
 
         return starts_ts.to_dict(0)
 
-    def get_employe_prefererence_hours(self) -> SuperDict:
+    def get_employee_preference_hours(self) -> SuperDict:
         """
         Returns a SuperDict with the date and employee tuple as key
         and the max hours the employee wants to work for a specific day.
         For example: {("2021-09-06", 1): 6, ("2021-09-08", 2): 7...}
         """
 
-        return self._get_employee_preferences().to_dict(2, indices=[1, 0], is_list=False)
+        return self._get_employee_preferences().to_dict(
+            2, indices=[1, 0], is_list=False
+        )
+
+    def get_requirement(self, rq):
+        """
+        Returns the activation value of a given requirement
+        """
+        return self.data["requirements"].get(rq, True)

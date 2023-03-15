@@ -36,14 +36,22 @@ Parameters
 - Store holidays: the days in which the store is closed and therefore nobody works.
 - Employee downtime: the days in which an employee can not work due an illness.
 - Employee preferences: starting and number of hours preferences for one day.
+- Weekly schedule: starting and ending hours for each week day.
+- Schedule exceptions: starting and ending hours for a specific date.
 
 - Parameters:
 
   - Ending hour: the hour the work center closes.
   - Horizon: the number of weeks that are going to be solved.
-  - Minimum resting hours: the minimum amount of hours that have to be rested between the end of the shift on one day, and the start of the shift on the next day. 
-  - Minimum working hours: the minimum amount of hours that have to be worked each day that the employee works. 
-  - Opening days: the number of days that the work center opens, the first day is always considered to be a Monday.
+  - Minimum resting hours: the minimum amount of hours that have to be rested between the end of the shift on one day, and the start of the shift on the next day.
+  - Minimum working hours: the minimum amount of hours that have to be worked each day that the employee works.
   - Slot length: the length of each time slot in minutes.
-  - Starting date: the first day that has to be solved.
-  - Starting hour: the hour the work center opens. 
+
+- Requirements: table indicating which requirements should be complied and which not
+
+    - rq09: true or false if the skills requirement has to be applied
+    - rq10: true or false if the employee holidays requirement has to be applied
+    - rq11: true or false if the store holidays requirement has to be applied
+    - rq12: true or false if the employee downtime requirement has to be applied
+    - rq13: true or false if the employee preferences requirement has to be applied
+    - rq14: true or false if the employee max preference hours requirement has to be applied
