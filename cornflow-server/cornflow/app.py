@@ -2,8 +2,8 @@
 Main file with the creation of the app logic
 """
 # Full imports
-import click
 import os
+import click
 
 # Partial imports
 from flask import Flask
@@ -15,30 +15,27 @@ from flask_restful import Api
 from logging.config import dictConfig
 
 # Module imports
-from cornflow.commands.access import access_init_command
-from cornflow.commands.actions import register_actions_command
-from cornflow.commands.dag import register_deployed_dags_command
-from cornflow.commands.permissions import (
-    register_base_permissions_command,
-    register_dag_permissions_command,
-)
-from cornflow.commands.roles import register_roles_command
-from cornflow.commands.users import (
+from cornflow.commands import (
+    create_service_user_command,
     create_admin_user_command,
     create_planner_user_command,
-    create_service_user_command,
+    register_roles_command,
+    register_actions_command,
+    register_views_command,
+    register_base_permissions_command,
+    access_init_command,
+    register_deployed_dags_command,
+    register_dag_permissions_command,
 )
-from cornflow.commands.views import register_views_command
 from cornflow.config import app_config
 from cornflow.endpoints import resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
+from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
+from cornflow.shared.log_config import log_config
 from cornflow_core.compress import init_compress
 from cornflow_core.exceptions import initialize_errorhandlers
 from cornflow_core.shared import db, bcrypt
-
-from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
-from cornflow.shared.log_config import log_config
 
 
 def create_app(env_name="development", dataconn=None):
@@ -159,21 +156,21 @@ def register_actions(verbose):
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
 def register_views(verbose):
-    register_views_command(verbose)
+    register_views_command(verbose=verbose)
 
 
 @click.command("register_base_assignations")
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
 def register_base_assignations(verbose):
-    register_base_permissions_command(verbose)
+    register_base_permissions_command(verbose=verbose)
 
 
 @click.command("access_init")
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
 def access_init(verbose):
-    access_init_command(verbose)
+    access_init_command(verbose=verbose)
 
 
 @click.command("register_deployed_dags")
@@ -196,6 +193,5 @@ def register_dag_permissions(open_deployment, verbose):
 
 if __name__ == "__main__":
     environment_name = os.getenv("FLASK_ENV", "development")
-    # env_name = 'development'
     flask_app = create_app(environment_name)
     flask_app.run()
