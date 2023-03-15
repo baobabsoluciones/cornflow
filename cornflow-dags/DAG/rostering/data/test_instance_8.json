@@ -4126,6 +4126,26 @@
       "start": 8
     }
   ],
+  "employee_holidays": [
+    {
+      "id_employee": 1,
+      "day": "2021-09-07"
+    }
+  ],
+  "store_holidays": [
+    {
+      "day": "2021-09-08"
+    },
+    {
+      "day": "2021-09-09"
+    }
+  ],
+  "employee_downtime": [
+    {
+      "id_employee": 1,
+      "day": "2021-09-07"
+    }
+  ],
   "parameters": {
     "horizon": 1,
     "slot_length": 60,
@@ -4134,11 +4154,11 @@
     "min_resting_hours": 12
   },
   "requirements": {
-    "rq09": true,
-    "rq10": true,
-    "rq11": true,
-    "rq12": true,
-    "rq13": true,
-    "rq14": true
+    "rq09": false,
+    "rq10": false,
+    "rq11": false,
+    "rq12": false,
+    "rq13": false,
+    "rq14": false
   }
 }

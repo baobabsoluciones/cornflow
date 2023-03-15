@@ -410,7 +410,7 @@
       "day": "2021-09-07"
     }
   ],
-    "store_holidays": [
+  "store_holidays": [
     {
       "day": "2021-09-08"
     },
@@ -445,18 +445,19 @@
       "ending_hour": 20
     }
   ],
-  "schedule_exceptions":  [
-    {
-      "date": "2021-09-07",
-      "starting_hour": 8,
-      "ending_hour": 20
-    }
-  ],
   "parameters": {
-    "horizon": 4,
+    "horizon": 1,
     "slot_length": 60,
     "starting_date": "2021-09-06",
     "min_working_hours": 4,
     "min_resting_hours": 12
+  },
+  "requirements": {
+    "rq09": true,
+    "rq10": true,
+    "rq11": true,
+    "rq12": true,
+    "rq13": true,
+    "rq14": true
   }
 }

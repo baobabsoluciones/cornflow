@@ -84,7 +84,13 @@ class BaseDAGTests:
                 solution = self.app.solution.from_dict(solution_data)
                 s = self.app.get_default_solver_name()
                 experim = self.app.get_solver(s)(instance, solution)
-                experim.check_solution()
+                checks = experim.check_solution()
+                if len(checks) > 0:
+                    print(
+                        f"Test instance with position {pos} failed with the following checks:"
+                    )
+                    for check in checks:
+                        print(check)
                 experim.get_objective()
 
                 validator = Draft7Validator(experim.schema_checks)
@@ -282,3 +288,12 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
 
         self.app = TwoDimensionBinPackingProblem()
         self.config.update(dict(solver="right_corner.cbc"))
+
+
+class Timer(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.dag_timer import Timer
+
+        self.app = Timer()
+        self.config.update(dict(solver="default", seconds=10))
