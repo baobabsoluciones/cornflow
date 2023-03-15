@@ -3,6 +3,7 @@
 """
 # Imports from libraries
 import os
+from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Union
 
 # Imports from cornflow libraries
@@ -21,6 +22,16 @@ class Rostering(ApplicationCore):
     solution = Solution
     solvers = dict(mip=MipModel)
     schema = load_json(os.path.join(os.path.dirname(__file__), "./schemas/config.json"))
+
+    default_args = {
+        "owner": "baobab",
+        "depends_on_past": False,
+        "start_date": datetime(2020, 2, 1),
+        "email": [""],
+        "email_on_failure": False,
+        "email_on_retry": False,
+        "schedule_interval": None,
+    }
 
     @property
     def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:

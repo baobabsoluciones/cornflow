@@ -282,3 +282,12 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
 
         self.app = TwoDimensionBinPackingProblem()
         self.config.update(dict(solver="right_corner.cbc"))
+
+
+class Timer(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.dag_timer import Timer
+
+        self.app = Timer()
+        self.config.update(dict(solver="default", seconds=10))
