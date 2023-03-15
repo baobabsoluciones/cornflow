@@ -3,7 +3,7 @@
 """
 # Imports from libraries
 import os
-from pytups import SuperDict
+from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import ExperimentCore
@@ -67,7 +67,7 @@ class Experiment(ExperimentCore):
         return [{"timeslot": k} for k in time_slots_open - time_slots_assigned]
 
     def check_working_without_opening(self) -> list:
-        """Checks if there is any time slot where an employee is working but it shouldn't"""
+        """Checks if there is any time slot where an employee is working, but it shouldn't"""
         time_slots_open = self.instance.get_opening_time_slots_set()
         time_slots_assigned = self.solution.get_time_slots().to_set()
         return [{"timeslot": k} for k in time_slots_assigned - time_slots_open]
@@ -101,38 +101,45 @@ class Experiment(ExperimentCore):
 
     def check_skills_demand(self) -> list:
         """Checks if there are any time slot where the skill demand is not covered"""
-        ts_employee = self.solution.get_ts_employee()
+        if self.instance.get_requirement("rq09"):
+            ts_employee = self.solution.get_ts_employee()
 
-        ts_skill_demand = SuperDict(
-            {
-                (
-                    self.instance._get_time_slot_string(ts),
-                    id_skill,
-                ): self.instance._filter_skills_demand(ts, id_skill)
-                for ts in self.instance.time_slots
-                for id_skill in self.instance._get_skills()
-            }
-        )
-        ts_skill_worked = SuperDict(
-            {
-                (ts, skill): sum(
-                    1
-                    for e in employees
-                    if e in self.instance.get_employees_by_skill(skill)
-                )
-                for ts, employees in ts_employee.items()
-                for skill in self.instance._get_skills()
-            }
-        )
-
-        demand_minus_worked = ts_skill_demand - ts_skill_worked
-        return (
-            demand_minus_worked.vfilter(lambda v: v > 0)
-            .to_tuplist()
-            .vapply(
-                lambda v: {"timeslot": v[0], "id_skill": v[1], "number_missing": v[2]}
+            ts_skill_demand = SuperDict(
+                {
+                    (
+                        self.instance.get_time_slot_string(ts),
+                        id_skill,
+                    ): self.instance.filter_skills_demand(ts, id_skill)
+                    for ts in self.instance.time_slots
+                    for id_skill in self.instance.get_skills()
+                }
             )
-        )
+            ts_skill_worked = SuperDict(
+                {
+                    (ts, skill): sum(
+                        1
+                        for e in employees
+                        if e in self.instance.get_employees_by_skill(skill)
+                    )
+                    for ts, employees in ts_employee.items()
+                    for skill in self.instance.get_skills()
+                }
+            )
+
+            demand_minus_worked = ts_skill_demand - ts_skill_worked
+            return (
+                demand_minus_worked.vfilter(lambda v: v > 0)
+                .to_tuplist()
+                .vapply(
+                    lambda v: {
+                        "timeslot": v[0],
+                        "id_skill": v[1],
+                        "number_missing": v[2],
+                    }
+                )
+            )
+        else:
+            return TupList([])
 
     def get_one_employee_percentage(self) -> float:
         """Returns the percentage of time slots where only one employee is working"""
