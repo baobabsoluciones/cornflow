@@ -441,7 +441,6 @@
     "min_working_hours": 4,
     "min_resting_hours": 12
   },
-
   "requirements": {
     "skills": false,
     "skills_employees": false,
