@@ -41,9 +41,8 @@ class DAGTests(unittest.TestCase):
         response = client.request_headers_auth(method="GET", url=url)
         apps_variables = [k["key"] for k in response.json()["variables"]]
         print(f"The following apps have variables: {apps_variables}")
-        print(f"The following apps should have variables: {self.apps}")
         for app in self.apps:
-            value = client.get_one_variable(app)
+            value = client.get_one_variable(app.name)
             content = json.loads(value["value"])
             self.assertIn("instance", content)
             self.assertIn("solution", content)
