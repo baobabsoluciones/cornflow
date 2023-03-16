@@ -63,6 +63,15 @@ class ApplicationCore(ABC):
         return None
 
     @property
+    def extra_args(self) -> Dict:
+        """
+        Optional property
+
+        :return: dictionary with optional arguments for the DAG
+        """
+        return None
+
+    @property
     @abstractmethod
     def instance(self) -> Type[InstanceCore]:
         """
