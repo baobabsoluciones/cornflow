@@ -117,7 +117,7 @@ jobs:
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
-          flask db upgrade -d .\cornflow\migrations\ 
+          flask db upgrade -d cornflow/migrations/
           flask access_init
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
           flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
