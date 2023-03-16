@@ -18,7 +18,7 @@ Cornflow
 
 .. image:: https://img.shields.io/badge/License-Apache2.0-blue
 
-Cornflow is open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
+Cornflow is an open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
 
 While most deployment servers are based on the solving technique (MIP, CP, NLP, etc.), Cornflow focuses on the optimization problems themselves. However, it does not impose any constraint on the type of problem and solution method to use.
 
