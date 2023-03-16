@@ -118,7 +118,7 @@ jobs:
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=cornflow-server"
-          cornflow init service &
+          cornflow service init &
           deactivate
           sleep 5s
         env:
