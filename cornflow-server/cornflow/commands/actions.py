@@ -39,7 +39,7 @@ def register_actions_command(verbose: bool = True):
 
     if verbose:
         if len(actions_to_register) > 0:
-            current_app.logger.info("Actions registered: ", actions_to_register)
+            current_app.logger.info(f"Actions registered: {actions_to_register}")
         else:
             current_app.logger.info("No new actions to be registered")
 
