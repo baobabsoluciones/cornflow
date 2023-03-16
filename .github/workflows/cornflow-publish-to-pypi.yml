@@ -41,7 +41,7 @@ jobs:
       uses: jungwinter/split@v2
       id: split
       with:
-        msg : ${{ github.ref_name}}
+        msg : ${{ github.ref_name }}
         separator: "w"
     - name: Notify slack channel
       uses: slackapi/slack-github-action@v1.23.0
