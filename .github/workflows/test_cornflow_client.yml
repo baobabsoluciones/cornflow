@@ -27,7 +27,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.8, 3.9]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
@@ -57,7 +57,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [ 3.7, 3.8 ]
+        python-version: [ 3.8, 3.9 ]
         os: [ ubuntu-latest ]
 
     steps:
@@ -117,7 +117,7 @@ jobs:
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
-          flask db upgrade
+          flask db upgrade -d cornflow/migrations/
           flask access_init
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
           flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
@@ -136,6 +136,7 @@ jobs:
           SECRET_KEY: THISNEEDSTOBECHANGED
           OPEN_DEPLOYMENT: 1
           AUTH_TYPE: 1
+          LOG_LEVEL: 10
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
