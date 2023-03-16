@@ -14,12 +14,17 @@ def create_dag(app):
     else:
         default_args = utils.default_args
 
+    kwargs = {}
+    if app.extra_args is not None:
+        kwargs = app.extra_args
+
     dag = DAG(
         app.name,
         description=app.description,
         default_args=default_args,
         schedule_interval=None,
         tags=["model"],
+        **kwargs
     )
     with dag:
         t1 = PythonOperator(task_id=app.name, python_callable=solve)
