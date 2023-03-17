@@ -35,8 +35,8 @@ class Airflow(object):
             return False
         try:
             data = response.json()
-            database = data["metadatabase"]["status"]
-            scheduler = data["scheduler"]["status"]
+            database = data["metadatabase"]["status"] == "healthy"
+            scheduler = data["scheduler"]["status"] == "healthy"
         except json.JSONDecodeError:
             return False
         except KeyError:
