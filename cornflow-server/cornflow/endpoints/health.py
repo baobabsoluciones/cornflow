@@ -23,8 +23,15 @@ class HealthEndpoint(BaseMetaResource):
         try:
             current_app.logger.info("Health check")
             url = f"{current_app.config['AIRFLOW_URL']}/api/v1/health"
+            current_app.logger.info(f"Health url: {url}")
 
-            response = requests.get(url)
+            response = requests.get(
+                url,
+                headers={
+                    "Content-type": "application/json",
+                    "Accept": "application/json",
+                },
+            )
 
             current_app.logger.error(
                 f"AIRFLOW RESPONSE: {response.status_code}, {response.json()}"

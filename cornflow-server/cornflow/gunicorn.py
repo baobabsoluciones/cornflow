@@ -1,6 +1,9 @@
 """gunicorn WSGI server configuration."""
 import os
+from gevent import monkey
 from multiprocessing import cpu_count
+
+monkey.patch_all()
 
 
 def max_workers():
