@@ -137,6 +137,7 @@ jobs:
           OPEN_DEPLOYMENT: 1
           AUTH_TYPE: 1
           LOG_LEVEL: 10
+          CORNFLOW_SERVICE_USER: airflow
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
