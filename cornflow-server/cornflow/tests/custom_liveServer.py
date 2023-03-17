@@ -1,5 +1,8 @@
 # Full imports
+import os
+
 import cornflow_client as cf
+from cornflow_core.shared import db
 
 # External libraries
 from flask import current_app
@@ -7,12 +10,11 @@ from flask_testing import LiveServerTestCase
 
 # Internal modules
 from cornflow.app import create_app
-from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
+from cornflow.models import UserRoleModel
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow_core.shared import db
 from cornflow.tests.const import PREFIX
 
 
@@ -51,6 +53,13 @@ class CustomTestCaseLive(LiveServerTestCase):
         self.items_to_check = []
         register_dag_permissions_command(
             open_deployment=current_app.config["OPEN_DEPLOYMENT"], verbose=False
+        )
+        os.environ["CORNFLOW_SERVICE_USER"] = "service_user"
+
+        self.create_service_user(
+            dict(
+                username="service_user", pwd="Airflow_test_password1", email="su@cf.com"
+            )
         )
 
     def tearDown(self):
