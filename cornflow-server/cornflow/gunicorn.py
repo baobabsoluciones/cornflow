@@ -1,8 +1,4 @@
 """gunicorn WSGI server configuration."""
-from gevent import monkey
-
-monkey.patch_all(ssl=False)
-
 import os
 from multiprocessing import cpu_count
 

@@ -3,7 +3,7 @@ Main file with the creation of the app logic
 """
 from gevent import monkey
 
-monkey.patch_all(ssl=False)
+monkey.patch_all()
 # Full imports
 import os
 import click
