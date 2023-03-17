@@ -154,10 +154,11 @@ def init_cornflow_service():
             register_dag_permissions_command(open_deployment, verbose=True)
             update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
 
-            # execute gunicorn application
-            os.system(
-                "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
-            )
+        # execute gunicorn application
+        os.system(
+            "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
+        )
+
     elif external_application == 1:
         click.echo(f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE')}")
         os.chdir("/usr/src/app")
