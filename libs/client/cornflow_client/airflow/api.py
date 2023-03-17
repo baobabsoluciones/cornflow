@@ -35,12 +35,14 @@ class Airflow(object):
             return False
         try:
             data = response.json()
+            database = data["metadatabase"]["status"] == "healthy"
+            scheduler = data["scheduler"]["status"] == "healthy"
         except json.JSONDecodeError:
             return False
-        return (
-            data["metadatabase"]["status"] == "healthy"
-            and data["scheduler"]["status"] == "healthy"
-        )
+        except KeyError:
+            return False
+
+        return database and scheduler
 
     def request_headers_auth(self, status=200, **kwargs):
         def_headers = {"Content-type": "application/json", "Accept": "application/json"}
