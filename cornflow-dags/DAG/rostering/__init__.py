@@ -33,6 +33,8 @@ class Rostering(ApplicationCore):
         "schedule_interval": None,
     }
 
+    extra_args = {"max_active_runs": 2}
+
     @property
     def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
         # Base case with a split opening time on one day
