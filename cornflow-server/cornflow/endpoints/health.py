@@ -20,32 +20,44 @@ class HealthEndpoint(BaseMetaResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
     def get(self):
-
-        response = requests.get(f"{current_app.config['AIRFLOW_URL']}/api/v1/health")
-
-        current_app.logger.error(
-            f"AIRFLOW RESPONSE: {response.status_code}, {response.json()}"
-        )
-
-        data = response.json()
-
-        if (
-            data["metadatabase"]["status"] == "healthy"
-            and data["scheduler"]["status"] == "healthy"
-        ):
-            airflow_status = STATUS_HEALTHY
-        else:
-            airflow_status = STATUS_UNHEALTHY
-
         try:
-            current_app.logger.error(
-                f"Service user: {UserModel.get_one_user_by_username('service_user')}"
-            )
-            if UserModel.get_one_user_by_username("service_user") is not None:
-                cornflow_status = STATUS_HEALTHY
-            else:
-                cornflow_status = STATUS_UNHEALTHY
-        except Exception:
-            cornflow_status = STATUS_UNHEALTHY
+            current_app.logger.info("Health check")
+            url = f"{current_app.config['AIRFLOW_URL']}/api/v1/health"
 
-        return {"cornflow_status": cornflow_status, "airflow_status": airflow_status}
+            response = requests.get(url)
+
+            current_app.logger.error(
+                f"AIRFLOW RESPONSE: {response.status_code}, {response.json()}"
+            )
+
+            data = response.json()
+
+            if (
+                data["metadatabase"]["status"] == "healthy"
+                and data["scheduler"]["status"] == "healthy"
+            ):
+                airflow_status = STATUS_HEALTHY
+            else:
+                airflow_status = STATUS_UNHEALTHY
+
+            try:
+                current_app.logger.error(
+                    f"Service user: {UserModel.get_one_user_by_username('service_user')}"
+                )
+                if UserModel.get_one_user_by_username("service_user") is not None:
+                    cornflow_status = STATUS_HEALTHY
+                else:
+                    cornflow_status = STATUS_UNHEALTHY
+            except Exception:
+                cornflow_status = STATUS_UNHEALTHY
+
+            return {
+                "cornflow_status": cornflow_status,
+                "airflow_status": airflow_status,
+            }
+        except Exception as e:
+            current_app.logger.error(f"Unexpected Exception: {e}")
+            return {
+                "cornflow_status": STATUS_UNHEALTHY,
+                "airflow_status": STATUS_UNHEALTHY,
+            }
