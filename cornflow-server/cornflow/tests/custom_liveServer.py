@@ -54,9 +54,13 @@ class CustomTestCaseLive(LiveServerTestCase):
         register_dag_permissions_command(
             open_deployment=current_app.config["OPEN_DEPLOYMENT"], verbose=False
         )
-        os.environ["CORNFLOW_SERVICE_USER"] = "testuser4"
+        os.environ["CORNFLOW_SERVICE_USER"] = "service_user"
 
-        self.create_service_user()
+        self.create_service_user(
+            dict(
+                username="service_user", pwd="Airflow_test_password1", email="su@cf.com"
+            )
+        )
 
     def tearDown(self):
         db.session.remove()
