@@ -7,6 +7,7 @@ from logging import error
 
 import click
 import cornflow
+from cornflow.app import app as create_app
 from cornflow.commands import (
     access_init_command,
     create_user_with_role,
@@ -124,7 +125,7 @@ def init_cornflow_service():
 
     if external_application == 0:
         click.echo("Starting cornflow")
-        app = cornflow.create_app(environment, cornflow_db_conn)
+        app = create_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
             migrate = Migrate(app=app, db=db, directory=path)
@@ -156,7 +157,7 @@ def init_cornflow_service():
 
         # execute gunicorn application
         os.system(
-            "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow:create_app('$FLASK_ENV')\""
+            "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow.production:create_app('$FLASK_ENV')\""
         )
 
     elif external_application == 1:
