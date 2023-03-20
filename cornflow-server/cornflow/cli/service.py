@@ -157,7 +157,7 @@ def init_cornflow_service():
 
         # execute gunicorn application
         os.system(
-            "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow.production:create_app('$FLASK_ENV')\""
+            "/usr/local/bin/gunicorn -c python:cornflow.gunicorn \"cornflow.local:create_app('$FLASK_ENV')\""
         )
 
     elif external_application == 1:
