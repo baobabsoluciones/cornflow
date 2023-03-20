@@ -11,7 +11,7 @@ def get_app():
         warnings.filterwarnings("ignore")
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
-        from cornflow import create_app
+        from cornflow.app import app as create_app
     else:
         sys.path.append("./")
         external_app = os.getenv("EXTERNAL_APP_MODULE", "external_app")

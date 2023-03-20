@@ -13,7 +13,7 @@ from cornflow_client import get_pulp_jsonschema, get_empty_schema
 from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
 
 # Imports from internal modules
-from cornflow.app import create_app
+from cornflow.app import app as create_app
 from cornflow.tests.const import SCHEMA_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 

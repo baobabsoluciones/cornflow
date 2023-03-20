@@ -13,7 +13,7 @@ from cornflow_core.models import (
 )
 
 # Import from internal modules
-from cornflow.app import create_app
+from cornflow.app import app as create_app
 from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,

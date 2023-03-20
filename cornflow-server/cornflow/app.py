@@ -1,10 +1,6 @@
 """
 Main file with the creation of the app logic
 """
-from gevent import monkey
-
-monkey.patch_all()
-
 # Full imports
 import os
 import click
@@ -42,7 +38,7 @@ from cornflow_core.exceptions import initialize_errorhandlers
 from cornflow_core.shared import db, bcrypt
 
 
-def create_app(env_name="development", dataconn=None):
+def app(env_name="development", dataconn=None):
     """
 
     :param str env_name: 'testing' or 'development' or 'production'
@@ -197,5 +193,5 @@ def register_dag_permissions(open_deployment, verbose):
 
 if __name__ == "__main__":
     environment_name = os.getenv("FLASK_ENV", "development")
-    flask_app = create_app(environment_name)
+    flask_app = app(environment_name)
     flask_app.run()
