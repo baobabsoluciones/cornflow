@@ -7,7 +7,7 @@ from logging import error
 
 import click
 import cornflow
-from cornflow.app import create_app as create_app
+from cornflow.app import create_app
 from cornflow.commands import (
     access_init_command,
     create_user_with_role,

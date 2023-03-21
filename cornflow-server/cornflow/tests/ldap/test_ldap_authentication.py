@@ -16,7 +16,7 @@ from cornflow.tests.custom_test_case import LoginTestCases
 
 class TestLogIn(LoginTestCases.LoginEndpoint):
     def create_app(self):
-        app = app("testing")
+        app = create_app("testing")
         return app
 
     def setUp(self):
