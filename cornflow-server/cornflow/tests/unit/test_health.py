@@ -2,7 +2,7 @@ import os
 
 from cornflow_core.shared import db
 
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.commands import access_init_command
 from cornflow.shared.const import STATUS_HEALTHY
 from cornflow.tests.const import HEALTH_URL

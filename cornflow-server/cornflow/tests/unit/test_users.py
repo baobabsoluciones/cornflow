@@ -1,7 +1,7 @@
 import json
 
 from flask_testing import TestCase
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command

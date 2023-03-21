@@ -2,7 +2,7 @@ import configparser
 import os
 
 from click.testing import CliRunner
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.cli import cli
 from cornflow.models import UserModel
 from cornflow_core.models import (

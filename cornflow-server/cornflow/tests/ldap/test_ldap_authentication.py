@@ -7,7 +7,7 @@ from flask import current_app
 import json
 
 # Import from internal modules
-from cornflow.app import app, register_roles, access_init
+from cornflow.app import create_app, register_roles, access_init
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow.tests.const import SIGNUP_URL, USER_ROLE_URL, USER_URL
@@ -21,7 +21,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
 
     def setUp(self):
         super().setUp()
-        self.runner = app().test_cli_runner()
+        self.runner = create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v"])
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {"username": "planner", "password": "planner1234"}

@@ -12,7 +12,7 @@ from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
 # Import internal modules
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
     EXEC_STATE_STOPPED,

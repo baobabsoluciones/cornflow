@@ -9,7 +9,7 @@ from flask_testing import TestCase
 import json
 
 # Import from internal modules
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.const import PLANNER_ROLE
 from cornflow_core.shared import db

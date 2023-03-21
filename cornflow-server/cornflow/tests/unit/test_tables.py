@@ -7,7 +7,7 @@ import json
 from flask_testing import TestCase
 
 # Import from internal modules
-from cornflow.app import app as create_app
+from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import UserRoleModel
