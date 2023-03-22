@@ -8,11 +8,7 @@ import json
 from unittest.mock import patch
 
 
-# Imports from environment
-from cornflow_client import get_pulp_jsonschema, get_empty_schema
-
 # Imports from internal modules
-from cornflow.app import create_app
 from cornflow.tests.const import EXAMPLE_URL, INSTANCE_PATH
 from cornflow.tests.custom_test_case import CustomTestCase
 

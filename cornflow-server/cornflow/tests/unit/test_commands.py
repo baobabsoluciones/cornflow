@@ -24,6 +24,7 @@ from cornflow.app import (
     register_views,
 )
 
+
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.endpoints import resources
 
