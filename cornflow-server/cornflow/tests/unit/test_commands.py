@@ -15,6 +15,7 @@ from flask_testing import TestCase
 from cornflow.app import (
     access_init,
     create_admin_user,
+    create_app,
     create_base_user,
     create_service_user,
     register_actions,
@@ -22,7 +23,7 @@ from cornflow.app import (
     register_roles,
     register_views,
 )
-from cornflow.app import create_app
+
 
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.endpoints import resources
