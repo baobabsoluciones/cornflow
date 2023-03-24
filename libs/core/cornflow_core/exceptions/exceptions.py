@@ -4,6 +4,7 @@ on a flask REST API server
 """
 from flask import jsonify
 from webargs.flaskparser import parser
+from werkzeug.exceptions import InternalServerError
 from cornflow_client.constants import AirflowError
 
 
@@ -151,6 +152,22 @@ def initialize_errorhandlers(app):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
+
+    if app.config["DEPLOYMENT_MODE"] in ["testing", "development"]:
+        @app.errorhandler(InternalServerError)
+        def handle_internal_server_error(error):
+            """
+            Method to handle all the other exceptions
+
+            :param error: the raised error
+            :type error: `InternalServerError`
+            :return: an HTTP response
+            :rtype: `Response`
+            """
+            error_str = f"{error.original_exception.__class__}: {error}"
+            app.logger.error(error_str)
+            response = jsonify(dict(error=error_str))
+            return response, 500
 
     return app
 
