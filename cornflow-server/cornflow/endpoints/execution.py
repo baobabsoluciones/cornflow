@@ -79,7 +79,6 @@ class ExecutionEndpoint(BaseMetaResource):
             for execution in executions
             if not execution.config.get("checks_only", False)
         ]
-        current_app.logger.info(f"{[(execution.id, execution.state) for execution in executions]}")
 
         running_executions = [
             execution for execution in executions
@@ -91,7 +90,6 @@ class ExecutionEndpoint(BaseMetaResource):
         ]
 
         for execution in running_executions:
-            current_app.logger.info(f"Updating status of execution {execution}")
             dag_run_id = execution.dag_run_id
             if not dag_run_id:
                 # it's safe to say we will never get anything if we did not store the dag_run_id
@@ -123,7 +121,6 @@ class ExecutionEndpoint(BaseMetaResource):
             data = response.json()
             state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
             execution.update_state(state)
-            current_app.logger.info(f"Updating status of execution {execution} to {state}")
 
         return executions
 
