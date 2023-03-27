@@ -79,10 +79,11 @@ class ExecutionEndpoint(BaseMetaResource):
             for execution in executions
             if not execution.config.get("checks_only", False)
         ]
+        current_app.logger.info(f"{[(execution.id, execution.state) for execution in executions]}")
 
         running_executions = [
             execution for execution in executions
-            if execution.state not in [
+            if execution.state in [
                 EXEC_STATE_RUNNING,
                 EXEC_STATE_QUEUED,
                 EXEC_STATE_UNKNOWN
