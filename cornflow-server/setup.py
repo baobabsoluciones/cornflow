@@ -1,7 +1,8 @@
 import setuptools
 
-with open("README.rst") as fh:
-    long_description = fh.read()
+"""with open("README.rst") as fh:
+    long_description = fh.read()"""
+long_description = ""
 
 required = []
 with open("requirements.txt", "r") as fh:

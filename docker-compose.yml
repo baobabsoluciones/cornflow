@@ -18,6 +18,7 @@ services:
       - CORNFLOW_DB_USER=cornflow
       - CORNFLOW_DB_PASSWORD=cornflow
       - CORNFLOW_DB=cornflow
+      - CF_ALARMS_ENDPOINT=1
     depends_on:
       - cornflow_db
       - webserver

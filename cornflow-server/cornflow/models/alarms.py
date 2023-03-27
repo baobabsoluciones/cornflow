@@ -4,6 +4,9 @@
 from cornflow_core.shared import db
 from cornflow_core.models import TraceAttributesModel
 
+# Imports from external libraries
+from sqlalchemy.dialects.postgresql import TEXT
+
 
 class AlarmsModel(TraceAttributesModel):
     """
@@ -23,7 +26,7 @@ class AlarmsModel(TraceAttributesModel):
     id = db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
     name = db.Column(db.String(256), nullable=False)
     criticality = db.Column(db.Float, nullable=False)
-    description = db.Column(db.String(256), nullable=False)
+    description = db.Column(TEXT, nullable=False)
     schema = db.Column(db.String(256), nullable=True)
 
     def __init__(self, data):
@@ -39,7 +42,7 @@ class AlarmsModel(TraceAttributesModel):
         :return: The representation of the :class:`AlarmsModel`
         :rtype: str
         """
-        return "<Alarms " + str(self.id) + ">"
+        return "<Alarm " + str(self.id) + ">"
 
     def __str__(self):
         """

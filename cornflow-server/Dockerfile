@@ -30,7 +30,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "cornflow==${CORNFLOW_VERSION}"
+RUN pip install "cornflow @ git+https://github.com/baobabsoluciones/cornflow@feature/alarms#subdirectory=cornflow-server"
 
 
 # create folder for logs
