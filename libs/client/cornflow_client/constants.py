@@ -199,6 +199,20 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
 
 }
 
+SOLVER_CONVERTER = {
+    # PYOMO
+    "gurobi": "gurobi",
+    "cbc": "cbc",
+    "scip": "scip",
+    "highs": "highs",
+
+    # PULP
+    "PULP_CBC_CMD": "cbc",
+    "GUROBI_CMD": "gurobi",
+    "GUROBI": "gurobi",
+    "SCIP_CMD": "scip",
+    "HiGHS_CMD": "highs"
+}
 
 
 
