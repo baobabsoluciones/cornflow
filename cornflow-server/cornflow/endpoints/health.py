@@ -33,8 +33,6 @@ class HealthEndpoint(BaseMetaResource):
         if af_client.is_alive():
             airflow_status = STATUS_HEALTHY
 
-        x = 4/0
-
         if (
             UserModel.get_one_user_by_username(os.getenv("CORNFLOW_SERVICE_USER"))
             is not None

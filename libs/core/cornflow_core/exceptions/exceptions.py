@@ -153,8 +153,9 @@ def initialize_errorhandlers(app):
         response.status_code = error.status_code
         return response
 
-    if app.config["DEPLOYMENT_MODE"] in ["testing", "development"]:
-        @app.errorhandler(InternalServerError)
+    if app.config["ENV"] in ["testing", "development"]:
+
+        @app.errorhandler(Exception)
         def handle_internal_server_error(error):
             """
             Method to handle all the other exceptions
@@ -164,10 +165,11 @@ def initialize_errorhandlers(app):
             :return: an HTTP response
             :rtype: `Response`
             """
-            error_str = f"{error.original_exception.__class__}: {error}"
+            error_str = f"{error.__class__.__name__}: {error}"
             app.logger.error(error_str)
             response = jsonify(dict(error=error_str))
-            return response, 500
+            response.status_code = 500
+            return response
 
     return app
 

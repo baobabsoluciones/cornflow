@@ -75,7 +75,6 @@ class DefaultConfig(object):
 
 class Development(DefaultConfig):
     """ """
-    DEPLOYMENT_MODE = "development"
 
 
 class Testing(DefaultConfig):
@@ -93,7 +92,6 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
-    DEPLOYMENT_MODE = "testing"
 
 
 class Production(DefaultConfig):
@@ -105,7 +103,6 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
-    DEPLOYMENT_MODE = "production"
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}
