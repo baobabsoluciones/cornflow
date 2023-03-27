@@ -58,6 +58,8 @@ from .token import TokenEndpoint
 from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+from .alarms import AlarmsEndpoint
+from .main_alarms import MainAlarmsEndpoint
 
 # from .tables import TablesEndpoint, TablesDetailsEndpoint
 
@@ -219,4 +221,18 @@ resources = [
     #     urls="/table/<string:table_name>/<string:idx>/",
     #     endpoint="tables-detail",
     # ),
+]
+
+
+alarms_resources = [
+    dict(
+        resource=AlarmsEndpoint,
+        urls="/alarms/",
+        endpoint="alarms",
+    ),
+    dict(
+        resource=MainAlarmsEndpoint,
+        urls="/main-alarms/",
+        endpoint="main-alarms",
+    ),
 ]

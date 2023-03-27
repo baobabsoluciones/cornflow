@@ -72,6 +72,9 @@ class DefaultConfig(object):
     SERVICE_EMAIL_SERVER = os.getenv("SERVICE_EMAIL_SERVER", None)
     SERVICE_EMAIL_PORT = os.getenv("SERVICE_EMAIL_PORT", None)
 
+    # Alarms endpoints
+    ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
+
 
 class Development(DefaultConfig):
     """ """
@@ -92,6 +95,7 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    ALARMS_ENDPOINTS = 1
 
 
 class Production(DefaultConfig):
