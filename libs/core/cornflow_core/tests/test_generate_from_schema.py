@@ -190,6 +190,7 @@ class GenerationTests(unittest.TestCase):
                     "..shared.authentification",
                     "..models",
                     "..schemas",
+                    "cornflow$"
                 ]
                 for package in packages_to_mock:
                     txt = txt.replace(package, "mockedpackage")
