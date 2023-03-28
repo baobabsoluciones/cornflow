@@ -14,7 +14,8 @@ class EndpointGenerator:
         return (
             "# Imports from libraries\n"
             "from flask_apispec import doc, marshal_with, use_kwargs\n"
-            "from cornflow_core.authentication import authenticate, BaseAuth\n"
+            "from cornflow.shared.authentication import Auth\n"
+            "from cornflow_core.authentication import authenticate\n"
             "from cornflow_core.resources import BaseMetaResource\n\n"
             "from cornflow_core.constants import SERVICE_ROLE\n"
             "# Import from internal modules\n"
@@ -41,7 +42,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Get list of all the elements in the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f"    @marshal_with({schema_name}(many=True))\n"
         res += "    def get(self, **kwargs):\n"
         res += SP8 + '"""\n'
@@ -66,7 +67,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Get one element of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f"    @marshal_with({schema_name})\n"
         res += "    def get(self, idx):\n"
         res += SP8 + '"""\n'
@@ -93,7 +94,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Add a new row to the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f"    @marshal_with({schema_marshal})\n"
         res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
         res += "    def post(self, **kwargs):\n"
@@ -116,7 +117,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Delete one row of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"], \n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += "    def delete(self, idx):\n"
         res += SP8 + '"""\n'
         res += SP8 + "API method to delete a row of the table.\n"
@@ -143,7 +144,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Edit one row of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"], \n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f'    @use_kwargs({schema_name}, location="json")\n'
         res += "    def put(self, idx, **data):\n"
         res += SP8 + '"""\n'
@@ -171,7 +172,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Patch one row of the table",\n'
         res += SP8 + f'tags=["{self.app_name}"], \n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f'    @use_kwargs({schema_name}, location="json")\n'
         res += "    def patch(self, idx, **data):\n"
         res += SP8 + '"""\n'
@@ -200,7 +201,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Add several new rows to the table",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f"    @marshal_with({schema_marshal}(many=True))\n"
         res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
         res += "    def post(self, **kwargs):\n"
@@ -225,7 +226,7 @@ class EndpointGenerator:
         res += SP8 + 'description="Updates several rows of the table or adds them if they do not exist",\n'
         res += SP8 + f'tags=["{self.app_name}"],\n'
         res += "    )\n"
-        res += "    @authenticate(auth_class=BaseAuth())\n"
+        res += "    @authenticate(auth_class=Auth())\n"
         res += f"    @marshal_with({schema_marshal}(many=True))\n"
         res += f'    @use_kwargs({schema_kwargs}, location="json")\n'
         res += "    def put(self, **kwargs):\n"

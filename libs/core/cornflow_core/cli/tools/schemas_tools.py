@@ -64,7 +64,12 @@ class SchemaGenerator:
         return res
 
     def generate_put_bulk_schema_one(self):
-        return "    id = fields.Int(required=True)\n"
+        if not self.schema["properties"].get("id"):
+            return "    id = fields.Int(required=True)\n"
+        else:
+            id_type=self.schema["properties"].get("id")["type"]
+            return f'    id = {JSON_TYPES_TO_FIELDS[id_type]}(required=True)\n'
+
 
     def generate_schema(self):
         if not self.schema["properties"].get("id"):
