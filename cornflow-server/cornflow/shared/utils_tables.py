@@ -17,7 +17,7 @@ def import_models():
     external_app = int(os.getenv("EXTERNAL_APP", 0))
     if external_app != 0:
         sys.path.append("./")
-        external_app_module = import_module(os.getenv("EXTERNAL_APP_MODULE"))
+        external_app_module = os.getenv("EXTERNAL_APP_MODULE")
 
         external_module = import_module(external_app_module)
         models = external_module.models
