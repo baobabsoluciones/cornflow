@@ -5,7 +5,6 @@ import os
 import sys
 import json
 import shutil
-import cornflow
 
 from click.testing import CliRunner
 from flask_sqlalchemy import SQLAlchemy
@@ -191,7 +190,7 @@ class GenerationTests(unittest.TestCase):
                     "..shared.authentification",
                     "..models",
                     "..schemas",
-                    "cornflow "
+                    "cornflow.shared.authentication"
                 ]
                 for package in packages_to_mock:
                     txt = txt.replace(package, "mockedpackage")
