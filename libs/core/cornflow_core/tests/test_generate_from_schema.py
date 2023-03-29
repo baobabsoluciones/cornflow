@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import shutil
+import cornflow
 
 from click.testing import CliRunner
 from flask_sqlalchemy import SQLAlchemy
