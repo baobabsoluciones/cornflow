@@ -6,6 +6,7 @@ from flask import jsonify
 from webargs.flaskparser import parser
 from werkzeug.exceptions import InternalServerError
 from cornflow_client.constants import AirflowError
+from werkzeug.exceptions import HTTPException
 
 
 class InvalidUsage(Exception):
@@ -165,6 +166,8 @@ def initialize_errorhandlers(app):
             :return: an HTTP response
             :rtype: `Response`
             """
+            if isinstance(error, HTTPException):
+                return error
             error_str = f"{error.__class__.__name__}: {error}"
             app.logger.error(error_str)
             response = jsonify(dict(error=error_str))
