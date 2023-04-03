@@ -88,7 +88,7 @@ def schema_from_excel(
     """
     if not param_tables:
         param_tables = []
-    xl_data = read_excel(path_in, param_tables, preserve_type=True)
+    xl_data = read_excel(path_in, param_tables, preserve_types=True)
 
     # process and remove special tables
     if "endpoints_methods" in xl_data:
