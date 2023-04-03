@@ -70,7 +70,7 @@ def schema_from_excel(
     param_tables=None,
     path_out=None,
     fk=False,
-    format=False,
+    date_format=False,
     path_methods=None,
     path_access=None,
 ):
@@ -80,14 +80,15 @@ def schema_from_excel(
     :param path_in: path of the Excel file
     :param param_tables: array containing the names of the parameter tables
     :param path_out: path where to save the json schema as a json file.
-    :param fk: True if foreign key are described in the second line.
+    :param fk: True if foreign key are described in the second row.
+    :param date_format: if format is true special format (like date, time or datetime) are specified in the third row.
     :param path_methods: path where to save the methods dict as a json file
     :param path_access: path where to save the access dict as a json file
     :return: the jsonschema
     """
     if not param_tables:
         param_tables = []
-    xl_data = read_excel(path_in, param_tables)
+    xl_data = read_excel(path_in, param_tables, preserve_type=True)
 
     # process and remove special tables
     if "endpoints_methods" in xl_data:
@@ -120,7 +121,8 @@ def schema_from_excel(
         check_fk(fk_values)
     else:
         fk_values = {}
-    if format:
+
+    if date_format:
         next_row += 1
         format_values = {
             k: clean_none(v[next_row])
