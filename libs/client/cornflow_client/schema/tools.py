@@ -139,6 +139,7 @@ def schema_from_excel(
     schema = instance.generate_schema()
     add_details("foreign_key", fk_values, schema)
     add_details("format", format_values, schema)
+    fix_required(schema)
 
     # Save json files
     if path_out is not None:
@@ -197,3 +198,12 @@ def str_columns(table):
     :return: the modified list of dict
     """
     return [str_key(d) for d in table]
+
+
+def fix_required(schema):
+    for table_name, table in schema["properties"].items():
+        required=[]
+        for field_name, field in table["items"]["properties"].items():
+            if "null" not in field["type"]:
+                required +=[field_name]
+            table["items"]["required"]=required
