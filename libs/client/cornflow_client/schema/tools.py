@@ -113,7 +113,9 @@ def schema_from_excel(
     if fk:
         next_row += 1
         fk_values = {
-            k: clean_none(v[next_row]) for k, v in xl_data.items() if isinstance(v, list)
+            k: clean_none(v[next_row])
+            for k, v in xl_data.items()
+            if isinstance(v, list)
         }
         check_fk(fk_values)
     else:
@@ -121,7 +123,9 @@ def schema_from_excel(
     if format:
         next_row += 1
         format_values = {
-            k: clean_none(v[next_row]) for k, v in xl_data.items() if isinstance(v, list)
+            k: clean_none(v[next_row])
+            for k, v in xl_data.items()
+            if isinstance(v, list)
         }
     else:
         format_values = {}
@@ -174,9 +178,7 @@ def add_details(name, details, schema):
     for table, val in details.items():
         for k, v in val.items():
             if v is not None:
-                schema["properties"][table]["items"]["properties"][k].update(
-                    {name: v}
-                )
+                schema["properties"][table]["items"]["properties"][k].update({name: v})
 
 
 def str_key(dic):
@@ -201,9 +203,15 @@ def str_columns(table):
 
 
 def fix_required(schema):
+    """
+    Fix required property in schema: if a field is allowed null, it is not required
+
+    :param schema: the json schema
+    :return: None
+    """
     for table_name, table in schema["properties"].items():
-        required=[]
+        required = []
         for field_name, field in table["items"]["properties"].items():
             if "null" not in field["type"]:
-                required +=[field_name]
-            table["items"]["required"]=required
+                required += [field_name]
+            table["items"]["required"] = required
