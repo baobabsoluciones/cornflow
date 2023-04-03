@@ -1,26 +1,25 @@
 import json
+import os
+import sys
+import time
 import unittest
-import os, sys, time
 
 from cornflow_client.airflow.api import Airflow
 
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
-from DAG.update_all_schemas import get_new_apps
+from DAG.update_all_schemas import get_new_apps, get_all_schemas, get_all_example_data
+from DAG.auto_scripts.automatic_scripts import execute_scripts
 
-existing_apps = [app.name for app in get_new_apps()]
+ALL_VARIABLES = [k for k in get_all_schemas().keys()] + [
+    k for k in get_all_example_data().keys()
+]
 
 
 class DAGTests(unittest.TestCase):
     def setUp(self) -> None:
         self.apps = get_new_apps()
         pass
-
-    def test_all_dags_exist(self):
-        names = [app.name for app in self.apps]
-        missing = set(existing_apps).difference(names)
-        print("Missing apps: {}".format(missing))
-        self.assertEqual(len(missing), 0)
 
     def run_update_all_variables_until_finished(self):
         client = Airflow(url="http://localhost:8080", user="admin", pwd="admin")
@@ -30,9 +29,7 @@ class DAGTests(unittest.TestCase):
         finished = False
         while not finished:
             time.sleep(2)
-            status = client.get_dag_run_status(
-                "update_all_schemas", data["dag_run_id"]
-            )
+            status = client.get_dag_run_status("update_all_schemas", data["dag_run_id"])
             state = status.json()["state"]
             finished = state != "running"
             print("STATUS OF update_all_variables: {}".format(state))
@@ -40,29 +37,24 @@ class DAGTests(unittest.TestCase):
 
     def test_access_schemas(self):
         client = self.run_update_all_variables_until_finished()
-        url = "{}/variables".format(client.url)
+        url = f"{client.url}/variables"
         response = client.request_headers_auth(method="GET", url=url)
-        print(
-            "The following apps have schemas: {}".format(
-                [
-                    k["key"]
-                    for k in response.json()["variables"]
-                    if "examples" not in k["key"]
-                ]
-            )
-        )
-        for app in existing_apps:
-            if "examples" not in app:
-                print(app)
-                value = client.get_one_variable(app)
-                content = json.loads(value["value"])
-                self.assertIn("instance", content)
-                self.assertIn("solution", content)
-                self.assertIn("config", content)
+        apps_variables = [k["key"] for k in response.json()["variables"]]
+        print(f"The following apps have variables: {apps_variables}")
+        for app in self.apps:
+            value = client.get_one_variable(app.name)
+            content = json.loads(value["value"])
+            self.assertIn("instance", content)
+            self.assertIn("solution", content)
+            self.assertIn("config", content)
 
     def test_access_all_variables(self):
         client = self.run_update_all_variables_until_finished()
-        variables = [
-            variable["key"] for variable in client.get_all_variables()["variables"]
-        ]
-        self.assertEqual(len(variables), len(existing_apps) * 2)
+        apps = [app["name"] for app in client.get_all_schemas()]
+        self.assertEqual(apps, ALL_VARIABLES)
+
+    def test_auto_scripts(self):
+        script_folder = os.path.join(os.path.dirname(__file__), "./data/auto_scripts/")
+        destination_folder = script_folder
+        results = execute_scripts(script_folder, destination_folder)
+        self.assertTrue(results)

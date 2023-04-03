@@ -14,25 +14,10 @@
           "title": "Horizon",
           "description": "The number of weeks that are going to be solved"
         },
-        "opening_days": {
-          "type": "integer",
-          "title": "Days open",
-          "description": "The number of days that the work center opens, the first day is always considered to be a Monday"
-        },
         "slot_length": {
           "type": "integer",
           "title": "Slot length",
           "description": "The length of each time slot in minutes"
-        },
-        "starting_hour": {
-          "type": "number",
-          "title": "Starting hour",
-          "description": "The hour the work center opens"
-        },
-        "ending_hour": {
-          "type": "number",
-          "title": "Ending hour",
-          "description": "The hour the work center closes"
         },
         "starting_date": {
           "type": "string",
@@ -53,13 +38,57 @@
       },
       "required": [
         "horizon",
-        "opening_days",
         "slot_length",
-        "starting_hour",
-        "ending_hour",
         "starting_date",
         "min_working_hours",
         "min_resting_hours"
+      ]
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Boolean values to activate or deactivate different requirements of the problem",
+      "show": true,
+      "filterable": false,
+      "sortable": true,
+      "properties": {
+        "rq09": {
+          "type": "boolean",
+          "title": "Skills",
+          "description": "The demand of skills has to be covered"
+        },
+        "rq10": {
+          "type": "boolean",
+          "title": "Employee holidays",
+          "description": "The employee holidays are respected"
+        },
+        "rq11": {
+          "type": "boolean",
+          "title": "Store holidays",
+          "description": "The days when a store is closed are respected"
+        },
+        "rq12": {
+          "type": "boolean",
+          "title": "Employee downtime",
+          "description": "The employee downtime is respected"
+        },
+        "rq13": {
+          "type": "boolean",
+          "title": "Employee starting hour preference",
+          "description": "The employee starting hour is respected"
+        },
+        "rq14": {
+          "type": "boolean",
+          "title": "Employee max hours worked",
+          "description": "The employee maximum hours worked preference is respected"
+        }
+      },
+      "required": [
+        "rq09",
+        "rq10",
+        "rq11",
+        "rq12",
+        "rq13",
+        "rq14"
       ]
     },
     "employees": {
@@ -266,6 +295,84 @@
         ]
       }
     },
+    "weekly_schedule": {
+      "type": "array",
+      "description": "Opening and closing times of every day of the week",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "week_day": {
+            "description": "Day of the week in number. 1 is Monday",
+            "title": "Day of week",
+            "type": "number",
+            "$comment": "Day. Monday 1",
+            "sortable": true,
+            "filterable": true
+          },
+          "starting_hour": {
+            "description": "The hour the work center opens",
+            "title": "Opening hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          },
+          "ending_hour": {
+            "description": "The hour the work center closes",
+            "title": "Closing hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "week_day",
+          "starting_hour",
+          "ending_hour"
+        ]
+      }
+    },
+    "schedule_exceptions": {
+      "type": "array",
+      "description": "Schedule exceptions that override weekly schedule",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "description": "Date of the exception",
+            "title": "Date",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "starting_hour": {
+            "description": "The hour the work center opens",
+            "title": "Opening hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          },
+          "ending_hour": {
+            "description": "The hour the work center closes",
+            "title": "Closing hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "date",
+          "starting_hour",
+          "ending_hour"
+        ]
+      }
+    },
     "skills": {
       "type": "array",
       "description": "Table with the information about each skill",
@@ -290,7 +397,10 @@
             "filterable": true
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       }
     },
     "skills_employees": {
@@ -358,7 +468,134 @@
             "filterable": true
           }
         },
-        "required": ["day", "hour", "id_skill", "demand"]
+        "required": [
+          "day",
+          "hour",
+          "id_skill",
+          "demand"
+        ]
+      }
+    },
+    "employee_holidays": {
+      "type": "array",
+      "description": "Table with the holidays of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the holiday. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_employee",
+          "day"
+        ]
+      }
+    },
+    "store_holidays": {
+      "type": "array",
+      "description": "Table with the store holidays",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "description": "The date of the skill demand. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "day"
+        ]
+      }
+    },
+    "employee_downtime": {
+      "type": "array",
+      "description": "Table with the downtime days of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the downtime. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          }
+        }
+      }
+    },
+    "employee_preferences": {
+      "type": "array",
+      "description": "Table with the preferences of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "day": {
+            "description": "The date of the preference. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "hours": {
+            "description": "Number of hours to work.",
+            "title": "Hours",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "start": {
+            "description": "The start hour time.",
+            "title": "Start",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          }
+        }
       }
     }
   },
@@ -367,6 +604,8 @@
     "shifts",
     "contracts",
     "demand",
-    "parameters"
+    "weekly_schedule",
+    "parameters",
+    "requirements"
   ]
 }

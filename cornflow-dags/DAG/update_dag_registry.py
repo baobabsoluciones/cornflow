@@ -52,30 +52,38 @@ def update_dag_registry(**kwargs):
                     instance_schema=app.instance.schema,
                     instance_checks_schema=app.instance.schema_checks,
                     solution_schema=app.solution.schema,
-                    solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                    solution_checks_schema=app.solvers[
+                        app.get_default_solver_name()
+                    ].schema_checks,
                     config_schema=app.schema,
-                    encoding="br"
+                    encoding="br",
                 )
                 print(f"DAG: {response['id']} registered")
             else:
                 # Even if the dag is registered, we still update its schemas
                 response = cf_client.put_deployed_dag(
-                    id=model.dag_id,
+                    dag_id=model.dag_id,
                     data=dict(
                         description=model.description,
                         instance_schema=app.instance.schema,
                         instance_checks_schema=app.instance.schema_checks,
                         solution_schema=app.solution.schema,
-                        solution_checks_schema=app.solvers[app.get_default_solver_name()].schema_checks,
+                        solution_checks_schema=app.get_solver(
+                            app.get_default_solver_name()
+                        ).schema_checks,
                         config_schema=app.schema,
                     ),
-                    encoding='br'
+                    encoding="br",
                 )
-                print(f"DAG: {response['id']} registered")
+                print(f"DAG: {model.dag_id} registered")
 
 
 dag = DAG(
-    "update_dag_registry", default_args=default_args, catchup=False, tags=["internal"], schedule_interval="@hourly",
+    "update_dag_registry",
+    default_args=default_args,
+    catchup=False,
+    tags=["internal"],
+    schedule_interval="@hourly",
 )
 
 update_dag_registry_2 = PythonOperator(

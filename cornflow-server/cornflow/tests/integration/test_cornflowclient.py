@@ -88,7 +88,9 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.assertEqual(case["id"], response["id"])
         self.assertEqual(case["name"], payload["name"])
         self.assertEqual(case["description"], payload["description"])
-        case_data = self.client.raw.get_api_for_id("case", response["id"], "data").json()
+        case_data = self.client.raw.get_api_for_id(
+            "case", response["id"], "data"
+        ).json()
         self.assertEqual(case_data["data"], payload["data"])
         return case
 
@@ -282,7 +284,8 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
     def test_get_one_schema(self):
         response = self.client.raw.get_schema("solve_model_dag")
         self.assertEqual(
-            {"error": "User does not have permission to access this dag"}, response.json()
+            {"error": "User does not have permission to access this dag"},
+            response.json(),
         )
 
 

@@ -8,10 +8,14 @@ LABEL maintainer="sistemas@baobabsoluciones"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
+# CORNFLOW vars
+ARG CORNFLOW_VERSION=1.0.3
+
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
 		gcc \
 		git \
+        ssh \
 		python3-dev \
 		libffi-dev \
 		libpq-dev \
@@ -26,19 +30,16 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt /usr/src/app/requirements.txt
-RUN pip install -r requirements.txt --force-reinstall
+RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
-# copy project
-COPY cornflow /usr/src/app/cornflow
-COPY docs /usr/src/app/docs
-COPY migrations /usr/src/app/migrations
-COPY examples /usr/src/app/examples
-COPY *.py /usr/src/app/
+
+# create folder for logs
 RUN mkdir -p /usr/src/app/log
+
+# create folder for custom ssh keys
+RUN mkdir /usr/src/app/.ssh
 
 EXPOSE 5000
 
 # execute python init script
-ENTRYPOINT [ "python" ]
-CMD ["/usr/src/app/init_cornflow_service.py"]
+CMD ["cornflow", "service", "init"]
