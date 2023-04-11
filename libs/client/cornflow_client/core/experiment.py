@@ -85,7 +85,7 @@ class ExperimentCore(ABC):
         raise NotImplementedError()
 
     @staticmethod
-    def get_solver_config(config, lib="pyomo", default_solver="cbc"):
+    def get_solver_config(config, lib="pyomo", default_solver="cbc", remove_unknown=False):
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
@@ -122,9 +122,15 @@ class ExperimentCore(ABC):
             )
             solver = default_solver
 
-        conf = {
-            mapping[k, lib, solver]: v for k, v in config.items() if (k, lib, solver) in mapping
-        }
+        if remove_unknown:
+            conf = {
+                mapping[k, lib, solver]: v for k, v in config.items() if (k, lib, solver) in mapping
+            }
+        else:
+            conf = {
+                mapping.get((k, lib, solver), k): v for k, v in config.items()
+            }
+            conf.pop("solver", None)
         if config.get("solver_config"):
             solver_config = copy(config["solver_config"])
             conf.update(
