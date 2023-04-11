@@ -131,6 +131,7 @@ class ExperimentCore(ABC):
                 mapping.get((k, lib, solver), k): v for k, v in config.items()
             }
             conf.pop("solver", None)
+            conf.pop("solver_config", None)
         if config.get("solver_config"):
             solver_config = copy(config["solver_config"])
             conf.update(
