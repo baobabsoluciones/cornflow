@@ -113,6 +113,7 @@ jobs:
         LOG_LEVEL: 30
         AIRFLOW_USER: notadmin
         AIRFLOW_PWD: notadmin
+        CF_ALARMS_ENDPOINT: 1
     - name: Run ldap unit tests
       run: | 
         coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/ldap

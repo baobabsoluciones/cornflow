@@ -1,12 +1,6 @@
 """
 
 """
-# TODO: Remove this
-import sys, os
-prev_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..")
-print(prev_dir)
-sys.path.insert(1, prev_dir)
-
 import json
 
 # Imports from internal modules

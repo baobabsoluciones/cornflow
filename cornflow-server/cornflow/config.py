@@ -95,7 +95,6 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
-    ALARMS_ENDPOINTS = 1
 
 
 class Production(DefaultConfig):
