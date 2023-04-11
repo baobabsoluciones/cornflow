@@ -129,7 +129,7 @@ class CLITests(TestCase):
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
         views = ViewBaseModel.get_all_objects().all()
-        self.assertEqual(len(views), 46)
+        self.assertEqual(len(views), 48)
 
     def test_permissions_entrypoint(self):
         runner = CliRunner()
@@ -153,7 +153,7 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleBaseModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 46)
+        self.assertEqual(len(views), 48)
         self.assertEqual(len(permissions), 520)
 
     def test_permissions_base_command(self):
@@ -169,7 +169,7 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleBaseModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 46)
+        self.assertEqual(len(views), 48)
         self.assertEqual(len(permissions), 520)
 
     def test_service_entrypoint(self):
