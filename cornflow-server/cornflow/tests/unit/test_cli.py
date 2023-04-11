@@ -154,7 +154,7 @@ class CLITests(TestCase):
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
         self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 520)
+        self.assertEqual(len(permissions), 530)
 
     def test_permissions_base_command(self):
         runner = CliRunner()
@@ -170,7 +170,7 @@ class CLITests(TestCase):
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
         self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 520)
+        self.assertEqual(len(permissions), 530)
 
     def test_service_entrypoint(self):
         runner = CliRunner()
