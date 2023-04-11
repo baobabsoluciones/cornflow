@@ -61,7 +61,7 @@ from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 from .alarms import AlarmsEndpoint
 from .main_alarms import MainAlarmsEndpoint
 
-# from .tables import TablesEndpoint, TablesDetailsEndpoint
+from .tables import TablesEndpoint, TablesDetailsEndpoint
 
 
 resources = [
@@ -213,14 +213,14 @@ resources = [
         urls="/licences/",
         endpoint="licences",
     ),
-    # dict(
-    #     resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
-    # ),
-    # dict(
-    #     resource=TablesDetailsEndpoint,
-    #     urls="/table/<string:table_name>/<string:idx>/",
-    #     endpoint="tables-detail",
-    # ),
+    dict(
+        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail",
+    ),
 ]
 
 
