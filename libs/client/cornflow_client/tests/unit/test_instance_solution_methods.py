@@ -355,7 +355,7 @@ class TestExperimentCore(TestCase):
     def test_get_solver_config_pulp(self):
         initial_config = {
             "solver": "mip.GUROBI_CMD",
-            "time_limit": 10,
+            "timeLimit": 10,
             "iteration_limit": 10
         }
         res = self.class_to_use.get_solver_config(initial_config, lib="pulp")
@@ -364,7 +364,7 @@ class TestExperimentCore(TestCase):
     def test_get_solver_config_pyomo(self):
         initial_config = {
             "solver": "mip.scip",
-            "time_limit": 10,
+            "timeLimit": 10,
             "iteration_limit": 10
         }
         res = self.class_to_use.get_solver_config(initial_config)
@@ -374,7 +374,7 @@ class TestExperimentCore(TestCase):
         initial_config = {
             "solver": "mip.scip",
             "solver_config": {
-                "time_limit": 10,
+                "timeLimit": 10,
                 "iteration_limit": 10
             }
         }

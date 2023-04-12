@@ -115,7 +115,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('best_obj_stop', 'pyomo', 'cbc') : 'primalT' ,
     ('iteration_limit', 'pyomo', 'cbc') : 'maxIt' ,
     ('solution_limit', 'pyomo', 'cbc') : 'maxSaved' ,
-    ('time_limit', 'pyomo', 'cbc') : 'sec' ,
+    ('timeLimit', 'pyomo', 'cbc') : 'sec' ,
     ('pump_passes', 'pyomo', 'cbc') : 'pumpC' ,
     ('heuristics', 'pyomo', 'cbc') : 'heur' ,
 
@@ -123,14 +123,15 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('abs_gap', 'pulp', 'cbc') : 'gapAbs' ,
     ('rel_gap', 'pulp', 'cbc') : 'gapRel' ,
     ('cutoff', 'pulp', 'cbc') : 'cuts' ,
-    ('time_limit', 'pulp', 'cbc') : 'timeLimit' ,
+    ('timeLimit', 'pulp', 'cbc') : 'timeLimit' ,
     ('threads', 'pulp', 'cbc') : 'threads' ,
     ('presolve', 'pulp', 'cbc') : 'presolve' ,
+    ('msg', 'pulp', 'cbc'): 'msg',
     
 
     ('abs_gap', 'pyomo', 'gurobi') : 'MIPGapAbs' ,
     ('rel_gap', 'pyomo', 'gurobi') : 'MIPGap' ,
-    ('time_limit', 'pyomo', 'gurobi') : 'TimeLimit' ,
+    ('timeLimit', 'pyomo', 'gurobi') : 'TimeLimit' ,
     ('presolve', 'pyomo', 'gurobi') : 'Presolve' ,
     ('iteration_limit', 'pyomo', 'gurobi') : 'IterationLimit' , 
     ('bar_iter_limit', 'pyomo', 'gurobi') : 'BarIterLimit' ,
@@ -146,15 +147,16 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'gurobi') : 'mip' ,
     ('abs_gap', 'pulp', 'gurobi') : 'gapAbs' ,
     ('rel_gap', 'pulp', 'gurobi') : 'gapRel' ,
-    ('time_limit', 'pulp', 'gurobi') : 'timeLimit' ,
+    ('timeLimit', 'pulp', 'gurobi') : 'timeLimit' ,
     ('presolve', 'pulp', 'gurobi') : 'presolve' ,
     ('feasibility_tol', 'pulp', 'gurobi') : 'FeasibilityTol' ,
     ('iteration_limit', 'pulp', 'gurobi') : 'IterationLimit' ,
+    ('msg', 'pulp', 'gurobi'): 'msg',
 
 
     ('abs_gap', 'pyomo', 'scip') : 'limits/absgap ' ,
     ('rel_gap', 'pyomo', 'scip') : 'limits/gap' ,
-    ('time_limit', 'pyomo', 'scip') : 'limits/time' ,
+    ('timeLimit', 'pyomo', 'scip') : 'limits/time' ,
     ('threads', 'pyomo', 'scip') : 'threads' ,
     ('bar_tol', 'pyomo', 'scip') : 'numerics/barrierconvtol' ,
     ('cutoff_breaker', 'pyomo', 'scip') : 'heuristics/shiftandpropagate/cutoffbreaker' ,
@@ -170,7 +172,7 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'scip') : 'mip' ,
     ('abs_gap', 'pulp', 'scip') : 'gapAbs' ,
     ('rel_gap', 'pulp', 'scip') : 'gapRel' ,
-    ('time_limit', 'pulp', 'scip') : 'timeLimit' ,
+    ('timeLimit', 'pulp', 'scip') : 'timeLimit' ,
     ('threads', 'pulp', 'scip') : 'threads' ,
     ('max_nodes', 'pulp', 'scip') : 'maxNodes' ,
     ('iteration_limit', 'pulp', 'scip') : 'lp/iterlim' ,
@@ -179,11 +181,12 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('presolve', 'pulp', 'scip') : 'presolve' ,
     ('solution_limit', 'pulp', 'scip') : 'limits/maxsol' ,
     ('nlp_iteration_limit', 'pulp', 'scip') : 'heuristics/subnlp/itermin' ,
+    ('msg', 'pulp', 'scip'): 'msg',
 
 
     ('rel_gap', 'pyomo', 'highs') : 'mip_rel_gap' ,
     ('abs_gap', 'pyomo', 'highs') : 'mip_abs_gap' ,
-    ('time_limit', 'pyomo', 'highs') : 'time_limit' ,
+    ('timeLimit', 'pyomo', 'highs') : 'time_limit' ,
     ('presolve', 'pyomo', 'highs') : 'presolve' ,
     ('parallel', 'pyomo', 'highs') : 'parallel' ,
     ('crossover', 'pyomo', 'highs') : 'run_crossover' ,
@@ -192,10 +195,11 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ('is_mip', 'pulp', 'highs') : 'mip' ,
     ('abs_gap', 'pulp', 'highs') : 'gapAbs' ,
     ('rel_gap', 'pulp', 'highs') : 'gapRel' ,
-    ('time_limit', 'pulp', 'highs') : 'timeLimit' ,
+    ('timeLimit', 'pulp', 'highs') : 'timeLimit' ,
     ('presolve', 'pulp', 'highs') : 'presolve' ,
     ('threads', 'pulp', 'highs') : 'threads' ,
     ('heuristics', 'pulp', 'highs') : 'mip_heuristic_effort' ,
+    ('msg', 'pulp', 'highs'): 'msg',
 
 }
 
@@ -211,7 +215,10 @@ SOLVER_CONVERTER = {
     "GUROBI_CMD": "gurobi",
     "GUROBI": "gurobi",
     "SCIP_CMD": "scip",
-    "HiGHS_CMD": "highs"
+    "SCIP": "scip",
+    "SCIP_PY": "scip",
+    "HiGHS_CMD": "highs",
+    "HiGHS": "highs"
 }
 
 
