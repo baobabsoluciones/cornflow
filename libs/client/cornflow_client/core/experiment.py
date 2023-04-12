@@ -124,16 +124,26 @@ class ExperimentCore(ABC):
             conf = {
                 mapping[k, lib, solver]: v for k, v in config.items() if (k, lib, solver) in mapping
             }
+            if config.get("solver_config"):
+                conf.update(
+                    {
+                        mapping[k, lib, solver]: v
+                        for k, v in config["solver_config"].items()
+                        if (k, lib, solver) in mapping
+                    }
+                )
         else:
             conf = {
                 mapping.get((k, lib, solver), k): v for k, v in config.items()
             }
             conf.pop("solver", None)
             conf.pop("solver_config", None)
-        if config.get("solver_config"):
-            solver_config = copy(config["solver_config"])
-            conf.update(
-                ExperimentCore.get_solver_config(solver_config, default_solver=solver)
-            )
+            if config.get("solver_config"):
+                conf.update(
+                    {
+                        mapping.get((k, lib, solver), k): v
+                        for k, v in config["solver_config"].items()
+                    }
+                )
 
         return conf
