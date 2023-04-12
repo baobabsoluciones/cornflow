@@ -10,13 +10,16 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 def register_views_command(external_app: str = None, verbose: bool = False):
 
     if external_app is None:
-        from cornflow.endpoints import resources
+        from cornflow.endpoints import resources, alarms_resources
+        resources_to_register = resources
+        if current_app.config["ALARMS_ENDPOINTS"]:
+            resources_to_register = resources + alarms_resources
     elif external_app is not None:
         sys.path.append("./")
         external_module = import_module(external_app)
-        resources = external_module.endpoints.resources
+        resources_to_register = external_module.endpoints.resources
     else:
-        resources = []
+        resources_to_register = []
         exit()
 
     views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
@@ -29,7 +32,7 @@ def register_views_command(external_app: str = None, verbose: bool = False):
                 "description": view["resource"].DESCRIPTION,
             }
         )
-        for view in resources
+        for view in resources_to_register
         if view["endpoint"] not in views_registered
     ]
 
