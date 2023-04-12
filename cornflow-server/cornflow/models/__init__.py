@@ -9,3 +9,5 @@ from .execution import ExecutionModel
 from .instance import InstanceModel
 from .user import UserModel
 from .user_role import UserRoleModel
+from .alarms import AlarmsModel
+from .main_alarms import MainAlarmsModel
