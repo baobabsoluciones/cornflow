@@ -101,6 +101,8 @@ class ExperimentCore(ABC):
         :param config: dict config argument of the solver method
         :param lib: str library used to create the model (pulp or pyomo)
         :param default_solver: str default solver to use if none is present inf config.
+        :param remove_unknown: bool. if True, the unknown parameters will be deleted. Otherwise, they will remain
+            but will not be translated.
         :return: the solver name and the config dict.
         """
         mapping = PARAMETER_SOLVER_TRANSLATING_MAPPING
