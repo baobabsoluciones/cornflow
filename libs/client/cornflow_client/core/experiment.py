@@ -106,17 +106,13 @@ class ExperimentCore(ABC):
         :return: the solver name and the config dict.
         """
         mapping = PARAMETER_SOLVER_TRANSLATING_MAPPING
-        solver = config.get("solver", None)
-
-        if solver is None:
-            message = f"No solver found in config. Default solver {default_solver} will be used"
-            print(message)
-            solver = default_solver
+        solver = config.get("solver", "unknown")
 
         if "." in solver:
             solver = solver.split(".")[1]
 
         solver = SOLVER_CONVERTER.get(solver)
+
         if solver is None:
             print(
                 "The solver doesn't correspond to any solver in the parameters mapping. "
