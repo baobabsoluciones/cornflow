@@ -13,7 +13,7 @@
     "msg": {
       "type": "boolean"
     },
-    "seconds": {
+    "rel_gap": {
       "type": "number"
     }
   }

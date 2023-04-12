@@ -73,11 +73,56 @@ class ExecutionEndpoint(BaseMetaResource):
         """
         executions = self.get_list(user=self.get_user(), **kwargs)
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
-        return [
+
+        executions = [
             execution
             for execution in executions
             if not execution.config.get("checks_only", False)
         ]
+
+        running_executions = [
+            execution for execution in executions
+            if execution.state in [
+                EXEC_STATE_RUNNING,
+                EXEC_STATE_QUEUED,
+                EXEC_STATE_UNKNOWN
+            ]
+        ]
+
+        for execution in running_executions:
+            dag_run_id = execution.dag_run_id
+            if not dag_run_id:
+                # it's safe to say we will never get anything if we did not store the dag_run_id
+                current_app.logger.warning(
+                    "Error while the app tried to update the status of all running executions."
+                    f"Execution {execution.id} has status {execution.state} but has no dag run associated."
+                )
+                continue
+
+            af_client = Airflow.from_config(current_app.config)
+            if not af_client.is_alive():
+                current_app.logger.warning(
+                    "Error while the app tried to update the status of all running executions."
+                    "Airflow is not accessible."
+                )
+                continue
+
+            try:
+                response = af_client.get_dag_run_status(
+                    dag_name=execution.schema, dag_run_id=dag_run_id
+                )
+            except AirflowError as err:
+                current_app.logger.warning(
+                    "Error while the app tried to update the status of all running executions."
+                    f"Airflow responded with an error: {err}"
+                )
+                continue
+
+            data = response.json()
+            state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
+            execution.update_state(state)
+
+        return executions
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
