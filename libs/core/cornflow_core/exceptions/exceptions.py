@@ -5,6 +5,7 @@ on a flask REST API server
 from flask import jsonify
 from webargs.flaskparser import parser
 from cornflow_client.constants import AirflowError
+from werkzeug.exceptions import HTTPException
 
 
 class InvalidUsage(Exception):
@@ -151,6 +152,26 @@ def initialize_errorhandlers(app):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
+
+    if app.config["ENV"] in ["testing", "development"]:
+
+        @app.errorhandler(Exception)
+        def handle_internal_server_error(error):
+            """
+            Method to handle all the other exceptions
+
+            :param error: the raised error
+            :type error: `Exception`
+            :return: an HTTP response
+            :rtype: `Response`
+            """
+            if isinstance(error, HTTPException):
+                return error
+            error_str = f"{error.__class__.__name__}: {error}"
+            app.logger.error(error_str)
+            response = jsonify(dict(error=error_str))
+            response.status_code = 500
+            return response
 
     return app
 

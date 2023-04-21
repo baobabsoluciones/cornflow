@@ -72,6 +72,9 @@ class DefaultConfig(object):
     SERVICE_EMAIL_SERVER = os.getenv("SERVICE_EMAIL_SERVER", None)
     SERVICE_EMAIL_PORT = os.getenv("SERVICE_EMAIL_PORT", None)
 
+    # Alarms endpoints
+    ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
+
 
 class Development(DefaultConfig):
     """ """
