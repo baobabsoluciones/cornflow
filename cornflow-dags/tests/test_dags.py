@@ -244,7 +244,7 @@ class Rostering(BaseDAGTests.SolvingTests):
         from DAG.rostering import Rostering
 
         self.app = Rostering()
-        self.config.update(dict(solver="mip.PULP_CBC_CMD"))
+        self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
         self.config.pop("seconds")
 
 

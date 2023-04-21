@@ -61,8 +61,8 @@ class MipModel(Experiment):
             prefix = "mip"
             solver_name = "PULP_CBC_CMD"
 
-        solver = pl.getSolver(solver_name, **options)
         options["solver"] = f"{prefix}.{solver_name}"
+        solver = pl.getSolver(solver_name, **self.get_solver_config(options, lib="pulp"))
 
         # Solver and solve
         status = model.solve(solver)

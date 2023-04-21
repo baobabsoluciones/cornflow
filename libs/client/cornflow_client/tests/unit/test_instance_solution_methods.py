@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from unittest import TestCase
 from cornflow_client.core import InstanceSolutionCore
 
-from cornflow_client import InstanceCore
+from cornflow_client import InstanceCore, ExperimentCore
 
 from cornflow_client.schema.tools import get_empty_schema
 
@@ -347,6 +347,41 @@ class TestCustomInstanceDag(TestSimpleApplicationDag):
         return instance
 
 
+class TestExperimentCore(TestCase):
+    def setUp(self):
+        self.class_to_use = SimpleExperiment
+        self.schema = get_empty_schema()
+
+    def test_get_solver_config_pulp(self):
+        initial_config = {
+            "solver": "mip.GUROBI_CMD",
+            "timeLimit": 10,
+            "iteration_limit": 10
+        }
+        res = self.class_to_use.get_solver_config(initial_config, lib="pulp")
+        self.assertEqual(res, {'timeLimit': 10, 'IterationLimit': 10})
+
+    def test_get_solver_config_pyomo(self):
+        initial_config = {
+            "solver": "mip.scip",
+            "timeLimit": 10,
+            "iteration_limit": 10
+        }
+        res = self.class_to_use.get_solver_config(initial_config)
+        self.assertEqual(res, {"limits/time": 10, "lp/iterlim": 10})
+
+    def test_get_solver_config_pyomo_2(self):
+        initial_config = {
+            "solver": "mip.scip",
+            "solver_config": {
+                "timeLimit": 10,
+                "iteration_limit": 10
+            }
+        }
+        res = self.class_to_use.get_solver_config(initial_config)
+        self.assertEqual(res, {"limits/time": 10, "lp/iterlim": 10})
+
+
 class SimpleInstance(InstanceCore):
     schema = get_empty_schema()
     schema_checks = get_empty_schema()
@@ -369,3 +404,16 @@ class Instance(InstanceCore):
 
         data_p = {el: self.data[el].values_l() for el in tables}
         return pickle.loads(pickle.dumps(data_p, -1))
+
+
+class SimpleExperiment(ExperimentCore):
+    schema_checks = get_empty_schema()
+
+    def solve(self) -> dict:
+        return 0, 0
+
+    def get_objective(self) -> float:
+        return 0
+
+    def check_solution(self):
+        return dict()
