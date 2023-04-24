@@ -714,6 +714,41 @@ inside represents one error of that particular type.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_solver_config">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_solver_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyomo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cbc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_unknown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config" title="Permalink to this definition"></a></dt>
+<dd><p>Format the configuration used to solve the problem.
+Solver configuration can either be directly in config using cornflow mapping name</p>
+<blockquote>
+<div><p>or in a config[“solver_config”] using the solver names.</p>
+</div></blockquote>
+<dl>
+<dt>Example:</dt><dd><dl class="simple">
+<dt>config = {</dt><dd><p>“solver”:”milp.cbc”,
+“time_limit”:60,
+“rel_gap”:0.1,
+“solver_config”:{“heur”:1, “pumpC”:0}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – dict config argument of the solver method</p></li>
+<li><p><strong>lib</strong> – str library used to create the model (pulp or pyomo)</p></li>
+<li><p><strong>default_solver</strong> – str default solver to use if none is present inf config.</p></li>
+<li><p><strong>remove_unknown</strong> – bool. if True, the unknown parameters will be deleted. Otherwise, they will remain
+but will not be translated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the solver name and the config dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
