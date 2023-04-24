@@ -152,7 +152,7 @@ jobs:
         CF_ALARMS_ENDPOINT: 1
     - name: Run integration tests
       run: |
-        coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
+        coverage run -a --source=./cornflow/ --omit="*/tests/data/* -m unittest discover -s cornflow/tests/integration
         coverage report -m
         coverage xml
       env:

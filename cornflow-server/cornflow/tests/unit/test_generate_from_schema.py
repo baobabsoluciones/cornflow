@@ -164,7 +164,6 @@ class GenerationTests(unittest.TestCase):
     def check(
         self, instance=None, output_path=None, include_methods=None, app_name=None
     ):
-        print("Checking")
         if app_name is None:
             app_name = self.app_name
         db = SQLAlchemy()
@@ -179,7 +178,6 @@ class GenerationTests(unittest.TestCase):
         # Checks that the directories have been created
         for path in created_dirs:
             self.assertTrue(os.path.isdir(self._get_path(path)))
-        print("All dirs created")
 
         # Checks that each file has been created
         created_dirs = created_dirs[1:4]
@@ -192,7 +190,6 @@ class GenerationTests(unittest.TestCase):
             os.path.join(path, file) for path in created_dirs for file, _ in files
         ]
         for path_file in absolute_paths:
-            print("Created", path_file)
             self.assertTrue(os.path.exists(self._get_path(path_file)))
             if os.path.exists(path_file):
                 with open(path_file, "r") as fd:
@@ -209,7 +206,6 @@ class GenerationTests(unittest.TestCase):
 
         # Checks that the models have the correct methods and attributes
         for file, table in files:
-            print("Importing models", file, table)
             class_name = self.snake_to_camel(app_name + "_" + table + "_model")
             file_path = os.path.join(models_dir, file)
             spec = importlib.util.spec_from_file_location(class_name, file_path)
@@ -254,11 +250,9 @@ class GenerationTests(unittest.TestCase):
             expected_methods = set(expected_methods)
             for method in expected_methods:
                 self.assertIn(method, props_and_methods.keys())
-        print("All models correctly declared")
 
         # Checks that the schemas have the correct methods and attributes
         for file, table in files:
-            print("Importing schemas", file, table)
             mod_name = self.snake_to_camel(app_name + "_" + table + "_schema")
             class_names = [
                 self.snake_to_camel(app_name + "_" + table + "_" + type_schema)
@@ -278,11 +272,9 @@ class GenerationTests(unittest.TestCase):
                 expected_prop = TupList(expected_prop).vfilter(lambda v: v != "id")
                 for prop in expected_prop:
                     self.assertIn(prop, props)
-        print("All schemas correctly declared")
 
         # Checks that the endpoints have all the methods
         for file, table in files:
-            print("Importing endpoint", file, table)
             mod_name = self.snake_to_camel(app_name + "_" + table + "_endpoint")
             class_names = [self.snake_to_camel(app_name + "_" + table + "_endpoint")]
             if (
