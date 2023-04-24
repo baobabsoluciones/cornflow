@@ -8,7 +8,7 @@ on:
 jobs:
   notify:
     name: Notify slack channel
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - name: Notify slack channel
       uses: slackapi/slack-github-action@v1.23.0
