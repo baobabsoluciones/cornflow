@@ -45,7 +45,6 @@ class SchemaGenerator:
         self.mock_packages(files)
 
         self.parse(files)
-        print("Inheriting")
 
         self.inherit()
 

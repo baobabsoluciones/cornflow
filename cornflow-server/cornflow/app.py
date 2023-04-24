@@ -28,7 +28,7 @@ from cornflow.commands import (
     register_dag_permissions_command,
 )
 from cornflow.config import app_config
-from cornflow.endpoints import resources
+from cornflow.endpoints import resources, alarms_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
@@ -73,10 +73,16 @@ def create_app(env_name="development", dataconn=None):
     api = Api(app)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
     docs = FlaskApiSpec(app)
     for res in resources:
         docs.register(target=res["resource"], endpoint=res["endpoint"])
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]

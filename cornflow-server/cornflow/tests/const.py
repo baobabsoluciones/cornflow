@@ -60,6 +60,8 @@ APIVIEW_URL = PREFIX + "/apiview/"
 DEPLOYED_DAG_URL = PREFIX + "/dag/deployed/"
 
 TABLES_URL = PREFIX + "/table/"
+ALARMS_URL = PREFIX + "/alarms/"
+MAIN_ALARMS_URL = PREFIX + "/main-alarms/"
 
 PUBLIC_DAGS = [
     "solve_model_dag",

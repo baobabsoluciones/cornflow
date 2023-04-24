@@ -1,7 +1,6 @@
 # Import from libraries
 from flask_apispec import doc, use_kwargs
 from flask import current_app
-import os
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
@@ -9,12 +8,7 @@ from cornflow.schemas.common import QueryFilters
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import SERVICE_ROLE
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist
-from cornflow.shared.utils import get_all_tables, item_as_dict, items_as_dict_list
-
-
-models_paths = [
-    os.path.join(os.path.dirname(__file__), "..", ".."),
-]
+from cornflow.shared.utils_tables import get_all_tables, item_as_dict, items_as_dict_list
 
 
 class TablesEndpoint(BaseMetaResource):
@@ -23,7 +17,7 @@ class TablesEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = None
-        self.tables = get_all_tables(models_paths)
+        self.tables = get_all_tables()
 
     @doc(description="Get all rows of a table", tags=["Tables"])
     @authenticate(auth_class=Auth())
@@ -51,7 +45,7 @@ class TablesDetailsEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = None
-        self.tables = get_all_tables(models_paths)
+        self.tables = get_all_tables()
 
     @doc(description="Get a row", tags=["Tables"])
     @authenticate(auth_class=Auth())
@@ -72,7 +66,7 @@ class TablesDetailsEndpoint(BaseMetaResource):
             except (ValueError, TypeError):
                 raise InvalidUsage(
                     "Invalid identifier.",
-                    log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                    log_txt=f"Error while user {self.get_user()} tries to access row {idx} of table {table_name}. "
                     f"Identifier is not valid.",
                 )
 
@@ -82,7 +76,7 @@ class TablesDetailsEndpoint(BaseMetaResource):
         res = self.get_detail(idx=conv_idx)
         if res is None:
             raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user()} tries to delete row {idx} of table {table_name}. "
+                log_txt=f"Error while user {self.get_user()} tries to access row {idx} of table {table_name}. "
                 "The object does not exist."
             )
         return item_as_dict(res), 200

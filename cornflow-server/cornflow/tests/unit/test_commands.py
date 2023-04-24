@@ -26,7 +26,7 @@ from cornflow.app import (
 
 
 from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.endpoints import resources
+from cornflow.endpoints import resources, alarms_resources
 
 from cornflow.models import (
     DeployedDAG,
@@ -53,7 +53,7 @@ class TestCommands(TestCase):
             "email": "testemail@test.org",
             "password": "Testpassword1!",
         }
-        self.resources = resources
+        self.resources = resources + alarms_resources
         self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v"])
 

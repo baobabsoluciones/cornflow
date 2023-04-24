@@ -13,13 +13,16 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     if external_app is None:
-        from cornflow.endpoints import resources
+        from cornflow.endpoints import resources, alarms_resources
+        resources_to_register = resources
+        if current_app.config["ALARMS_ENDPOINTS"]:
+            resources_to_register = resources + alarms_resources
     elif external_app is not None:
         sys.path.append("./")
         external_module = import_module(external_app)
-        resources = external_module.endpoints.resources
+        resources_to_register = external_module.endpoints.resources
     else:
-        resources = []
+        resources_to_register = []
         exit()
 
     views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
@@ -27,7 +30,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     permissions_in_db_keys = [
         (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_db
     ]
-    resources_names = [resource["endpoint"] for resource in resources]
+    resources_names = [resource["endpoint"] for resource in resources_to_register]
 
     # Create base permissions
     permissions_in_app = [
@@ -39,7 +42,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
             }
         )
         for role, action in BASE_PERMISSION_ASSIGNATION
-        for view in resources
+        for view in resources_to_register
         if role in view["resource"].ROLES_WITH_ACCESS
     ] + [
         PermissionViewRoleModel(
