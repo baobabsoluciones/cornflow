@@ -1,7 +1,10 @@
+# Imports from libraries
 from marshmallow import fields, Schema, validate
-from .solution_log import LogSchema
+
+# Imports from internal modules
 from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 from .common import QueryFilters, BaseDataEndpointResponse
+from .solution_log import LogSchema
 
 
 class QueryFiltersExecution(QueryFilters):

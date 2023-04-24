@@ -1,10 +1,13 @@
-import sys
-from importlib import import_module
 
-from cornflow_core.models import ViewBaseModel
-from cornflow_core.shared import db
+# Imports from external libraries
 from flask import current_app
+from importlib import import_module
 from sqlalchemy.exc import DBAPIError, IntegrityError
+import sys
+
+# Imports from internal libraries
+from cornflow.models import ViewModel
+from cornflow.shared import db
 
 
 def register_views_command(external_app: str = None, verbose: bool = False):
@@ -19,10 +22,10 @@ def register_views_command(external_app: str = None, verbose: bool = False):
         resources = []
         exit()
 
-    views_registered = [view.name for view in ViewBaseModel.get_all_objects()]
+    views_registered = [view.name for view in ViewModel.get_all_objects()]
 
     views_to_register = [
-        ViewBaseModel(
+        ViewModel(
             {
                 "name": view["endpoint"],
                 "url_rule": view["urls"],

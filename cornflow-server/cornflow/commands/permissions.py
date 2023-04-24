@@ -5,8 +5,8 @@ from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
 )
-from cornflow_core.models import ViewBaseModel, PermissionViewRoleBaseModel
-from cornflow_core.shared import db
+from cornflow.models import ViewModel, PermissionViewRoleModel
+from cornflow.shared import db
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
@@ -22,8 +22,8 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         resources = []
         exit()
 
-    views_in_db = {view.name: view.id for view in ViewBaseModel.get_all_objects()}
-    permissions_in_db = [perm for perm in PermissionViewRoleBaseModel.get_all_objects()]
+    views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
+    permissions_in_db = [perm for perm in PermissionViewRoleModel.get_all_objects()]
     permissions_in_db_keys = [
         (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_db
     ]
@@ -31,7 +31,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
 
     # Create base permissions
     permissions_in_app = [
-        PermissionViewRoleBaseModel(
+        PermissionViewRoleModel(
             {
                 "role_id": role,
                 "action_id": action,
@@ -42,7 +42,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         for view in resources
         if role in view["resource"].ROLES_WITH_ACCESS
     ] + [
-        PermissionViewRoleBaseModel(
+        PermissionViewRoleModel(
             {
                 "role_id": role,
                 "action_id": action,
@@ -126,7 +126,7 @@ def register_dag_permissions_command(
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
     from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
-    from cornflow_core.shared import db
+    from cornflow.shared import db
 
     if open_deployment is None:
         open_deployment = int(current_app.config["OPEN_DEPLOYMENT"])

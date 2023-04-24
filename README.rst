@@ -9,10 +9,6 @@ Cornflow
    :alt: PyPI
    :target: https://pypi.python.org/pypi/cornflow-client
 
-.. image:: https://img.shields.io/pypi/v/cornflow-core?label=cornflow-core&style=for-the-badge
-  :alt: PyPI
-  :target: https://pypi.python.org/pypi/cornflow-core
-
 .. image:: https://img.shields.io/pypi/l/cornflow-client?color=blue&style=for-the-badge
   :alt: PyPI - License
   :target: https://github.com/baobabsoluciones/cornflow/blob/master/LICENSE
@@ -22,10 +18,6 @@ Cornflow
    :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
 
 .. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=client-tests&label=client&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
-   :alt: Codecov
-   :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
-
-.. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=core-tests&label=Core&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
    :alt: Codecov
    :target: https://app.codecov.io/gh/baobabsoluciones/cornflow
 

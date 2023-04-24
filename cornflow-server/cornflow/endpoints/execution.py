@@ -6,15 +6,12 @@ These endpoints hve different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import (
-    json_schema_validate_as_string,
-)
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, DeployedDAG, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
@@ -28,8 +25,8 @@ from cornflow.schemas.execution import (
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
 )
-
-from cornflow.shared.authentication import Auth
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
@@ -41,10 +38,8 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
-from cornflow_core.compress import compressed
-
+from cornflow.shared.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
+from cornflow.shared.validators import json_schema_validate_as_string
 
 class ExecutionEndpoint(BaseMetaResource):
     """

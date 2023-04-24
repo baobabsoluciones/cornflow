@@ -4,6 +4,10 @@ or from an existing case, update the case info, patch its data, get all of them 
 These endpoints have different access url, but manage the same data entities
 """
 # Import from libraries
+from cornflow_client.constants import (
+    INSTANCE_SCHEMA,
+    SOLUTION_SCHEMA
+)
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -11,8 +15,13 @@ import jsonpatch
 
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import CaseModel, ExecutionModel, DeployedDAG, InstanceModel
-
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.compress import compressed
+from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
+from cornflow.shared.exceptions import InvalidData, ObjectDoesNotExist
+from cornflow.shared.validators import json_schema_validate_as_string
 from cornflow.schemas.case import (
     CaseBase,
     CaseFromInstanceExecution,
@@ -25,22 +34,6 @@ from cornflow.schemas.case import (
     CaseCompareResponse,
     CaseListAllWithIndicators,
 )
-
-from cornflow.schemas.model_json import DataSchema
-from cornflow.shared.authentication import Auth
-from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
-
-from cornflow_client.constants import (
-    INSTANCE_SCHEMA,
-    SOLUTION_SCHEMA
-)
-
-from cornflow_core.authentication import authenticate
-from cornflow_core.compress import compressed
-from cornflow_core.exceptions import InvalidData, ObjectDoesNotExist
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import json_schema_validate_as_string
-
 
 
 class CaseEndpoint(BaseMetaResource):

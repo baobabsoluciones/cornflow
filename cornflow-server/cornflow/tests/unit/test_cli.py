@@ -5,13 +5,13 @@ from click.testing import CliRunner
 from cornflow.app import create_app
 from cornflow.cli import cli
 from cornflow.models import UserModel
-from cornflow_core.models import (
-    ActionBaseModel,
-    RoleBaseModel,
-    ViewBaseModel,
-    PermissionViewRoleBaseModel,
+from cornflow.models import (
+    ActionModel,
+    RoleModel,
+    ViewModel,
+    PermissionViewRoleModel,
 )
-from cornflow_core.shared import db
+from cornflow.shared import db
 from flask_testing import TestCase
 
 
@@ -62,7 +62,7 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["actions", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
-        actions = ActionBaseModel.get_all_objects().all()
+        actions = ActionModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
 
     def test_config_entrypoint(self):
@@ -113,7 +113,7 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["roles", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
-        roles = RoleBaseModel.get_all_objects().all()
+        roles = RoleModel.get_all_objects().all()
         self.assertEqual(len(roles), 4)
 
     def test_views_entrypoint(self):
@@ -128,7 +128,7 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
-        views = ViewBaseModel.get_all_objects().all()
+        views = ViewModel.get_all_objects().all()
         self.assertEqual(len(views), 44)
 
     def test_permissions_entrypoint(self):
@@ -147,10 +147,10 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["permissions", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
-        actions = ActionBaseModel.get_all_objects().all()
-        roles = RoleBaseModel.get_all_objects().all()
-        views = ViewBaseModel.get_all_objects().all()
-        permissions = PermissionViewRoleBaseModel.get_all_objects().all()
+        actions = ActionModel.get_all_objects().all()
+        roles = RoleModel.get_all_objects().all()
+        views = ViewModel.get_all_objects().all()
+        permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
         self.assertEqual(len(views), 44)
@@ -163,10 +163,10 @@ class CLITests(TestCase):
         runner.invoke(cli, ["views", "init", "-v"])
         result = runner.invoke(cli, ["permissions", "base", "-v"])
         self.assertEqual(result.exit_code, 0)
-        actions = ActionBaseModel.get_all_objects().all()
-        roles = RoleBaseModel.get_all_objects().all()
-        views = ViewBaseModel.get_all_objects().all()
-        permissions = PermissionViewRoleBaseModel.get_all_objects().all()
+        actions = ActionModel.get_all_objects().all()
+        roles = RoleModel.get_all_objects().all()
+        views = ViewModel.get_all_objects().all()
+        permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
         self.assertEqual(len(views), 44)

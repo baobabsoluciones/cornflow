@@ -31,11 +31,11 @@ from cornflow.config import app_config
 from cornflow.endpoints import resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
+from cornflow.shared import db, bcrypt
+from cornflow.shared.compress import init_compress
 from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
+from cornflow.shared.exceptions import initialize_errorhandlers
 from cornflow.shared.log_config import log_config
-from cornflow_core.compress import init_compress
-from cornflow_core.exceptions import initialize_errorhandlers
-from cornflow_core.shared import db, bcrypt
 
 
 def create_app(env_name="development", dataconn=None):

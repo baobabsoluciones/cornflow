@@ -3,17 +3,16 @@ Endpoints to get the schemas
 """
 
 # Import from libraries
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import NoPermission
-from cornflow_core.resources import BaseMetaResource
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, DeployedDAG
 from cornflow.schemas.schemas import SchemaOneApp, SchemaListApp
-from cornflow.shared.authentication import Auth
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.exceptions import NoPermission
 
 
 class SchemaEndpoint(BaseMetaResource):

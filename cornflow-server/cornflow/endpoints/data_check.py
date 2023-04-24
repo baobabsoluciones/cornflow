@@ -5,18 +5,14 @@ External endpoints to launch the solution check on an execution
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import AirflowError, ObjectDoesNotExist, InvalidUsage, InvalidData
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import json_schema_validate_as_string
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
-from cornflow.shared.authentication import Auth
-
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
     EXEC_STATE_ERROR,
@@ -24,7 +20,13 @@ from cornflow.shared.const import (
     EXEC_STATE_NOT_RUN,
     EXECUTION_STATE_MESSAGE_DICT, VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE,
 )
-
+from cornflow.shared.exceptions import (
+    AirflowError,
+    ObjectDoesNotExist,
+    InvalidUsage,
+    InvalidData
+)
+from cornflow.shared.validators import json_schema_validate_as_string
 
 
 class DataCheckExecutionEndpoint(BaseMetaResource):

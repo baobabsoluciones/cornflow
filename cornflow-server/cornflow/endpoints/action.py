@@ -1,16 +1,15 @@
 """
 
 """
-
-from cornflow_core.authentication import authenticate
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.schemas import ActionsResponse
+# Imports from external libraries
 from flask_apispec import marshal_with, doc
 from flask import current_app
 
 # Import from internal modules
-from cornflow_core.models import ActionBaseModel
-from cornflow.shared.authentication import Auth
+from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.models import ActionModel
+from cornflow.schemas.action import ActionsResponse
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ADMIN_ROLE
 
 
@@ -20,7 +19,7 @@ class ActionListEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = ActionBaseModel
+        self.data_model = ActionModel
 
     @doc(description="Get all the actions", tags=["Actions"])
     @authenticate(auth_class=Auth())

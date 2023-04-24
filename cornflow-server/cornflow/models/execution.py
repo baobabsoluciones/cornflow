@@ -4,14 +4,11 @@ Model for the executions
 
 # Import from libraries
 import hashlib
-
-# Imports from sqlalchemy
-from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.dialects.postgresql import TEXT
+from sqlalchemy.dialects.postgresql import JSON, TEXT
 
 # Imports from internal modules
-from cornflow_core.shared import db
-from .base_data_model import BaseDataModel
+from cornflow.models.base_data_model import BaseDataModel
+from cornflow.shared import db
 from cornflow.shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
 
 
