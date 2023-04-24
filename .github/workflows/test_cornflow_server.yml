@@ -102,7 +102,7 @@ jobs:
         AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
     - name: Run unit tests
       run: | 
-        coverage run --source=./cornflow/ -m unittest discover -s cornflow/tests/unit
+        coverage run --source=./cornflow/ --omit="*/tests/data/* -m unittest discover -s cornflow/tests/unit
         coverage report -m
       env:
         FLASK_ENV: testing
@@ -152,7 +152,7 @@ jobs:
         CF_ALARMS_ENDPOINT: 1
     - name: Run integration tests
       run: |
-        coverage run -a --source=./cornflow/ --omit="*/tests/data/* -m unittest discover -s cornflow/tests/integration
+        coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
         coverage report -m
         coverage xml
       env:
