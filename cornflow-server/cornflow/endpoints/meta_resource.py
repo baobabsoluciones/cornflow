@@ -86,8 +86,8 @@ class BaseMetaResource(Resource, MethodResource):
             {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
         ]
 
-        instances = self.data_model.create_bulk(data)
-        return instances, 201
+        self.data_model.create_bulk(data)
+        return {"message": "Created correctly"}, 201
 
     def post_bulk_update(self, data, trace_field="user_id"):
         """"""
@@ -107,7 +107,7 @@ class BaseMetaResource(Resource, MethodResource):
                 instances.append(instance)
 
         self.data_model.create_update_bulk(instances)
-        return instances, 201
+        return {"message": "Updated correctly"}, 201
 
     def put_detail(self, data, track_user: bool = True, **kwargs):
         """
