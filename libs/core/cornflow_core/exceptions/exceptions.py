@@ -173,12 +173,15 @@ def initialize_errorhandlers(app):
         # Log the entire traceback
         error_msg = f"{error.__class__.__name__}: {error}"
         error_str = f"{error.__class__.__name__}: {error}. {traceback.format_exc()}"
-        app.logger.error(error_str)
+        # app.logger.error(error_str)
 
         status_code = 500
 
         # ToDo: should we leave the default behavior for HTTPExceptions ?
         if isinstance(error, HTTPException):
+            # Log only the name and description of the error since it's a HTTPException
+            app.logger.error(error_msg)
+
             # For HTTPExceptions we keep the associated messages
             #     but return them as json instead of html
 
@@ -193,6 +196,9 @@ def initialize_errorhandlers(app):
             response = jsonify(response_dict)
 
         elif app.config["ENV"] == "production":
+            # Log the entire traceback
+            app.logger.error(error_str)
+
             # We are in production: we return generic messages
             #    to avoid giving away sensitive information
 
@@ -202,6 +208,9 @@ def initialize_errorhandlers(app):
             }
             response = jsonify(response_dict)
         else:
+            # Log the entire traceback
+            app.logger.error(error_str)
+
             # Testing or development: we return the full error
             response = jsonify(dict(message=error_msg, error=error_str))
 
