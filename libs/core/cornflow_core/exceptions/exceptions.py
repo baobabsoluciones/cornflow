@@ -170,10 +170,8 @@ def initialize_errorhandlers(app):
         :return: an HTTP response
         :rtype: `Response`
         """
-        # Log the entire traceback
         error_msg = f"{error.__class__.__name__}: {error}"
         error_str = f"{error.__class__.__name__}: {error}. {traceback.format_exc()}"
-        # app.logger.error(error_str)
 
         status_code = 500
 
