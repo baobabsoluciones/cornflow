@@ -6,6 +6,7 @@ from flask import jsonify
 from webargs.flaskparser import parser
 from cornflow_client.constants import AirflowError
 from werkzeug.exceptions import HTTPException
+import traceback
 
 
 class InvalidUsage(Exception):
@@ -121,6 +122,12 @@ class ConfigurationError(InvalidUsage):
     error = "No authentication method configured on the server"
 
 
+INTERNAL_SERVER_ERROR_MESSAGE = "500 Internal Server Error"
+INTERNAL_SERVER_ERROR_MESSAGE_DETAIL = "The server encountered an internal error and was unable " \
+                                       "to complete your request. Either the server is overloaded or " \
+                                       "there is an error in the application."
+
+
 def initialize_errorhandlers(app):
     """
     Function to register the different error handlers
@@ -153,25 +160,53 @@ def initialize_errorhandlers(app):
         response.status_code = error.status_code
         return response
 
-    if app.config["ENV"] in ["testing", "development"]:
+    @app.errorhandler(Exception)
+    def handle_internal_server_error(error):
+        """
+        Method to handle all the other exceptions
 
-        @app.errorhandler(Exception)
-        def handle_internal_server_error(error):
-            """
-            Method to handle all the other exceptions
+        :param error: the raised error
+        :type error: `Exception`
+        :return: an HTTP response
+        :rtype: `Response`
+        """
+        # Log the entire traceback
+        error_msg = f"{error.__class__.__name__}: {error}"
+        error_str = f"{error.__class__.__name__}: {error}. {traceback.format_exc()}"
+        app.logger.error(error_str)
 
-            :param error: the raised error
-            :type error: `Exception`
-            :return: an HTTP response
-            :rtype: `Response`
-            """
-            if isinstance(error, HTTPException):
-                return error
-            error_str = f"{error.__class__.__name__}: {error}"
-            app.logger.error(error_str)
-            response = jsonify(dict(error=error_str))
-            response.status_code = 500
-            return response
+        status_code = 500
+
+        # ToDo: should we leave the default behavior for HTTPExceptions ?
+        if isinstance(error, HTTPException):
+            # For HTTPExceptions we keep the associated messages
+            #     but return them as json instead of html
+
+            # HTTPExceptions sometimes already have an associated status code
+            status_code = error.code or status_code
+            error_msg = f"{status_code} {error.name or INTERNAL_SERVER_ERROR_MESSAGE}"
+            error_str = f"{error_msg}. {str(error.description or '') or INTERNAL_SERVER_ERROR_MESSAGE_DETAIL}"
+            response_dict = {
+                "message": error_msg,
+                "error": error_str
+            }
+            response = jsonify(response_dict)
+
+        elif app.config["ENV"] == "production":
+            # We are in production: we return generic messages
+            #    to avoid giving away sensitive information
+
+            response_dict = {
+                "message": INTERNAL_SERVER_ERROR_MESSAGE,
+                "error": INTERNAL_SERVER_ERROR_MESSAGE_DETAIL
+            }
+            response = jsonify(response_dict)
+        else:
+            # Testing or development: we return the full error
+            response = jsonify(dict(message=error_msg, error=error_str))
+
+        response.status_code = status_code
+        return response
 
     return app
 
