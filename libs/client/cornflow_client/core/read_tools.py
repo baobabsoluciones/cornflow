@@ -9,12 +9,15 @@ from pytups import TupList, SuperDict
 import numbers
 
 
-def read_excel(path: str, param_tables_names: list = None) -> dict:
+def read_excel(
+    path: str, param_tables_names: list = None, preserve_types=False
+) -> dict:
     """
-    Read an entire excel file.
+    Read an entire Excel file.
 
-    :param path: path of the excel file
-    :param param_tables_names: names of the parameter tables
+    :param path: path of the Excel file.
+    :param param_tables_names: names of the parameter tables.
+    :param preserve_types: if true pandas will not interpret type.
     :return: a dict with a list of dict (records format) for each table.
     """
     is_xl_type(path)
@@ -29,7 +32,9 @@ def read_excel(path: str, param_tables_names: list = None) -> dict:
     except (ModuleNotFoundError, ImportError):
         raise Exception("You must install pandas package to use this method")
 
-    data = pd.read_excel(path, sheet_name=None)
+    dtype = "object" if preserve_types else None
+
+    data = pd.read_excel(path, sheet_name=None, dtype=dtype)
 
     data_tables = {
         name: TupList(content.to_dict(orient="records")).vapply(

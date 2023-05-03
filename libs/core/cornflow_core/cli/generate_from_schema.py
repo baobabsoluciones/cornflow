@@ -2,7 +2,7 @@
 File that implements the generate from schema cli command
 """
 import click
-
+import json
 from cornflow_core.cli.tools.api_generator import APIGenerator
 
 METHOD_OPTIONS = [
@@ -13,7 +13,7 @@ METHOD_OPTIONS = [
     "patch_detail",
     "delete_detail",
     "post_bulk",
-    "put_bulk"
+    "put_bulk",
 ]
 
 
@@ -31,7 +31,7 @@ METHOD_OPTIONS = [
     required=False,
 )
 @click.option(
-    "--remove_methods",
+    "--remove-methods",
     "-r",
     type=click.Choice(METHOD_OPTIONS, case_sensitive=False),
     help="Methods that will NOT be added to the new endpoints",
@@ -44,27 +44,59 @@ METHOD_OPTIONS = [
     help="If your schema describes only one table, use this option to indicate the name of the table",
     required=False,
 )
-def generate_from_schema(path, app_name, output_path, remove_methods, one):
+@click.option(
+    "--endpoints-methods",
+    "-m",
+    type=str,
+    default=None,
+    help="json file with dict of methods that will be added to each new endpoints",
+    required=False,
+)
+@click.option(
+    "--endpoints-access",
+    "-e",
+    type=str,
+    default=None,
+    help="json file with dict of roles access that will be added to each new endpoints",
+    required=False,
+)
+def generate_from_schema(
+    path, app_name, output_path, remove_methods, one, endpoints_methods, endpoints_access
+):
     """
     This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
 
-    :param str path: the path to the JSONSchema file
-    :param str app_name: the name of the application
-    :param str output_path: the output path
-    :param tuple remove_methods: the methods that will not be added to the new endpoints
-    :param str one: if your schema describes only one table, use this option to indicate the name of the table
+    :param str path: the path to the JSONSchema file.
+    :param str app_name: the name of the application.
+    :param str output_path: the output path.
+    :param tuple remove_methods: the methods that will not be added to the new endpoints.
+    :param str one: if your schema describes only one table, use this option to indicate the name of the table.
+    :param str endpoints_methods: json file with dict of methods that will be added to each new endpoints.
+    :param str endpoints_access: json file with dict of roles access that will be added to each new endpoints.
     :return: a click status code
     :rtype: int
     """
+
     path = path.replace("\\", "/")
     output = None
     if output_path != "output":
         output = output_path.replace("\\", "/")
 
     if remove_methods is not None:
-        methods_to_add = list(set(METHOD_OPTIONS) - set(remove_methods))
+        methods_to_add = {"default": list(set(METHOD_OPTIONS) - set(remove_methods))}
     else:
-        methods_to_add = []
+        methods_to_add = {"default": list(set(METHOD_OPTIONS))}
+
+    if endpoints_methods is not None:
+        endpoints_methods = endpoints_methods.replace("\\", "/")
+        with open(endpoints_methods, "r") as file:
+            methods_to_add.update(json.load(file))
+
+    dict_endpoints_access = {"default": ["SERVICE_ROLE"]}
+    if endpoints_access is not None:
+        endpoints_access = endpoints_access.replace("\\", "/")
+        with open(endpoints_access, "r") as file:
+            dict_endpoints_access.update(json.load(file))
 
     name_table = None
     if one:
@@ -74,7 +106,9 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
     click.echo(f"The path to the JSONSchema is {path}")
     click.echo(f"The app_name is {app_name}")
     click.echo(f"The output_path is {output}")
-    click.echo(f"The methods to add is {methods_to_add}")
+    click.echo(f"The method to add are obtained from {endpoints_methods}")
+    click.echo(f"The methods to add are {methods_to_add}")
+    click.echo(f"The roles to add are {endpoints_access}")
     click.echo(f"The name_table is {name_table}")
 
     APIGenerator(
@@ -83,4 +117,5 @@ def generate_from_schema(path, app_name, output_path, remove_methods, one):
         output_path=output_path,
         options=methods_to_add,
         name_table=name_table,
+        endpoints_access=dict_endpoints_access
     ).main()
