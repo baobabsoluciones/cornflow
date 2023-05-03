@@ -13,6 +13,7 @@ from sqlalchemy.sql.sqltypes import Integer
 from pytups import TupList, SuperDict
 from cornflow_core.models import TraceAttributesModel
 from cornflow_core.cli.generate_from_schema import generate_from_schema
+from cornflow_core.cli.tools.api_generator import APIGenerator
 
 sys.modules["mockedpackage"] = MagicMock()
 path_to_tests = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,7 @@ class GenerationTests(unittest.TestCase):
         super().setUp()
 
         self.full_inst_path = self._get_path("./data/instance.json")
+        self.inst_path2 = self._get_path("./data/instance2.json")
         self.full_inst = SuperDict.from_dict(self.import_schema(self.full_inst_path))
         # Removing parameter tables
         self.full_inst["properties"] = self.full_inst["properties"].vfilter(
@@ -38,8 +40,19 @@ class GenerationTests(unittest.TestCase):
         self.other_output_path = self._get_path("./data/output_path")
         self.last_path = self.default_output_path
         self.all_methods = TupList(
-            ["getOne", "getAll", "deleteOne", "deleteAll", "update", "post"]
+            [
+                "get_detail",
+                "get_list",
+                "delete_detail",
+                "put_detail",
+                "patch_detail",
+                "post_list",
+                "put_bulk",
+                "post_bulk",
+            ]
         )
+        self.endpoints_methods_path = self._get_path("./data/endpoints_methods.json")
+        self.endpoints_access_path = self._get_path("./data/endpoints_access.json")
 
     def tearDown(self):
         if os.path.isdir(self.last_path):
@@ -140,7 +153,7 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
         include_methods = self.all_methods.vfilter(
-            lambda v: v not in ["deleteOne", "update", "getOne"]
+            lambda v: v not in ["delete_detail", "put_detail", "get_detail", "patch_detail"]
         )
         self.last_path = self.other_output_path
         self.check(
@@ -148,6 +161,45 @@ class GenerationTests(unittest.TestCase):
             include_methods=include_methods,
             app_name=self.second_app_name,
         )
+
+    def test_endpoints_methods(self):
+
+        runner = CliRunner()
+        result = runner.invoke(
+            generate_from_schema,
+            [
+                "-p",
+                self.full_inst_path,
+                "-a",
+                "test3",
+                "-o",
+                self.other_output_path,
+                "-m",
+                self.endpoints_methods_path,
+            ],
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.last_path = self.other_output_path
+        self.check(output_path=self.other_output_path, app_name="test3")
+
+    def test_endpoints_access(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            generate_from_schema,
+            [
+                "-p",
+                self.full_inst_path,
+                "-a",
+                "test4",
+                "-o",
+                self.other_output_path,
+                "-e",
+                self.endpoints_access_path,
+            ],
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.last_path = self.other_output_path
+        self.check(output_path=self.other_output_path, app_name="test4")
 
     def check(
         self, instance=None, output_path=None, include_methods=None, app_name=None
@@ -270,15 +322,16 @@ class GenerationTests(unittest.TestCase):
         # Checks that the endpoints have all the methods
         for file, table in files:
             mod_name = self.snake_to_camel(app_name + "_" + table + "_endpoint")
-            class_names = [self.snake_to_camel(app_name + "_" + table + "_endpoint")]
-            if (
-                "getOne" in include_methods
-                or "deleteOne" in include_methods
-                or "update" in include_methods
-            ):
-                class_names.append(
-                    self.snake_to_camel(app_name + "_" + table + "_details_endpoint")
-                )
+            class_names = []
+            base = self.snake_to_camel(app_name + "_" + table + "_endpoint")
+            details = self.snake_to_camel(app_name + "_" + table + "_details_endpoint")
+            bulk = self.snake_to_camel(app_name + "_" + table + "_bulk_endpoint")
+            if any(m in include_methods for m in ["get_list", "post_list"]):
+                class_names += [base]
+            if any(m in include_methods for m in ["get_detail", "delete_detail", "put_detail", "patch_detail"]):
+                class_names += [details]
+            if any(m in include_methods for m in ["put_bulk", "post_bulk"]):
+                class_names += [bulk]
             file_path = os.path.join(endpoints_dir, file)
             spec = importlib.util.spec_from_file_location(mod_name, file_path)
             mod = importlib.util.module_from_spec(spec)
@@ -295,28 +348,48 @@ class GenerationTests(unittest.TestCase):
                 "delete_detail": "DELETE",
                 "put_detail": "PUT",
                 "patch_detail": "PATCH",
+                "post_bulk": "POST",
+                "put_bulk": "PUT",
             }
-            # Checks the methods of the first endpoint
-            include_methods_e1 = [
-                method_name
-                for method_name in include_methods
-                if method_name in ["get_list", "post_list"]
-            ]
-            props_and_methods = mod.__dict__[class_names[0]].methods
-            for method_name in include_methods_e1:
-                self.assertIn(api_methods[method_name], props_and_methods)
+            # Checks the methods of the base endpoint
+            if base in class_names:
+                include_methods_base = [
+                    method_name
+                    for method_name in include_methods
+                    if method_name in ["get_list", "post_list"]
+                ]
+                props_and_methods = mod.__dict__[base].methods
+                for method_name in include_methods_base:
+                    self.assertIn(api_methods[method_name], props_and_methods)
 
             # Checks the methods of the details endpoint
-            if len(class_names) == 2:
-                include_methods_e2 = [
+            if details in class_names:
+                include_methods_details = [
                     method_name
                     for method_name in include_methods
                     if method_name
                     in ["get_detail", "put_detail", "delete_detail", "patch_detail"]
                 ]
-                props_and_methods = mod.__dict__[class_names[1]].methods
-                for method_name in include_methods_e2:
+                props_and_methods = mod.__dict__[details].methods
+                for method_name in include_methods_details:
                     self.assertIn(api_methods[method_name], props_and_methods)
+
+            if bulk in class_names:
+                include_methods_bulk = [
+                    method_name
+                    for method_name in include_methods
+                    if method_name in ["post_bulk", "put_bulk"]
+                ]
+                props_and_methods = mod.__dict__[bulk].methods
+                for method_name in include_methods_bulk:
+                    self.assertIn(api_methods[method_name], props_and_methods)
+
+    def test_get_id_type(self):
+        api_gen = APIGenerator(schema_path=self.inst_path2, app_name=None)
+        self.assertEqual(api_gen.get_id_type("employees"), "<string:idx>")
+        self.assertEqual(api_gen.get_id_type("shifts"), "<int:idx>")
+        self.assertEqual(api_gen.get_id_type("demand"), "<int:idx>")
+
 
     @staticmethod
     def snake_to_camel(name):

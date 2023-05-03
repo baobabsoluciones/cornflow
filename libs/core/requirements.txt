@@ -1,5 +1,5 @@
 click
-cornflow-client
+cornflow-client<=1.0.12
 cryptography
 disposable-email-domains
 Flask==2.1.3

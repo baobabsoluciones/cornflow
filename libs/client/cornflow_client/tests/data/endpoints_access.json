@@ -1,0 +1,15 @@
+{
+    "table1": [
+        "ADMIN_ROLE",
+        "SERVICE_ROLE"
+    ],
+    "table2": [
+        "SERVICE_ROLE"
+    ],
+    "table3": [
+        "VIEWER_ROLE",
+        "PLANNER_ROLE",
+        "ADMIN_ROLE",
+        "SERVICE_ROLE"
+    ]
+}

@@ -1,3 +1,20 @@
+version 1.0.4
+---------------
+
+- released: 2023-04-21
+- description: added alarms models and endpoints that can be used, change the get of all executions, better error handling and new useful methods
+- changelog:
+    - when performing a get of all executions the running executions get their status updated
+    - improve error handling
+    - add alarms models and endpoints so they can be used on `external_apps`
+    - added new useful methods
+
+
+
+version 1.0.3
+---------------
+
+
 version 1.0.2
 ---------------
 

@@ -1,0 +1,94 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"properties": {
+		"table1": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"col1": {
+						"type": [
+							"null",
+							"string"
+						]
+					},
+					"col2": {
+						"type": "number"
+					},
+					"col3": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"col2",
+					"col3"
+				]
+			}
+		},
+		"table2": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"col1": {
+						"type": [
+							"null",
+							"string"
+						]
+					},
+					"col2": {
+						"type": [
+							"integer",
+							"string"
+						]
+					},
+					"date": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"col2",
+					"date"
+				]
+			}
+		},
+		"table3": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id_t1": {
+						"type": "integer",
+						"foreign_key": "table1.id"
+					},
+					"id_t2": {
+						"type": "integer",
+						"foreign_key": "table2.id"
+					},
+					"value": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id_t1",
+					"id_t2",
+					"value"
+				]
+			}
+		}
+	},
+	"required": [
+		"table1",
+		"table2",
+		"table3"
+	]
+}

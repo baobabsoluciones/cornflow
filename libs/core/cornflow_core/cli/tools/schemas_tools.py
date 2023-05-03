@@ -1,4 +1,6 @@
 # Schemas
+from .tools import get_type
+
 schemas_imports = "from marshmallow import fields, Schema\n\n"
 
 JSON_TYPES_TO_FIELDS = {
@@ -7,6 +9,9 @@ JSON_TYPES_TO_FIELDS = {
     "number": "fields.Number",
     "boolean": "fields.Boolean",
     "array": "fields.List",
+    "date": "fields.Date",
+    "datetime": "fields.DateTime",
+    "time": "fields.Time",
 }
 
 
@@ -30,13 +35,8 @@ class SchemaGenerator:
         for key, val in self.schema["properties"].items():
             if key == "id":
                 continue
-            val_type = val["type"]
-            if isinstance(val_type, list):
-                if val_type[0] == "null":
-                    val_type = val_type[1]
-                else:
-                    val_type = val_type[0]
-            res += f"    {key} = {JSON_TYPES_TO_FIELDS[val_type]}("
+            ty, nullable = get_type(val)
+            res += f"    {key} = {JSON_TYPES_TO_FIELDS[ty]}("
             res += "required=False"
             res += ")\n"
         return res
@@ -44,13 +44,8 @@ class SchemaGenerator:
     def generate_post_schema(self):
         res = ""
         for key, val in self.schema["properties"].items():
-            val_type = val["type"]
-            if isinstance(val_type, list):
-                if val_type[0] == "null":
-                    val_type = val_type[1]
-                else:
-                    val_type = val_type[0]
-            res += f"    {key} = {JSON_TYPES_TO_FIELDS[val_type]}("
+            ty, nullable = get_type(val)
+            res += f"    {key} = {JSON_TYPES_TO_FIELDS[ty]}("
             if key in self.schema["required"]:
                 res += "required=True"
             else:
