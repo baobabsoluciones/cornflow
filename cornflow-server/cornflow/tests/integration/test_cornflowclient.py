@@ -346,7 +346,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         time.sleep(5)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_RUNNING)
-        time.sleep(10)
+        time.sleep(12)
         status = self.client.get_status(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 

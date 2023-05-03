@@ -1,15 +1,5 @@
 import json
 
-from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
-from cornflow.tests.integration.test_cornflowclient import load_file
-from cornflow.models import (
-    ActionModel,
-    PermissionViewRoleModel,
-    RoleModel,
-    ViewModel,
-)
-
-from cornflow.shared import db
 from flask_testing import TestCase
 
 from cornflow.app import (
@@ -23,22 +13,27 @@ from cornflow.app import (
     register_roles,
     register_views,
 )
-
-
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.endpoints import resources, alarms_resources
-
+from cornflow.models import (
+    ActionModel,
+    PermissionViewRoleModel,
+    RoleModel,
+    ViewModel,
+)
 from cornflow.models import (
     DeployedDAG,
     PermissionsDAG,
     UserModel,
 )
-
+from cornflow.shared import db
 from cornflow.shared.const import (
     ACTIONS_MAP,
     ROLES_MAP,
     BASE_PERMISSION_ASSIGNATION,
 )
+from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
+from cornflow.tests.integration.test_cornflowclient import load_file
 
 
 class TestCommands(TestCase):
@@ -177,7 +172,6 @@ class TestCommands(TestCase):
         for base in BASE_PERMISSION_ASSIGNATION:
             for view in self.resources:
                 if base[0] in view["resource"].ROLES_WITH_ACCESS:
-
                     permission = PermissionViewRoleModel.get_permission(
                         role_id=base[0],
                         api_view_id=ViewModel.query.filter_by(name=view["endpoint"])

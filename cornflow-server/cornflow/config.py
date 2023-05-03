@@ -77,12 +77,16 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
+
     """ """
+
+    ENV = "development"
 
 
 class Testing(DefaultConfig):
     """ """
 
+    ENV = "testing"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = True
@@ -100,6 +104,7 @@ class Testing(DefaultConfig):
 class Production(DefaultConfig):
     """ """
 
+    ENV = "production"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
