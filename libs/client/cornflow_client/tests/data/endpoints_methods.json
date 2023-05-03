@@ -1,0 +1,20 @@
+{
+    "table1": [
+        "get_list",
+        "post_list",
+        "get_detail",
+        "put_detail",
+        "patch_detail",
+        "delete_detail"
+    ],
+    "table2": [
+        "get_list",
+        "get_detail"
+    ],
+    "table3": [
+        "get_list",
+        "post_list",
+        "post_bulk",
+        "put_bulk"
+    ]
+}

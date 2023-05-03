@@ -102,7 +102,7 @@ class Auth(BaseAuth):
                 error="You do not have permission to access this endpoint",
                 status_code=403,
                 log_txt=f"Error while user {user_id} tries to access endpoint. "
-                f"The user does not permission to access. ",
+                f"The user does not have permission to access. ",
             )
 
         for role in user_roles:
