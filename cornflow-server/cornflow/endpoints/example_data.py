@@ -6,17 +6,15 @@ Endpoints to get the example data from a DAG
 from cornflow_client.airflow.api import Airflow
 from flask import current_app, request
 from flask_apispec import marshal_with, doc
-from cornflow_core.authentication import authenticate
 import json
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG
-from cornflow.shared.authentication import Auth
-from cornflow_core.exceptions import AirflowError, NoPermission
 from cornflow.schemas.example_data import ExampleData
-from cornflow_core.resources import BaseMetaResource
-
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
+from cornflow.shared.exceptions import AirflowError, NoPermission
 
 
 class ExampleDataDetailsEndpoint(BaseMetaResource):

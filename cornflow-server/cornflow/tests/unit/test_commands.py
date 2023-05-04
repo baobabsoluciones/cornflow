@@ -1,15 +1,5 @@
 import json
 
-from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
-from cornflow.tests.integration.test_cornflowclient import load_file
-from cornflow_core.models import (
-    ActionBaseModel,
-    PermissionViewRoleBaseModel,
-    RoleBaseModel,
-    ViewBaseModel,
-)
-
-from cornflow_core.shared import db
 from flask_testing import TestCase
 
 from cornflow.app import (
@@ -23,22 +13,27 @@ from cornflow.app import (
     register_roles,
     register_views,
 )
-
-
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.endpoints import resources, alarms_resources
-
+from cornflow.models import (
+    ActionModel,
+    PermissionViewRoleModel,
+    RoleModel,
+    ViewModel,
+)
 from cornflow.models import (
     DeployedDAG,
     PermissionsDAG,
     UserModel,
 )
-
+from cornflow.shared import db
 from cornflow.shared.const import (
     ACTIONS_MAP,
     ROLES_MAP,
     BASE_PERMISSION_ASSIGNATION,
 )
+from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
+from cornflow.tests.integration.test_cornflowclient import load_file
 
 
 class TestCommands(TestCase):
@@ -150,7 +145,7 @@ class TestCommands(TestCase):
     def test_register_actions(self):
         self.runner.invoke(register_actions)
 
-        actions = ActionBaseModel.query.all()
+        actions = ActionModel.query.all()
 
         for a in actions:
             self.assertEqual(ACTIONS_MAP[a.id], a.name)
@@ -158,7 +153,7 @@ class TestCommands(TestCase):
     def test_register_views(self):
         self.runner.invoke(register_views)
 
-        views = ViewBaseModel.query.all()
+        views = ViewModel.query.all()
         views_list = [v.name for v in views]
         resources_list = [
             self.resources[i]["endpoint"] for i in range(len(self.resources))
@@ -167,7 +162,7 @@ class TestCommands(TestCase):
         self.assertCountEqual(views_list, resources_list)
 
     def test_register_roles(self):
-        roles = RoleBaseModel.query.all()
+        roles = RoleModel.query.all()
         for r in roles:
             self.assertEqual(ROLES_MAP[r.id], r.name)
 
@@ -177,10 +172,9 @@ class TestCommands(TestCase):
         for base in BASE_PERMISSION_ASSIGNATION:
             for view in self.resources:
                 if base[0] in view["resource"].ROLES_WITH_ACCESS:
-
-                    permission = PermissionViewRoleBaseModel.get_permission(
+                    permission = PermissionViewRoleModel.get_permission(
                         role_id=base[0],
-                        api_view_id=ViewBaseModel.query.filter_by(name=view["endpoint"])
+                        api_view_id=ViewModel.query.filter_by(name=view["endpoint"])
                         .first()
                         .id,
                         action_id=base[1],

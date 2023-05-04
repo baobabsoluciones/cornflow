@@ -1,8 +1,7 @@
 def create_user_with_role(
     username, email, password, role_name, role, verbose: bool = False
 ):
-    from cornflow.models import UserModel, UserRoleModel
-    from cornflow_core.models import RoleBaseModel
+    from cornflow.models import UserModel, UserRoleModel, RoleModel
     from flask import current_app
 
     user = UserModel.get_one_user_by_username(username)
@@ -23,7 +22,7 @@ def create_user_with_role(
     user_actual_roles = [ur.role for ur in user_roles]
     if (
         user_roles is not None
-        and RoleBaseModel.get_one_object(role) in user_actual_roles
+        and RoleModel.get_one_object(role) in user_actual_roles
     ):
         if verbose:
             current_app.logger.info(

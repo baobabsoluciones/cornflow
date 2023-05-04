@@ -4,8 +4,8 @@
 import hashlib
 
 # Imported from internal models
-from .base_data_model import BaseDataModel
-from cornflow_core.shared import db
+from cornflow.models.base_data_model import BaseDataModel
+from cornflow.shared import db
 
 
 class InstanceModel(BaseDataModel):

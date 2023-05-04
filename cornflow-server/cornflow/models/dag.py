@@ -2,11 +2,6 @@
 
 """
 # Import from libraries
-from sqlalchemy.dialects.postgresql import TEXT, JSON
-
-# Import from internal modules
-from cornflow_core.models import TraceAttributesModel
-from cornflow_core.shared import db
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
@@ -14,7 +9,12 @@ from cornflow_client.constants import (
     INSTANCE_CHECKS_SCHEMA,
     SOLUTION_CHECKS_SCHEMA
 )
-from cornflow_core.exceptions import ObjectDoesNotExist
+from sqlalchemy.dialects.postgresql import TEXT, JSON
+
+# Import from internal modules
+from cornflow.models.meta_models import TraceAttributesModel
+from cornflow.shared import db
+from cornflow.shared.exceptions import ObjectDoesNotExist
 
 
 class DeployedDAG(TraceAttributesModel):

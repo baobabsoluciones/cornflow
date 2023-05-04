@@ -1,8 +1,8 @@
 """ Model for the alarms """
 
 # Import from internal modules
-from cornflow_core.shared import db
-from cornflow_core.models import TraceAttributesModel
+from cornflow.shared import db
+from cornflow.models.meta_models import TraceAttributesModel
 
 # Imports from external libraries
 from sqlalchemy.dialects.postgresql import TEXT

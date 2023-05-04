@@ -10,10 +10,10 @@ from flask import current_app
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.models import UserModel
 from cornflow.schemas.health import HealthResponse
 from cornflow.shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
-from cornflow_core.resources import BaseMetaResource
-from cornflow.models import UserModel
 
 
 class HealthEndpoint(BaseMetaResource):
