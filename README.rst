@@ -5,6 +5,10 @@ Cornflow
    :alt: GitHub Workflow Status
    :target: https://github.com/baobabsoluciones/cornflow/actions
 
+.. image:: https://img.shields.io/pypi/v/cornflow?label=cornflow&style=for-the-badge
+   :alt: PyPI
+   :target: https://pypi.python.org/pypi/cornflow
+
 .. image:: https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&style=for-the-badge
    :alt: PyPI
    :target: https://pypi.python.org/pypi/cornflow-client
