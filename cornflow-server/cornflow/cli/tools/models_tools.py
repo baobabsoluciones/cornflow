@@ -1,3 +1,5 @@
+from .tools import get_type
+
 # Models
 model_shared_imports = (
     "# Import from libraries\n"
@@ -13,6 +15,9 @@ JSON_TYPES_TO_SQLALCHEMY = {
     "number": "db.Float",
     "boolean": "db.Boolean",
     "array": "ARRAY",
+    "date": "db.Date",
+    "datetime": "db.DateTime",
+    "time": "db.Time",
 }
 
 
@@ -80,16 +85,9 @@ class ModelGenerator:
         if not has_id(schema_table["properties"]):
             res += f"    id = db.Column(db.Integer, primary_key=True, autoincrement=True)\n"
         for key, val in schema_table["properties"].items():
-            nullable = False
             res += f"    {key} = db.Column("
-            types = val["type"]
-            if isinstance(types, list):
-                nullable = True
-                if types[0] == "null":
-                    types = types[1]
-                else:
-                    types = types[0]
-            res += JSON_TYPES_TO_SQLALCHEMY[types]
+            ty, nullable = get_type(val)
+            res += JSON_TYPES_TO_SQLALCHEMY[ty]
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
                 if self.app_name is not None:
