@@ -1,3 +1,12 @@
+version 1.0.13
+---------------
+
+- released: 2023-05-04
+- description: bugfix on error handling in dag solving workflow
+- changelog:
+    - bugfix on error handling in dag solving workflow
+    - calls to cornflow now use the raw client.
+
 version 1.0.12
 ---------------
 
