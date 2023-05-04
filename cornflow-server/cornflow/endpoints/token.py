@@ -1,13 +1,13 @@
 # Import from libraries
-from cornflow_core.resources import BaseMetaResource
 from flask import request
 from flask_apispec import marshal_with, doc
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.schemas.user import TokenEndpointResponse
-from cornflow_core.exceptions import InvalidCredentials, ObjectDoesNotExist
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.exceptions import InvalidCredentials, ObjectDoesNotExist
 
 
 class TokenEndpoint(BaseMetaResource):

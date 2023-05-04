@@ -1,8 +1,6 @@
-from cornflow_core.models import TraceAttributesModel
-from cornflow_core.shared import db
-
-# from .meta_model import TraceAttributes
-from .dag import DeployedDAG
+from cornflow.models.dag import DeployedDAG
+from cornflow.models.meta_models import TraceAttributesModel
+from cornflow.shared import db
 
 
 class PermissionsDAG(TraceAttributesModel):

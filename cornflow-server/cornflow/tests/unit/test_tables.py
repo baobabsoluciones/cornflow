@@ -9,9 +9,9 @@ from flask_testing import TestCase
 # Import from internal modules
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
+from cornflow.models import UserRoleModel
+from cornflow.shared import db
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.models import UserModel, UserRoleModel
-from cornflow_core.shared import db
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, TABLES_URL
 
 

@@ -1,15 +1,14 @@
 # Import from libraries
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import InvalidUsage, ObjectDoesNotExist
-from cornflow_core.resources import BaseMetaResource
 from flask_apispec import doc, use_kwargs
 from flask import current_app
 
 # Import from internal modules
-from cornflow.shared.const import SERVICE_ROLE
-from cornflow.shared.authentication import Auth
-from cornflow.shared.utils_tables import get_all_tables, item_as_dict, items_as_dict_list
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.schemas.common import QueryFilters
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.const import SERVICE_ROLE
+from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist
+from cornflow.shared.utils_tables import get_all_tables, item_as_dict, items_as_dict_list
 
 
 class TablesEndpoint(BaseMetaResource):

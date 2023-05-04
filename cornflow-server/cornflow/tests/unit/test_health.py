@@ -1,6 +1,6 @@
 import os
 
-from cornflow_core.shared import db
+from cornflow.shared import db
 
 from cornflow.app import create_app
 from cornflow.commands import access_init_command

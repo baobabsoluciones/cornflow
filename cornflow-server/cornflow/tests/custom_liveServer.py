@@ -2,7 +2,7 @@
 import os
 
 import cornflow_client as cf
-from cornflow_core.shared import db
+from cornflow.shared import db
 
 # External libraries
 from flask import current_app

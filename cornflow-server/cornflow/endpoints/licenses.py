@@ -1,10 +1,11 @@
 # Imports from libraries
-from cornflow_core.authentication import authenticate
-from cornflow_core.resources import BaseMetaResource
 from flask_apispec import doc
+
+# Imports from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
 from cornflow.shared.licenses import get_licenses_summary
-from cornflow.shared.authentication import Auth
 
 
 class LicensesEndpoint(BaseMetaResource):

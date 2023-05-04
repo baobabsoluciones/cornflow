@@ -5,8 +5,7 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import json_schema_validate_as_string
+from cornflow_client.constants import INSTANCE_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -14,9 +13,9 @@ from marshmallow.exceptions import ValidationError
 import os
 import pulp
 from werkzeug.utils import secure_filename
-from cornflow_core.authentication import authenticate
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, DeployedDAG
 from cornflow.schemas.instance import (
     InstanceSchema,
@@ -29,10 +28,11 @@ from cornflow.schemas.instance import (
     QueryFiltersInstance,
 )
 
-from cornflow.shared.authentication import Auth
-from cornflow_core.compress import compressed
-from cornflow_core.exceptions import InvalidUsage, InvalidData
-from cornflow_client.constants import INSTANCE_SCHEMA
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.compress import compressed
+from cornflow.shared.exceptions import InvalidUsage, InvalidData
+from cornflow.shared.validators import json_schema_validate_as_string
+
 
 
 # Initialize the schema that all endpoints are going to use
