@@ -2,7 +2,7 @@ import os.path
 
 
 import click
-from cornflow_core.shared import db
+from cornflow.shared import db
 from flask_migrate import Migrate, migrate, upgrade, init
 
 from .utils import get_app

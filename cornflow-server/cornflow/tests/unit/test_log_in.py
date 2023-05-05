@@ -7,7 +7,7 @@ from flask import current_app
 
 # Import from internal modules
 from cornflow.models import UserModel
-from cornflow_core.shared import db
+from cornflow.shared import db
 from cornflow.tests.custom_test_case import LoginTestCases
 
 

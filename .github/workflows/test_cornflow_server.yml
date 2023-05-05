@@ -65,8 +65,6 @@ jobs:
         CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         python -m pip install --upgrade pip
         python -m pip install -U -r requirements-dev.txt
-        python -m pip uninstall cornflow-core -y
-        python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/core"
         python -m pip uninstall cornflow-client -y
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
     - name: Install airflow
@@ -104,7 +102,7 @@ jobs:
         AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
     - name: Run unit tests
       run: | 
-        coverage run --source=./cornflow/ -m unittest discover -s cornflow/tests/unit
+        coverage run --source=./cornflow/ --omit="*/tests/data/*" -m unittest discover -s cornflow/tests/unit
         coverage report -m
       env:
         FLASK_ENV: testing

@@ -8,6 +8,7 @@ from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from cornflow.schemas.case import CaseCheckRequest
@@ -19,8 +20,7 @@ from cornflow.schemas.execution import (
     ExecutionSchema,
 )
 
-from cornflow.schemas.model_json import DataSchema
-from cornflow.shared.authentication import Auth
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ADMIN_ROLE,
     EXEC_STATE_CORRECT,
@@ -29,14 +29,8 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
     PLANNER_ROLE,
 )
-
-from cornflow_core.exceptions import ObjectDoesNotExist, InvalidData
-from cornflow_core.authentication import authenticate
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.shared import json_schema_validate_as_string
-
-
-execution_schema = ExecutionSchema()
+from cornflow.shared.exceptions import ObjectDoesNotExist, InvalidData
+from cornflow.shared.validators import json_schema_validate_as_string
 
 
 class DAGDetailEndpoint(BaseMetaResource):

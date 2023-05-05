@@ -15,10 +15,7 @@ flag_management:
   individual_flags: 
     - name: server-tests  
       paths: 
-        - cornflow-server/  
-    - name: core-tests 
-      paths: 
-        - libs/core/
+        - cornflow-server/
     - name: client-tests 
       paths: 
         - libs/client/

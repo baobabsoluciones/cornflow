@@ -1,0 +1,388 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "parameters": {
+      "type": "object",
+      "description": "Scalar values needed for the rostering problem",
+      "show": true,
+      "filterable": false,
+      "sortable": true,
+      "properties": {
+        "horizon": {
+          "type": "integer",
+          "title": "Horizon",
+          "description": "The number of weeks that are going to be solved",
+          "minimum": 1
+        },
+        "opening_days": {
+          "type": "integer",
+          "title": "Days open",
+          "description": "The number of days that the work center opens, the first day is always considered to be a Monday",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "slot_length": {
+          "type": "integer",
+          "title": "Slot length",
+          "description": "The length of each time slot in minutes"
+        },
+        "starting_hour": {
+          "type": "number",
+          "title": "Starting hour",
+          "description": "The hour the work center opens",
+          "minimum": 0,
+          "maximum": 23
+        },
+        "ending_hour": {
+          "type": "number",
+          "title": "Ending hour",
+          "description": "The hour the work center closes",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "starting_date": {
+          "type": "string",
+          "title": "Starting date",
+          "description": "The first day that has to be solved",
+          "format": "date"
+        },
+        "min_working_hours": {
+          "type": "integer",
+          "title": "Minimum hours work per day",
+          "description": "The minimum amount of hours that have to be worked each day that the employee works",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "min_resting_hours": {
+          "type": "integer",
+          "title": "Minimum hours to rest",
+          "description": "The minimum amount of hours that have to be rested between the end of the shift on one day, and the start of the shift on the next day",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "horizon",
+        "opening_days",
+        "slot_length",
+        "starting_hour",
+        "ending_hour",
+        "starting_date",
+        "min_working_hours",
+        "min_resting_hours"
+      ]
+    },
+    "employees": {
+      "type": "array",
+      "description": "Table with the employee master information",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for each employee.",
+            "title": "Employee id.",
+            "type": "string",
+            "sortable": true,
+            "filterable": true
+          },
+          "name": {
+            "description": "The name of each employee.",
+            "title": "Employee name",
+            "type": "string",
+            "sortable": true,
+            "filterable": true
+          },
+          "manager": {
+            "description": "If the employee is a manager or not.",
+            "title": "Manager",
+            "type": "boolean",
+            "sortable": true,
+            "filterable": true
+          },
+          "manager_tasks": {
+            "description": "If the employee can perform the tasks of a manager without being one. It is not required.",
+            "title": "Manager tasks",
+            "type": "boolean",
+            "sortable": true,
+            "filterable": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "manager"
+        ]
+      }
+    },
+    "shifts": {
+      "type": "array",
+      "description": "Table with the shifts master information",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier of each shift.",
+            "title": "Shift id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "name": {
+            "description": "The name of the shift.",
+            "title": "Shift name",
+            "type": "string",
+            "sortable": true,
+            "filterable": true
+          },
+          "start": {
+            "description": "The earliest hour that an employee assigned to this shift can start working.",
+            "title": "Starting hour",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "end": {
+            "description": "The latest hour that an employee assigned to this shift can stop working.",
+            "title": "Ending hour",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "start",
+          "end"
+        ]
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "description": "Table with the relationship between employees, shifts and their past, current and future contracts",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier of each contract.",
+            "title": "Contract id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "id_employee": {
+            "description": "The unique identifier of the employee assigned to the contract.",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true,
+            "foreign_key": "employees.id"
+          },
+          "id_shift": {
+            "description": "The unique identifier of the shift assigned to the contract.",
+            "title": "Shift id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true,
+            "foreign_key": "shifts.id"
+          },
+          "start_contract": {
+            "description": "The starting date of the contract. Must be a Monday and have format YYYY-MM-DD.",
+            "title": "Contract start",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "end_contract": {
+            "description": "The ending date of the contract. Must be a Sunday and have format YYYY-MM-DD. It is not required and can be void.",
+            "title": "Contract end",
+            "type": [
+              "string",
+              "null"
+            ],
+            "$comment": "date",
+            "sortable": true,
+            "filterable": false
+          },
+          "weekly_hours": {
+            "description": "The number of hours that the employee has to work each week.",
+            "title": "Contract weekly hours",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          },
+          "days_worked": {
+            "description": "The number of days that the employee has to work per week.",
+            "title": "Contract weekly days",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id",
+          "id_employee",
+          "id_shift",
+          "start_contract",
+          "weekly_hours",
+          "days_worked"
+        ]
+      }
+    },
+    "demand": {
+      "type": "array",
+      "description": "Demand that needs to be covered and tried to make the same across all time slots",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "description": "The date of the demand. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "hour": {
+            "description": "The hour of the demand.",
+            "title": "Hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          },
+          "demand": {
+            "description": "The demand value.",
+            "title": "Demand",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "day",
+          "hour",
+          "demand"
+        ]
+      }
+    },
+    "skills": {
+      "type": "array",
+      "description": "Table with the information about each skill",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier of the skill",
+            "title": "Skill id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "name": {
+            "description": "The name of the skill",
+            "title": "Name",
+            "type": "string",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["id", "name"]
+      }
+    },
+    "skills_employees": {
+      "type": "array",
+      "description": "Table with the skills of each employee",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_skill": {
+            "description": "The unique identifier of the skill",
+            "title": "Skill id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true,
+            "foreign_key": "skills.id"
+          },
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true,
+            "foreign_key": "employees.id"
+          }
+        },
+        "required": ["id_skill", "id_employee"]
+      }
+    },
+    "skill_demand": {
+      "type": "array",
+      "description": "Demand for each skill, that needs to be covered",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "description": "The date of the skill demand. Has to have format YYYY-MM-DD.",
+            "title": "Day",
+            "type": "string",
+            "$comment": "date",
+            "sortable": true,
+            "filterable": true
+          },
+          "hour": {
+            "description": "The hour of the skill demand.",
+            "title": "Hour",
+            "type": "number",
+            "sortable": true,
+            "filterable": true
+          },
+          "id_skill": {
+            "description": "The unique identifier of the skill",
+            "title": "Skill id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true,
+            "foreign_key": "skills.id"
+          },
+          "demand": {
+            "description": "The number of employees with the skill that are demanded.",
+            "title": "Demand",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["day", "hour", "id_skill", "demand"]
+      }
+    }
+  },
+  "required": [
+    "employees",
+    "shifts",
+    "contracts",
+    "demand",
+    "parameters"
+  ]
+}

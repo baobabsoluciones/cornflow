@@ -1,12 +1,16 @@
-from importlib import import_module
-import sys
-import os
+# Imports from external libraries
 import inspect
+import os
+import sys
+
+from importlib import import_module
 from sqlalchemy.dialects.postgresql import TEXT
-from cornflow_core.models import EmptyBaseModel
-from cornflow_core.shared import db
 from sqlalchemy.sql.sqltypes import Integer
+
+# Imports from internal modules
 from cornflow.models import *
+from cornflow.models.meta_models import EmptyBaseModel
+from cornflow.shared import db
 
 
 def _import_file(filename):

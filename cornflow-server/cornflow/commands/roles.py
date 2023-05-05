@@ -3,14 +3,14 @@ def register_roles_command(verbose: bool = True):
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app
 
-    from cornflow_core.models import RoleBaseModel
+    from cornflow.models import RoleModel
     from cornflow.shared.const import ROLES_MAP
-    from cornflow_core.shared import db
+    from cornflow.shared import db
 
-    roles_registered = [role.name for role in RoleBaseModel.get_all_objects()]
+    roles_registered = [role.name for role in RoleModel.get_all_objects()]
 
     roles_to_register = [
-        RoleBaseModel({"id": key, "name": value})
+        RoleModel({"id": key, "name": value})
         for key, value in ROLES_MAP.items()
         if value not in roles_registered
     ]
