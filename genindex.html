@@ -113,10 +113,10 @@
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.instance.allowed_file">allowed_file() (in module cornflow.endpoints.instance)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore">ApplicationCore (class in cornflow_client.core.application)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.args">args (cornflow_client.constants.AirflowError attribute)</a>
 
       <ul>
@@ -129,6 +129,12 @@
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.NoSolverException.args">(cornflow_client.constants.NoSolverException attribute)</a>
 </li>
       </ul></li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginBaseEndpoint.auth_db_authenticate">auth_db_authenticate() (cornflow.endpoints.login.LoginBaseEndpoint method)</a>
+</li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginBaseEndpoint.auth_ldap_authenticate">auth_ldap_authenticate() (cornflow.endpoints.login.LoginBaseEndpoint method)</a>
+</li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginBaseEndpoint.auth_oid_authenticate">auth_oid_authenticate() (cornflow.endpoints.login.LoginBaseEndpoint method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -169,9 +175,15 @@
         <li><a href="dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore.check">(cornflow_client.core.instance.InstanceCore method)</a>
 </li>
       </ul></li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.check_email_in_use">check_email_in_use() (cornflow.models.user.UserModel method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.check_hash">check_hash() (cornflow.models.user.UserModel method)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema">check_schema() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.check_solution">check_solution() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.check_username_in_use">check_username_in_use() (cornflow.models.user.UserModel method)</a>
 </li>
       <li><a href="dev/models.html#cornflow.models.execution.ExecutionModel.checks">checks (cornflow.models.execution.ExecutionModel attribute)</a>
 
@@ -179,6 +191,8 @@
         <li><a href="dev/models.html#cornflow.models.instance.InstanceModel.checks">(cornflow.models.instance.InstanceModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.comes_from_external_provider">comes_from_external_provider() (cornflow.models.user.UserModel method)</a>
+</li>
       <li>
     cornflow.endpoints.case
 
@@ -249,6 +263,8 @@
         <li><a href="dev/models.html#module-cornflow.models.instance">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cornflow.models.user
 
@@ -256,8 +272,6 @@
         <li><a href="dev/models.html#module-cornflow.models.user">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cornflow_client.constants
 
@@ -480,6 +494,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.generate_random_password">generate_random_password() (cornflow.models.user.UserModel static method)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">generate_schema() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.case.CaseCompare.get">get() (cornflow.endpoints.case.CaseCompare method)</a>
@@ -516,6 +532,8 @@
         <li><a href="dev/endpoints.html#cornflow.endpoints.user.UserEndpoint.get">(cornflow.endpoints.user.UserEndpoint method)</a>
 </li>
       </ul></li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_all_users">get_all_users() (cornflow.models.user.UserModel class method)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string">get_date_from_string() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string">get_date_hour_from_string() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
@@ -561,6 +579,12 @@
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string">get_next_hour_datetimesec_string() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.get_objective">get_objective() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user">get_one_user() (cornflow.models.user.UserModel class method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user_by_email">get_one_user_by_email() (cornflow.models.user.UserModel class method)</a>
+</li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.get_one_user_by_username">get_one_user_by_username() (cornflow.models.user.UserModel class method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour">get_previous_hour() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
@@ -650,9 +674,13 @@
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.manager.SchemaManager.load_schema">load_schema() (cornflow_client.schema.manager.SchemaManager class method)</a>
 </li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginBaseEndpoint.log_in">log_in() (cornflow.endpoints.login.LoginBaseEndpoint method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dev/cornflow_client.html#cornflow_client.constants.AirflowError.log_txt">log_txt (cornflow_client.constants.AirflowError attribute)</a>
+</li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginBaseEndpoint">LoginBaseEndpoint (class in cornflow.endpoints.login)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.login.LoginEndpoint">LoginEndpoint (class in cornflow.endpoints.login)</a>
 </li>
@@ -867,6 +895,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dev/endpoints.html#cornflow.endpoints.user.RecoverPassword">RecoverPassword (class in cornflow.endpoints.user)</a>
 </li>
+      <li><a href="dev/models.html#cornflow.models.user.UserModel.roles">roles (cornflow.models.user.UserModel property)</a>
+</li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.case.CaseCompare.ROLES_WITH_ACCESS">ROLES_WITH_ACCESS (cornflow.endpoints.case.CaseCompare attribute)</a>
 
       <ul>
@@ -927,10 +957,12 @@
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.manager.SchemaManager">SchemaManager (class in cornflow_client.schema.manager)</a>
 </li>
-      <li><a href="dev/endpoints.html#cornflow.endpoints.signup.SignUpEndpoint">SignUpEndpoint (class in cornflow.endpoints.signup)</a>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.signup.SignUpEndpoint.sign_up">sign_up() (cornflow.endpoints.signup.SignUpEndpoint method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.signup.SignUpEndpoint">SignUpEndpoint (class in cornflow.endpoints.signup)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.solution">solution (cornflow_client.core.application.ApplicationCore property)</a>
 
       <ul>
@@ -993,6 +1025,8 @@
 
       <ul>
         <li><a href="dev/models.html#cornflow.models.instance.InstanceModel.update">(cornflow.models.instance.InstanceModel method)</a>
+</li>
+        <li><a href="dev/models.html#cornflow.models.user.UserModel.update">(cornflow.models.user.UserModel method)</a>
 </li>
       </ul></li>
       <li><a href="dev/models.html#cornflow.models.execution.ExecutionModel.update_log_txt">update_log_txt() (cornflow.models.execution.ExecutionModel method)</a>

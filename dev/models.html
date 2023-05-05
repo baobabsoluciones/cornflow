@@ -369,10 +369,11 @@ information to create a new instance</p>
 </section>
 <section id="module-cornflow.models.user">
 <span id="user-model"></span><h2>User model<a class="headerlink" href="#module-cornflow.models.user" title="Permalink to this heading"></a></h2>
+<p>This file contains the UserModel</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.user.UserModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.user.</span></span><span class="sig-name descname"><span class="pre">UserModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserBaseModel</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributesModel</span></code></p>
 <p>Model class for the Users.
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributes</span></code> to have trace fields.</p>
 <p>The class <a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a> has the following fields:</p>
@@ -404,16 +405,137 @@ values in <code class="docutils literal notranslate"><span class="pre">kwargs</s
 <p>Only keys that are present as
 attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_admin">
-<span class="sig-name descname"><span class="pre">is_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_admin" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a boolean if a user is an admin or not</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.roles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">roles</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.roles" title="Permalink to this definition"></a></dt>
+<dd><p>This property gives back the roles assigned to the user</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_service_user">
-<span class="sig-name descname"><span class="pre">is_service_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_service_user" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a boolean if a user is a service user or not</p>
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.update" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the user information in the database</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – the data to update the user</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.comes_from_external_provider">
+<span class="sig-name descname"><span class="pre">comes_from_external_provider</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.comes_from_external_provider" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a boolean if the user comes from an external_provider or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_hash">
+<span class="sig-name descname"><span class="pre">check_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_hash" title="Permalink to this definition"></a></dt>
+<dd><p>Method to check if the hash stored in the database is the same as the password given by the user</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the password given by the user.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>if the password is the same or not.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_all_users">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_all_users" title="Permalink to this definition"></a></dt>
+<dd><p>Query to get all users</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list with all the users.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list(<a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user" title="Permalink to this definition"></a></dt>
+<dd><p>Query to get the information of one user</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – ID of the user</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the user object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user_by_email">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_email" title="Permalink to this definition"></a></dt>
+<dd><p>Query to get one user from the email</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>email</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – User email</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the user object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.get_one_user_by_username">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_username</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.get_one_user_by_username" title="Permalink to this definition"></a></dt>
+<dd><p>Returns one user (object) given a username</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the user username that we want to query for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the user object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#cornflow.models.user.UserModel" title="cornflow.models.user.UserModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_username_in_use">
+<span class="sig-name descname"><span class="pre">check_username_in_use</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_username_in_use" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if a username is already in use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a boolean if the username is in use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.check_email_in_use">
+<span class="sig-name descname"><span class="pre">check_email_in_use</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.check_email_in_use" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if a email is already in use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a boolean if the username is in use</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -426,10 +548,36 @@ for example, any mapped columns or relationships.</p>
 <span class="sig-name descname"><span class="pre">deleted_at</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.deleted_at" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.generate_random_password">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_random_password</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#cornflow.models.user.UserModel.generate_random_password" title="Permalink to this definition"></a></dt>
+<dd><p>Method to generate a new random password for the user</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the newly generated password</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.models.user.UserModel.updated_at">
 <span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#cornflow.models.user.UserModel.updated_at" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_admin">
+<span class="sig-name descname"><span class="pre">is_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_admin" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a boolean if a user is an admin or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.models.user.UserModel.is_service_user">
+<span class="sig-name descname"><span class="pre">is_service_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.user.UserModel.is_service_user" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a boolean if a user is a service user or not</p>
+</dd></dl>
 
 </dd></dl>
 
