@@ -1,16 +1,15 @@
 # Imports from libraries
 from flask_apispec import doc, marshal_with, use_kwargs
-from cornflow_core.authentication import authenticate
-from cornflow_core.resources import BaseMetaResource
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import MainAlarmsModel
 from cornflow.schemas.main_alarms import (
     MainAlarmsResponse,
     MainAlarmsPostRequest,
     QueryFiltersMainAlarms
 )
-from cornflow.shared.authentication import Auth
+from cornflow.shared.authentication import Auth, authenticate
 
 
 class MainAlarmsEndpoint(BaseMetaResource):

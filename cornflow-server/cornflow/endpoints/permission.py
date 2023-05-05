@@ -1,25 +1,22 @@
 """
 
 """
-
-# Import from internal modules
-from cornflow_core.authentication import authenticate
-from cornflow_core.compress import compressed
-from cornflow_core.exceptions import ObjectAlreadyExists
-from cornflow_core.models import PermissionViewRoleBaseModel
-from cornflow_core.resources import BaseMetaResource
-from cornflow_core.schemas import (
-    PermissionViewRoleBaseEditRequest,
-    PermissionViewRoleBaseRequest,
-    PermissionViewRoleBaseResponse,
-)
-
 # Import from libraries
 from flask_apispec import doc, marshal_with, use_kwargs
 from flask import current_app
 
-from cornflow.shared.authentication import Auth
+# Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.models import PermissionViewRoleModel
+from cornflow.schemas.permissions import (
+    PermissionViewRoleEditRequest,
+    PermissionViewRoleRequest,
+    PermissionViewRoleResponse,
+)
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.compress import compressed
 from cornflow.shared.const import ADMIN_ROLE
+from cornflow.shared.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(BaseMetaResource):
@@ -27,14 +24,14 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = PermissionViewRoleBaseModel
+        self.data_model = PermissionViewRoleModel
 
     @doc(
         description="Get all the permissions assigned to the roles",
         tags=["PermissionViewRole"],
     )
     @authenticate(auth_class=Auth())
-    @marshal_with(PermissionViewRoleBaseResponse(many=True))
+    @marshal_with(PermissionViewRoleResponse(many=True))
     @compressed
     def get(self):
         current_app.logger.info(
@@ -44,10 +41,10 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
 
     @doc(description="Create a new permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @use_kwargs(PermissionViewRoleBaseRequest, location="json")
-    @marshal_with(PermissionViewRoleBaseResponse)
+    @use_kwargs(PermissionViewRoleRequest, location="json")
+    @marshal_with(PermissionViewRoleResponse)
     def post(self, **kwargs):
-        if PermissionViewRoleBaseModel.get_permission(
+        if PermissionViewRoleModel.get_permission(
             role_id=kwargs.get("role_id"),
             api_view_id=kwargs.get("api_view_id"),
             action_id=kwargs.get("action_id"),
@@ -66,11 +63,11 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = PermissionViewRoleBaseModel
+        self.data_model = PermissionViewRoleModel
 
     @doc(description="Get one permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @marshal_with(PermissionViewRoleBaseResponse)
+    @marshal_with(PermissionViewRoleResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -90,7 +87,7 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
 
     @doc(description="Edit a permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
-    @use_kwargs(PermissionViewRoleBaseEditRequest, location="json")
+    @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
         response = self.put_detail(kwargs, idx=idx, track_user=False)
         current_app.logger.info(f"User {self.get_user()} edits permission {idx}")

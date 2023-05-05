@@ -2,16 +2,15 @@
 
 """
 # Import from libraries
-from cornflow_core.models import TraceAttributesModel
-
-# Import from internal modules
-from cornflow_core.shared import db
 from flask import current_app
 from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
 
+# Import from internal modules
+from cornflow.models.meta_models import TraceAttributesModel
+from cornflow.shared import db
 from cornflow.shared.utils import hash_json_256
 
 

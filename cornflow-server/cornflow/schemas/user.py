@@ -1,12 +1,20 @@
-from cornflow_core.schemas import BaseUserSchema
+"""
+This file contains the schemas used for the users defined in the application
+"""
 from marshmallow import fields, Schema
-
 from .instance import InstanceSchema
 
 
-class UserSchema(BaseUserSchema):
+class UserSchema(Schema):
     """ """
-
+    id = fields.Int(dump_only=True)
+    first_name = fields.Str()
+    last_name = fields.Str()
+    username = fields.Str(required=True)
+    email = fields.Email(required=True)
+    password = fields.Str(required=True, load_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    modified_at = fields.DateTime(dump_only=True)
     instances = fields.Nested(InstanceSchema, many=True)
 
 
@@ -41,3 +49,32 @@ class UserEditRequest(Schema):
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
+
+
+class LoginEndpointRequest(Schema):
+    """
+    This is the schema used by the login endpoint with auth db or ldap
+    """
+
+    username = fields.Str(required=True)
+    password = fields.Str(required=True)
+
+
+class LoginOpenAuthRequest(Schema):
+    """
+    This is the schema used by the login endpoint with Open ID protocol
+    """
+
+    token = fields.Str(required=True)
+
+
+class SignupRequest(Schema):
+    """
+    This is the schema used by the sign up
+    """
+
+    username = fields.Str(required=True)
+    email = fields.Email(required=True)
+    password = fields.Str(required=True, load_only=True)
+    first_name = fields.Str(required=False)
+    last_name = fields.Str(required=False)

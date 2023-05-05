@@ -2,7 +2,7 @@
 File with the common schemas used in cornflow
 """
 from marshmallow import fields, Schema
-from cornflow_core.schemas import BaseQueryFilters
+from .query import BaseQueryFilters
 
 
 class QueryFilters(BaseQueryFilters):

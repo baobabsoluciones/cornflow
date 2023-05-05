@@ -16,7 +16,7 @@ from cornflow.commands import (
     update_schemas_command,
 )
 from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, SERVICE_ROLE
-from cornflow_core.shared import db
+from cornflow.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 

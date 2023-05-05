@@ -2,14 +2,14 @@ def register_actions_command(verbose: bool = True):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow_core.models import ActionBaseModel
+    from cornflow.models import ActionModel
     from cornflow.shared.const import ACTIONS_MAP
-    from cornflow_core.shared import db
+    from cornflow.shared import db
 
-    actions_registered = [ac.name for ac in ActionBaseModel.get_all_objects()]
+    actions_registered = [ac.name for ac in ActionModel.get_all_objects()]
 
     actions_to_register = [
-        ActionBaseModel(id=key, name=value)
+        ActionModel(id=key, name=value)
         for key, value in ACTIONS_MAP.items()
         if value not in actions_registered
     ]

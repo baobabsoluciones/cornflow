@@ -1,24 +1,19 @@
 """
 Endpoints to manage the roles of the application and the assignation fo roles to users.
-Some of this endpoints are disable in case that the authentication is not performed over AUTH DB
+Some of this endpoints are disabled in case that the authentication is not performed over AUTH DB
 """
-
-from cornflow_core.authentication import authenticate
-from cornflow_core.exceptions import EndpointNotImplemented, ObjectAlreadyExists
-from cornflow_core.resources import BaseMetaResource
 
 # Import from libraries
 from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
 
 # Import from internal modules
+from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserRoleModel
-from cornflow_core.schemas import (
-    UserRoleRequest,
-    UserRoleResponse,
-)
-from cornflow.shared.authentication import Auth
+from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
+from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
+from cornflow.shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
 
 
 class UserRoleListEndpoint(BaseMetaResource):
