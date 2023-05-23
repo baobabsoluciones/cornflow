@@ -14,17 +14,19 @@ def get_date_string_from_ts(ts: datetime) -> str:
     return datetime.strftime(ts, "%Y-%m-%d")
 
 
-def get_date_string_from_ts_string(ts: str) -> str:
-    return ts[0:10]
-
-
 def get_hour_from_date_time(ts: datetime) -> float:
     """Returns the hours (in number) of the given time slot"""
     return float(ts.hour + ts.minute / 60)
 
 
-def get_hour_from_string(string: str) -> float:
-    return get_hour_from_date_time(get_date_time_from_string(string))
+def get_hour_string_from_date_time(ts: datetime) -> str:
+    """Returns the hour string for the given time slot"""
+    return ts.strftime("%H:%M")
+
+
+def get_hour_string_from_hour_minute(hour: int, minute: int) -> str:
+    """Returns the hour string for the given time slot"""
+    return datetime.now().replace(hour=hour, minute=minute).strftime("%H:%M")
 
 
 def get_one_date(starting_date: datetime, weeks: int = 0, days: int = 0) -> datetime:
