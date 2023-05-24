@@ -37,10 +37,12 @@ class MipModel(Experiment):
         self.demand = SuperDict()
         self.ts_demand_employee_skill = SuperDict()
         self.ts_employees_holidays = TupList()
+        self.ts_employees_rest_days = TupList()
         self.ts_skill_demand = TupList()
         self.preference_starts_ts = SuperDict()
         self.preference_hours_employee = SuperDict()
         self.preference_slots = SuperDict()
+        self.employees_rest_days = TupList()
 
         # Variables
         self.works = SuperDict()
@@ -55,6 +57,7 @@ class MipModel(Experiment):
         self.unmet_max_weekly_work_days_constraint = SuperDict()
         self.unmet_max_daily_hours_constraint = SuperDict()
         self.unmet_weekly_hours_constraint = SuperDict()
+        self.unmet_employee_schedule = SuperDict()
 
         self.initialize()
 
@@ -123,6 +126,8 @@ class MipModel(Experiment):
         self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
         self.preference_hours_employee = self.instance.get_employee_preference_hours()
         self.preference_slots = self.instance.get_employee_time_slots_preferences()
+        self.ts_employees_rest_days = self.instance.get_employee_time_slots_rest_days()
+        self.employees_rest_days = self.instance.get_employees_rest_days(self.ts_employees_rest_days)
 
     def create_variables(self):
 
@@ -240,6 +245,16 @@ class MipModel(Experiment):
         )
         self.unmet_preference_hours = SuperDict(self.unmet_preference_hours)
 
+        # RQ15
+        self.unmet_employee_schedule = pl.LpVariable.dicts(
+            "unmet_employee_schedule",
+            self.employees_rest_days,
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous
+        )
+        self.unmet_employee_schedule = SuperDict(self.unmet_employee_schedule)
+
     def create_constraints(self, model):
         # RQ00: objective function - minimize working hours
         big_m = sum(len(self.ts_employees) * max(self.demand.values()) for _ in self.ts_open) / 100
@@ -277,6 +292,9 @@ class MipModel(Experiment):
             + (self.instance.get_requirement("rq14") == "soft")
                 * self.instance.get_penalty("rq14")
                 * pl.lpSum(self.unmet_preference_hours.values())
+            + (self.instance.get_requirement("rq15") == "soft")
+                * self.instance.get_penalty("rq15")
+                * pl.lpSum(self.unmet_employee_schedule.values())
         )
 
         # RQ01: at least one employee at all times
@@ -418,5 +436,10 @@ class MipModel(Experiment):
                         pl.lpSum(self.works[ts, e] for ts in slots)
                         <= self.preference_hours_employee[d, e]
                     )
+
+        # RQ15: Employee schedule
+        if self.instance.get_requirement("rq15") == "soft":
+            for (ts, d, e) in self.ts_employees_rest_days:
+                model += self.works[ts, e] <= self.unmet_employee_schedule[d, e]
 
         return model

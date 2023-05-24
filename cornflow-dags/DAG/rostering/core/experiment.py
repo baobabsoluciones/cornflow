@@ -43,6 +43,7 @@ class Experiment(ExperimentCore):
             difference_hours_worked=self.check_hours_worked(),
             manager_present=self.check_manager_present(),
             skills_demand=self.check_skills_demand(),
+            employee_work_days=self.check_employee_work_days(),
         ).vfilter(lambda v: len(v))
 
     def get_objective(self) -> float:
@@ -140,6 +141,19 @@ class Experiment(ExperimentCore):
             )
         else:
             return TupList([])
+
+    def check_employee_work_days(self) -> TupList:
+        """Checks if some employees are assigned to work on their days off"""
+        ts_employee = (
+            self.solution.get_ts_employee()
+            .to_tuplist()
+            .vapply_col(0, lambda v: v[0][:10])
+        )
+        work_days = self.instance.get_employee_time_slots_rest_days().take([1, 2])
+        intersection = ts_employee.intersect(work_days).vapply(
+            lambda v: {"date": v[0], "id_employee": v[1]}
+        )
+        return intersection
 
     def get_one_employee_percentage(self) -> float:
         """Returns the percentage of time slots where only one employee is working"""

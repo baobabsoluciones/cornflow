@@ -111,6 +111,32 @@
                 "required": ["timeslot", "id_skill", "number_missing"],
                 "additionalProperties": false
             }
+        },
+        "employee_work_days": {
+            "type": "array",
+            "title": "Employee work days",
+            "description": "Table containing the information about dates when the employees work days are not respected.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "title": "Date",
+                        "description": "The date of the issue."
+                    },
+                    "id_employee": {
+                        "type": "integer",
+                        "title": "Id employee",
+                        "description": "The unique identifier of the employee."
+                    }
+                },
+                "required": [
+                    "date",
+                    "id_employee"
+                ],
+                "additionalProperties": false
+            }
         }
     },
     "required": [],

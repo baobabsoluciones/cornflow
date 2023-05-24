@@ -22780,13 +22780,14 @@
     "rq05": "strict",
     "rq06": "strict",
     "rq07": "strict",
-    "rq08": "strict",
-    "rq09": "deactivated",
+    "rq08": "soft",
+    "rq09": "strict",
     "rq10": "strict",
     "rq11": "strict",
     "rq12": "strict",
     "rq13": "deactivated",
-    "rq14": "deactivated"
+    "rq14": "soft",
+    "rq15": "strict"
   },
   "penalties": {
     "rq02": 1,
@@ -22798,6 +22799,7 @@
     "rq09": 2,
     "rq10": 1,
     "rq13": 1,
-    "rq14": 1
+    "rq14": 1,
+    "rq15": 1
   }
 }

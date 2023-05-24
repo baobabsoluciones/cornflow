@@ -122,6 +122,12 @@
           "title": "Employee max hours worked",
           "description": "The employee maximum hours worked preference is respected",
           "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq15": {
+          "type": "string",
+          "title": "Employee work days",
+          "description": "The employee work days are respected",
+          "enum": ["strict", "soft", "deactivated"]
         }
       },
       "required": [
@@ -130,7 +136,8 @@
         "rq11",
         "rq12",
         "rq13",
-        "rq14"
+        "rq14",
+        "rq15"
       ]
     },
     "penalties": {
@@ -189,6 +196,11 @@
           "type": "integer",
           "title": "Employee max hours worked",
           "description": "The penalty when the employee maximum hours worked preference is not respected"
+        },
+        "rq15": {
+          "type": "integer",
+          "title": "Employee work days",
+          "description": "The penalty when the employee work days are not respected"
         }
       },
       "required": []
@@ -698,6 +710,35 @@
             "filterable": true
           }
         }
+      }
+    },
+    "employee_schedule": {
+      "type": "array",
+      "title": "Employees schedules",
+      "description": "Table with the week days worked by the employees. If an employee isn't in the table, it will be assumed that they can work every day of the week.",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "description": "The unique identifier of the employee",
+            "title": "Employee id.",
+            "type": "integer",
+            "sortable": true,
+            "filterable": true
+          },
+          "week_day": {
+            "description": "Day of the week in number. 1 is Monday",
+            "title": "Day of week",
+            "type": "number",
+            "$comment": "Day. Monday 1",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": ["id_employee", "week_day"]
       }
     }
   },

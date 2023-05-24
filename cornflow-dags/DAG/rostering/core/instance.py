@@ -122,6 +122,13 @@ class Instance(InstanceCore):
         else:
             data_p["employee_preferences"] = SuperDict({})
 
+        if data.get("employee_schedule"):
+            data_p["employee_schedule"] = TupList(
+                data["employee_schedule"]
+            ).to_dict(result_col="week_day", indices=["id_employee", "id_contract"])
+        else:
+            data_p["employee_schedule"] = SuperDict()
+
         return cls(data_p)
 
     def to_dict(self) -> Dict:
@@ -176,6 +183,11 @@ class Instance(InstanceCore):
             dict(id_employee=id_employee, day=day, hours=hours, start=start)
             for (id_employee, day, hours, start) in self.data["employee_preferences"]
         ]
+        data_p["employee_schedule"] = [
+            dict(id_employee=id_employee, week_day=week_day, id_contract=id_contract)
+            for (id_employee, id_contract), weekdays in self.data["employee_schedule"].items()
+            for week_day in weekdays
+        ]
         return pickle.loads(pickle.dumps(data_p, -1))
 
     def cache_properties(self):
@@ -189,6 +201,8 @@ class Instance(InstanceCore):
         self.time_slots_properties = self._get_time_slots_properties()
 
     def check(self) -> dict:
+        # ToDo: Warning if the number of days in the employees' contracts don't correspond to the
+        #    number of days in employees_schedules.
         return SuperDict(
             incoherent_foreign_keys=self.check_indexes_coherence(),
             timeslot_length=self.check_timeslot_length(),
@@ -297,8 +311,6 @@ class Instance(InstanceCore):
             .keys_tl()
             .vapply(lambda v: {"requirement": v})
         )
-
-
 
     def _get_weeks(self) -> TupList:
         """
@@ -507,6 +519,33 @@ class Instance(InstanceCore):
             return "00:00"
         return el
 
+    def _get_employee_schedule(self, set_default=True, model=False) -> SuperDict:
+        """
+        Returns a SuperDict with the week and employee as key and the
+        worked weekdays as values.
+        By default, an employee can work any day.
+        For example: [(12, 1), (12, 3), ...]
+        """
+        employees_contracts = self._get_employees_contracts()
+        employee_schedule = (
+            self.data["employee_schedule"]
+            .to_tuplist()
+            .to_dict(result_col=2, indices=[0, 1])
+        )
+        if not set_default:
+            return (
+                employees_contracts
+                .kvapply(lambda k, v: employee_schedule.get((k[1], v), None))
+                .vfilter(lambda v: v)
+            )
+        if self.get_requirement("rq15") == "strict" or (self.get_requirement("rq15") == "soft" and model):
+            return (
+                employees_contracts
+                .kvapply(lambda k, v: employee_schedule.get((k[1], v), list(range(7))))
+            )
+        else:
+            return employees_contracts.vapply(lambda v: list(range(7)))
+
     def _get_start_date(self) -> datetime:
         """Returns the datetime object of the starting date"""
         return self.get_date_from_string(self.data["parameters"]["starting_date"])
@@ -701,6 +740,7 @@ class Instance(InstanceCore):
             and (e, self._get_date_string_from_ts(ts))
             not in self._get_employee_downtime()
             if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
+            if ts.isoweekday() in self._get_employee_schedule()[w, e]
         )
 
     def get_employees_time_slots_week(self) -> SuperDict:
@@ -746,7 +786,42 @@ class Instance(InstanceCore):
             and (e, self._get_date_string_from_ts(ts))
             not in self._get_employee_downtime()
             if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
+            if ts.isoweekday() in self._get_employee_schedule()[w, e]
         )
+
+    def get_employee_time_slots_rest_days(self) -> TupList:
+        """
+        Returns a TupList with the combinations of employees, days and time slots
+        in which the employees doesn't work.
+        For example: [("2021-09-06T07:00", "2021-09-06", 1),
+            ("2021-09-06T08:00", "2021-09-06", 1), ...]
+        """
+        start = (
+            self._get_employees_contract_starting_hour()
+            .vapply(lambda v: self._get_hour_from_hour_string(v))
+        )
+        end = (
+            self._get_employees_contract_ending_hour()
+            .vapply(lambda v: self._get_hour_from_hour_string(v))
+        )
+
+        return TupList(
+            (self.get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
+            for ts in self.time_slots
+            for (w, e) in start
+            if self._get_week_from_ts(ts) == w
+            and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
+            and (e, self._get_date_string_from_ts(ts))
+            not in self._get_employee_holidays()
+            and (e, self._get_date_string_from_ts(ts))
+            not in self._get_employee_downtime()
+            if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
+            if ts.isoweekday() not in self._get_employee_schedule(model=True)[w, e]
+        )
+
+    @staticmethod
+    def get_employees_rest_days(ts_employees_rest_days):
+        return ts_employees_rest_days.take([1, 2]).unique2().vapply(lambda v: tuple(v))
 
     def get_consecutive_time_slots_employee(self) -> TupList:
         """
