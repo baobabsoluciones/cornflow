@@ -4154,11 +4154,29 @@
     "min_resting_hours": 12
   },
   "requirements": {
-    "rq09": true,
-    "rq10": true,
-    "rq11": true,
-    "rq12": true,
-    "rq13": true,
-    "rq14": true
+    "rq02": "strict",
+    "rq03": "strict",
+    "rq05": "strict",
+    "rq06": "strict",
+    "rq07": "strict",
+    "rq08": "strict",
+    "rq09": "strict",
+    "rq10": "strict",
+    "rq11": "strict",
+    "rq12": "strict",
+    "rq13": "soft",
+    "rq14": "soft"
+  },
+  "penalties": {
+    "rq02": 4,
+    "rq03": 4,
+    "rq05": 5,
+    "rq06": 4,
+    "rq07": 5,
+    "rq08": 3,
+    "rq09": 1,
+    "rq10": 5,
+    "rq13": 1,
+    "rq14": 1
   }
 }
