@@ -366,7 +366,7 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_week_from_datetime_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M")
         return datetime_object.isocalendar()[1]
 
     @staticmethod

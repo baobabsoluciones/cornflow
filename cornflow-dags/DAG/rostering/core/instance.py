@@ -16,14 +16,9 @@ from .const import INSTANCE_KEYS_RELATION
 
 # Imports from internal modules
 from .tools import (
-    get_date_from_string,
-    get_date_string_from_ts,
-    get_hour_from_date_time,
     get_hour_string_from_date_time,
     get_hour_string_from_hour_minute,
     get_one_date,
-    get_time_slot_string,
-    get_week_from_ts,
 )
 
 
@@ -347,8 +342,8 @@ class Instance(InstanceCore):
         return SuperDict(
             {
                 date: {
-                    "string": get_date_string_from_ts(date),
-                    "week": get_week_from_ts(date),
+                    "string": self.get_date_string_from_ts(date),
+                    "week": self.get_week_from_ts(date),
                 }
                 for date in self.dates
             }
@@ -379,16 +374,16 @@ class Instance(InstanceCore):
             )
             .vfilter(
                 # Remove schedule exceptions.
-                lambda v: get_date_string_from_ts(v)
+                lambda v: self.get_date_string_from_ts(v)
                 not in self._get_schedule_exceptions()
             )
             .vfilter(
-                lambda v: get_date_string_from_ts(v) not in self._get_store_holidays()
+                lambda v: self.get_date_string_from_ts(v) not in self._get_store_holidays()
             )
         )
 
         ts_schedule_exceptions = TupList(
-            get_date_from_string(d)
+            self.get_date_from_string(d)
             + timedelta(hours=h_start, minutes=m_start + self._get_slot_length() * x)
             for d, value in self._get_schedule_exceptions().items()
             for (h_start, m_start, h_end, m_end) in value
@@ -408,10 +403,10 @@ class Instance(InstanceCore):
         return SuperDict(
             {
                 ts: {
-                    "string": get_time_slot_string(ts),
-                    "date": get_date_string_from_ts(ts),
-                    "week": get_week_from_ts(ts),
-                    "hour": get_hour_from_date_time(ts),
+                    "string": self.get_datetime_string_from_ts(ts),
+                    "date": self.get_date_string_from_ts(ts),
+                    "week": self.get_week_from_ts(ts),
+                    "hour": self.get_hour_from_ts(ts),
                     "hour_string": get_hour_string_from_date_time(ts)
                 }
                 for ts in self.time_slots
@@ -514,7 +509,7 @@ class Instance(InstanceCore):
 
     def _get_start_date(self) -> datetime:
         """Returns the datetime object of the starting date"""
-        return get_date_from_string(self.data["parameters"]["starting_date"])
+        return self.get_date_from_string(self.data["parameters"]["starting_date"])
 
     def _get_end_date(self) -> datetime:
         """Returns the last date in the horizon"""
@@ -555,7 +550,7 @@ class Instance(InstanceCore):
         Contracts are supposed to start on Monday and end on Sunday
         For example: {(36, 1): 10, ...}
         """
-        default_date = get_date_string_from_ts(self._get_end_date())
+        default_date = self.get_date_string_from_ts(self._get_end_date())
 
         contract_start = self._get_contracts("start_contract")
         contract_end = self._get_contracts("end_contract").vapply(
