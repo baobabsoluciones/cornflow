@@ -201,10 +201,9 @@ class Instance(InstanceCore):
         self.time_slots_properties = self._get_time_slots_properties()
 
     def check(self) -> dict:
-        # ToDo: Warning if the number of days in the employees' contracts don't correspond to the
-        #    number of days in employees_schedules.
         return SuperDict(
             incoherent_foreign_keys=self.check_indexes_coherence(),
+            missing_data=self.check_missing_data(),
             timeslot_length=self.check_timeslot_length(),
             penalties=self.check_penalties(),
             **self.check_timeslot_coherence(),
@@ -213,7 +212,7 @@ class Instance(InstanceCore):
     def check_indexes_coherence(self) -> list:
         errors = list()
         for pk, fk_list in INSTANCE_KEYS_RELATION.items():
-            for fk_table, fk_column in fk_list:
+            for fk_table, fk_column, _ in fk_list:
                 fk_values = self._get_property(fk_table, fk_column).values_tl()
                 for fk in fk_values:
                     if fk not in self._get_property(pk[0], pk[1]).values_tl():
@@ -228,13 +227,30 @@ class Instance(InstanceCore):
 
         return errors
 
+    def check_missing_data(self) -> list:
+        errors = list()
+        for pk, fk_list in INSTANCE_KEYS_RELATION.items():
+            for fk_table, fk_column, f_item_required in fk_list:
+                if not f_item_required:
+                    continue
+                items = self._get_property(pk[0], pk[1]).values_tl()
+                fk_items = self._get_property(fk_table, fk_column).values_tl()
+                errors += items.vfilter(lambda v: v not in fk_items).vapply(lambda v: {
+                    "primary_table": pk[0],
+                    "foreign_table": fk_table,
+                    "key": pk[1],
+                    "value": v,
+                })
+
+        return errors
+
     def check_timeslot_length(self):
         slot_length = self._get_slot_length()
         if slot_length not in [15, 30, 60]:
             return dict(timeslot_length=slot_length)
         return dict()
 
-    def check_timeslot_coherence(self):
+    def check_timeslot_coherence(self) -> dict:
         checks = SuperDict(
             weekly_schedule_timeslots=TupList(),
             schedule_exceptions_timeslots=TupList(),

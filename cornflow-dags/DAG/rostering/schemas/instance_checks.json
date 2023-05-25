@@ -26,6 +26,31 @@
         "additionalProperties": false
       }
     },
+    "missing_data": {
+      "type": "array",
+      "title": "Missing data",
+      "description": "Table containing the data about missing input data. The entry with {key}={value} from table {primary_table} does not have an associated entry in {foreign_table}.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "primary_table": {
+            "type": "string"
+          },
+          "foreign_table": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": ["integer", "string"]
+          }
+        },
+        "required": ["primary_table", "foreign_table", "key", "value"],
+        "additionalProperties": false
+      }
+    },
     "timeslot_length": {
       "type": "object",
       "title": "Timeslot length",
