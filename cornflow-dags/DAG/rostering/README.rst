@@ -24,6 +24,7 @@ This decision is subject to:
 - RQ12: employees can not work during downtime.
 - RQ13: employee starting hour preference.
 - RQ14: employee max preference hours.
+- RQ15: employee weekly schedule
 
 Parameters
 ----------
@@ -38,6 +39,7 @@ Parameters
 - Employee preferences: starting and number of hours preferences for one day.
 - Weekly schedule: starting and ending hours for each week day.
 - Schedule exceptions: starting and ending hours for a specific date.
+- Employee schedule: days of the week the employee can work on
 
 - Parameters:
 
@@ -61,5 +63,6 @@ Parameters
     - rq12: "strict" or "deactivated for the employee downtime constraint
     - rq13: "soft", "strict" or "deactivated for the employee start hour preferences constraint
     - rq14: "soft", "strict" or "deactivated for the employee max preference hours constraint
+    - rq15: "soft", "strict" or "deactivated for the employee schedule constraint
 
 - Penalties: table indicating for each soft constraint the penalty level when it is not respected.
