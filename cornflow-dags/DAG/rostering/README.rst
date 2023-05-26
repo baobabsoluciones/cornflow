@@ -47,11 +47,19 @@ Parameters
   - Minimum working hours: the minimum amount of hours that have to be worked each day that the employee works.
   - Slot length: the length of each time slot in minutes.
 
-- Requirements: table indicating which requirements should be complied and which not
+- Requirements: table indicating which requirements should be complied and which not, and if they are, if they should be applied as strict or soft constraints.
 
-    - rq09: true or false if the skills requirement has to be applied
-    - rq10: true or false if the employee holidays requirement has to be applied
-    - rq11: true or false if the store holidays requirement has to be applied
-    - rq12: true or false if the employee downtime requirement has to be applied
-    - rq13: true or false if the employee preferences requirement has to be applied
-    - rq14: true or false if the employee max preference hours requirement has to be applied
+    - rq02: "soft", "strict" or "deactivated for the weekly hours constraint
+    - rq03: "soft", "strict" or "deactivated for the maximum daily hours constraint
+    - rq05: "soft", "strict" or "deactivated for the maximum days worked per week constraint
+    - rq06: "soft", "strict" or "deactivated for the minimum daily hours constraint
+    - rq07: "soft", "strict" or "deactivated for the minimum rest hours between shifts constraint
+    - rq08: "soft", "strict" or "deactivated for the constraint about needing to have a manager in the store at all times
+    - rq09: "soft", "strict" or "deactivated for the skills constraint
+    - rq10: "soft", "strict" or "deactivated for the employees' holidays constraint
+    - rq11: "strict" or "deactivated for the store holidays constraint
+    - rq12: "strict" or "deactivated for the employee downtime constraint
+    - rq13: "soft", "strict" or "deactivated for the employee start hour preferences constraint
+    - rq14: "soft", "strict" or "deactivated for the employee max preference hours constraint
+
+- Penalties: table indicating for each soft constraint the penalty level when it is not respected.
