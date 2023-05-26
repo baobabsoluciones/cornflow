@@ -465,57 +465,66 @@ class Instance(InstanceCore):
 
     def _get_weekly_schedule(self, round_ts=True):
         """Returns a SuperDict of days and the opening hours"""
-        ts_length = self._get_slot_length()
-        if not round_ts:
-            ts_length = 1
-
         return self.data["weekly_schedule"].vapply(
-            lambda v: (
-                v.vapply(
-                    lambda vv: (
-                        int(vv[0][:2]),
-                        ts_length * (int(vv[0][3:]) // ts_length),
-                        int(vv[1][:2]),
-                        ts_length * ceil(int(vv[1][3:]) / ts_length),
-                    )
-                ).vapply(self._round_up_tuple)
-            )
+            lambda v: (v.vapply(lambda vv: self._format_hour_tuples(vv, round_ts)))
         )
 
     def _get_schedule_exceptions(self, round_ts=True):
         """Returns a SuperDict of days and the opening hours"""
-        ts_length = self._get_slot_length()
-        if not round_ts:
-            ts_length = 1
-
         return self.data["schedule_exceptions"].vapply(
-            lambda v: (
-                v.vapply(
-                    lambda vv: (
-                        int(vv[0][:2]),
-                        ts_length * (int(vv[0][3:]) // ts_length),
-                        int(vv[1][:2]),
-                        ts_length * ceil(int(vv[1][3:]) / ts_length),
-                    )
-                ).vapply(self._round_up_tuple)
-            )
+            lambda v: (v.vapply(lambda vv: self._format_hour_tuples(vv, round_ts)))
         )
 
-    @staticmethod
-    def _round_up_tuple(el):
-        if el[3] == 60 and el[2] != 23:
-            return el[0], el[1], el[2] + 1, 0
-        elif el[3] == 60 and el[2] == 23:
-            return el[0], el[1], 0, 0
-        return el
+    def round_hour_string_down_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the lower time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 12, 30
+        """
+        ts_length = self._get_slot_length()
+        return int(hour_string[:2]), ts_length * (int(hour_string[3:]) // ts_length)
 
-    @staticmethod
-    def _round_up_string(el):
-        if el[3:] == "60" and el[:2] != "23":
-            return f"{int(el[:2]) + 1}:00"
-        elif el[3:] == "60" and el[:2] == "23":
-            return "00:00"
-        return el
+    def round_hour_string_up_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the upper time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 13, 0
+        """
+        ts_length = self._get_slot_length()
+        rounded_hour = int(hour_string[:2])
+        rounded_minutes = ts_length * ceil(int(hour_string[3:]) / ts_length)
+        if rounded_hour != 23 and rounded_minutes == 60:
+            return rounded_hour + 1, 0
+        elif rounded_hour == 23 and rounded_minutes == 60:
+            return 0, 0
+        return rounded_hour, rounded_minutes
+
+    def _format_hour_tuples(self, tup, round_ts):
+        """
+        Returns a tuple (hour, minutes, hour, minutes) with the hours and minutes of the provided
+        hour string, with the first hour string rounded down and the second rounded up.
+        For example: for tup = ("08:15", "19:45") and slot_length = 30, returns (8, 0, 20, 0)
+        """
+        if round_ts:
+            rounded_hour_1 = self.round_hour_string_down_to_tuple(tup[0])
+            rounded_hour_2 = self.round_hour_string_up_to_tuple(tup[1])
+        else:
+            rounded_hour_1 = int(tup[0][:2]), int(tup[0][3:])
+            rounded_hour_2 = int(tup[1][:2]), int(tup[1][3:])
+        return (
+            rounded_hour_1[0],
+            rounded_hour_1[1],
+            rounded_hour_2[0],
+            rounded_hour_2[1],
+        )
+
+    def _round_hour_string_up(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "13:00"
+        """
+        hour, minutes = self.round_hour_string_up_to_tuple(hour_string)
+        return get_hour_string_from_hour_minute(hour, minutes)
 
     def _get_start_date(self) -> datetime:
         """Returns the datetime object of the starting date"""
@@ -682,7 +691,7 @@ class Instance(InstanceCore):
 
         if round_ts:
             end = end.vapply(
-                lambda v: self._round_up_string(
+                lambda v: self._round_hour_string_up(
                     v[:3] + str(ts_length * ceil(int(v[3:]) / ts_length)).zfill(2)
                 )
             )
@@ -1155,16 +1164,9 @@ class Instance(InstanceCore):
         For example: [(1, "2021-09-09", 5, "15:00"),
         (1, "2021-09-09", 5, "15:00"), ...]
         """
-
-        ts_length = self._get_slot_length()
-        if not round_ts:
-            ts_length = 1
-
         return TupList(self.data["employee_preferences"].keys_tl()).vapply_col(
             3,
-            lambda v: self._round_up_string(
-                v[3][:3] + str(ts_length * (int(v[3][3:]) // ts_length)).zfill(2)
-            ),
+            lambda v: self._round_hour_string_up(v[3]) if round_ts else v[3],
         )
 
     def get_employee_time_slots_preferences(self) -> SuperDict:
