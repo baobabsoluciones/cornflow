@@ -47,7 +47,6 @@ class MipModel(Experiment):
         self.initialize()
 
     def solve(self, options: dict) -> dict:
-
         model = pl.LpProblem("rostering", pl.LpMaximize)
         # Variables:
         self.create_variables()
@@ -62,7 +61,9 @@ class MipModel(Experiment):
             solver_name = "PULP_CBC_CMD"
 
         options["solver"] = f"{prefix}.{solver_name}"
-        solver = pl.getSolver(solver_name, **self.get_solver_config(options, lib="pulp"))
+        solver = pl.getSolver(
+            solver_name, **self.get_solver_config(options, lib="pulp")
+        )
 
         # Solver and solve
         status = model.solve(solver)
@@ -111,7 +112,6 @@ class MipModel(Experiment):
         self.preference_slots = self.instance.get_employee_time_slots_preferences()
 
     def create_variables(self):
-
         self.works = pl.LpVariable.dicts(
             "works",
             self.employee_ts_availability,
@@ -158,7 +158,7 @@ class MipModel(Experiment):
             )
 
         # RQ04A: starts if does not work in one ts but in the next it does
-        for (ts, ts2, e) in self.ts_ts_employee:
+        for ts, ts2, e in self.ts_ts_employee:
             model += self.works[ts, e] >= self.works[ts2, e] - self.starts[ts2, e]
 
         # RQ04B: starts on first time slot
@@ -185,7 +185,7 @@ class MipModel(Experiment):
             )
 
         # RQ07: employees at least have to rest an amount of hours between working days.
-        for (ts, ts2, e) in self.incompatible_ts_employee:
+        for ts, ts2, e in self.incompatible_ts_employee:
             model += self.works[ts, e] + self.works[ts2, e] <= 1
 
         # RQ08: a manager has to be working at all times
