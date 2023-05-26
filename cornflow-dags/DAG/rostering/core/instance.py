@@ -1271,7 +1271,7 @@ class Instance(InstanceCore):
             ),
         )
 
-    def _get_fixed_worktable(self, round_ts=True) -> TupList:
+    def get_fixed_worktable(self, round_ts=True) -> TupList:
         """
         Returns a TupList with the fixed schedule
         For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
@@ -1333,7 +1333,7 @@ class Instance(InstanceCore):
         For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
         """
         availability = self.get_employees_ts_availability()
-        fixed_worktable = self._get_fixed_worktable()
+        fixed_worktable = self.get_fixed_worktable()
 
         return fixed_worktable.vfilter(lambda v: v in availability)
 

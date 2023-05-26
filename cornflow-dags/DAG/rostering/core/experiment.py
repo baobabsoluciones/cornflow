@@ -50,6 +50,7 @@ class Experiment(ExperimentCore):
             start_hour_preference=self.check_start_hour_preference(),
             number_hours_preferences=self.check_number_hours_preference(),
             employee_work_days=self.check_employee_work_days(),
+            fixed_worktable=self.check_fixed_worktable()
         ).vfilter(lambda v: len(v))
 
     def get_objective(self) -> float:
@@ -273,6 +274,16 @@ class Experiment(ExperimentCore):
             .vapply(
                 lambda v: {"date": v[0], "id_employee": v[1]}
             )
+        )
+
+    def check_fixed_worktable(self) -> TupList:
+        """ Checks if some parts of the fixed worktable are not respected """
+        ts_employee = self.solution.get_ts_employee().to_tuplist()
+
+        return(
+            self.instance.get_fixed_worktable()
+            .vfilter(lambda v: v not in ts_employee)
+            .vapply(lambda v: {"time_slot": v[0], "id_employee": v[1]})
         )
 
     def get_one_employee_percentage(self) -> float:

@@ -25,6 +25,7 @@ This decision is subject to:
 - RQ13: employee starting hour preference.
 - RQ14: employee max preference hours.
 - RQ15: employee weekly schedule
+- RQ16: fixed worktable
 
 Parameters
 ----------
@@ -40,6 +41,7 @@ Parameters
 - Weekly schedule: starting and ending hours for each week day.
 - Schedule exceptions: starting and ending hours for a specific date.
 - Employee schedule: days of the week the employee can work on
+- Fixed worktable: worktable fixed by the user
 
 - Parameters:
 
@@ -64,5 +66,6 @@ Parameters
     - rq13: "soft", "strict" or "deactivated for the employee start hour preferences constraint
     - rq14: "soft", "strict" or "deactivated for the employee max preference hours constraint
     - rq15: "soft", "strict" or "deactivated for the employee schedule constraint
+    - rq16: "soft", "strict" or "deactivated for the fixed worktable constraint
 
 - Penalties: table indicating for each soft constraint the penalty level when it is not respected.

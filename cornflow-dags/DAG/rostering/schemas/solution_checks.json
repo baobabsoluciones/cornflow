@@ -307,6 +307,36 @@
                 ],
                 "additionalProperties": false
             }
+        },
+        "fixed_worktable": {
+            "type": "array",
+            "description": "Table containing information about the parts of the fixed worktable that are not respected.",
+            "show": true,
+            "filterable": true,
+            "sortable": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_employee": {
+                        "type": "integer",
+                        "description": "The unique identifier for each employee.",
+                        "title": "Employee id.",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "time_slot": {
+                        "type": "string",
+                        "title": "Time slot",
+                        "description": "The time slot the employee should be working on",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id_employee",
+                    "time_slot"
+                ]
+            }
         }
     },
     "required": [],
