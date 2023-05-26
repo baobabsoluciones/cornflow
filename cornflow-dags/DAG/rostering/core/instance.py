@@ -49,6 +49,8 @@ class Instance(InstanceCore):
 
         self.cache_properties()
 
+        print(self.get_employee_fixed_worktable())
+
     @classmethod
     def from_dict(cls, data: dict) -> "Instance":
         tables = ["employees", "shifts", "contracts"]
@@ -129,6 +131,14 @@ class Instance(InstanceCore):
         else:
             data_p["employee_schedule"] = SuperDict()
 
+        if data.get("fixed_worktables"):
+            data_p["fixed_worktables"] = {
+                (el["id_employee"], el["date"], el["hour"]): el
+                for el in data["fixed_worktables"]
+            }
+        else:
+            data_p["fixed_worktables"] = SuperDict({})
+
         return cls(data_p)
 
     def to_dict(self) -> Dict:
@@ -143,6 +153,7 @@ class Instance(InstanceCore):
             "employee_downtime",
             "store_holidays",
             "employee_preferences",
+            "fixed_worktables"
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -1260,6 +1271,22 @@ class Instance(InstanceCore):
             ),
         )
 
+    def _get_fixed_worktable(self, round_ts=True) -> TupList:
+        """
+        Returns a TupList with the fixed schedule
+        For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
+        """
+        ts_length = self._get_slot_length()
+        if not round_ts:
+            ts_length = 1
+
+        return TupList(self.data["fixed_worktables"].keys_tl()).vapply_col(
+            None,
+            lambda v: v[1] + "T" + self._round_up_string(
+                v[2][:3] + str(ts_length * (int(v[2][3:]) // ts_length)).zfill(2)
+            ),
+        ).take([3, 0])
+
     def get_employee_time_slots_preferences(self) -> SuperDict:
         """
         Returns a SuperDict with the date and employee tuple as key
@@ -1299,6 +1326,16 @@ class Instance(InstanceCore):
         )
 
         return starts_ts.to_dict(0)
+
+    def get_employee_fixed_worktable(self) -> TupList:
+        """
+        Returns a TupList with the employees and the timeslots they have to work on
+        For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
+        """
+        availability = self.get_employees_ts_availability()
+        fixed_worktable = self._get_fixed_worktable()
+
+        return fixed_worktable.vfilter(lambda v: v in availability)
 
     def get_employee_preference_hours(self) -> SuperDict:
         """

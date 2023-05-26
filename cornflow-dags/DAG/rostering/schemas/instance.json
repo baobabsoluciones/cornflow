@@ -128,6 +128,12 @@
           "title": "Employee work days",
           "description": "The employee work days are respected",
           "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq16": {
+          "type": "string",
+          "title": "Fixed worktable",
+          "description": "The employees fixed work table is respected",
+          "enum": ["strict", "soft", "deactivated"]
         }
       },
       "required": [
@@ -143,7 +149,8 @@
         "rq12",
         "rq13",
         "rq14",
-        "rq15"
+        "rq15",
+        "rq16"
       ]
     },
     "penalties": {
@@ -207,6 +214,11 @@
           "type": "integer",
           "title": "Employee work days",
           "description": "The penalty when the employee work days are not respected"
+        },
+        "rq16": {
+          "type": "integer",
+          "title": "Fixed worktable",
+          "description": "The penalty when the employees fixed work table is respected"
         }
       },
       "required": []
@@ -745,6 +757,44 @@
           }
         },
         "required": ["id_employee", "week_day"]
+      }
+    },
+    "fixed_worktables": {
+      "type": "array",
+      "description": "Table with the fixed worktables indicating for each employee in which time slots they have to work",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_employee": {
+            "type": "integer",
+            "description": "The unique identifier for each employee.",
+            "title": "Employee id.",
+            "sortable": true,
+            "filterable": true
+          },
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "The date the employee has to work on",
+            "sortable": true,
+            "filterable": true
+          },
+          "hour": {
+            "title": "Hour",
+            "type": "string",
+            "description": "The hour the employee has to work on.",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "id_employee",
+          "date",
+          "hour"
+        ]
       }
     }
   },
