@@ -467,10 +467,20 @@ class Instance(InstanceCore):
         )
 
     def round_hour_string_down_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the lower time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 12, 30
+        """
         ts_length = self._get_slot_length()
         return int(hour_string[:2]), ts_length * (int(hour_string[3:]) // ts_length)
 
     def round_hour_string_up_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the upper time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 13, 0
+        """
         ts_length = self._get_slot_length()
         rounded_hour = int(hour_string[:2])
         rounded_minutes = ts_length * ceil(int(hour_string[3:]) / ts_length)
@@ -481,6 +491,11 @@ class Instance(InstanceCore):
         return rounded_hour, rounded_minutes
 
     def _format_hour_tuples(self, tup, round_ts):
+        """
+        Returns a tuple (hour, minutes, hour, minutes) with the hours and minutes of the provided
+        hour string, with the first hour string rounded down and the second rounded up.
+        For example: for tup = ("08:15", "19:45") and slot_length = 30, returns (8, 0, 20, 0)
+        """
         if round_ts:
             rounded_hour_1 = self.round_hour_string_down_to_tuple(tup[0])
             rounded_hour_2 = self.round_hour_string_up_to_tuple(tup[1])
@@ -495,6 +510,10 @@ class Instance(InstanceCore):
         )
 
     def _round_hour_string_up(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "13:00"
+        """
         hour, minutes = self.round_hour_string_up_to_tuple(hour_string)
         return get_hour_string_from_hour_minute(hour, minutes)
 
