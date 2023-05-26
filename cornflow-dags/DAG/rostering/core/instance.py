@@ -1327,7 +1327,7 @@ class Instance(InstanceCore):
         """
         Returns the penalty value of a given requirement
         """
-        return self.data["penalties"].get(rq, 1)
+        return (self.get_requirement(rq) == "soft") * self.data["penalties"].get(rq, 1)
 
     def get_penalties(self):
         """
