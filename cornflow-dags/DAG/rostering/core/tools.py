@@ -26,7 +26,7 @@ def get_hour_string_from_date_time(ts: datetime) -> str:
 
 def get_hour_string_from_hour_minute(hour: int, minute: int) -> str:
     """Returns the hour string for the given time slot"""
-    return datetime.now().replace(hour=hour, minute=minute).strftime("%H:%M")
+    return str(hour).zfill(2) + ":" + str(minute).zfill(2)
 
 
 def get_one_date(starting_date: datetime, weeks: int = 0, days: int = 0) -> datetime:

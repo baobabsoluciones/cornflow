@@ -487,7 +487,9 @@ class Instance(InstanceCore):
         if rounded_hour != 23 and rounded_minutes == 60:
             return rounded_hour + 1, 0
         elif rounded_hour == 23 and rounded_minutes == 60:
-            return 0, 0
+            return 24, 0
+        elif rounded_hour == 0 and rounded_minutes == 0:
+            return 24, 0
         return rounded_hour, rounded_minutes
 
     def _format_hour_tuples(self, tup, round_ts):
