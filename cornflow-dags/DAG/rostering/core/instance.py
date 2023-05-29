@@ -265,6 +265,7 @@ class Instance(InstanceCore):
             schedule_exceptions_timeslots=TupList(),
             shift_hours_timeslots=TupList(),
             employee_preferences_timeslots=TupList(),
+            fixed_worktable_timeslots=TupList()
         )
         slot_length = self._get_slot_length()
         weekly_schedule = self._get_weekly_schedule(round_ts=False)
@@ -273,7 +274,8 @@ class Instance(InstanceCore):
             round_ts=False
         )
         contract_end_hours = self._get_employees_contract_ending_hour(round_ts=False)
-        employee_preferences = self._get_employee_preferences()
+        employee_preferences = self._get_employee_preferences(round_ts=False)
+        fixed_worktable = self.get_fixed_worktable(round_ts=False)
 
         for key, values in weekly_schedule.items():
             checks["weekly_schedule_timeslots"] += TupList(
@@ -323,6 +325,12 @@ class Instance(InstanceCore):
             {"date": date, "employee": employee, "hour": hour_string}
             for (employee, date, _, hour_string) in employee_preferences
             if int(hour_string[3:]) % slot_length != 0
+        )
+
+        checks["fixed_worktable_timeslots"] = TupList(
+            {"date": ts[:10], "employee": employee, "hour": ts[-5:]}
+            for (ts, employee) in fixed_worktable
+            if int(ts[-2:]) % slot_length != 0
         )
 
         return checks.vfilter(lambda v: len(v))
@@ -556,6 +564,14 @@ class Instance(InstanceCore):
             rounded_hour_2[0],
             rounded_hour_2[1],
         )
+
+    def _round_hour_string_down(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "12:30"
+        """
+        hour, minutes = self.round_hour_string_down_to_tuple(hour_string)
+        return get_hour_string_from_hour_minute(hour, minutes)
 
     def _round_hour_string_up(self, hour_string):
         """
@@ -1278,7 +1294,7 @@ class Instance(InstanceCore):
         """
         return TupList(self.data["fixed_worktables"].keys_tl()).vapply_col(
             None,
-            lambda v: v[1] + "T" + self._round_hour_string_up(v[2]) if round_ts else v[2],
+            lambda v: v[1] + "T" + self._round_hour_string_down(v[2]) if round_ts else v[2],
         ).take([3, 0])
 
     def get_employee_time_slots_preferences(self) -> SuperDict:

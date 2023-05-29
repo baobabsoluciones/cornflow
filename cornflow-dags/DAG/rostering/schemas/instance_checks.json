@@ -163,6 +163,33 @@
         "required": ["week", "employee", "hour"]
       }
     },
+    "fixed_worktable_timeslots": {
+      "type": "array",
+      "title": "Fixed worktable timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the fixed worktable table are not coherent with the timeslot length. The hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The week of the problem"
+          },
+          "employee": {
+            "type": "integer",
+            "title": "Employee",
+            "description": "The employee with the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["week", "employee", "hour"]
+      }
+    },
     "penalties": {
       "type": "array",
       "title": "Penalties",
