@@ -49,8 +49,6 @@ class Instance(InstanceCore):
 
         self.cache_properties()
 
-        print(self.get_employee_fixed_worktable())
-
     @classmethod
     def from_dict(cls, data: dict) -> "Instance":
         tables = ["employees", "shifts", "contracts"]
@@ -1278,15 +1276,9 @@ class Instance(InstanceCore):
         Returns a TupList with the fixed schedule
         For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
         """
-        ts_length = self._get_slot_length()
-        if not round_ts:
-            ts_length = 1
-
         return TupList(self.data["fixed_worktables"].keys_tl()).vapply_col(
             None,
-            lambda v: v[1] + "T" + self._round_up_string(
-                v[2][:3] + str(ts_length * (int(v[2][3:]) // ts_length)).zfill(2)
-            ),
+            lambda v: v[1] + "T" + self._round_hour_string_up(v[2]) if round_ts else v[2],
         ).take([3, 0])
 
     def get_employee_time_slots_preferences(self) -> SuperDict:
