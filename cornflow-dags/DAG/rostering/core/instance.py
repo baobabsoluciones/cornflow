@@ -496,7 +496,9 @@ class Instance(InstanceCore):
         if rounded_hour != 23 and rounded_minutes == 60:
             return rounded_hour + 1, 0
         elif rounded_hour == 23 and rounded_minutes == 60:
-            return 0, 0
+            return 24, 0
+        elif rounded_hour == 0 and rounded_minutes == 0:
+            return 24, 0
         return rounded_hour, rounded_minutes
 
     def _format_hour_tuples(self, tup, round_ts):
@@ -517,6 +519,14 @@ class Instance(InstanceCore):
             rounded_hour_2[0],
             rounded_hour_2[1],
         )
+
+    def _round_hour_string_down(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "12:30"
+        """
+        hour, minutes = self.round_hour_string_down_to_tuple(hour_string)
+        return get_hour_string_from_hour_minute(hour, minutes)
 
     def _round_hour_string_up(self, hour_string):
         """
@@ -669,11 +679,8 @@ class Instance(InstanceCore):
         """
         start = self._get_shifts("start")
 
-        ts_length = self._get_slot_length()
         if round_ts:
-            start = start.vapply(
-                lambda v: v[:3] + str(ts_length * (int(v[3:]) // ts_length)).zfill(2)
-            )
+            start = start.vapply(self._round_hour_string_down)
 
         return self._get_employees_contract_shift().vapply(lambda s: start[s])
 
@@ -687,14 +694,9 @@ class Instance(InstanceCore):
         For example: {(36, 1): 21, ...}
         """
         end = self._get_shifts("end")
-        ts_length = self._get_slot_length()
 
         if round_ts:
-            end = end.vapply(
-                lambda v: self._round_hour_string_up(
-                    v[:3] + str(ts_length * ceil(int(v[3:]) / ts_length)).zfill(2)
-                )
-            )
+            end = end.vapply(self._round_hour_string_up)
         return self._get_employees_contract_shift().vapply(lambda s: end[s])
 
     def _get_employee_time_slots_week(self) -> TupList:
