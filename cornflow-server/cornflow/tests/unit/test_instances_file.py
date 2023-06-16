@@ -1,4 +1,5 @@
 from cornflow.models import InstanceModel
+from cornflow.shared import db
 from cornflow.tests.custom_test_case import CustomTestCase
 import pulp
 from cornflow.tests.const import (
@@ -36,7 +37,7 @@ class TestInstances(CustomTestCase):
         file = INSTANCE_MPS
         response = self.create_new_row_file(file)
         self.assertEqual(201, response.status_code)
-        row = self.model.query.get(response.json["id"])
+        row = db.session.get(self.model, response.json["id"])
         self.assertEqual(row.id, response.json["id"])
         payload = pulp.LpProblem.fromMPS(file, sense=1)[1].toDict()
         self.assertEqual(row.data, payload)

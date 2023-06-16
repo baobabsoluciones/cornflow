@@ -450,7 +450,7 @@ class TestUserModel(TestCase):
 
         self.assertEqual(200, response.status_code)
 
-        instance = InstanceModel.query.get(instance_id)
+        instance = db.session.get(InstanceModel, instance_id)
         self.assertIsNone(instance)
 
     def test_instance_execution_delete_cascade(self):
@@ -500,8 +500,8 @@ class TestUserModel(TestCase):
 
         self.assertEqual(200, response.status_code)
 
-        instance = InstanceModel.query.get(instance_id)
-        execution = ExecutionModel.query.get(execution_id)
+        instance = db.session.get(InstanceModel, instance_id)
+        execution = db.session.get(ExecutionModel, execution_id)
         self.assertIsNone(instance)
         self.assertIsNone(execution)
 
@@ -536,7 +536,7 @@ class TestUserModel(TestCase):
 
         self.assertEqual(200, response.status_code)
 
-        case = CaseModel.query.get(case_id)
+        case = db.session.get(CaseModel, case_id)
         self.assertIsNone(case)
 
     def test_user_role_delete_cascade(self):
@@ -565,12 +565,12 @@ class TestUserModel(TestCase):
     def test_user_roles(self):
         response = self.log_in(self.admin)
         user_id = response.json["id"]
-        user = UserModel.query.get(user_id)
+        user = db.session.get(UserModel, user_id)
         self.assertEqual(user.roles, {2: "planner", 3: "admin"})
 
     def test_user_no_roles(self):
         role = UserRoleModel.query.filter_by(user_id=self.viewer["id"]).delete()
-        user = UserModel.query.get(self.viewer["id"])
+        user = db.session.get(UserModel, self.viewer["id"])
         self.assertEqual(user.roles, {})
 
     def test_permission_dag_cascade(self):

@@ -164,7 +164,7 @@ class CustomTestCase(TestCase):
         self.assertEqual(expected_status, response.status_code)
         if not check_payload:
             return response.json
-        row = model.query.get(response.json["id"])
+        row = db.session.get(model, response.json["id"])
         self.assertEqual(row.id, response.json["id"])
 
         for key in self.get_keys_to_check(payload):
@@ -316,11 +316,11 @@ class CustomTestCase(TestCase):
         return
 
     def repr_method(self, idx, representation):
-        row = self.model.query.get(idx)
+        row = db.session.get(self.model, idx)
         self.assertEqual(repr(row), representation)
 
     def str_method(self, idx, string: str):
-        row = self.model.query.get(idx)
+        row = db.session.get(self.model, idx)
         self.assertEqual(str(row), string)
 
     def cascade_delete(
@@ -330,15 +330,15 @@ class CustomTestCase(TestCase):
         payload_2[parent_key] = parent_object_idx
         child_object_idx = self.create_new_row(url_2, model_2, payload_2)
 
-        parent_object = model.query.get(parent_object_idx)
-        child_object = model_2.query.get(child_object_idx)
+        parent_object = db.session.get(model, parent_object_idx)
+        child_object = db.session.get(model_2, child_object_idx)
         self.assertIsNotNone(parent_object)
         self.assertIsNotNone(child_object)
 
         parent_object.delete()
 
-        parent_object = model.query.get(parent_object_idx)
-        child_object = model_2.query.get(child_object_idx)
+        parent_object = db.session.get(model, parent_object_idx)
+        child_object = db.session.get(model_2, child_object_idx)
         self.assertIsNone(parent_object)
         self.assertIsNone(child_object)
 
