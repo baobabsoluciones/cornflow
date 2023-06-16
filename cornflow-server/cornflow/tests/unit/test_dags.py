@@ -185,7 +185,7 @@ class TestDeployedDAG(TestCase):
     def test_permission_cascade_deletion(self):
         before = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertIsNotNone(before)
-        dag = DeployedDAG.query.get("solve_model_dag")
+        dag = db.session.get(DeployedDAG, "solve_model_dag")
         dag.delete()
         after = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertNotEqual(before, after)

@@ -44,7 +44,6 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.assertTrue("id" in response)
         instance = self.client.get_one_instance(response["id"])
         log.debug("Got instance with id: {}".format(instance["id"]))
-        # row = InstanceModel.query.get(response['id'])
         self.assertEqual(instance["id"], response["id"])
         self.assertEqual(instance["name"], name)
         self.assertEqual(instance["description"], description)

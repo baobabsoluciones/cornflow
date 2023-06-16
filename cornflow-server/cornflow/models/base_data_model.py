@@ -32,7 +32,7 @@ class BaseDataModel(TraceAttributesModel):
 
     @declared_attr
     def user(self):
-        return db.relationship("UserModel")
+        return db.relationship("UserModel", viewonly=True)
 
     def __init__(self, data):
         self.user_id = data.get("user_id")
