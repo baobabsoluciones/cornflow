@@ -18,7 +18,6 @@ class EmptyBaseModel(db.Model):
     """
 
     __abstract__ = True
-    __allow_unmapped__ = True
 
     def commit_changes(self, action: str = None):
         """
