@@ -10,7 +10,7 @@ from cornflow_client.constants import (
     SOLUTION_CHECKS_SCHEMA
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Import from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -26,11 +26,11 @@ class DeployedDAG(TraceAttributesModel):
     __tablename__ = "deployed_dags"
     id: db.Mapped[int] = db.mapped_column(db.String(128), primary_key=True)
     description: db.Mapped[str] = db.mapped_column(TEXT, nullable=True)
-    instance_schema: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
-    solution_schema: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
-    config_schema: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
-    instance_checks_schema: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
-    solution_checks_schema: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    instance_schema: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    solution_schema: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    config_schema: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    instance_checks_schema: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    solution_checks_schema: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
 
     dag_permissions: db.Mapped[List[Any]] = db.relationship(
         "PermissionsDAG",

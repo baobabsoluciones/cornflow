@@ -7,7 +7,7 @@ import jsonpatch
 from flask import current_app
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Import from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -50,9 +50,9 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
-    solution: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    solution: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
     solution_hash: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
-    solution_checks: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    solution_checks: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
