@@ -4,7 +4,9 @@ This file contains the PermissionViewRoleModel
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
-from typing import List
+
+# Imports from external libraries
+from typing import Any, List
 
 
 class PermissionViewRoleModel(TraceAttributesModel):
@@ -32,29 +34,16 @@ class PermissionViewRoleModel(TraceAttributesModel):
     __tablename__ = "permission_view"
     __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
 
-    """
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    action_id = db.Column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
-    action = db.relationship("ActionModel", viewonly=True)
-
-    api_view_id = db.Column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
-    api_view = db.relationship("ViewModel", viewonly=True)
-
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleModel", viewonly=True)
-    """
-
     id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
 
     action_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
-    action: db.Mapped[List["ActionModel"]] = db.relationship("ActionModel", viewonly=True)
+    action: db.Mapped[List[Any]] = db.relationship("ActionModel", viewonly=True)
 
     api_view_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
-    api_view: db.Mapped[List["ViewModel"]] = db.relationship("ViewModel", viewonly=True)
+    api_view: db.Mapped[List[Any]] = db.relationship("ViewModel", viewonly=True)
 
     role_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role: db.Mapped[List["RoleModel"]] = db.relationship("RoleModel", viewonly=True)
+    role: db.Mapped[List[Any]] = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
         super().__init__()

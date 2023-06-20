@@ -5,6 +5,7 @@ Model for the executions
 # Import from libraries
 import hashlib
 from sqlalchemy.dialects.postgresql import JSON, TEXT
+from typing import Any, Optional
 
 # Imports from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -50,16 +51,16 @@ class ExecutionModel(BaseDataModel):
     __tablename__ = "executions"
 
     # Model fields
-    id = db.Column(db.String(256), nullable=False, primary_key=True)
-    instance_id = db.Column(
+    id: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False, primary_key=True)
+    instance_id: db.Mapped[str] = db.mapped_column(
         db.String(256), db.ForeignKey("instances.id"), nullable=False
     )
-    config = db.Column(JSON, nullable=False)
-    dag_run_id = db.Column(db.String(256), nullable=True)
-    log_text = db.Column(TEXT, nullable=True)
-    log_json = db.Column(JSON, nullable=True)
-    state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
-    state_message = db.Column(
+    config: db.Mapped[dict[str, Any]] = db.mapped_column(JSON, nullable=False)
+    dag_run_id: db.Mapped[Optional[str]] = db.mapped_column(db.String(256), nullable=True)
+    log_text: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
+    log_json: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    state: db.Mapped[int] = db.mapped_column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
+    state_message: db.Mapped[Optional[str]] = db.mapped_column(
         TEXT,
         default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE],
         nullable=True,

@@ -6,6 +6,7 @@ from cornflow.models.meta_models import TraceAttributesModel
 
 # Imports from external libraries
 from sqlalchemy.dialects.postgresql import TEXT
+from typing import Optional
 
 
 class AlarmsModel(TraceAttributesModel):
@@ -23,11 +24,11 @@ class AlarmsModel(TraceAttributesModel):
     __tablename__ = "alarms"
 
     # Model fields
-    id = db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
-    criticality = db.Column(db.Float, nullable=False)
-    description = db.Column(TEXT, nullable=False)
-    schema = db.Column(db.String(256), nullable=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
+    name: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
+    criticality: db.Mapped[float] = db.mapped_column(db.Float, nullable=False)
+    description: db.Mapped[str] = db.mapped_column(TEXT, nullable=False)
+    schema: db.Mapped[Optional[str]] = db.mapped_column(db.String(256), nullable=True)
 
     def __init__(self, data):
         super().__init__()

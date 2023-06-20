@@ -5,7 +5,7 @@ This file contains the base abstract models from which the rest of the models in
 from datetime import datetime
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # Imports from internal modules
 from cornflow.shared import db
@@ -203,9 +203,9 @@ class TraceAttributesModel(EmptyBaseModel):
     """
 
     __abstract__ = True
-    created_at = db.Column(db.DateTime, nullable=False)
-    updated_at = db.Column(db.DateTime, nullable=False)
-    deleted_at = db.Column(db.DateTime, nullable=True)
+    created_at: db.Mapped[datetime] = db.mapped_column(db.DateTime, nullable=False)
+    updated_at: db.Mapped[datetime] = db.mapped_column(db.DateTime, nullable=False)
+    deleted_at: db.Mapped[Optional[datetime]] = db.mapped_column(db.DateTime, nullable=True)
 
     def __init__(self):
         self.created_at = datetime.utcnow()

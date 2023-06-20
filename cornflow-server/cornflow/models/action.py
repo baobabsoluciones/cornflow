@@ -3,7 +3,7 @@ This file contains the model that has the actions that can be performed on an RE
 """
 from cornflow.models.meta_models import EmptyBaseModel
 from cornflow.shared import db
-from typing import List
+from typing import List, Any
 
 
 class ActionModel(EmptyBaseModel):
@@ -18,15 +18,11 @@ class ActionModel(EmptyBaseModel):
     """
 
     __tablename__ = "actions"
-    """
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
-    """
+
     id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
     name: db.Mapped[str] = db.mapped_column(db.String(128), unique=True, nullable=False)
 
-    # permissions = db.relationship(
-    permissions: db.Mapped[List["PermissionViewRoleModel"]] = db.relationship(
+    permissions: db.Mapped[List[Any]] = db.relationship(
         "PermissionViewRoleModel",
         backref="actions",
         lazy=True,

@@ -3,6 +3,7 @@ This file contains the view model
 """
 # Imports from libraries
 from sqlalchemy.dialects.postgresql import TEXT
+from typing import Any, List, Optional
 
 # Imports from internal modules
 from cornflow.models.meta_models import EmptyBaseModel
@@ -23,12 +24,12 @@ class ViewModel(EmptyBaseModel):
     """
 
     __tablename__ = "api_view"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
-    url_rule = db.Column(db.String(128), nullable=False)
-    description = db.Column(TEXT, nullable=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    name: db.Mapped[str] = db.mapped_column(db.String(128), unique=True, nullable=False)
+    url_rule: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False)
+    description: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
 
-    permissions = db.relationship(
+    permissions: db.Mapped[List[Any]] = db.relationship(
         "PermissionViewRoleModel",
         backref="api_views",
         lazy=True,

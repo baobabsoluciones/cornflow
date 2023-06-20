@@ -2,6 +2,7 @@
 
 # Import from libraries
 import hashlib
+from typing import Any, List
 
 # Imported from internal models
 from cornflow.models.base_data_model import BaseDataModel
@@ -38,8 +39,8 @@ class InstanceModel(BaseDataModel):
     __tablename__ = "instances"
 
     # Model fields
-    id = db.Column(db.String(256), nullable=False, primary_key=True)
-    executions = db.relationship(
+    id: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False, primary_key=True)
+    executions: db.Mapped[List[Any]] = db.relationship(
         "ExecutionModel",
         backref="instances",
         lazy=True,
