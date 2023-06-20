@@ -7,6 +7,7 @@ from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
+from typing import Any, List, Optional
 
 # Import from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -19,19 +20,19 @@ class BaseDataModel(TraceAttributesModel):
 
     __abstract__ = True
 
-    data = db.Column(JSON, nullable=True)
-    checks = db.Column(JSON, nullable=True)
-    name = db.Column(db.String(256), nullable=False)
-    description = db.Column(TEXT, nullable=True)
-    data_hash = db.Column(db.String(256), nullable=False)
-    schema = db.Column(db.String(256), nullable=True)
+    data: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    checks: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    name: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
+    description: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
+    data_hash: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
+    schema: db.Mapped[Optional[str]] = db.mapped_column(db.String(256), nullable=True)
 
     @declared_attr
-    def user_id(self):
-        return db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    def user_id(self) -> db.Mapped[int]:
+        return db.mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     @declared_attr
-    def user(self):
+    def user(self) -> db.Mapped[List[Any]]:
         return db.relationship("UserModel", viewonly=True)
 
     def __init__(self, data):
