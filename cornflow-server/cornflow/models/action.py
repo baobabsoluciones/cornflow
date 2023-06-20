@@ -22,7 +22,7 @@ class ActionModel(EmptyBaseModel):
     id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
     name: db.Mapped[str] = db.mapped_column(db.String(128), unique=True, nullable=False)
 
-    permissions: db.Mapped[List[Any]] = db.relationship(
+    permissions: db.Mapped[List["PermissionViewRoleModel"]] = db.relationship(
         "PermissionViewRoleModel",
         backref="actions",
         lazy=True,

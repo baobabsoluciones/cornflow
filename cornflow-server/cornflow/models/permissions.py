@@ -37,7 +37,7 @@ class PermissionViewRoleModel(TraceAttributesModel):
     id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
 
     action_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
-    action: db.Mapped[List[Any]] = db.relationship("ActionModel", viewonly=True)
+    action: db.Mapped[List["ActionModel"]] = db.relationship("ActionModel", viewonly=True)
 
     api_view_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
     api_view: db.Mapped[List[Any]] = db.relationship("ViewModel", viewonly=True)
