@@ -5,7 +5,7 @@ Model for the executions
 # Import from libraries
 import hashlib
 from sqlalchemy.dialects.postgresql import JSON, TEXT
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 # Imports from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -55,10 +55,10 @@ class ExecutionModel(BaseDataModel):
     instance_id: db.Mapped[str] = db.mapped_column(
         db.String(256), db.ForeignKey("instances.id"), nullable=False
     )
-    config: db.Mapped[dict[str, Any]] = db.mapped_column(JSON, nullable=False)
+    config: db.Mapped[Dict[str, Any]] = db.mapped_column(JSON, nullable=False)
     dag_run_id: db.Mapped[Optional[str]] = db.mapped_column(db.String(256), nullable=True)
     log_text: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
-    log_json: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    log_json: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
     state: db.Mapped[int] = db.mapped_column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
     state_message: db.Mapped[Optional[str]] = db.mapped_column(
         TEXT,

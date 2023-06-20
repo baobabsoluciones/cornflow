@@ -7,7 +7,7 @@ from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Import from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -20,8 +20,8 @@ class BaseDataModel(TraceAttributesModel):
 
     __abstract__ = True
 
-    data: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
-    checks: db.Mapped[Optional[dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    data: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    checks: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
     name: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
     description: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
     data_hash: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
