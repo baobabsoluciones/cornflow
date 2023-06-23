@@ -1,13 +1,16 @@
 """
 Model for the relationship between users and roles
 """
+# Imports from external libraries
+from typing import Any, TYPE_CHECKING
+
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-
-# Imports from external libraries
-from typing import Any, List
+if TYPE_CHECKING:
+    from .role import RoleModel
+    from .user import UserModel
 
 
 class UserRoleModel(TraceAttributesModel):
@@ -36,10 +39,10 @@ class UserRoleModel(TraceAttributesModel):
     id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
 
     user_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user: db.Mapped[List[Any]] = db.relationship("UserModel", viewonly=True, lazy=False)
+    user: db.Mapped["UserModel"] = db.relationship("UserModel", viewonly=True, lazy=False)
 
     role_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role: db.Mapped[List[Any]] = db.relationship("RoleModel", viewonly=True, lazy=False)
+    role: db.Mapped["RoleModel"] = db.relationship("RoleModel", viewonly=True, lazy=False)
 
     def __init__(self, data):
         """

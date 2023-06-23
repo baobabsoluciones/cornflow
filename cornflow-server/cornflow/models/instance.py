@@ -2,11 +2,13 @@
 
 # Import from libraries
 import hashlib
-from typing import Any, List
+from typing import List, TYPE_CHECKING
 
 # Imported from internal models
 from cornflow.models.base_data_model import BaseDataModel
 from cornflow.shared import db
+if TYPE_CHECKING:
+    from .execution import ExecutionModel
 
 
 class InstanceModel(BaseDataModel):
@@ -40,7 +42,7 @@ class InstanceModel(BaseDataModel):
 
     # Model fields
     id: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False, primary_key=True)
-    executions: db.Mapped[List[Any]] = db.relationship(
+    executions: db.Mapped[List["ExecutionModel"]] = db.relationship(
         "ExecutionModel",
         backref="instances",
         lazy=True,

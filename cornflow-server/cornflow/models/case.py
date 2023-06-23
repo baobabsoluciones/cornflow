@@ -42,7 +42,7 @@ class CaseModel(BaseDataModel):
     # To find the descendants of this node, we look for nodes whose path
     # starts with this node's path.
     # c_path =
-    descendants: db.Mapped[List[Any]] = db.relationship(
+    descendants: db.Mapped[List["CaseModel"]] = db.relationship(
         "CaseModel",
         viewonly=True,
         order_by=path,

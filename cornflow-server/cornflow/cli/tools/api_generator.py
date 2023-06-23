@@ -6,7 +6,7 @@ import os
 import re
 
 from .endpoint_tools import EndpointGenerator
-from .models_tools import ModelGenerator, model_shared_imports
+from .models_tools import ModelGenerator, model_shared_imports, model_import_datetime, model_import_list
 from .schemas_tools import SchemaGenerator, schemas_imports
 from .tools import generate_class_def
 
@@ -24,6 +24,7 @@ class APIGenerator:
         options=None,
         name_table=None,
         endpoints_access=None,
+        reformat=True
     ):
         self.path = schema_path
         self.name = app_name
@@ -53,6 +54,7 @@ class APIGenerator:
         self.schema_path = os.path.join(self.output_path, "schemas")
         self.init_resources = []
         self.init_file = os.path.join(self.endpoint_path, "__init__.py")
+        self.reformat = reformat
 
     def import_schema(self) -> dict:
         """
@@ -116,6 +118,8 @@ class APIGenerator:
             self.new_endpoint(table, model_name, schemas_names)
 
         self.write_resources()
+        if self.reformat:
+            self.run_black()
         print(
             f"The generated files will be stored in {os.path.join(os.getcwd(), self.output_path)}\n"
         )
@@ -136,20 +140,27 @@ class APIGenerator:
         mg = ModelGenerator(
             class_name, self.schema, parents_class, table_name, self.name
         )
+        file_text = ""
+
+        import_text = model_shared_imports
+
+        file_text += "\n"
+        file_text += generate_class_def(class_name, parents_class)
+        file_text += mg.generate_model_description() + "\n"
+        file_text += mg.generate_table_name() + "\n"
+        model_fields, import_dt, import_list = mg.generate_model_fields()
+        if import_dt:
+            import_text += model_import_datetime
+        if import_list:
+            import_text += model_import_list
+        file_text += model_fields + "\n"
+        file_text += mg.generate_model_init() + "\n"
+        file_text += mg.generate_model_repr_str() + "\n"
+
+        file_text = import_text + "\n" + file_text
+
         with open(filename, "w") as fd:
-            fd.write(model_shared_imports)
-            fd.write("\n")
-            fd.write(generate_class_def(class_name, parents_class))
-            fd.write(mg.generate_model_description())
-            fd.write("\n")
-            fd.write(mg.generate_table_name())
-            fd.write("\n")
-            fd.write(mg.generate_model_fields())
-            fd.write("\n")
-            fd.write(mg.generate_model_init())
-            fd.write("\n")
-            fd.write(mg.generate_model_repr_str())
-            fd.write("\n")
+            fd.write(file_text)
 
         init_file = os.path.join(self.model_path, "__init__.py")
 
@@ -294,7 +305,6 @@ class APIGenerator:
                 )
 
         id_type = self.get_id_type(table_name)
-        print(class_imports)
         for res in class_imports:
             self.init_resources += [
                 dict(
@@ -303,7 +313,6 @@ class APIGenerator:
                     endpoint=f'"{self.camel_to_ep(res)}"',
                 )
             ]
-        print(self.init_resources)
 
     def write_resources(self):
         """
@@ -441,3 +450,11 @@ class APIGenerator:
             return "<int:idx>"
         else:
             raise NotImplementedError(f"Unknown type for primary key: {id_type}")
+
+    def run_black(self):
+        try:
+            os.system(f"black {self.output_path}")
+        except Exception as e:
+            print(
+                "Error while trying to run black. The generated files will not be formatted."
+            )

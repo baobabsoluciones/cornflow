@@ -3,11 +3,13 @@ This file contains the view model
 """
 # Imports from libraries
 from sqlalchemy.dialects.postgresql import TEXT
-from typing import Any, List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 # Imports from internal modules
 from cornflow.models.meta_models import EmptyBaseModel
 from cornflow.shared import db
+if TYPE_CHECKING:
+    from .permissions import PermissionViewRoleModel
 
 
 class ViewModel(EmptyBaseModel):
@@ -29,7 +31,7 @@ class ViewModel(EmptyBaseModel):
     url_rule: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False)
     description: db.Mapped[Optional[str]] = db.mapped_column(TEXT, nullable=True)
 
-    permissions: db.Mapped[List[Any]] = db.relationship(
+    permissions: db.Mapped[List["PermissionViewRoleModel"]] = db.relationship(
         "PermissionViewRoleModel",
         backref="api_views",
         lazy=True,

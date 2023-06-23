@@ -1,7 +1,12 @@
+# Imports from external libraries
+from typing import TYPE_CHECKING
+
+# Imports from internal modules
 from cornflow.models.dag import DeployedDAG
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
-from typing import Any, List
+if TYPE_CHECKING:
+    from .user import UserModel
 
 
 class PermissionsDAG(TraceAttributesModel):
@@ -14,7 +19,7 @@ class PermissionsDAG(TraceAttributesModel):
         db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
     )
     user_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user: db.Mapped[List[Any]] = db.relationship("UserModel", viewonly=True)
+    user: db.Mapped["UserModel"] = db.relationship("UserModel", viewonly=True)
 
     def __init__(self, data):
         super().__init__()

@@ -5,8 +5,13 @@ model_shared_imports = (
     "# Import from libraries\n"
     "from cornflow.shared import db\n"
     "from cornflow.models.meta_models import TraceAttributesModel\n"
-    "from sqlalchemy.dialects.postgresql import ARRAY\n\n"
 )
+model_import_datetime = "from datetime import datetime\n"
+model_import_list = (
+    "from sqlalchemy.dialects.postgresql import ARRAY\n"
+    "from typing import Any, List\n"
+)
+
 SP8 = 8 * " "
 SP12 = 12 * " "
 JSON_TYPES_TO_SQLALCHEMY = {
@@ -18,6 +23,16 @@ JSON_TYPES_TO_SQLALCHEMY = {
     "date": "db.Date",
     "datetime": "db.DateTime",
     "time": "db.Time",
+}
+MAPPED_TYPES = {
+    "integer": "int",
+    "string": "str",
+    "number": "float",
+    "boolean": "bool",
+    "array": "List[Any]",
+    "date": "datetime",
+    "datetime": "datetime",
+    "time": "datetime"
 }
 
 
@@ -31,7 +46,10 @@ class ModelGenerator:
 
     def generate_model_description(self):
         res = '    """\n'
-        res += f"    Model class for table {self.table_name} of the application {self.app_name}\n"
+        res += (
+                f"    Model class for table {self.table_name}"
+                + (f"of the application {self.app_name}" if self.app_name is not None else "") + "\n"
+        )
         res += f'    It inherits from :class:`{" and :class:".join(self.parents_class)}`\n\n'
         app_description = self.schema.get("description")
         if app_description is not None and app_description != "":
@@ -74,6 +92,8 @@ class ModelGenerator:
 
     def generate_model_fields(self):
         schema_table = self.schema["properties"][self.table_name]["items"]
+        import_datetime = False
+        import_list = False
 
         def has_id(schema):
             for prop in schema:
@@ -83,11 +103,21 @@ class ModelGenerator:
 
         res = "    # Model fields\n"
         if not has_id(schema_table["properties"]):
-            res += f"    id = db.Column(db.Integer, primary_key=True, autoincrement=True)\n"
+            res += f"    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)\n"
         for key, val in schema_table["properties"].items():
-            res += f"    {key} = db.Column("
             ty, nullable = get_type(val)
-            res += JSON_TYPES_TO_SQLALCHEMY[ty]
+            mapped_type = MAPPED_TYPES[ty]
+            sqlalchemy_type = JSON_TYPES_TO_SQLALCHEMY[ty]
+            if mapped_type == "datetime":
+                import_datetime = True
+            elif mapped_type == "List[Any]":
+                import_list = True
+                item_type = val.get("items", dict()).get("type")
+                if item_type is not None:
+                    mapped_type = mapped_type.replace("Any", f"{MAPPED_TYPES[item_type]}")
+                    sqlalchemy_type += f"({JSON_TYPES_TO_SQLALCHEMY[item_type]})"
+            res += f"    {key}: db.Mapped[{mapped_type}] = db.mapped_column("
+            res += sqlalchemy_type
             if val.get("foreign_key"):
                 foreign_table, foreign_prop = val["foreign_key"].split(".")
                 if self.app_name is not None:
@@ -101,7 +131,7 @@ class ModelGenerator:
             if key == "id":
                 res += ", primary_key=True"
             res += ")\n"
-        return res
+        return res, import_datetime, import_list
 
     def generate_model_init(self):
         keys = self.schema["properties"][self.table_name]["items"]["properties"].keys()
