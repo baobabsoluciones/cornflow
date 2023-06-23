@@ -9,6 +9,7 @@ from functools import wraps
 from pytups import SuperDict
 
 # Import from internal modules
+from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
@@ -66,7 +67,7 @@ class BaseMetaResource(Resource, MethodResource):
         item = self.data_model(data)
         if self.foreign_data is not None:
             for fk in self.foreign_data:
-                owner = self.foreign_data[fk].query.get(getattr(item, fk))
+                owner = db.session.get(self.foreign_data[fk], getattr(item, fk))
                 if owner is None:
                     raise ObjectDoesNotExist()
                 if self.user.id != owner.user_id:

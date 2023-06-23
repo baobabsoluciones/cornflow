@@ -16,6 +16,7 @@ from cornflow.models import (
     UserModel,
     UserRoleModel,
 )
+from cornflow.shared import db
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
@@ -449,7 +450,7 @@ class TestRolesModelMethods(CustomTestCase):
         payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
         PermissionViewRoleModel(payload).save()
 
-        role = self.model.query.get(idx)
+        role = db.session.get(self.model, idx)
         permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
 
         self.assertIsNotNone(role)
@@ -457,7 +458,7 @@ class TestRolesModelMethods(CustomTestCase):
 
         role.delete()
 
-        role = self.model.query.get(idx)
+        role = db.session.get(self.model, idx)
         permission = PermissionViewRoleModel.query.filter_by(role_id=idx).first()
 
         self.assertIsNone(role)

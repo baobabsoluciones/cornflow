@@ -9,7 +9,7 @@ import unittest
 from click.testing import CliRunner
 from flask_sqlalchemy import SQLAlchemy
 from pytups import TupList, SuperDict
-from sqlalchemy.dialects.postgresql import TEXT, JSON
+from sqlalchemy.dialects.postgresql import TEXT, JSON, ARRAY
 from sqlalchemy.sql.sqltypes import Integer
 from unittest.mock import MagicMock
 
@@ -297,6 +297,7 @@ class GenerationTests(unittest.TestCase):
                     db.Boolean: "boolean",
                     db.SmallInteger: "integer",
                     db.Float: "number",
+                    ARRAY: "array"
                 }
                 actual_type = "null"
                 for possible_type, repr_type in type_converter.items():

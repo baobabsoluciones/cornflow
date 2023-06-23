@@ -1,9 +1,16 @@
 """
 This file contains the PermissionViewRoleModel
 """
+# Imports from external libraries
+from typing import TYPE_CHECKING
+
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
+if TYPE_CHECKING:
+    from .action import ActionModel
+    from .role import RoleModel
+    from .view import ViewModel
 
 
 class PermissionViewRoleModel(TraceAttributesModel):
@@ -31,16 +38,16 @@ class PermissionViewRoleModel(TraceAttributesModel):
     __tablename__ = "permission_view"
     __table_args__ = (db.UniqueConstraint("action_id", "api_view_id", "role_id"),)
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
 
-    action_id = db.Column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
-    action = db.relationship("ActionModel", viewonly=True)
+    action_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("actions.id"), nullable=False)
+    action: db.Mapped["ActionModel"] = db.relationship("ActionModel", viewonly=True)
 
-    api_view_id = db.Column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
-    api_view = db.relationship("ViewModel", viewonly=True)
+    api_view_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("api_view.id"), nullable=False)
+    api_view: db.Mapped["ViewModel"] = db.relationship("ViewModel", viewonly=True)
 
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    role = db.relationship("RoleModel", viewonly=True)
+    role_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
+    role: db.Mapped["RoleModel"] = db.relationship("RoleModel", viewonly=True)
 
     def __init__(self, data):
         super().__init__()

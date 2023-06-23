@@ -4,6 +4,7 @@ This file contains the UserModel
 # Imports from external libraries
 import random
 import string
+from typing import List, Optional, TYPE_CHECKING
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -17,6 +18,10 @@ from cornflow.shared.validators import (
     check_password_pattern,
     check_email_pattern,
 )
+if TYPE_CHECKING:
+    from .case import CaseModel
+    from .instance import InstanceModel
+    from .dag_permissions import PermissionsDAG
 
 
 class UserModel(TraceAttributesModel):
@@ -46,18 +51,18 @@ class UserModel(TraceAttributesModel):
     """
 
     __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    first_name = db.Column(db.String(128), nullable=True)
-    last_name = db.Column(db.String(128), nullable=True)
-    username = db.Column(db.String(128), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=True)
-    email = db.Column(db.String(128), nullable=False, unique=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    first_name: db.Mapped[Optional[str]] = db.mapped_column(db.String(128), nullable=True)
+    last_name: db.Mapped[Optional[str]] = db.mapped_column(db.String(128), nullable=True)
+    username: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False, unique=True)
+    password: db.Mapped[Optional[str]] = db.mapped_column(db.String(128), nullable=True)
+    email: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False, unique=True)
 
-    user_roles = db.relationship(
+    user_roles: db.Mapped[List["UserRoleModel"]] = db.relationship(
         "UserRoleModel", cascade="all,delete", backref="users"
     )
 
-    instances = db.relationship(
+    instances: db.Mapped[List["InstanceModel"]] = db.relationship(
         "InstanceModel",
         backref="users",
         lazy=True,
@@ -66,7 +71,7 @@ class UserModel(TraceAttributesModel):
         cascade="all,delete",
     )
 
-    cases = db.relationship(
+    cases: db.Mapped[List["CaseModel"]] = db.relationship(
         "CaseModel",
         backref="users",
         lazy=True,
@@ -74,7 +79,7 @@ class UserModel(TraceAttributesModel):
         cascade="all,delete",
     )
 
-    dag_permissions = db.relationship(
+    dag_permissions: db.Mapped[List["PermissionsDAG"]] = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",
         backref="users",

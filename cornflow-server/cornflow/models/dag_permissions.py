@@ -1,19 +1,25 @@
+# Imports from external libraries
+from typing import TYPE_CHECKING
+
+# Imports from internal modules
 from cornflow.models.dag import DeployedDAG
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
+if TYPE_CHECKING:
+    from .user import UserModel
 
 
 class PermissionsDAG(TraceAttributesModel):
     __tablename__ = "permission_dag"
     __table_args__ = (db.UniqueConstraint("dag_id", "user_id"),)
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
 
-    dag_id = db.Column(
+    dag_id: db.Mapped[str] = db.mapped_column(
         db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
     )
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    user = db.relationship("UserModel", viewonly=True)
+    user_id: db.Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user: db.Mapped["UserModel"] = db.relationship("UserModel", viewonly=True)
 
     def __init__(self, data):
         super().__init__()

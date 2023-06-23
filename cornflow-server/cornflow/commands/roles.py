@@ -1,6 +1,7 @@
 def register_roles_command(verbose: bool = True):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
+    from sqlalchemy import text
     from flask import current_app
 
     from cornflow.models import RoleModel
@@ -28,14 +29,16 @@ def register_roles_command(verbose: bool = True):
         current_app.logger.error(f"Unknown error on roles register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('roles', 'id'), MAX(id)) FROM roles;"
-        )
-        try:
-            db.session.commit()
-        except DBAPIError as e:
-            db.session.rollback()
-            current_app.logger.error(f"Unknown error on roles sequence updating: {e}")
+        with db.engine.connect() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('roles', 'id'), MAX(id)) FROM roles;")
+            )
+
+            try:
+                conn.commit()
+            except DBAPIError as e:
+                conn.rollback()
+                current_app.logger.error(f"Unknown error on roles sequence updating: {e}")
 
     if verbose:
         if len(roles_to_register) > 0:

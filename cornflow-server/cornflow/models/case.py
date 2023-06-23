@@ -7,6 +7,7 @@ import jsonpatch
 from flask import current_app
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from typing import Any, Dict, List, Optional
 
 # Import from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -36,12 +37,12 @@ SEPARATOR = "/"
 class CaseModel(BaseDataModel):
     __tablename__ = "cases"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    path = db.Column(db.String(500), nullable=False, index=True)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    path: db.Mapped[str] = db.mapped_column(db.String(500), nullable=False, index=True)
     # To find the descendants of this node, we look for nodes whose path
     # starts with this node's path.
     # c_path =
-    descendants = db.relationship(
+    descendants: db.Mapped[List["CaseModel"]] = db.relationship(
         "CaseModel",
         viewonly=True,
         order_by=path,
@@ -49,9 +50,9 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
-    solution = db.Column(JSON, nullable=True)
-    solution_hash = db.Column(db.String(256), nullable=False)
-    solution_checks = db.Column(JSON, nullable=True)
+    solution: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
+    solution_hash: db.Mapped[str] = db.mapped_column(db.String(256), nullable=False)
+    solution_checks: db.Mapped[Optional[Dict[str, Any]]] = db.mapped_column(JSON, nullable=True)
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake

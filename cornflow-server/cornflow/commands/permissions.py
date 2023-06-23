@@ -9,6 +9,7 @@ from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy import text
 
 
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
@@ -93,17 +94,18 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         current_app.logger.error(f"Unknown error on base permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('permission_view', 'id'), MAX(id)) FROM permission_view;"
-        )
-
-        try:
-            db.session.commit()
-        except DBAPIError as e:
-            db.session.rollback()
-            current_app.logger.error(
-                f"Unknown error on base permissions sequence updating: {e}"
+        with db.engine.connect() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('permission_view', 'id'), MAX(id)) FROM permission_view;")
             )
+
+            try:
+                conn.commit()
+            except DBAPIError as e:
+                conn.rollback()
+                current_app.logger.error(
+                    f"Unknown error on base permissions sequence updating: {e}"
+                )
 
     if verbose:
         if len(permissions_to_register) > 0:
@@ -177,17 +179,18 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on dag permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;"
-        )
-
-        try:
-            db.session.commit()
-        except DBAPIError as e:
-            db.session.rollback()
-            current_app.logger.error(
-                f"Unknown error on dag permissions sequence updating: {e}"
+        with db.engine.connect() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;")
             )
+
+            try:
+                conn.commit()
+            except DBAPIError as e:
+                conn.rollback()
+                current_app.logger.error(
+                    f"Unknown error on dag permissions sequence updating: {e}"
+                )
 
     if verbose:
         if len(permissions) > 1:

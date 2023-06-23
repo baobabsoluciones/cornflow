@@ -1,9 +1,15 @@
 """
 This file contains the RoleModel
 """
+# Imports from external libraries
+from typing import List, TYPE_CHECKING
+
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
+if TYPE_CHECKING:
+    from .user_role import UserRoleModel
+    from .permissions import PermissionViewRoleModel
 
 
 class RoleModel(TraceAttributesModel):
@@ -25,10 +31,10 @@ class RoleModel(TraceAttributesModel):
     """
 
     __tablename__ = "roles"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), nullable=False)
+    id: db.Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    name: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False)
 
-    user_roles = db.relationship(
+    user_roles: db.Mapped[List["UserRoleModel"]] = db.relationship(
         "UserRoleModel",
         backref="roles",
         lazy=True,
@@ -37,7 +43,7 @@ class RoleModel(TraceAttributesModel):
         cascade="all,delete",
     )
 
-    permissions = db.relationship(
+    permissions: db.Mapped[List["PermissionViewRoleModel"]] = db.relationship(
         "PermissionViewRoleModel",
         backref="roles",
         lazy=True,

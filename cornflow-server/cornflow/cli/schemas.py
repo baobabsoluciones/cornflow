@@ -69,8 +69,14 @@ def schemas():
     help="json file with dict of roles access that will be added to each new endpoints",
     required=False,
 )
+@click.option(
+    "--reformat",
+    default=False,
+    help="Apply black formatting",
+    is_flag=True,
+)
 def generate_from_schema(
-    path, app_name, output_path, remove_methods, one, endpoints_methods, endpoints_access
+    path, app_name, output_path, remove_methods, one, endpoints_methods, endpoints_access, reformat
 ):
     """
     This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
@@ -126,7 +132,8 @@ def generate_from_schema(
         output_path=output_path,
         options=methods_to_add,
         name_table=name_table,
-        endpoints_access=dict_endpoints_access
+        endpoints_access=dict_endpoints_access,
+        reformat=reformat
     ).main()
 
 

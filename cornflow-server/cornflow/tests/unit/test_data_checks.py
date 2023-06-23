@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 # Import from internal modules
 from cornflow.models import ExecutionModel, InstanceModel, CaseModel
+from cornflow.shared import db
 from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
@@ -55,7 +56,7 @@ class TestDataChecksExecutionEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertEqual(row.id, exec_to_check_id)
 
@@ -77,7 +78,7 @@ class TestDataChecksExecutionEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertEqual(row.id, exec_to_check_id)
 
@@ -104,7 +105,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
 
         self.assertEqual(row.instance_id, self.instance_id)
@@ -124,7 +125,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
 
         self.assertEqual(row.instance_id, self.instance_id)
@@ -153,7 +154,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertTrue(row.config.get("checks_only"))
 
@@ -171,6 +172,6 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         self.assertEqual(201, response.status_code)
         response = response.json
 
-        row = self.model.query.get(response["id"])
+        row = db.session.get(self.model, response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertTrue(row.config.get("checks_only"))
