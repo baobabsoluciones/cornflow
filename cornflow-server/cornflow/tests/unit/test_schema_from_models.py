@@ -48,7 +48,7 @@ class SchemaFromModelsTests(unittest.TestCase):
         schema = self.import_schema(self._get_path(self.output_path))
 
         tables = {
-            "instances": {
+            "other_instances": {
                 "id": "string",
                 "data": "object",
                 "checks": "object",
@@ -98,7 +98,7 @@ class SchemaFromModelsTests(unittest.TestCase):
         # The required property is correct
         self.assertEqual(
             required_instance,
-            set(schema["properties"]["instances"]["items"]["required"]),
+            set(schema["properties"]["other_instances"]["items"]["required"]),
         )
 
     def test_ignore(self):
@@ -121,4 +121,4 @@ class SchemaFromModelsTests(unittest.TestCase):
 
         schema = self.import_schema(self.output_path)
 
-        self.assertNotIn("instances", schema["properties"].keys())
+        self.assertNotIn("other_instances", schema["properties"].keys())

@@ -27,6 +27,13 @@ class SchemaGenerator:
         self.table_model = dict()
 
     def main(self):
+        try:
+            self._main()
+        except Exception as e:
+            self.clear()
+            raise e
+
+    def _main(self):
         os.mkdir(self.tmp_path)
 
         copy_tree(self.path, self.tmp_path)
@@ -111,7 +118,9 @@ class SchemaGenerator:
                     for key, val in props.items():
                         if key in forget_keys:
                             continue
-                        elif isinstance(val, db.Column):
+                        elif isinstance(val, db.Column) or isinstance(val, db.MappedColumn):
+                            if isinstance(val, db.MappedColumn):
+                                val = val.column
                             type_converter = {
                                 db.String: "string",
                                 TEXT: "string",

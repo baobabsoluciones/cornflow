@@ -7,12 +7,14 @@ from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.ext.declarative import declared_attr
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 # Import from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.utils import hash_json_256
+if TYPE_CHECKING:
+    from .user import UserModel
 
 
 class BaseDataModel(TraceAttributesModel):
@@ -32,7 +34,7 @@ class BaseDataModel(TraceAttributesModel):
         return db.mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     @declared_attr
-    def user(self) -> db.Mapped[List[Any]]:
+    def user(self) -> db.Mapped["UserModel"]:
         return db.relationship("UserModel", viewonly=True)
 
     def __init__(self, data):

@@ -4,7 +4,7 @@ This file contains the UserModel
 # Imports from external libraries
 import random
 import string
-from typing import Any, List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -18,6 +18,10 @@ from cornflow.shared.validators import (
     check_password_pattern,
     check_email_pattern,
 )
+if TYPE_CHECKING:
+    from .case import CaseModel
+    from .instance import InstanceModel
+    from .dag_permissions import PermissionsDAG
 
 
 class UserModel(TraceAttributesModel):
@@ -54,11 +58,11 @@ class UserModel(TraceAttributesModel):
     password: db.Mapped[Optional[str]] = db.mapped_column(db.String(128), nullable=True)
     email: db.Mapped[str] = db.mapped_column(db.String(128), nullable=False, unique=True)
 
-    user_roles: db.Mapped[List[Any]] = db.relationship(
+    user_roles: db.Mapped[List["UserRoleModel"]] = db.relationship(
         "UserRoleModel", cascade="all,delete", backref="users"
     )
 
-    instances: db.Mapped[List[Any]] = db.relationship(
+    instances: db.Mapped[List["InstanceModel"]] = db.relationship(
         "InstanceModel",
         backref="users",
         lazy=True,
@@ -67,7 +71,7 @@ class UserModel(TraceAttributesModel):
         cascade="all,delete",
     )
 
-    cases: db.Mapped[List[Any]] = db.relationship(
+    cases: db.Mapped[List["CaseModel"]] = db.relationship(
         "CaseModel",
         backref="users",
         lazy=True,
@@ -75,7 +79,7 @@ class UserModel(TraceAttributesModel):
         cascade="all,delete",
     )
 
-    dag_permissions: db.Mapped[List[Any]] = db.relationship(
+    dag_permissions: db.Mapped[List["PermissionsDAG"]] = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",
         backref="users",

@@ -3,7 +3,9 @@ This file contains the model that has the actions that can be performed on an RE
 """
 from cornflow.models.meta_models import EmptyBaseModel
 from cornflow.shared import db
-from typing import List, Any
+from typing import List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .permissions import PermissionViewRoleModel
 
 
 class ActionModel(EmptyBaseModel):

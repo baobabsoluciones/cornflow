@@ -24,9 +24,9 @@ class SchemaGenerator:
     def generate_schema_file_description(self):
         res = (
             '"""\n'
-            f"This file contains the schemas used for the table {self.table_name} "
-            f"defined in the application {self.app_name}\n"
-            '"""\n'
+            + f"This file contains the schemas used for the table {self.table_name}"
+            + (f" defined in the application {self.app_name}\n" if self.app_name is not None else "")
+            + '\n"""\n'
         )
         return res
 
