@@ -51,7 +51,7 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
         wget
 
 # install Airflow and extras: celery,postgres and redis
-RUN pip install "apache-airflow[celery,google,postgres,redis]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 RUN pip install python-ldap
 RUN pip install GitPython
 RUN pip install cmake
