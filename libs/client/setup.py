@@ -7,7 +7,7 @@ required = []
 with open("requirements.txt", "r") as fh:
     required.append(fh.read().splitlines())
 
-extra_required = {"excel": ["openpyxl", "pandas"]}
+extra_required = {"excel": ["openpyxl", "pandas"], "ortools": ["ortools"]}
 
 
 setuptools.setup(
