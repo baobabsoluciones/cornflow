@@ -30,6 +30,7 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
 )
 from cornflow.shared.exceptions import ObjectDoesNotExist, InvalidData
+from cornflow.shared.socket import emit_socket
 from cornflow.shared.validators import json_schema_validate_as_string
 
 
@@ -145,6 +146,15 @@ class DAGDetailEndpoint(BaseMetaResource):
         execution.update(req_data)
         # TODO: is this save necessary?
         execution.save()
+        emit_socket(
+            {
+                "execution_id": idx,
+                "state": state,
+                "message": f"Execution {idx} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}"
+            },
+            "execution_results",
+            self.get_user().id
+        )
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
 
