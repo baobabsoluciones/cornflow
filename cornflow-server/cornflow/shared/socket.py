@@ -47,28 +47,36 @@ def emit_socket(data, event=None, user_id=None):
         f"to {'all users' if user_id is None else 'user ' + str(user_id)}"
     )
 
-    clean_disconnected()
+    try:
+        clean_disconnected()
 
-    if event is None:
-        if user_id is None:
-            socketio.send(data=data)
+        if event is None:
+            if user_id is None:
+                socketio.send(data=data)
+                current_app.logger.info("Here: 0")
+                return
+            sessions_ids = [
+                conn.session_id
+                for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
+            ]
+            for session_id in sessions_ids:
+                socketio.send(data, to=session_id)
+            current_app.logger.info("Here: 1")
             return
-        sessions_ids = [
-            conn.session_id
-            for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
-        ]
-        for session_id in sessions_ids:
-            socketio.send(data, to=session_id)
-        return
 
-    if user_id is not None:
-        sessions_ids = [
-            conn.session_id
-            for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
-        ]
+        if user_id is not None:
+            sessions_ids = [
+                conn.session_id
+                for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
+            ]
 
-        for session_id in sessions_ids:
-            socketio.emit(event, data, to=session_id)
-        return
-    socketio.emit(event, data)
+            for session_id in sessions_ids:
+                socketio.emit(event, data, to=session_id)
+            current_app.logger.info("Here: 2")
+            return
+        socketio.emit(event, data)
+        current_app.logger.info("Here: 3")
+    except Exception as e:
+        current_app.logger.error(e)
+        raise e
 
