@@ -19,7 +19,6 @@ def initialize_socket(socket_app: SocketIO):
 
     @socket_app.on('disconnect')
     def handle_disconnection():
-        print("DISCONNECT", request.sid)
         connections = ConnectionModel.get_all_objects(session_id=request.sid).all()
         for connection in connections:
             connection.delete()
@@ -77,6 +76,6 @@ def emit_socket(data, event=None, user_id=None):
         socketio.emit(event, data)
         current_app.logger.info("Here: 3")
     except Exception as e:
-        current_app.logger.error(e)
+        current_app.logger.info(str(e))
         raise e
 
