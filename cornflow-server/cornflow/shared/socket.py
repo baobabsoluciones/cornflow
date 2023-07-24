@@ -35,8 +35,6 @@ def clean_disconnected():
     for conn in disconnected:
         conn.delete()
 
-    return
-
 
 def emit_socket(data, event=None, user_id=None):
     from flask import current_app
@@ -47,6 +45,7 @@ def emit_socket(data, event=None, user_id=None):
     )
 
     try:
+        current_app.logger.info("Trying")
         clean_disconnected()
 
         if event is None:
