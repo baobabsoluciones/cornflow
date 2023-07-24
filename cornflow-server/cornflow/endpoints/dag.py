@@ -154,7 +154,7 @@ class DAGDetailEndpoint(BaseMetaResource):
                 "type": "info"
             },
             "execution_results",
-            self.get_user().id
+            execution.user_id
         )
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
