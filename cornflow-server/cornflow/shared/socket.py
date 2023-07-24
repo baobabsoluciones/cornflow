@@ -42,6 +42,10 @@ def clean_disconnected():
 def emit_socket(data, event=None, user_id=None):
     from flask import current_app
     socketio = getattr(current_app, "__socketio_obj")
+    current_app.logger.info(
+        f"Sending message '{data['text']}' "
+        f"to {'all users' if user_id is None else 'user ' + str(user_id)}"
+    )
 
     clean_disconnected()
 
