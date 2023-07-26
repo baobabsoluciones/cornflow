@@ -10,15 +10,22 @@ def initialize_socket(socket_app: SocketIO):
 
     @socket_app.on('connect')
     def handle_connection():
+        from flask import current_app
+        current_app.logger.info("Connection attempt")
         try:
             user = Auth().get_user_from_header(request.headers)
+            current_app.logger.info("User authenticated")
             ConnectionModel({"user_id": user.id, "session_id": request.sid}).save()
+            current_app.logger.info("Returning True")
             return True
         except Exception as e:
+            current_app.logger.info(f"Returning False: {e}")
             return False
 
     @socket_app.on('disconnect')
     def handle_disconnection():
+        from flask import current_app
+        current_app.logger.info(f"User with sid {request.sid} disconnected")
         connections = ConnectionModel.get_all_objects(session_id=request.sid).all()
         for connection in connections:
             connection.delete()
