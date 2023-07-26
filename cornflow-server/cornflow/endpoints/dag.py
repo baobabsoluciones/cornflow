@@ -156,7 +156,7 @@ class DAGDetailEndpoint(BaseMetaResource):
                 "text": f"Execution {idx} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
                 "type": "info"
             },
-            None,
+            "message",
             execution.user_id
         )
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
