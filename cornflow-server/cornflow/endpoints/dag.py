@@ -148,12 +148,13 @@ class DAGDetailEndpoint(BaseMetaResource):
         execution.save()
         emit_socket(
             {
+                "info_type": "execution_results",
                 "execution_id": idx,
                 "state": state,
                 "text": f"Execution {idx} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
                 "type": "info"
             },
-            "execution_results",
+            None,
             execution.user_id
         )
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
