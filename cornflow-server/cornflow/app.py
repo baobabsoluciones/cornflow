@@ -40,7 +40,7 @@ from cornflow.shared.log_config import log_config
 from cornflow.shared.socket import initialize_socket
 
 
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 def create_app(env_name="development", dataconn=None):
