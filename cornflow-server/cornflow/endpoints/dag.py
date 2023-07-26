@@ -149,8 +149,10 @@ class DAGDetailEndpoint(BaseMetaResource):
         emit_socket(
             {
                 "info_type": "execution_results",
-                "execution_id": idx,
-                "state": state,
+                "data": {
+                    "execution_id": idx,
+                    "state": state,
+                },
                 "text": f"Execution {idx} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
                 "type": "info"
             },
