@@ -154,7 +154,9 @@ class EmptyBaseModel(db.Model):
         """
         if "user" in kwargs:
             kwargs.pop("user")
-        query = cls.query.filter_by(**kwargs).offset(offset)
+        query = cls.query.filter_by(**kwargs)
+        if offset:
+            query = query.offset(offset)
         if limit:
             query = query.limit(limit)
         return query
@@ -300,7 +302,8 @@ class TraceAttributesModel(EmptyBaseModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
 
-        query = query.offset(offset)
+        if offset:
+            query = query.offset(offset)
         if limit:
             query = query.limit(limit)
         return query
