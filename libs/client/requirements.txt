@@ -3,5 +3,5 @@ genson
 jsonschema
 marshmallow
 pytups
-ortools
+ortools<=9.6.2534
 PuLP>=2.3
