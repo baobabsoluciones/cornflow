@@ -153,7 +153,7 @@ class DAGDetailEndpoint(BaseMetaResource):
                     "execution_id": idx,
                     "state": state,
                 },
-                "text": f"Execution {idx} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
+                "text": f"Execution {execution.name} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
                 "type": "info"
             },
             "message",
