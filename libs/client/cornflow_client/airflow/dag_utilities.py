@@ -10,6 +10,10 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
+import logging
+from airflow.utils.email import send_email
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
 
 # Imports from modules
 from cornflow_client import CornFlow, CornFlowApiError
@@ -312,6 +316,31 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )
+
+def callback_email(context):
+    path_to_log = (
+        f"./logs/{context['dag'].dag_id}/"
+        f"{context['ti'].task_id}/{context['ts']}/1.log"
+    )
+    environment = EnvironmentVariablesBackend().get_variable("ENVIRONMENT")
+    # We make the msc an environment variable
+    notification_email= EnvironmentVariablesBackend().get_variable("NOTIFICATION_EMAIL")
+    title = f"Airflow. MSC ({environment}). Fallo de DAG/task: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
+    body = f"""
+        El DAG/task {context['dag'].dag_id}/{context['ti'].task_id} ha fallado.
+        <br>
+        El log se encuentra adjunto.
+        """
+
+    send_email(
+        to=[
+            #"msc-kyomu@baobabsoluciones.es",
+            notification_email,
+        ],
+        subject=title,
+        html_content=body,
+        files=[path_to_log],
+    )
 
 
 class NoSolverException(Exception):
