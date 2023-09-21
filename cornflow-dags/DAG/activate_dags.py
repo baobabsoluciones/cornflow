@@ -30,7 +30,11 @@ def create_dag(app):
         if not app.notify:
             t1 = PythonOperator(task_id=app.name, python_callable=solve)
         else:
-            t1 = PythonOperator(task_id=app.name, python_callable=solve, on_failure_callback=utils.callback_email(app))
+            t1 = PythonOperator(
+                task_id=app.name,
+                python_callable=solve,
+                on_failure_callback=utils.callback_email(app),
+            )
 
     return dag
 
