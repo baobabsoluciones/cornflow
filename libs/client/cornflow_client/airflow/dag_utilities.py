@@ -5,7 +5,6 @@
 import json
 import logging
 import os
-import logging
 # Partial imports
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
