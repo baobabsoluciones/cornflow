@@ -1,3 +1,15 @@
+version 1.0.5
+--------------
+
+- released: 2023-05-04
+- description: first version of cornflow without cornflow core
+- changelog:
+    - removed cornflow core from dependencies.
+    - moved all cornflow core code to cornflow.
+    - added new error handling for InternalServerErrors.
+    - updated version of flask to 2.3.2 due to security reasons.
+    - updated version of other libraries due to upgrade on flask version.
+
 version 1.0.4
 ---------------
 
