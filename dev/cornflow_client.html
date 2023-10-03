@@ -11,9 +11,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d636b35b"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -986,19 +988,82 @@ set self.__traceback__ to tb and return self.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.clean_none">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">clean_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.clean_none" title="Permalink to this definition"></a></dt>
+<dd><p>Remove empty values from a dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dic</strong> – a dict</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the filtered dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.check_fk">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">check_fk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fk_dic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.check_fk" title="Permalink to this definition"></a></dt>
+<dd><p>Check the format of foreign keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fk_dic</strong> – a dict of foreign keys values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None (raise an error if problems are detected)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="cornflow_client.schema.tools.schema_from_excel">
-<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">schema_from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_tables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.schema_from_excel" title="Permalink to this definition"></a></dt>
-<dd><p>Create a jsonschema based on an excel data file.</p>
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">schema_from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_tables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_access</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.schema_from_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Create a jsonschema based on an Excel data file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path_in</strong> – path of the excel file</p></li>
+<li><p><strong>path_in</strong> – path of the Excel file</p></li>
 <li><p><strong>param_tables</strong> – array containing the names of the parameter tables</p></li>
 <li><p><strong>path_out</strong> – path where to save the json schema as a json file.</p></li>
+<li><p><strong>fk</strong> – True if foreign key are described in the second row.</p></li>
+<li><p><strong>date_format</strong> – if format is true special format (like date, time or datetime) are specified in the third row.</p></li>
+<li><p><strong>path_methods</strong> – path where to save the methods dict as a json file</p></li>
+<li><p><strong>path_access</strong> – path where to save the access dict as a json file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the jsonschema</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.add_details">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">add_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.add_details" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Add a detail attribute to a json schema property.</dt><dd><p>Example:
+add_details(“foreign_key”, {first_table:{“name”:”other_table.name”}}, schema)
+# generate:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“name”: {</dt><dd><p>“type”: “string”
+“foreign_key”: “other_table.name”</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of the attribute to add</p></li>
+<li><p><strong>details</strong> – dict of dict in format {table:{column_name:value}}</p></li>
+<li><p><strong>schema</strong> – schema to update</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1028,6 +1093,20 @@ This must be a applied to a dict in order to transform it into json.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the modified list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cornflow_client.schema.tools.fix_required">
+<span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.tools.</span></span><span class="sig-name descname"><span class="pre">fix_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.tools.fix_required" title="Permalink to this definition"></a></dt>
+<dd><p>Fix required property in schema: if a field is allowed null, it is not required</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>schema</strong> – the json schema</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
