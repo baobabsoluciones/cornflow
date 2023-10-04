@@ -4146,7 +4146,8 @@
     "rq12": "strict",
     "rq13": "soft",
     "rq14": "soft",
-    "rq15": "strict"
+    "rq15": "strict",
+    "rq16": "strict"
   },
   "penalties": {
     "rq02": 1,
@@ -4159,6 +4160,7 @@
     "rq10": 1,
     "rq13": 1,
     "rq14": 1,
-    "rq15": 1
+    "rq15": 1,
+    "rq16": 5
   }
 }
