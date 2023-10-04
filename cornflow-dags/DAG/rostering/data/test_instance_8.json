@@ -4126,6 +4126,13 @@
       "start": "08:00"
     }
   ],
+  "fixed_worktables": [
+    {
+      "id_employee": 1,
+      "date": "2021-09-06",
+      "hour": "18:00"
+    }
+  ],
   "employee_holidays": [
     {
       "id_employee": 1,
@@ -4165,7 +4172,9 @@
     "rq11": "strict",
     "rq12": "strict",
     "rq13": "soft",
-    "rq14": "soft"
+    "rq14": "soft",
+    "rq15": "strict",
+    "rq16": "strict"
   },
   "penalties": {
     "rq02": 4,
@@ -4177,6 +4186,8 @@
     "rq09": 1,
     "rq10": 5,
     "rq13": 1,
-    "rq14": 1
+    "rq14": 1,
+    "rq15": 5,
+    "rq16": 2
   }
 }
