@@ -65,9 +65,12 @@ Solving status
 .. data:: cornflow_client.constants.STATUS_INFEASIBLE
 .. data:: cornflow_client.constants.STATUS_UNBOUNDED
 .. data:: cornflow_client.constants.STATUS_UNDEFINED
-.. data:: cornflow_client.constants.STATUS_TIME_LIMIT
+.. data:: cornflow_client.constants.STATUS_FEASIBLE
 .. data:: cornflow_client.constants.STATUS_MEMORY_LIMIT
 .. data:: cornflow_client.constants.STATUS_NODE_LIMIT
+.. data:: cornflow_client.constants.STATUS_TIME_LIMIT
+.. data:: cornflow_client.constants.STATUS_LICENSING_PROBLEM
+.. data:: cornflow_client.constants.STATUS_QUEUED
 
 ============================================================  ==========
 Constant                                                       Value
@@ -77,9 +80,12 @@ Constant                                                       Value
 :data:`cornflow_client.constants.STATUS_INFEASIBLE`              -1
 :data:`cornflow_client.constants.STATUS_UNBOUNDED`               -2
 :data:`cornflow_client.constants.STATUS_UNDEFINED`               -3
-:data:`cornflow_client.constants.STATUS_TIME_LIMIT`              2
+:data:`cornflow_client.constants.STATUS_FEASIBLE`                2
 :data:`cornflow_client.constants.STATUS_MEMORY_LIMIT`            3
 :data:`cornflow_client.constants.STATUS_NODE_LIMIT`              4
+:data:`cornflow_client.constants.STATUS_TIME_LIMIT`              5
+:data:`cornflow_client.constants.STATUS_LICENSING_PROBLEM`       -5
+:data:`cornflow_client.constants.STATUS_QUEUED`                  -7
 ============================================================  ==========
 
 
