@@ -47,8 +47,6 @@ jobs:
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
     - name: Install airflow
       run: |
-        python -m venv afvenv
-        source afvenv/bin/activate
         AIRFLOW_VERSION=2.7.1
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
         CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
@@ -56,7 +54,6 @@ jobs:
         python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip install -U orloge pulp
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-        python -m pip install -U -r requirements-dev.txt
         airflow db init
         airflow users create \
               --username admin \
