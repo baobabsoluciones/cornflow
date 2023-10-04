@@ -1,8 +1,9 @@
-from airflow import DAG
-from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 import cornflow_client.airflow.dag_utilities as utils
-from update_all_schemas import get_new_apps
+from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
+from update_all_schemas import get_new_apps
 
 
 def create_dag(app):
@@ -33,7 +34,7 @@ def create_dag(app):
             t1 = PythonOperator(
                 task_id=app.name,
                 python_callable=solve,
-                on_failure_callback=utils.callback_email(app),
+                on_failure_callback=utils.callback_email,
             )
 
     return dag

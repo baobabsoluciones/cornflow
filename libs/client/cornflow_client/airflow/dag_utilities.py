@@ -5,9 +5,11 @@
 import json
 import logging
 import os
+
 # Partial imports
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
+
 # Imports from modules
 from cornflow_client import CornFlow, CornFlowApiError
 
@@ -323,9 +325,9 @@ def callback_email(context):
     notification_email = EnvironmentVariablesBackend().get_variable(
         "NOTIFICATION_EMAIL"
     )
-    msc = EnvironmentVariablesBackend().get_variable("MSC")
+    environment_name = EnvironmentVariablesBackend().get_variable("ENVIRONMENT_NAME")
 
-    title = f"Airflow. {msc} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
+    title = f"Airflow. {environment_name} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
     body = f"""
         The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has failed.
         <br>
