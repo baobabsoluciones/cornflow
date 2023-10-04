@@ -51,8 +51,8 @@ jobs:
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
         CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-        pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-        python -m pip uninstall cornflow-client -y
+        python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+        python -m pip install -U orloge pulp
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
         airflow db init
         airflow users create \

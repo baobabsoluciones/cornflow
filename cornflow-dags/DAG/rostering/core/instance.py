@@ -19,6 +19,8 @@ from .tools import (
     get_date_from_string,
     get_date_string_from_ts,
     get_hour_from_date_time,
+    get_hour_string_from_date_time,
+    get_hour_string_from_hour_minute,
     get_one_date,
     get_time_slot_string,
     get_week_from_ts,
@@ -182,10 +184,6 @@ class Instance(InstanceCore):
     def cache_properties(self):
         """Caches the list of weeks, dates and time slots and its associated properties"""
 
-        # We check if the slot length is coherent
-        if self._get_slot_length() % 5:
-            print("WARNING, SLOT LENGTH MUST BE MULTIPLES OF 5")
-
         self.weeks = self._get_weeks()
         self.opening_days = self._get_opening_days()
         self.dates = self._get_dates()
@@ -194,7 +192,11 @@ class Instance(InstanceCore):
         self.time_slots_properties = self._get_time_slots_properties()
 
     def check(self) -> dict:
-        return dict(incoherent_foreign_keys=self.check_indexes_coherence())
+        return SuperDict(
+            incoherent_foreign_keys=self.check_indexes_coherence(),
+            timeslot_length=self.check_timeslot_length(),
+            **self.check_timeslot_coherence(),
+        ).vfilter(lambda v: len(v))
 
     def check_indexes_coherence(self) -> list:
         errors = list()
@@ -213,6 +215,80 @@ class Instance(InstanceCore):
                         )
 
         return errors
+
+    def check_timeslot_length(self):
+        slot_length = self._get_slot_length()
+        if slot_length not in [15, 30, 60]:
+            return dict(timeslot_length=slot_length)
+        return dict()
+
+    def check_timeslot_coherence(self):
+        checks = SuperDict(
+            weekly_schedule_timeslots=TupList(),
+            schedule_exceptions_timeslots=TupList(),
+            shift_hours_timeslots=TupList(),
+            employee_preferences_timeslots=TupList(),
+        )
+        slot_length = self._get_slot_length()
+        weekly_schedule = self._get_weekly_schedule(round_ts=False)
+        schedule_exceptions = self._get_schedule_exceptions(round_ts=False)
+        contract_start_hours = self._get_employees_contract_starting_hour(
+            round_ts=False
+        )
+        contract_end_hours = self._get_employees_contract_ending_hour(round_ts=False)
+        employee_preferences = self._get_employee_preferences()
+
+        for key, values in weekly_schedule.items():
+            checks["weekly_schedule_timeslots"] += TupList(
+                {
+                    "weekday": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
+                }
+                for v in values
+                if v[1] % slot_length != 0
+            ) + TupList(
+                {
+                    "weekday": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
+                }
+                for v in values
+                if v[3] % slot_length != 0
+            )
+
+        for key, values in schedule_exceptions.items():
+            checks["schedule_exceptions_timeslots"] += TupList(
+                {
+                    "date": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
+                }
+                for v in values
+                if v[1] % slot_length != 0
+            ) + TupList(
+                {
+                    "date": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
+                }
+                for v in values
+                if v[3] % slot_length != 0
+            )
+
+        checks["shift_hours_timeslots"] += TupList(
+            {"week": week, "employee": employee, "hour": hour}
+            for (week, employee), hour in contract_start_hours.items()
+            if int(hour[3:]) % slot_length != 0
+        ) + TupList(
+            {"week": week, "employee": employee, "hour": hour}
+            for (week, employee), hour in contract_end_hours.items()
+            if int(hour[3:]) % slot_length != 0
+        )
+
+        checks["employee_preferences_timeslots"] += TupList(
+            {"date": date, "employee": employee, "hour": hour_string}
+            for (employee, date, _, hour_string) in employee_preferences
+            if int(hour_string[3:]) % slot_length != 0
+        )
+
+        return checks.vfilter(lambda v: len(v))
 
     def _get_weeks(self) -> TupList:
         """
@@ -281,10 +357,19 @@ class Instance(InstanceCore):
 
         ts = (
             TupList(
-                key + timedelta(hours=h_start, minutes=self._get_slot_length() * x)
+                key
+                + timedelta(
+                    hours=h_start, minutes=m_start + self._get_slot_length() * x
+                )
                 for key, value in date_shift.items()
-                for (h_start, h_end) in value
-                for x in range(int(self._hour_to_slot(h_end - h_start)))
+                for (h_start, m_start, h_end, m_end) in value
+                for x in range(
+                    int(
+                        self._minutes_to_slot(
+                            60 * h_end + m_end - 60 * h_start - m_start
+                        )
+                    )
+                )
             )
             .vfilter(
                 # Remove schedule exceptions.
@@ -298,10 +383,12 @@ class Instance(InstanceCore):
 
         ts_schedule_exceptions = TupList(
             get_date_from_string(d)
-            + timedelta(hours=h_start, minutes=self._get_slot_length() * x)
+            + timedelta(hours=h_start, minutes=m_start + self._get_slot_length() * x)
             for d, value in self._get_schedule_exceptions().items()
-            for (h_start, h_end) in value
-            for x in range(int(self._hour_to_slot(h_end - h_start)))
+            for (h_start, m_start, h_end, m_end) in value
+            for x in range(
+                int(self._minutes_to_slot(60 * h_end + m_end - 60 * h_start - m_start))
+            )
         )
         # In case some shift overlap we apply unique
         ts_total = (ts + ts_schedule_exceptions).unique2().sorted()
@@ -321,6 +408,7 @@ class Instance(InstanceCore):
                     "date": get_date_string_from_ts(ts),
                     "week": get_week_from_ts(ts),
                     "hour": get_hour_from_date_time(ts),
+                    "hour_string": get_hour_string_from_date_time(ts),
                 }
                 for ts in self.time_slots
             }
@@ -342,6 +430,14 @@ class Instance(InstanceCore):
         """Returns the hour of a given time slot"""
         return self.time_slots_properties[ts]["hour"]
 
+    def _get_hour_string_from_ts(self, ts):
+        """Returns the hour of a given time slot"""
+        return self.time_slots_properties[ts]["hour_string"]
+
+    def _get_hour_from_hour_string(self, st):
+        """Returns a float corresponding to the given hour"""
+        return int(st[:2]) + int(st[3:]) / 60
+
     def _get_employees(self, prop) -> SuperDict:
         """Returns a SuperDict with the employee id as key and the prop as value"""
         return self._get_property("employees", prop)
@@ -358,13 +454,78 @@ class Instance(InstanceCore):
         """Returns the value of the horizon parameter"""
         return self.data["parameters"]["horizon"]
 
-    def _get_weekly_schedule(self):
+    def _get_weekly_schedule(self, round_ts=True):
         """Returns a SuperDict of days and the opening hours"""
-        return self.data["weekly_schedule"]
+        return self.data["weekly_schedule"].vapply(
+            lambda v: (v.vapply(lambda vv: self._format_hour_tuples(vv, round_ts)))
+        )
 
-    def _get_schedule_exceptions(self):
+    def _get_schedule_exceptions(self, round_ts=True):
         """Returns a SuperDict of days and the opening hours"""
-        return self.data["schedule_exceptions"]
+        return self.data["schedule_exceptions"].vapply(
+            lambda v: (v.vapply(lambda vv: self._format_hour_tuples(vv, round_ts)))
+        )
+
+    def round_hour_string_down_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the lower time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 12, 30
+        """
+        ts_length = self._get_slot_length()
+        return int(hour_string[:2]), ts_length * (int(hour_string[3:]) // ts_length)
+
+    def round_hour_string_up_to_tuple(self, hour_string):
+        """
+        Returns a tuple (hours, minutes) with the hour and minutes
+        of the provided hour_string rounded to the upper time slot
+        For example: for hour_string = "12:45" and the slot_length being 30, returns 13, 0
+        """
+        ts_length = self._get_slot_length()
+        rounded_hour = int(hour_string[:2])
+        rounded_minutes = ts_length * ceil(int(hour_string[3:]) / ts_length)
+        if rounded_hour != 23 and rounded_minutes == 60:
+            return rounded_hour + 1, 0
+        elif rounded_hour == 23 and rounded_minutes == 60:
+            return 24, 0
+        elif rounded_hour == 0 and rounded_minutes == 0:
+            return 24, 0
+        return rounded_hour, rounded_minutes
+
+    def _format_hour_tuples(self, tup, round_ts):
+        """
+        Returns a tuple (hour, minutes, hour, minutes) with the hours and minutes of the provided
+        hour string, with the first hour string rounded down and the second rounded up.
+        For example: for tup = ("08:15", "19:45") and slot_length = 30, returns (8, 0, 20, 0)
+        """
+        if round_ts:
+            rounded_hour_1 = self.round_hour_string_down_to_tuple(tup[0])
+            rounded_hour_2 = self.round_hour_string_up_to_tuple(tup[1])
+        else:
+            rounded_hour_1 = int(tup[0][:2]), int(tup[0][3:])
+            rounded_hour_2 = int(tup[1][:2]), int(tup[1][3:])
+        return (
+            rounded_hour_1[0],
+            rounded_hour_1[1],
+            rounded_hour_2[0],
+            rounded_hour_2[1],
+        )
+
+    def _round_hour_string_down(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "12:30"
+        """
+        hour, minutes = self.round_hour_string_down_to_tuple(hour_string)
+        return get_hour_string_from_hour_minute(hour, minutes)
+
+    def _round_hour_string_up(self, hour_string):
+        """
+        Returns an hour string with the hour rounded to the upper time slot.
+        For example: for hour_string = "12:45" and slot_length = 30, returns "13:00"
+        """
+        hour, minutes = self.round_hour_string_up_to_tuple(hour_string)
+        return get_hour_string_from_hour_minute(hour, minutes)
 
     def _get_start_date(self) -> datetime:
         """Returns the datetime object of the starting date"""
@@ -397,6 +558,10 @@ class Instance(InstanceCore):
     def _hour_to_slot(self, hours) -> int:
         """Converts from a hours to slots"""
         return int(hours * 60 / self._get_slot_length())
+
+    def _minutes_to_slot(self, minutes) -> int:
+        """Converts from a hours to slots"""
+        return int(minutes / self._get_slot_length())
 
     def _get_employees_contracts(self) -> SuperDict[Tuple[int, int], int]:
         """
@@ -496,7 +661,7 @@ class Instance(InstanceCore):
         contract_shift = self._get_contracts("id_shift")
         return self._get_employees_contracts().vapply(lambda c: contract_shift[c])
 
-    def _get_employees_contract_starting_hour(self) -> SuperDict:
+    def _get_employees_contract_starting_hour(self, round_ts=True) -> SuperDict:
         """
         Returns a SuperDict with the week and employee tuple as key
         and the shift starting hour
@@ -504,9 +669,15 @@ class Instance(InstanceCore):
         For example: {(36, 1): 7, ...}
         """
         start = self._get_shifts("start")
+
+        if round_ts:
+            start = start.vapply(self._round_hour_string_down)
+
         return self._get_employees_contract_shift().vapply(lambda s: start[s])
 
-    def _get_employees_contract_ending_hour(self) -> SuperDict[Tuple[int, int], float]:
+    def _get_employees_contract_ending_hour(
+        self, round_ts=True
+    ) -> SuperDict[Tuple[int, int], float]:
         """
         Returns a SuperDict with the week and employee tuple as key
         and the shift ending hour
@@ -514,6 +685,9 @@ class Instance(InstanceCore):
         For example: {(36, 1): 21, ...}
         """
         end = self._get_shifts("end")
+
+        if round_ts:
+            end = end.vapply(self._round_hour_string_up)
         return self._get_employees_contract_shift().vapply(lambda s: end[s])
 
     def _get_employee_time_slots_week(self) -> TupList:
@@ -523,8 +697,12 @@ class Instance(InstanceCore):
         For example: [("2021-09-06T07:00", 36, "2021-09-06", 1),
             ("2021-09-06T08:00", 36, "2021-09-06", 1), ...]
         """
-        start = self._get_employees_contract_starting_hour()
-        end = self._get_employees_contract_ending_hour()
+        start = self._get_employees_contract_starting_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
+        )
+        end = self._get_employees_contract_ending_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
+        )
 
         return TupList(
             (self.get_time_slot_string(ts), w, self._get_date_string_from_ts(ts), e)
@@ -731,7 +909,7 @@ class Instance(InstanceCore):
         Given a time slot (date time) it returns the demand, if exists, zero otherwise
         """
         return self._get_property("demand", "demand").get(
-            (self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts)), 0
+            (self._get_date_string_from_ts(ts), self._get_hour_string_from_ts(ts)), 0
         )
 
     def get_demand(self) -> SuperDict:
@@ -751,7 +929,12 @@ class Instance(InstanceCore):
         Given a time slot (date time) and the id of a skill, returns the skill demand if it exists, zero otherwise
         """
         return self._get_property("skill_demand", "demand").get(
-            (self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts), id_skill), 0
+            (
+                self._get_date_string_from_ts(ts),
+                self._get_hour_string_from_ts(ts),
+                id_skill,
+            ),
+            0,
         )
 
     def get_ts_demand_employees_skill(self, e_availability) -> TupList:
@@ -928,13 +1111,16 @@ class Instance(InstanceCore):
         downtime_days_week = downtime_days.take([0, 1, 2]).to_dict(2)
         return SuperDict({k: sum(v) for k, v in downtime_days_week.items()})
 
-    def _get_employee_preferences(self) -> TupList:
+    def _get_employee_preferences(self, round_ts=True) -> TupList:
         """
         Returns a TupList with the employee preferences
-        For example: [(1, "2021-09-09", 5, 15),
-        (1, "2021-09-09", 5, 15), ...]
+        For example: [(1, "2021-09-09", 5, "15:00"),
+        (1, "2021-09-09", 5, "15:00"), ...]
         """
-        return TupList((self.data["employee_preferences"].keys_tl()))
+        return TupList(self.data["employee_preferences"].keys_tl()).vapply_col(
+            3,
+            lambda v: self._round_hour_string_up(v[3]) if round_ts else v[3],
+        )
 
     def get_employee_time_slots_preferences(self) -> SuperDict:
         """
@@ -969,7 +1155,7 @@ class Instance(InstanceCore):
             (self.get_time_slot_string(ts), self._get_date_string_from_ts(ts), e)
             for ts in self.time_slots
             for e in self._get_employees("id")
-            if (e, self._get_date_string_from_ts(ts), self._get_hour_from_ts(ts))
+            if (e, self._get_date_string_from_ts(ts), self._get_hour_string_from_ts(ts))
             in preferences.take([0, 1, 3])
             if (self.get_time_slot_string(ts), e) in availability
         )
