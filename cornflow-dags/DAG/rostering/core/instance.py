@@ -3,6 +3,7 @@
 """
 import os
 import pickle
+
 # Imports from libraries
 from datetime import datetime, timedelta
 from math import ceil
@@ -14,6 +15,7 @@ from cornflow_client.core.tools import load_json
 from pytups import SuperDict, TupList
 
 from .const import INSTANCE_KEYS_RELATION
+
 # Imports from internal modules
 from .tools import (
     get_hour_string_from_date_time,

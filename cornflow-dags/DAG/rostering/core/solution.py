@@ -10,8 +10,6 @@ from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
 from pytups import SuperDict, TupList
 
-from DAG.rostering.core.tools import get_week_from_string
-
 
 class Solution(SolutionCore):
     schema = load_json(
