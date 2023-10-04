@@ -1,3 +1,11 @@
+version 1.0.14
+---------------
+
+- released: 2023-10-03
+- description: added pandas dependency due to ortools missing pandas as their own dependency
+- changelog:
+    - added pandas (>=1.5.2) dependency due to ortools missing pandas as their own dependency
+
 version 1.0.13
 ---------------
 
