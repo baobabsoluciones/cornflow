@@ -12,20 +12,19 @@ Install cornflow
 
 Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in the same machine.
 
-Download the Cornflow project::
+Create and activate the virtual environment::
 
-    git clone git@github.com:baobabsoluciones/cornflow.git
-    cd cornflow-server
     python3 -m venv venv
-    venv/bin/pip3 install -r requirements-dev.txt
-
-activate the virtual environment::
-
     source venv/bin/activate
 
 or, in windows::
 
+    python3 -m venv venv
     venv/Scripts/activate
+
+Install the Cornflow library::
+
+    venv/bin/pip3 install cornflow
 
 
 Setup cornflow database

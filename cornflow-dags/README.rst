@@ -1,3 +1,4 @@
+===============
 Cornflow-dags
 ===============
 
@@ -9,7 +10,7 @@ Uploading a new app / solver
 Setting the environment
 ------------------------
 
-This project requires python 3.5 or above::
+This project requires python 3.7 or above::
 
     python -m venv venv
     venv/Scripts/activate
@@ -20,149 +21,278 @@ Introduction
 
 There are several things that are needed when submitting a new solver.
 
-1. a `solve` function.
-2. a `name` string.
-3. an `instance` dictionary.
-4. an `solution` dictionary.
-5. a `test_cases` function that returns a list of dictionaries.
+1. an `Instance` class.
+2. a `Solution` class.
+3. an `Experiment class`
+4. a `Solver` class
+5. an `Application class`
 
-In its most minimalistic form: an app constitutes one dag file that contains all of this.
+In its most minimalistic form: an app constitutes one file that contains all of this.
 In the following lines we will explain each of these concepts while using the graph-coloring example dag. This example can be found in the `DAG/graph_coloring` directory.
+
+The Instance class
+-----------------------------------------
+The Instance class is used to process the input data.
+It inherits the class `InstanceCore`, that can be found in cornflow_client.core.
+
+In its most basic form, the Instance class should contain at least two fields: schema, and schema_checks.
+Those fields should contain the jsonschema used to verify the format of the input data and the input data checks.
+
+In the case of the graph-coloring, the class is defined as::
+
+    import os
+    from cornflow_client import InstanceCore, get_empty_schema
+    from cornflow_client.core.tools import load_json
+    import pytups as pt
+
+
+    class Instance(InstanceCore):
+        schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
+        schema_checks = get_empty_schema()
+
+        def get_pairs(self):
+            return pt.TupList((el["n1"], el["n2"]) for el in self.data["pairs"])
+
+The class can also define a check() method, that should execute verifications on the input data and return a
+dictionary with the errors.
+If it defined, this method will be ran before every execution of the solver, to check that the
+input data doesn't contain infeasibilities.
+
+From this class, the input data can be accessed through the `data` field.
+
+The Solution class
+-----------------------------------------
+The Solution class is used to process the output data.
+It inherits the class `SolutionCore`, that can be found in cornflow_client.core.
+
+In its most basic form, the Solution class should contain at least one field: schema.
+This fields should contain the jsonschema used to verify the format of the output data.
+
+In the case of the graph-coloring, the class is defined as::
+
+    import os
+    from cornflow_client import SolutionCore
+    from cornflow_client.core.tools import load_json
+    import pytups as pt
+
+
+    class Solution(SolutionCore):
+        schema = load_json(
+            os.path.join(os.path.dirname(__file__), "../schemas/output.json")
+        )
+
+        def get_assignments(self):
+            return pt.SuperDict({v["node"]: v["color"] for v in self.data["assignment"]})
+
+
+From this class, the input data can be accessed through the `data` field.
+
+The Experiment class
+-----------------------------------------
+The Experiment class is used to work on the union of input and output_data.
+It inherits the class `ExperimentCore`, that can be found in cornflow_client.core.
+An Experiment object is linked to an Instance and a Solution object and can therefore use their data.
+
+In its most basic form, the Experiment class should contain at least one field and two methods:
+schema_checks, get_objective(), check_solution().
+The method check_solution() should execute verifications on the output data and return a
+dictionary with the errors. The method get_objective() should calculate and return the value of the
+objective function given the current Instance and Solution.
+The field schema_checks should contain the jsonschema used to verify the format of the output data.
+
+In the case of the graph-coloring, the class is defined as::
+
+    from cornflow_client import ExperimentCore
+    from cornflow_client.core.tools import load_json
+    from .instance import Instance
+    from .solution import Solution
+    import os
+
+
+    class Experiment(ExperimentCore):
+        schema_checks = load_json(
+            os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
+        )
+
+        @property
+        def instance(self) -> Instance:
+            return super().instance
+
+        @property
+        def solution(self) -> Solution:
+            return super().solution
+
+        @solution.setter
+        def solution(self, value):
+            self._solution = value
+
+        def get_objective(self) -> float:
+            return self.solution.get_assignments().values_tl().unique().len()
+
+        def check_solution(self, *args, **kwargs) -> dict:
+            # if a pair of nodes have the same colors: that's a problem
+            colors = self.solution.get_assignments()
+            pairs = self.instance.get_pairs()
+            errors = [
+                {"n1": n1, "n2": n2} for (n1, n2) in pairs if colors[n1] == colors[n2]
+            ]
+            return dict(pairs=errors)
+
+
+From this class, the instance can be accessed through the `instance` field, and the solution can be
+accessed through the `solution` field.
 
 The solver
 ------------
 
-The solver comes in the form of a python function that takes exactly two arguments: `data` and `config`. The first one is a python dictionary with the input data to solve the problem. The second one is also a dictionary with the execution configuration.
+The solver is the part of the app that takes care of the resolution of the problem. An app can contain
+several ones.
+The solver comes in the form of a python class. It inherits the Experiment class. As such, it is also
+linked to an Instance and a Solution object and can therefore use their data.
 
-This function needs to be named `solve` and returns three things: a python dictionary with the output data, a string that stores the whole log, and a dictionary with the log information processed. Only the first needs to have a value.
+In its most basic form, the Solver class should contain at least a `solve()` method. This method should
+take exactly one argument: a dictionary with the execution configuration. It should return a dictionary
+with two keys: `status` and `status_sol`. `status` should contain the status of the execution (optimal,
+unbounded, time_limit...) while `status_sol` should return the information of whether the execution
+has found a solution or not. The mappings of both these statuses are defined in
+cornflow_client.constants.
 
-The function for the graph-coloring case is::
+The class for the graph-coloring case is::
 
     from ortools.sat.python import cp_model
+    from cornflow_client.constants import (
+        ORTOOLS_STATUS_MAPPING,
+        SOLUTION_STATUS_FEASIBLE,
+        SOLUTION_STATUS_INFEASIBLE,
+    )
     import pytups as pt
-    from timeit import default_timer as timer
+    from ..core import Solution, Experiment
 
+    class OrToolsCP(Experiment):
+        def solve(self, options: dict):
+            model = cp_model.CpModel()
+            input_data = pt.SuperDict.from_dict(self.instance.data)
+            pairs = input_data["pairs"]
+            n1s = pt.TupList(pairs).vapply(lambda v: v["n1"])
+            n2s = pt.TupList(pairs).vapply(lambda v: v["n2"])
+            nodes = (n1s + n2s).unique2()
+            max_colors = len(nodes) - 1
 
-    def solve(data, config):
-        """
-        :param data: json for the problem
-        :param config: execution configuration, including solver
-        :return: solution and log
-        """
-        start = timer()
-        model = cp_model.CpModel()
-        input_data = pt.SuperDict.from_dict(data)
-        pairs = input_data["pairs"]
-        n1s = pt.TupList(pairs).vapply(lambda v: v["n1"])
-        n2s = pt.TupList(pairs).vapply(lambda v: v["n2"])
-        nodes = (n1s + n2s).unique2()
-        max_colors = len(nodes) - 1
+            # variable declaration:
+            color = pt.SuperDict(
+                {
+                    node: model.NewIntVar(0, max_colors, "color_{}".format(node))
+                    for node in nodes
+                }
+            )
+            for pair in pairs:
+                model.Add(color[pair["n1"]] != color[pair["n2"]])
 
-        # variable declaration:
-        color = pt.SuperDict(
-            {
-                node: model.NewIntVar(0, max_colors, "color_{}".format(node))
-                for node in nodes
-            }
-        )
-        for pair in pairs:
-            model.Add(color[pair["n1"]] != color[pair["n2"]])
-            # model.AddAllDifferent(color[n] for n in nodes)
+            obj_var = model.NewIntVar(0, max_colors, "total_colors")
+            model.AddMaxEquality(obj_var, color.values())
+            model.Minimize(obj_var)
+            solver = cp_model.CpSolver()
+            solver.parameters.max_time_in_seconds = options.get("timeLimit", 10)
+            termination_condition = solver.Solve(model)
+            if termination_condition not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
+                return dict(
+                    status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
+                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
+            color_sol = color.vapply(solver.Value)
 
-        # TODO: identify maximum cliques and apply constraint on the cliques instead of on pairs
+            assign_list = color_sol.items_tl().vapply(lambda v: dict(node=v[0], color=v[1]))
+            self.solution = Solution(dict(assignment=assign_list))
 
-        obj_var = model.NewIntVar(0, max_colors, "total_colors")
-        model.AddMaxEquality(obj_var, color.values())
-        model.Minimize(obj_var)
-        solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = config.get("timeLimit", 10)
-        status = solver.Solve(model)
-        if status not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
-            return status
-        color_sol = color.vapply(solver.Value)
+            return dict(
+                status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
+                status_sol=SOLUTION_STATUS_FEASIBLE
+            )
 
-        assign_list = color_sol.items_tl().vapply(lambda v: dict(node=v[0], color=v[1]))
-        solution = dict(assignment=assign_list)
-        log = ""
-        status_conv = {4: "Optimal", 2: "Feasible", 3: "Infeasible", 0: "Unknown"}
-        log = dict(
-            time=timer() - start,
-            solver="ortools",
-            status=status_conv.get(status, "Unknown"),
-        )
-        return solution, "", log
+The class can also defined a string field `log`. If it does,
+the log will be saved in cornflow at the end of the execution with the solution data, so that it
+can be consulted by the user.
 
-Name and configuration
+The Application
 -----------------------
 
-You need to choose a name for the solution method, as well as the configuration schema. A quick way of creating a configuration is just creating an empty schema and add some parameters. In the graph-coloring example we add a `timeLimit` property to stop the solver after X seconds::
+The Application class is the base of the app. It links the different resolution methods and takes care
+of the connection with the server.
+It inherits the class `ApplicationCore`, that can be found in cornflow_client.core.
 
-    name = "graph_coloring"
-    config = get_empty_schema()
-    config["properties"] = dict(timeLimit=dict(type="number"))
+An Application should contain several fields:
 
-The input schema and output schema
+- a string `name`
+- an `instance` object that contains the Instance class defined earlier
+- a `solution` object that contains the Solution class defined earlier
+- a `solvers` dictionary that contains a mapping to the different solvers defined earlier
+- a `schema` object that contains the jsonschema corresponding to the configuration dictionaries.
+A quick way of creating a configuration is just creating an empty schema and add some parameters.
+In the graph-coloring example we add a `timeLimit` property to stop the solver after X seconds.
+- a `test_cases` property that should return a list of test instance datasets.
+The `test_cases` function is used in the unittests to be sure the solver works as intended.
+In the graph-coloring example we read the examples from the the `data` directory and transform
+them to the correct format.
+
+The class for the graph-coloring case is::
+
+    from cornflow_client import get_empty_schema, ApplicationCore
+    from typing import List, Dict
+    import pytups as pt
+    import os
+
+    from .solvers import OrToolsCP
+    from .core import Instance, Solution
+
+
+    class GraphColoring(ApplicationCore):
+        name = "graph_coloring"
+        instance = Instance
+        solution = Solution
+        solvers = dict(default=OrToolsCP)
+        schema = get_empty_schema(
+            properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys())
+        )
+
+        @property
+        def test_cases(self) -> List[Dict]:
+            def read_file(filePath):
+                with open(filePath, "r") as f:
+                    contents = f.read().splitlines()
+
+                pairs = (
+                    pt.TupList(contents[1:])
+                    .vapply(lambda v: v.split(" "))
+                    .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
+                )
+                return dict(pairs=pairs)
+
+            file_dir = os.path.join(os.path.dirname(__file__), "data")
+            files = os.listdir(file_dir)
+            test_files = pt.TupList(files).vfilter(lambda v: v.startswith("gc_"))
+            return [read_file(os.path.join(file_dir, fileName)) for fileName in test_files]
+
+The jsonschemas
 -----------------------------------------
 
-Both schemas are built and deployed similarly so we present how the input schema is done.
-
-The input schema is a json schema file (https://json-schema.org/) that includes all the characteristics of the input data for each dag. This file can be built with many tools (a regular text editor could be enough).
-
-In order to upload it, you need to have an `instance` variable available in your dag file.
-
-In the case of the graph-coloring, these variables are imported from the package::
-
-    with open(os.path.join(os.path.dirname(__file__), "input.json"), "r") as f:
-        instance = json.load(f)
-    with open(os.path.join(os.path.dirname(__file__), "output.json"), "r") as f:
-        solution = json.load(f)
-
-This just imports the `input.json` and `output.json` files as python dictionaries. You can check either file to see how they are structured.
-
-Airflow functions and name
------------------------------
-There are some basic functions and declarations that need to be created. The easiest is to just copy the ones from and example and adapt them if needed::
-
-    from airflow import DAG
-    from airflow.operators.python import PythonOperator
-    import cornflow_client.airflow.dag_utilities as utils
-
-    dag = DAG(name, default_args=utils.default_args, schedule_interval=None)
-    def solve_hk(**kwargs):
-        return utils.cf_solve(solve, name, EnvironmentVariablesBackend(), **kwargs)
-
-    graph_coloring = PythonOperator(task_id=name, python_callable=solve_hk, dag=dag)
-
+All jsonschemas are built and deployed similarly so we present how the input schema is done.
+A jsonschema is a json schema file (https://json-schema.org/) that includes all the characteristics of the data for each dag.
+This file can be built with many tools (a regular text editor could be enough).
+You can check the `DAG/graph_coloring/schemas` directory to see how they are structured.
 
 Unit tests
 ------------
 
-The `test_cases` function is used in the unittests to be sure the solver works as intended. In the graph-coloring example we read the examples from the the `data` directory and transform them to the correct format::
-
-    def test_cases():
-        file_dir = os.path.join(os.path.dirname(__file__), "..", "data")
-        files = os.listdir(file_dir)
-        test_files = pt.TupList(files).vfilter(lambda v: v.startswith("gc_"))
-        return [read_file(os.path.join(file_dir, fileName)) for fileName in test_files]
-
-
-    def read_file(filePath):
-        with open(filePath, "r") as f:
-            contents = f.read().splitlines()
-
-        pairs = (
-            pt.TupList(contents[1:])
-            .vapply(lambda v: v.split(" "))
-            .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
-        )
-        return dict(pairs=pairs)
-
-To be sure that the the the solution method is tested, you need to edit the `tests/test_dags.py` file and add a reference to your solver::
+To be sure that the the the solution method is tested, you need to edit the `tests/test_dags.py` file
+and add a reference to your solver::
 
     class GraphColor(BaseDAGTests.SolvingTests):
         def setUp(self):
             super().setUp()
-            self.app = _import_file("graph_coloring")
+            from DAG.graph_coloring import GraphColoring
+
+            self.app = GraphColoring()
+            self.config = dict(msg=False)
 
 Then, you can execute the unittests for your solver with the following command::
 
