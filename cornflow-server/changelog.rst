@@ -1,3 +1,23 @@
+version 1.0.7
+--------------
+
+- released: 2023-10-03
+- description: security version of cornflow to update vulnerability on dependency
+- changelog:
+    - updated version of gevent to 23.9.0.post1 due to security reasons.
+
+version 1.0.5
+--------------
+
+- released: 2023-05-04
+- description: first version of cornflow without cornflow core
+- changelog:
+    - removed cornflow core from dependencies.
+    - moved all cornflow core code to cornflow.
+    - added new error handling for InternalServerErrors.
+    - updated version of flask to 2.3.2 due to security reasons.
+    - updated version of other libraries due to upgrade on flask version.
+
 version 1.0.4
 ---------------
 
