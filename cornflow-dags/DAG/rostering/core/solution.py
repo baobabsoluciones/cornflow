@@ -59,21 +59,18 @@ class Solution(SolutionCore):
         Returns a SuperDict with the amount of time slots worked by each employee in each week.
         For example: {(0, 1): 40, ...}
         """
-        try:
-            return (
-                TupList(
-                    {
-                        "id_employee": id_employee,
-                        "ts": ts,
-                        "week": get_week_from_string(ts),
-                    }
-                    for (id_employee, ts) in self.data["works"]
-                )
-                .to_dict(result_col="ts", indices=["week", "id_employee"])
-                .vapply(lambda v: len(v))
+        return (
+            TupList(
+                {
+                    "id_employee": id_employee,
+                    "ts": ts,
+                    "week": self.get_week_from_datetime_string(ts),
+                }
+                for (id_employee, ts) in self.data["works"]
             )
-        except ValueError as e:
-            return SuperDict()
+            .to_dict(result_col="ts", indices=["week", "id_employee"])
+            .vapply(lambda v: len(v))
+        )
 
     def get_ts_employee(self) -> SuperDict:
         """
