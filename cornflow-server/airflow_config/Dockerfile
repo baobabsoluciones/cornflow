@@ -1,8 +1,8 @@
-# VERSION 2.x.x
+# VERSION 2.7.1
 # AUTHOR: sistemas@baobabsoluciones.es
-# DESCRIPTION: Airflow 2.x.x image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
+# DESCRIPTION: Airflow 2.7.1 image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
 
-FROM python:3.8-slim-buster
+FROM python:3.10-slim-buster
 LABEL maintainer="sistemas@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
@@ -10,9 +10,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.2.4
+ARG AIRFLOW_VERSION=2.7.1
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
-ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.8.txt"
+ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.10.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
