@@ -1,29 +1,26 @@
 """
 
 """
-# Imports from libraries
-from datetime import datetime, timedelta
 import os
 import pickle
-from pytups import SuperDict, TupList
-from typing import Dict, Tuple
+
+# Imports from libraries
+from datetime import datetime, timedelta
 from math import ceil
+from typing import Dict, Tuple
 
 # Imports from cornflow libraries
 from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
+from pytups import SuperDict, TupList
+
 from .const import INSTANCE_KEYS_RELATION
 
 # Imports from internal modules
 from .tools import (
-    get_date_from_string,
-    get_date_string_from_ts,
-    get_hour_from_date_time,
     get_hour_string_from_date_time,
     get_hour_string_from_hour_minute,
     get_one_date,
-    get_time_slot_string,
-    get_week_from_ts,
 )
 
 
@@ -76,6 +73,7 @@ class Instance(InstanceCore):
 
         data_p["parameters"] = pickle.loads(pickle.dumps(data["parameters"], -1))
         data_p["requirements"] = pickle.loads(pickle.dumps(data["requirements"], -1))
+        data_p["penalties"] = pickle.loads(pickle.dumps(data["penalties"], -1))
 
         if data.get("skill_demand"):
             data_p["skill_demand"] = {
@@ -146,6 +144,7 @@ class Instance(InstanceCore):
 
         data_p["parameters"] = self.data["parameters"]
         data_p["requirements"] = self.data["requirements"]
+        data_p["penalties"] = self.data["penalties"]
 
         data_p["weekly_schedule"] = [
             {"week_day": d, "starting_hour": h_ini, "ending_hour": h_end}
@@ -195,6 +194,7 @@ class Instance(InstanceCore):
         return SuperDict(
             incoherent_foreign_keys=self.check_indexes_coherence(),
             timeslot_length=self.check_timeslot_length(),
+            penalties=self.check_penalties(),
             **self.check_timeslot_coherence(),
         ).vfilter(lambda v: len(v))
 
@@ -290,6 +290,16 @@ class Instance(InstanceCore):
 
         return checks.vfilter(lambda v: len(v))
 
+    def check_penalties(self):
+        """Checks that all penalties are defined for soft constraints"""
+        penalties = self.get_penalties().keys_l()
+        return (
+            self.get_requirements()
+            .kvfilter(lambda k, v: v == "soft" and k not in penalties)
+            .keys_tl()
+            .vapply(lambda v: {"requirement": v})
+        )
+
     def _get_weeks(self) -> TupList:
         """
         Returns a TupList with the starting date of each week in date time format
@@ -332,8 +342,8 @@ class Instance(InstanceCore):
         return SuperDict(
             {
                 date: {
-                    "string": get_date_string_from_ts(date),
-                    "week": get_week_from_ts(date),
+                    "string": self.get_date_string_from_ts(date),
+                    "week": self.get_week_from_ts(date),
                 }
                 for date in self.dates
             }
@@ -373,16 +383,17 @@ class Instance(InstanceCore):
             )
             .vfilter(
                 # Remove schedule exceptions.
-                lambda v: get_date_string_from_ts(v)
+                lambda v: self.get_date_string_from_ts(v)
                 not in self._get_schedule_exceptions()
             )
             .vfilter(
-                lambda v: get_date_string_from_ts(v) not in self._get_store_holidays()
+                lambda v: self.get_date_string_from_ts(v)
+                not in self._get_store_holidays()
             )
         )
 
         ts_schedule_exceptions = TupList(
-            get_date_from_string(d)
+            self.get_date_from_string(d)
             + timedelta(hours=h_start, minutes=m_start + self._get_slot_length() * x)
             for d, value in self._get_schedule_exceptions().items()
             for (h_start, m_start, h_end, m_end) in value
@@ -404,10 +415,10 @@ class Instance(InstanceCore):
         return SuperDict(
             {
                 ts: {
-                    "string": get_time_slot_string(ts),
-                    "date": get_date_string_from_ts(ts),
-                    "week": get_week_from_ts(ts),
-                    "hour": get_hour_from_date_time(ts),
+                    "string": self.get_datetime_string_from_ts(ts),
+                    "date": self.get_date_string_from_ts(ts),
+                    "week": self.get_week_from_ts(ts),
+                    "hour": self.get_hour_from_ts(ts),
                     "hour_string": get_hour_string_from_date_time(ts),
                 }
                 for ts in self.time_slots
@@ -529,7 +540,7 @@ class Instance(InstanceCore):
 
     def _get_start_date(self) -> datetime:
         """Returns the datetime object of the starting date"""
-        return get_date_from_string(self.data["parameters"]["starting_date"])
+        return self.get_date_from_string(self.data["parameters"]["starting_date"])
 
     def _get_end_date(self) -> datetime:
         """Returns the last date in the horizon"""
@@ -570,7 +581,7 @@ class Instance(InstanceCore):
         Contracts are supposed to start on Monday and end on Sunday
         For example: {(36, 1): 10, ...}
         """
-        default_date = get_date_string_from_ts(self._get_end_date())
+        default_date = self.get_date_string_from_ts(self._get_end_date())
 
         contract_start = self._get_contracts("start_contract")
         contract_end = self._get_contracts("end_contract").vapply(
@@ -732,6 +743,33 @@ class Instance(InstanceCore):
         For example: {("2021-09-06", 1): ["2021-09-06T07:00", "2021-09-06T08:00", ...], ...}
         """
         return self._get_employee_time_slots_week().take([0, 2, 3]).to_dict(0)
+
+    def get_employee_time_slots_holidays(self) -> TupList:
+        """
+        Returns a TupList with the combinations of employees and timeslots
+        in which the employees are on holidays.
+        For example: [("2021-09-06T07:00", 1),
+            ("2021-09-06T08:00", 1), ...]
+        """
+        start = self._get_employees_contract_starting_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
+        )
+        end = self._get_employees_contract_ending_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
+        )
+
+        return TupList(
+            (self.get_time_slot_string(ts), e)
+            for ts in self.time_slots
+            for (w, e) in start
+            if self._get_week_from_ts(ts) == w
+            and start[w, e] <= self._get_hour_from_ts(ts) < end[w, e]
+            and (e, self._get_date_string_from_ts(ts))
+            in self._get_employee_holidays(model=True)
+            and (e, self._get_date_string_from_ts(ts))
+            not in self._get_employee_downtime()
+            if self._get_date_string_from_ts(ts) not in self._get_store_holidays()
+        )
 
     def get_consecutive_time_slots_employee(self) -> TupList:
         """
@@ -937,7 +975,7 @@ class Instance(InstanceCore):
             0,
         )
 
-    def get_ts_demand_employees_skill(self, e_availability) -> TupList:
+    def get_ts_demand_employees_skill(self, e_availability) -> SuperDict:
         """
         Returns a TupList with the combinations of:
          - Time slots
@@ -959,13 +997,26 @@ class Instance(InstanceCore):
             }
         ).kvapply(lambda k, v: [e for e in v if (k[0], e) in e_availability])
 
-    def _get_employee_holidays(self) -> TupList:
+    @staticmethod
+    def get_ts_skill_demand(ts_demand_employees_skill):
+        """
+        Returns a TupList with the combinations of skills and timeslots when those
+        skills are needed.
+        For example: [("2021-09-06T07:00", 1), ("2021-09-06T08:00", 2), ...]
+        """
+        return (
+            ts_demand_employees_skill.take([0, 1]).unique2().vapply(lambda v: tuple(v))
+        )
+
+    def _get_employee_holidays(self, model=False) -> TupList:
         """
         Returns a TupList with the combinations of employees and holiday days.
         For example: [(1, "2021-09-06"),
             (2, "2021-09-07"), ...]
         """
-        if self.get_requirement("rq10"):
+        if self.get_requirement("rq10") == "strict" or (
+            self.get_requirement("rq10") == "soft" and model
+        ):
             return TupList(self.data["employee_holidays"].keys_tl())
         else:
             return TupList([])
@@ -1015,7 +1066,7 @@ class Instance(InstanceCore):
         For example: [("2021-09-06"),
             ("2021-09-07"), ...]
         """
-        if self.get_requirement("rq11"):
+        if self.get_requirement("rq11") != "deactivated":
             return TupList(self.data["store_holidays"].keys_tl())
         else:
             return TupList([])
@@ -1067,7 +1118,7 @@ class Instance(InstanceCore):
         For example: [(1, "2021-09-06"),
             (2, "2021-09-07"), ...]
         """
-        if self.get_requirement("rq12"):
+        if self.get_requirement("rq12") != "deactivated":
             return TupList(self.data["employee_downtime"].keys_tl())
         else:
             return TupList([])
@@ -1178,3 +1229,21 @@ class Instance(InstanceCore):
         Returns the activation value of a given requirement
         """
         return self.data["requirements"].get(rq, True)
+
+    def get_requirements(self):
+        """
+        Returns the activation values of the requirements
+        """
+        return self.data["requirements"]
+
+    def get_penalty(self, rq):
+        """
+        Returns the penalty value of a given requirement
+        """
+        return (self.get_requirement(rq) == "soft") * self.data["penalties"].get(rq, 1)
+
+    def get_penalties(self):
+        """
+        Returns the penalties values of the requirement
+        """
+        return self.data["penalties"]

@@ -4,14 +4,11 @@
 # Imports from libraries
 import os
 import pickle
-from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
-
-# Imports from internal modules
-from .tools import get_week_from_string
+from pytups import SuperDict, TupList
 
 
 class Solution(SolutionCore):
@@ -62,7 +59,11 @@ class Solution(SolutionCore):
         """
         return (
             TupList(
-                {"id_employee": id_employee, "ts": ts, "week": get_week_from_string(ts)}
+                {
+                    "id_employee": id_employee,
+                    "ts": ts,
+                    "week": self.get_week_from_datetime_string(ts),
+                }
                 for (id_employee, ts) in self.data["works"]
             )
             .to_dict(result_col="ts", indices=["week", "id_employee"])
