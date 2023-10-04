@@ -46,43 +46,91 @@
     },
     "requirements": {
       "type": "object",
-      "description": "Boolean values to activate or deactivate different requirements of the problem",
+      "description": "Parameters to activate or deactivate different requirements of the problem",
       "show": true,
       "filterable": false,
       "sortable": true,
       "properties": {
+        "rq02": {
+          "type": "string",
+          "title": "Weekly hours",
+          "description": "The employees weekly hours are respected",
+          "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq03": {
+          "type": "string",
+          "title": "Max daily hours",
+          "description": "The employees maximum daily hours are respected",
+          "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq05": {
+          "type": "string",
+          "title": "Work days",
+          "description": "The employees max numbers of days worked per week are respected",
+          "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq06": {
+          "type": "string",
+          "title": "Min daily hours",
+          "description": "The employees minimum daily hours are respected",
+          "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq07": {
+          "type": "string",
+          "title": "Rest hours",
+          "description": "The employees rest hours are respected",
+          "enum": ["strict", "soft", "deactivated"]
+        },
+        "rq08": {
+          "type": "string",
+          "title": "Managers",
+          "description": "A manager should be present into the store at all times",
+          "enum": ["strict", "soft", "deactivated"]
+        },
         "rq09": {
-          "type": "boolean",
+          "type": "string",
           "title": "Skills",
-          "description": "The demand of skills has to be covered"
+          "description": "The demand of skills has to be covered",
+          "enum": ["strict", "soft", "deactivated"]
         },
         "rq10": {
-          "type": "boolean",
+          "type": "string",
           "title": "Employee holidays",
-          "description": "The employee holidays are respected"
+          "description": "The employee holidays are respected",
+          "enum": ["strict", "soft", "deactivated"]
         },
         "rq11": {
-          "type": "boolean",
+          "type": "string",
           "title": "Store holidays",
-          "description": "The days when a store is closed are respected"
+          "description": "The days when a store is closed are respected",
+          "enum": ["strict", "deactivated"]
         },
         "rq12": {
-          "type": "boolean",
+          "type": "string",
           "title": "Employee downtime",
-          "description": "The employee downtime is respected"
+          "description": "The employee downtime is respected",
+          "enum": ["strict", "deactivated"]
         },
         "rq13": {
-          "type": "boolean",
+          "type": "string",
           "title": "Employee starting hour preference",
-          "description": "The employee starting hour is respected"
+          "description": "The employee starting hour is respected",
+          "enum": ["strict", "soft", "deactivated"]
         },
         "rq14": {
-          "type": "boolean",
+          "type": "string",
           "title": "Employee max hours worked",
-          "description": "The employee maximum hours worked preference is respected"
+          "description": "The employee maximum hours worked preference is respected",
+          "enum": ["strict", "soft", "deactivated"]
         }
       },
       "required": [
+        "rq02",
+        "rq03",
+        "rq05",
+        "rq06",
+        "rq07",
+        "rq08",
         "rq09",
         "rq10",
         "rq11",
@@ -90,6 +138,66 @@
         "rq13",
         "rq14"
       ]
+    },
+    "penalties": {
+      "type": "object",
+      "description": "Parameters to activate or deactivate different requirements of the problem",
+      "show": true,
+      "filterable": false,
+      "sortable": true,
+      "properties": {
+        "rq02": {
+          "type": "integer",
+          "title": "Weekly hours",
+          "description": "The penalty when the employees weekly hours are not respected"
+        },
+        "rq03": {
+          "type": "integer",
+          "title": "Max daily hours",
+          "description": "The penalty when the employees maximum daily hours are not respected"
+        },
+        "rq05": {
+          "type": "integer",
+          "title": "Work days",
+          "description": "The penalty when the employees max numbers of days worked per week are not respected"
+        },
+        "rq06": {
+          "type": "integer",
+          "title": "Min daily hours",
+          "description": "The penalty when the employees minimum daily hours are not respected"
+        },
+        "rq07": {
+          "type": "integer",
+          "title": "Rest hours",
+          "description": "The penalty when the employees rest hours are not respected"
+        },
+        "rq08": {
+          "type": "integer",
+          "title": "Managers",
+          "description": "The penalty when there is not a manager present into the store at all times"
+        },
+        "rq09": {
+          "type": "integer",
+          "title": "Skills",
+          "description": "The penalty when skill demand is not covered"
+        },
+        "rq10": {
+          "type": "integer",
+          "title": "Employee holidays",
+          "description": "The penalty when the employee holidays are not respected"
+        },
+        "rq13": {
+          "type": "integer",
+          "title": "Employee starting hour preference",
+          "description": "The penalty when the employee starting hour is not respected"
+        },
+        "rq14": {
+          "type": "integer",
+          "title": "Employee max hours worked",
+          "description": "The penalty when the employee maximum hours worked preference is not respected"
+        }
+      },
+      "required": []
     },
     "employees": {
       "type": "array",

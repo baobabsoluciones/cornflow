@@ -137,6 +137,23 @@
         },
         "required": ["week", "employee", "hour"]
       }
+    },
+    "penalties": {
+      "type": "array",
+      "title": "Penalties",
+      "description": "Some soft constraints do not have a penalty defined. They will be assigned the default value 1.",
+      "is_warning": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "title": "Requirement",
+            "description": "The name of the requirement for which the penalty is not defined"
+          }
+        },
+        "required": ["requirement"]
+      }
     }
   },
   "required": []
