@@ -8,7 +8,7 @@
         "gap": {"type": "number"},
         "solver": {
             "type": "string",
-            "enum": ["naive", "aco", "cpsat"],
+            "enum": ["naive", "cpsat"],
             "default": "naive"
         }
     }
