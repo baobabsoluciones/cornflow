@@ -4,11 +4,11 @@
 # Imports from libraries
 import os
 import pickle
+from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
-from pytups import SuperDict, TupList
 
 
 class Solution(SolutionCore):

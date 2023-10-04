@@ -26,6 +26,31 @@
         "additionalProperties": false
       }
     },
+    "missing_data": {
+      "type": "array",
+      "title": "Missing data",
+      "description": "Table containing the data about missing input data. The entry with {key}={value} from table {primary_table} does not have an associated entry in {foreign_table}.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "primary_table": {
+            "type": "string"
+          },
+          "foreign_table": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": ["integer", "string"]
+          }
+        },
+        "required": ["primary_table", "foreign_table", "key", "value"],
+        "additionalProperties": false
+      }
+    },
     "timeslot_length": {
       "type": "object",
       "title": "Timeslot length",
@@ -116,6 +141,33 @@
       "title": "Employee preferences timeslots",
       "is_warning": true,
       "description": "The hours provided in the employees preferences table are not coherent with the timeslot length. The opening hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The week of the problem"
+          },
+          "employee": {
+            "type": "integer",
+            "title": "Employee",
+            "description": "The employee with the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["week", "employee", "hour"]
+      }
+    },
+    "fixed_worktable_timeslots": {
+      "type": "array",
+      "title": "Fixed worktable timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the fixed worktable table are not coherent with the timeslot length. The hours will be rounded to match timeslot length.",
       "items": {
         "type": "object",
         "properties": {

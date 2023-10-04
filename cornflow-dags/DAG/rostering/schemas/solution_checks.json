@@ -281,6 +281,62 @@
             },
             "required": ["date", "id_employee", "number_hours_worked"],
             "additionalProperties": false
+        },
+        "employee_work_days": {
+            "type": "array",
+            "title": "Employee work days",
+            "description": "Table containing the information about dates when the employees work days are not respected.",
+            "is_warning": false,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "title": "Date",
+                        "description": "The date of the issue."
+                    },
+                    "id_employee": {
+                        "type": "integer",
+                        "title": "Id employee",
+                        "description": "The unique identifier of the employee."
+                    }
+                },
+                "required": [
+                    "date",
+                    "id_employee"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "fixed_worktable": {
+            "type": "array",
+            "description": "Table containing information about the parts of the fixed worktable that are not respected.",
+            "show": true,
+            "filterable": true,
+            "sortable": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id_employee": {
+                        "type": "integer",
+                        "description": "The unique identifier for each employee.",
+                        "title": "Employee id.",
+                        "sortable": true,
+                        "filterable": true
+                    },
+                    "time_slot": {
+                        "type": "string",
+                        "title": "Time slot",
+                        "description": "The time slot the employee should be working on",
+                        "sortable": true,
+                        "filterable": true
+                    }
+                },
+                "required": [
+                    "id_employee",
+                    "time_slot"
+                ]
+            }
         }
     },
     "required": [],

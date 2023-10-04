@@ -48,8 +48,8 @@
       "id_shift": 3,
       "start_contract": "2021-09-06",
       "end_contract": null,
-      "weekly_hours": 40,
-      "days_worked": 5
+      "weekly_hours": 32,
+      "days_worked": 4
     },
     {
       "id": 12,
@@ -434,6 +434,28 @@
       "ending_hour": "20:00"
     }
   ],
+  "employee_schedule": [
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 1
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 2
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 3
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 5
+    }
+  ],
   "parameters": {
     "horizon": 1,
     "slot_length": 60,
@@ -453,7 +475,9 @@
     "rq11": "strict",
     "rq12": "strict",
     "rq13": "soft",
-    "rq14": "soft"
+    "rq14": "soft",
+    "rq15": "soft",
+    "rq16": "strict"
   },
   "penalties": {
     "rq02": 1,
@@ -465,6 +489,8 @@
     "rq09": 2,
     "rq10": 1,
     "rq13": 1,
-    "rq14": 1
+    "rq14": 1,
+    "rq15": 1,
+    "rq16": 5
   }
 }
