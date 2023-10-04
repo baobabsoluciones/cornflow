@@ -1,29 +1,24 @@
 """
 
 """
-# Imports from libraries
-from datetime import datetime, timedelta
 import os
 import pickle
-from pytups import SuperDict, TupList
-from typing import Dict, Tuple
+# Imports from libraries
+from datetime import datetime, timedelta
 from math import ceil
+from typing import Dict, Tuple
 
 # Imports from cornflow libraries
 from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
-from .const import INSTANCE_KEYS_RELATION
+from pytups import SuperDict, TupList
 
+from .const import INSTANCE_KEYS_RELATION
 # Imports from internal modules
 from .tools import (
-    get_date_from_string,
-    get_date_string_from_ts,
-    get_hour_from_date_time,
     get_hour_string_from_date_time,
     get_hour_string_from_hour_minute,
     get_one_date,
-    get_time_slot_string,
-    get_week_from_ts,
 )
 
 

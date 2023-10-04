@@ -4,11 +4,13 @@
 # Imports from libraries
 import os
 import pickle
-from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
+from pytups import SuperDict, TupList
+
+from DAG.rostering.core.tools import get_week_from_string
 
 
 class Solution(SolutionCore):
@@ -57,18 +59,21 @@ class Solution(SolutionCore):
         Returns a SuperDict with the amount of time slots worked by each employee in each week.
         For example: {(0, 1): 40, ...}
         """
-        return (
-            TupList(
-                {
-                    "id_employee": id_employee,
-                    "ts": ts,
-                    "week": self.get_week_from_datetime_string(ts),
-                }
-                for (id_employee, ts) in self.data["works"]
+        try:
+            return (
+                TupList(
+                    {
+                        "id_employee": id_employee,
+                        "ts": ts,
+                        "week": get_week_from_string(ts),
+                    }
+                    for (id_employee, ts) in self.data["works"]
+                )
+                .to_dict(result_col="ts", indices=["week", "id_employee"])
+                .vapply(lambda v: len(v))
             )
-            .to_dict(result_col="ts", indices=["week", "id_employee"])
-            .vapply(lambda v: len(v))
-        )
+        except ValueError as e:
+            return SuperDict()
 
     def get_ts_employee(self) -> SuperDict:
         """
