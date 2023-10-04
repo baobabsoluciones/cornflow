@@ -1,14 +1,24 @@
 import os
+import sys
 from typing import Dict
 
 from cornflow_client import ExperimentCore
 from cornflow_client.core.tools import load_json
-from matplotlib import pyplot as plt
-from matplotlib.collections import PatchCollection
-from matplotlib.patches import Rectangle
 from pytups import SuperDict
+
 from .instance import Instance
 from .solution import Solution
+
+try:
+    from matplotlib import pyplot as plt
+    from matplotlib.collections import PatchCollection
+    from matplotlib.patches import Rectangle
+except ModuleNotFoundError:
+    pass
+except NameError:
+    pass
+except ImportError:
+    pass
 
 
 class Experiment(ExperimentCore):
@@ -43,6 +53,11 @@ class Experiment(ExperimentCore):
         return dict()
 
     def plot_solution(self):
+        if "matplotlib" not in sys.modules:
+            raise ModuleNotFoundError(
+                "Matplotlib has to be installed to be able to plot!"
+            )
+
         rectangles = [
             Rectangle(
                 (el["x"], el["y"]),

@@ -16,9 +16,14 @@ from .const import INSTANCE_KEYS_RELATION
 
 # Imports from internal modules
 from .tools import (
+    get_date_from_string,
+    get_date_string_from_ts,
+    get_hour_from_date_time,
     get_hour_string_from_date_time,
     get_hour_string_from_hour_minute,
     get_one_date,
+    get_time_slot_string,
+    get_week_from_ts,
 )
 
 
