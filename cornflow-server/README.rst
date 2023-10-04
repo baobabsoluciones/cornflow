@@ -40,7 +40,7 @@ Cornflow helps you formalize your problem by proposing development guidelines. I
 Installation instructions
 -------------------------------
 
-Cornflow is tested with Ubuntu 20.04, python >= 3.7 and git.
+Cornflow is tested with Ubuntu 20.04, python >= 3.8 and git.
 
 Download the Cornflow project and install requirements::
 

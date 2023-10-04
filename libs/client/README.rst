@@ -6,7 +6,7 @@ The aim of this repository is to have a client to use to connect to a deployed c
 Requirements
 ~~~~~~~~~~~~
 
-* python >= 3.7
+* python >= 3.8
 
 Install cornflow-client
 ~~~~~~~~~~~~~~~~~~~~~~~~
