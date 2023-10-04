@@ -5,7 +5,7 @@ on:
     types: [ opened, edited, synchronize, reopened ]
     paths:
       - 'cornflow-dags/**'
-      - 'workflows/test_cornflow_dags.yml'
+      - '.github/workflows/test_cornflow_dags.yml'
       - '!cornflow-dags/README.rst'
   push:
     branches:

@@ -5,7 +5,7 @@ on:
     types: [ opened, edited, synchronize, reopened ]
     paths: 
       - 'cornflow-server/**'
-      - 'workflows/test_cornflow_server.yml'
+      - '.github/workflows/test_cornflow_server.yml'
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
   push:

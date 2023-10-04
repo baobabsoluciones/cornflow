@@ -5,7 +5,7 @@ on:
     types: [ opened, edited, synchronize, reopened ]
     paths:
       - 'libs/client/**'
-      - 'workflows/test_cornflow_client.yml'
+      - '.github/workflows/test_cornflow_client.yml'
       - '!libs/client/README.rst'
       - '!libs/client/setup.py'
   push:
