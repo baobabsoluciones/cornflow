@@ -21,7 +21,6 @@ class Solution(SolutionCore):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Solution":
-
         data_p = {
             el: {(v["id_employee"], v["time_slot"]): v for v in data[el]}
             for el in ["works"]

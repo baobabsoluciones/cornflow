@@ -162,14 +162,14 @@
           "start": {
             "description": "The earliest hour that an employee assigned to this shift can start working.",
             "title": "Starting hour",
-            "type": "integer",
+            "type": "string",
             "sortable": true,
             "filterable": true
           },
           "end": {
             "description": "The latest hour that an employee assigned to this shift can stop working.",
             "title": "Ending hour",
-            "type": "integer",
+            "type": "string",
             "sortable": true,
             "filterable": true
           }
@@ -276,7 +276,7 @@
           "hour": {
             "description": "The hour of the demand.",
             "title": "Hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           },
@@ -315,14 +315,14 @@
           "starting_hour": {
             "description": "The hour the work center opens",
             "title": "Opening hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           },
           "ending_hour": {
             "description": "The hour the work center closes",
             "title": "Closing hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           }
@@ -354,14 +354,14 @@
           "starting_hour": {
             "description": "The hour the work center opens",
             "title": "Opening hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           },
           "ending_hour": {
             "description": "The hour the work center closes",
             "title": "Closing hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           }
@@ -449,7 +449,7 @@
           "hour": {
             "description": "The hour of the skill demand.",
             "title": "Hour",
-            "type": "number",
+            "type": "string",
             "sortable": true,
             "filterable": true
           },
@@ -591,7 +591,7 @@
           "start": {
             "description": "The start hour time.",
             "title": "Start",
-            "type": "integer",
+            "type": "string",
             "sortable": true,
             "filterable": true
           }
