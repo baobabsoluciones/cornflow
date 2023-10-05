@@ -28,9 +28,9 @@ logger = logging.getLogger("airflow.task")
 def run_examples(**kwargs):
     with create_session() as session:
         current_examples = {
-            var.key: var.val["instance_1"]
+            var.key: var.get_val()["instance_1"]
             for var in session.query(Variable)
-            if "_examples" in var.key and len(var.val["instance_1"])
+            if "_examples" in var.key
         }
 
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
