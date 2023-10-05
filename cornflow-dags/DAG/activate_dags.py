@@ -28,7 +28,7 @@ def create_dag(app):
         **kwargs
     )
     with dag:
-        notify = app.get("notify", False)
+        notify = getattr(app, "notify", True)
         if not notify:
             t1 = PythonOperator(task_id=app.name, python_callable=solve)
         else:
