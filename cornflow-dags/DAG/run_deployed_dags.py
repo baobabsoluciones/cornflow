@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from datetime import datetime, timedelta
@@ -28,7 +29,7 @@ logger = logging.getLogger("airflow.task")
 def run_examples(**kwargs):
     with create_session() as session:
         current_examples = {
-            var.key: var.get_val()
+            var.key: json.loads(var.get_val())["instance_1"]
             for var in session.query(Variable)
             if "_examples" in var.key
         }
