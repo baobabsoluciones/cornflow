@@ -41,6 +41,7 @@ from cornflow.shared.const import (
 from cornflow.shared.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
 from cornflow.shared.validators import json_schema_validate_as_string
 
+
 class ExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new execution or get all the executions and their information back
