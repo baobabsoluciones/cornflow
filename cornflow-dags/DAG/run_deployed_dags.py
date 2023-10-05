@@ -55,7 +55,7 @@ def run_examples(**kwargs):
 
         instance_id = response["id"]
 
-        config = {"solver": "PULP_CBC_CMD", "time_limit": 60, "msg": True}
+        config = {"time_limit": 60, "msg": True}
 
         try:
             response = cf_client.create_execution(
