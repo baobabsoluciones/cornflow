@@ -10,7 +10,6 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
-
 # Imports from modules
 from cornflow_client import CornFlow, CornFlowApiError
 
@@ -312,6 +311,37 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )
+
+
+def callback_email(context):
+    from airflow.utils.email import send_email
+    from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
+    path_to_log = (
+        f"./logs/{context['dag'].dag_id}/"
+        f"{context['ti'].task_id}/{context['ts']}/1.log"
+    )
+    environment = EnvironmentVariablesBackend().get_variable("ENVIRONMENT")
+    notification_email = EnvironmentVariablesBackend().get_variable(
+        "NOTIFICATION_EMAIL"
+    )
+    environment_name = EnvironmentVariablesBackend().get_variable("ENVIRONMENT_NAME")
+
+    title = f"Airflow. {environment_name} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
+    body = f"""
+        The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has failed.
+        <br>
+        The log is attached.
+        """
+
+    send_email(
+        to=[
+            notification_email,
+        ],
+        subject=title,
+        html_content=body,
+        files=[path_to_log],
+    )
 
 
 class NoSolverException(Exception):
