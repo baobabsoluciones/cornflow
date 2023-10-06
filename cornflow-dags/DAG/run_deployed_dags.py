@@ -34,6 +34,8 @@ def run_examples(**kwargs):
             if "_examples" in var.key
         }
 
+    current_examples = {k: v for k, v in current_examples.items() if v != {}}
+
     logger.info(current_examples)
 
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
@@ -91,7 +93,7 @@ def run_examples(**kwargs):
 
             if response["state"] in (1, 2):
                 logger.info(
-                    f"Execution {execution} if schema {schema} finished successfully"
+                    f"Execution {execution} of schema {schema} finished successfully"
                 )
                 executions.pop(index)
             elif response["state"] in (-1, -2, -3, -4, -5, -6):

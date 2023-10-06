@@ -39,7 +39,10 @@ from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
 )
 from cornflow.shared.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
-from cornflow.shared.validators import json_schema_validate_as_string
+from cornflow.shared.validators import (
+    json_schema_validate_as_string,
+    json_schema_extend_and_validate_as_string,
+)
 
 
 class ExecutionEndpoint(BaseMetaResource):
@@ -77,12 +80,10 @@ class ExecutionEndpoint(BaseMetaResource):
         ]
 
         running_executions = [
-            execution for execution in executions
-            if execution.state in [
-                EXEC_STATE_RUNNING,
-                EXEC_STATE_QUEUED,
-                EXEC_STATE_UNKNOWN
-            ]
+            execution
+            for execution in executions
+            if execution.state
+            in [EXEC_STATE_RUNNING, EXEC_STATE_QUEUED, EXEC_STATE_UNKNOWN]
         ]
 
         for execution in running_executions:
@@ -185,7 +186,9 @@ class ExecutionEndpoint(BaseMetaResource):
 
         # Validate config before running the dag
         config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
-        config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
+        new_config, config_errors = json_schema_extend_and_validate_as_string(
+            config_schema, kwargs["config"]
+        )
         if config_errors:
             execution.update_state(
                 EXEC_STATE_ERROR_START,
@@ -198,6 +201,8 @@ class ExecutionEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                 f"Configuration data does not match the jsonschema.",
             )
+        elif new_config != kwargs["config"]:
+            execution.update_config(new_config)
 
         # Validate instance data before running the dag
         instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
@@ -327,7 +332,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(config, kwargs["schema"], CONFIG_SCHEMA)
+        config_schema = DeployedDAG.get_one_schema(
+            config, kwargs["schema"], CONFIG_SCHEMA
+        )
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             raise InvalidData(
@@ -445,14 +452,18 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if data.get("data") is not None and schema is not None:
-            data_jsonschema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
-            validation_errors = json_schema_validate_as_string(data_jsonschema, data["data"])
+            data_jsonschema = DeployedDAG.get_one_schema(
+                config, schema, SOLUTION_SCHEMA
+            )
+            validation_errors = json_schema_validate_as_string(
+                data_jsonschema, data["data"]
+            )
 
             if validation_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=validation_errors),
                     log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
-                            f"Solution data does not match the jsonschema.",
+                    f"Solution data does not match the jsonschema.",
                 )
 
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")

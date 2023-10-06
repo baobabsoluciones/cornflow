@@ -22,7 +22,6 @@ class Rostering(ApplicationCore):
     solution = Solution
     solvers = dict(mip=MipModel)
     schema = load_json(os.path.join(os.path.dirname(__file__), "./schemas/config.json"))
-    notify = True
 
     default_args = {
         "owner": "baobab",
