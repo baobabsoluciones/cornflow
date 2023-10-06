@@ -89,25 +89,17 @@ def run_examples(**kwargs):
                 executions.pop(index)
                 continue
 
-            try:
-                if response["status"] in (1, 2):
-                    logger.info(
-                        f"Execution {execution} if schema {schema} finished successfully"
-                    )
-                    executions.pop(index)
-                elif response["status"] in (-1, -2, -3, -4, -5, -6):
-                    logger.info(f"Execution {execution} of schema {schema} failed")
-                    executions.pop(index)
-                else:
-                    continue
-            except KeyError as e:
-                logger.info(e)
-                logger.info(response)
+            if response["state"] in (1, 2):
                 logger.info(
-                    f"Execution {execution} of schema {schema} had an error on status retrieval"
+                    f"Execution {execution} if schema {schema} finished successfully"
                 )
                 executions.pop(index)
+            elif response["state"] in (-1, -2, -3, -4, -5, -6):
+                logger.info(f"Execution {execution} of schema {schema} failed")
+                executions.pop(index)
+            else:
                 continue
+
         time.sleep(15)
 
     if len(executions):
