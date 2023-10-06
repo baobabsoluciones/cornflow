@@ -318,9 +318,10 @@ def callback_email(context):
     from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 
     path_to_log = (
-        f"./logs/{context['dag'].dag_id}/"
-        f"{context['ti'].task_id}/{context['ts']}/1.log"
+        f"./logs/dag_id={context['dag'].dag_id}/run_id={context['run_id']}"
+        f"/task_id={context['ti'].task_id}/attempt=1.log"
     )
+
     environment = EnvironmentVariablesBackend().get_variable("ENVIRONMENT")
     notification_email = EnvironmentVariablesBackend().get_variable(
         "NOTIFICATION_EMAIL"
