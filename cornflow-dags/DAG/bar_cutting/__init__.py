@@ -17,12 +17,9 @@ class BarCutting(ApplicationCore):
     solution = Solution
     solvers = dict(mip=MipModel, CG=ColumnGeneration)
     schema = load_json(os.path.join(os.path.dirname(__file__), "./schemas/config.json"))
-    schema["properties"]["solver"]["enum"].append("mip.cbc")
-    schema["properties"]["solver"]["enum"].append("CG.cbc")
 
     @property
     def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
-
         options_instance = ["data/example_instance_1.json"]
 
         options_solution = ["data/example_solution_1.json"]
