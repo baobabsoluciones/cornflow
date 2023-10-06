@@ -36,8 +36,6 @@ def run_examples(**kwargs):
 
     current_examples = {k: v for k, v in current_examples.items() if v != {}}
 
-    logger.info(current_examples)
-
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
     executions = []
 
