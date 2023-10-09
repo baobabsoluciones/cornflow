@@ -55,7 +55,7 @@ def run_examples(**kwargs):
 
         instance_id = response["id"]
 
-        config = {"timeLimit": 60, "msg": True}
+        config = {"timeLimit": 60, "msg": True, "seconds": 60}
 
         try:
             response = cf_client.create_execution(
