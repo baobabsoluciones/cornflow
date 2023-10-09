@@ -12,7 +12,7 @@ path_to_tests = os.path.dirname(os.path.abspath(__file__))
 class SchemaFromModelsTests(unittest.TestCase):
     def setUp(self):
         super().setUp()
-        self.models_path = self._get_path("../data/models")
+        self.models_path = self._get_path("../../models")
         self.output_path = self._get_path(os.path.join(os.getcwd(), "test_output.json"))
 
     @staticmethod
