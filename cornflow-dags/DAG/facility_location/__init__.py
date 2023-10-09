@@ -13,13 +13,6 @@ class FacilityLocation(ApplicationCore):
     solvers = dict(Pyomo=PyomoSolver)
     schema = load_json(os.path.join(os.path.dirname(__file__), "./schemas/config.json"))
 
-    def get_solver(self, name: str = "Pyomo") -> Union[Type[Experiment], None]:
-        if "." in name:
-            solver, _ = name.split(".")
-        else:
-            solver = name
-        return self.solvers.get(solver)
-
     @property
     def test_cases(self):
         data = load_json(
