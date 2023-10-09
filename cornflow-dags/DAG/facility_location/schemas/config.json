@@ -4,8 +4,8 @@
     "properties": {
         "solver": {
 			"type": "string",
-			"enum": ["PyomoSolver", "PyomoSolver.cbc"],
-			"default": "PyomoSolver.cbc"
+			"enum": ["Pyomo", "Pyomo.cbc"],
+			"default": "Pyomo.cbc"
 			},
         "timeLimit": {
 			"type": "number"
