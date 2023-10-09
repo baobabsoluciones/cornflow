@@ -97,7 +97,7 @@ services:
     <<: *cornflow-common
     restart: always
     ports:
-      - 8000:5000
+      - 5000:5000
     healthcheck:
       test: ["CMD-SHELL", "[ -f /usr/src/app/gunicorn.pid ]"]
       interval: 30s
