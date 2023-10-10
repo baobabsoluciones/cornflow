@@ -15,3 +15,9 @@ STATE_COLORS = {
     "up_for_retry": "yellow",
     "upstream_failed": "#b31e1e",
 }
+
+from airflow.www.utils import UIAlert
+
+DASHBOARD_UIALERTS = [
+    UIAlert("Welcome! This is the backend of your Cornflow environment. Airflow™ is a platform created by the community to programmatically author, schedule and monitor workflows."),
+]
