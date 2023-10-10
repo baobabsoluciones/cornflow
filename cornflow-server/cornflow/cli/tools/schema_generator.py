@@ -144,9 +144,6 @@ class SchemaGenerator:
         except Exception as err:
             click.echo(err)
 
-        for model in self.model_table:
-            click.echo(model, self.model_table[model])
-
     def inherit(self):
         all_classes = set(self.parents.keys())
         not_treated = set(all_classes)
