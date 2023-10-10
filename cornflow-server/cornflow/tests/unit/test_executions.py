@@ -16,6 +16,8 @@ from cornflow.tests.const import (
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
     DAG_URL,
+    BAD_EXECUTION_PATH,
+    EXECUTION_SOLUTION_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client
@@ -38,7 +40,9 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             return temp
 
         self.payload = load_file_fk(EXECUTION_PATH)
+        self.bad_payload = load_file_fk(BAD_EXECUTION_PATH)
         self.payloads = [load_file_fk(f) for f in EXECUTIONS_LIST]
+        self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
 
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
@@ -48,6 +52,55 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         patch_af_client(af_client_class)
 
         self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_bad_config(self, af_client_class):
+        patch_af_client(af_client_class)
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.bad_payload,
+            expected_status=400,
+            check_payload=False,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_partial_config(self, af_client_class):
+        patch_af_client(af_client_class)
+        self.payload["config"].pop("solver")
+        response = self.create_new_row(
+            EXECUTION_URL, self.model, payload=self.payload, check_payload=False
+        )
+        self.assertIn("solver", response["config"])
+        self.assertEqual(response["config"]["solver"], "cbc")
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_with_solution(self, af_client_class):
+        patch_af_client(af_client_class)
+        self.payload["data"] = self.solution
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+        )
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_with_solution_bad(self, af_client_class):
+        patch_af_client(af_client_class)
+        patch_af_client(af_client_class)
+        self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+            expected_status=400,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
 
     def test_new_execution_no_instance(self):
         payload = dict(self.payload)
@@ -281,11 +334,7 @@ class TestExecutionsDetailEndpoint(
     def test_stop_execution(self, af_client_class):
         patch_af_client(af_client_class)
 
-        idx = self.create_new_row(
-            EXECUTION_URL,
-            self.model,
-            payload=self.payload
-        )
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
         response = self.client.post(
             self.url + str(idx) + "/",
@@ -347,11 +396,13 @@ class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
     @patch("cornflow.endpoints.execution.Airflow")
     def test_get_one_status(self, af_client_class):
         patch_af_client(af_client_class)
-    
+
         idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
-        data = self.get_one_row(EXECUTION_URL + idx + "/status/", payload, check_payload=False)
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/", payload, check_payload=False
+        )
         self.assertEqual(data["state"], 1)
 
     @patch("cornflow.endpoints.execution.Airflow")

@@ -41,10 +41,3 @@ class BarCutting(ApplicationCore):
             )
             for i in range(len(options_instance))
         ]
-
-    def get_solver(self, name: str = "mip") -> Union[Type[Experiment], None]:
-        if "." in name:
-            solver, _ = name.split(".")
-        else:
-            solver = name
-        return self.solvers.get(solver)

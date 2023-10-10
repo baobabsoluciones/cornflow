@@ -148,14 +148,6 @@ class ExecutionEndpoint(BaseMetaResource):
             user=self.get_user(), idx=execution.instance_id
         )
 
-        if instance is None:
-            err = "The instance to solve does not exist"
-            raise ObjectDoesNotExist(
-                error=err,
-                log_txt=f"Error while user {self.get_user()} tries to create an execution "
-                f"for instance {execution.instance_id}. " + err,
-            )
-
         current_app.logger.debug(f"The request is: {request.args.get('run')}")
         # this allows testing without airflow interaction:
         if request.args.get("run", "1") == "0":
