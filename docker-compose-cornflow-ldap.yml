@@ -42,6 +42,8 @@ x-airflow-common:
       AIRFLOW_DB_USER: airflow
       AIRFLOW_DB_PASSWORD: airflow
       AIRFLOW_DB: airflow
+      AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
+      AIRFLOW__WEBSERVER__NAVBAR_COLOR: '#0693e3' 
       AIRFLOW_LDAP_ENABLE: 'True'
       AIRFLOW_LDAP_URI: ldap://openldap:389
       AIRFLOW_LDAP_SEARCH: ou=users,dc=example,dc=org
@@ -56,6 +58,7 @@ x-airflow-common:
       - ./cornflow-dags/requirements.txt:/requirements.txt
       - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
       - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
+      - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
     depends_on:
       &airflow-common-depends-on
       airflow_db:
