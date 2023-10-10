@@ -29,7 +29,6 @@ class SchemaFromModelsTests(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.output_path):
             os.remove(self.output_path)
-        db.metadata.clear()
 
     def test_base(self):
         runner = CliRunner()
