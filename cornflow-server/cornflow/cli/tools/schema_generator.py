@@ -6,6 +6,8 @@ import json
 import importlib.util
 from distutils.dir_util import copy_tree
 from unittest.mock import MagicMock
+
+import click
 from flask_sqlalchemy import SQLAlchemy
 import shutil
 from pytups import TupList, SuperDict
@@ -140,10 +142,10 @@ class SchemaGenerator:
 
             db.session.close()
         except Exception as err:
-            print(err)
+            click.echo(err)
 
         for model in self.model_table:
-            print(model, self.model_table[model])
+            click.echo(model, self.model_table[model])
 
     def inherit(self):
         all_classes = set(self.parents.keys())
