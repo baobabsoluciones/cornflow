@@ -71,7 +71,8 @@ class DeployedDAG(TraceAttributesModel):
             jsonschema = item.instance_checks_schema
         elif schema == SOLUTION_CHECKS_SCHEMA:
             jsonschema = item.solution_checks_schema
-        else:           # schema == CONFIG_SCHEMA
+        # schema == CONFIG_SCHEMA
+        else:
             jsonschema = item.config_schema
 
         if jsonschema is None:
