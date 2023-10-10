@@ -5,6 +5,7 @@ import os
 from click.testing import CliRunner
 
 from cornflow.cli import cli
+from cornflow.shared import db
 
 path_to_tests = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,6 +29,7 @@ class SchemaFromModelsTests(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.output_path):
             os.remove(self.output_path)
+        db.metadata.clear()
 
     def test_base(self):
         runner = CliRunner()
@@ -68,7 +70,7 @@ class SchemaFromModelsTests(unittest.TestCase):
                 "role_id": "integer",
             },
         }
-        required_instance = {"id", "name", "data_hash"}
+        required_instance = {"id", "name", "data_hash", "user_id"}
         foreign_keys = [
             ("permission_dag", "dag_id", "deployed_dags.id"),
             ("permission_dag", "user_id", "users.id"),

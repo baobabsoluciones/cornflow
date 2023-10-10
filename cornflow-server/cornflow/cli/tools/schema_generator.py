@@ -25,11 +25,18 @@ class SchemaGenerator:
         self.data = SuperDict()
         self.model_table = dict()
         self.table_model = dict()
+        self.prefix_table_name = "sfm_tmp_"
 
     def main(self):
+        self.clear()
         os.mkdir(self.tmp_path)
 
-        copy_tree(self.path, self.tmp_path)
+        # copy_tree(self.path, self.tmp_path)
+        for root, dirs, files in os.walk(self.path):
+            for file_ in files:
+                if file_.endswith(".py"):
+                    shutil.copy(os.path.join(root, file_), os.path.join(self.tmp_path, file_))
+                    print(f"Moving {os.path.join(root, file_)} to {os.path.join(self.tmp_path, file_)}")
 
         files = (
             TupList(os.listdir(self.tmp_path))
@@ -44,9 +51,13 @@ class SchemaGenerator:
 
         self.mock_packages(files)
 
+        self.replace_table_names(files)
+
         self.parse(files)
 
         self.inherit()
+
+        self.clean_table_names()
 
         schema = self.to_schema()
 
@@ -71,12 +82,29 @@ class SchemaGenerator:
 
         sys.modules["mockedpackage"] = MagicMock()
 
+    def replace_table_names(self, files):
+        # Mock tablenames
+        for file_path, file_name in files:
+            with open(file_path, "r") as fd:
+                text = fd.read()
+            tablenames_1 = list(re.findall(r"__tablename__ = \"(.+)\"", text)) + list(re.findall(r"__tablename__ = \'(.+)\'", text))
+            tablenames_2 = list(re.findall(r"__tablename__ =\"(.+)\"", text)) + list(re.findall(r"__tablename__ =\'(.+)\'", text))
+            for tab in tablenames_1:
+                text = text.replace(f"__tablename__ = \"{tab}\"", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+                text = text.replace(f"__tablename__ = \'{tab}\'", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+            for tab in tablenames_2:
+                text = text.replace(f"__tablename__ =\"{tab}\"", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+                text = text.replace(f"__tablename__ =\'{tab}\'", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+
+            with open(file_path, "w") as fd:
+                fd.write(text)
+
     def parse(self, files):
         forget_keys = ["created_at", "updated_at", "deleted_at"]
         db = SQLAlchemy()
         try:
             for file_path, file_name in files:
-
+                print(file_name)
                 spec = importlib.util.spec_from_file_location(file_name, file_path)
                 mod = importlib.util.module_from_spec(spec)
 
@@ -173,6 +201,12 @@ class SchemaGenerator:
             not_treated -= treated
         if not self.leave_bases:
             self.data = self.data.vfilter(lambda v: not v.get("remove", False))
+
+    def clean_table_names(self):
+        self.data = {
+            k.replace(self.prefix_table_name, ""): v
+            for k, v in self.data.items()
+        }
 
     def clear(self):
         if os.path.isdir(self.tmp_path):
