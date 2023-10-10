@@ -25,7 +25,7 @@ def schemas():
 
 @schemas.command(
     name="generate_from_schema",
-    help="Command to generate models, endpoints and schemas from a jsonschema"
+    help="Command to generate models, endpoints and schemas from a jsonschema",
 )
 @click.option(
     "--path", "-p", type=str, help="The absolute path to the JSONSchema", required=True
@@ -70,7 +70,13 @@ def schemas():
     required=False,
 )
 def generate_from_schema(
-    path, app_name, output_path, remove_methods, one, endpoints_methods, endpoints_access
+    path,
+    app_name,
+    output_path,
+    remove_methods,
+    one,
+    endpoints_methods,
+    endpoints_access,
 ):
     """
     This method is executed for the command and creates all the files for the REST API from the provided JSONSchema
@@ -126,11 +132,14 @@ def generate_from_schema(
         output_path=output_path,
         options=methods_to_add,
         name_table=name_table,
-        endpoints_access=dict_endpoints_access
+        endpoints_access=dict_endpoints_access,
     ).main()
 
 
-@schemas.command(name="schema_from_models", help="Command to generate a jsonschema from a set of models")
+@schemas.command(
+    name="schema_from_models",
+    help="Command to generate a jsonschema from a set of models",
+)
 @click.option(
     "--path",
     "-p",
@@ -182,3 +191,5 @@ def schema_from_models(path, output_path, ignore_files, leave_bases):
     SchemaGenerator(
         path, output_path=output, ignore_files=ignore_files, leave_bases=leave_bases
     ).main()
+
+    return True

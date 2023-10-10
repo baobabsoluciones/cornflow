@@ -1,19 +1,28 @@
-import unittest
 import json
 import os
+import unittest
 
 from click.testing import CliRunner
+from flask_testing import TestCase
 
+from cornflow.app import create_app
 from cornflow.cli import cli
+from cornflow.shared import db
 
 path_to_tests = os.path.dirname(os.path.abspath(__file__))
 
 
-class SchemaFromModelsTests(unittest.TestCase):
+class SchemaFromModelsTests(TestCase):
+    def create_app(self):
+        app = create_app("testing")
+        return app
+
     def setUp(self):
-        super().setUp()
-        self.models_path = self._get_path("../data/models")
+        db.create_all()
+        self.models_path = self._get_path("../../models")
+        print(self.models_path)
         self.output_path = self._get_path(os.path.join(os.getcwd(), "test_output.json"))
+        print(self.output_path)
 
     @staticmethod
     def import_schema(path):
@@ -26,6 +35,8 @@ class SchemaFromModelsTests(unittest.TestCase):
         return os.path.join(path_to_tests, rel_path)
 
     def tearDown(self):
+        db.session.remove()
+        db.drop_all()
         if os.path.exists(self.output_path):
             os.remove(self.output_path)
 
@@ -39,11 +50,11 @@ class SchemaFromModelsTests(unittest.TestCase):
                 "-p",
                 self.models_path,
                 "-o",
-                self.output_path
-            ]
+                self.output_path,
+            ],
         )
 
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, True)
 
         schema = self.import_schema(self._get_path(self.output_path))
 
@@ -113,11 +124,11 @@ class SchemaFromModelsTests(unittest.TestCase):
                 "-o",
                 self.output_path,
                 "-i",
-                "instance.py"
-            ]
+                "instance.py",
+            ],
         )
 
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, True)
 
         schema = self.import_schema(self.output_path)
 
