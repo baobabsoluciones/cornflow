@@ -2,7 +2,7 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
 from pytups import SuperDict
 from two_dimension_bin_packing.core import Experiment, Solution
@@ -257,6 +257,7 @@ class RightCornerModel(Experiment):
             _, solver_name = solver_name.split(".")
 
         # Setting solver
+        # TODO: review solver options translation
         if solver_name == "gurobi":
             opt = SolverFactory(solver_name, solver_io="python")
         else:
@@ -274,14 +275,12 @@ class RightCornerModel(Experiment):
         # Check status
         if status in ["error", "unknown", "warning"]:
             return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         elif status == "aborted":
             if termination_condition != STATUS_TIME_LIMIT:
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
 
         solution_dict = SuperDict()
@@ -304,7 +303,4 @@ class RightCornerModel(Experiment):
         self.solution = Solution.from_dict(solution_dict)
         # self.plot_solution()
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=termination_condition, status_sol=SOLUTION_STATUS_FEASIBLE)
