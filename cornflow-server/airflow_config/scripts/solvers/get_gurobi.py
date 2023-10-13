@@ -22,10 +22,10 @@ def install():
         install_dir = "/usr/local/airflow/gurobi"
         os.chdir("/usr/local/airflow")
         subprocess.check_output(
-            ["wget", "https://packages.gurobi.com/9.5/gurobi9.5.0_linux64.tar.gz"]
+            ["wget", "https://packages.gurobi.com/10.0/gurobi10.0.1_linux64.tar.gz"]
         )
-        subprocess.check_output(["tar", "-xvf", "gurobi9.5.0_linux64.tar.gz"])
-        os.rename("gurobi950", "gurobi")
+        subprocess.check_output(["tar", "-xvf", "gurobi10.0.1_linux64.tar.gz"])
+        os.rename("gurobi1001", "gurobi")
         uid = pwd.getpwnam("airflow").pw_uid
         gid = grp.getgrnam("airflow").gr_gid
         os.chown(install_dir, uid, gid)
