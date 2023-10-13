@@ -1,10 +1,17 @@
 version 1.0.16
 ---------------
 
+- released:
+- description:
+- changelog:
 
 version 1.0.15
 ---------------
 
+- released: 2023-10-04
+- description: dropped Python 3.7 support
+- changelog:
+    - dropped python 3.7 support as will the rest of components.
 
 
 version 1.0.14

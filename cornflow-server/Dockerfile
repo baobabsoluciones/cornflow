@@ -1,4 +1,4 @@
-# VERSION 1.0.8a1
+# VERSION 1.0.8a3
 # AUTHOR: sistemas@baobabsoluciones.es
 
 FROM python:3.10-slim-buster
@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.0.8a2
+ARG CORNFLOW_VERSION=1.0.8a3
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \

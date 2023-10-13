@@ -1,6 +1,9 @@
 version 1.0.8
 --------------
 
+- released:
+- description:
+- changelog:
 
 
 version 1.0.7
