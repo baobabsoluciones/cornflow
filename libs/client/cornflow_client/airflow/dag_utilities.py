@@ -78,7 +78,7 @@ def connect_to_cornflow(secrets):
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
-    uri = secrets.get_conn_uri("CF_URI")
+    uri = secrets.get_conn_value("CF_URI")
     conn = urlparse(uri)
     scheme = conn.scheme
     if scheme == "cornflow":
@@ -326,7 +326,7 @@ def callback_email(context):
     notification_email = EnvironmentVariablesBackend().get_variable(
         "NOTIFICATION_EMAIL"
     )
-    environment_name = EnvironmentVariablesBackend().get_variable("ENVIRONMENT_NAME")
+    environment_name = os.getenv("AIRFLOW__WEBSERVER__INSTANCE_NAME", "CornflowEnv")
 
     title = f"Airflow. {environment_name} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
     body = f"""
