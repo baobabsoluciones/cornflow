@@ -1,9 +1,9 @@
 # VERSION 2.7.1
-# AUTHOR: sistemas@baobabsoluciones.es
+# AUTHOR: cornflow@baobabsoluciones.es
 # DESCRIPTION: Airflow 2.7.1 image personalized for use with Cornflow (from puckel/docker-airflow https://github.com/puckel/docker-airflow by "Puckel_")
 
 FROM python:3.10-slim-buster
-LABEL maintainer="sistemas@baobabsoluciones"
+LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
