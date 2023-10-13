@@ -1,8 +1,8 @@
-requests==2.31.0
-genson
-jsonschema
+requests<=2.31.0
+genson<=1.2.2
+jsonschema<=4.19.1
 marshmallow<=3.19.0
-pytups>=0.86.2
-ortools
+pytups<=0.86.2
+ortools<=9.7.2996
 pandas>=1.5.2
-PuLP>=2.3
+PuLP<=2.7.0
