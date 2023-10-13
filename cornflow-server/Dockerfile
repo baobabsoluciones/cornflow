@@ -2,7 +2,7 @@
 # AUTHOR: sistemas@baobabsoluciones.es
 
 FROM python:3.10-slim-buster
-LABEL maintainer="sistemas@baobabsoluciones"
+LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
@@ -38,6 +38,11 @@ RUN mkdir -p /usr/src/app/log
 
 # create folder for custom ssh keys
 RUN mkdir /usr/src/app/.ssh
+
+# user cornflow on application
+RUN useradd -ms /bin/bash -d /usr/src/app cornflow
+RUN chown -R cornflow: /usr/src/app
+USER cornflow
 
 EXPOSE 5000
 
