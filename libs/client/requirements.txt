@@ -1,8 +1,8 @@
-requests
+requests==2.31.0
 genson
 jsonschema
-marshmallow
-pytups
+marshmallow<=3.19.0
+pytups>=0.86.2
 ortools
 pandas>=1.5.2
 PuLP>=2.3
