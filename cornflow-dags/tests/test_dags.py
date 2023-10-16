@@ -162,9 +162,6 @@ class Tsp(BaseDAGTests.SolvingTests):
 
         self.app = TspApp()
 
-    def test_solve_aco(self):
-        return self.test_try_solving_testcase(dict(solver="aco", **self.config))
-
     def test_solve_cpsat(self):
         return self.test_try_solving_testcase(dict(solver="cpsat", **self.config))
 

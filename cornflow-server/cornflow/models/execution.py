@@ -99,6 +99,16 @@ class ExecutionModel(BaseDataModel):
             self.checks = None
         super().update(data)
 
+    def update_config(self, config: dict):
+        """
+        Method to update the config of the execution after extending with default values
+
+        :param dict config: The config to store
+        :return: nothing
+        """
+        self.config = config
+        super().update({})
+
     def update_state(self, code, message=None):
         """
         Method to update the state code and message of an execution

@@ -11,17 +11,7 @@ class FacilityLocation(ApplicationCore):
     instance = Instance
     solution = Solution
     solvers = dict(Pyomo=PyomoSolver)
-    schema = get_empty_schema(
-        properties=dict(timeLimit=dict(type="number")),
-        solvers=list(solvers.keys()) + ["Pyomo.cbc"],
-    )
-
-    def get_solver(self, name: str = "Pyomo") -> Union[Type[Experiment], None]:
-        if "." in name:
-            solver, _ = name.split(".")
-        else:
-            solver = name
-        return self.solvers.get(solver)
+    schema = load_json(os.path.join(os.path.dirname(__file__), "./schemas/config.json"))
 
     @property
     def test_cases(self):

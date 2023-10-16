@@ -31,8 +31,8 @@ class DagUtilities(unittest.TestCase):
         ]
         client_instance = CornFlow.return_value
         client_instance.login.return_value = ""
-        for (conn_str, user_info, url) in conn_uris:
-            secrets.get_conn_uri.return_value = conn_str
+        for conn_str, user_info, url in conn_uris:
+            secrets.get_conn_value.return_value = conn_str
             du.connect_to_cornflow(secrets)
             client_instance.login.assert_called_with(
                 username=user_info[0], pwd=user_info[1]

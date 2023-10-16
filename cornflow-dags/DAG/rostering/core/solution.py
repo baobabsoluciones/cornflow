@@ -10,9 +10,6 @@ from pytups import SuperDict, TupList
 from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
 
-# Imports from internal modules
-from .tools import get_week_from_string
-
 
 class Solution(SolutionCore):
     schema = load_json(
@@ -21,7 +18,6 @@ class Solution(SolutionCore):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Solution":
-
         data_p = {
             el: {(v["id_employee"], v["time_slot"]): v for v in data[el]}
             for el in ["works"]
@@ -63,7 +59,11 @@ class Solution(SolutionCore):
         """
         return (
             TupList(
-                {"id_employee": id_employee, "ts": ts, "week": get_week_from_string(ts)}
+                {
+                    "id_employee": id_employee,
+                    "ts": ts,
+                    "week": self.get_week_from_datetime_string(ts),
+                }
                 for (id_employee, ts) in self.data["works"]
             )
             .to_dict(result_col="ts", indices=["week", "id_employee"])
