@@ -49,6 +49,7 @@ def create_app(env_name="development", dataconn=None):
     dictConfig(log_config(app_config[env_name].LOG_LEVEL))
 
     app = Flask(__name__)
+    app.json.sort_keys = False
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
 
     app.config.from_object(app_config[env_name])

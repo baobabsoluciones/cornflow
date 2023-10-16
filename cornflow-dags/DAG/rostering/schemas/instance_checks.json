@@ -25,7 +25,188 @@
         "required": ["primary_table", "foreign_table", "key", "value"],
         "additionalProperties": false
       }
+    },
+    "missing_data": {
+      "type": "array",
+      "title": "Missing data",
+      "description": "Table containing the data about missing input data. The entry with {key}={value} from table {primary_table} does not have an associated entry in {foreign_table}.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "primary_table": {
+            "type": "string"
+          },
+          "foreign_table": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": ["integer", "string"]
+          }
+        },
+        "required": ["primary_table", "foreign_table", "key", "value"],
+        "additionalProperties": false
+      }
+    },
+    "timeslot_length": {
+      "type": "object",
+      "title": "Timeslot length",
+      "is_warning": false,
+      "description": "Timeslot length should be 15, 30 or 60.",
+      "properties": {
+        "timeslot_length": {
+          "type": "number",
+          "title": "Timeslot length",
+          "description": "The timeslot length provided by the user."
+        }
+      },
+      "required": []
+    },
+    "weekly_schedule_timeslots": {
+      "type": "array",
+      "title": "Weekly schedule timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the weekly schedule table are not coherent with the timeslot length. The opening hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday",
+            "description": "The day of the week"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["weekday", "hour"]
+      }
+    },
+    "schedule_exceptions_timeslots": {
+      "type": "array",
+      "title": "Schedule exceptions timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the schedule exceptions table are not coherent with the timeslot length. The opening hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "title": "Date",
+            "description": "The date of the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["date", "hour"]
+      }
+    },
+    "shift_hours_timeslots": {
+      "type": "array",
+      "title": "Contracts timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the contracts table are not coherent with the timeslot length. The opening hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "title": "Date",
+            "description": "The date of the problem"
+          },
+          "employee": {
+            "type": "integer",
+            "title": "Employee",
+            "description": "The employee with the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["week", "employee", "hour"]
+      }
+    },
+    "employee_preferences_timeslots": {
+      "type": "array",
+      "title": "Employee preferences timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the employees preferences table are not coherent with the timeslot length. The opening hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The week of the problem"
+          },
+          "employee": {
+            "type": "integer",
+            "title": "Employee",
+            "description": "The employee with the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["week", "employee", "hour"]
+      }
+    },
+    "fixed_worktable_timeslots": {
+      "type": "array",
+      "title": "Fixed worktable timeslots",
+      "is_warning": true,
+      "description": "The hours provided in the fixed worktable table are not coherent with the timeslot length. The hours will be rounded to match timeslot length.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The week of the problem"
+          },
+          "employee": {
+            "type": "integer",
+            "title": "Employee",
+            "description": "The employee with the problem"
+          },
+          "hour": {
+            "type": "string",
+            "title": "Hour",
+            "description": "The hour of the incoherence"
+          }
+        },
+        "required": ["week", "employee", "hour"]
+      }
+    },
+    "penalties": {
+      "type": "array",
+      "title": "Penalties",
+      "description": "Some soft constraints do not have a penalty defined. They will be assigned the default value 1.",
+      "is_warning": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "title": "Requirement",
+            "description": "The name of the requirement for which the penalty is not defined"
+          }
+        },
+        "required": ["requirement"]
+      }
     }
   },
-  "required": ["incoherent_foreign_keys"]
+  "required": []
 }
