@@ -29,7 +29,7 @@ def install():
         subprocess.check_output("make")
         subprocess.check_output(["cp", "bin/highs", "/usr/local/bin/highs"])
         subprocess.check_output(["chmod", "+x", "/usr/local/bin/highs"])
-        uid = pwd.getpwnam("airflow").pw_uid
+        uid = pwd.getpwnam("cornflow").pw_uid
         gid = grp.getgrnam("root").gr_gid
         highs_path = "/usr/local/bin/highs"
         os.chown(highs_path, uid, gid)
