@@ -30,7 +30,7 @@ def install():
         )
         output_choco = choco_install.stdout
         print(output_choco)
-        uid = pwd.getpwnam("airflow").pw_uid
+        uid = pwd.getpwnam("cornflow").pw_uid
         gid = grp.getgrnam("root").gr_gid
         choco_path = "/usr/local/bin/choco.jar"
         os.chown(choco_path, uid, gid)
