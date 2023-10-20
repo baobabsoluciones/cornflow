@@ -116,19 +116,18 @@
 <section id="install-cornflow">
 <h2>Install cornflow<a class="headerlink" href="#install-cornflow" title="Permalink to this heading"></a></h2>
 <p>Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the “development deploy” that consists on installing them in the same machine.</p>
-<p>Download the Cornflow project:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">cornflow</span><span class="o">-</span><span class="n">server</span>
-<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
-<span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">txt</span>
-</pre></div>
-</div>
-<p>activate the virtual environment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<p>Create and activate the virtual environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
+<span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
 <p>or, in windows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">venv</span><span class="o">/</span><span class="n">Scripts</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
+<span class="n">venv</span><span class="o">/</span><span class="n">Scripts</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+<p>Install the Cornflow library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">pip3</span> <span class="n">install</span> <span class="n">cornflow</span>
 </pre></div>
 </div>
 </section>

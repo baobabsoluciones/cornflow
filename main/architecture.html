@@ -140,17 +140,17 @@
 <p>Create instance (data):</p>
 <ol class="arabic simple">
 <li><p>Client calls Cornflow and sends instance.</p></li>
-<li><p>Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.</p></li>
+<li><p>Cornflow validates the instance matches the app’s jsonschema.</p></li>
 <li><p>Cornflow saves the instance and returns the instance code to client.</p></li>
 </ol>
 <p>Solve instance (instance, config, dag):</p>
 <ol class="arabic simple">
-<li><p>Client calls Cornflow and gives instance code and execution configuration.</p></li>
-<li><p>Cornflow asks cornflow for schema and validates the instance matches the dag to execute.</p></li>
+<li><p>Client calls Cornflow and gives instance code, execution configuration and eventually an existing solution.</p></li>
+<li><p>Cornflow validates the instance matches the jsonschema of the dag to execute.</p></li>
 <li><p>Cornflow calls airflow dag and assigns dagrun code to execution.</p></li>
 <li><p>Cornflow creates execution and returns the execution code to client.</p></li>
 <li><p>Airflow creates a rundag for the selected dag and sends it to a worker.</p></li>
-<li><p>The worker asks Cornflow for the instance and the config.</p></li>
+<li><p>The worker asks Cornflow for the instance, the config, and eventually the solution data.</p></li>
 <li><p>The worker solves the problem.</p></li>
 <li><p>The worker sends Cornflow the results (solution and log) of the execution.</p></li>
 </ol>
@@ -183,7 +183,7 @@
 <p>Retrieve schema:</p>
 <ol class="arabic simple">
 <li><p>Client asks Cornflow for the schema to a problem.</p></li>
-<li><p>Cornflow asks Airflow for the schema of a problem.</p></li>
+<li><p>If Cornflow does not know it: it asks Airflow for the schema of a problem.</p></li>
 <li><p>Airflow returns the schema if it exists.</p></li>
 </ol>
 <p>Get instance data:</p>

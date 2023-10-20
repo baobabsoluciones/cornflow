@@ -54,17 +54,17 @@ Main data flows
 Create instance (data):
 
 #. Client calls Cornflow and sends instance.
-#. Cornflow asks airflow for the schema of the instance and validates the instance matches the schema.
+#. Cornflow validates the instance matches the app's jsonschema.
 #. Cornflow saves the instance and returns the instance code to client.
 
 Solve instance (instance, config, dag):
 
-#. Client calls Cornflow and gives instance code and execution configuration.
-#. Cornflow asks cornflow for schema and validates the instance matches the dag to execute.
+#. Client calls Cornflow and gives instance code, execution configuration and eventually an existing solution.
+#. Cornflow validates the instance matches the jsonschema of the dag to execute.
 #. Cornflow calls airflow dag and assigns dagrun code to execution.
 #. Cornflow creates execution and returns the execution code to client.
 #. Airflow creates a rundag for the selected dag and sends it to a worker.
-#. The worker asks Cornflow for the instance and the config.
+#. The worker asks Cornflow for the instance, the config, and eventually the solution data.
 #. The worker solves the problem.
 #. The worker sends Cornflow the results (solution and log) of the execution.
 
@@ -97,7 +97,7 @@ Retrieve status (execution):
 Retrieve schema:
 
 #. Client asks Cornflow for the schema to a problem.
-#. Cornflow asks Airflow for the schema of a problem.
+#. If Cornflow does not know it: it asks Airflow for the schema of a problem.
 #. Airflow returns the schema if it exists.
 
 Get instance data:
