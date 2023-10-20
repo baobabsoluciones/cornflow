@@ -1,15 +1,15 @@
-# VERSION 2.0.2
+# VERSION 1.0.8
 # AUTHOR: sistemas@baobabsoluciones.es
 
-FROM python:3.8-slim-buster
-LABEL maintainer="sistemas@baobabsoluciones"
+FROM python:3.10-slim-buster
+LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.0.7
+ARG CORNFLOW_VERSION=1.0.8
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
@@ -38,6 +38,11 @@ RUN mkdir -p /usr/src/app/log
 
 # create folder for custom ssh keys
 RUN mkdir /usr/src/app/.ssh
+
+# user cornflow on application
+RUN useradd -ms /bin/bash -d /usr/src/app cornflow
+RUN chown -R cornflow: /usr/src/app
+USER cornflow
 
 EXPOSE 5000
 

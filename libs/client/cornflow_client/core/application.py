@@ -33,6 +33,13 @@ class ApplicationCore(ABC):
     """
     The application template.
     """
+    # We create a new attribute controlling the use of the notification mail function
+    def __init__(self):
+        self._notify = False
+
+    @property
+    def notify(self) -> bool:
+        return self._notify
 
     @property
     @abstractmethod

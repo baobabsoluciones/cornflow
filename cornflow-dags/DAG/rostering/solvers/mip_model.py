@@ -36,18 +36,34 @@ class MipModel(Experiment):
         self.first_ts_day_employee = SuperDict()
         self.demand = SuperDict()
         self.ts_demand_employee_skill = SuperDict()
+        self.ts_employees_holidays = TupList()
+        self.ts_employees_rest_days = TupList()
+        self.ts_skill_demand = TupList()
         self.preference_starts_ts = SuperDict()
         self.preference_hours_employee = SuperDict()
         self.preference_slots = SuperDict()
+        self.employees_rest_days = TupList()
+        self.fixed_schedule = TupList()
 
         # Variables
         self.works = SuperDict()
         self.starts = SuperDict()
+        self.unmet_skill_demand = SuperDict()
+        self.unmet_preference_start = SuperDict()
+        self.unmet_preference_hours = SuperDict()
+        self.unmet_manager_constraint = SuperDict()
+        self.unmet_rest_hours_constraint = SuperDict()
+        self.unmet_employee_holidays_constraint = SuperDict()
+        self.unmet_min_daily_hours_constraint = SuperDict()
+        self.unmet_max_weekly_work_days_constraint = SuperDict()
+        self.unmet_max_daily_hours_constraint = SuperDict()
+        self.unmet_weekly_hours_constraint = SuperDict()
+        self.unmet_employee_schedule = SuperDict()
+        self.unmet_fixed_schedule_constraint = SuperDict()
 
         self.initialize()
 
     def solve(self, options: dict) -> dict:
-
         model = pl.LpProblem("rostering", pl.LpMaximize)
         # Variables:
         self.create_variables()
@@ -62,7 +78,9 @@ class MipModel(Experiment):
             solver_name = "PULP_CBC_CMD"
 
         options["solver"] = f"{prefix}.{solver_name}"
-        solver = pl.getSolver(solver_name, **self.get_solver_config(options, lib="pulp"))
+        solver = pl.getSolver(
+            solver_name, **self.get_solver_config(options, lib="pulp")
+        )
 
         # Solver and solve
         status = model.solve(solver)
@@ -106,12 +124,18 @@ class MipModel(Experiment):
         self.ts_demand_employee_skill = self.instance.get_ts_demand_employees_skill(
             self.employee_ts_availability
         )
+        self.ts_skill_demand = self.instance.get_ts_skill_demand(
+            self.ts_demand_employee_skill.keys_tl()
+        )
+        self.ts_employees_holidays = self.instance.get_employee_time_slots_holidays()
         self.preference_starts_ts = self.instance.get_employee_preference_start_ts()
         self.preference_hours_employee = self.instance.get_employee_preference_hours()
         self.preference_slots = self.instance.get_employee_time_slots_preferences()
+        self.ts_employees_rest_days = self.instance.get_employee_time_slots_rest_days()
+        self.employees_rest_days = self.instance.get_employees_rest_days(self.ts_employees_rest_days)
+        self.fixed_schedule = self.instance.get_employee_fixed_worktable()
 
     def create_variables(self):
-
         self.works = pl.LpVariable.dicts(
             "works",
             self.employee_ts_availability,
@@ -132,11 +156,163 @@ class MipModel(Experiment):
 
         self.starts = SuperDict(self.starts)
 
+        # RQ02
+        self.unmet_weekly_hours_constraint = pl.LpVariable.dicts(
+            "unmet_weekly_hours_constraint",
+            self.max_working_ts_week.keys_l(),
+            lowBound=0,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_weekly_hours_constraint = SuperDict(
+            self.unmet_weekly_hours_constraint
+        )
+
+        # RQ03
+        self.unmet_max_daily_hours_constraint = pl.LpVariable.dicts(
+            "unmet_max_daily_hours_constraint",
+            self.workable_ts_day.keys_l(),
+            lowBound=0,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_max_daily_hours_constraint = SuperDict(
+            self.unmet_max_daily_hours_constraint
+        )
+
+        # RQ05
+        self.unmet_max_weekly_work_days_constraint = pl.LpVariable.dicts(
+            "unmet_max_weekly_work_days_constraint",
+            self.workable_ts_week.keys_l(),
+            lowBound=0,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_max_weekly_work_days_constraint = SuperDict(
+            self.unmet_max_weekly_work_days_constraint
+        )
+
+        # RQ06
+        self.unmet_min_daily_hours_constraint = pl.LpVariable.dicts(
+            "unmet_min_daily_hour_constraint",
+            self.workable_ts_day.keys_l(),
+            lowBound=0,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_min_daily_hours_constraint = SuperDict(
+            self.unmet_min_daily_hours_constraint
+        )
+
+        # RQ07
+        self.unmet_rest_hours_constraint = pl.LpVariable.dicts(
+            "unmet_rest_hours_constraint",
+            self.incompatible_ts_employee,
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_rest_hours_constraint = SuperDict(self.unmet_rest_hours_constraint)
+
+        # RQ08
+        self.unmet_manager_constraint = pl.LpVariable.dicts(
+            "unmet_manager_constraints",
+            self.ts_managers.keys_l(),
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_manager_constraint = SuperDict(self.unmet_manager_constraint)
+
+        # RQ09
+        self.unmet_skill_demand = pl.LpVariable.dicts(
+            "unmet_skill_demand", self.ts_skill_demand, lowBound=0, cat=pl.LpContinuous
+        )
+        self.unmet_skill_demand = SuperDict(self.unmet_skill_demand)
+
+        # RQ10
+        self.unmet_employee_holidays_constraint = pl.LpVariable.dicts(
+            "unmet_employees_holidays_constraint",
+            self.ts_employees_holidays,
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_employee_holidays_constraint = SuperDict(
+            self.unmet_employee_holidays_constraint
+        )
+
+        # RQ13
+        self.unmet_preference_start = pl.LpVariable.dicts(
+            "unmet_preference_start",
+            self.preference_starts_ts.keys_l(),
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_preference_start = SuperDict(self.unmet_preference_start)
+
+        # RQ14
+        self.unmet_preference_hours = pl.LpVariable.dicts(
+            "unmet_preference_hours",
+            self.preference_slots.keys_l(),
+            lowBound=0,
+            cat=pl.LpContinuous,
+        )
+        self.unmet_preference_hours = SuperDict(self.unmet_preference_hours)
+
+        # RQ15
+        self.unmet_employee_schedule = pl.LpVariable.dicts(
+            "unmet_employee_schedule",
+            self.employees_rest_days,
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous
+        )
+        self.unmet_employee_schedule = SuperDict(self.unmet_employee_schedule)
+
+        # RQ16
+        self.unmet_fixed_schedule_constraint = pl.LpVariable.dicts(
+            "unmet_fixed_schedule_constraint",
+            self.fixed_schedule,
+            lowBound=0,
+            upBound=1,
+            cat=pl.LpContinuous
+        )
+        self.unmet_fixed_schedule_constraint = SuperDict(self.unmet_fixed_schedule_constraint)
+
     def create_constraints(self, model):
         # RQ00: objective function - minimize working hours
+        big_m = (
+            sum(
+                len(self.ts_employees) * max(self.demand.values()) for _ in self.ts_open
+            )
+            / 10
+        )
         model += pl.lpSum(
             pl.lpSum(self.works[ts, e] for e in self.ts_employees[ts]) * self.demand[ts]
             for ts in self.ts_open
+        ) - big_m * (
+            self.instance.get_penalty("rq02")
+            * pl.lpSum(self.unmet_weekly_hours_constraint.values())
+            + self.instance.get_penalty("rq03")
+            * pl.lpSum(self.unmet_max_daily_hours_constraint.values())
+            + self.instance.get_penalty("rq05")
+            * pl.lpSum(self.unmet_max_weekly_work_days_constraint.values())
+            + self.instance.get_penalty("rq06")
+            * pl.lpSum(self.unmet_min_daily_hours_constraint.values())
+            + self.instance.get_penalty("rq07")
+            * pl.lpSum(self.unmet_rest_hours_constraint.values())
+            + self.instance.get_penalty("rq08")
+            * pl.lpSum(self.unmet_manager_constraint.values())
+            + self.instance.get_penalty("rq09")
+            * pl.lpSum(self.unmet_skill_demand.values())
+            + self.instance.get_penalty("rq10")
+            * pl.lpSum(self.unmet_employee_holidays_constraint.values())
+            + self.instance.get_penalty("rq13")
+            * pl.lpSum(self.unmet_preference_start.values())
+            + self.instance.get_penalty("rq14")
+            * pl.lpSum(self.unmet_preference_hours.values())
+            + self.instance.get_penalty("rq15")
+            * pl.lpSum(self.unmet_employee_schedule.values())
+            + self.instance.get_penalty("rq16")
+            * pl.lpSum(self.unmet_fixed_schedule_constraint.values())
         )
 
         # RQ01: at least one employee at all times
@@ -144,21 +320,27 @@ class MipModel(Experiment):
             model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
 
         # RQ02: employees work their weekly hours
-        for (w, e), max_slots in self.max_working_ts_week.items():
-            model += (
-                pl.lpSum(self.works[ts, e] for ts in self.workable_ts_week[w, e])
-                == max_slots
-            )
+        if self.instance.get_requirement("rq02") != "deactivated":
+            for (w, e), max_slots in self.max_working_ts_week.items():
+                model += (
+                    pl.lpSum(self.works[ts, e] for ts in self.workable_ts_week[w, e])
+                    - (self.instance.get_requirement("rq02") == "soft")
+                    * self.unmet_weekly_hours_constraint[w, e]
+                    == max_slots
+                )
 
         # RQ03: employees can not exceed their daily hours
-        for (d, e), slots in self.workable_ts_day.items():
-            model += (
-                pl.lpSum(self.works[ts, e] for ts in slots)
-                <= self.max_working_ts_day[d, e]
-            )
+        if self.instance.get_requirement("rq03") != "deactivated":
+            for (d, e), slots in self.workable_ts_day.items():
+                model += (
+                    pl.lpSum(self.works[ts, e] for ts in slots)
+                    - (self.instance.get_requirement("rq03") == "soft")
+                    * self.unmet_max_daily_hours_constraint[d, e]
+                    <= self.max_working_ts_day[d, e]
+                )
 
         # RQ04A: starts if does not work in one ts but in the next it does
-        for (ts, ts2, e) in self.ts_ts_employee:
+        for ts, ts2, e in self.ts_ts_employee:
             model += self.works[ts, e] >= self.works[ts2, e] - self.starts[ts2, e]
 
         # RQ04B: starts on first time slot
@@ -170,48 +352,103 @@ class MipModel(Experiment):
             model += pl.lpSum(self.starts[ts, e] for ts in slots) <= 1
 
         # RQ05: max days worked per week
-        for (w, e), slots in self.workable_ts_week.items():
-            model += (
-                pl.lpSum(self.starts[ts, e] for ts in slots)
-                <= self.max_working_days[w, e]
-            )
+        if self.instance.get_requirement("rq05") != "deactivated":
+            for (w, e), slots in self.workable_ts_week.items():
+                model += (
+                    pl.lpSum(self.starts[ts, e] for ts in slots)
+                    - (self.instance.get_requirement("rq05") == "soft")
+                    * self.unmet_max_weekly_work_days_constraint[w, e]
+                    <= self.max_working_days[w, e]
+                )
 
         # RQ06: employees at least work the minimum hours
-        for (d, e), slots in self.workable_ts_day.items():
-            model += pl.lpSum(
-                self.works[ts, e] for ts in slots
-            ) >= self.min_working_ts_day[d, e] * pl.lpSum(
-                self.starts[ts, e] for ts in slots
-            )
+        if self.instance.get_requirement("rq06") != "deactivated":
+            for (d, e), slots in self.workable_ts_day.items():
+                model += pl.lpSum(self.works[ts, e] for ts in slots) + (
+                    self.instance.get_requirement("rq06") == "soft"
+                ) * self.unmet_min_daily_hours_constraint[
+                    d, e
+                ] >= self.min_working_ts_day[
+                    d, e
+                ] * pl.lpSum(
+                    self.starts[ts, e] for ts in slots
+                )
 
         # RQ07: employees at least have to rest an amount of hours between working days.
-        for (ts, ts2, e) in self.incompatible_ts_employee:
-            model += self.works[ts, e] + self.works[ts2, e] <= 1
+        if self.instance.get_requirement("rq07") != "deactivated":
+            for ts, ts2, e in self.incompatible_ts_employee:
+                model += (
+                    self.works[ts, e]
+                    + self.works[ts2, e]
+                    - (self.instance.get_requirement("rq07") == "soft")
+                    * self.unmet_rest_hours_constraint[ts, ts2, e]
+                    <= 1
+                )
 
         # RQ08: a manager has to be working at all times
-        for ts, _employees in self.ts_managers.items():
-            model += pl.lpSum(self.works[ts, e] for e in _employees) >= 1
+        if self.instance.get_requirement("rq08") != "deactivated":
+            for ts, _employees in self.ts_managers.items():
+                model += (
+                    pl.lpSum(self.works[ts, e] for e in _employees)
+                    + (self.instance.get_requirement("rq08") == "soft")
+                    * self.unmet_manager_constraint[ts]
+                    >= 1
+                )
 
         # RQ09: The demand for each skill is covered
-        if self.instance.get_requirement("rq09"):
+        if self.instance.get_requirement("rq09") != "deactivated":
             for (
                 ts,
                 id_skill,
                 skill_demand,
             ), employees in self.ts_demand_employee_skill.items():
-                model += pl.lpSum(self.works[ts, e] for e in employees) >= skill_demand
+                model += (
+                    pl.lpSum(self.works[ts, e] for e in employees)
+                    + (self.instance.get_requirement("rq09") == "soft")
+                    * self.unmet_skill_demand[ts, id_skill]
+                    >= skill_demand
+                )
+
+        # RQ10: Employee holidays
+        if self.instance.get_requirement("rq10") == "soft":
+            for ts, e in self.ts_employees_holidays:
+                model += (
+                    self.works[ts, e] <= self.unmet_employee_holidays_constraint[ts, e]
+                )
 
         # RQ13: Starting hour preference
-        if self.instance.get_requirement("rq13"):
+        if self.instance.get_requirement("rq13") != "deactivated":
             for (d, e), slots in self.preference_starts_ts.items():
-                model += pl.lpSum(self.starts[ts, e] for ts in slots) == 1
+                model += (
+                    pl.lpSum(self.starts[ts, e] for ts in slots)
+                    + (self.instance.get_requirement("rq13") == "soft")
+                    * self.unmet_preference_start[d, e]
+                    == 1
+                )
 
         # RQ14: max preference hours
-        if self.instance.get_requirement("rq14"):
+        if self.instance.get_requirement("rq14") != "deactivated":
             for (d, e), slots in self.preference_slots.items():
                 model += (
                     pl.lpSum(self.works[ts, e] for ts in slots)
+                    - (self.instance.get_requirement("rq14") == "soft")
+                    * self.unmet_preference_hours[d, e]
                     <= self.preference_hours_employee[d, e]
+                )
+
+        # RQ15: Employee schedule
+        if self.instance.get_requirement("rq15") == "soft":
+            for (ts, d, e) in self.ts_employees_rest_days:
+                model += self.works[ts, e] <= self.unmet_employee_schedule[d, e]
+
+        # RQ16: Fixed schedule
+        if self.instance.get_requirement("rq16") != "deactivated":
+            for (ts, e) in self.fixed_schedule:
+                model += (
+                    self.works[ts, e]
+                    + (self.instance.get_requirement("rq16") == "soft")
+                    * self.unmet_fixed_schedule_constraint[ts, e]
+                    == 1
                 )
 
         return model

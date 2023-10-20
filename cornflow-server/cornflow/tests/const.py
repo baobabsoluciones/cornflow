@@ -16,6 +16,8 @@ INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
 INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
+BAD_EXECUTION_PATH = _get_file("./data/bad_execution.json")
+EXECUTION_SOLUTION_PATH = _get_file("./data/new_execution_solution.json")
 EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
@@ -62,6 +64,8 @@ DEPLOYED_DAG_URL = PREFIX + "/dag/deployed/"
 TABLES_URL = PREFIX + "/table/"
 ALARMS_URL = PREFIX + "/alarms/"
 MAIN_ALARMS_URL = PREFIX + "/main-alarms/"
+
+LICENSES_URL = PREFIX + "/licences/"
 
 PUBLIC_DAGS = [
     "solve_model_dag",

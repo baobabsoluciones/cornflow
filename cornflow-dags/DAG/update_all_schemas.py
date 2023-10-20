@@ -1,19 +1,14 @@
-# General imports
 import importlib as il
 import os
 import sys
-
-# Partial imports
-from airflow.operators.python import PythonOperator
-from airflow.models import Variable
-from airflow import DAG
-from airflow.utils.db import create_session
 from datetime import datetime, timedelta
 from typing import List
 
-# Import from cornflow environment
+from airflow import DAG
+from airflow.models import Variable
+from airflow.operators.python import PythonOperator
+from airflow.utils.db import create_session
 from cornflow_client import ApplicationCore
-
 
 default_args = {
     "owner": "baobab",
