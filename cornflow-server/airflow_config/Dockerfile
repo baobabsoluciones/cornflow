@@ -1,6 +1,7 @@
 # VERSION 2.7.1
 # AUTHOR: cornflow@baobabsoluciones.es
 # DESCRIPTION: Airflow 2.7.1 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
+# baobab code version is 1.0.8
 
 FROM baobabsoluciones/pysolver:1.0
 LABEL maintainer="cornflow@baobabsoluciones"

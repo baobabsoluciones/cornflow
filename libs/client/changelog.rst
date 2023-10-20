@@ -1,8 +1,8 @@
 version 1.0.16
 ---------------
 
-- released:
-- description:
+- released: 2023-10-20
+- description: Small fixes to the cornflow-client
 - changelog:
 
 version 1.0.15
