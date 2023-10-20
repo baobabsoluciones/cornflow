@@ -40,19 +40,33 @@ Cornflow helps you formalize your problem by proposing development guidelines. I
 Installation instructions
 -------------------------------
 
-Cornflow is tested with Ubuntu 20.04, python >= 3.5 and git.
+Cornflow is tested with Ubuntu 20.04, python >= 3.8 and git.
 
 Download the Cornflow project and install requirements::
 
-    git clone git@github.com:baobabsoluciones/cornflow.git
-    cd cornflow-server
     python3 -m venv venv
-    venv/bin/pip3 install -r requirements-dev.txt
+    venv/bin/pip3 install cornflow
+
+initialize the sqlite database::
+
+    source venv/bin/activate
+    export FLASK_APP=cornflow.app
+    export DATABASE_URL=sqlite:///cornflow.db
+    flask db upgrade
+    flask access_init
+    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password
+    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
+
 
 activate the virtual environment and run Cornflow::
 
     source venv/bin/activate
     export FLASK_APP=cornflow.app
+    export SECRET_KEY=THISNEEDSTOBECHANGED
+    export DATABASE_URL=sqlite:///cornflow.db
+    export AIRFLOW_URL=http://127.0.0.1:8080/
+    export AIRFLOW_USER=airflow_user
+    export AIRFLOW_PWD=airflow_pwd
     flask run
 
 **Cornflow needs a running installation of Airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
@@ -135,8 +149,7 @@ Using cornflow to deploy a solution method
 
 To deploy a cornflow solution method, the following tasks need to be accomplished:
 
-#. Create I/O schemas for the new problem (e.g., “TSP format”).
-#. Create a solve function (e.g., a 2-opt heuristic).
+#. Create an Application for the new problem
 #. Do a PR to a compatible repo linked to a server instance (e.g., like `this one <https://github.com/baobabsoluciones/cornflow>`_).
 
 For more details on each part, check the `deployment guide <https://baobabsoluciones.github.io/cornflow/guides/deploy_solver.html>`_.

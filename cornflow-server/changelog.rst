@@ -1,3 +1,18 @@
+version 1.0.8
+--------------
+
+- released: 2023-10-20
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - This version of cornflow is only compatible with Python versions 3.8 or higher, with the desired version for deployment being Python version 3.10 (preferred version for baobab development as well).
+    - This version of cornflow updates the version of airflow to 2.7.1.
+    - Almost all library versions have been fixed to avoid dependency problems in future deployments.
+    - In the ApplicationCore you can define a new class-level argument (like schemas) which is notify. This argument, when True, automatically adds a callback that will send us an email with the log attached in case the model fails when running in Airflow.
+    - There is a new default DAG (run_deployed_models) that allows us to automatically launch all the models that we have deployed and for which we have defined a test instance in the ApplicationCore definition, so that once deployed we can do a quick test of the correct functioning of the model.
+    - If we create an execution and in the configuration we have not included all the information, the default values defined in the configuration json schema are taken.
+    - A command that used to convert models from an external app to jsonschemas is now disabled.
+
+
 version 1.0.7
 --------------
 

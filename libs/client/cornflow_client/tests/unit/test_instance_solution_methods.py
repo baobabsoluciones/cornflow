@@ -278,7 +278,7 @@ class TestSimpleApplicationDag(TestCase):
         self.assertEqual(result, expected)
 
     def test_get_week_from_datetime_string(self):
-        string = "2022-01-01T12:00:00"
+        string = "2022-01-01T12:00"
         result = InstanceSolutionCore.get_week_from_datetime_string(string)
         expected = 52
         self.assertEqual(result, expected)

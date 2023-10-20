@@ -1,15 +1,13 @@
-# Full imports
-
-
 # Partial imports
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.models import DagModel
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 from airflow.utils.db import create_session
-from cornflow_client import CornFlow
 from cornflow_client.airflow.dag_utilities import connect_to_cornflow
-from datetime import datetime, timedelta
+
 from update_all_schemas import get_new_apps
 
 default_args = {
@@ -27,7 +25,6 @@ default_args = {
 
 def update_dag_registry(**kwargs):
     with create_session() as session:
-
         model_dags = [
             dag
             for dag in session.query(DagModel)

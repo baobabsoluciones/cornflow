@@ -170,3 +170,6 @@ cornssh.pub
 
 # IO files
 *.mps
+
+# airflow logs
+cornflow-server/airflow_config/logs
