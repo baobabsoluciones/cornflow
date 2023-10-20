@@ -1,4 +1,4 @@
-cornflow-client>=1.0.16a1
+cornflow-client<=1.0.16
 orloge<=0.17.2
 PuLP<=2.7
 pandas<=2.1.1
