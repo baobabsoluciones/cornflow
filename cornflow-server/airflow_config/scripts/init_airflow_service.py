@@ -49,11 +49,11 @@ os.environ["AIRFLOW__CORE__EXECUTOR"] = f"{AIRFLOW__CORE__EXECUTOR}Executor"
 
 # Add ssh key for install packages inside workers
 CUSTOM_SSH_HOST = os.getenv("CUSTOM_SSH_HOST")
-if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not None:
-    ADD_KEY = "chmod 0600 /usr/local/airflow/.ssh/id_rsa && ssh-add /usr/local/airflow/.ssh/id_rsa"
-    ADD_HOST = f"ssh-keyscan {CUSTOM_SSH_HOST} >> /usr/local/airflow/.ssh/known_hosts"
-    CONFIG_SSH_HOST = f"echo Host {CUSTOM_SSH_HOST} > /usr/local/airflow/.ssh/config"
-    CONFIG_SSH_KEY = 'echo "    IdentityFile /usr/local/airflow/.ssh/id_rsa" >> /usr/local/airflow/.ssh/config'
+if os.path.isfile("$HOME/.ssh/id_rsa") and CUSTOM_SSH_HOST is not None:
+    ADD_KEY = "chmod 0600 $HOME/.ssh/id_rsa && ssh-add $HOME/.ssh/id_rsa"
+    ADD_HOST = f"ssh-keyscan {CUSTOM_SSH_HOST} >> $HOME/.ssh/known_hosts"
+    CONFIG_SSH_HOST = f"echo Host {CUSTOM_SSH_HOST} > $HOME/.ssh/config"
+    CONFIG_SSH_KEY = 'echo "    IdentityFile $HOME/.ssh/id_rsa" >> $HOME/.ssh/config'
     os.system(ADD_KEY)
     os.system(ADD_HOST)
     os.system(CONFIG_SSH_HOST)

@@ -26,7 +26,7 @@ COPY plugins ${AIRFLOW_HOME}/plugins
 COPY webserver_ldap.py ${AIRFLOW_HOME}/webserver_ldap.py
 
 # create folder for custom ssh keys
-RUN mkdir ${AIRFLOW_HOME}/.ssh
+RUN mkdir ${HOME}/.ssh
 
 # rights for user cornflow on application
 RUN chown -R cornflow: ${AIRFLOW_HOME}
