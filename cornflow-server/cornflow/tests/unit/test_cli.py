@@ -14,7 +14,7 @@ from cornflow.models import (
 )
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.exceptions import NoPermission
+from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
 
 
 class CLITests(TestCase):
@@ -349,3 +349,20 @@ class CLITests(TestCase):
         )
 
         self.assertIsInstance(result.exception, NoPermission)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                100,
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIsInstance(result.exception, ObjectDoesNotExist)
