@@ -65,7 +65,8 @@ def create_unexpiring_token(idx, username, password):
     with app.app_context():
         user = UserModel.get_one_object(id=idx)
         asking_user = UserModel.get_one_user_by_username(username)
-        if not asking_user.check_hash(password) and not asking_user.is_service_user():
+
+        if not asking_user.check_hash(password) or not asking_user.is_service_user():
             raise NoPermission("The asking user has no permissions to generate tokens")
 
         if not user:

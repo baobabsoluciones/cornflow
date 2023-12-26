@@ -14,6 +14,8 @@ from cornflow.models import (
 from cornflow.shared import db
 from flask_testing import TestCase
 
+from cornflow.shared.exceptions import NoPermission
+
 
 class CLITests(TestCase):
     def setUp(self):
@@ -230,6 +232,8 @@ class CLITests(TestCase):
     def test_generate_token(self):
         runner = CliRunner()
 
+        self.test_roles_init_command()
+
         result = runner.invoke(
             cli,
             [
@@ -245,7 +249,7 @@ class CLITests(TestCase):
             ],
         )
 
-        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.exit_code, 0)
 
         user_id = UserModel.get_one_user_by_username("viewer_user").id
 
@@ -264,7 +268,7 @@ class CLITests(TestCase):
             ],
         )
 
-        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.exit_code, 0)
 
         result = runner.invoke(
             cli,
@@ -282,3 +286,38 @@ class CLITests(TestCase):
         )
 
         self.assertIn("ey", result.output)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "test",
+                "-p",
+                "Otherpassword",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertIsInstance(result.exception, NoPermission)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "viewer_user",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIsInstance(result.exception, NoPermission)
