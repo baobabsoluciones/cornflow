@@ -9,7 +9,8 @@ import json
 # Import from internal modules
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.tests.custom_test_case import CheckTokenTestCase
+from cornflow.shared.authentication.auth import BIAuth
+from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 from cornflow.tests.const import LOGIN_URL
 
 
@@ -64,3 +65,18 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.get_check_token()
         self.assertEqual(200, self.response.status_code)
         self.assertEqual(0, self.response.json["valid"])
+
+
+class TestUnexpiringToken(CustomTestCase):
+    def test_token_unexpiring(self):
+        auth = BIAuth()
+
+        token = auth.generate_token(1)
+
+        response = auth.decode_token(token)
+        self.assertEqual(response, {"user_id": 1})
+
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM1OTI1OTIsInN1YiI6MX0.Plvmi02FMfZOTn6bxArELEmDeyuP-2X794c5VtAFgCg"
+
+        response = auth.decode_token(token)
+        self.assertEqual(response, {"user_id": 1})

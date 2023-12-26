@@ -129,7 +129,7 @@ class CLITests(TestCase):
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
         views = ViewModel.get_all_objects().all()
-        self.assertEqual(len(views), 48)
+        self.assertEqual(len(views), 46)
 
     def test_permissions_entrypoint(self):
         runner = CliRunner()
@@ -153,8 +153,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 530)
+        self.assertEqual(len(views), 46)
+        self.assertEqual(len(permissions), 498)
 
     def test_permissions_base_command(self):
         runner = CliRunner()
@@ -169,8 +169,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 530)
+        self.assertEqual(len(views), 46)
+        self.assertEqual(len(permissions), 498)
 
     def test_service_entrypoint(self):
         runner = CliRunner()
@@ -226,3 +226,59 @@ class CLITests(TestCase):
         user = UserModel.get_one_user_by_email("test@test.org")
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@test.org")
+
+    def test_generate_token(self):
+        runner = CliRunner()
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "viewer_user",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "viewer@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 1)
+
+        user_id = UserModel.get_one_user_by_username("viewer_user").id
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "service",
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "test@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 1)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIn("ey", result.output)

@@ -6,7 +6,8 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 class DefaultConfig(object):
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
+    SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
@@ -91,7 +92,8 @@ class Testing(DefaultConfig):
     DEBUG = False
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
-    SECRET_KEY = "TESTINGSECRETKEY"
+    SECRET_TOKEN_KEY = "TESTINGSECRETKEY"
+    SECRET_BI_KEY = "THISISANOTHERKEY"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://localhost:8080")
     PRESERVE_CONTEXT_ON_EXCEPTION = False
