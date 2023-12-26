@@ -2,18 +2,18 @@ import configparser
 import os
 
 from click.testing import CliRunner
+from flask_testing import TestCase
+
 from cornflow.app import create_app
 from cornflow.cli import cli
-from cornflow.models import UserModel
 from cornflow.models import (
     ActionModel,
     RoleModel,
     ViewModel,
     PermissionViewRoleModel,
 )
+from cornflow.models import UserModel
 from cornflow.shared import db
-from flask_testing import TestCase
-
 from cornflow.shared.exceptions import NoPermission
 
 
@@ -210,6 +210,7 @@ class CLITests(TestCase):
 
     def test_service_user_command(self):
         runner = CliRunner()
+        self.test_roles_init_command()
         result = runner.invoke(
             cli,
             [
@@ -224,10 +225,37 @@ class CLITests(TestCase):
                 "test@test.org",
             ],
         )
-        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.exit_code, 0)
         user = UserModel.get_one_user_by_email("test@test.org")
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@test.org")
+        self.assertEqual(user.roles, {4: "service"})
+        self.assertTrue(user.is_service_user())
+
+    def test_viewer_user_command(self):
+        runner = CliRunner()
+        self.test_roles_init_command()
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "test@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("test@test.org")
+        self.assertEqual(user.username, "test")
+        self.assertEqual(user.email, "test@test.org")
+        self.assertEqual(user.roles, {1: "viewer"})
+        self.assertFalse(user.is_service_user())
 
     def test_generate_token(self):
         runner = CliRunner()
