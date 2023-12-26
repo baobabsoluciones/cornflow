@@ -3,6 +3,7 @@ init file to have this as a module
 """
 
 import click
+
 from cornflow.cli.actions import actions
 from cornflow.cli.config import config
 from cornflow.cli.migrations import migrations
