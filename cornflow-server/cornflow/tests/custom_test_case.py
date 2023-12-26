@@ -101,7 +101,6 @@ class CustomTestCase(TestCase):
 
     @staticmethod
     def assign_role(user_id, role_id):
-
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(
                 user_id=user_id, role_id=role_id
@@ -288,7 +287,6 @@ class CustomTestCase(TestCase):
         self.assertEqual(payload_to_check["solution"], row.json["solution"])
 
     def delete_row(self, url):
-
         response = self.client.delete(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )
@@ -733,7 +731,7 @@ class LoginTestCases:
             self.assertEqual(str, type(self.response.json["token"]))
             decoded_token = jwt.decode(
                 self.response.json["token"],
-                current_app.config["SECRET_KEY"],
+                current_app.config["SECRET_TOKEN_KEY"],
                 algorithms="HS256",
             )
 
