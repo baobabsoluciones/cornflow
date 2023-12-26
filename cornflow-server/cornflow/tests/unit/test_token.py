@@ -1,18 +1,16 @@
 """
 Unit test for the token endpoint
 """
-
-# Import from libraries
-from flask import current_app
 import json
 
-# Import from internal modules
+from flask import current_app
+
 from cornflow.models import UserModel
 from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth, Auth
 from cornflow.shared.exceptions import InvalidUsage
-from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 from cornflow.tests.const import LOGIN_URL
+from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 
 
 class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
