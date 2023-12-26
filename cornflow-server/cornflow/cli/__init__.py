@@ -3,7 +3,6 @@ init file to have this as a module
 """
 
 import click
-from click import BaseCommand
 
 from cornflow.cli.actions import actions
 from cornflow.cli.config import config

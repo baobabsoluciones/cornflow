@@ -1,7 +1,4 @@
-import os
-
 import click
-from click import Command
 
 from cornflow.cli.utils import get_app
 from cornflow.commands import register_actions_command
