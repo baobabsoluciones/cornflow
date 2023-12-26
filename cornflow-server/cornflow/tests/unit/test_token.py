@@ -9,7 +9,8 @@ import json
 # Import from internal modules
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.authentication.auth import BIAuth
+from cornflow.shared.authentication.auth import BIAuth, Auth
+from cornflow.shared.exceptions import InvalidUsage
 from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 from cornflow.tests.const import LOGIN_URL
 
@@ -80,3 +81,19 @@ class TestUnexpiringToken(CustomTestCase):
 
         response = auth.decode_token(token)
         self.assertEqual(response, {"user_id": 1})
+
+    def test_user_not_valid(self):
+        auth = BIAuth()
+        self.assertRaises(InvalidUsage, auth.generate_token, None)
+
+        auth = Auth()
+        self.assertRaises(InvalidUsage, auth.generate_token, None)
+
+    def test_token_not_valid(self):
+        auth = BIAuth()
+        self.assertRaises(InvalidUsage, auth.decode_token, None)
+        token = ""
+        self.assertRaises(InvalidUsage, auth.decode_token, token)
+
+        auth = Auth()
+        self.assertRaises(InvalidUsage, auth.decode_token, None)
