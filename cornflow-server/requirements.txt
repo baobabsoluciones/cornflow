@@ -2,7 +2,7 @@ alembic==1.9.2
 apispec<=6.2.0
 click<=8.1.3
 cornflow-client<=1.0.16
-cryptography<=39.0.2
+cryptography<=41.0.7
 disposable-email-domains>=0.0.86
 Flask==2.3.2
 flask-apispec<=0.11.4
@@ -24,7 +24,7 @@ PuLP<=2.7.0
 psycopg2<=2.95
 PyJWT<=2.6.0
 pytups>=0.86.2
-requests<=2.29.0
+requests<=2.31.0
 SQLAlchemy==1.3.21
 webargs<=8.2.0
-Werkzeug<=2.3.3
+Werkzeug<=3.0.1
