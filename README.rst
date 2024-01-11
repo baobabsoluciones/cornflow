@@ -8,7 +8,6 @@ Cornflow
 .. image:: https://img.shields.io/pypi/v/cornflow?label=cornflow&style=for-the-badge
    :alt: PyPI
    :target: https://pypi.python.org/pypi/cornflow
-   :width: 25%
 
 .. image:: https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&style=for-the-badge
    :alt: PyPI
