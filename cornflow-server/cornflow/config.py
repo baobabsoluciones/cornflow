@@ -76,6 +76,9 @@ class DefaultConfig(object):
     # Alarms endpoints
     ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
 
+    # Password rotation time in months
+    PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 360)
+
 
 class Development(DefaultConfig):
 

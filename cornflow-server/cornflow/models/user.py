@@ -4,6 +4,7 @@ This file contains the UserModel
 # Imports from external libraries
 import random
 import string
+from datetime import datetime
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -51,6 +52,7 @@ class UserModel(TraceAttributesModel):
     last_name = db.Column(db.String(128), nullable=True)
     username = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=True)
+    pwd_last_change = db.Column(db.DateTime, nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
 
     user_roles = db.relationship(
@@ -93,6 +95,7 @@ class UserModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
+        self.pwd_last_change = datetime.utcnow()
         # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(data.get("password"))
         if check_pass:
@@ -121,6 +124,7 @@ class UserModel(TraceAttributesModel):
         # First we create the hash of the new password and then we update the object
         new_password = data.get("password")
         if new_password:
+            self.pwd_last_change = datetime.utcnow()
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
         super().update(data)
