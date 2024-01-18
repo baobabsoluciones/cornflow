@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError, DBAPIError
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import PermissionsDAG, UserModel, UserRoleModel
+from cornflow.models import UserModel, UserRoleModel
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth, LDAPBase
