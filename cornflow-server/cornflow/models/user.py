@@ -124,9 +124,9 @@ class UserModel(TraceAttributesModel):
         # First we create the hash of the new password and then we update the object
         new_password = data.get("password")
         if new_password:
-            self.pwd_last_change = datetime.utcnow()
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
+            data["pwd_last_change"] = datetime.utcnow()
         super().update(data)
 
     def comes_from_external_provider(self):

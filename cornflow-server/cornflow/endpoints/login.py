@@ -48,11 +48,11 @@ class LoginBaseEndpoint(BaseMetaResource):
         :rtype: dict
         """
         auth_type = current_app.config["AUTH_TYPE"]
-        change_password = False
+        response = {}
 
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
-            change_password = check_last_password_change(user)
+            response.update({"change_password": check_last_password_change(user)})
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
         elif auth_type == AUTH_OID:
@@ -65,7 +65,9 @@ class LoginBaseEndpoint(BaseMetaResource):
         except Exception as e:
             raise InvalidUsage(f"Error in generating user token: {str(e)}", 400)
 
-        return {"token": token, "id": user.id, "change_password": change_password}, 200
+        response.update({"token": token, "id": user.id})
+
+        return response, 200
 
     def auth_db_authenticate(self, username, password):
         """
