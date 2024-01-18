@@ -6,7 +6,7 @@ External endpoint for the user to login to the cornflow webserver
 from flask import current_app
 from flask_apispec import use_kwargs, doc
 from sqlalchemy.exc import IntegrityError, DBAPIError
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
@@ -182,7 +182,6 @@ class LoginBaseEndpoint(BaseMetaResource):
 
 
 def check_last_password_change(user):
-    from datetime import timedelta
     if user.pwd_last_change:
         if user.pwd_last_change + timedelta(days=int(current_app.config["PWD_ROTATION_TIME"])) < datetime.utcnow():
             return True
