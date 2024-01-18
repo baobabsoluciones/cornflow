@@ -198,11 +198,7 @@ class LoginEndpoint(LoginBaseEndpoint):
         :rtype: Tuple(dict, integer)
         """
 
-        content, status = self.log_in(**kwargs)
-        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-            PermissionsDAG.delete_all_permissions_from_user(content["id"])
-            PermissionsDAG.add_all_permissions_to_user(content["id"])
-        return content, status
+        return self.log_in(**kwargs)
 
 
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
@@ -218,9 +214,4 @@ class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     @use_kwargs(LoginOpenAuthRequest, location="json")
     def post(self, **kwargs):
         """ """
-
-        content, status = self.log_in(**kwargs)
-        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-            PermissionsDAG.delete_all_permissions_from_user(content["id"])
-            PermissionsDAG.add_all_permissions_to_user(content["id"])
-        return content, status
+        return self.log_in(**kwargs)
