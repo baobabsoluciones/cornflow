@@ -114,20 +114,52 @@ Once airflow is running and cornflow set up we can run it::
 
 And with this we should have both cornflow and airflow running. We can check that cornflow is running by going to http://localhost:5000/health/ and airflow by going to http://localhost:8080.
 
-Local installation as a package
+
+Docker. Build images from local
 --------------------------------
 
+We first start by cloning the repository::
 
-Docker installation
---------------------
+  git clone https://github.com/baobabsoluciones/cornflow
 
-asdasdas
+Then we are going to need some files to have, that can be modified to alter how the deployment is going to work.
 
-Docker hub installation
-------------------------
+The Dockerfile for cornflow can be found inside the ``cornflow/cornflow-server`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub.
 
-asdasdas
+The Dockerfile for airflow can be found on the ``cornflow/cornflow-server/airflow_config`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub. This image is built on top of another one that gets built manually and that has all the needed libraries for the solvers. This is done this way to improve the build time of the image as the solver libraries are quite heavy and quite prone to remain stable for long periods of time.
 
+Then we need a docker-compose file. The ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` that are in the root folder of the repository can be used with some small tweaks to build the images from the local repo instead that taking the official images.
+
+The changes needed to be done are just to comment lines 33-34 and 63-64 and uncomment lines 35-36 and 65-66. Then we can run the following commands to start up the containers::
+
+  cp -r cornflow/cornflow-dags/DAG/* cornflow/cornflow-server/airflow_config/dags/
+  cp cornflow/cornflow-dags/requirements.txt cornflow/cornflow-server/airflow_config/
+  docker-compose up -d
+
+Then to stop the containers we can run::
+
+  docker-compose down --remove-orphans
+
+And to delete the containers in case we want to rebuild them after stopping them::
+
+  docker system prune -af
+
+And with these command we should have a cornflow and airflow instance up and running on our machine with the default variables that can be seen on the docker-compose file.
+
+If we want to have the full ecosystem to test out the celery backend, then we have to run the ``docker-compose-cornflow-celery.yml`` file instead of the ``docker-compose.yml`` file. This will start up a redis instance and a celery worker that will be used by airflow to run the DAGs. 
+
+To use this docker-compose file we need to comment lines 33-34 and 67-68
+ and uncomment lines 35-36 and 69-70.
+
+To start it up then we can run::
+
+  docker-compose -f docker-compose-cornflow-celery.yml up -d
+
+
+Docker. Pull images from docker hub
+------------------------------------
+
+To run the environment with the official images then we just have to copy the ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` file to our system and run the docker-compose up command to use the official docker hub images.
 
 Troubleshooting
 ----------------
