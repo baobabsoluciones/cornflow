@@ -1,34 +1,41 @@
 Models
 ==========================
 
-Case model
------------
+Instance model
+------------------
 
-.. automodule:: cornflow.models.case
-   :members:
-   :show-inheritance:
-   :member-order: bysource
+.. autoclass:: cornflow.models.InstanceModel
+  :members: update
+  :show-inheritance:
+  :member-order: bysource
+
 
 Execution model
 ------------------
 
-.. automodule:: cornflow.models.execution
-   :members:
-   :show-inheritance:
-   :member-order: bysource
+.. autoclass:: cornflow.models.ExecutionModel
+  :members: update, update_config, update_state, update_log_txt
+  :show-inheritance:
+  :member-order: bysource
 
-Instance model
-------------------
 
-.. automodule:: cornflow.models.instance
-   :members:
-   :show-inheritance:
-   :member-order: bysource
+Case model
+-----------
+
+.. autoclass:: cornflow.models.CaseModel
+  :members: from_parent_id, patch, update, move_to, apply_patch, 
+  :show-inheritance:
+  :member-order: bysource
+
 
 User model
 ------------------
 
-.. automodule:: cornflow.models.user
-   :members:
-   :show-inheritance:
-   :member-order: bysource
+.. autoclass:: cornflow.models.UserModel
+  :members: update, comes_from_external_provider, check_hash, get_all_users, get_one_user, get_one_user_by_email, get_one_user_by_username, check_username_in_use, generate_random_password, is_admin, is_service_user
+  :show-inheritance:
+  :member-order: bysource
+   
+
+
+

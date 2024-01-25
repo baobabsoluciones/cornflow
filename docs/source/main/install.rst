@@ -118,6 +118,8 @@ And with this we should have both cornflow and airflow running. We can check tha
 Docker. Build images from local
 --------------------------------
 
+More information about how to deploy with docker containers can be found of the :ref:`deploy-cornflow` section of the documentation.
+
 We first start by cloning the repository::
 
   git clone https://github.com/baobabsoluciones/cornflow

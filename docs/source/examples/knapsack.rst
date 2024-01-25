@@ -1,0 +1,1 @@
+.. include:: ../../../cornflow-dags/DAG/knapsack/README.rst
