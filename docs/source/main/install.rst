@@ -43,7 +43,7 @@ Then we run the following commands::
 
   flask db upgrade -d cornflow/migrations
   flask access_init
-  flask creare_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+  flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
   flask create_service_user -u service_user -e service_user@cornflow.org -p Service_password1
   flask run
 
@@ -124,7 +124,7 @@ We first start by cloning the repository::
 
   git clone https://github.com/baobabsoluciones/cornflow
 
-Then we are going to need some files to have, that can be modified to alter how the deployment is going to work.
+To continue the deployment we are going to need the Dockerfiles and docker-compose files that are on the repository. To be able to build from the source code we are going to need to do some small modifications to some of the files.
 
 The Dockerfile for cornflow can be found inside the ``cornflow/cornflow-server`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub.
 
@@ -132,7 +132,35 @@ The Dockerfile for airflow can be found on the ``cornflow/cornflow-server/airflo
 
 Then we need a docker-compose file. The ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` that are in the root folder of the repository can be used with some small tweaks to build the images from the local repo instead that taking the official images.
 
-The changes needed to be done are just to comment lines 33-34 and 63-64 and uncomment lines 35-36 and 65-66. Then we can run the following commands to start up the containers::
+To test out the simpler deployment we are going to use the ``docker-compose.yml`` file. We have to do the following changes. Comment the following lines:
+
+.. code-block:: yaml
+  
+  image: baobabsoluciones/airflow:release-v1.0.8
+
+and:
+
+.. code-block:: yaml
+
+  image: baobabsoluciones/cornflow:release-v1.0.8
+
+In both cases the version of the image can be updated, but these lines are the ones that have to be commented in order to build the iamges from surce instead of downloading them from docker hub.
+
+And uncomment the following lines:
+
+.. code-block:: yaml
+
+  build: 
+    context: ./cornflow-server/airflow_config
+
+and:
+
+.. code-block:: yaml
+
+  build: 
+    context: ./cornflow-server
+
+Then we can run the following commands to start up the containers::
 
   cp -r cornflow/cornflow-dags/DAG/* cornflow/cornflow-server/airflow_config/dags/
   cp cornflow/cornflow-dags/requirements.txt cornflow/cornflow-server/airflow_config/
@@ -150,8 +178,7 @@ And with these command we should have a cornflow and airflow instance up and run
 
 If we want to have the full ecosystem to test out the celery backend, then we have to run the ``docker-compose-cornflow-celery.yml`` file instead of the ``docker-compose.yml`` file. This will start up a redis instance and a celery worker that will be used by airflow to run the DAGs. 
 
-To use this docker-compose file we need to comment lines 33-34 and 67-68
- and uncomment lines 35-36 and 69-70.
+The lines that have to be modified on this file are the same ones that the one on the ``docker-compose.yml`` file.
 
 To start it up then we can run::
 

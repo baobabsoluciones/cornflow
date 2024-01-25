@@ -60,19 +60,19 @@ Parameters
 
 - Requirements: table indicating which requirements should be complied and which not, and if they are, if they should be applied as strict or soft constraints.
 
-  - rq02: "soft", "strict" or "deactivated for the weekly hours constraint
-  - rq03: "soft", "strict" or "deactivated for the maximum daily hours constraint
-  - rq05: "soft", "strict" or "deactivated for the maximum days worked per week constraint
-  - rq06: "soft", "strict" or "deactivated for the minimum daily hours constraint
-  - rq07: "soft", "strict" or "deactivated for the minimum rest hours between shifts constraint
-  - rq08: "soft", "strict" or "deactivated for the constraint about needing to have a manager in the store at all times
-  - rq09: "soft", "strict" or "deactivated for the skills constraint
-  - rq10: "soft", "strict" or "deactivated for the employees' holidays constraint
-  - rq11: "strict" or "deactivated for the store holidays constraint
-  - rq12: "strict" or "deactivated for the employee downtime constraint
-  - rq13: "soft", "strict" or "deactivated for the employee start hour preferences constraint
-  - rq14: "soft", "strict" or "deactivated for the employee max preference hours constraint
-  - rq15: "soft", "strict" or "deactivated for the employee schedule constraint
-  - rq16: "soft", "strict" or "deactivated for the fixed worktable constraint
+  - rq02: "soft", "strict" or "deactivated" for the weekly hours constraint
+  - rq03: "soft", "strict" or "deactivated" for the maximum daily hours constraint
+  - rq05: "soft", "strict" or "deactivated" for the maximum days worked per week constraint
+  - rq06: "soft", "strict" or "deactivated" for the minimum daily hours constraint
+  - rq07: "soft", "strict" or "deactivated" for the minimum rest hours between shifts constraint
+  - rq08: "soft", "strict" or "deactivated" for the constraint about needing to have a manager in the store at all times
+  - rq09: "soft", "strict" or "deactivated" for the skills constraint
+  - rq10: "soft", "strict" or "deactivated" for the employees' holidays constraint
+  - rq11: "strict" or "deactivated" for the store holidays constraint
+  - rq12: "strict" or "deactivated" for the employee downtime constraint
+  - rq13: "soft", "strict" or "deactivated" for the employee start hour preferences constraint
+  - rq14: "soft", "strict" or "deactivated" for the employee max preference hours constraint
+  - rq15: "soft", "strict" or "deactivated" for the employee schedule constraint
+  - rq16: "soft", "strict" or "deactivated" for the fixed worktable constraint
 
 - Penalties: table indicating for each soft constraint the penalty level when it is not respected.
