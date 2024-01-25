@@ -16,7 +16,7 @@ Cornflow
 .. image:: https://img.shields.io/pypi/l/cornflow-client?color=blue&style=for-the-badge
   :alt: PyPI - License
   :target: https://github.com/baobabsoluciones/cornflow/blob/master/LICENSE
-  
+
 .. image:: https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=server-tests&label=cornflow&logo=codecov&logoColor=white&style=for-the-badge&token=H14UGPUQVL
    :alt: Codecov
    :target: https://app.codecov.io/gh/baobabsoluciones/cornflow

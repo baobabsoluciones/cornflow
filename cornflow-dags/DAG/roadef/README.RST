@@ -5,6 +5,15 @@ Problem
 -------
 A vendor has to manage the inventories of its customers and decide when and how to deliver to them in order to avoid stock-outs. He has to create the delivery routes, assign them to a driver, a trailer, and a starting time, and to decide what quantity of product will be delivered to each customer on every route. The objective to minimize is the total cost of all the shifts.
 
+**Name of dag**: roadef.
+
+**Available slution methods**:
+
+- **default**: a greedy heuristic.
+- Greedy: a greedy heuristic. It is the default solver.
+- MIPMoldel: a MIP approach.
+- PeriodicMIPModel: a MIP approach that gets solved iteratively.
+
 Decisions
 ---------
 A set of routes (ordered list of locations) associated to a trailer, a driver and a departure time. Each step of the route is associated to a quantity, corresponding to the quantity of product delivered (if the location is a customer) or loaded (if the location is a source).

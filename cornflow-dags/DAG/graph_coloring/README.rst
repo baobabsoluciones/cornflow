@@ -1,7 +1,14 @@
-Problem
-------------
+Graph coloring
+=======================
 
-A set of nodes in a graph need to be colored. The only constraint is that two nodes that share an arc cannot have the same color. Finally, we want to accomplish this using the least amount of colors possible.
+The problem consists on assigning colors to the nodes in a graph while taking care never to assign the same color to nodes that share an edge (or arc). The objective is to use the least number of different colors to succesfully color the whole graph.
+
+**Name of dag**: graph_coloring
+
+**Available solution methods**:
+
+- **default:** CP model built in ortools with CP-SAT as solver.
+
 
 Decision
 ------------
@@ -13,4 +20,4 @@ Colors are represented as an integer number.
 Parameters
 ------------
 
-* Edges of the graph.
+- Edges of the graph.

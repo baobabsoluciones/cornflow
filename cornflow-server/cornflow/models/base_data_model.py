@@ -28,6 +28,9 @@ class BaseDataModel(TraceAttributesModel):
 
     @declared_attr
     def user_id(self):
+        """
+        The foreign key for the user (:class:`UserModel<cornflow.models.UserModel>`).
+        """
         return db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     @declared_attr

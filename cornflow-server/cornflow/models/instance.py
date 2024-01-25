@@ -11,7 +11,7 @@ from cornflow.shared import db
 class InstanceModel(BaseDataModel):
     """
     Model class for the Instances
-    It inherits from :class:`BaseDataModel` to have the trace fields and user field
+    It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field
 
     The :class:`InstanceModel` has the following fields:
 
@@ -58,12 +58,14 @@ class InstanceModel(BaseDataModel):
             (str(self.created_at) + " " + str(self.user_id)).encode()
         ).hexdigest()
 
-    def update(self, data):
+    def update(self, data: dict):
         """
-        Method used to update an instance from the database
+        Method used to update an instance from the database.
+
+        This method is mainly used on PUT requests to update the instance.
 
         :param dict data: the data of the object
-        :return: None
+        :return: Nothing, it will update the instance in-place and on the database
         :rtype: None
         """
         # Delete the checks if the data has been modified since they are probably not valid anymore

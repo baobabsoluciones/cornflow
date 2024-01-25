@@ -34,10 +34,40 @@ SEPARATOR = "/"
 
 
 class CaseModel(BaseDataModel):
+    """
+    Model class for the Cases. 
+    It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field.
+
+    - **id**: int, the primary key for the cases, is an autoincrement.
+    - **path**: str, the path for the case, by default it would be the "root folder" (empty string).
+    - **name**: str, the name of the case given by the user.
+    - **description**: str, the description of the case given by the user. It is optional.
+    - **data**: dict (JSON), the data of the instance of the case.
+    - **checks**: dict (JSON), the checks of instance of the case.
+    - **data_hash**: str, the hash of the data of the instance of the case.
+    - **solution**: dict (JSON), the solution of the instance of the case.
+    - **solution_hash**: str, the hash of the solution of the instance of the case.
+    - **solution_checks**: dict (JSON), the checks of the solution of the instance of the case.
+    - **schema**: str, the schema of the instance of the case.
+    - **user_id**: int, the foreign key for the user (:class:`UserModel<cornflow.models.UserModel>`). It links the case to its owner.
+    - **created_at**: datetime, the datetime when the case was created (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **updated_at**: datetime, the datetime when the case was last updated (in UTC).
+      This datetime is generated automatically, the user does not need to provide it.
+    - **deleted_at**: datetime, the datetime when the case was deleted (in UTC). Even though it is deleted, actually, it is not deleted from the database, in order to have a command that cleans up deleted data after a certain time of its deletion.
+
+    """
+
+
     __tablename__ = "cases"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     path = db.Column(db.String(500), nullable=False, index=True)
+    solution = db.Column(JSON, nullable=True)
+    solution_hash = db.Column(db.String(256), nullable=False)
+    solution_checks = db.Column(JSON, nullable=True)
+
+
     # To find the descendants of this node, we look for nodes whose path
     # starts with this node's path.
     # c_path =
@@ -49,9 +79,7 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
-    solution = db.Column(JSON, nullable=True)
-    solution_hash = db.Column(db.String(256), nullable=False)
-    solution_checks = db.Column(JSON, nullable=True)
+    
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
@@ -100,6 +128,17 @@ class CaseModel(BaseDataModel):
 
     @classmethod
     def from_parent_id(cls, user, data):
+        """
+        Class method to create a new case from an already existing case.
+
+        :param user: the user that is creating the case.
+        :type user: :class:`UserModel<cornflow.models.UserModel>`
+        :param data: the data of the case
+        :type data: dict
+        :return: the new case
+        :rtype: :class:`CaseModel<cornflow.models.CaseModel>`
+        """
+        
         if data.get("parent_id") is None:
             # we assume at root
             return cls(data, parent=None)
@@ -195,6 +234,12 @@ class CaseModel(BaseDataModel):
         return patched_data, hash_json_256(patched_data)
 
     def move_to(self, new_parent=None):
+        """
+        Method to move the case to a new path based on a new parent case
+
+        :param new_parent: the new parent case
+        :type new_parent: :class:`CaseModel<cornflow.models.CaseModel>`
+        """
         if new_parent is None:
             new_path = ""
         else:

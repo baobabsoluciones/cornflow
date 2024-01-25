@@ -1,0 +1,1 @@
+.. include:: ../../../cornflow-dags/DAG/graph_coloring/README.rst
