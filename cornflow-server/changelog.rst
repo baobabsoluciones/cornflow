@@ -1,3 +1,13 @@
+version 1.0.9
+--------------
+
+- released: 2023-12-27
+- description: added new authentication for BI endpoints where the token does not expire
+- changelog:
+    - Added new auth method.
+    - Added new token generation that can be used only through the cli.
+    - Added new token decodification that doe snot check for expiry date on token.
+
 version 1.0.8
 --------------
 

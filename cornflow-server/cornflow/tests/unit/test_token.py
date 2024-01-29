@@ -1,16 +1,16 @@
 """
 Unit test for the token endpoint
 """
-
-# Import from libraries
-from flask import current_app
 import json
 
-# Import from internal modules
+from flask import current_app
+
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.tests.custom_test_case import CheckTokenTestCase
+from cornflow.shared.authentication.auth import BIAuth, Auth
+from cornflow.shared.exceptions import InvalidUsage
 from cornflow.tests.const import LOGIN_URL
+from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 
 
 class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
@@ -64,3 +64,34 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.get_check_token()
         self.assertEqual(200, self.response.status_code)
         self.assertEqual(0, self.response.json["valid"])
+
+
+class TestUnexpiringToken(CustomTestCase):
+    def test_token_unexpiring(self):
+        auth = BIAuth()
+
+        token = auth.generate_token(1)
+
+        response = auth.decode_token(token)
+        self.assertEqual(response, {"user_id": 1})
+
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM1OTI1OTIsInN1YiI6MX0.Plvmi02FMfZOTn6bxArELEmDeyuP-2X794c5VtAFgCg"
+
+        response = auth.decode_token(token)
+        self.assertEqual(response, {"user_id": 1})
+
+    def test_user_not_valid(self):
+        auth = BIAuth()
+        self.assertRaises(InvalidUsage, auth.generate_token, None)
+
+        auth = Auth()
+        self.assertRaises(InvalidUsage, auth.generate_token, None)
+
+    def test_token_not_valid(self):
+        auth = BIAuth()
+        self.assertRaises(InvalidUsage, auth.decode_token, None)
+        token = ""
+        self.assertRaises(InvalidUsage, auth.decode_token, token)
+
+        auth = Auth()
+        self.assertRaises(InvalidUsage, auth.decode_token, None)
