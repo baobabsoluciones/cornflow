@@ -26,11 +26,13 @@ class SchemaGenerator:
         self.data = SuperDict()
         self.model_table = dict()
         self.table_model = dict()
+        self.prefix_table_name = "sfm_tmp_"
 
     def main(self):
+        self.clear()
         os.mkdir(self.tmp_path)
 
-        copy_tree(self.path, self.tmp_path)
+        self.copy_tree(self.path, self.tmp_path)
 
         files = (
             TupList(os.listdir(self.tmp_path))
@@ -43,11 +45,15 @@ class SchemaGenerator:
             .vapply(lambda v: (os.path.join(self.tmp_path, v), v[:-3]))
         )
 
+        self.replace_table_names(files)
+
         self.mock_packages(files)
 
         self.parse(files)
 
         self.inherit()
+
+        self.clean_table_names()
 
         schema = self.to_schema()
 
@@ -55,6 +61,13 @@ class SchemaGenerator:
             json.dump(schema, fd, indent=2)
         self.clear()
         return 0
+
+    def copy_tree(self, origin_path, destination_path):
+        # Creating a temporary copy of all python files
+        for root, dirs, files in os.walk(origin_path):
+            for file_ in files:
+                if file_.endswith(".py"):
+                    shutil.copy(os.path.join(root, file_), os.path.join(destination_path, file_))
 
     def mock_packages(self, files):
         # Mocking all relative imports
@@ -67,10 +80,46 @@ class SchemaGenerator:
             libs = re.findall(r"from ((\.+\w+)+) import (\w+)", text)
             for lib in libs:
                 text = text.replace(lib[0], "mockedpackage")
+            text = text.replace("@declared_attr", "")
             with open(file_path, "w") as fd:
                 fd.write(text)
 
         sys.modules["mockedpackage"] = MagicMock()
+
+    def replace_table_names(self, files):
+        # Mock tablenames
+        for file_path, file_name in files:
+            with open(file_path, "r") as fd:
+                text = fd.read()
+            tablenames_1 = list(re.findall(r"__tablename__ = \"(.+)\"", text)) + list(re.findall(r"__tablename__ = \'(.+)\'", text))
+            tablenames_2 = list(re.findall(r"__tablename__ =\"(.+)\"", text)) + list(re.findall(r"__tablename__ =\'(.+)\'", text))
+            for tab in tablenames_1:
+                text = text.replace(f"__tablename__ = \"{tab}\"", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+                text = text.replace(f"__tablename__ = \'{tab}\'", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+            for tab in tablenames_2:
+                text = text.replace(f"__tablename__ =\"{tab}\"", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+                text = text.replace(f"__tablename__ =\'{tab}\'", f"__tablename__ = '{self.prefix_table_name}{tab}'")
+            parents = re.findall(r"class (.+)\((.+)\):", text)
+            for cl, parent in parents:
+                if parent != "db.Model":
+                    new_parent = self.prefix_table_name + parent
+                    text = text.replace(
+                        f"class {cl}({parent})",
+                        f"class {self.prefix_table_name + cl}({new_parent})"
+                    )
+                    imports = re.findall(r"from (\w*(\.+\w+)*)" + f" import {parent}", text)
+                    for imp in imports:
+                        text = text.replace(
+                            f"from {imp[0]} import {parent}",
+                            f"from mockedpackage import {new_parent}"
+                        )
+                else:
+                    text = text.replace(
+                        f"class {cl}({parent})",
+                        f"class {self.prefix_table_name + cl}({parent})"
+                    )
+            with open(file_path, "w") as fd:
+                fd.write(text)
 
     def parse(self, files):
         forget_keys = ["created_at", "updated_at", "deleted_at"]
@@ -109,6 +158,15 @@ class SchemaGenerator:
                     self.model_table[model] = table_name
                     self.table_model[table_name] = model
                     for key, val in props.items():
+                        if callable(val):
+                            # declared_attr
+                            try:
+                                tmp_val = val(None)
+                                if isinstance(tmp_val, db.Column):
+                                    val = tmp_val
+                            except:
+                                pass
+
                         if key in forget_keys:
                             continue
                         elif isinstance(val, db.Column):
@@ -145,6 +203,14 @@ class SchemaGenerator:
             click.echo(err)
 
     def inherit(self):
+        self.parents = {
+            k.replace(self.prefix_table_name, ""): None if v is None else v.replace(self.prefix_table_name, "")
+            for k, v in self.parents.items()
+        }
+        self.model_table = {
+            k.replace(self.prefix_table_name, ""): v
+            for k, v in self.model_table.items()
+        }
         all_classes = set(self.parents.keys())
         not_treated = set(all_classes)
         treated = {"db.Model"}
@@ -173,6 +239,12 @@ class SchemaGenerator:
             not_treated -= treated
         if not self.leave_bases:
             self.data = self.data.vfilter(lambda v: not v.get("remove", False))
+
+    def clean_table_names(self):
+        self.data = {
+            k.replace(self.prefix_table_name, ""): v
+            for k, v in self.data.items()
+        }
 
     def clear(self):
         if os.path.isdir(self.tmp_path):
