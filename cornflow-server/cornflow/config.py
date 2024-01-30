@@ -76,6 +76,9 @@ class DefaultConfig(object):
     # Alarms endpoints
     ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
 
+    # Token duration in hours
+    TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
+
     # Password rotation time in days
     PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
 
