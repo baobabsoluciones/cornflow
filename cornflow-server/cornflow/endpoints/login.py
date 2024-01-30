@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import PermissionsDAG, UserModel, UserRoleModel
+from cornflow.models import UserModel, UserRoleModel
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth, LDAPBase
@@ -210,11 +210,7 @@ class LoginEndpoint(LoginBaseEndpoint):
         :rtype: Tuple(dict, integer)
         """
 
-        content, status = self.log_in(**kwargs)
-        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-            PermissionsDAG.delete_all_permissions_from_user(content["id"])
-            PermissionsDAG.add_all_permissions_to_user(content["id"])
-        return content, status
+        return self.log_in(**kwargs)
 
 
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
@@ -230,9 +226,4 @@ class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     @use_kwargs(LoginOpenAuthRequest, location="json")
     def post(self, **kwargs):
         """ """
-
-        content, status = self.log_in(**kwargs)
-        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
-            PermissionsDAG.delete_all_permissions_from_user(content["id"])
-            PermissionsDAG.add_all_permissions_to_user(content["id"])
-        return content, status
+        return self.log_in(**kwargs)
