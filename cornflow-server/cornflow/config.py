@@ -79,6 +79,9 @@ class DefaultConfig(object):
     # Token duration in hours
     TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
 
+    # Password rotation time in days
+    PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
+
 
 class Development(DefaultConfig):
 

@@ -1,6 +1,8 @@
 import json
 
+from flask import current_app
 from flask_testing import TestCase
+from datetime import datetime, timedelta
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
@@ -358,6 +360,20 @@ class TestUserEndpoint(TestCase):
         response = self.log_in(self.viewer)
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])
+
+    def test_change_password_rotation(self):
+        current_app.config["PWD_ROTATION_TIME"] = 1  # in days
+        payload = {"pwd_last_change": (datetime.utcnow() - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        self.modify_info(self.planner, self.planner, payload)
+        response = self.log_in(self.planner)
+        self.assertEqual(True, response.json["change_password"])
+
+        payload = {"password": "Newtestpassword1!"}
+        self.modify_info(self.planner, self.planner, payload)
+        self.planner.update(payload)
+        print(self.planner)
+        response = self.log_in(self.planner)
+        self.assertEqual(False, response.json["change_password"])
 
 
 class TestUserModel(TestCase):

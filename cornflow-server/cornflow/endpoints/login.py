@@ -6,6 +6,7 @@ External endpoint for the user to login to the cornflow webserver
 from flask import current_app
 from flask_apispec import use_kwargs, doc
 from sqlalchemy.exc import IntegrityError, DBAPIError
+from datetime import datetime, timedelta
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
@@ -47,9 +48,11 @@ class LoginBaseEndpoint(BaseMetaResource):
         :rtype: dict
         """
         auth_type = current_app.config["AUTH_TYPE"]
+        response = {}
 
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
+            response.update({"change_password": check_last_password_change(user)})
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
         elif auth_type == AUTH_OID:
@@ -62,7 +65,9 @@ class LoginBaseEndpoint(BaseMetaResource):
         except Exception as e:
             raise InvalidUsage(f"Error in generating user token: {str(e)}", 400)
 
-        return {"token": token, "id": user.id}, 200
+        response.update({"token": token, "id": user.id})
+
+        return response, 200
 
     def auth_db_authenticate(self, username, password):
         """
@@ -174,6 +179,13 @@ class LoginBaseEndpoint(BaseMetaResource):
             user_role.save()
 
         return user
+
+
+def check_last_password_change(user):
+    if user.pwd_last_change:
+        if user.pwd_last_change + timedelta(days=int(current_app.config["PWD_ROTATION_TIME"])) < datetime.utcnow():
+            return True
+    return False
 
 
 class LoginEndpoint(LoginBaseEndpoint):
