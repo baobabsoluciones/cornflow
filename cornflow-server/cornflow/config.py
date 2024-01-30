@@ -76,6 +76,9 @@ class DefaultConfig(object):
     # Alarms endpoints
     ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
 
+    # Token duration in hours
+    TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
+
 
 class Development(DefaultConfig):
 
