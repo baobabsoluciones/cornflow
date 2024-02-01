@@ -79,8 +79,8 @@ class MIPSolver(Experiment):
             _, solver_name = solver_name.split(".")
 
         opt = SolverFactory(solver_name)
-        opt.options.update(config)
-        results = opt.solve(model_instance)
+        opt.options.update(self.get_solver_config(config))
+        results = opt.solve(model_instance, tee=config.get("msg", True))
 
         status = results.solver.status
         termination_condition = PYOMO_STOP_MAPPING[results.solver.termination_condition]

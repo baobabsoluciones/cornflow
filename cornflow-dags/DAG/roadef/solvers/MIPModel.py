@@ -88,21 +88,23 @@ class MIPModel(Experiment):
         solver_name = self.get_solver(config)
         config_first = dict(
             solver=solver_name,
-            gapRel=0.1,
+            rel_gap=0.1,
             timeLimit=min(200.0, self._get_remaining_time()),
             msg=self.print_log,
         )
+        config_first = self.get_solver_config(config_first, lib="pulp")
 
         def config_iteration(self, warm_start):
-            return dict(
+            conf = dict(
                 solver=solver_name,
-                gapRel=0.05,
+                rel_gap=0.05,
                 timeLimit=min(100.0, self._get_remaining_time()),
                 msg=self.print_log,
                 warmStart=warm_start,
             )
+            return self.get_solver_config(conf, lib="pulp")
 
-        solver = pl.getSolver(**config_first)
+        solver = pl.getSolver(solver=solver_name, **config_first)
         used_routes, previous_value = self.solve_one_iteration(
             solver, used_routes, previous_value, current_round
         )
@@ -111,7 +113,7 @@ class MIPModel(Experiment):
             self.print_in_console(
                 f"=================== ROUND {current_round} ========================"
             )
-            solver = pl.getSolver(**config_iteration(self, current_round != 1))
+            solver = pl.getSolver(solver=solver_name, **config_iteration(self, current_round != 1))
 
             used_routes, previous_value = self.solve_one_iteration(
                 solver, used_routes, previous_value, current_round

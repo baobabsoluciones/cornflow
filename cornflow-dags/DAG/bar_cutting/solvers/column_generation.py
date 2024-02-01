@@ -204,13 +204,14 @@ class ColumnGeneration(Experiment):
             _, solver_name = solver_name.split(".")
 
         SOLVER_PARAMETERS = dict(
-            sec=config.get("timeLimit", 360),
-            allow=config.get("gapAbs", 1),
-            ratio=config.get("gaPRel", 0.01),
-            tee=config.get("msg", 1),
+            time_limit=config.get("timeLimit", 360),
+            abs_gap=config.get("abs_gap", 1),
+            rel_gap=config.get("rel_gap", 0.01),
+            solver=solver_name
         )
+        SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
 
-        opt = SolverFactory(solver_name)
+        opt = SolverFactory(solver_name, tee=config.get("msg", 1))
         opt.options.update(SOLVER_PARAMETERS)
 
         more_patterns_bar1 = True

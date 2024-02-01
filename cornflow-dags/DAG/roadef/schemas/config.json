@@ -4,7 +4,17 @@
     "solver":{
       "type": "string",
       "default": "Greedy",
-      "enum": ["Greedy", "MIPModel", "PeriodicMIPModel", "MIPModel.PULP_CBC_CMD", "PeriodicMIPModel.PULP_CBC_CMD"]
+      "enum": [
+        "Greedy",
+        "MIPModel",
+        "PeriodicMIPModel",
+        "MIPModel.PULP_CBC_CMD",
+        "PeriodicMIPModel.PULP_CBC_CMD",
+        "MIPModel.GUROBI_CMD",
+        "PeriodicMIPModel.GUROBI_CMD",
+        "MIPModel.GUROBI",
+        "PeriodicMIPModel.GUROBI"
+      ]
     },
     "timeLimit":{
       "type": "number"

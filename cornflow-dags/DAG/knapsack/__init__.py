@@ -17,7 +17,7 @@ class Knapsack(ApplicationCore):
         MIP=MIPSolver,
     )
     schema = get_empty_schema(
-        properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys()) + ["MIP.cbc"],
+        properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys()) + ["MIP.cbc", "MIP.gurobi"],
     )
 
     def get_solver_name(self, data, conf):

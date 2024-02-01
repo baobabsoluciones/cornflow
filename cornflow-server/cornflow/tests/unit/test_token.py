@@ -41,6 +41,23 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.assertEqual(200, self.response.status_code)
         self.assertEqual(1, self.response.json["valid"])
 
+    def test_token_duration(self):
+        durations = [0.000000000001, 1]
+        asserts = [0, 1]
+        payload = self.data
+        for i in range(2):
+            current_app.config["TOKEN_DURATION"] = durations[i]
+            self.token = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            ).json["token"]
+
+            self.get_check_token()
+            self.assertEqual(200, self.response.status_code)
+            self.assertEqual(asserts[i], self.response.json["valid"])
+
     def test_get_invalid_token(self):
         self.token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk4MjAwNzMsImlhdCI6MTYzOTczMzY3Mywic3ViIjoxfQ"
         self.token += ".KzAYFDSrAJoCrnxGqKL2v6fE3oxT2muBgYztF1wcuN8"

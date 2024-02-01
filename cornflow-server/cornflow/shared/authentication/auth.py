@@ -103,7 +103,7 @@ class Auth:
             )
 
         payload = {
-            "exp": datetime.utcnow() + timedelta(days=1),
+            "exp": datetime.utcnow() + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user_id,
         }

@@ -7,9 +7,6 @@
       "enum": ["right_corner.cbc", "right_corner.gurobi", "right_corner.scip"],
       "default": "right_corner.cbc"
     },
-    "seconds": {
-      "type": "number"
-    },
     "timeLimit": {
       "type": "number"
     },
