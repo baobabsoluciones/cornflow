@@ -1,6 +1,7 @@
 
 # Imports from external libraries
 from flask import current_app
+from sqlalchemy import text
 from importlib import import_module
 from sqlalchemy.exc import DBAPIError, IntegrityError
 import sys
@@ -52,9 +53,10 @@ def register_views_command(external_app: str = None, verbose: bool = False):
         current_app.logger.error(f"Unknow error on views register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('api_view', 'id'), MAX(id)) FROM api_view;"
-        )
+        with db.engine.begin() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('api_view', 'id'), MAX(id)) FROM api_view;")
+            )
         try:
             db.session.commit()
         except DBAPIError as e:

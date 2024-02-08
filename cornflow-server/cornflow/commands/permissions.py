@@ -1,6 +1,8 @@
 import sys
 from importlib import import_module
 
+from sqlalchemy import text
+
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
@@ -93,9 +95,10 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         current_app.logger.error(f"Unknown error on base permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('permission_view', 'id'), MAX(id)) FROM permission_view;"
-        )
+        with db.engine.begin() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('permission_view', 'id'), MAX(id)) FROM permission_view;")
+            )
 
         try:
             db.session.commit()
@@ -177,9 +180,10 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on dag permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;"
-        )
+        with db.engine.begin() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;")
+            )
 
         try:
             db.session.commit()

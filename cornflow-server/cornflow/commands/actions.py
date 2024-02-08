@@ -1,6 +1,7 @@
 def register_actions_command(verbose: bool = True):
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
+    from sqlalchemy import text
 
     from cornflow.models import ActionModel
     from cornflow.shared.const import ACTIONS_MAP
@@ -27,9 +28,10 @@ def register_actions_command(verbose: bool = True):
         current_app.logger.error(f"Unknown error on actions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):
-        db.engine.execute(
-            "SELECT setval(pg_get_serial_sequence('actions', 'id'), MAX(id)) FROM actions;"
-        )
+        with db.engine.begin() as conn:
+            conn.execute(
+                text("SELECT setval(pg_get_serial_sequence('actions', 'id'), MAX(id)) FROM actions;")
+            )
 
         try:
             db.session.commit()
