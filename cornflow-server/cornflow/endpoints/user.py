@@ -170,7 +170,7 @@ class UserDetailsEndpoint(BaseMetaResource):
                 f"To edit a user, go to the OID provider.",
             )
 
-        if data.get("password"):
+        if data.get("password") is not None:
             check, msg = check_password_pattern(data.get("password"))
             if not check:
                 raise InvalidCredentials(
@@ -179,7 +179,7 @@ class UserDetailsEndpoint(BaseMetaResource):
                     f"The new password is not valid.",
                 )
 
-        if data.get("email"):
+        if data.get("email") is not None:
             check, msg = check_email_pattern(data.get("email"))
             if not check:
                 raise InvalidCredentials(
