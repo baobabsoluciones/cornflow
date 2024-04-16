@@ -65,6 +65,7 @@ def get_licenses_summary():
     :return: a list of dicts with library, license, version, author, description, home page and license text.
     """
     license_list = []
+    # TODO: pkg_resources.working_set is deprecated, find a better way to get the list of packages
     for pkg in sorted(pkg_resources.working_set, key=lambda x: str(x).lower()):
         license_list += [
             {
