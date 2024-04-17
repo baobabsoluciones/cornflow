@@ -165,3 +165,4 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         flags: server-tests
+        token: ${{secrets.CODECOV_TOKEN}}
