@@ -11,7 +11,7 @@ class TestLicensesListEndpoint(CustomTestCase):
             requirements = content.split("\n")
 
         requirements = [
-            r.split("=")[0].split(">")[0].split("<")[0].split(" @")[0].lower()
+            r.split("=")[0].split(">")[0].split("<")[0].split("@")[0].lower()
             for r in requirements
             if r != "" and not r.startswith("#")
         ]
