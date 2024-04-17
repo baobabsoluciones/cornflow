@@ -17,7 +17,7 @@ gevent==23.9.1
 greenlet<=2.0.2;python_version<"3.11"
 greenlet==3.0.0;python_version>="3.11"
 # this should be changed once the correct version (higher than 21.2.0) is released
-gunicorn@git+http://github.com/benoitc/gunicorn@88fc4a43152039c28096c8ba3eeadb3fbaa4aff9
+gunicorn<=22.0.0
 jsonpatch<=1.32
 ldap3<=2.9.1
 marshmallow<=3.19.0
