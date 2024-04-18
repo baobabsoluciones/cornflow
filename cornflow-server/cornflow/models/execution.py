@@ -15,7 +15,7 @@ from cornflow.shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAG
 class ExecutionModel(BaseDataModel):
     """
     Model class for the Executions.
-    It inherits from :class:`BaseDataModel` to have the trace fields and user field
+    It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field.
 
     - **id**: str, the primary key for the executions, a hash generated upon creation of the execution
       and the id given back to the user.
