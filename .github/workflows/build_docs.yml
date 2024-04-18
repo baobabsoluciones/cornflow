@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'cornflow-server/docs/**'
+      - 'docs/**'
       - 'cornflow-server/README.rst'
       - 'cornflow-server/**'
       - 'libs/client/**'
@@ -30,7 +30,6 @@ jobs:
         python -m pip install -r requirements-dev.txt
     - name: Building docs
       run: |
-        cd cornflow-server
         cd docs && make html && cd ..
     # Great extra actions to compose with:
     # Publish built docs to gh-pages branch.
@@ -39,7 +38,7 @@ jobs:
       run: |
         git clone https://github.com/baobabsoluciones/cornflow.git --branch gh-pages --single-branch gh-pages
         rm -rf gh-pages/*
-        cp -r cornflow-server/docs/build/html/* gh-pages/
+        cp -r docs/build/html/* gh-pages/
         cd gh-pages
         touch .nojekyll
         git config --local user.email "action@github.com"
