@@ -30,7 +30,6 @@ jobs:
         python -m pip install -r requirements-dev.txt
     - name: Building docs
       run: |
-        cd cornflow-server
         cd docs && make html && cd ..
     # Great extra actions to compose with:
     # Publish built docs to gh-pages branch.
