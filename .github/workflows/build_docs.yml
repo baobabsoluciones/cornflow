@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'cornflow-server/docs/**'
+      - 'docs/**'
       - 'cornflow-server/README.rst'
       - 'cornflow-server/**'
       - 'libs/client/**'
