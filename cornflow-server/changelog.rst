@@ -1,3 +1,14 @@
+version 1.0.10
+---------------
+
+- released: 2024-04-17
+- description: changed libraries versions due to discovered vulnerabilities
+- changelog:
+    - Upgraded cryptography version to 42.0.5
+    - Upgraded gunicorn version to 22.0.0
+    - Upgraded requests version to 2.31.0
+    - Upgraded Werkzeug version to 2.3.8
+
 version 1.0.9
 --------------
 
