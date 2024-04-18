@@ -1,58 +1,108 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en">
+
+  <!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Running with simultaneous resolutions - Cornflow 1.0.10 documentation</title>
+    <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Deployment options" href="options.html" /><link rel="prev" title="Docker stack" href="docker-stack.html" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running with simultaneous resolutions &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d636b35b"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Deployment options" href="options.html" />
-    <link rel="prev" title="Docker stack" href="docker-stack.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="../index.html" class="icon icon-home">
-            Cornflow
-          </a>
-              <div class="version">
-                3.0
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  <script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(sessionStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=aecf457f" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=aef655f6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Running with simultaneous resolutions"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="document"><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand mr-4" href="../index.html">
+      
+      
+      <strong>Cornflow</strong>
+    </a>
+    <div class="sy-head-links" id="NavLinks">
+      <nav class="sy-head-nav"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        
+<form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form>
+        
+        
+        <div class="sy-head-socials flex items-center">
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own Cornflow-server</a><ul class="current">
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
+      <button class="js-theme theme-switch flex items-center"
+        data-aria-auto="Switch to light color mode"
+        data-aria-light="Switch to dark color mode"
+        data-aria-dark="Switch to auto color mode">
+        <i class="i-lucid theme-icon"></i>
+      </button>
+      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="NavLinks" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/deploy_solver_new.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/coding_style.html">Solution method coding style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/bar_cutting.html">Bar cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/facility_location.html">Facility location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/graph_coloring.html">Graph coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/knapsack.html">Knapsack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../clients/python-api.html">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own cornflow-server</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
@@ -64,41 +114,80 @@
 <li class="toctree-l2"><a class="reference internal" href="problems.html">Known problems</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dev/models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_models.html">Auxiliar models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/meta_models.html">Meta models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
         </div>
       </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Cornflow</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Deploy your own Cornflow-server</a></li>
-      <li class="breadcrumb-item active">Running with simultaneous resolutions</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/deploy/simultaneous.rst.txt" rel="nofollow"> View page source</a>
+      
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucid close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div>
+    </div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+    <div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucid menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
       </li>
-  </ul>
-  <hr/>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Deploy your own cornflow-server</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Running with simultaneous resolutions</strong>
+        <meta itemprop="position" content="3" />
+      </li>
+      
+      
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucid outdent"></i>
+      </button>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="running-with-simultaneous-resolutions">
-<h1>Running with simultaneous resolutions<a class="headerlink" href="#running-with-simultaneous-resolutions" title="Permalink to this heading"></a></h1>
+    <div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="running-with-simultaneous-resolutions">
+<h1>Running with simultaneous resolutions<a class="headerlink" href="#running-with-simultaneous-resolutions" title="Permalink to this heading">¶</a></h1>
 <p>To do this kind of deployment, you could use the template <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-celery.yml</span></code>.
 To deploy you should fetch <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-celery.yml</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-celery.yml&#39;</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">curl</span> <span class="o">-</span><span class="n">LfO</span> <span class="s1">&#39;https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose-cornflow-celery.yml&#39;</span>
+</span></pre></div>
 </div>
 <p>Airflow service allows you to run with <code class="docutils literal notranslate"><span class="pre">CeleryExecutor</span></code>. For more information, see <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/concepts.html">Basic airflow architecture</a>.</p>
 <p>This type of deployment allows simultaneous execution of resolution jobs. For this, different machines are created with an airflow installation that communicate with the main server through a message broker. These machines are defined as <code class="docutils literal notranslate"><span class="pre">workers</span></code>.
@@ -106,7 +195,7 @@ You can deploy as many workers as you want, but taking into account that each pa
 <figure class="align-default" id="id1">
 <span id="cornflow-celery-docker-stack"></span><img alt="../_images/cornflow_celery_docker_stack.png" src="../_images/cornflow_celery_docker_stack.png" />
 <figcaption>
-<p><span class="caption-text">Demonstration of the cornflow service with three instances of simultaneous execution communicating through redis.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Demonstration of the cornflow service with three instances of simultaneous execution communicating through redis.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>If you are running cornflow with multiple workers, there are additional resources that must be provided in your deployment:</p>
@@ -116,78 +205,108 @@ You can deploy as many workers as you want, but taking into account that each pa
 <li><p>redis message broker server</p></li>
 </ol>
 <p>New environment variables must also be taken into account for services running in Celery mode:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXECUTOR</span> <span class="o">-</span> <span class="n">Airflow</span> <span class="n">execution</span> <span class="n">mode</span><span class="o">.</span> <span class="n">In</span> <span class="n">this</span> <span class="n">case</span> <span class="n">the</span> <span class="n">value</span> <span class="n">it</span> <span class="n">should</span> <span class="n">have</span> <span class="ow">is</span> <span class="n">Celery</span><span class="o">.</span>
-<span class="n">AIRFLOW__CORE__FERNET_KEY</span> <span class="o">-</span> <span class="n">A</span> <span class="n">fernet</span> <span class="n">key</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">to</span> <span class="n">encrypt</span> <span class="ow">and</span> <span class="n">decrypt</span> <span class="n">tokens</span> <span class="n">managed</span> <span class="n">by</span> <span class="n">aiflow</span><span class="o">.</span> <span class="n">All</span> <span class="n">airflow</span> <span class="n">related</span> <span class="n">services</span> <span class="n">must</span> <span class="n">have</span> <span class="n">the</span> <span class="n">same</span> <span class="n">key</span> <span class="n">value</span><span class="o">.</span>
-<span class="n">AIRFLOW__CELERY__BROKER_URL</span> <span class="o">-</span> <span class="n">CeleryExecutor</span> <span class="n">drives</span> <span class="n">the</span> <span class="n">need</span> <span class="k">for</span> <span class="n">a</span> <span class="n">Celery</span> <span class="n">broker</span><span class="p">,</span> <span class="n">here</span> <span class="n">Redis</span> <span class="ow">is</span> <span class="n">used</span><span class="o">.</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">EXECUTOR</span> <span class="o">-</span> <span class="n">Airflow</span> <span class="n">execution</span> <span class="n">mode</span><span class="o">.</span> <span class="n">In</span> <span class="n">this</span> <span class="n">case</span> <span class="n">the</span> <span class="n">value</span> <span class="n">it</span> <span class="n">should</span> <span class="n">have</span> <span class="ow">is</span> <span class="n">Celery</span><span class="o">.</span>
+</span><span data-line="2"><span class="n">AIRFLOW__CORE__FERNET_KEY</span> <span class="o">-</span> <span class="n">A</span> <span class="n">fernet</span> <span class="n">key</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">to</span> <span class="n">encrypt</span> <span class="ow">and</span> <span class="n">decrypt</span> <span class="n">tokens</span> <span class="n">managed</span> <span class="n">by</span> <span class="n">aiflow</span><span class="o">.</span> <span class="n">All</span> <span class="n">airflow</span> <span class="n">related</span> <span class="n">services</span> <span class="n">must</span> <span class="n">have</span> <span class="n">the</span> <span class="n">same</span> <span class="n">key</span> <span class="n">value</span><span class="o">.</span>
+</span><span data-line="3"><span class="n">AIRFLOW__CELERY__BROKER_URL</span> <span class="o">-</span> <span class="n">CeleryExecutor</span> <span class="n">drives</span> <span class="n">the</span> <span class="n">need</span> <span class="k">for</span> <span class="n">a</span> <span class="n">Celery</span> <span class="n">broker</span><span class="p">,</span> <span class="n">here</span> <span class="n">Redis</span> <span class="ow">is</span> <span class="n">used</span><span class="o">.</span>
+</span></pre></div>
 </div>
 <p>For running with CeleryExecutor execute this command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
-
-<span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>         <span class="n">STATUS</span>                   <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
-<span class="n">e13c87bcd36b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_1</span>
-<span class="mi">5</span><span class="n">a96cc04b69b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh sch…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">5</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_scheduler_1</span>
-<span class="n">c5d3fdad4c6b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
-<span class="n">e98dfc643ddd</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
-<span class="mi">129</span><span class="n">fd9b29361</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh flo…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_flower_1</span>
-<span class="n">c56e3444078c</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
-<span class="mi">7</span><span class="n">a7b10d09a46</span>   <span class="n">redis</span><span class="p">:</span><span class="mf">5.0.5</span>                       <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">6379</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_redis_1</span>
-<span class="mi">8389735999</span><span class="n">d5</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>         <span class="n">STATUS</span>                   <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
+</span><span data-line="4"><span class="n">e13c87bcd36b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_1</span>
+</span><span data-line="5"><span class="mi">5</span><span class="n">a96cc04b69b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh sch…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">5</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_scheduler_1</span>
+</span><span data-line="6"><span class="n">c5d3fdad4c6b</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
+</span><span data-line="7"><span class="n">e98dfc643ddd</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
+</span><span data-line="8"><span class="mi">129</span><span class="n">fd9b29361</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh flo…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_flower_1</span>
+</span><span data-line="9"><span class="n">c56e3444078c</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
+</span><span data-line="10"><span class="mi">7</span><span class="n">a7b10d09a46</span>   <span class="n">redis</span><span class="p">:</span><span class="mf">5.0.5</span>                       <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">6379</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_redis_1</span>
+</span><span data-line="11"><span class="mi">8389735999</span><span class="n">d5</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">6</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
+</span></pre></div>
 </div>
 <p>The number of <code class="docutils literal notranslate"><span class="pre">workers</span></code> deployed depends on <code class="docutils literal notranslate"><span class="pre">--scale</span></code> argument. For example, if number of workers needed is 3:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">scale</span> <span class="n">worker</span><span class="o">=</span><span class="mi">3</span>
-
-<span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>         <span class="n">STATUS</span>                   <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
-<span class="mi">65</span><span class="n">de0e382a04</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">53</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_1</span>
-<span class="mi">4</span><span class="n">c872f5b6647</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_3</span>
-<span class="n">fca4c231139f</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">54</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_2</span>
-<span class="n">a7f2868e9329</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh sch…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">24</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_scheduler_1</span>
-<span class="n">f21b97ae83e8</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
-<span class="mi">68</span><span class="n">d8f7db53ac</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
-<span class="mi">7</span><span class="n">d6e114978af</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh flo…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">3</span> <span class="n">minutes</span>             <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_flower_1</span>
-<span class="n">d2730ce4b8c1</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
-<span class="n">ec86c6761b80</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
-<span class="mi">2</span><span class="n">d5200460cfb</span>   <span class="n">redis</span><span class="p">:</span><span class="mf">5.0.5</span>                       <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">6379</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_redis_1</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">scale</span> <span class="n">worker</span><span class="o">=</span><span class="mi">3</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                  <span class="n">CREATED</span>         <span class="n">STATUS</span>                   <span class="n">PORTS</span>                                                           <span class="n">NAMES</span>
+</span><span data-line="4"><span class="mi">65</span><span class="n">de0e382a04</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">53</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_1</span>
+</span><span data-line="5"><span class="mi">4</span><span class="n">c872f5b6647</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_3</span>
+</span><span data-line="6"><span class="n">fca4c231139f</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh wor…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">54</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_worker_2</span>
+</span><span data-line="7"><span class="n">a7f2868e9329</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh sch…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">24</span> <span class="n">seconds</span>            <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>                                    <span class="n">corn_scheduler_1</span>
+</span><span data-line="8"><span class="n">f21b97ae83e8</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>         <span class="s2">&quot;./initapp.sh&quot;</span>           <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5000</span><span class="o">-&gt;</span><span class="mi">5000</span><span class="o">/</span><span class="n">tcp</span>                       <span class="n">corn_cornflow_1</span>
+</span><span data-line="9"><span class="mi">68</span><span class="n">d8f7db53ac</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh web…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span> <span class="p">(</span><span class="n">healthy</span><span class="p">)</span>   <span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">8080</span><span class="o">-&gt;</span><span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_webserver_1</span>
+</span><span data-line="10"><span class="mi">7</span><span class="n">d6e114978af</span>   <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span>   <span class="s2">&quot;/initairflow.sh flo…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">3</span> <span class="n">minutes</span>             <span class="mi">8080</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">5555</span><span class="o">-&gt;</span><span class="mi">5555</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">8793</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">corn_flower_1</span>
+</span><span data-line="11"><span class="n">d2730ce4b8c1</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_cornflow_db_1</span>
+</span><span data-line="12"><span class="n">ec86c6761b80</span>   <span class="n">postgres</span>                          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_airflow_db_1</span>
+</span><span data-line="13"><span class="mi">2</span><span class="n">d5200460cfb</span>   <span class="n">redis</span><span class="p">:</span><span class="mf">5.0.5</span>                       <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>             <span class="mi">6379</span><span class="o">/</span><span class="n">tcp</span>                                                        <span class="n">corn_redis_1</span>
+</span></pre></div>
 </div>
 <p>Airflow service available at <a class="reference external" href="http://localhost:8080">http://localhost:8080</a>
 Flower service available at <a class="reference external" href="http://localhost:5555">http://localhost:5555</a></p>
 <p>If you want to stop the docker services and remove all volumes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">volumes</span> <span class="o">--</span><span class="n">rmi</span> <span class="nb">all</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">celery</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">volumes</span> <span class="o">--</span><span class="n">rmi</span> <span class="nb">all</span>
+</span></pre></div>
 </div>
 </section>
 
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="docker-stack.html" class="btn btn-neutral float-left" title="Docker stack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="options.html" class="btn btn-neutral float-right" title="Deployment options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
+        <button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button>
+        
+        <div class="navigation flex print:hidden">
+  <div class="navigation-prev">
+    <a href="docker-stack.html">
+      <i class="i-lucid chevron"></i>
+      <div class="page-info">
+        <span>Previous</span>
+        
+        <div class="title">Docker stack</div>
+        
       </div>
-    </section>
+    </a>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
+  <div class="navigation-next">
+    <a href="options.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Deployment options</div>
+      </div>
+      <i class="i-lucid chevron"></i>
+    </a>
+  </div>
+</div>
+        
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2020-, cornflow documentation team.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+</div>
+    </div>
+  </div>
+</footer></div>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=4f5bc5c4"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/design-tabs.js?v=36754332"></script>
+      <script src="../_static/shibuya.js?v=9aab5f5b"></script>
+    
 </body>
 </html>

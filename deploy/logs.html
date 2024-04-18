@@ -1,58 +1,108 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en">
+
+  <!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Logging and monitoring - Cornflow 1.0.10 documentation</title>
+    <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Known problems" href="problems.html" /><link rel="prev" title="Access control" href="access.html" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Logging and monitoring &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d636b35b"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Known problems" href="problems.html" />
-    <link rel="prev" title="Access control" href="access.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="../index.html" class="icon icon-home">
-            Cornflow
-          </a>
-              <div class="version">
-                3.0
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  <script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(sessionStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=aecf457f" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=aef655f6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Logging and monitoring"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="document"><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand mr-4" href="../index.html">
+      
+      
+      <strong>Cornflow</strong>
+    </a>
+    <div class="sy-head-links" id="NavLinks">
+      <nav class="sy-head-nav"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        
+<form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form>
+        
+        
+        <div class="sy-head-socials flex items-center">
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own Cornflow-server</a><ul class="current">
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
+      <button class="js-theme theme-switch flex items-center"
+        data-aria-auto="Switch to light color mode"
+        data-aria-light="Switch to dark color mode"
+        data-aria-dark="Switch to auto color mode">
+        <i class="i-lucid theme-icon"></i>
+      </button>
+      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="NavLinks" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/deploy_solver_new.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/coding_style.html">Solution method coding style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/bar_cutting.html">Bar cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/facility_location.html">Facility location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/graph_coloring.html">Graph coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/knapsack.html">Knapsack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../clients/python-api.html">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own cornflow-server</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
@@ -60,168 +110,241 @@
 <li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging and monitoring</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#cornflow-logs">Cornflow logs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#airflow-logs">Airflow logs</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#scheduler-log">Scheduler log</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#worker-logs">Worker logs</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#monitoring">Monitoring</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cornflow-monitoring">Cornflow monitoring</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#airflow-monitoring">Airflow monitoring</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging and monitoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="problems.html">Known problems</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dev/models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_models.html">Auxiliar models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/meta_models.html">Meta models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
         </div>
       </div>
-    </nav>
+      
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucid close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4">
+  <div class="localtoc">
+    <h3>On this page</h3>
+    <ul>
+<li><a class="reference internal" href="#cornflow-logs">Cornflow logs</a></li>
+<li><a class="reference internal" href="#airflow-logs">Airflow logs</a><ul>
+<li><a class="reference internal" href="#scheduler-log">Scheduler log</a></li>
+<li><a class="reference internal" href="#worker-logs">Worker logs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#monitoring">Monitoring</a><ul>
+<li><a class="reference internal" href="#cornflow-monitoring">Cornflow monitoring</a></li>
+<li><a class="reference internal" href="#airflow-monitoring">Airflow monitoring</a></li>
+</ul>
+</li>
+</ul>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Cornflow</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Deploy your own Cornflow-server</a></li>
-      <li class="breadcrumb-item active">Logging and monitoring</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/deploy/logs.rst.txt" rel="nofollow"> View page source</a>
+  </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div>
+    </div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+    <div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucid menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
       </li>
-  </ul>
-  <hr/>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Deploy your own cornflow-server</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Logging and monitoring</strong>
+        <meta itemprop="position" content="3" />
+      </li>
+      
+      
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucid outdent"></i>
+      </button>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="logging-and-monitoring">
-<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this heading"></a></h1>
+    <div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="logging-and-monitoring">
+<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this heading">¶</a></h1>
 <section id="cornflow-logs">
-<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this heading"></a></h2>
+<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this heading">¶</a></h2>
 <p>Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
+</span></pre></div>
 </div>
 <p>If you want to know about the possibilities offered by the docker log engine, you can visit the official documentation <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/logs/">here</a>.</p>
 <p>If you want to activate the persistent log storage in files, you must pass the value <code class="docutils literal notranslate"><span class="pre">file</span></code> to the environment variable <code class="docutils literal notranslate"><span class="pre">CORNFLOW_LOGGING</span></code> in the cornflow server deployment.
 Once the log storage is activated, these will be saved in the path <code class="docutils literal notranslate"><span class="pre">/usr/src/app/log</span></code> inside the cornflow container.
 To permanently store the logs even if the service is destroyed, you can mount a volume against the directory as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to_storage</span><span class="o">/</span><span class="n">cornflow</span><span class="o">/</span><span class="n">logs</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">log</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to_storage</span><span class="o">/</span><span class="n">cornflow</span><span class="o">/</span><span class="n">logs</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">log</span>
+</span></pre></div>
 </div>
 <p>The log files will rotate and be compressed following the configuration provided to the logrotate service:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">number</span> <span class="n">of</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">directory</span> <span class="o">-</span> <span class="mi">30</span>
-<span class="n">frequency</span> <span class="o">-</span> <span class="n">daily</span>
-<span class="n">log</span> <span class="n">file</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">20</span><span class="n">M</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">number</span> <span class="n">of</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">directory</span> <span class="o">-</span> <span class="mi">30</span>
+</span><span data-line="2"><span class="n">frequency</span> <span class="o">-</span> <span class="n">daily</span>
+</span><span data-line="3"><span class="n">log</span> <span class="n">file</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">20</span><span class="n">M</span>
+</span></pre></div>
 </div>
 <p>Two files will be created in log directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>info.log - record messages with access to the application with the default log level value ``info``
-error.log - here the application errors will be recorded
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">info.log - record messages with access to the application with the default log level value ``info``
+</span><span data-line="2">error.log - here the application errors will be recorded
+</span></pre></div>
 </div>
 <p>The compressed logs will have this format: <code class="docutils literal notranslate"><span class="pre">info.log.1.gz</span></code></p>
 </section>
 <section id="airflow-logs">
-<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this heading"></a></h2>
+<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this heading">¶</a></h2>
 <p>Airflow supports a variety of logging and monitoring mechanisms as shown on it’s <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/index.html#logging-monitoring">documentation page</a>.</p>
 <section id="scheduler-log">
-<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Permalink to this heading"></a></h3>
+<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Permalink to this heading">¶</a></h3>
 <p>The logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.</p>
 <p>The scheduler logs are named after the DAGs handled by the service. Navigate to where the log file is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker exec -it `docker ps -q --filter name=scheduler` bash -c &quot;ls -l ${AIRFLOW_HOME}logs/scheduler/latest/&quot;
-
--rw-r--r-- 1 airflow airflow 1377544 May 20 10:04 dag_timer.py.log
--rw-r--r-- 1 airflow airflow 1168103 May 20 10:03 graph_coloring.py.log
--rw-r--r-- 1 airflow airflow 1454702 May 20 10:04 hk_2020_dag.py.log
--rw-r--r-- 1 airflow airflow 1370681 May 20 10:03 optim_dag.py.log
--rw-r--r-- 1 airflow airflow 1495255 May 20 10:03 update_all_schemas.py.log
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">docker exec -it `docker ps -q --filter name=scheduler` bash -c &quot;ls -l ${AIRFLOW_HOME}logs/scheduler/latest/&quot;
+</span><span data-line="2">
+</span><span data-line="3">-rw-r--r-- 1 airflow airflow 1377544 May 20 10:04 dag_timer.py.log
+</span><span data-line="4">-rw-r--r-- 1 airflow airflow 1168103 May 20 10:03 graph_coloring.py.log
+</span><span data-line="5">-rw-r--r-- 1 airflow airflow 1454702 May 20 10:04 hk_2020_dag.py.log
+</span><span data-line="6">-rw-r--r-- 1 airflow airflow 1370681 May 20 10:03 optim_dag.py.log
+</span><span data-line="7">-rw-r--r-- 1 airflow airflow 1495255 May 20 10:03 update_all_schemas.py.log
+</span></pre></div>
 </div>
 </section>
 <section id="worker-logs">
-<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Permalink to this heading"></a></h3>
+<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Permalink to this heading">¶</a></h3>
 <p>As in the rest of airflow services, the logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.
 The logs are divided into folders with the name of the DAGs and into subfolders with their execution dates.</p>
 <p>If we want to view logs with a command, here things get a bit complicated since we can have different workers deployed, with different DAGs. We must help ourselves with the linux bash commands to filter the search as much as possible. Let’s say we want to review today logs of the DAG <code class="docutils literal notranslate"><span class="pre">update_all_squemas</span></code> in every worker:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for id in `docker ps -q --filter name=worker_`; do docker exec -it $id bash -c &quot;tail ${AIRFLOW_HOME}logs/update_all_schemas/update_all_schemas/$(date +%Y-%m-%d)*/*.log&quot;;done;
-
-[2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - looking for apps in dir=/usr/local/airflow/dags
-[2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - Files are: [&#39;graph_coloring.py&#39;, &#39;update_all_schemas.py&#39;, &#39;__init__.py&#39;, &#39;graph_coloring_output.json&#39;, &#39;hk_2020_dag.py&#39;, &#39;dag_timer.py&#39;, &#39;graph_coloring_input.json&#39;, &#39;__pycache__&#39;, &#39;optim_dag.py&#39;]
-[2021-05-19 17:37:28,149] {logging_mixin.py:104} WARNING - /usr/local/airflow/.local/lib/python3.8/site-packages/hackathonbaobab2020/execution/__init__.py:7 UserWarning: To use the benchmark functions, you need to install the benchmark dependencies:
-`pip install hackathonbaobab2020[benchmark]`
-[2021-05-19 17:37:28,251] {logging_mixin.py:104} INFO - Found the following apps: [&#39;graph_coloring&#39;, &#39;hk_2020_dag&#39;, &#39;timer&#39;, &#39;solve_model_dag&#39;]
-[2021-05-19 17:37:28,571] {python.py:118} INFO - Done. Returned value was: None
-[2021-05-19 17:37:28,588] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=update_all_schemas, task_id=update_all_schemas, execution_date=20210518T173709, start_date=20210519T173726, end_date=20210519T173728
-[2021-05-19 17:37:28,629] {taskinstance.py:1246} INFO - 0 downstream tasks scheduled from follow-on schedule check
-[2021-05-19 17:37:28,654] {local_task_job.py:146} INFO - Task exited with return code 0
-&#39;logs/update_all_schemas/update_all_schemas/2021-05-18*/*.log&#39;: No such file or directory
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">for id in `docker ps -q --filter name=worker_`; do docker exec -it $id bash -c &quot;tail ${AIRFLOW_HOME}logs/update_all_schemas/update_all_schemas/$(date +%Y-%m-%d)*/*.log&quot;;done;
+</span><span data-line="2">
+</span><span data-line="3">[2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - looking for apps in dir=/usr/local/airflow/dags
+</span><span data-line="4">[2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - Files are: [&#39;graph_coloring.py&#39;, &#39;update_all_schemas.py&#39;, &#39;__init__.py&#39;, &#39;graph_coloring_output.json&#39;, &#39;hk_2020_dag.py&#39;, &#39;dag_timer.py&#39;, &#39;graph_coloring_input.json&#39;, &#39;__pycache__&#39;, &#39;optim_dag.py&#39;]
+</span><span data-line="5">[2021-05-19 17:37:28,149] {logging_mixin.py:104} WARNING - /usr/local/airflow/.local/lib/python3.8/site-packages/hackathonbaobab2020/execution/__init__.py:7 UserWarning: To use the benchmark functions, you need to install the benchmark dependencies:
+</span><span data-line="6">`pip install hackathonbaobab2020[benchmark]`
+</span><span data-line="7">[2021-05-19 17:37:28,251] {logging_mixin.py:104} INFO - Found the following apps: [&#39;graph_coloring&#39;, &#39;hk_2020_dag&#39;, &#39;timer&#39;, &#39;solve_model_dag&#39;]
+</span><span data-line="8">[2021-05-19 17:37:28,571] {python.py:118} INFO - Done. Returned value was: None
+</span><span data-line="9">[2021-05-19 17:37:28,588] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=update_all_schemas, task_id=update_all_schemas, execution_date=20210518T173709, start_date=20210519T173726, end_date=20210519T173728
+</span><span data-line="10">[2021-05-19 17:37:28,629] {taskinstance.py:1246} INFO - 0 downstream tasks scheduled from follow-on schedule check
+</span><span data-line="11">[2021-05-19 17:37:28,654] {local_task_job.py:146} INFO - Task exited with return code 0
+</span><span data-line="12">&#39;logs/update_all_schemas/update_all_schemas/2021-05-18*/*.log&#39;: No such file or directory
+</span></pre></div>
 </div>
 <p>Note that we can get an error of the type (<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory</span></code>) because that log does not exist in all workers.</p>
 </section>
 </section>
 <section id="monitoring">
-<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this heading"></a></h2>
+<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this heading">¶</a></h2>
 <section id="cornflow-monitoring">
-<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Permalink to this heading"></a></h3>
+<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Permalink to this heading">¶</a></h3>
 <p>You can call the <code class="docutils literal notranslate"><span class="pre">/health</span></code> endpoint to obtain the status of the cornflow and airflow servers. It should return a 200 code as well as “healthy” of status for both <code class="docutils literal notranslate"><span class="pre">cornflow_status</span></code> and <code class="docutils literal notranslate"><span class="pre">airflow_status</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="s2">&quot;airflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;cornflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span>
-<span class="p">}</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2">  <span class="s2">&quot;airflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
+</span><span data-line="3">  <span class="s2">&quot;cornflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span>
+</span><span data-line="4"><span class="p">}</span>
+</span></pre></div>
 </div>
 <p>Check the <a class="reference external" href="https://baobabsoluciones.github.io/cornflow/stable-rest-api-ref.html#tag/Health">API docs</a> for more information.</p>
 </section>
 <section id="airflow-monitoring">
-<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Permalink to this heading"></a></h3>
+<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Permalink to this heading">¶</a></h3>
 <p>To check the <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html#checking-airflow-health-status">health status of your Airflow instance</a> directly without using cornflow, you can simply access the endpoint <code class="docutils literal notranslate"><span class="pre">/health</span></code>. It will return a JSON object in which a high-level glance is provided.</p>
 </section>
 </section>
 </section>
 
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="access.html" class="btn btn-neutral float-left" title="Access control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="problems.html" class="btn btn-neutral float-right" title="Known problems" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
+        <button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button>
+        
+        <div class="navigation flex print:hidden">
+  <div class="navigation-prev">
+    <a href="access.html">
+      <i class="i-lucid chevron"></i>
+      <div class="page-info">
+        <span>Previous</span>
+        
+        <div class="title">Access control</div>
+        
       </div>
-    </section>
+    </a>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
+  <div class="navigation-next">
+    <a href="problems.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Known problems</div>
+      </div>
+      <i class="i-lucid chevron"></i>
+    </a>
+  </div>
+</div>
+        
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2020-, cornflow documentation team.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+</div>
+    </div>
+  </div>
+</footer></div>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=4f5bc5c4"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/design-tabs.js?v=36754332"></script>
+      <script src="../_static/shibuya.js?v=9aab5f5b"></script>
+    
 </body>
 </html>

@@ -4,194 +4,195 @@ Installation instructions
 Requirements
 ~~~~~~~~~~~~~~~~~~
 
-* Linux or Windows with WSL
-* python >= 3.7
+* Linux or Windows with WSL.
+* python >= 3.8, preferably 3.10.
 
 Install cornflow
 ~~~~~~~~~~~~~~~~~~
 
-Cornflow consists of two projects: cornflow (itself) and airflow (from apache). They are conceived to be deployed independently. Here we will explain the "development deploy" that consists on installing them in the same machine.
+There are several ways to install cornflow and set it up and running. First we are going to cover how to set up cornflow and airflow locally on a Linux machine. Then how to deploy cornflow building the docker containers and how to set it up using the official docker hub images.
 
-Create and activate the virtual environment::
+Local installation from repository
+-----------------------------------
 
-    python3 -m venv venv
-    source venv/bin/activate
+Set up cornflow
+^^^^^^^^^^^^^^^^
 
-or, in windows::
+We first start by cloning the repository::
 
-    python3 -m venv venv
-    venv/Scripts/activate
+  git clone https://github.com/baobabsoluciones/cornflow
 
-Install the Cornflow library::
+Then we create a virtual environment and install all the requirements::
 
-    venv/bin/pip3 install cornflow
+  cd cornflow
+  cd cornflow-server
+  python3 -m venv cenv
+  source cenv/bin/activate
+  pip install -r requirements-dev.txt
 
+Before running cornflow we have to create some environment variables::
 
-Setup cornflow database
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  export FLASK_APP=cornflow.app
+  export FLASK_ENV=development
+  export SECRET_KEY=THISNEEDSTOBECHANGED
+  export AIRFLOW_URL=http://localhost:8080
+  export AIRFLOW_USER=admin
+  export AIRFLOW_PWD=admin
 
-This local example assumes sqlite as database engine. For an example of postgresql deployment, see the :ref:`this section<Setup cornflow database with your own PostgreSQL server>`.
+Then we run the following commands::
 
-Initialize the database::
+  flask db upgrade -d cornflow/migrations
+  flask access_init
+  flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+  flask create_service_user -u service_user -e service_user@cornflow.org -p Service_password1
+  flask run
 
-    source venv/bin/activate
-    export FLASK_APP=cornflow.app
-    export DATABASE_URL=sqlite:///cornflow.db
-    flask db upgrade
-    flask access_init
-    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password
-    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
+And this should let us have a cornflow server on development mode running on http://localhost:5000. If we want to run it on the background we can use::
 
-Launch cornflow server
-~~~~~~~~~~~~~~~~~~~~~~~
+  flask run &
 
-Each time you run the flask server, execute the following::
+And to stop it we can find the process id and kill it::
 
-    source venv/bin/activate
-    export FLASK_APP=cornflow.app
-    export FLASK_ENV=development
-    export DATABASE_URL=sqlite:///cornflow.db
-    export SECRET_KEY=THISNEEDSTOBECHANGED
-    export AIRFLOW_URL=http://localhost:8080
-    export AIRFLOW_USER=admin
-    export AIRFLOW_PWD=admin
-    flask run
+  ps aux | grep flask
+  kill -9 <process_id>
 
-In windows use ``set`` instead of ``export``.
+We should kill the process and set up and run airflow before coming back to launch cornflow.
 
-Install and configure airflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Set up and run airflow
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here are the minimal instructions to install and configure airflow with the default dags in this project. The instructions assume Ubuntu.
+First if we have followed cornflow installation instructions we should exit the virtual environment first and go back to the root folder::
 
-Create a virtual environment for airflow::
+  deactivate
+  cd ..
 
-    cd corn
-    python3 -m venv afvenv
-    source afvenv/bin/activate
+Then we move the default DAGs that we have in the repo to the correct folder::
 
-Install airflow from pip::
+  cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+  cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
+  cd cornflow-server
 
-    AIRFLOW_VERSION=2.1.0
-    PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
-    CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-    pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+Now we create a virtual environment and install all the requirements::
 
-Install the default workers dependencies::
+  python3 -m venv aenv
+  source aenv/bin/activate
+  AIRFLOW_VERSION=2.7.1
+  PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+  CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+  pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+  pip install orloge pulp
+  pip install -r airflow_config/requirements.txt
+  pip install -e ../libs/client
+  pip install apache-airflow-providers-google
+  airflow db init
+  airflow users create -u admin -p admin -f admin -l user -r Admin -e admin@airflow.org
+  
+Then we export the variables that we need to run airflow::
 
-    pip install orloge cornflow_client pulp
+  export AIRFLOW__CORE__LOAD_EXAMPLES=0
+  export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
+  export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+  export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+  export AIRFLOW_CONN_CF_URI=http://service_user:Service_password1@localhost:5000
+  airflow webserver -p 8080 &
+  airflow scheduler &
 
-Initialize the database and create an admin user::
+And to stop the services we can::
 
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    airflow db init
-    airflow users create \
-          --username admin \
-          --firstname admin \
-          --lastname admin \
-          --role Admin \
-          --password admin \
-          --email admin@example.org
+  ps aux | grep airflow
+  kill -9 <process_id>
 
-Launch airflow server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run cornflow
+^^^^^^^^^^^^^^^^
 
-Set the base config::
+Once airflow is running and cornflow set up we can run it::
+  
+    source cenv/bin/activate
+    flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+    flask register_dag_permissions -o 1
+    flask run -p 5000 &
 
-    source afvenv/bin/activate
-    export AIRFLOW_HOME="$PWD/airflow_config"
-    export AIRFLOW__CORE__LOAD_EXAMPLES=0
-    export AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=0
-    export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
-    export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
-    export AIRFLOW_CONN_CF_URI=http://airflow_test@admin.com:airflow_test_password@localhost:5000
+And with this we should have both cornflow and airflow running. We can check that cornflow is running by going to http://localhost:5000/health/ and airflow by going to http://localhost:8080.
 
-Start the web server::
 
-    airflow webserver -p 8080 &
+Docker. Build images from local
+--------------------------------
 
-Also, start the scheduler::
+More information about how to deploy with docker containers can be found of the :ref:`deploy-cornflow` section of the documentation.
 
-    airflow scheduler &
+We first start by cloning the repository::
 
-airflow gui will be at::
+  git clone https://github.com/baobabsoluciones/cornflow
 
-    http://localhost:8080
+To continue the deployment we are going to need the Dockerfiles and docker-compose files that are on the repository. To be able to build from the source code we are going to need to do some small modifications to some of the files.
 
-Killing airflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Dockerfile for cornflow can be found inside the ``cornflow/cornflow-server`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub.
 
-Search for the code of the process in Linux::
+The Dockerfile for airflow can be found on the ``cornflow/cornflow-server/airflow_config`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub. This image is built on top of another one that gets built manually and that has all the needed libraries for the solvers. This is done this way to improve the build time of the image as the solver libraries are quite heavy and quite prone to remain stable for long periods of time.
 
-    ps aux | grep airflow
+Then we need a docker-compose file. The ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` that are in the root folder of the repository can be used with some small tweaks to build the images from the local repo instead that taking the official images.
 
-Kill it::
+To test out the simpler deployment we are going to use the ``docker-compose.yml`` file. We have to do the following changes. Comment the following lines:
 
-    kill -9 CODE
+.. code-block:: yaml
+  
+  image: baobabsoluciones/airflow:release-v1.0.8
 
-If you're feeling lucky::
+and:
 
-    kill -9 $(ps aux | grep 'airflow' | awk '{print $2}')
+.. code-block:: yaml
 
+  image: baobabsoluciones/cornflow:release-v1.0.8
 
+In both cases the version of the image can be updated, but these lines are the ones that have to be commented in order to build the iamges from surce instead of downloading them from docker hub.
 
-Install with docker
-=======================
+And uncomment the following lines:
 
-Pull
-~~~~~~~~
+.. code-block:: yaml
 
-Pull the image from the Docker repository::
+  build: 
+    context: ./cornflow-server/airflow_config
 
-    docker pull baobabsoluciones/cornflow
+and:
 
-Build
-~~~~~~~~~~
+.. code-block:: yaml
 
-Build cornflow image::
+  build: 
+    context: ./cornflow-server
 
-    docker build -t cornflow .
+Then we can run the following commands to start up the containers::
 
-Optionally install Airflow personalized image in folder `airflow_config` ::
+  cp -r cornflow/cornflow-dags/DAG/* cornflow/cornflow-server/airflow_config/dags/
+  cp cornflow/cornflow-dags/requirements.txt cornflow/cornflow-server/airflow_config/
+  docker-compose up -d
 
-    cd airflow_config && docker build -t docker-airflow .
+Then to stop the containers we can run::
 
-Don't forget to update the images in the docker-compose files to baobabsoluciones/cornflow:latest and baobabsoluciones/docker-airflow:latest.
+  docker-compose down --remove-orphans
 
-Usage
-~~~~~~~~~~
+And to delete the containers in case we want to rebuild them after stopping them::
 
-We have created several `docker-compose.yml` files so that you can use them and deploy the test environment:
-By default, docker-airflow runs Airflow with SequentialExecutor::
+  docker system prune -af
 
-    docker-compose up --build -d
-    
-For CeleryExecutor::
+And with these command we should have a cornflow and airflow instance up and running on our machine with the default variables that can be seen on the docker-compose file.
 
-    docker-compose -f docker-compose-cornflow-celery.yml up -d
+If we want to have the full ecosystem to test out the celery backend, then we have to run the ``docker-compose-cornflow-celery.yml`` file instead of the ``docker-compose.yml`` file. This will start up a redis instance and a celery worker that will be used by airflow to run the DAGs. 
 
-List containers::
+The lines that have to be modified on this file are the same ones that the one on the ``docker-compose.yml`` file.
 
-    docker-compose ps
+To start it up then we can run::
 
-Interact with container::
+  docker-compose -f docker-compose-cornflow-celery.yml up -d
 
-    docker exec -it `docker ps -q --filter ancestor=baobabsoluciones/cornflow` bash
 
-See the logs for a particular service (e.g., SERVICE=cornflow)::
+Docker. Pull images from docker hub
+------------------------------------
 
-    docker-compose logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
+To run the environment with the official images then we just have to copy the ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` file to our system and run the docker-compose up command to use the official docker hub images.
 
-Stop the containers and clean volumes::
-    
-    docker-compose down --volumes --rmi all
+Troubleshooting
+----------------
 
-Help me
-----------
+To install all the dependencies, additional packages may be needed. For example, in Ubuntu 20.04, the following packages are needed::
 
-If you have a database server and you only want to create the database or, for example, you already have an airflow environment, you can go to the following links to learn more about other types of cornflow deployment.
-
-:ref:`Deploy cornflow with docker<Deploy your own Cornflow-server>`
-
-`Airflow documentation <https://airflow.apache.org/docs/apache-airflow/2.1.0/index.html>`_
-
+  sudo apt-get install libpq-dev python3-dev python3.10-venv build-essential

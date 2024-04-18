@@ -1,4 +1,6 @@
-Deploy your own Cornflow-server
+.. _deploy-cornflow:
+
+Deploy your own cornflow-server
 ==========================================
 
 From the beginning of the project, we thought that the best way to offer a cornflow deployment would be through container technology. Following the agile methodology allows us to translate the development to any system in a precise and immutable way. We will continue to work to provide a kubernetes installation template and other code-infrastructure deployment methods.

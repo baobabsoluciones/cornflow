@@ -1,214 +1,337 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en">
+
+  <!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Production deployment and security - Cornflow 1.0.10 documentation</title>
+    <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Access control" href="access.html" /><link rel="prev" title="Deployment options" href="options.html" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Production deployment and security &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d636b35b"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Access control" href="access.html" />
-    <link rel="prev" title="Deployment options" href="options.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="../index.html" class="icon icon-home">
-            Cornflow
-          </a>
-              <div class="version">
-                3.0
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  <script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(sessionStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=aecf457f" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=aef655f6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Production deployment and security"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="document"><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand mr-4" href="../index.html">
+      
+      
+      <strong>Cornflow</strong>
+    </a>
+    <div class="sy-head-links" id="NavLinks">
+      <nav class="sy-head-nav"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        
+<form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form>
+        
+        
+        <div class="sy-head-socials flex items-center">
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own Cornflow-server</a><ul class="current">
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
+      <button class="js-theme theme-switch flex items-center"
+        data-aria-auto="Switch to light color mode"
+        data-aria-light="Switch to dark color mode"
+        data-aria-dark="Switch to auto color mode">
+        <i class="i-lucid theme-icon"></i>
+      </button>
+      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="NavLinks" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/deploy_solver_new.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/coding_style.html">Solution method coding style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/bar_cutting.html">Bar cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/facility_location.html">Facility location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/graph_coloring.html">Graph coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/knapsack.html">Knapsack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../clients/python-api.html">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own cornflow-server</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker-stack.html">Docker stack</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Production deployment and security</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#database-backend">Database backend</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ssl">SSL</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#enforce-security">Enforce security</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ldap-authentication">LDAP Authentication</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#airflow-user">Airflow user</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="problems.html">Known problems</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dev/models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_models.html">Auxiliar models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/meta_models.html">Meta models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
         </div>
       </div>
-    </nav>
+      
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucid close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4">
+  <div class="localtoc">
+    <h3>On this page</h3>
+    <ul>
+<li><a class="reference internal" href="#database-backend">Database backend</a></li>
+<li><a class="reference internal" href="#ssl">SSL</a></li>
+<li><a class="reference internal" href="#enforce-security">Enforce security</a></li>
+<li><a class="reference internal" href="#ldap-authentication">LDAP Authentication</a></li>
+<li><a class="reference internal" href="#airflow-user">Airflow user</a></li>
+</ul>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Cornflow</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Deploy your own Cornflow-server</a></li>
-      <li class="breadcrumb-item active">Production deployment and security</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/deploy/production.rst.txt" rel="nofollow"> View page source</a>
+  </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div>
+    </div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+    <div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucid menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
       </li>
-  </ul>
-  <hr/>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Deploy your own cornflow-server</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Production deployment and security</strong>
+        <meta itemprop="position" content="3" />
+      </li>
+      
+      
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucid outdent"></i>
+      </button>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="production-deployment-and-security">
-<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this heading"></a></h1>
+    <div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="production-deployment-and-security">
+<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this heading">¶</a></h1>
 <p>It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html">production-ready</a>.</p>
 <section id="database-backend">
-<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this heading"></a></h2>
+<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this heading">¶</a></h2>
 <p>Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
+</span></pre></div>
 </div>
 </section>
 <section id="ssl">
-<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this heading"></a></h2>
+<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this heading">¶</a></h2>
 <p>At the moment cornflow does not have built-in <a class="reference external" href="https://en.wikipedia.org/wiki/Transport_Layer_Security">SSL</a> support. You can use a reverse proxy service such as <a class="reference external" href="http://nginx.org/">Nginx</a> to give adequate security to the connection with your server.
 Please go to the <a class="reference external" href="http://nginx.org/en/docs/http/configuring_https_servers.html">Nginx documentation page</a> to correctly configure your server’s certificates.</p>
 <p>This is a Nginx configuration template (<code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/mysite.conf</span></code>) that we can use to configure the ssl encryption with the cornflow service:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>server {
-   listen 443 ssl;
-   server_name mycornflowsite.com;
-   location / {
-   rewrite ^/v1/(.*)$ /$1 break;
-     proxy_pass http://localhost:5000;
-     proxy_set_header Host $host;
-     proxy_redirect off;
-     proxy_http_version 1.1;
-     proxy_set_header Upgrade $http_upgrade;
-     proxy_set_header Connection &quot;upgrade&quot;;
-   }
-   ssl_certificate /pathtocertificate/mysite.crt;
-   ssl_certificate_key /pathtocertificatekey/mysite.key;
-   error_page 400 /400.json;
-   location /400.json {
-       return 400 &#39;{&quot;error&quot;:{&quot;code&quot;:400,&quot;message&quot;:&quot;Bad Request&quot;}}&#39;;
-   }
-   error_page 403 /403.json;
-   location /403.json {
-       return 403 &#39;{&quot;error&quot;:{&quot;code&quot;:403,&quot;message&quot;: &quot;Forbidden&quot;}}&#39;;
-   }
-   error_page 500 /500.json;
-   location /500.json {
-       return 500 &#39;{&quot;error&quot;:{&quot;code&quot;:500,&quot;message&quot;:&quot;Internal Server Error&quot;}}&#39;;
-   }
-}
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">server {
+</span><span data-line="2">   listen 443 ssl;
+</span><span data-line="3">   server_name mycornflowsite.com;
+</span><span data-line="4">   location / {
+</span><span data-line="5">   rewrite ^/v1/(.*)$ /$1 break;
+</span><span data-line="6">     proxy_pass http://localhost:5000;
+</span><span data-line="7">     proxy_set_header Host $host;
+</span><span data-line="8">     proxy_redirect off;
+</span><span data-line="9">     proxy_http_version 1.1;
+</span><span data-line="10">     proxy_set_header Upgrade $http_upgrade;
+</span><span data-line="11">     proxy_set_header Connection &quot;upgrade&quot;;
+</span><span data-line="12">   }
+</span><span data-line="13">   ssl_certificate /pathtocertificate/mysite.crt;
+</span><span data-line="14">   ssl_certificate_key /pathtocertificatekey/mysite.key;
+</span><span data-line="15">   error_page 400 /400.json;
+</span><span data-line="16">   location /400.json {
+</span><span data-line="17">       return 400 &#39;{&quot;error&quot;:{&quot;code&quot;:400,&quot;message&quot;:&quot;Bad Request&quot;}}&#39;;
+</span><span data-line="18">   }
+</span><span data-line="19">   error_page 403 /403.json;
+</span><span data-line="20">   location /403.json {
+</span><span data-line="21">       return 403 &#39;{&quot;error&quot;:{&quot;code&quot;:403,&quot;message&quot;: &quot;Forbidden&quot;}}&#39;;
+</span><span data-line="22">   }
+</span><span data-line="23">   error_page 500 /500.json;
+</span><span data-line="24">   location /500.json {
+</span><span data-line="25">       return 500 &#39;{&quot;error&quot;:{&quot;code&quot;:500,&quot;message&quot;:&quot;Internal Server Error&quot;}}&#39;;
+</span><span data-line="26">   }
+</span><span data-line="27">}
+</span></pre></div>
 </div>
 </section>
 <section id="enforce-security">
-<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this heading"></a></h2>
+<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this heading">¶</a></h2>
 <p>When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the <a class="reference external" href="https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose">docker secret manager</a>.</p>
 <p>It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REDIS_PASSWORD</span><span class="o">=</span><span class="s2">&quot;myredispassword&quot;</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">REDIS_PASSWORD</span><span class="o">=</span><span class="s2">&quot;myredispassword&quot;</span>
+</span></pre></div>
 </div>
 <p>Flower has by default a <a class="reference external" href="https://flower.readthedocs.io/en/latest/auth.html">basic authentication</a> shared with the airflow server in the deployment.</p>
 </section>
 <section id="ldap-authentication">
-<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this heading"></a></h2>
+<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this heading">¶</a></h2>
 <p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
 <p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">ldap</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">-</span><span class="n">cornflow</span><span class="o">-</span><span class="n">ldap</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+</span></pre></div>
 </div>
 <p>With this docker template following users will be create in openldap server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">User</span> <span class="s2">&quot;administrator&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;adminnistrator1234&quot;</span>
-<span class="n">Service</span> <span class="n">user</span> <span class="s2">&quot;cornflow&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;cornflow1234&quot;</span>
-<span class="n">Viewer</span> <span class="n">user</span> <span class="s2">&quot;viewer&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;viewer1234&quot;</span>
-<span class="n">General</span> <span class="n">user</span> <span class="s2">&quot;planner&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;planner1234&quot;</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">User</span> <span class="s2">&quot;administrator&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;adminnistrator1234&quot;</span>
+</span><span data-line="2"><span class="n">Service</span> <span class="n">user</span> <span class="s2">&quot;cornflow&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;cornflow1234&quot;</span>
+</span><span data-line="3"><span class="n">Viewer</span> <span class="n">user</span> <span class="s2">&quot;viewer&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;viewer1234&quot;</span>
+</span><span data-line="4"><span class="n">General</span> <span class="n">user</span> <span class="s2">&quot;planner&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;planner1234&quot;</span>
+</span></pre></div>
 </div>
 <p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
 </section>
 <section id="airflow-user">
-<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this heading"></a></h2>
+<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this heading">¶</a></h2>
 <p>It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow.
 A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.</p>
 </section>
 </section>
 
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="options.html" class="btn btn-neutral float-left" title="Deployment options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="access.html" class="btn btn-neutral float-right" title="Access control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
+        <button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button>
+        
+        <div class="navigation flex print:hidden">
+  <div class="navigation-prev">
+    <a href="options.html">
+      <i class="i-lucid chevron"></i>
+      <div class="page-info">
+        <span>Previous</span>
+        
+        <div class="title">Deployment options</div>
+        
       </div>
-    </section>
+    </a>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
+  <div class="navigation-next">
+    <a href="access.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Access control</div>
+      </div>
+      <i class="i-lucid chevron"></i>
+    </a>
+  </div>
+</div>
+        
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2020-, cornflow documentation team.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+</div>
+    </div>
+  </div>
+</footer></div>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=4f5bc5c4"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/design-tabs.js?v=36754332"></script>
+      <script src="../_static/shibuya.js?v=9aab5f5b"></script>
+    
 </body>
 </html>

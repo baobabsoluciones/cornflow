@@ -1,69 +1,111 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en">
+
+  <!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Docker stack - Cornflow 1.0.10 documentation</title>
+    <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Running with simultaneous resolutions" href="simultaneous.html" /><link rel="prev" title="docker-compose.yml" href="docker-compose.yml.html" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Docker stack &mdash; Cornflow 3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d636b35b"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Running with simultaneous resolutions" href="simultaneous.html" />
-    <link rel="prev" title="docker-compose.yml" href="docker-compose.yml.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="../index.html" class="icon icon-home">
-            Cornflow
-          </a>
-              <div class="version">
-                3.0
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  <script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(sessionStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=aecf457f" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=aef655f6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Docker stack"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="document"><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand mr-4" href="../index.html">
+      
+      
+      <strong>Cornflow</strong>
+    </a>
+    <div class="sy-head-links" id="NavLinks">
+      <nav class="sy-head-nav"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        
+<form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form>
+        
+        
+        <div class="sy-head-socials flex items-center">
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own Cornflow-server</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Docker stack</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#image-build">Image build</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#official-image-build">Official image build</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#environment-variables">Environment variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#entrypoint">Entrypoint</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#airflow-personalized-image">Airflow personalized image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#postgresql-docker-image">PostgreSQL docker image</a></li>
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
+      <button class="js-theme theme-switch flex items-center"
+        data-aria-auto="Switch to light color mode"
+        data-aria-light="Switch to dark color mode"
+        data-aria-dark="Switch to auto color mode">
+        <i class="i-lucid theme-icon"></i>
+      </button>
+      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="NavLinks" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/index.html">User guides and how-to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/deploy_solver_new.html">Deploy a new solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/coding_style.html">Solution method coding style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/jsonschema.html">Write a json-schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/testing_app.html">Test your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/use_solver.html">Use your solution method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/debug_with_airflow.html">Debug your solution method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples of solution methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/bar_cutting.html">Bar cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/facility_location.html">Facility location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/graph_coloring.html">Graph coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/knapsack.html">Knapsack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../clients/index.html">Supported clients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../clients/python-api.html">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Deploy your own cornflow-server</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Before you begin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-compose.yml.html">docker-compose.yml</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Docker stack</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simultaneous.html">Running with simultaneous resolutions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="options.html">Deployment options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
@@ -72,75 +114,126 @@
 <li class="toctree-l2"><a class="reference internal" href="problems.html">Known problems</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../dev/models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_models.html">Auxiliar models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/meta_models.html">Meta models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
 </ul>
 
         </div>
       </div>
-    </nav>
+      
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucid close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4">
+  <div class="localtoc">
+    <h3>On this page</h3>
+    <ul>
+<li><a class="reference internal" href="#image-build">Image build</a></li>
+<li><a class="reference internal" href="#official-image-build">Official image build</a></li>
+<li><a class="reference internal" href="#environment-variables">Environment variables</a></li>
+<li><a class="reference internal" href="#entrypoint">Entrypoint</a></li>
+<li><a class="reference internal" href="#airflow-personalized-image">Airflow personalized image</a></li>
+<li><a class="reference internal" href="#postgresql-docker-image">PostgreSQL docker image</a></li>
+</ul>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Cornflow</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Deploy your own Cornflow-server</a></li>
-      <li class="breadcrumb-item active">Docker stack</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/deploy/docker-stack.rst.txt" rel="nofollow"> View page source</a>
+  </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div>
+    </div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+    <div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucid menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
       </li>
-  </ul>
-  <hr/>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Deploy your own cornflow-server</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li>
+      
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Docker stack</strong>
+        <meta itemprop="position" content="3" />
+      </li>
+      
+      
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucid outdent"></i>
+      </button>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="docker-stack">
-<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Permalink to this heading"></a></h1>
+    <div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="docker-stack">
+<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Permalink to this heading">¶</a></h1>
 <section id="image-build">
-<h2>Image build<a class="headerlink" href="#image-build" title="Permalink to this heading"></a></h2>
+<h2>Image build<a class="headerlink" href="#image-build" title="Permalink to this heading">¶</a></h2>
 <p>The Dockerfile in <a class="reference external" href="https://github.com/baobabsoluciones/corn">cornflow github project</a> is builded from python3-slim-buster docker image.
 Installation path of cornflow app is <code class="docutils literal notranslate"><span class="pre">/usr/src/app</span></code>.
 There is no docker volumes attached to deployment for cornflow app.</p>
 <p>You can customize certain environment variables after building the image. To build the image in a custom way, run the command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">tag</span> <span class="n">my</span><span class="o">-</span><span class="n">image</span><span class="p">:</span><span class="n">my</span><span class="o">-</span><span class="n">tag</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span> <span class="n">build</span> <span class="o">.</span> <span class="o">--</span><span class="n">tag</span> <span class="n">my</span><span class="o">-</span><span class="n">image</span><span class="p">:</span><span class="n">my</span><span class="o">-</span><span class="n">tag</span>
+</span></pre></div>
 </div>
 <p>Where my-image is the name you want to name it and my-tag is the tag you want to tag the image with.</p>
 </section>
 <section id="official-image-build">
-<h2>Official image build<a class="headerlink" href="#official-image-build" title="Permalink to this heading"></a></h2>
+<h2>Official image build<a class="headerlink" href="#official-image-build" title="Permalink to this heading">¶</a></h2>
 <p>The cornflow image is built from the Dockerfile file hosted in the official repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="p">:</span><span class="n">latest</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="p">:</span><span class="n">latest</span>
+</span></pre></div>
 </div>
 </section>
 <section id="environment-variables">
-<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading"></a></h2>
+<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading">¶</a></h2>
 <p>Main cornflow environment variables:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">user</span>
-<span class="n">CORNFLOW_ADMIN_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">pwd</span>
-<span class="n">CORNFLOW_SERVICE_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">service</span> <span class="n">user</span> <span class="n">name</span>
-<span class="n">CORNFLOW_SERVICE_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">service</span> <span class="n">user</span> <span class="n">password</span>
-<span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">admin</span> <span class="n">user</span>
-<span class="n">AIRFLOW_PWD</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">admin</span> <span class="n">pwd</span>
-<span class="n">AIRFLOW_URL</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">url</span> <span class="n">service</span>
-<span class="n">CORNFLOW_URL</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">url</span> <span class="n">service</span>
-<span class="n">CORNFLOW_DB_CONN</span> <span class="o">-</span> <span class="n">postgresql</span> <span class="n">connection</span> <span class="k">for</span> <span class="n">cornflow</span> <span class="n">database</span>
-<span class="n">SECRET_KEY</span> <span class="o">-</span> <span class="n">encrypted</span> <span class="n">key</span> <span class="n">like</span> <span class="n">fernet</span> <span class="k">for</span> <span class="n">keep</span> <span class="n">data</span> <span class="n">safe</span>
-<span class="n">FLASK_APP</span> <span class="o">-</span> <span class="n">python3</span> <span class="n">cornflow</span> <span class="n">app</span> <span class="p">(</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
-<span class="n">FLASK_ENV</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">deployment</span> <span class="n">environment</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">user</span>
+</span><span data-line="2"><span class="n">CORNFLOW_ADMIN_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">pwd</span>
+</span><span data-line="3"><span class="n">CORNFLOW_SERVICE_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">service</span> <span class="n">user</span> <span class="n">name</span>
+</span><span data-line="4"><span class="n">CORNFLOW_SERVICE_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">service</span> <span class="n">user</span> <span class="n">password</span>
+</span><span data-line="5"><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">admin</span> <span class="n">user</span>
+</span><span data-line="6"><span class="n">AIRFLOW_PWD</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">admin</span> <span class="n">pwd</span>
+</span><span data-line="7"><span class="n">AIRFLOW_URL</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">url</span> <span class="n">service</span>
+</span><span data-line="8"><span class="n">CORNFLOW_URL</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">url</span> <span class="n">service</span>
+</span><span data-line="9"><span class="n">CORNFLOW_DB_CONN</span> <span class="o">-</span> <span class="n">postgresql</span> <span class="n">connection</span> <span class="k">for</span> <span class="n">cornflow</span> <span class="n">database</span>
+</span><span data-line="10"><span class="n">SECRET_KEY</span> <span class="o">-</span> <span class="n">encrypted</span> <span class="n">key</span> <span class="n">like</span> <span class="n">fernet</span> <span class="k">for</span> <span class="n">keep</span> <span class="n">data</span> <span class="n">safe</span>
+</span><span data-line="11"><span class="n">FLASK_APP</span> <span class="o">-</span> <span class="n">python3</span> <span class="n">cornflow</span> <span class="n">app</span> <span class="p">(</span><span class="n">cornflow</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
+</span><span data-line="12"><span class="n">FLASK_ENV</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">deployment</span> <span class="n">environment</span>
+</span></pre></div>
 </div>
 </section>
 <section id="entrypoint">
-<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this heading"></a></h2>
+<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this heading">¶</a></h2>
 <p>If you are using the default entrypoint of the production image, it will execute the <code class="docutils literal notranslate"><span class="pre">init_cornflow_service.py</span></code> script which uses and initializes environment variables to work with postgresql and airflow defined in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>.
 The image entrypoint works as follows:</p>
 <ol class="arabic simple">
@@ -152,76 +245,106 @@ The image entrypoint works as follows:</p>
 </ol>
 </section>
 <section id="airflow-personalized-image">
-<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Permalink to this heading"></a></h2>
+<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Permalink to this heading">¶</a></h2>
 <p>For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
 The airflow personalized image is built from the Dockerfile file hosted in the official cornflow repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span><span class="p">:</span><span class="n">latest</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span><span class="p">:</span><span class="n">latest</span>
+</span></pre></div>
 </div>
 <p>Airflow has different execution modes: <code class="docutils literal notranslate"><span class="pre">SecuentialExecutor</span></code>, <code class="docutils literal notranslate"><span class="pre">CeleryExecutor</span></code> and <code class="docutils literal notranslate"><span class="pre">KubernetesExecutor</span></code>. At the moment we have focused on the first two execution modes and next we will develop an image to be used with Kubernetes.
 The default executor is set to <code class="docutils literal notranslate"><span class="pre">SequentialExecutor</span></code>, which allows you to perform executions sequentially. That is, when you start an execution, the next one is not executed until the previous one has finished. For more information on the <code class="docutils literal notranslate"><span class="pre">CeleryExecutor</span></code>, go to the next section: <a class="reference internal" href="simultaneous.html#running-with-simultaneous-resolutions"><span class="std std-ref">Running with simultaneous resolutions</span></a>.</p>
 <p>The airflow environment variables included in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> are:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>AIRFLOW_USER - airflow administrator´s username
-AIRFLOW_PWD - airflow administrator´s password
-AIRFLOW_DB_HOST - airflow postgresql server
-AIRFLOW_DB_PORT - airflow postgresql server port
-AIRFLOW_DB_USER - airflow database username
-AIRFLOW_DB_PASSWORD - airflow database password
-AIRFLOW_DB - airflow database name
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">AIRFLOW_USER - airflow administrator´s username
+</span><span data-line="2">AIRFLOW_PWD - airflow administrator´s password
+</span><span data-line="3">AIRFLOW_DB_HOST - airflow postgresql server
+</span><span data-line="4">AIRFLOW_DB_PORT - airflow postgresql server port
+</span><span data-line="5">AIRFLOW_DB_USER - airflow database username
+</span><span data-line="6">AIRFLOW_DB_PASSWORD - airflow database password
+</span><span data-line="7">AIRFLOW_DB - airflow database name
+</span></pre></div>
 </div>
 <p>The airflow deployment requires mounting two volumes linked to the directory created on the host:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">airflow_config</span><span class="o">/</span><span class="n">dags</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">airflow</span><span class="o">/</span><span class="n">dags</span> <span class="o">-</span> <span class="n">DAG</span> <span class="n">folder</span> <span class="n">inside</span> <span class="n">of</span> <span class="n">installation</span> <span class="n">path</span><span class="o">.</span>
-<span class="n">airflow_config</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="p">:</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span> <span class="n">development</span> <span class="n">packages</span> <span class="n">required</span> <span class="n">to</span> <span class="n">install</span> <span class="n">inside</span> <span class="n">workers</span><span class="o">.</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">airflow_config</span><span class="o">/</span><span class="n">dags</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">airflow</span><span class="o">/</span><span class="n">dags</span> <span class="o">-</span> <span class="n">DAG</span> <span class="n">folder</span> <span class="n">inside</span> <span class="n">of</span> <span class="n">installation</span> <span class="n">path</span><span class="o">.</span>
+</span><span data-line="2"><span class="n">airflow_config</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="p">:</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span> <span class="n">development</span> <span class="n">packages</span> <span class="n">required</span> <span class="n">to</span> <span class="n">install</span> <span class="n">inside</span> <span class="n">workers</span><span class="o">.</span>
+</span></pre></div>
 </div>
 <p>These volumes allow you to persist the DAG files and also link the development packages necessary for their execution.</p>
 </section>
 <section id="postgresql-docker-image">
-<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Permalink to this heading"></a></h2>
+<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Permalink to this heading">¶</a></h2>
 <p>The image displayed in the container will be the official image of the popular <a class="reference external" href="https://hub.docker.com/_/postgres">PostgreSQL</a> database engine.
 The postgresql environment variables included in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> are:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POSTGRES_USER - database username of service
-POSTGRES_PASSWORD - database user´s password of service
-POSTGRES_DB - database name of service
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">POSTGRES_USER - database username of service
+</span><span data-line="2">POSTGRES_PASSWORD - database user´s password of service
+</span><span data-line="3">POSTGRES_DB - database name of service
+</span></pre></div>
 </div>
 <p>The postgresql deployment requires mounting one volume linked to the directory created on the host:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">postgres_cf_data</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">postgresql</span><span class="o">/</span><span class="n">data</span><span class="o">/</span> <span class="o">-</span> <span class="n">This</span> <span class="n">volume</span> <span class="n">stores</span> <span class="n">the</span> <span class="n">database</span> <span class="n">files</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">postgres_cf_data</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">postgresql</span><span class="o">/</span><span class="n">data</span><span class="o">/</span> <span class="o">-</span> <span class="n">This</span> <span class="n">volume</span> <span class="n">stores</span> <span class="n">the</span> <span class="n">database</span> <span class="n">files</span>
+</span></pre></div>
 </div>
 </section>
 </section>
 
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="docker-compose.yml.html" class="btn btn-neutral float-left" title="docker-compose.yml" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="simultaneous.html" class="btn btn-neutral float-right" title="Running with simultaneous resolutions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020-, cornflow documentation team..</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
+        <button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button>
+        
+        <div class="navigation flex print:hidden">
+  <div class="navigation-prev">
+    <a href="docker-compose.yml.html">
+      <i class="i-lucid chevron"></i>
+      <div class="page-info">
+        <span>Previous</span>
+        
+        <div class="title">docker-compose.yml</div>
+        
       </div>
-    </section>
+    </a>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
+  <div class="navigation-next">
+    <a href="simultaneous.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Running with simultaneous resolutions</div>
+      </div>
+      <i class="i-lucid chevron"></i>
+    </a>
+  </div>
+</div>
+        
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2020-, cornflow documentation team.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+</div>
+    </div>
+  </div>
+</footer></div>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=4f5bc5c4"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/design-tabs.js?v=36754332"></script>
+      <script src="../_static/shibuya.js?v=9aab5f5b"></script>
+    
 </body>
 </html>
