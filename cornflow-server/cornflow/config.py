@@ -56,7 +56,7 @@ class DefaultConfig(object):
 
     # APISPEC:
     APISPEC_SPEC = APISpec(
-        title="Cornflow API docs",
+        title="cornflow API docs",
         version="v1",
         plugins=[MarshmallowPlugin()],
         openapi_version="2.0.0",

@@ -174,7 +174,7 @@ We follow some common conventions in the configuration schema so most apps share
 #. **gapRel**: float. The maximum relative gap allowed when considering a solution optimal.
 #. **threads**: integer. The number of cores that should be used in the solution method.
 
-Cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn't make much sense to be creating a separated ``config.json`` schema file. For these cases, it's possible to use :py:func:`cornflow_client.schema.tools.get_empty_schema`.
+cornflow-client has some utility functions to help while making this configuration schema. For small solution methods, it doesn't make much sense to be creating a separated ``config.json`` schema file. For these cases, it's possible to use :py:func:`cornflow_client.schema.tools.get_empty_schema`.
 
 Instance and solution schemas
 *******************************

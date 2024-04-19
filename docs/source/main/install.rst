@@ -172,7 +172,11 @@ Then to stop the containers we can run::
 
 And to delete the containers in case we want to rebuild them after stopping them::
 
-  docker system prune -af
+  docker-compose rm -f
+
+And if you want to delete the volumes as well::
+
+  docker-compose rm -f -v
 
 And with these command we should have a cornflow and airflow instance up and running on our machine with the default variables that can be seen on the docker-compose file.
 

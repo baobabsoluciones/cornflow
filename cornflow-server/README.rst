@@ -1,4 +1,4 @@
-Cornflow
+cornflow
 =========
 
 .. image:: https://github.com/baobabsoluciones/cornflow/workflows/build/badge.svg?style=svg
@@ -18,13 +18,13 @@ Cornflow
 
 .. image:: https://img.shields.io/badge/License-Apache2.0-blue
 
-Cornflow is an open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
+cornflow is an open source multi-solver optimization server with a REST API built using `flask <https://flask.palletsprojects.com>`_, `airflow <https://airflow.apache.org/>`_ and `pulp <https://coin-or.github.io/pulp/>`_.
 
-While most deployment servers are based on the solving technique (MIP, CP, NLP, etc.), Cornflow focuses on the optimization problems themselves. However, it does not impose any constraint on the type of problem and solution method to use.
+While most deployment servers are based on the solving technique (MIP, CP, NLP, etc.), cornflow focuses on the optimization problems themselves. However, it does not impose any constraint on the type of problem and solution method to use.
 
-With Cornflow you can deploy a Traveling Salesman Problem solver next to a Knapsack solver or a Nurse Rostering Problem solver. As long as you describe the input and output data, you can upload any solution method for any problem and then use it with any data you want.
+With cornflow you can deploy a Traveling Salesman Problem solver next to a Knapsack solver or a Nurse Rostering Problem solver. As long as you describe the input and output data, you can upload any solution method for any problem and then use it with any data you want.
 
-Cornflow helps you formalize your problem by proposing development guidelines. It also provides a range of functionalities around your deployed solution method, namely:
+cornflow helps you formalize your problem by proposing development guidelines. It also provides a range of functionalities around your deployed solution method, namely:
 
 * storage of users, instances, solutions and solution logs.
 * deployment and maintenance of models, solvers and algorithms.
@@ -40,9 +40,9 @@ Cornflow helps you formalize your problem by proposing development guidelines. I
 Installation instructions
 -------------------------------
 
-Cornflow is tested with Ubuntu 20.04, python >= 3.8 and git.
+cornflow is tested with Ubuntu 20.04, python >= 3.8 and git.
 
-Download the Cornflow project and install requirements::
+Download the cornflow project and install requirements::
 
     python3 -m venv venv
     venv/bin/pip3 install cornflow
@@ -58,7 +58,7 @@ initialize the sqlite database::
     flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
 
 
-activate the virtual environment and run Cornflow::
+activate the virtual environment and run cornflow::
 
     source venv/bin/activate
     export FLASK_APP=cornflow.app
@@ -69,7 +69,7 @@ activate the virtual environment and run Cornflow::
     export AIRFLOW_PWD=airflow_pwd
     flask run
 
-**Cornflow needs a running installation of Airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
+**cornflow needs a running installation of Airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
 
 Using cornflow to solve a PuLP model
 ---------------------------------------

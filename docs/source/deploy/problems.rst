@@ -36,10 +36,10 @@ Problem: The image is not installing any linux pkg.
     
     Possible solution: Try to use docker platform argument "—platform linux/amd64" for build image with extended compatibility.
 
-Cornflow database
+cornflow database
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Problem: Cornflow can´t reach postgres internal database
+Problem: cornflow can´t reach postgres internal database
 
     Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "host_database" to address: Name or service not known 
     
