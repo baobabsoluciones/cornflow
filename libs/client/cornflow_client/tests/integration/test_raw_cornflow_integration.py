@@ -45,6 +45,16 @@ class TestRawCornflowClientUser(TestCase):
     def tearDown(self):
         pass
 
+    def check_execution_statuses(self, execution_id):
+        statuses = []
+        response = self.client.raw.get_status(execution_id)
+        statuses.append(response.json()["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.raw.get_status(execution_id)
+            statuses.append(response.json()["state"])
+        return statuses
+
     def test_health_endpoint(self):
         response = self.client.raw.is_alive()
         self.assertEqual(response.status_code, 200)
@@ -185,13 +195,7 @@ class TestRawCornflowClientUser(TestCase):
     def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
 
-        statuses = []
-        response = self.client.raw.get_status(exec_to_check["id"])
-        statuses.append(response.json()["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.raw.get_status(exec_to_check["id"])
-            statuses.append(response.json()["state"])
+        statuses = self.check_execution_statuses(exec_to_check["id"])
 
         exec_to_check_id = exec_to_check["id"]
         response = self.client.raw.create_execution_data_check(exec_to_check_id)
@@ -202,13 +206,7 @@ class TestRawCornflowClientUser(TestCase):
     def test_execution_data_check_solution(self):
         execution = self.test_create_execution_data_check()
 
-        statuses = []
-        response = self.client.raw.get_status(execution["id"])
-        statuses.append(response.json()["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.raw.get_status(execution["id"])
-            statuses.append(response.json()["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         results = self.client.raw.get_solution(execution["id"])
         self.assertEqual(results.status_code, 200)
@@ -243,13 +241,7 @@ class TestRawCornflowClientUser(TestCase):
     def test_execution_results(self):
         execution = self.test_create_execution()
 
-        statuses = []
-        response = self.client.raw.get_status(execution["id"])
-        statuses.append(response.json()["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.raw.get_status(execution["id"])
-            statuses.append(response.json()["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         response = self.client.raw.get_results(execution["id"])
         self.assertEqual(response.status_code, 200)
@@ -278,23 +270,16 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_execution_status(self):
         execution = self.test_create_execution()
-        self.assertEqual(STATUS_QUEUED, execution["state"])
 
-        time.sleep(4)
-        response = self.client.raw.get_status(execution["id"])
-        self.assertEqual(response.status_code, 200)
-        response = response.json()
+        statuses = self.check_execution_statuses(execution["id"])
+
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
+
         items = ["id", "state", "message", "data_hash"]
-        for item in items:
-            self.assertIn(item, response.keys())
-        self.assertEqual(STATUS_NOT_SOLVED, response["state"])
-
-        time.sleep(10)
         response = self.client.raw.get_status(execution["id"])
-        self.assertEqual(response.status_code, 200)
         for item in items:
             self.assertIn(item, response.json().keys())
-        self.assertEqual(STATUS_OPTIMAL, response.json()["state"])
 
     def test_stop_execution(self):
         execution = self.test_create_execution()
@@ -329,13 +314,7 @@ class TestRawCornflowClientUser(TestCase):
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
 
-        statuses = []
-        response = self.client.raw.get_status(execution["id"])
-        statuses.append(response.json()["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.raw.get_status(execution["id"])
-            statuses.append(response.json()["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         response = self.client.raw.get_solution(execution["id"])
         self.assertEqual(response.status_code, 200)

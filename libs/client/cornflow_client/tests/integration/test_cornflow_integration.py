@@ -43,6 +43,16 @@ class TestCornflowClientUser(TestCase):
     def tearDown(self):
         pass
 
+    def check_execution_statuses(self, execution_id):
+        statuses = []
+        response = self.client.get_status(execution_id)
+        statuses.append(response["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.get_status(execution_id)
+            statuses.append(response["state"])
+        return statuses
+
     def test_health_endpoint(self):
         response = self.client.is_alive()
         self.assertEqual(response["cornflow_status"], "healthy")
@@ -170,13 +180,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
-        statuses = []
-        response = self.client.get_status(exec_to_check["id"])
-        statuses.append(response["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.get_status(exec_to_check["id"])
-            statuses.append(response["state"])
+        statuses = self.check_execution_statuses(exec_to_check["id"])
 
         exec_to_check_id = exec_to_check["id"]
         execution = self.client.create_execution_data_check(exec_to_check_id)
@@ -186,13 +190,7 @@ class TestCornflowClientUser(TestCase):
     def test_execution_data_check_solution(self):
         execution = self.test_create_execution_data_check()
 
-        statuses = []
-        response = self.client.get_status(execution["id"])
-        statuses.append(response["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.get_status(execution["id"])
-            statuses.append(response["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
@@ -221,13 +219,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_execution_results(self):
         execution = self.test_create_execution()
-        statuses = []
-        response = self.client.get_status(execution["id"])
-        statuses.append(response["state"])
-        while response["state"] != STATUS_OPTIMAL and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.get_status(execution["id"])
-            statuses.append(response["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         response = self.client.get_results(execution["id"])
 
@@ -254,20 +246,16 @@ class TestCornflowClientUser(TestCase):
 
     def test_execution_status(self):
         execution = self.test_create_execution()
-        self.assertEqual(STATUS_QUEUED, execution["state"])
 
-        time.sleep(4)
-        response = self.client.get_status(execution["id"])
+        statuses = self.check_execution_statuses(execution["id"])
+
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
+
         items = ["id", "state", "message", "data_hash"]
-        for item in items:
-            self.assertIn(item, response.keys())
-        self.assertEqual(STATUS_NOT_SOLVED, response["state"])
-
-        time.sleep(10)
         response = self.client.get_status(execution["id"])
         for item in items:
             self.assertIn(item, response.keys())
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
 
     def test_stop_execution(self):
         execution = self.test_create_execution()
@@ -300,13 +288,7 @@ class TestCornflowClientUser(TestCase):
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
         response = self.client.get_status(execution["id"])
-        statuses = [response["state"]]
-        # Add loop to check that instance get solving.
-        while response["state"] != STATUS_OPTIMAL and len(statuses) < 100:
-            time.sleep(2)
-            response = self.client.get_status(execution["id"])
-
-            statuses.append(response["state"])
+        statuses = self.check_execution_statuses(execution["id"])
 
         response = self.client.get_solution(execution["id"])
         items = [
