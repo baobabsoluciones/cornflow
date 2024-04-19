@@ -22,7 +22,7 @@ class BaseDAGTests:
     class SolvingTests(unittest.TestCase):
         def setUp(self) -> None:
             self.app = None
-            self.config = SuperDict(msg=False, timeLimit=1, seconds=1)
+            self.config = SuperDict(msg=False, timeLimit=1)
 
         @property
         def app(self) -> ApplicationCore:
@@ -242,7 +242,6 @@ class Rostering(BaseDAGTests.SolvingTests):
 
         self.app = Rostering()
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
-        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
@@ -265,7 +264,7 @@ class FacilityLocation(BaseDAGTests.SolvingTests):
         from DAG.facility_location import FacilityLocation
 
         self.app = FacilityLocation()
-        self.config.update(dict(solver="Pyomo.cbc", gapAbs=1, gapRel=0.01))
+        self.config.update(dict(solver="Pyomo.cbc", abs_gap=1, rel_gap=0.01))
 
 
 class PuLP(BaseDAGTests.SolvingTests):
@@ -275,7 +274,6 @@ class PuLP(BaseDAGTests.SolvingTests):
 
         self.app = PuLP()
         self.config.update(dict(solver="PULP_CBC_CMD"))
-        self.config.pop("seconds")
 
 
 class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
