@@ -404,7 +404,7 @@ class TestCornflowClientUser(TestCase):
 
         self.assertEqual(self.user_id, response["id"])
         self.assertEqual("user", response["username"])
-        self.assertEqual("cornflow_admin@cornflow.com", response["email"])
+        self.assertEqual("user@cornflow.org", response["email"])
 
     def test_get_one_instance(self):
         instance = self.test_create_instance()
