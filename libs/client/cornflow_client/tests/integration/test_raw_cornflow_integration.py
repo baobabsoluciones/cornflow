@@ -3,16 +3,14 @@ Integration test for the Cornflow client
 Base, admin and service user get tested
 Integration between Airflow and cornflow through airflow client and cornflow client tested as well
 """
-# Full imports
+
 import json
 import os
-import pulp as pl
 import time
-
-# Partial imports
 from unittest import TestCase
 
-# Internal imports
+import pulp as pl
+
 from cornflow_client import CornFlow
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
@@ -20,6 +18,7 @@ from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
 
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 # Helper functions
 def _load_file(_file):
@@ -64,7 +63,9 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_create_instance(self):
         data = _load_file(PULP_EXAMPLE)
-        response = self.client.raw.create_instance(data, "test_example", "test_description")
+        response = self.client.raw.create_instance(
+            data, "test_example", "test_description"
+        )
         self.assertEqual(response.status_code, 201)
         instance = response.json()
 
@@ -183,7 +184,15 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
-        time.sleep(15)
+
+        statuses = []
+        response = self.client.raw.get_status(exec_to_check["id"])
+        statuses.append(response.json()["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.raw.get_status(exec_to_check["id"])
+            statuses.append(response.json()["state"])
+
         exec_to_check_id = exec_to_check["id"]
         response = self.client.raw.create_execution_data_check(exec_to_check_id)
         execution = response.json()
@@ -192,7 +201,15 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_execution_data_check_solution(self):
         execution = self.test_create_execution_data_check()
-        time.sleep(15)
+
+        statuses = []
+        response = self.client.raw.get_status(execution["id"])
+        statuses.append(response.json()["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.raw.get_status(execution["id"])
+            statuses.append(response.json()["state"])
+
         results = self.client.raw.get_solution(execution["id"])
         self.assertEqual(results.status_code, 200)
         self.assertEqual(results.json()["state"], 1)
@@ -225,7 +242,15 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_execution_results(self):
         execution = self.test_create_execution()
-        time.sleep(10)
+
+        statuses = []
+        response = self.client.raw.get_status(execution["id"])
+        statuses.append(response.json()["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.raw.get_status(execution["id"])
+            statuses.append(response.json()["state"])
+
         response = self.client.raw.get_results(execution["id"])
         self.assertEqual(response.status_code, 200)
         response = response.json()
@@ -248,7 +273,8 @@ class TestRawCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
 
     def test_execution_status(self):
         execution = self.test_create_execution()
@@ -302,7 +328,15 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
-        time.sleep(15)
+
+        statuses = []
+        response = self.client.raw.get_status(execution["id"])
+        statuses.append(response.json()["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.raw.get_status(execution["id"])
+            statuses.append(response.json()["state"])
+
         response = self.client.raw.get_solution(execution["id"])
         self.assertEqual(response.status_code, 200)
         response = response.json()
@@ -326,13 +360,16 @@ class TestRawCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
 
         return response
 
     def test_put_one_execution(self):
         execution = self.test_create_execution()
-        response = self.client.raw.put_one_execution(execution["id"], {"name": "new_execution_name"})
+        response = self.client.raw.put_one_execution(
+            execution["id"], {"name": "new_execution_name"}
+        )
         self.assertEqual(200, response.status_code)
         self.assertEqual("Updated correctly", response.json()["message"])
 
@@ -440,7 +477,7 @@ class TestRawCornflowClientUser(TestCase):
             "created_at",
             "user_id",
             "data_hash",
-            "schema"
+            "schema",
         ]
 
         self.assertIn("data", response.keys())
@@ -450,7 +487,9 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_put_one_instance(self):
         instance = self.test_create_instance()
-        response = self.client.raw.put_one_instance(instance["id"], {"name": "new_instance_name"})
+        response = self.client.raw.put_one_instance(
+            instance["id"], {"name": "new_instance_name"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual("Updated correctly", response.json()["message"])
 
@@ -559,7 +598,7 @@ class TestRawCornflowClientUser(TestCase):
         schema["config"]["properties"]["solver"]["enum"] = pl.listSolvers()
         schema["config"]["properties"]["solver"]["default"] = "PULP_CBC_CMD"
 
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             self.assertDictEqual(value, response[key])
 
     def test_get_all_schemas(self):
@@ -614,7 +653,9 @@ class TestRawCornflowClientService(TestCase):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
         data = _load_file(PULP_EXAMPLE)
-        instance = client.raw.create_instance(data, "test_example", "test_description").json()
+        instance = client.raw.create_instance(
+            data, "test_example", "test_description"
+        ).json()
         execution = client.raw.create_execution(
             instance_id=instance["id"],
             config={"solver": "PULP_CBC_CMD", "timeLimit": 60},
@@ -638,7 +679,9 @@ class TestRawCornflowClientService(TestCase):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
         data = _load_file(PULP_EXAMPLE)
-        instance = client.raw.create_instance(data, "test_example", "test_description").json()
+        instance = client.raw.create_instance(
+            data, "test_example", "test_description"
+        ).json()
         execution = client.raw.create_execution(
             instance_id=instance["id"],
             config={"solver": "PULP_CBC_CMD", "timeLimit": 60},
@@ -674,7 +717,6 @@ class TestRawCornflowClientService(TestCase):
             self.assertIn(dag, deployed_dags)
 
     def test_post_deployed_dag(self):
-
         response = self.client.raw.create_deployed_dag(
             name="test_dag_2",
             description="test_dag_2_description",
@@ -682,7 +724,7 @@ class TestRawCornflowClientService(TestCase):
             instance_checks_schema=dict(),
             solution_schema=dict(),
             solution_checks_schema=dict(),
-            config_schema=dict()
+            config_schema=dict(),
         )
         self.assertEqual(response.status_code, 201)
         response = response.json()

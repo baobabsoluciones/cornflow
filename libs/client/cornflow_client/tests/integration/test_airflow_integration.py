@@ -14,6 +14,7 @@ from cornflow_client.tests.const import PULP_EXAMPLE
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
 
+
 # Helper functions
 def _load_file(_file):
     with open(_file) as f:
@@ -56,8 +57,8 @@ class TestAirflowClient(TestCase):
 
     def test_run_dag(self):
         data = _load_file(PULP_EXAMPLE)
-        cf_client = CornFlow(url="http://127.0.0.1:5050/")
-        cf_login = cf_client.login("user", "UserPassword1!")
+        cf_client = CornFlow(url="http://127.0.0.1:5000/")
+        cf_login = cf_client.login("admin", "Adminpassword1!")
         instance = cf_client.create_instance(data, "test_example", "test_description")
         execution = cf_client.create_execution(
             instance_id=instance["id"],
