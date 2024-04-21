@@ -13,7 +13,7 @@ jobs:
     - name: Notify slack channel
       uses: slackapi/slack-github-action@v1.23.0
       with:
-        slack-message: "A new image of cornflow server is being built and should be deployed in around 30 minutes"
+        slack-message: "A new image of cornflow server is being built and should be deployed in around 30 minutes (in the development server)"
         channel-id: ${{ secrets.SLACK_CHANNEL }}
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
