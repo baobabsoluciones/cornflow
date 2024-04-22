@@ -22,9 +22,10 @@ class TspApp(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/gr17.tsp")
         )
 
-        return {
-            "example": {
+        return [
+            {
+                "name": "Groetschel 17-city problem",
                 "instance": instance.to_dict(),
                 "description": "Example with 17 cities (Groetschel)",
             }
-        }
+        ]

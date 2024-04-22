@@ -43,9 +43,13 @@ class Knapsack(ApplicationCore):
         path = os.path.join(cwd, "data", "ks_4_0")
 
         data = Instance.from_file(path).to_dict()
-        return {
-            "ks_4_0": {"instance": data, "description": "Example data with 4 items"}
-        }
+        return [
+            {
+                "name": "ks_4_0",
+                "instance": data,
+                "description": "Example data with 4 items",
+            }
+        ]
 
     def get_solver(self, name: str = "default") -> Union[Type[Experiment], None]:
         if "." in name:

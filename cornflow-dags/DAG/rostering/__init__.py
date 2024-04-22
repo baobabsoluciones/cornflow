@@ -79,39 +79,46 @@ class Rostering(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/test_instance_8.json")
         )
 
-        return {
-            "example_1": {
+        return [
+            {
+                "name": "Base case",
                 "instance": data_1,
                 "solution": data_out1,
                 "description": "Base case with a split opening time on one day. "
-                "No skills, no holidays, no dowtime, no preferences",
+                "No skills, no holidays, no downtime, no preferences",
             },
-            "example_2": {
+            {
+                "name": "Employee downtime",
                 "instance": data_2,
                 "description": "Base case with an employee downtime, no preferences, no skills, no holidays",
             },
-            "example_3": {
+            {
+                "name": "Employee skills",
                 "instance": data_3,
                 "solution": data_out3,
                 "description": "Base case with skills, no preferences, no holidays, no downtime, no skills",
             },
-            "example_4": {
+            {
+                "name": "Resting hours",
                 "instance": data_4,
                 "description": "Base case with more opening hours to check the resting hours properly",
             },
-            "example_5": {
+            {
+                "name": "Store and employee holidays",
                 "instance": data_5,
                 "description": "Base case with store and employee holidays, no downtime, no preferences, no skills",
             },
-            "example_7": {
+            {
+                "name": "Employee preferences",
                 "instance": data_7,
                 "description": "Base case with preferences, skills, no holidays, no downtime",
             },
-            "example_8": {
+            {
+                "name": "Requirements deactivated",
                 "instance": data_8,
                 "description": "Base case with everything but deactivated",
             },
-        }
+        ]
 
     def get_solver(self, name: str = "mip"):
         if "." in name:

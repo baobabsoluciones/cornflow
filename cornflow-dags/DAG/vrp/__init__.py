@@ -26,4 +26,10 @@ class VRP(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/input_test_1_small.json")
         )
 
-        return {"example_1": {"instance": data, "description": "Example with 17 nodes"}}
+        return [
+            {
+                "name": "example_1",
+                "instance": data,
+                "description": "Example with 17 nodes",
+            }
+        ]

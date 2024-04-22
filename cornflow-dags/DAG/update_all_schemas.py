@@ -83,31 +83,23 @@ def get_all_example_data():
     for app in apps:
         tests = app.test_cases
         print(f"App: {app.name} has {len(tests)} examples")
-        n = 1
 
-        # TODO: phase out the list version of test cases on future versions.
-        if isinstance(tests, list):
-            warn(
-                "Using list of test cases is deprecated. Use dictionary instead. "
-                "Support for list for test cases will be deprecated on cornflow-client 2.0.0"
-            )
-            example = dict()
-            for t in tests:
-                if isinstance(t, dict):
-                    instance = f"instance_{n}"
-                    example[instance] = t
+        for pos, test in enumerate(tests):
+            if isinstance(test, dict):
+                continue
 
-                elif isinstance(t, tuple):
-                    instance = f"instance_{n}"
-                    solution = f"solution_{n}"
-                    example[instance] = t[0]
-                    example[solution] = t[1]
-                n = n + 1
+            elif isinstance(test, tuple):
+                warn(
+                    "The tests as a tuple is no loger supported, please upgrade to the new test cases structure"
+                )
+                temp_example = {
+                    "name": "No available name for the test",
+                    "instance": test[0],
+                    "solution": test[1],
+                }
+                tests[pos] = temp_example
 
-            if len(tests) > 0:
-                example_data_new[f"z_{app.name}_examples"] = example
-
-        elif isinstance(tests, dict):
+        if len(tests) > 0:
             example_data_new[f"z_{app.name}_examples"] = tests
 
     print("Found the following new apps: {}".format([app.name for app in apps]))

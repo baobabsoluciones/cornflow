@@ -20,10 +20,11 @@ class Roadef(ApplicationCore):
         _get_instance = lambda fn: Instance.from_json(_get_file(fn)).to_dict()
         _get_solution = lambda fn: Solution.from_json(_get_file(fn)).to_dict()
 
-        return {
-            "example": {
+        return [
+            {
+                "name": "Base case",
                 "instance": _get_instance("example_instance_filtered.json"),
                 "solution": _get_solution("example_solution_filtered.json"),
                 "description": "Example data",
             }
-        }
+        ]

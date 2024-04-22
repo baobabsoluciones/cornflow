@@ -89,12 +89,13 @@ class PuLP(ApplicationCore):
         prob += x + z >= 10, "c2"
         prob += -y + z == 7.5, "c3"
 
-        return {
-            "example": {
+        return [
+            {
+                "name": "Base case with 3 variables",
                 "instance": prob.toDict(),
                 "description": "Simple MIP with 3 variables",
             }
-        }
+        ]
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         return PuLPSolve

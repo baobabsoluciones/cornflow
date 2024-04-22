@@ -27,10 +27,11 @@ class BarCutting(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/example_solution_1.json")
         )
 
-        return {
-            "example_instance_1": {
+        return [
+            {
+                "name": "Base case",
                 "instance": data_1,
                 "solution": data_out_1,
                 "description": "Base instance and solution",
             }
-        }
+        ]

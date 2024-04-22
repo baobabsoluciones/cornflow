@@ -113,7 +113,7 @@ class ApplicationCore(ABC):
     @abstractmethod
     def test_cases(
         self,
-    ) -> Union[Dict[str, Union[Dict, str]], List[Union[Dict, Tuple[Dict, Dict]]]]:
+    ) -> Union[List[Dict[str, Union[str, Dict]]], List[Union[Dict, Tuple[Dict, Dict]]]]:
         """
         Mandatory property
 
@@ -123,10 +123,14 @@ class ApplicationCore(ABC):
           * **dict**: each element is an instance
           * **tuple**: the first part is the instance, the second its solution
 
-          it can also return a dict with the name of the test case and a subdictionary with a dict for the instance,
-           a dict for the solution (optional) and a description of the test case
+          it can also return a list of dicts, where the keys are:
+
+          * **name**: name of the test case.
+          * **description** optional field with a description of the test case.
+          * **instance**: the instance data.
+          * **solution**: the solution data (optional)
         """
-        # TODO: phase out List support for the test cases
+        # TODO: Phase out older list implementation
         raise NotImplementedError()
 
     @property

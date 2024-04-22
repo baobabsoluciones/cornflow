@@ -49,9 +49,11 @@ class BaseDAGTests:
             config = config or self.config
             tests = self.app.test_cases
 
-            for test_case, data in tests.items():
-                instance_data = data.get("instance")
-                solution_data = data.get("solution", None)
+            for test_case in tests:
+                instance_data = test_case.get("instance")
+                solution_data = test_case.get("solution", None)
+                case_name = test_case.get("name")
+                case_description = test_case.get("description", "No description")
 
                 marshm = SchemaManager(self.app.instance.schema).jsonschema_to_flask()
                 marshm().load(instance_data)
@@ -88,7 +90,7 @@ class BaseDAGTests:
                 failed_checks = [k for k, v in checks.items() if len(v) > 0]
                 if len(failed_checks) > 0:
                     print(
-                        f"Test instance {test_case} ({data.get('description', 'No description')}) "
+                        f"Test instance {case_name} ({case_description}) "
                         f"failed with the following checks:"
                     )
                     for check, values in checks.items():
@@ -109,9 +111,9 @@ class BaseDAGTests:
         def test_complete_solve(self, connectCornflow, config=None):
             config = config or self.config
             tests = self.app.test_cases
-            for test_case, data in tests.items():
-                instance_data = data.get("instance")
-                solution_data = data.get("solution", None)
+            for test_case in tests:
+                instance_data = test_case.get("instance")
+                solution_data = test_case.get("solution", None)
 
                 mock = Mock()
                 mock.get_data.return_value = dict(
