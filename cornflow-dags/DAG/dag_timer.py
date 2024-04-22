@@ -46,4 +46,4 @@ class Timer(ApplicationCore):
 
     @property
     def test_cases(self):
-        return [{}]
+        return {}

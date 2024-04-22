@@ -18,4 +18,4 @@ class FacilityLocation(ApplicationCore):
         data = load_json(
             os.path.join(os.path.dirname(__file__), "data/input_data_test1.json")
         )
-        return [data]
+        return {"example_1": {"instance": data, "description": "Base example instance"}}

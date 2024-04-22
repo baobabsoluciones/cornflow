@@ -79,15 +79,39 @@ class Rostering(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/test_instance_8.json")
         )
 
-        return [
-            (data_1, data_out1),
-            data_2,
-            (data_3, data_out3),
-            data_4,
-            data_5,
-            data_7,
-            data_8,
-        ]
+        return {
+            "example_1": {
+                "instance": data_1,
+                "solution": data_out1,
+                "description": "Base case with a split opening time on one day. "
+                "No skills, no holidays, no dowtime, no preferences",
+            },
+            "example_2": {
+                "instance": data_2,
+                "description": "Base case with an employee downtime, no preferences, no skills, no holidays",
+            },
+            "example_3": {
+                "instance": data_3,
+                "solution": data_out3,
+                "description": "Base case with skills, no preferences, no holidays, no downtime, no skills",
+            },
+            "example_4": {
+                "instance": data_4,
+                "description": "Base case with more opening hours to check the resting hours properly",
+            },
+            "example_5": {
+                "instance": data_5,
+                "description": "Base case with store and employee holidays, no downtime, no preferences, no skills",
+            },
+            "example_7": {
+                "instance": data_7,
+                "description": "Base case with preferences, skills, no holidays, no downtime",
+            },
+            "example_8": {
+                "instance": data_8,
+                "description": "Base case with everything but deactivated",
+            },
+        }
 
     def get_solver(self, name: str = "mip"):
         if "." in name:

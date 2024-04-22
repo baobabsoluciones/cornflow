@@ -21,4 +21,10 @@ class TspApp(ApplicationCore):
         instance = Instance.from_tsplib_file(
             os.path.join(os.path.dirname(__file__), "data/gr17.tsp")
         )
-        return [instance.to_dict()]
+
+        return {
+            "example": {
+                "instance": instance.to_dict(),
+                "description": "Example with 17 cities (Groetschel)",
+            }
+        }

@@ -25,4 +25,5 @@ class VRP(ApplicationCore):
         data = load_json(
             os.path.join(os.path.dirname(__file__), "data/input_test_1_small.json")
         )
-        return [data]
+
+        return {"example_1": {"instance": data, "description": "Example with 17 nodes"}}
