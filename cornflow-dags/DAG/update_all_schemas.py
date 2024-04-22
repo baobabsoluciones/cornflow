@@ -3,6 +3,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from typing import List
+from warnings import warn
 
 from airflow import DAG
 from airflow.models import Variable
@@ -84,7 +85,12 @@ def get_all_example_data():
         print(f"App: {app.name} has {len(tests)} examples")
         n = 1
 
+        # TODO: phase out the list version of test cases on future versions.
         if isinstance(tests, list):
+            warn(
+                "Using list of test cases is deprecated. Use dictionary instead. "
+                "Support for list for test cases will be deprecated on cornflow-client 2.0.0"
+            )
             example = dict()
             for t in tests:
                 if isinstance(t, dict):
