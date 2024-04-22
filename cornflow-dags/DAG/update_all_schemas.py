@@ -83,21 +83,26 @@ def get_all_example_data():
         tests = app.test_cases
         print(f"App: {app.name} has {len(tests)} examples")
         n = 1
-        example = dict()
-        for t in tests:
-            if isinstance(t, dict):
-                instance = f"instance_{n}"
-                example[instance] = t
 
-            elif isinstance(t, tuple):
-                instance = f"instance_{n}"
-                solution = f"solution_{n}"
-                example[instance] = t[0]
-                example[solution] = t[1]
-            n = n + 1
+        if isinstance(tests, list):
+            example = dict()
+            for t in tests:
+                if isinstance(t, dict):
+                    instance = f"instance_{n}"
+                    example[instance] = t
 
-        if len(tests) > 0:
-            example_data_new[f"z_{app.name}_examples"] = example
+                elif isinstance(t, tuple):
+                    instance = f"instance_{n}"
+                    solution = f"solution_{n}"
+                    example[instance] = t[0]
+                    example[solution] = t[1]
+                n = n + 1
+
+            if len(tests) > 0:
+                example_data_new[f"z_{app.name}_examples"] = example
+
+        elif isinstance(tests, dict):
+            example_data_new[f"z_{app.name}_examples"] = tests
 
     print("Found the following new apps: {}".format([app.name for app in apps]))
     return example_data_new
