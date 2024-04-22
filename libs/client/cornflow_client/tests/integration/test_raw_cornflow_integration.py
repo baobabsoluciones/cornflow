@@ -45,14 +45,25 @@ class TestRawCornflowClientUser(TestCase):
     def tearDown(self):
         pass
 
-    def check_execution_statuses(self, execution_id):
+    def check_execution_statuses(self, execution_id, end_state=STATUS_OPTIMAL):
         statuses = []
         response = self.client.raw.get_status(execution_id)
         statuses.append(response.json()["state"])
-        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+        while end_state not in statuses and len(statuses) < 100:
             time.sleep(2)
             response = self.client.raw.get_status(execution_id)
             statuses.append(response.json()["state"])
+
+        self.assertIn(STATUS_QUEUED, statuses)
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(end_state, statuses)
+
+        queued_idx = statuses.index(STATUS_QUEUED)
+        not_solved_idx = statuses.index(STATUS_NOT_SOLVED)
+        end_state_idx = statuses.index(end_state)
+        self.assertLess(queued_idx, not_solved_idx)
+        self.assertLess(not_solved_idx, end_state_idx)
+
         return statuses
 
     def test_health_endpoint(self):
