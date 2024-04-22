@@ -1,6 +1,5 @@
-import os
-
 import click
+
 from cornflow.cli.utils import get_app
 from cornflow.commands import register_actions_command
 from .arguments import verbose

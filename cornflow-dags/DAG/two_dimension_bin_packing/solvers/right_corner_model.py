@@ -262,7 +262,7 @@ class RightCornerModel(Experiment):
             opt = SolverFactory(solver_name, solver_io="python")
         else:
             opt = SolverFactory(solver_name)
-        opt.options.update(options)
+        opt.options.update(self.get_solver_config(options))
         results = opt.solve(model_instance, tee=options.get("msg"))
 
         if options.get("log"):

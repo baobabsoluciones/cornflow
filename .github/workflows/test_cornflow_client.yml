@@ -151,3 +151,4 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           flags: client-tests
+          token: ${{secrets.CODECOV_TOKEN}}
