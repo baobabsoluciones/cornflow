@@ -1,0 +1,66 @@
+# VERSION 1.0
+# AUTHOR: cornflow@baobabsoluciones.es
+
+FROM python:3.10-slim-buster
+LABEL maintainer="cornflow@baobabsoluciones"
+
+# Never prompt the user for choices on installation/configuration of packages
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM linux
+
+# solver vars
+ENV SOLVER_DIR=/usr/local/solvers
+
+# install linux requirements
+RUN apt update -y && apt-get install -y --no-install-recommends \
+        apt-utils \
+        default-jre \
+        default-jdk \
+        g++ \
+        gcc \
+        git \
+		freetds-bin \
+        krb5-user \
+        ldap-utils \
+        libffi6 \
+        libffi-dev \
+        libldap2-dev \
+		libpq-dev \
+        libprotobuf-dev \
+        libsasl2-2 \
+        libsasl2-dev \
+        libsasl2-modules \
+        libssl1.1 \
+        libssl-dev \
+        locales  \
+        lsb-release \
+        make \
+        pkg-config \
+        protobuf-compiler \
+		python3-dev \
+        sasl2-bin \
+        slapd \
+        sqlite3 \
+        ssh \
+        unixodbc \
+        wget
+
+RUN pip install python-ldap
+RUN pip install GitPython
+RUN pip install cmake
+
+# copy init script and config to container
+COPY scripts ${SOLVER_DIR}/scripts
+
+# add user cornflow on application
+RUN useradd -ms /bin/bash -d ${SOLVER_DIR} cornflow
+RUN chown -R cornflow: ${SOLVER_DIR}
+
+# execute installation solvers script
+RUN python ${SOLVER_DIR}/scripts/solver_installation.py
+ENV GUROBI_HOME=${SOLVER_DIR}/gurobi/linux64
+ENV PATH=${PATH}:${GUROBI_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib
+ENV GRB_LICENSE_FILE=${GUROBI_HOME}/gurobi.lic
+
+WORKDIR ${SOLVER_DIR}

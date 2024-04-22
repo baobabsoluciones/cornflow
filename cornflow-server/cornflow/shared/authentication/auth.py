@@ -99,17 +99,18 @@ class Auth:
         if user_id is None:
             err = "The user id passed to generate the token is not valid."
             raise InvalidUsage(
-                err,
-                log_txt="Error while trying to generate token. " + err
+                err, log_txt="Error while trying to generate token. " + err
             )
 
         payload = {
-            "exp": datetime.utcnow() + timedelta(days=1),
+            "exp": datetime.utcnow() + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user_id,
         }
 
-        return jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
+        return jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
 
     @staticmethod
     def decode_token(token: str = None) -> dict:
@@ -123,27 +124,26 @@ class Auth:
         if token is None:
             err = "The provided token is not valid."
             raise InvalidUsage(
-                err,
-                log_txt="Error while trying to decode token. " + err
+                err, log_txt="Error while trying to decode token. " + err
             )
         try:
             payload = jwt.decode(
-                token, current_app.config["SECRET_KEY"], algorithms="HS256"
+                token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
             )
             return {"user_id": payload["sub"]}
         except jwt.ExpiredSignatureError:
             raise InvalidCredentials(
                 "The token has expired, please login again",
-                log_txt="Error while trying to decode token. The token has expired."
+                log_txt="Error while trying to decode token. The token has expired.",
             )
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",
-                log_txt="Error while trying to decode token. The token is invalid."
+                log_txt="Error while trying to decode token. The token is invalid.",
             )
 
     def validate_oid_token(
-            self, token: str, client_id: str, tenant_id: str, issuer: str, provider: int
+        self, token: str, client_id: str, tenant_id: str, issuer: str, provider: int
     ) -> dict:
         """
         This method takes a token issued by an OID provider, the relevant information about the OID provider
@@ -172,12 +172,12 @@ class Auth:
         except jwt.ExpiredSignatureError:
             raise InvalidCredentials(
                 "The token has expired, please login again",
-                log_txt="Error while trying to validate a token. The token has expired. "
+                log_txt="Error while trying to validate a token. The token has expired.",
             )
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",
-                log_txt="Error while trying to validate a token. The token is not valid. "
+                log_txt="Error while trying to validate a token. The token is not valid.",
             )
 
     @staticmethod
@@ -191,12 +191,14 @@ class Auth:
         :rtype: str
         """
         if headers is None:
-            raise InvalidUsage(log_txt="Error while trying to get a token from header. The header is invalid.")
+            raise InvalidUsage(
+                log_txt="Error while trying to get a token from header. The header is invalid."
+            )
 
         if "Authorization" not in headers:
             raise InvalidCredentials(
                 "Auth token is not available",
-                log_txt="Error while trying to get a token from header. The auth token is not available."
+                log_txt="Error while trying to get a token from header. The auth token is not available.",
             )
         auth_header = headers.get("Authorization")
         if not auth_header:
@@ -206,8 +208,7 @@ class Auth:
         except Exception as e:
             err = f"The authorization header has a bad syntax: {e}"
             raise InvalidCredentials(
-                err,
-                log_txt=f"Error while trying to get a token from header. " + err
+                err, log_txt=f"Error while trying to get a token from header. " + err
             )
 
     def get_user_from_header(self, headers: Headers = None) -> UserModel:
@@ -222,8 +223,7 @@ class Auth:
         if headers is None:
             err = "Headers are missing from the request. Authentication was not possible to perform."
             raise InvalidUsage(
-                err,
-                log_txt="Error while trying to get user from header. " + err
+                err, log_txt="Error while trying to get user from header. " + err
             )
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
@@ -232,8 +232,7 @@ class Auth:
         if user is None:
             err = "User does not exist, invalid token."
             raise ObjectDoesNotExist(
-                err,
-                log_txt="Error while trying to get user from header. " + err
+                err, log_txt="Error while trying to get user from header. " + err
             )
         return user
 
@@ -460,3 +459,57 @@ class Auth:
         kid = self._get_key_id(token)
         jwk = self._get_jwk(kid, tenant_id, provider)
         return self._rsa_pem_from_jwk(jwk)
+
+
+class BIAuth(Auth):
+    def __init__(self, user_model=UserModel):
+        super().__init__(user_model)
+
+    @staticmethod
+    def decode_token(token: str = None) -> dict:
+        """
+        Decodes a given JSON Web token and extracts the sub from it to give it back.
+
+        :param str token: the given JSON Web Token
+        :return: the sub field of the token as the user_id
+        :rtype: dict
+        """
+        if token is None:
+            err = "The provided token is not valid."
+            raise InvalidUsage(
+                err, log_txt="Error while trying to decode token. " + err
+            )
+        try:
+            payload = jwt.decode(
+                token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
+            )
+            return {"user_id": payload["sub"]}
+        except jwt.InvalidTokenError:
+            raise InvalidCredentials(
+                "Invalid token, please try again with a new token",
+                log_txt="Error while trying to decode token. The token is invalid.",
+            )
+
+    @staticmethod
+    def generate_token(user_id: int = None) -> str:
+        """
+        Generates a token given a user_id with a duration of one day
+
+        :param int user_id: user code to be encoded in the token to identify the user afterward.
+        :return: the generated token
+        :rtype: str
+        """
+        if user_id is None:
+            err = "The user id passed to generate the token is not valid."
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate token. " + err
+            )
+
+        payload = {
+            "iat": datetime.utcnow(),
+            "sub": user_id,
+        }
+
+        return jwt.encode(
+            payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"
+        )

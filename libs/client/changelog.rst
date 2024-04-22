@@ -1,3 +1,19 @@
+version 1.0.16
+---------------
+
+- released: 2023-10-20
+- description: Small fixes to the cornflow-client
+- changelog:
+
+version 1.0.15
+---------------
+
+- released: 2023-10-04
+- description: dropped Python 3.7 support
+- changelog:
+    - dropped python 3.7 support as will the rest of components.
+
+
 version 1.0.14
 ---------------
 

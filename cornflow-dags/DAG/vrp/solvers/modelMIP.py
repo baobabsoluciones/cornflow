@@ -266,14 +266,14 @@ class modelMIP(Experiment):
         :return:
         """
         SOLVER_PARAMETERS = dict(
-            sec=options.get("timeLimit", 300),
-            allow=options.get("gapAbs", 1),
-            ratio=options.get("gaPRel", 0.01),
-            tee=options.get("msg", 0),
+            timeLimit=options.get("timeLimit", 360),
+            abs_gap=options.get("abs_gap", 1),
+            rel_gap=options.get("rel_gap", 0.01),
+            solver="cbc"
         )
-
+        SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
         mip_vrp = self.get_mip_model()
-        opt = SolverFactory("cbc")
+        opt = SolverFactory("cbc", tee=options.get("msg", 1))
         opt.options.update(SOLVER_PARAMETERS)
         termination_condition = STATUS_NOT_SOLVED
 

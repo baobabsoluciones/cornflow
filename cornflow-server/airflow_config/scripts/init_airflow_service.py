@@ -54,10 +54,12 @@ if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not N
     ADD_HOST = f"ssh-keyscan {CUSTOM_SSH_HOST} >> /usr/local/airflow/.ssh/known_hosts"
     CONFIG_SSH_HOST = f"echo Host {CUSTOM_SSH_HOST} > /usr/local/airflow/.ssh/config"
     CONFIG_SSH_KEY = 'echo "    IdentityFile /usr/local/airflow/.ssh/id_rsa" >> /usr/local/airflow/.ssh/config'
+    COPY_TO_USER_DIR = "cp -r /usr/local/airflow/.ssh $HOME/"
     os.system(ADD_KEY)
     os.system(ADD_HOST)
     os.system(CONFIG_SSH_HOST)
     os.system(CONFIG_SSH_KEY)
+    os.system(COPY_TO_USER_DIR)
 
 # Install custom python package if requirements.txt is present
 if os.path.isfile("/requirements.txt"):

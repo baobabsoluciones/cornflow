@@ -8,11 +8,11 @@ from solvers import get_cbc, get_glpk, get_highs, get_choco, get_mipcl, get_guro
 # * MIPCL: https://github.com/onebitbrain/MIPCL/blob/master/bin/mps_mipcl
 # * glpk: https://www.gnu.org/software/glpk/
 # * Gurobi optimizer: https://www.gurobi.com/
-available_solver = ["HiGHS", "CBC", "CHOCO", "glpk", "gurobi"]
+available_solver = "HiGHS,CBC,CHOCO,glpk,gurobi"
+default_solvers = "HiGHS,CBC,gurobi"
 
 # list of solvers that will be installed
-solver_list = os.getenv("SOLVER_LIST", "CBC,glpk,HiGHS,CHOCO,MIPCL,gurobi").split(",")
-
+solver_list = os.getenv("SOLVER_LIST", default_solvers).split(",")
 
 def install(s):
     if s in "CBC":
