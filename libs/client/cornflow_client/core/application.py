@@ -33,6 +33,7 @@ class ApplicationCore(ABC):
     """
     The application template.
     """
+
     # We create a new attribute controlling the use of the notification mail function
     def __init__(self):
         self._notify = False
@@ -110,7 +111,9 @@ class ApplicationCore(ABC):
 
     @property
     @abstractmethod
-    def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
+    def test_cases(
+        self,
+    ) -> Union[Dict[str, Union[Dict, str]], List[Union[Dict, Tuple[Dict, Dict]]]]:
         """
         Mandatory property
 
@@ -119,6 +122,9 @@ class ApplicationCore(ABC):
 
           * **dict**: each element is an instance
           * **tuple**: the first part is the instance, the second its solution
+
+          it can also return a dict with the name of the test case and a subdictionary with a dict for the instance,
+           a dict for the solution (optional) and a description of the test case
         """
         raise NotImplementedError()
 
