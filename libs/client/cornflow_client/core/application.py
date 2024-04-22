@@ -126,6 +126,7 @@ class ApplicationCore(ABC):
           it can also return a dict with the name of the test case and a subdictionary with a dict for the instance,
            a dict for the solution (optional) and a description of the test case
         """
+        # TODO: phase out List support for the test cases
         raise NotImplementedError()
 
     @property
