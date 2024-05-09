@@ -114,6 +114,10 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
     indicators = fields.Method("get_indicators")
 
 
+class ExecutionResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
+    log_json = fields.Raw()
+
+
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.Str()
     state = fields.Int()
@@ -129,6 +133,7 @@ class ExecutionStatusEndpointUpdate(Schema):
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
+    log_json = fields.Raw()
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
