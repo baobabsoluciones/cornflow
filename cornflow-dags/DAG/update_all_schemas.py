@@ -35,20 +35,32 @@ def get_new_apps() -> List[ApplicationCore]:
 def import_dags():
     sys.path.append(os.path.dirname(__file__))
     _dir = os.path.dirname(__file__)
-    print("looking for apps in dir={}".format(_dir))
+    print(f"looking for apps in dir={_dir}")
     files = os.listdir(_dir)
-    print("Files are: {}".format(files))
+    print(f"Files are: {files}")
     # we go file by file and try to import it if matches the filters
+    # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
     for dag_module in files:
         filename, ext = os.path.splitext(dag_module)
         if ext not in [".py", ""]:
             continue
-        if filename in ["activate_apps"]:
+        if filename.startswith(
+            (
+                ".",
+                "__",
+                "scripts",
+                "documentation",
+                "tests",
+                "activate_dags",
+            )
+        ):
             continue
+
         try:
             _import_file(filename)
+            print(f"Imported {filename}")
         except Exception as e:
-            continue
+            raise e
 
 
 def _import_file(filename):
