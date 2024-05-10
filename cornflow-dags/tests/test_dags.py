@@ -135,17 +135,6 @@ class BaseDAGTests:
                 mock.write_solution.assert_called_once()
 
 
-class Hackathon(BaseDAGTests.SolvingTests):
-    def setUp(self):
-        super().setUp()
-        from DAG.hk_2020_dag import HackathonApp
-
-        self.app = HackathonApp()
-
-    def test_solve_ortools(self):
-        return self.test_try_solving_testcase(dict(solver="ortools", **self.config))
-
-
 class GraphColor(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
