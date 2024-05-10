@@ -1,3 +1,14 @@
+version 1.0.11
+---------------
+
+- released: 2024-05-10
+- description: release to fix security vulnerabilities
+- changelog:
+    - Upgraded flask-cors version to 4.0.1
+    - Upgraded Werkzeug version to 3.0.3
+    - Upgraded Airflow to version 2.9.1
+    - Fixed Werkzeug version on airflow image to 3.0.3
+
 version 1.0.10
 ---------------
 
