@@ -9,6 +9,7 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.utils.db import create_session
 from cornflow_client import ApplicationCore
+from cornflow_client.airflow.dag_utilities import callback_email
 
 default_args = {
     "owner": "baobab",
@@ -42,8 +43,10 @@ def import_dags():
     # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
     for dag_module in files:
         filename, ext = os.path.splitext(dag_module)
+
         if ext not in [".py", ""]:
             continue
+
         if filename.startswith(
             (
                 ".",
@@ -72,21 +75,21 @@ def get_schemas_dag_file(_module):
     return contents
 
 
-def get_all_schemas():
-    apps = get_new_apps()
+def get_all_schemas(apps):
+    apps_names = [app.name for app in apps]
     if len(apps):
-        print("Found the following apps: {}".format([app.name for app in apps]))
+        print(f"Found the following apps: {apps_names}")
     else:
         print("No apps were found to update")
     schemas_new = {app.name: app.get_schemas() for app in apps}
-    print("Found the following new apps: {}".format([app.name for app in apps]))
+    print(f"Found the following new apps: {apps_names}")
     return schemas_new
 
 
-def get_all_example_data():
-    apps = get_new_apps()
+def get_all_example_data(apps):
+    apps_names = [app.name for app in apps]
     if len(apps):
-        print("Found the following apps: {}".format([app.name for app in apps]))
+        print(f"Found the following apps: {apps_names}")
     else:
         print("No apps were found to update")
     example_data_new = {}
@@ -111,11 +114,13 @@ def get_all_example_data():
         if len(tests) > 0:
             example_data_new[f"z_{app.name}_examples"] = example
 
-    print("Found the following new apps: {}".format([app.name for app in apps]))
+    print(f"Found the following new apps: {apps_names}")
     return example_data_new
 
 
 def update_all_schemas(**kwargs):
+    sys.setrecursionlimit(250)
+
     # first we delete all variables (this helps to keep it clean)
     with create_session() as session:
         current_vars = set(var.key for var in session.query(Variable))
@@ -123,13 +128,15 @@ def update_all_schemas(**kwargs):
             Variable.delete(_var, session)
 
     # we update all schemas that we found:
-    schemas = get_all_schemas()
+    apps = get_new_apps()
+
+    schemas = get_all_schemas(apps)
 
     for key, value in schemas.items():
         Variable.set(key=key, value=value, serialize_json=True)
 
     # we update all examples that we found:
-    example_data = get_all_example_data()
+    example_data = get_all_example_data(apps)
     for key, value in example_data.items():
         Variable.set(key=key, value=value, serialize_json=True)
 
@@ -147,6 +154,7 @@ update_schema2 = PythonOperator(
     provide_context=True,
     python_callable=update_all_schemas,
     dag=dag,
+    on_failure_callback=callback_email,
 )
 
 
