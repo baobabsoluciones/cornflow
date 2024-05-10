@@ -14,6 +14,7 @@ from cornflow.commands import (
     register_deployed_dags_command,
     register_dag_permissions_command,
     update_schemas_command,
+    update_dag_registry_command,
 )
 from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared import db
@@ -211,6 +212,9 @@ def init_cornflow_service():
             )
             register_dag_permissions_command(open_deployment, verbose=True)
             update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
+            update_dag_registry_command(
+                airflow_url, airflow_user, airflow_pwd, verbose=True
+            )
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "

@@ -50,6 +50,9 @@ class FirstSolution(Schema):
 
 
 class LogSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     version = fields.Str(**log_options)
     solver = fields.Str(**log_options)
     status = fields.Str(**log_options)
