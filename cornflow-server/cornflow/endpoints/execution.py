@@ -24,7 +24,7 @@ from cornflow.schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
-    ExecutionResponse
+    ExecutionDetailsWithIndicatorsAndLogResponse
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
@@ -59,7 +59,7 @@ class ExecutionEndpoint(BaseMetaResource):
 
     @doc(description="Get all executions", tags=["Executions"])
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionResponse(many=True))
+    @marshal_with(ExecutionDetailsWithIndicatorsAndLogResponse(many=True))
     @use_kwargs(QueryFiltersExecution, location="query")
     def get(self, **kwargs):
         """
