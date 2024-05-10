@@ -1,7 +1,7 @@
 # AIRFLOW VERSION 2.9.0
 # AUTHOR: cornflow@baobabsoluciones.es
 # DESCRIPTION: Airflow 2.9.0 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
-# baobab code version is 1.0.10
+# baobab code version is 1.0.11
 
 FROM baobabsoluciones/pysolver:1.0
 LABEL maintainer="cornflow@baobabsoluciones"
@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.9.0
+ARG AIRFLOW_VERSION=2.9.1
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.10.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
