@@ -3,23 +3,16 @@
 """
 # Partial imports
 from abc import ABC, abstractmethod
-from jsonschema import Draft7Validator
-from pytups import SuperDict
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
-# Imports from internal modules
-from .instance import InstanceCore
-from .solution import SolutionCore
-from .experiment import ExperimentCore
+from jsonschema import Draft7Validator
+from pytups import SuperDict
 
 from cornflow_client.constants import (
     STATUS_CONV,
     STATUS_OPTIMAL,
-    STATUS_NOT_SOLVED,
     STATUS_INFEASIBLE,
-    STATUS_UNDEFINED,
-    STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
     NoSolverException,
@@ -27,6 +20,11 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstance,
 )
+from .experiment import ExperimentCore
+
+# Imports from internal modules
+from .instance import InstanceCore
+from .solution import SolutionCore
 
 
 class ApplicationCore(ABC):
@@ -155,6 +153,7 @@ class ApplicationCore(ABC):
         if solver is None:
             solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
+        # TODO: I think this exception is unreachable
         if solver_class is None:
             raise NoSolverException(f"Solver {solver} is not available")
         inst = self.instance.from_dict(data)
