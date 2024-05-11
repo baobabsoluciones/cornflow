@@ -1,4 +1,4 @@
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, EXCLUDE
 
 options = dict(required=True, allow_none=True)
 log_options = dict(required=False, allow_none=True)
