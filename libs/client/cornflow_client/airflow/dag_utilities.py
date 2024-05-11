@@ -39,6 +39,7 @@ default_args = {
 
 
 def get_schemas_from_file(_dir, dag_name):
+    # TODO: check if in use
     with open(os.path.join(_dir, dag_name + "_input.json"), "r") as f:
         instance = json.load(f)
     with open(os.path.join(_dir, dag_name + "_output.json"), "r") as f:
@@ -53,6 +54,7 @@ def get_requirements(path):
     :param path: The path of the project
     :return: A list of required packages
     """
+    # TODO: check if in use
     req_path = f"{path}/requirements.txt"
 
     try:
@@ -146,6 +148,7 @@ def try_to_write_solution(client, exec_id, payload):
 
 
 def get_schema(dag_name):
+    # TODO: check if in use
     _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
     with open(_file, "r") as f:
         schema = json.load(f)

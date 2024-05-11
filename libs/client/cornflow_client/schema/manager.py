@@ -166,7 +166,7 @@ class SchemaManager:
 
         :return: nothing
         """
-        self.save_json(self.to_dict_schema(), path)
+        save_json(self.to_dict_schema(), path)
 
     def draft_schema_from(self, path, save_path=None):
         """
@@ -286,10 +286,6 @@ class SchemaManager:
         return the json content.
         """
         return load_json(path)
-
-    @staticmethod
-    def save_json(data, path):
-        return save_json(data, path)
 
     """
     Aliases:
