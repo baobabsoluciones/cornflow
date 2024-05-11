@@ -1,18 +1,15 @@
 """
 Class to help create and manage data schema and to validate json files.
 """
-# Full imports
-import os
 
-# Partial imports
+import os
 from copy import deepcopy
+
 from genson import SchemaBuilder
 from jsonschema import Draft7Validator
 
-
-# Imports form internal modules
-from .dictSchema import DictSchema
 from cornflow_client.core.tools import load_json, save_json
+from .dictSchema import DictSchema
 
 
 class SchemaManager:

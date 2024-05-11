@@ -1,18 +1,13 @@
 """
 
 """
-# Full imports
-import json
-import logging
-import os
 
-# Partial imports
+import json
+import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
-# Imports from modules
 from cornflow_client import CornFlow, CornFlowApiError
-
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
