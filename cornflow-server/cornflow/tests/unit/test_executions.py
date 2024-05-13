@@ -115,7 +115,9 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.assertTrue("error" in response.json)
 
     def test_get_executions(self):
-        self.get_rows(self.url, self.payloads)
+        keys_to_check = ['instance_id', 'schema', 'indicators', 'id', 'config', 'data_hash', 'basic_log_json',
+                         'created_at', 'state', 'user_id', 'message', 'name', 'description']
+        self.get_rows(self.url, self.payloads, keys_to_check=keys_to_check)
 
     def test_get_no_executions(self):
         self.get_no_rows(self.url)
