@@ -203,7 +203,7 @@ class CustomTestCase(TestCase):
         return payload.keys()
 
     def get_one_row(
-            self, url, payload, expected_status=200, check_payload=True, token=None
+            self, url, payload, expected_status=200, check_payload=True, token=None, keys_to_check: List[str] = None
     ):
         token = token or self.token
 
@@ -214,6 +214,8 @@ class CustomTestCase(TestCase):
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
             return row.json
+        if keys_to_check:
+            self.assertCountEqual(list(row.json.keys()), keys_to_check)
         self.assertEqual(row.json["id"], payload["id"])
         for key in self.get_keys_to_check(payload):
             self.assertIn(key, row.json)

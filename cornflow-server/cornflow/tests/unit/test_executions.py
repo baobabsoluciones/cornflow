@@ -359,7 +359,9 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         self.url = EXECUTION_URL + idx + "/data/"
         payload = dict(self.payload)
         payload["id"] = idx
-        self.get_one_row(self.url, payload)
+        keys_to_check = ['created_at', 'checks', 'instance_id', 'schema', 'data', 'user_id', 'message', 'data_hash',
+                         'basic_log_json', 'config', 'description', 'state', 'name', 'id']
+        self.get_one_row(self.url, payload, keys_to_check=keys_to_check)
 
     def test_get_one_execution_superadmin(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
