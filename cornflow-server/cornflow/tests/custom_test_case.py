@@ -5,6 +5,9 @@ This file contains the different custom test classes used to generalize the unit
 # Import from libraries
 import logging as log
 from datetime import datetime, timedelta
+
+from typing import List
+
 from flask import current_app
 from flask_testing import TestCase
 import json
@@ -171,7 +174,7 @@ class CustomTestCase(TestCase):
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data, token=None, check_data=True, keys_to_check: list[str] = None):
+    def get_rows(self, url, data, token=None, check_data=True, keys_to_check: List[str] = None):
         token = token or self.token
 
         codes = [
