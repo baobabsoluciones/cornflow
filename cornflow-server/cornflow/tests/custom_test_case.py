@@ -174,7 +174,9 @@ class CustomTestCase(TestCase):
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data, token=None, check_data=True, keys_to_check: List[str] = None):
+    def get_rows(
+        self, url, data, token=None, check_data=True, keys_to_check: List[str] = None
+    ):
         token = token or self.token
 
         codes = [
@@ -203,7 +205,13 @@ class CustomTestCase(TestCase):
         return payload.keys()
 
     def get_one_row(
-            self, url, payload, expected_status=200, check_payload=True, token=None, keys_to_check: List[str] = None
+        self,
+        url,
+        payload,
+        expected_status=200,
+        check_payload=True,
+        token=None,
+        keys_to_check: List[str] = None,
     ):
         token = token or self.token
 
@@ -233,13 +241,13 @@ class CustomTestCase(TestCase):
         return rows.json
 
     def update_row(
-            self,
-            url,
-            change,
-            payload_to_check,
-            expected_status=200,
-            check_payload=True,
-            token=None,
+        self,
+        url,
+        change,
+        payload_to_check,
+        expected_status=200,
+        check_payload=True,
+        token=None,
     ):
         token = token or self.token
 
@@ -270,7 +278,7 @@ class CustomTestCase(TestCase):
         return row.json
 
     def patch_row(
-            self, url, json_patch, payload_to_check, expected_status=200, check_payload=True
+        self, url, json_patch, payload_to_check, expected_status=200, check_payload=True
     ):
         response = self.client.patch(
             url,
@@ -328,7 +336,7 @@ class CustomTestCase(TestCase):
         self.assertEqual(str(row), string)
 
     def cascade_delete(
-            self, url, model, payload, url_2, model_2, payload_2, parent_key
+        self, url, model, payload, url_2, model_2, payload_2, parent_key
     ):
         parent_object_idx = self.create_new_row(url, model, payload)
         payload_2[parent_key] = parent_object_idx
@@ -416,9 +424,9 @@ class BaseTestCases:
                 return self.url
             else:
                 return (
-                        self.url
-                        + "?"
-                        + "&".join(["%s=%s" % _ for _ in self.query_arguments.items()])
+                    self.url
+                    + "?"
+                    + "&".join(["%s=%s" % _ for _ in self.query_arguments.items()])
                 )
 
         def test_get_one_row(self):

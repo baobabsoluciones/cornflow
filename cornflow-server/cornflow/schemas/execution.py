@@ -114,8 +114,10 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
     indicators = fields.Method("get_indicators")
 
 
-class ExecutionDetailsWithIndicatorsAndLogResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
-    basic_log_json = fields.Nested(BasicLogSchema, attribute="log_json")
+class ExecutionDetailsWithIndicatorsAndLogResponse(
+    ExecutionDetailsEndpointWithIndicatorsResponse
+):
+    log = fields.Nested(BasicLogSchema, attribute="log_json")
 
 
 class ExecutionStatusEndpointResponse(Schema):
@@ -133,7 +135,7 @@ class ExecutionStatusEndpointUpdate(Schema):
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
-    basic_log_json = fields.Nested(BasicLogSchema, attribute="log_json")
+    log = fields.Nested(BasicLogSchema, attribute="log_json")
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
