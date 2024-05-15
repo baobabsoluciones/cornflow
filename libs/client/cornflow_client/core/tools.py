@@ -1,11 +1,10 @@
 """
 
 """
-# Full imports
+
 import json
 import pickle
 
-# Partial imports
 from pytups import OrderSet
 
 

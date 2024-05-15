@@ -24,6 +24,7 @@ from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
     USER_URL,
+    EXECUTION_URL,
 )
 from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
 from cornflow_client import get_pulp_jsonschema, get_empty_schema
@@ -90,19 +91,50 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         with open(CASE_PATH) as f:
             payload = json.load(f)
+
+        log_json = {
+            "time": 10.3,
+            "solver": "dummy",
+            "status": "feasible",
+            "status_code": 2,
+            "sol_code": 1,
+            "some_other_key": "this should be excluded",
+        }
+
         data = dict(
             data=payload["data"],
             state=EXEC_STATE_CORRECT,
+            log_json={
+                "time": 10.3,
+                "solver": "dummy",
+                "status": "feasible",
+                "status_code": 2,
+                "sol_code": 1,
+                "some_other_key": "this should be excluded",
+            },
         )
         payload_to_check = {**self.payload, **data}
         token = self.create_service_user()
-        data = self.update_row(
+        self.update_row(
             url=DAG_URL + idx + "/",
             payload_to_check=payload_to_check,
             change=data,
             token=token,
             check_payload=False,
         )
+
+        data = self.get_one_row(
+            url=EXECUTION_URL + idx + "/log/",
+            token=token,
+            check_payload=False,
+            payload=self.payload,
+            expected_status=200,
+        )
+
+        for key in data["log"]:
+            self.assertEqual(data["log"][key], log_json[key])
+
+        self.assertNotIn("some_other_key", data["log"].keys())
 
     def test_get_dag(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
