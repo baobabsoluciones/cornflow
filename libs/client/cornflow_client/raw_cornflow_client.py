@@ -1,14 +1,13 @@
 """
 
 """
-# Full imports
+
 import logging as log
 import re
-import requests
-
-# Partial imports
 from functools import wraps
 from urllib.parse import urljoin
+
+import requests
 
 
 class RawCornFlow(object):
@@ -409,7 +408,7 @@ class RawCornFlow(object):
             headers={
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
-            }
+            },
         )
 
     @log_call
@@ -439,17 +438,17 @@ class RawCornFlow(object):
             headers={
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
-            }
+            },
         )
 
     @log_call
     @ask_token
     @prepare_encoding
     def create_case_data_check(
-            self,
-            case_id,
-            encoding=None,
-            run=True,
+        self,
+        case_id,
+        encoding=None,
+        run=True,
     ):
         """
         Creates an execution to check the instance and solution of a case
@@ -469,7 +468,7 @@ class RawCornFlow(object):
             headers={
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
-            }
+            },
         )
 
     @ask_token
@@ -554,9 +553,7 @@ class RawCornFlow(object):
         :param str execution_id: id for the execution
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
-        return self.get_api_for_id(
-            api="execution/", id=execution_id, encoding=encoding
-        )
+        return self.get_api_for_id(api="execution/", id=execution_id, encoding=encoding)
 
     @log_call
     @ask_token
@@ -688,9 +685,7 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         """
-        return self.get_api_for_id(
-            api="instance", id=reference_id, encoding=encoding
-        )
+        return self.get_api_for_id(api="instance", id=reference_id, encoding=encoding)
 
     @log_call
     @ask_token
@@ -729,7 +724,9 @@ class RawCornFlow(object):
         :param str reference_id: id for the case
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
-        return self.get_api_for_id(api="case", id=reference_id, post_url="data", encoding=encoding)
+        return self.get_api_for_id(
+            api="case", id=reference_id, post_url="data", encoding=encoding
+        )
 
     @log_call
     @ask_token
@@ -815,9 +812,7 @@ class RawCornFlow(object):
         :param int reference_id: id for the case
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
-        return self.delete_api_for_id(
-            api="case", id=reference_id, encoding=encoding
-        )
+        return self.delete_api_for_id(api="case", id=reference_id, encoding=encoding)
 
     @log_call
     @ask_token
@@ -877,7 +872,7 @@ class RawCornFlow(object):
         solution_checks_schema: dict,
         config_schema: dict,
         description: str = None,
-        encoding=None
+        encoding=None,
     ):
         if name is None:
             return {"error": "No dag name was given"}
@@ -888,15 +883,17 @@ class RawCornFlow(object):
             solution_schema=solution_schema,
             instance_checks_schema=instance_checks_schema,
             solution_checks_schema=solution_checks_schema,
-            config_schema=config_schema
+            config_schema=config_schema,
         )
         return self.create_api("dag/deployed/", json=payload, encoding=encoding)
-    
+
     @log_call
     @ask_token
     @prepare_encoding
     def put_deployed_dag(self, dag_id, data, encoding=None):
-        return self.put_api_for_id("dag/deployed/", dag_id, payload=data, encoding=encoding)
+        return self.put_api_for_id(
+            "dag/deployed/", dag_id, payload=data, encoding=encoding
+        )
 
 
 class CornFlowApiError(Exception):
