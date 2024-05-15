@@ -29,19 +29,20 @@ logger = logging.getLogger("airflow.task")
 def run_examples(**kwargs):
     with create_session() as session:
         current_examples = {
-            var.key: json.loads(var.get_val())["instance_1"]
+            var.key: json.loads(var.get_val())
             for var in session.query(Variable)
             if "_examples" in var.key
         }
 
-    current_examples = {k: v for k, v in current_examples.items() if v != {}}
+    current_examples = {k: v for k, v in current_examples.items() if v != []}
 
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
     executions = []
 
-    for key, instance in current_examples.items():
+    for key, example_list in current_examples.items():
         schema = key.split("z_")[1].split("_examples")[0]
-
+        # TODO: maybe we want to run all available test instances?
+        instance = example_list[0]["instance"]
         try:
             response = cf_client.create_instance(
                 data=instance, name=f"Automatic_instance_run_{schema}", schema=schema

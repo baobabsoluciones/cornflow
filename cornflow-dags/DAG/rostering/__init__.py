@@ -80,13 +80,44 @@ class Rostering(ApplicationCore):
         )
 
         return [
-            (data_1, data_out1),
-            data_2,
-            (data_3, data_out3),
-            data_4,
-            data_5,
-            data_7,
-            data_8,
+            {
+                "name": "Base case",
+                "instance": data_1,
+                "solution": data_out1,
+                "description": "Base case with a split opening time on one day. "
+                "No skills, no holidays, no downtime, no preferences",
+            },
+            {
+                "name": "Employee downtime",
+                "instance": data_2,
+                "description": "Base case with an employee downtime, no preferences, no skills, no holidays",
+            },
+            {
+                "name": "Employee skills",
+                "instance": data_3,
+                "solution": data_out3,
+                "description": "Base case with skills, no preferences, no holidays, no downtime, no skills",
+            },
+            {
+                "name": "Resting hours",
+                "instance": data_4,
+                "description": "Base case with more opening hours to check the resting hours properly",
+            },
+            {
+                "name": "Store and employee holidays",
+                "instance": data_5,
+                "description": "Base case with store and employee holidays, no downtime, no preferences, no skills",
+            },
+            {
+                "name": "Employee preferences",
+                "instance": data_7,
+                "description": "Base case with preferences, skills, no holidays, no downtime",
+            },
+            {
+                "name": "Requirements deactivated",
+                "instance": data_8,
+                "description": "Base case with everything but deactivated",
+            },
         ]
 
     def get_solver(self, name: str = "mip"):
