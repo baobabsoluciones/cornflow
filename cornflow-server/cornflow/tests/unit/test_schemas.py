@@ -1,6 +1,7 @@
 """
 
 """
+
 # General imports
 import unittest
 
@@ -159,11 +160,20 @@ class TestSchemaEndpoint(CustomTestCase):
         self.schema_name = "solve_model_dag"
 
     def test_get_schema(self):
+        keys_to_check = [
+            "solution_checks",
+            "instance_checks",
+            "config",
+            "solution",
+            "name",
+            "instance",
+        ]
         schemas = self.get_one_row(
             self.url + "{}/".format(self.schema_name),
             {},
             expected_status=200,
             check_payload=False,
+            keys_to_check=keys_to_check,
         )
         self.assertIn("instance", schemas)
         self.assertIn("solution", schemas)
@@ -178,7 +188,7 @@ class TestNewSchemaEndpointOpen(CustomTestCase):
         self.url = SCHEMA_URL
 
     def test_get_all_schemas(self):
-        schemas = self.get_one_row(self.url, {}, 200, False)
+        schemas = self.get_one_row(self.url, {}, 200, False, keys_to_check=["name"])
         dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer"]]
 
         self.assertEqual(dags, schemas)
@@ -205,6 +215,7 @@ class TestNewSchemaEndpointNotOpen(CustomTestCase):
             {},
             expected_status=403,
             check_payload=False,
+            keys_to_check=["error"],
         )
         self.assertEqual(
             {"error": "User does not have permission to access this dag"}, schema
