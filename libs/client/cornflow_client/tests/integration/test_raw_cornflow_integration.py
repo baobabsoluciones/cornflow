@@ -45,8 +45,13 @@ class TestRawCornflowClientUser(TestCase):
     def tearDown(self):
         pass
 
-    def check_execution_statuses(self, execution_id, end_state=STATUS_OPTIMAL):
-        statuses = []
+    def check_execution_statuses(
+        self, execution_id, end_state=STATUS_OPTIMAL, initial_state=None
+    ):
+        if initial_state is None:
+            statuses = [initial_state]
+        else:
+            statuses = []
         response = self.client.raw.get_status(execution_id)
         statuses.append(response.json()["state"])
         while end_state not in statuses and len(statuses) < 100:
@@ -217,7 +222,9 @@ class TestRawCornflowClientUser(TestCase):
     def test_execution_data_check_solution(self):
         execution = self.test_create_execution_data_check()
 
-        statuses = self.check_execution_statuses(execution["id"])
+        statuses = self.check_execution_statuses(
+            execution["id"], initial_state=execution["state"]
+        )
 
         results = self.client.raw.get_solution(execution["id"])
         self.assertEqual(results.status_code, 200)
