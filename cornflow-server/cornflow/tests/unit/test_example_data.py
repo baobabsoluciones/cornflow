@@ -1,6 +1,7 @@
 """
 
 """
+
 # General imports
 import json
 
@@ -40,11 +41,13 @@ class TestExampleDataEndpoint(CustomTestCase):
     @patch("cornflow.endpoints.example_data.Airflow.from_config")
     def test_get_example(self, airflow_init):
         af_client = self.patch_af_client(airflow_init)
+        keys_to_check = ["name", "examples"]
         example = self.get_one_row(
             self.url + "{}/".format(self.schema_name),
             {},
             expected_status=200,
             check_payload=False,
+            keys_to_check=keys_to_check,
         )
         self.assertIn("examples", example)
         self.assertIn("name", example)

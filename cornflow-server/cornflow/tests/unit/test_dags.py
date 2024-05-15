@@ -139,16 +139,30 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
     def test_get_dag(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         token = self.create_service_user()
+        keys_to_check = ["id", "data", "solution_data", "config"]
         data = self.get_one_row(
             url=DAG_URL + idx + "/",
             token=token,
             check_payload=False,
             payload=self.payload,
+            keys_to_check=keys_to_check,
         )
+        keys_to_check = [
+            "data",
+            "id",
+            "schema",
+            "data_hash",
+            "user_id",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
         instance_data = self.get_one_row(
             url=INSTANCE_URL + self.payload["instance_id"] + "/data/",
             payload=dict(),
             check_payload=False,
+            keys_to_check=keys_to_check,
         )
         self.assertEqual(data["data"], instance_data["data"])
         self.assertEqual(data["config"], self.payload["config"])
@@ -162,6 +176,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
             check_payload=False,
             payload=self.payload,
             expected_status=403,
+            keys_to_check=["error"],
         )
 
 
