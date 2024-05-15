@@ -3,6 +3,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from typing import List
+from warnings import warn
 
 from airflow import DAG
 from airflow.models import Variable
@@ -97,22 +98,24 @@ def get_all_example_data(apps):
     for app in apps:
         tests = app.test_cases
         print(f"App: {app.name} has {len(tests)} examples")
-        n = 1
-        example = dict()
-        for t in tests:
-            if isinstance(t, dict):
-                instance = f"instance_{n}"
-                example[instance] = t
 
-            elif isinstance(t, tuple):
-                instance = f"instance_{n}"
-                solution = f"solution_{n}"
-                example[instance] = t[0]
-                example[solution] = t[1]
-            n = n + 1
+        for pos, test in enumerate(tests):
+            if isinstance(test, dict):
+                continue
+
+            elif isinstance(test, tuple):
+                warn(
+                    "The tests as a tuple is no loger supported, please upgrade to the new test cases structure"
+                )
+                temp_example = {
+                    "name": "No available name for the test",
+                    "instance": test[0],
+                    "solution": test[1],
+                }
+                tests[pos] = temp_example
 
         if len(tests) > 0:
-            example_data_new[f"z_{app.name}_examples"] = example
+            example_data_new[f"z_{app.name}_examples"] = tests
 
     print(f"Found the following new apps: {apps_names}")
     return example_data_new
