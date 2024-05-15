@@ -16,4 +16,4 @@ Specifically, we will ignore results of security scans that contain a list of de
 
 ## How to report the issue?
 
-Please send one plain-text email for each vulnerability you are reporting including an explanation of how it affects Airflow security. We may ask that you resubmit your report if you send it as an image, movie, HTML, or PDF attachment when you could as easily describe it with plain text.
+Please send one plain-text email for each vulnerability you are reporting including an explanation of how it affects cornflow security. We may ask that you resubmit your report if you send it as an image, movie, HTML, or PDF attachment when you could as easily describe it with plain text.
