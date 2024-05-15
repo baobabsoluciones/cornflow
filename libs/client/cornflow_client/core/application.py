@@ -3,23 +3,16 @@
 """
 # Partial imports
 from abc import ABC, abstractmethod
-from jsonschema import Draft7Validator
-from pytups import SuperDict
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
-# Imports from internal modules
-from .instance import InstanceCore
-from .solution import SolutionCore
-from .experiment import ExperimentCore
+from jsonschema import Draft7Validator
+from pytups import SuperDict
 
 from cornflow_client.constants import (
     STATUS_CONV,
     STATUS_OPTIMAL,
-    STATUS_NOT_SOLVED,
     STATUS_INFEASIBLE,
-    STATUS_UNDEFINED,
-    STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
     NoSolverException,
@@ -27,12 +20,18 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstance,
 )
+from .experiment import ExperimentCore
+
+# Imports from internal modules
+from .instance import InstanceCore
+from .solution import SolutionCore
 
 
 class ApplicationCore(ABC):
     """
     The application template.
     """
+
     # We create a new attribute controlling the use of the notification mail function
     def __init__(self):
         self._notify = False
@@ -154,6 +153,7 @@ class ApplicationCore(ABC):
         if solver is None:
             solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
+        # TODO: I think this exception is unreachable
         if solver_class is None:
             raise NoSolverException(f"Solver {solver} is not available")
         inst = self.instance.from_dict(data)
@@ -196,13 +196,17 @@ class ApplicationCore(ABC):
             output = dict(status=output)
         status = output.get("status")
         status_sol = output.get("status_sol")
-        log = dict(
-            time=timer() - start,
-            solver=solver,
-            status=STATUS_CONV.get(status, "Unknown"),
-            status_code=status,
-            sol_code=SOLUTION_STATUS_INFEASIBLE,
-        )
+
+        log_json = {
+            **output,
+            **{
+                "time": timer() - start,
+                "solver": solver,
+                "status": STATUS_CONV.get(status, "Unknown"),
+                "status_code": status,
+                "sol_code": SOLUTION_STATUS_INFEASIBLE,
+            },
+        }
 
         try:
             log_txt = algo.log
@@ -214,11 +218,11 @@ class ApplicationCore(ABC):
         #  because there may be already an initial solution in the solver
         # TODO: review whole status types and meaning
         if status_sol is not None:
-            log["sol_code"] = status_sol
+            log_json["sol_code"] = status_sol
         elif algo.solution is not None and len(algo.solution.data):
-            log["sol_code"] = SOLUTION_STATUS_FEASIBLE
+            log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
 
-        if log["sol_code"] > 0:
+        if log_json["sol_code"] > 0:
             sol = algo.solution.to_dict()
 
         if sol != {} and sol is not None:
@@ -226,7 +230,7 @@ class ApplicationCore(ABC):
         else:
             checks = None
 
-        return sol, checks, instance_checks, log_txt, log
+        return sol, checks, instance_checks, log_txt, log_json
 
     def check(
         self, instance_data: dict, solution_data: dict, *args, **kwargs
