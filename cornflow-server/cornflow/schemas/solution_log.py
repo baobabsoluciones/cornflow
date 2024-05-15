@@ -1,4 +1,4 @@
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, EXCLUDE
 
 options = dict(required=True, allow_none=True)
 log_options = dict(required=False, allow_none=True)
@@ -56,6 +56,9 @@ class BasicLogSchema(Schema):
 
 
 class LogSchema(BasicLogSchema):
+    class Meta:
+        unknown = EXCLUDE
+
     version = fields.Str(**log_options)
     solver = fields.Str(**log_options)
     best_bound = fields.Float(**log_options)

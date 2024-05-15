@@ -1,12 +1,10 @@
 """
 
 """
-# Full imports
 import re
 
-# Imports from internal modules
-from .dict_functions import gen_schema, ParameterSchema, sort_dict
 from cornflow_client.constants import JSON_TYPES, DATASCHEMA
+from .dict_functions import gen_schema, ParameterSchema, sort_dict
 
 
 class DictSchema:
