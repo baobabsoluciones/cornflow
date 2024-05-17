@@ -1,0 +1,171 @@
+---
+title: "TSP report"
+execute:
+  echo: false
+  warning: false
+format:
+  html:
+    embed-resources: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{python}
+#| tags: [parameters]
+
+file_name = "/home/pchtsp/Documents/projects/baobab/cornflow/corn/cornflow-dags/DAG/tsp/data/gr17.tsp"
+```
+
+## TSP
+
+From [wikipedia](https://en.wikipedia.org/wiki/Travelling_salesman_problem):
+
+> The travelling salesman problem, also known as the travelling salesperson problem (TSP), asks the following question: "Given a list of cities and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city?" It is an NP-hard problem in combinatorial optimization, important in theoretical computer science and operations research. 
+
+```{python}
+#| echo: false
+import os
+import sys
+module_path = os.path.abspath(os.path.join('../..'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+from tsp import TspApp
+import networkx as nx
+import numpy as np
+import pytups as pt
+import matplotlib.pyplot as plt
+
+my_instance = TspApp.instance.from_tsplib_file(file_name)
+my_experiment = TspApp.solvers['cpsat'](instance=my_instance, solution=TspApp.solution(dict(route=[])))
+
+status = my_experiment.solve({'timeLimit': 2})
+pop_element = my_experiment.solution.data['route'].pop()
+
+```
+
+
+## Instance statistics
+
+The problem has `{python} len(my_instance.get_nodes())` nodes and `{python} len(my_instance.get_arcs())` arcs.
+
+The distance distribution is the following:
+
+```{python}
+#| label: fig-distance-dist
+#| fig-cap: "Distance distribution"
+
+# Import seaborn
+import seaborn as sns
+import pandas as pd
+
+# Apply the default theme
+sns.set_theme(style="whitegrid")
+
+# Load an example dataset
+distances = my_instance.get_arcs().take('w')
+my_df = pd.DataFrame(dict(distance=distances))
+
+# Create a visualization
+ax = sns.histplot(
+    data=my_df,
+    x="distance", 
+    binwidth=50
+)
+ax.set(xlabel='Distance', ylabel='Number of edges')
+plt.show()
+
+```
+
+## The network
+
+See @fig-distances for a representation of the network distances.
+
+
+```{python}
+#| echo: false
+#| label: fig-distances
+#| fig-cap: "Network. Green lines mean shorter distances, red ones, longer ones."
+G = my_instance.get_graph()
+pos = nx.kamada_kawai_layout(G)
+
+weights = pt.SuperDict(nx.get_edge_attributes(G, 'weight')).vfilter(lambda v: v > 0)
+
+low, mid, high = np.quantile(weights.values_tl(), [0.25, 0.5, 0.75])
+
+def get_color(value):
+  if value <= low:
+    return 'green'
+  if value > high:
+    return 'red'
+  return 'black'
+
+colors = weights.vapply(get_color)
+
+__nodes = nx.draw_networkx_nodes(G, pos=pos)
+__edges = nx.draw_networkx_edges(G, edgelist=weights.keys_l(), pos=pos, edge_color=colors.values_tl())
+
+# nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=weights)
+
+__labels = nx.draw_networkx_labels(G, pos=pos, font_color='white')
+
+ax = plt.gca()
+ax.margins(0.05)
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```
+
+## Solution statistics
+
+```{python}
+objective = my_experiment.get_objective()
+checks = my_experiment.check_solution()
+feasible = len(checks['missing_nodes']) == 0 and len(checks['missing_positions']) == 0
+
+```
+
+```{python}
+#| output: asis
+
+from IPython.display import display, Markdown
+
+if feasible:
+  print("::: {{.callout-tip}}\n\n## Solution is feasible\n\nThe shortest tour has length {}.\n\n:::".format(objective))
+else:
+  my_text = ""
+  if checks['missing_nodes']:
+    my_text += 'The solution is missing the following nodes: {}\n\n'.format(checks['missing_nodes'].take('node'))
+  if checks['missing_positions']:
+    my_text += 'The solution is missing the following positions: {}\n\n'.format(checks['missing_positions'].take('position'))
+
+  print("::: {{.callout-important}}\n\n## Solution is infeasible\n\n{}\n\n:::".format(my_text))
+
+```
+
+## Solution
+
+```{python}
+#| label: fig-tour
+#| fig-cap: "Shortest tour that passes through each node once"
+#| code-fold: true
+
+my_solution = my_experiment.solution
+
+my_arcs = my_experiment.get_used_arc_weights()
+my_arcs_keys = my_arcs.keys_tl()
+my_colors = my_arcs_keys.vapply(lambda v: colors[v])
+
+__nodes = nx.draw_networkx_nodes(G, pos=pos)
+__edges = nx.draw_networkx_edges(G, edgelist=my_arcs_keys, pos=pos, edge_color=my_colors)
+
+nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=my_arcs, font_size=8)
+
+__labels = nx.draw_networkx_labels(G, pos=pos, font_color='white')
+
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```
