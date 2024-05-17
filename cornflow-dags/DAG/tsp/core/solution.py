@@ -19,7 +19,7 @@ class Solution(SolutionCore):
         tour = self.get_tour()
 
         if len(tour) <= 1:
-            return []
+            return pt.TupList()
         edges = pt.TupList(zip(tour, tour[1:]))
         edges.append((tour[-1], tour[0]))
         return edges
