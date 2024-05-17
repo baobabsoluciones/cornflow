@@ -1,7 +1,10 @@
 import os, sys
 
-prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
-sys.path.insert(1, prev_dir)
+prev_dir = os.path.join(os.path.dirname(__file__), "../")
+my_paths = [prev_dir, os.path.join(prev_dir, 'DAG')]
+for __my_path in my_paths:
+    sys.path.insert(1, __my_path)
+
 import unittest
 from unittest.mock import patch, Mock, MagicMock
 
