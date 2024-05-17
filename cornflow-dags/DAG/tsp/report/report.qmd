@@ -13,7 +13,7 @@ editor_options:
 ```{python}
 #| tags: [parameters]
 
-file_name = "/home/pchtsp/Documents/projects/baobab/cornflow/corn/cornflow-dags/DAG/tsp/data/gr17.tsp"
+file_name = "../data/gr17.tsp"
 ```
 
 ## TSP
@@ -36,11 +36,18 @@ import numpy as np
 import pytups as pt
 import matplotlib.pyplot as plt
 
-my_instance = TspApp.instance.from_tsplib_file(file_name)
+extension = os.path.splitext(file_name)[1]
+if extension=='.tsp':
+  my_instance = TspApp.instance.from_tsplib_file(file_name)
+elif extension=='.json':
+  my_instance = TspApp.instance.from_json(file_name)
+else:
+  raise ValueError("Unknown extension: {}".format(extension))
 my_experiment = TspApp.solvers['cpsat'](instance=my_instance, solution=TspApp.solution(dict(route=[])))
 
-status = my_experiment.solve({'timeLimit': 2})
-pop_element = my_experiment.solution.data['route'].pop()
+# TODO: Ideally, we should not solve the problem inside the report, we should already have an example of problem solved.
+# status = my_experiment.solve({'timeLimit': 2})
+# pop_element = my_experiment.solution.data['route'].pop()
 
 ```
 
@@ -49,7 +56,7 @@ pop_element = my_experiment.solution.data['route'].pop()
 
 The problem has `{python} len(my_instance.get_nodes())` nodes and `{python} len(my_instance.get_arcs())` arcs.
 
-The distance distribution is the following:
+The distance distribution is shown in the histogram of @fig-distance-dist.
 
 ```{python}
 #| label: fig-distance-dist
@@ -79,12 +86,12 @@ plt.show()
 
 ## The network
 
-See @fig-distances for a representation of the network distances.
+See @fig-network for a representation of the network distances.
 
 
 ```{python}
 #| echo: false
-#| label: fig-distances
+#| label: fig-network
 #| fig-cap: "Network. Green lines mean shorter distances, red ones, longer ones."
 G = my_instance.get_graph()
 pos = nx.kamada_kawai_layout(G)
@@ -104,8 +111,6 @@ colors = weights.vapply(get_color)
 
 __nodes = nx.draw_networkx_nodes(G, pos=pos)
 __edges = nx.draw_networkx_edges(G, edgelist=weights.keys_l(), pos=pos, edge_color=colors.values_tl())
-
-# nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=weights)
 
 __labels = nx.draw_networkx_labels(G, pos=pos, font_color='white')
 
@@ -129,7 +134,7 @@ feasible = len(checks['missing_nodes']) == 0 and len(checks['missing_positions']
 ```{python}
 #| output: asis
 
-from IPython.display import display, Markdown
+# The following code shows (1) a box with feasibility + objective function OR (2) root cause of infeasibility.
 
 if feasible:
   print("::: {{.callout-tip}}\n\n## Solution is feasible\n\nThe shortest tour has length {}.\n\n:::".format(objective))
@@ -146,12 +151,13 @@ else:
 
 ## Solution
 
+
+See @fig-tour for a representation of the solution tour. Number in links show the actual distance. Colors are kept from the network representation of the instance.
+
 ```{python}
 #| label: fig-tour
 #| fig-cap: "Shortest tour that passes through each node once"
 #| code-fold: true
-
-my_solution = my_experiment.solution
 
 my_arcs = my_experiment.get_used_arc_weights()
 my_arcs_keys = my_arcs.keys_tl()

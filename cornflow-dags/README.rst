@@ -297,3 +297,19 @@ and add a reference to your solver::
 Then, you can execute the unittests for your solver with the following command::
 
     python -m unittest tests.test_dags.GraphColor
+
+The reports
+--------------
+
+The generation of reports needs to have the `quarto` app installed in the system.
+To downloda and install quarto, check here: https://quarto.org/docs/download/.
+
+A report is a static/ self-contained view of an Experiment (solved or not).
+
+For example, to generate the `tsp` report, you execute::
+
+    quarto render cornflow-dags/DAG/tsp/report/report.qmd
+
+By default, it uses an example instance. If a new instance is needed, the path to it is required::
+
+   quarto render cornflow-dags/DAG/tsp/report/report.qmd -P file_name:PATH_TO_JSON.json
