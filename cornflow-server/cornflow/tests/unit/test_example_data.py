@@ -23,7 +23,18 @@ class TestExampleDataEndpoint(CustomTestCase):
                 temp = json.load(f)
             return temp
 
-        self.example = load_file(INSTANCE_PATH)
+        self.example = [
+            {
+                "name": "test_example_1",
+                "description": "some_description",
+                "instance": load_file(INSTANCE_PATH),
+            },
+            {
+                "name": "test_example_2",
+                "description": "some_description",
+                "instance": load_file(INSTANCE_PATH),
+            },
+        ]
         self.url = EXAMPLE_URL
         self.schema_name = "solve_model_dag"
 
@@ -39,16 +50,40 @@ class TestExampleDataEndpoint(CustomTestCase):
         return af_client
 
     @patch("cornflow.endpoints.example_data.Airflow.from_config")
-    def test_get_example(self, airflow_init):
+    def test_get_list_of_examples(self, airflow_init):
+        af_client = self.patch_af_client(airflow_init)
+        examples = self.get_one_row(
+            f"{self.url}/{self.schema_name}/",
+            {},
+            expected_status=200,
+            check_payload=False,
+        )
+
+        for pos, item in enumerate(examples):
+            self.assertIn("name", item)
+            self.assertEqual(self.example[pos]["name"], item["name"])
+            self.assertIn("description", item)
+            self.assertEqual(self.example[pos]["description"], item["description"])
+
+    @patch("cornflow.endpoints.example_data.Airflow.from_config")
+    def test_get_one_example(self, airflow_init):
+        def load_file(_file):
+            with open(_file) as f:
+                temp = json.load(f)
+            return temp
+
         af_client = self.patch_af_client(airflow_init)
         keys_to_check = ["name", "examples"]
         example = self.get_one_row(
-            self.url + "{}/".format(self.schema_name),
+            f"{self.url}/{self.schema_name}/test_example_1/",
             {},
             expected_status=200,
             check_payload=False,
             keys_to_check=keys_to_check,
         )
-        self.assertIn("examples", example)
+
         self.assertIn("name", example)
-        self.assertEqual(example["examples"], self.example)
+        self.assertEqual("test_example_1", example["name"])
+        self.assertIn("description", example)
+        self.assertIn("instance", example)
+        self.assertEqual(load_file(INSTANCE_PATH), example["instance"])
