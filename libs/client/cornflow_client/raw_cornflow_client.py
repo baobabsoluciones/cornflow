@@ -895,6 +895,20 @@ class RawCornFlow(object):
             "dag/deployed/", dag_id, payload=data, encoding=encoding
         )
 
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def get_example_list(self, dag_name, encoding=None):
+        return self.get_api_for_id(api="example", id=dag_name, encoding=encoding)
+
+    @log_call
+    @ask_token
+    @prepare_encoding
+    def get_one_example(self, dag_name, example_name, encoding=None):
+        return self.get_api_for_id(
+            api="example", id=f"{dag_name}/{example_name}", ecoding=encoding
+        )
+
 
 class CornFlowApiError(Exception):
     """
