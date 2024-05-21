@@ -1,15 +1,9 @@
-"""
-
-"""
-
-# General imports
 import json
 
-# Partial imports
+
 from unittest.mock import patch
 
-
-# Imports from internal modules
+from cornflow.models import PermissionsDAG
 from cornflow.tests.const import EXAMPLE_URL, INSTANCE_PATH
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -47,6 +41,12 @@ class TestExampleDataEndpoint(CustomTestCase):
             "key": self.schema_name,
         }
         af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
+        return af_client
+
+    def patch_af_client_not_alive(self, Airflow_mock):
+        af_client = Airflow_mock.return_value
+        af_client.is_alive.return_value = False
+        af_client.is_alive.return_value = False
         return af_client
 
     @patch("cornflow.endpoints.example_data.Airflow.from_config")
@@ -87,3 +87,38 @@ class TestExampleDataEndpoint(CustomTestCase):
         self.assertIn("description", example)
         self.assertIn("instance", example)
         self.assertEqual(load_file(INSTANCE_PATH), example["instance"])
+
+    @patch("cornflow.endpoints.example_data.Airflow.from_config")
+    def test_airflow_not_available(self, airflow_init):
+        af_client = self.patch_af_client_not_alive(airflow_init)
+        self.get_one_row(
+            f"{self.url}/{self.schema_name}/test_example_1/",
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+        self.get_one_row(
+            f"{self.url}/{self.schema_name}/",
+            {},
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_if_no_permission(self):
+        with patch.object(
+            PermissionsDAG, "check_if_has_permissions", return_value=False
+        ) as mock_permission:
+            self.get_one_row(
+                f"{self.url}/{self.schema_name}/",
+                {},
+                expected_status=403,
+                check_payload=False,
+            )
+
+            self.get_one_row(
+                f"{self.url}/{self.schema_name}/test_example_1/",
+                {},
+                expected_status=403,
+                check_payload=False,
+            )

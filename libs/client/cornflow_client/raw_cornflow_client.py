@@ -906,7 +906,7 @@ class RawCornFlow(object):
     @prepare_encoding
     def get_one_example(self, dag_name, example_name, encoding=None):
         return self.get_api_for_id(
-            api="example", id=f"{dag_name}/{example_name}", ecoding=encoding
+            api="example", id=f"{dag_name}/{example_name}", encoding=encoding
         )
 
 
