@@ -535,6 +535,15 @@ class TestCornflowClientUser(TestCase):
         for schema in PUBLIC_DAGS:
             self.assertIn(schema, read_schemas)
 
+    def test_get_example_list(self):
+        response = self.client.get_example_list("rostering")
+        self.assertEqual(7, len(response))
+
+    def test_get_one_example(self):
+        response = self.client.get_one_example("rostering", "Base case")
+        self.assertIn("instance", response)
+        self.assertIn("solution", response)
+
 
 class TestCornflowClientAdmin(TestCase):
     def setUp(self):
