@@ -44,7 +44,7 @@ jobs:
         pip install .
     - name: Test
       run: |
-        coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+        coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
         coverage report -m
   
   integration:
@@ -140,11 +140,11 @@ jobs:
           CORNFLOW_SERVICE_USER: airflow
       - name: Run unit tests
         run: |
-          coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
           coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
+          coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
           coverage report -m
           coverage xml
       - name: Upload coverage to codecov

@@ -22,7 +22,7 @@ class BaseDAGTests:
     class SolvingTests(unittest.TestCase):
         def setUp(self) -> None:
             self.app = None
-            self.config = SuperDict(msg=False, timeLimit=1, seconds=1)
+            self.config = SuperDict(msg=False, timeLimit=1)
 
         @property
         def app(self) -> ApplicationCore:
@@ -48,49 +48,55 @@ class BaseDAGTests:
         def test_try_solving_testcase(self, config=None):
             config = config or self.config
             tests = self.app.test_cases
-            for pos, data in enumerate(tests):
-                data_out = None
-                if isinstance(data, tuple):
-                    # sometimes we have input and output
-                    data, data_out = data
+
+            for test_case in tests:
+                instance_data = test_case.get("instance")
+                solution_data = test_case.get("solution", None)
+                case_name = test_case.get("name")
+                case_description = test_case.get("description", "No description")
+
                 marshm = SchemaManager(self.app.instance.schema).jsonschema_to_flask()
-                marshm().load(data)
-                if data_out is not None:
+                marshm().load(instance_data)
+                if solution_data is not None:
                     (
-                        solution_data,
+                        solution_test,
                         solution_check,
                         inst_check,
                         log,
                         log_dict,
-                    ) = self.app.solve(data, config, data_out)
+                    ) = self.app.solve(instance_data, config, solution_data)
                 else:
                     # for compatibility with previous format
                     (
-                        solution_data,
+                        solution_test,
                         solution_check,
                         inst_check,
                         log,
                         log_dict,
-                    ) = self.app.solve(data, config)
-                if solution_data is None:
+                    ) = self.app.solve(instance_data, config)
+                if solution_test is None:
                     raise ValueError("No solution found")
                 marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
                 validator = Draft7Validator(self.app.solution.schema)
-                if not validator.is_valid(solution_data):
+                if not validator.is_valid(solution_test):
                     raise Exception("The solution has invalid format")
 
-                self.assertTrue(len(solution_data) > 0)
-                instance = self.app.instance.from_dict(data)
-                solution = self.app.solution.from_dict(solution_data)
+                self.assertTrue(len(solution_test) > 0)
+                instance = self.app.instance.from_dict(instance_data)
+                solution = self.app.solution.from_dict(solution_test)
                 s = self.app.get_default_solver_name()
                 experim = self.app.get_solver(s)(instance, solution)
                 checks = experim.check_solution()
-                if len(checks) > 0:
+                failed_checks = [k for k, v in checks.items() if len(v) > 0]
+                if len(failed_checks) > 0:
                     print(
-                        f"Test instance with position {pos} failed with the following checks:"
+                        f"Test instance {case_name} ({case_description}) "
+                        f"failed with the following checks:"
                     )
-                    for check in checks:
-                        print(check)
+                    for check, values in checks.items():
+                        if len(values) > 0:
+                            print(f"{check}: {values}")
+
                 experim.get_objective()
 
                 validator = Draft7Validator(experim.schema_checks)
@@ -105,14 +111,13 @@ class BaseDAGTests:
         def test_complete_solve(self, connectCornflow, config=None):
             config = config or self.config
             tests = self.app.test_cases
-            for pos, data in enumerate(tests):
-                data_out = None
-                if isinstance(data, tuple):
-                    # sometimes we have input and output
-                    data, data_out = data
+            for test_case in tests:
+                instance_data = test_case.get("instance")
+                solution_data = test_case.get("solution", None)
+
                 mock = Mock()
                 mock.get_data.return_value = dict(
-                    data=data, config=config, id=1, solution_data=None
+                    data=instance_data, config=config, id=1, solution_data=solution_data
                 )
                 connectCornflow.return_value = mock
                 dag_run = Mock()
@@ -133,17 +138,6 @@ class BaseDAGTests:
                 )
                 mock.get_data.assert_called_once()
                 mock.write_solution.assert_called_once()
-
-
-class Hackathon(BaseDAGTests.SolvingTests):
-    def setUp(self):
-        super().setUp()
-        from DAG.hk_2020_dag import HackathonApp
-
-        self.app = HackathonApp()
-
-    def test_solve_ortools(self):
-        return self.test_try_solving_testcase(dict(solver="ortools", **self.config))
 
 
 class GraphColor(BaseDAGTests.SolvingTests):
@@ -242,7 +236,6 @@ class Rostering(BaseDAGTests.SolvingTests):
 
         self.app = Rostering()
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
-        self.config.pop("seconds")
 
 
 class BarCutting(BaseDAGTests.SolvingTests):
@@ -265,7 +258,7 @@ class FacilityLocation(BaseDAGTests.SolvingTests):
         from DAG.facility_location import FacilityLocation
 
         self.app = FacilityLocation()
-        self.config.update(dict(solver="Pyomo.cbc", gapAbs=1, gapRel=0.01))
+        self.config.update(dict(solver="Pyomo.cbc", abs_gap=1, rel_gap=0.01))
 
 
 class PuLP(BaseDAGTests.SolvingTests):
@@ -275,7 +268,6 @@ class PuLP(BaseDAGTests.SolvingTests):
 
         self.app = PuLP()
         self.config.update(dict(solver="PULP_CBC_CMD"))
-        self.config.pop("seconds")
 
 
 class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):

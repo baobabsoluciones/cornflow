@@ -33,6 +33,16 @@ class GraphColoring(ApplicationCore):
             return dict(pairs=pairs)
 
         file_dir = os.path.join(os.path.dirname(__file__), "data")
-        files = os.listdir(file_dir)
-        test_files = pt.TupList(files).vfilter(lambda v: v.startswith("gc_"))
-        return [read_file(os.path.join(file_dir, fileName)) for fileName in test_files]
+
+        return [
+            {
+                "name": "gc_4_1",
+                "instance": read_file(os.path.join(file_dir, "gc_4_1")),
+                "description": "Example data with 4 pairs",
+            },
+            {
+                "name": "gc_50_1",
+                "instance": read_file(os.path.join(file_dir, "gc_50_1")),
+                "description": "Example data with 50 pairs",
+            },
+        ]

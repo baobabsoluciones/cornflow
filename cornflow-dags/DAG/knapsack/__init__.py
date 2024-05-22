@@ -1,4 +1,4 @@
-from typing import  Union, Type
+from typing import Union, Type
 from cornflow_client import ApplicationCore, get_empty_schema
 import os
 from .core import Instance, Solution, Experiment
@@ -17,7 +17,8 @@ class Knapsack(ApplicationCore):
         MIP=MIPSolver,
     )
     schema = get_empty_schema(
-        properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys()) + ["MIP.cbc"],
+        properties=dict(timeLimit=dict(type="number")),
+        solvers=list(solvers.keys()) + ["MIP.cbc", "MIP.gurobi"],
     )
 
     def get_solver_name(self, data, conf):
@@ -39,10 +40,16 @@ class Knapsack(ApplicationCore):
     @property
     def test_cases(self):
         cwd = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(cwd, "Data", "ks_4_0")
+        path = os.path.join(cwd, "data", "ks_4_0")
 
         data = Instance.from_file(path).to_dict()
-        return [data]
+        return [
+            {
+                "name": "ks_4_0",
+                "instance": data,
+                "description": "Example data with 4 items",
+            }
+        ]
 
     def get_solver(self, name: str = "default") -> Union[Type[Experiment], None]:
         if "." in name:
