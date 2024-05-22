@@ -1,6 +1,11 @@
 version 1.1.0
 --------------
 
+- released: 2024-05-22
+- description: Changed the way test cases are stored
+- changelog:
+  - changed the way test cases are stored.
+  - changed what the log stores when solverolving the application.
 
 
 version 1.0.16
