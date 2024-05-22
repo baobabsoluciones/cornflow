@@ -11,8 +11,8 @@ sys.path.insert(1, prev_dir)
 from DAG.update_all_schemas import get_new_apps, get_all_schemas, get_all_example_data
 from DAG.auto_scripts.automatic_scripts import execute_scripts
 
-ALL_VARIABLES = [k for k in get_all_schemas().keys()] + [
-    k for k in get_all_example_data().keys()
+ALL_VARIABLES = [k for k in get_all_schemas(get_new_apps()).keys()] + [
+    k for k in get_all_example_data(get_new_apps()).keys()
 ]
 
 

@@ -1,3 +1,15 @@
+version 1.1.0
+--------------
+
+- released: 2024-05-22
+- description: new version of cornflow with new features and bug fixes.
+- changelog: 
+  - custom token duration.
+  - fixed errors on login.
+  - added password rotation capabilities.
+  - migrated some deprecated functions on dependencies.
+  - updated documentation.
+
 version 1.0.11
 ---------------
 

@@ -201,8 +201,29 @@ class TestCasesRawDataEndpoint(CustomTestCase):
         self.payload.pop("solution")
         self.items_to_check = ["name", "description", "schema", "data"]
         _id = self.create_new_row(self.url, self.model, self.payload)
+        keys_to_check = [
+            "data",
+            "solution_checks",
+            "updated_at",
+            "id",
+            "schema",
+            "data_hash",
+            "path",
+            "solution_hash",
+            "user_id",
+            "indicators",
+            "solution",
+            "is_dir",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
         data = self.get_one_row(
-            self.url + "/" + str(_id) + "/data/", payload={}, check_payload=False
+            self.url + "/" + str(_id) + "/data/",
+            payload={},
+            check_payload=False,
+            keys_to_check=keys_to_check,
         )
         self.assertIsNone(data["solution"])
 
@@ -293,7 +314,21 @@ class TestCaseListEndpoint(BaseTestCases.ListFilters):
         self.url = CASE_URL
 
     def test_get_rows(self):
-        self.get_rows(self.url, self.payloads)
+        keys_to_check = [
+            "data_hash",
+            "created_at",
+            "is_dir",
+            "path",
+            "schema",
+            "description",
+            "solution_hash",
+            "id",
+            "user_id",
+            "updated_at",
+            "name",
+            "indicators",
+        ]
+        self.get_rows(self.url, self.payloads, keys_to_check=keys_to_check)
 
 
 class TestCaseDetailEndpoint(BaseTestCases.DetailEndpoint):
@@ -365,7 +400,19 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         )
 
         payload = response.json
-        result = self.get_one_row(INSTANCE_URL + payload["id"] + "/", payload)
+        keys_to_check = [
+            "id",
+            "schema",
+            "data_hash",
+            "executions",
+            "user_id",
+            "description",
+            "name",
+            "created_at",
+        ]
+        result = self.get_one_row(
+            INSTANCE_URL + payload["id"] + "/", payload, keys_to_check=keys_to_check
+        )
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -382,7 +429,23 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
         ]
         self.response_items = set(self.items_to_check)
 
-        result = self.get_one_row(INSTANCE_URL + payload["id"] + "/data/", payload)
+        keys_to_check = [
+            "data",
+            "id",
+            "schema",
+            "data_hash",
+            "user_id",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
+
+        result = self.get_one_row(
+            INSTANCE_URL + payload["id"] + "/data/",
+            payload,
+            keys_to_check=keys_to_check,
+        )
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -539,11 +602,37 @@ class TestCaseDataEndpoint(CustomTestCase):
         ]
 
     def test_get_data(self):
-        self.get_one_row(self.url + str(self.payload["id"]) + "/data/", self.payload)
+        keys_to_check = [
+            "data",
+            "solution_checks",
+            "updated_at",
+            "id",
+            "schema",
+            "data_hash",
+            "path",
+            "solution_hash",
+            "user_id",
+            "indicators",
+            "solution",
+            "is_dir",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
+        self.get_one_row(
+            self.url + str(self.payload["id"]) + "/data/",
+            self.payload,
+            keys_to_check=keys_to_check,
+        )
 
     def test_get_no_data(self):
         self.get_one_row(
-            self.url + str(500) + "/data/", {}, expected_status=404, check_payload=False
+            self.url + str(500) + "/data/",
+            {},
+            expected_status=404,
+            check_payload=False,
+            keys_to_check=["error"],
         )
 
     def test_get_compressed_data(self):

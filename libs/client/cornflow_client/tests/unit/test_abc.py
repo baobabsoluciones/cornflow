@@ -63,7 +63,7 @@ class TestABC(unittest.TestCase):
         self.assertIsInstance(inst_check, dict)
         self.assertIsInstance(sol_check, dict)
         self.assertIsInstance(log, dict)
-        self.assertEqual(log.get('status'), "Optimal")
+        self.assertEqual(log.get("status"), "Optimal")
 
 
 class GoodInstanceClass(InstanceCore):

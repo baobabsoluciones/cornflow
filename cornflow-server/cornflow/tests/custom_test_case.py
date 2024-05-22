@@ -5,6 +5,9 @@ This file contains the different custom test classes used to generalize the unit
 # Import from libraries
 import logging as log
 from datetime import datetime, timedelta
+
+from typing import List
+
 from flask import current_app
 from flask_testing import TestCase
 import json
@@ -26,7 +29,6 @@ from cornflow.tests.const import (
     USER_ROLE_URL,
     TOKEN_URL,
 )
-
 
 try:
     date_from_str = datetime.fromisoformat
@@ -172,7 +174,9 @@ class CustomTestCase(TestCase):
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data, token=None, check_data=True):
+    def get_rows(
+        self, url, data, token=None, check_data=True, keys_to_check: List[str] = None
+    ):
         token = token or self.token
 
         codes = [
@@ -187,6 +191,8 @@ class CustomTestCase(TestCase):
         if check_data:
             for i in range(len(data)):
                 self.assertEqual(rows_data[i]["id"], codes[i])
+                if keys_to_check:
+                    self.assertCountEqual(list(rows_data[i].keys()), keys_to_check)
                 for key in self.get_keys_to_check(data[i]):
                     self.assertIn(key, rows_data[i])
                     if key in data[i]:
@@ -199,7 +205,13 @@ class CustomTestCase(TestCase):
         return payload.keys()
 
     def get_one_row(
-        self, url, payload, expected_status=200, check_payload=True, token=None
+        self,
+        url,
+        payload,
+        expected_status=200,
+        check_payload=True,
+        token=None,
+        keys_to_check: List[str] = None,
     ):
         token = token or self.token
 
@@ -210,6 +222,8 @@ class CustomTestCase(TestCase):
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
             return row.json
+        if keys_to_check:
+            self.assertCountEqual(list(row.json.keys()), keys_to_check)
         self.assertEqual(row.json["id"], payload["id"])
         for key in self.get_keys_to_check(payload):
             self.assertIn(key, row.json)
