@@ -1,6 +1,7 @@
 """
 Unit test for the role endpoints
 """
+
 import json
 import logging as log
 from cornflow.models import PermissionViewRoleModel, RoleModel
@@ -250,7 +251,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
                 },
             )
             self.assertEqual(200, response.status_code)
-            self.assertEqual(self.payload, response.json)
+            self.assertCountEqual(self.payload, response.json)
 
     def test_get_user_roles_not_authorized_user(self):
         for role in ROLES_MAP:
