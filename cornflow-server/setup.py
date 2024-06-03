@@ -7,9 +7,12 @@ required = []
 with open("requirements.txt", "r") as fh:
     required.append(fh.read().splitlines())
 
+with open("cornflow/__version__.py") as fh:
+    version = fh.read().split("=")[1].replace('"', "").strip()
+
 setuptools.setup(
     name="cornflow",
-    version="1.0.11",
+    version=version,
     author="baobab soluciones",
     author_email="cornflow@baobabsoluciones.es",
     description="Cornflow is an open source multi-solver optimization server with a REST API built using flask.",

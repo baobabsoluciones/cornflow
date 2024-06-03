@@ -53,6 +53,7 @@ from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+from .version import VersionEndpoint
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -216,6 +217,7 @@ resources = [
         urls="/table/<string:table_name>/<string:idx>/",
         endpoint="tables-detail",
     ),
+    dict(resource=VersionEndpoint, urls="/version/", endpoint="version"),
 ]
 
 
