@@ -17,3 +17,5 @@ numpy
 matplotlib
 seaborn
 jupyter
+quarto
+papermill

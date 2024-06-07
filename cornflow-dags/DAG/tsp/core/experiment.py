@@ -6,6 +6,8 @@ from pytups import TupList, SuperDict
 from .instance import Instance
 from .solution import Solution
 
+from quarto import render
+
 
 class Experiment(ExperimentCore):
     schema_checks = load_json(
@@ -55,8 +57,11 @@ class Experiment(ExperimentCore):
             missing_positions=self.check_missing_positions(),
         )
 
-    def get_report(self):
-        # get positions (explicit, or implicitly via distances)
-        # get graph of solution
-        #
-        pass
+    def get_report(self) -> None:
+        path_to_report = os.path.join(os.path.dirname(__file__), "../report/test.qmd")
+        # by default, it creates the report next to the quarto file.
+
+        return render(
+            input=path_to_report,
+            execute_params=dict(file_name="MY_FILE_NAME"),
+        )
