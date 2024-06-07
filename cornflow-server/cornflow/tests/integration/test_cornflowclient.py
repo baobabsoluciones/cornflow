@@ -35,6 +35,24 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         super().setUp()
         self.items_to_check = ["name", "description"]
 
+    def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
+        statuses = [execution["state"]]
+        while end_state not in statuses and len(statuses) < 100:
+            time.sleep(1)
+            status = self.client.get_status(execution["id"])
+            statuses.append(status["state"])
+
+        self.assertIn(EXEC_STATE_QUEUED, statuses)
+        self.assertIn(EXEC_STATE_RUNNING, statuses)
+        self.assertIn(end_state, statuses)
+
+        queued_idx = statuses.index(EXEC_STATE_QUEUED)
+        running_idx = statuses.index(EXEC_STATE_RUNNING)
+        end_state_idx = statuses.index(end_state)
+
+        self.assertLess(queued_idx, running_idx)
+        self.assertLess(running_idx, end_state_idx)
+
     def create_new_instance_file(self, mps_file):
         name = "test_instance1"
         description = "description123"
@@ -141,7 +159,6 @@ class TestCornflowClientBasic(CustomTestCaseLive):
 
 
 class TestCornflowClientOpen(TestCornflowClientBasic):
-
     # TODO: user management
     # TODO: infeasible execution
 
@@ -242,7 +259,6 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.client.create_instance(**payload)
 
     def test_new_instance_with_schema_good(self):
-
         payload = load_file(INSTANCE_PATH)
         payload["schema"] = "solve_model_dag"
         self.create_new_instance_payload(payload)
@@ -335,23 +351,13 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_status_solving(self):
         execution = self.create_instance_and_execution()
-        time.sleep(10)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.check_status_evolution(execution, EXEC_STATE_CORRECT)
 
     def test_status_solving_timer(self):
         execution = self.create_timer_instance_and_execution(10)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_QUEUED)
-        time.sleep(5)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_RUNNING)
-        time.sleep(12)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_CORRECT)
+        self.check_status_evolution(execution, EXEC_STATE_CORRECT)
 
     def test_manual_execution(self):
-
         instance_payload = load_file(INSTANCE_PATH)
         one_instance = self.create_new_instance_payload(instance_payload)
         name = "test_execution_name_123"

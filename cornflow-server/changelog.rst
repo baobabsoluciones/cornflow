@@ -1,3 +1,37 @@
+version 1.1.0
+--------------
+
+- released: 2024-05-22
+- description: new version of cornflow with new features and bug fixes.
+- changelog: 
+  - custom token duration.
+  - fixed errors on login.
+  - added password rotation capabilities.
+  - migrated some deprecated functions on dependencies.
+  - updated documentation.
+
+version 1.0.11
+---------------
+
+- released: 2024-05-10
+- description: release to fix security vulnerabilities
+- changelog:
+    - Upgraded flask-cors version to 4.0.1
+    - Upgraded Werkzeug version to 3.0.3
+    - Upgraded Airflow to version 2.9.1
+    - Fixed Werkzeug version on airflow image to 3.0.3
+
+version 1.0.10
+---------------
+
+- released: 2024-04-17
+- description: changed libraries versions due to discovered vulnerabilities
+- changelog:
+    - Upgraded cryptography version to 42.0.5
+    - Upgraded gunicorn version to 22.0.0
+    - Upgraded requests version to 2.31.0
+    - Upgraded Werkzeug version to 2.3.8
+
 version 1.0.9
 --------------
 
