@@ -36,6 +36,15 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
 
         self.payload = load_file(INSTANCE_PATH)
         self.payloads = [load_file(f) for f in INSTANCES_LIST]
+        self.keys_to_check = [
+            "data_hash",
+            "created_at",
+            "schema",
+            "description",
+            "id",
+            "user_id",
+            "name",
+        ]
 
     def test_new_instance(self):
         self.create_new_row(self.url, self.model, self.payload)
@@ -65,10 +74,10 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
         self.assertTrue("error" in response.json)
 
     def test_get_instances(self):
-        self.get_rows(self.url, self.payloads)
+        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
 
     def test_get_instances_superadmin(self):
-        self.get_rows(self.url, self.payloads)
+        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
         token = self.create_service_user()
         rows = self.client.get(
             self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
@@ -173,7 +182,20 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
     def test_get_one_instance(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=idx)}
-        result = self.get_one_row(INSTANCE_URL + idx + "/data/", payload)
+        keys_to_check = [
+            "data",
+            "id",
+            "schema",
+            "data_hash",
+            "user_id",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
+        result = self.get_one_row(
+            INSTANCE_URL + idx + "/data/", payload, keys_to_check=keys_to_check
+        )
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
 
@@ -208,6 +230,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
             expected_status=404,
             check_payload=False,
             token=token,
+            keys_to_check=["error"],
         )
 
     def test_get_none_instance_planner_all(self):
@@ -232,8 +255,23 @@ class TestAccessPlannerUsers(CustomTestCase):
         idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_planner()
         payload = {**self.payload, **dict(id=idx)}
-
-        self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+        keys_to_check = [
+            "data",
+            "id",
+            "schema",
+            "data_hash",
+            "user_id",
+            "description",
+            "name",
+            "checks",
+            "created_at",
+        ]
+        self.get_one_row(
+            INSTANCE_URL + idx + "/data/",
+            payload,
+            token=token,
+            keys_to_check=keys_to_check,
+        )
 
     def test_get_all_instance_planner(self):
         # Test planner users can access objects of other users
