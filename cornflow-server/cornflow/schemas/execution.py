@@ -5,6 +5,7 @@ from marshmallow import fields, Schema, validate
 from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 from .common import QueryFilters, BaseDataEndpointResponse
 from .solution_log import LogSchema, BasicLogSchema
+from .reports import ReportSchema
 
 
 class QueryFiltersExecution(QueryFilters):
@@ -95,6 +96,7 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
 
 
 class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
+    reports = fields.Nested(ReportSchema, many=True)
     config = fields.Nested(ConfigSchemaResponse)
     instance_id = fields.Str()
     state = fields.Int()

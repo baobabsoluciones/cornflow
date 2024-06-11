@@ -1,6 +1,7 @@
 """
 Initialization file for the models module
 """
+
 from .action import ActionModel
 from .alarms import AlarmsModel
 from .case import CaseModel
@@ -14,3 +15,4 @@ from .role import RoleModel
 from .user import UserModel
 from .user_role import UserRoleModel
 from .view import ViewModel
+from .reports import ReportsModel
