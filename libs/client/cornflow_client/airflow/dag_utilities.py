@@ -7,7 +7,8 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
-from cornflow_client import CornFlow, CornFlowApiError
+from cornflow_client import CornFlow, CornFlowApiError, ApplicationCore
+from airflow.secrets import BaseSecretsBackend
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
@@ -38,7 +39,7 @@ default_args = {
 }
 
 
-def get_schemas_from_file(_dir, dag_name):
+def get_schemas_from_file(_dir: str, dag_name: str):
     # TODO: check if in use
     with open(os.path.join(_dir, dag_name + "_input.json"), "r") as f:
         instance = json.load(f)
@@ -47,7 +48,7 @@ def get_schemas_from_file(_dir, dag_name):
     return instance, solution
 
 
-def get_requirements(path):
+def get_requirements(path: str):
     """
     Read requirements.txt from a project and return a list of packages.
 
@@ -67,7 +68,7 @@ def get_requirements(path):
     return req_list
 
 
-def connect_to_cornflow(secrets):
+def connect_to_cornflow(secrets: BaseSecretsBackend):
     """
     Create a connection to cornflow and log in with airflow admin user.
 
@@ -90,7 +91,7 @@ def connect_to_cornflow(secrets):
     return airflow_user
 
 
-def try_to_save_error(client, exec_id, state=-1):
+def try_to_save_error(client: CornFlow, exec_id: str, state=-1):
     """
     Attempt at saving that the execution failed
     """
@@ -100,7 +101,7 @@ def try_to_save_error(client, exec_id, state=-1):
         print(f"An exception trying to register the failed status: {e}")
 
 
-def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+def try_to_save_airflow_log(client: CornFlow, exec_id: str, ti, base_log_folder: str):
     log_file = os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
@@ -119,7 +120,7 @@ def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
             print(f"An exception occurred while trying to register airflow log: {e}")
 
 
-def try_to_write_solution(client, exec_id, payload):
+def try_to_write_solution(client: CornFlow, exec_id: str, payload: dict):
     """
     Tries to write the payload into cornflow
     If it fails tries to write again that it failed.
@@ -147,7 +148,7 @@ def try_to_write_solution(client, exec_id, payload):
             raise AirflowDagException("The writing of the instance checks failed")
 
 
-def get_schema(dag_name):
+def get_schema(dag_name: str):
     # TODO: check if in use
     _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
     with open(_file, "r") as f:
@@ -155,14 +156,14 @@ def get_schema(dag_name):
     return schema
 
 
-def cf_solve_app(app, secrets, **kwargs):
+def cf_solve_app(app: ApplicationCore, secrets: BaseSecretsBackend, **kwargs):
     if kwargs["dag_run"].conf.get("checks_only"):
         return cf_check(app.check, app.name, secrets, **kwargs)
     else:
         return cf_solve(app.solve, app.name, secrets, **kwargs)
 
 
-def cf_solve(fun, dag_name, secrets, **kwargs):
+def cf_solve(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs):
     """
     Connect to cornflow, ask for data, solve the problem and write the solution in cornflow
 
@@ -239,7 +240,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException("There was an error during the solving")
 
 
-def cf_check(fun, dag_name, secrets, **kwargs):
+def cf_check(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs):
     """
     Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
     :param fun: The function to use to check the data
@@ -311,7 +312,56 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         )
 
 
-def callback_email(context):
+def cf_report(
+    app: ApplicationCore,
+    secrets: BaseSecretsBackend,
+    **kwargs,
+):
+    """
+    Connect to cornflow, ask for data, generate the report for the execution
+
+    :param app: the application from which to generate the report
+    :param secrets: Environment variables
+    :param kwargs: other kwargs passed to the dag task.
+    :return:
+    """
+    ti = kwargs["ti"]
+    try:
+        client = connect_to_cornflow(secrets)
+        exec_id = kwargs["dag_run"].conf["exec_id"]
+        # TODO: why not client.get_results? or get_status but for the config?
+        #  I just want to check the config as a first step
+        execution_data = client.get_data(exec_id)
+        config = execution_data["config"]
+        report_config = config.get("report", {})
+        if not report_config:
+            # no need to write report since it's not requested
+            return None
+
+        execution_data = client.get_data(exec_id)
+        input_data = execution_data["data"]
+        solution_data = execution_data["solution_data"]
+
+        report_name = report_config.get("name")
+        # maybe all of this should be abstracted inside the app
+        experiment = app.get_solver(app.get_default_solver_name())
+        my_experiment = experiment(
+            app.instance(input_data), app.solution(solution_data)
+        )
+        # this should return the path to the generated file
+        # TODO: add a get_report method in ExperimentCore
+        file_name = my_experiment.get_report(report_name)
+        # TODO: store it in AWS/GCD/Azure bucket
+        # TODO: update execution with link to bucket
+        payload = dict(report_link="")
+        client.put_one_execution(exec_id, payload)
+        return True
+
+    except Exception as e:
+        raise AirflowDagException("There was an error during the solving")
+
+
+def callback_email(context: dict):
     from airflow.utils.email import send_email
     from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 
