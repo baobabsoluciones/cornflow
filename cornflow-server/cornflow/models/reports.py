@@ -1,5 +1,5 @@
 """
-Model for the executions
+Model for the reports
 """
 
 # Import from libraries
@@ -16,20 +16,18 @@ class ReportsModel(TraceAttributesModel):
     Model class for the Reports.
     It inherits from :class:`TraceAttributesModel<cornflow.models.base_data_model.TraceAttributesModel>` to have the trace fields and user field.
 
-    - **id**: str, the primary key for the executions, a hash generated upon creation of the execution
-      and the id given back to the user.
-      The hash is generated from the creation date, the user and the id of the parent instance.
+    - **id**: int, the report id, primary key for the reports.
     - **execution_id**: str, the foreign key for the execution (:class:`ExecutionModel`). It links the report to its
       parent execution.
     - **report_link**: str, the link with the actual report. It should be a valid url to a cloud storage bucket.
     - **name**: str, the name of the report given by the user.
     - **description**: str, the description of the report given by the user. It is optional.
-    - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the execution to its owner.
-    - **created_at**: datetime, the datetime when the execution was created (in UTC).
+    - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the report to its owner.
+    - **created_at**: datetime, the datetime when the report was created (in UTC).
       This datetime is generated automatically, the user does not need to provide it.
-    - **updated_at**: datetime, the datetime when the execution was last updated (in UTC).
+    - **updated_at**: datetime, the datetime when the report was last updated (in UTC).
       This datetime is generated automatically, the user does not need to provide it.
-    - **deleted_at**: datetime, the datetime when the execution was deleted (in UTC). Even though it is deleted,
+    - **deleted_at**: datetime, the datetime when the report was deleted (in UTC). Even though it is deleted,
       actually, it is not deleted from the database, in order to have a command that cleans up deleted data
       after a certain time of its deletion.
       This datetime is generated automatically, the user does not need to provide it.
