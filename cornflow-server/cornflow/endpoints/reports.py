@@ -66,7 +66,7 @@ class ReportEndpoint(BaseMetaResource):
         report, status_code = self.post_list(data=kwargs)
 
         return report, 201
-    
+
 
 class ReportDetailsEndpointBase(BaseMetaResource):
     """
