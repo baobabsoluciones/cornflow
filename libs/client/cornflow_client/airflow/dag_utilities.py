@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
 from cornflow_client import CornFlow, CornFlowApiError, ApplicationCore
-from airflow.secrets import BaseSecretsBackend
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
@@ -68,7 +67,7 @@ def get_requirements(path: str):
     return req_list
 
 
-def connect_to_cornflow(secrets: BaseSecretsBackend):
+def connect_to_cornflow(secrets):
     """
     Create a connection to cornflow and log in with airflow admin user.
 
@@ -156,14 +155,14 @@ def get_schema(dag_name: str):
     return schema
 
 
-def cf_solve_app(app: ApplicationCore, secrets: BaseSecretsBackend, **kwargs):
+def cf_solve_app(app: ApplicationCore, secrets, **kwargs):
     if kwargs["dag_run"].conf.get("checks_only"):
         return cf_check(app.check, app.name, secrets, **kwargs)
     else:
         return cf_solve(app.solve, app.name, secrets, **kwargs)
 
 
-def cf_solve(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs):
+def cf_solve(fun: callable, dag_name: str, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, solve the problem and write the solution in cornflow
 
@@ -240,7 +239,7 @@ def cf_solve(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs
         raise AirflowDagException("There was an error during the solving")
 
 
-def cf_check(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs):
+def cf_check(fun: callable, dag_name: str, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
     :param fun: The function to use to check the data
@@ -314,7 +313,7 @@ def cf_check(fun: callable, dag_name: str, secrets: BaseSecretsBackend, **kwargs
 
 def cf_report(
     app: ApplicationCore,
-    secrets: BaseSecretsBackend,
+    secrets,
     **kwargs,
 ):
     """
