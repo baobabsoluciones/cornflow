@@ -9,9 +9,14 @@ from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import ExecutionModel, ReportsModel
+from cornflow.models import ExecutionModel, ReportModel
 
-from cornflow.schemas.reports import ReportSchema, ReportEditRequest, QueryFiltersReports, ReportRequest
+from cornflow.schemas.reports import (
+    ReportSchema,
+    ReportEditRequest,
+    QueryFiltersReports,
+    ReportRequest,
+)
 from cornflow.shared.authentication import Auth, authenticate
 
 
@@ -22,10 +27,9 @@ class ReportEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.model = ReportsModel
-        self.data_model = ReportsModel
+        self.model = ReportModel
+        self.data_model = ReportModel
         self.foreign_data = {"execution_id": ExecutionModel}
-
 
     @doc(description="Get all reports", tags=["Reports"])
     @authenticate(auth_class=Auth())
@@ -75,7 +79,7 @@ class ReportDetailsEndpointBase(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = ReportsModel
+        self.data_model = ReportModel
         self.foreign_data = {"execution_id": ExecutionModel}
 
 
@@ -95,9 +99,7 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
           the data of the report) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        current_app.logger.info(
-            f"User {self.get_user()} gets details of report {idx}"
-        )
+        current_app.logger.info(f"User {self.get_user()} gets details of report {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Edit a report", tags=["Reports"], inherit=False)
@@ -130,4 +132,3 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         """
         current_app.logger.info(f"User {self.get_user()} deleted report {idx}")
         return self.delete_detail(user=self.get_user(), idx=idx)
-
