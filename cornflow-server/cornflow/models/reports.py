@@ -40,7 +40,7 @@ class ReportsModel(TraceAttributesModel):
     # Model fields
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     execution_id = db.Column(
-        db.String(256), db.ForeignKey("execution.id"), nullable=False
+        db.String(256), db.ForeignKey("executions.id"), nullable=False
     )
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
