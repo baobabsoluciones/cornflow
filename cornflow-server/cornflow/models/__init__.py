@@ -15,4 +15,4 @@ from .role import RoleModel
 from .user import UserModel
 from .user_role import UserRoleModel
 from .view import ViewModel
-from .reports import ReportsModel
+from .reports import ReportModel

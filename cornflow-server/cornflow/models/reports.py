@@ -11,7 +11,7 @@ from cornflow.models.base_data_model import TraceAttributesModel
 from cornflow.shared import db
 
 
-class ReportsModel(TraceAttributesModel):
+class ReportModel(TraceAttributesModel):
     """
     Model class for the Reports.
     It inherits from :class:`TraceAttributesModel<cornflow.models.base_data_model.TraceAttributesModel>` to have the trace fields and user field.
