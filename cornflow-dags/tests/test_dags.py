@@ -164,9 +164,12 @@ class Tsp(BaseDAGTests.SolvingTests):
 
     def test_report(self):
         tests = self.app.test_cases
-        my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]))
+        my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
-        my_experim.get_report()
+        report_path = "./my_report.html"
+        my_experim.generate_report(report_path=report_path)
+        self.assertTrue(os.path.exists(report_path))
+        os.remove(report_path)
         # check the file is created.
 
 

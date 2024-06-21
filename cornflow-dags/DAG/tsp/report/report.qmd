@@ -38,16 +38,16 @@ import matplotlib.pyplot as plt
 
 extension = os.path.splitext(file_name)[1]
 if extension=='.tsp':
+  # it's an instance, so we should solve it, I guess
   my_instance = TspApp.instance.from_tsplib_file(file_name)
+  my_experiment = TspApp.solvers['cpsat'](instance=my_instance, solution=TspApp.solution(dict(route=[])))
+  status = my_experiment.solve({'timeLimit': 2})
 elif extension=='.json':
-  my_instance = TspApp.instance.from_json(file_name)
+  my_experiment = TspApp.solvers['cpsat'].from_json(file_name)
+  my_instance = my_experiment.instance
 else:
   raise ValueError("Unknown extension: {}".format(extension))
-my_experiment = TspApp.solvers['cpsat'](instance=my_instance, solution=TspApp.solution(dict(route=[])))
 
-# TODO: Ideally, we should not solve the problem inside the report, we should already have an example of problem solved.
-# status = my_experiment.solve({'timeLimit': 2})
-# pop_element = my_experiment.solution.data['route'].pop()
 
 ```
 

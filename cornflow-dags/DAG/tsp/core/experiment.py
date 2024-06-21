@@ -6,6 +6,7 @@ from pytups import TupList, SuperDict
 from .instance import Instance
 from .solution import Solution
 
+import json, tempfile
 from quarto import render
 
 
@@ -13,6 +14,26 @@ class Experiment(ExperimentCore):
     schema_checks = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
     )
+
+    def to_dict(self) -> dict:
+        return dict(instance=self.instance.to_dict(), solution=self.solution.to_dict())
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            Instance.from_dict(data["instance"]), Solution.from_dict(data["solution"])
+        )
+
+    @classmethod
+    def from_json(cls, path: str) -> "Experiment":
+        with open(path, "r") as f:
+            data_json = json.load(f)
+        return cls.from_dict(data_json)
+
+    def to_json(self, path: str) -> None:
+        data = self.to_dict()
+        with open(path, "w") as f:
+            json.dump(data, f, indent=4, sort_keys=True)
 
     @property
     def instance(self) -> Instance:
@@ -57,11 +78,22 @@ class Experiment(ExperimentCore):
             missing_positions=self.check_missing_positions(),
         )
 
-    def get_report(self) -> None:
-        path_to_report = os.path.join(os.path.dirname(__file__), "../report/test.qmd")
-        # by default, it creates the report next to the quarto file.
-
-        return render(
-            input=path_to_report,
-            execute_params=dict(file_name="MY_FILE_NAME"),
+    def generate_report(self, report_path: str, report_name="report") -> None:
+        # a user may give the full "report.qmd" name.
+        # We want to take out the extension
+        report_base = os.path.splitext(report_name)[0]
+        path_without_ext = os.path.join(
+            os.path.dirname(__file__), "../report/", report_base
         )
+        path_to_qmd = path_without_ext + ".qmd"
+        path_to_output = path_without_ext + ".html"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "experiment.json")
+            # write a json with instance and solution to temp file
+            self.to_json(path)
+            # pass the path to the report to render
+            # it generates a report with path = path_to_output
+            render(input=path_to_qmd, execute_params=dict(file_name=path))
+        # quarto always writes the report in the .qmd directory.
+        # thus, we need to move it where we want to:
+        os.replace(path_to_output, report_path)
