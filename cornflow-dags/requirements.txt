@@ -11,7 +11,7 @@ pyomo<=6.6.2
 tsplib95<=0.7.1
 networkx
 scipy
-numpy
+numpy<2.0.0
 
 # quarto
 matplotlib
