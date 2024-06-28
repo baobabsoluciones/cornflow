@@ -1,6 +1,10 @@
 """
 
 """
+
+import unittest
+import os
+
 # Imports from internal modules
 from cornflow.models import AlarmsModel
 from cornflow.tests.const import ALARMS_URL
@@ -15,25 +19,30 @@ class TestAlarmsEndpoint(CustomTestCase):
         self.response_items = {"id", "name", "description", "criticality", "schema"}
         self.items_to_check = ["name", "description", "schema", "criticality"]
 
+    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
     def test_post_alarm(self):
-        payload = {"name": "Alarm 1", "description": "Description Alarm 1", "criticality": 1}
+        payload = {
+            "name": "Alarm 1",
+            "description": "Description Alarm 1",
+            "criticality": 1,
+        }
         self.create_new_row(self.url, self.model, payload)
 
+    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
     def test_get_alarms(self):
         data = [
             {"name": "Alarm 1", "description": "Description Alarm 1", "criticality": 1},
-            {"name": "Alarm 2", "description": "Description Alarm 2", "criticality": 2, "schema": "solve_model_dag"},
+            {
+                "name": "Alarm 2",
+                "description": "Description Alarm 2",
+                "criticality": 2,
+                "schema": "solve_model_dag",
+            },
         ]
-        rows = self.get_rows(
-            self.url,
-            data,
-            check_data=False
-        )
+        rows = self.get_rows(self.url, data, check_data=False)
         rows_data = list(rows.json)
         for i in range(len(data)):
             for key in self.get_keys_to_check(data[i]):
                 self.assertIn(key, rows_data[i])
                 if key in data[i]:
                     self.assertEqual(rows_data[i][key], data[i][key])
-
-

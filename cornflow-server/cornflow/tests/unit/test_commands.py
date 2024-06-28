@@ -1,5 +1,5 @@
 import json
-
+import os
 from flask_testing import TestCase
 
 from cornflow.app import (
@@ -48,7 +48,11 @@ class TestCommands(TestCase):
             "email": "testemail@test.org",
             "password": "Testpassword1!",
         }
-        self.resources = resources + alarms_resources
+
+        if os.getenv("CF_ALARMS_ENDPOINT") == 1:
+            self.resources = resources + alarms_resources
+        else:
+            self.resources = resources
         self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v"])
 
