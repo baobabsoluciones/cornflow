@@ -324,6 +324,7 @@ def cf_report(
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
+    # TODO: if this task fails, the dagrun should still be valid
     ti = kwargs["ti"]
     try:
         client = connect_to_cornflow(secrets)
