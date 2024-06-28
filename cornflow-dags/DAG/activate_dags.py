@@ -1,14 +1,18 @@
 import cornflow_client.airflow.dag_utilities as utils
+
+from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-from airflow.decorators import dag, task
-from airflow.models.baseoperator import chain
-from airflow.exceptions import AirflowSkipException
 
 from update_all_schemas import get_new_apps
 
 
 def create_dag(app):
+    def solve(**kwargs):
+        return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
+
+    def run(**kwargs):
+      return utils.cf_report(app, EnvironmentVariablesBackend(), **kwargs)
 
     if app.default_args is not None:
         default_args = app.default_args
@@ -19,7 +23,7 @@ def create_dag(app):
     if app.extra_args is not None:
         kwargs = app.extra_args
 
-    @dag(
+    dag = DAG(
         app.name,
         description=app.description,
         default_args=default_args,
@@ -27,36 +31,24 @@ def create_dag(app):
         tags=["model"],
         **kwargs
     )
-    def taskflow_dag():
-        @task
-        def solve_app():
-            def solve(**kwargs):
-                return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
+      
+    notify = getattr(app, "notify", True)
+    if not notify:
+        t1 = PythonOperator(task_id=app.name, python_callable=solve, dag=dag)
+    else:
+        t1 = PythonOperator(
+            task_id=app.name,
+            python_callable=solve,
+            on_failure_callback=utils.callback_email,
+            dag=dag
+        )
 
-            notify = getattr(app, "notify", True)
-            if not notify:
-                return PythonOperator(task_id=app.name, python_callable=solve)
-            else:
-                return PythonOperator(
-                    task_id=app.name,
-                    python_callable=solve,
-                    on_failure_callback=utils.callback_email,
-                )
+    t2 = PythonOperator(task_id=f"{app.name}_report", python_callable=run, dag=dag)
 
-        @task
-        def run_report():
-            def run(**kwargs):
-                return utils.cf_report(app, EnvironmentVariablesBackend(), **kwargs)
 
-            file_name = PythonOperator(
-                task_id=app.name + "_report", python_callable=run
-            )
-            return dict(file_name=file_name)
+    t1 >> t2
 
-        # Define dependencies and call task functions
-        chain(solve_app(), run_report())
-
-    return taskflow_dag
+    return dag       
 
 
 for app in get_new_apps():
