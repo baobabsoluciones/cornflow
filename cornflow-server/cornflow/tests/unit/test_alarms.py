@@ -19,7 +19,9 @@ class TestAlarmsEndpoint(CustomTestCase):
         self.response_items = {"id", "name", "description", "criticality", "schema"}
         self.items_to_check = ["name", "description", "schema", "criticality"]
 
-    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
+    @unittest.skipUnless(
+        int(os.getenv("CF_ALARMS_ENDPOINT")) == 1, "No alarms implemented"
+    )
     def test_post_alarm(self):
         payload = {
             "name": "Alarm 1",
@@ -28,7 +30,9 @@ class TestAlarmsEndpoint(CustomTestCase):
         }
         self.create_new_row(self.url, self.model, payload)
 
-    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
+    @unittest.skipUnless(
+        int(os.getenv("CF_ALARMS_ENDPOINT")) == 1, "No alarms implemented"
+    )
     def test_get_alarms(self):
         data = [
             {"name": "Alarm 1", "description": "Description Alarm 1", "criticality": 1},
