@@ -74,6 +74,7 @@ def create_app(env_name="development", dataconn=None):
     api = Api(app)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
+
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])

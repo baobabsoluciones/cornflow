@@ -49,7 +49,7 @@ class TestCommands(TestCase):
             "password": "Testpassword1!",
         }
 
-        if os.getenv("CF_ALARMS_ENDPOINT") == 1:
+        if int(os.getenv("CF_ALARMS_ENDPOINT")) == 1:
             self.resources = resources + alarms_resources
         else:
             self.resources = resources

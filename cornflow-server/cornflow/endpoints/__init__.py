@@ -47,6 +47,7 @@ from .instance import (
 from .licenses import LicensesEndpoint
 from .main_alarms import MainAlarmsEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
+from .reports import ReportEndpoint, ReportDetailsEndpoint
 from .roles import RolesListEndpoint, RoleDetailEndpoint
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .tables import TablesEndpoint, TablesDetailsEndpoint
@@ -215,6 +216,12 @@ resources = [
         resource=TablesDetailsEndpoint,
         urls="/table/<string:table_name>/<string:idx>/",
         endpoint="tables-detail",
+    ),
+    dict(resource=ReportEndpoint, urls="/report/", endpoint="report"),
+    dict(
+        resource=ReportDetailsEndpoint,
+        urls="/report/<string:idx>/",
+        endpoint="report-detail",
     ),
 ]
 

@@ -31,7 +31,9 @@ class TestMainAlarmsEndpoint(CustomTestCase):
             headers=self.get_header_with_auth(self.token),
         ).json["id"]
 
-    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
+    @unittest.skipUnless(
+        int(os.getenv("CF_ALARMS_ENDPOINT")) == 1, "No alarms implemented"
+    )
     def test_post_main_alarm(self):
         payload = {
             "message": "Message Main Alarm 1",
@@ -40,7 +42,9 @@ class TestMainAlarmsEndpoint(CustomTestCase):
         }
         self.create_new_row(self.url, self.model, payload)
 
-    @unittest.skipUnless(os.getenv("CF_ALARMS_ENDPOINT") == 1, "No alarms implemented")
+    @unittest.skipUnless(
+        int(os.getenv("CF_ALARMS_ENDPOINT")) == 1, "No alarms implemented"
+    )
     def test_get_main_alarms(self):
         data = [
             {
