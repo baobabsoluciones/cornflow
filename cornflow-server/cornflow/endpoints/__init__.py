@@ -37,6 +37,8 @@ from .execution import (
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
 )
+
+from .reports import ReportEndpoint, ReportDetailsEndpoint
 from .health import HealthEndpoint
 from .instance import (
     InstanceEndpoint,
@@ -216,6 +218,12 @@ resources = [
         urls="/table/<string:table_name>/<string:idx>/",
         endpoint="tables-detail",
     ),
+    dict(
+        resource=ReportDetailsEndpoint,
+        urls="/report/<int:idx>/",
+        endpoint="report-detail",
+    ),
+    dict(resource=ReportEndpoint, urls="/report/", endpoint="report"),
 ]
 
 

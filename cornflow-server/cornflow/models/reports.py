@@ -19,7 +19,7 @@ class ReportModel(TraceAttributesModel):
     - **id**: int, the report id, primary key for the reports.
     - **execution_id**: str, the foreign key for the execution (:class:`ExecutionModel`). It links the report to its
       parent execution.
-    - **report_link**: str, the link with the actual report. It should be a valid url to a cloud storage bucket.
+    - **file_url**: str, the link with the actual report. It should be a valid url to a cloud storage bucket.
     - **name**: str, the name of the report given by the user.
     - **description**: str, the description of the report given by the user. It is optional.
     - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the report to its owner.
@@ -44,7 +44,7 @@ class ReportModel(TraceAttributesModel):
     )
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
-    report_link = db.Column(db.String(256), nullable=False)
+    file_url = db.Column(db.String(256), nullable=False)
 
     @declared_attr
     def user_id(self):
@@ -59,7 +59,7 @@ class ReportModel(TraceAttributesModel):
         self.execution_id = data.get("execution_id")
         self.name = data.get("name")
         self.description = data.get("description")
-        self.report_link = data.get("report_link")
+        self.file_url = data.get("file_url")
 
     def update(self, data):
         """
@@ -71,14 +71,14 @@ class ReportModel(TraceAttributesModel):
         """
         super().update(data)
 
-    def update_link(self, link: str):
+    def update_link(self, file_url: str):
         """
         Method to update the report link
 
-        :param str link: new URL for the report
+        :param str file_url: new URL for the report
         :return: nothing
         """
-        self.report_link = link
+        self.file_url = file_url
         super().update({})
 
     def __repr__(self):
