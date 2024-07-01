@@ -13,7 +13,6 @@ networkx
 scipy
 numpy<2.0.0
 
-# quarto
 matplotlib
 seaborn
 jupyter

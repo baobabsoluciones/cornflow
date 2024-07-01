@@ -49,6 +49,7 @@ from .instance import (
 from .licenses import LicensesEndpoint
 from .main_alarms import MainAlarmsEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
+from .reports import ReportEndpoint, ReportDetailsEndpoint
 from .roles import RolesListEndpoint, RoleDetailEndpoint
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .tables import TablesEndpoint, TablesDetailsEndpoint
