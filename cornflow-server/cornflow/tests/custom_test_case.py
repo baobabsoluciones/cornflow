@@ -169,7 +169,6 @@ class CustomTestCase(TestCase):
         self.assertEqual(row.id, response.json["id"])
 
         for key in self.get_keys_to_check(payload):
-            getattr(row, key)
             if key in payload:
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id

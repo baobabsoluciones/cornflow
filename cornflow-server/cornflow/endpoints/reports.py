@@ -45,7 +45,6 @@ class ReportEndpoint(BaseMetaResource):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: filter by execution_id
         reports = self.get_list(user=self.get_user(), **kwargs)
         current_app.logger.info(f"User {self.get_user()} gets list of reports")
         return reports
@@ -66,10 +65,13 @@ class ReportEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         # TODO: not sure if it should be possible to generate a report from the REST API
-        #  and if so, should we let them generate a new report file?
-        report, status_code = self.post_list(data=kwargs)
+        #  and if so, should we let them upload a new report file?
 
-        return report, 201
+        response = self.post_list(data=kwargs)
+        current_app.logger.info(
+            f"User {self.get_user()} creates report {response[0].id}"
+        )
+        return response
 
 
 class ReportDetailsEndpointBase(BaseMetaResource):

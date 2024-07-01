@@ -350,7 +350,7 @@ def cf_report(
         )
         # this should return the path to the generated file
         # TODO: add a get_report method in ExperimentCore
-        file_name = my_experiment.get_report(report_name)
+        file_name = my_experiment.generate_report(report_name)
         # TODO: store it in AWS/GCD/Azure bucket
         # TODO: update execution with link to bucket
         payload = dict(report_link="")
