@@ -1,4 +1,4 @@
-Known problems
+Known issues
 ------------------
 
 When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.
@@ -9,7 +9,7 @@ Situations
 Development
 ^^^^^^^^^^^^^^^
 
-Problem: Possible error with psycopg2
+Issue: Possible error with psycopg2
 
     Error: Error pg_config executable not found.  
     
@@ -18,19 +18,19 @@ Problem: Possible error with psycopg2
 Docker build
 ^^^^^^^^^^^^^^^
 
-Problem: The volume airflow_config can´t be mounted.
+Issue: The volume airflow_config can´t be mounted.
 
     Error: Unable to prepare context: path "local_path_to_docker-compose.yml/airflow_config"  
     
     Possible solution: Start docker-compose.yml from root path of cloned corn repository.
 
-Problem: The Dockerfile is not found by docker-compose. 
+Issue: The Dockerfile is not found by docker-compose. 
     
     Error: Not found or failed to solve with frontend dockerfile.v0: failed to read dockerfile 
     
     Possible solution: Start from the same path of Dockerfile or modify the location of it into the build section of docker-compose file.
 
-Problem: The image is not installing any linux pkg.
+Issue: The image is not installing any linux pkg.
     
     Error: gcc exited code error 1 
     
@@ -39,7 +39,7 @@ Problem: The image is not installing any linux pkg.
 Cornflow database
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Problem: Cornflow can´t reach postgres internal database
+Issue: Cornflow can´t reach postgres internal database
 
     Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "host_database" to address: Name or service not known 
     
@@ -48,7 +48,7 @@ Problem: Cornflow can´t reach postgres internal database
 Running cornflow-server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Problem: Users were not created when cornflow started
+Issue: Users were not created when cornflow started
 
     Error: usage: flask [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} ...
 
@@ -57,16 +57,35 @@ Problem: Users were not created when cornflow started
 Flower 
 ^^^^^^^^^^
 
-Problem: Can´t login to flower GUI
+Issue: Can't login to flower GUI
 
     Error: Access denied
     
     Possible solution: The admin user and password is the same than airflow.
 
+Scheduler
+^^^^^^^^^^^
+Issue: Can't find Scheduler logs. 
+    
+    Error: 
+    
+    .. code-block:: bash
+
+        FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/airflow/logs/scheduler/2024-07-01'
+        PermissionError: [Errno 13] Permission denied: '/usr/local/airflow/logs/scheduler'
+    
+    Possible solution: Both errors usually occur when using the root user and root group as the owner of the directory. One possible solution is:
+
+    .. code-block:: bash
+
+        sudo chown -R 1000:1000 cornflow/cornflow-server/airflow_config/logs
+      
+    You should use 1000 because it is the UID and GID of the first user and group different from root.
+
 Airflow
 ^^^^^^^^^^^
 
-Problem: Can´t login to airflow GUI
+Issue: Can't login to airflow GUI
 
     Error: Bad Request The CSRF session token is missing
 
@@ -75,25 +94,25 @@ Problem: Can´t login to airflow GUI
 Ldap docker
 ^^^^^^^^^^^^^^^^
 
-Problem: Can´t login to flower GUI
+Issue: Can't login to flower GUI
 
     Error: Access denied
     
     Possible solution: If airflow goes to ldap config, and you don´t give any values to AIRFLOW_USER and AIRFLOW_PWD, the default values are "admin/admin"
 
-Problem: Can´t login to airflow GUI
+Issue: Can't login to airflow GUI
 
     Error: Access denied
 
     Possible solution: User is not same as normal deployment
 
-Problem: Openldap docker container don´t start
+Issue: Openldap docker container don´t start
 
     Error: Can't parse ldif entry on line 1
 
     Possible solution: Some entry on ``*.ldif`` file has not properly defined and slapd can't start and populate the ldap server
 
-Problem: Openldap does not show entries from ldif file 
+Issue: Openldap does not show entries from ldif file 
 
     Error: failed: bash ls -l not ldif on path
 
