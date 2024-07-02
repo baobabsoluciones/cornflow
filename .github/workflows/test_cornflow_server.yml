@@ -102,7 +102,7 @@ jobs:
         AIRFLOW__CORE__LOAD_EXAMPLES: 0
         AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
     - name: Run unit tests
-      run: | 
+      run: |
         coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit
         coverage report -m
       env:
@@ -114,7 +114,7 @@ jobs:
         AIRFLOW_PWD: notadmin
         CF_ALARMS_ENDPOINT: 1
     - name: Run ldap unit tests
-      run: | 
+      run: |
         coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
         coverage report -m
       env:
@@ -142,7 +142,7 @@ jobs:
         LOG_LEVEL: 30
         CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
-      run: | 
+      run: |
         coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
         coverage report -m
       env:

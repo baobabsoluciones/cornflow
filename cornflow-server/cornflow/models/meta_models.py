@@ -33,17 +33,29 @@ class EmptyBaseModel(db.Model):
 
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {self}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {self}"
+            )
+
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
             current_app.logger.error(f"Data: {self.__dict__}")
-            raise InvalidData(f"Integrity error on {action} with data {self}")
+
+            if "FOREIGN KEY" in str(err):
+                message = f"Foreign key constraint error while {action} on {self.__class__.__tablename__} table"
+                raise InvalidData(message)
+            else:
+                raise InvalidData(f"Integrity error on {action} with data {self}")
+
         except DBAPIError as err:
             db.session.rollback()
-            current_app.logger.error(f"Unknown database error on {action} data: {err}")
+            current_app.logger.error(
+                f"Unknown database error on {action} data: {type(err)}"
+            )
             current_app.logger.error(f"Data: {self.__dict__}")
             raise InvalidData(f"Unknown database error on {action} with data {self}")
+
         except Exception as err:
             db.session.rollback()
             current_app.logger.error(f"Unknown error on {action} data: {err}")
@@ -99,7 +111,9 @@ class EmptyBaseModel(db.Model):
         action = "bulk create"
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {cls}"
+            )
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -120,7 +134,9 @@ class EmptyBaseModel(db.Model):
         action = "bulk create update"
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {cls}"
+            )
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -136,12 +152,7 @@ class EmptyBaseModel(db.Model):
         return instances
 
     @classmethod
-    def get_all_objects(
-        cls,
-        offset=0,
-        limit=None,
-        **kwargs
-    ):
+    def get_all_objects(cls, offset=0, limit=None, **kwargs):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
 
@@ -261,7 +272,7 @@ class TraceAttributesModel(EmptyBaseModel):
         update_date_lte=None,
         offset=0,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments

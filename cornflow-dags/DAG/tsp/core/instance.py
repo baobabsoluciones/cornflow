@@ -4,23 +4,24 @@ import tsplib95 as tsp
 from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 from pytups import TupList, SuperDict
+import networkx as nx
 
 
 class Instance(InstanceCore):
     schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
     schema_checks = get_empty_schema()
 
-    def __init__(self, data):
+    def __init__(self, data: dict):
         data = SuperDict(data)
         data["arcs"] = TupList(data["arcs"])
         super().__init__(data)
 
     @classmethod
-    def from_tsplib_file(cls, path):
+    def from_tsplib_file(cls, path: str):
         return cls.from_tsplib95(tsp.load(path))
 
     @classmethod
-    def from_tsplib95(cls, problem):
+    def from_tsplib95(cls, problem: tsp.models.StandardProblem):
         nodes = list(problem.get_nodes())
         edge_to_dict = lambda e: dict(
             n1=nodes[e[0]], n2=nodes[e[1]], w=problem.get_weight(*e)
@@ -29,7 +30,7 @@ class Instance(InstanceCore):
         return cls(dict(arcs=arcs))
 
     def to_tsplib95(self):
-        arcs = TupList(self.data["arcs"])
+        arcs = TupList(self.get_arcs())
         nodes = (arcs.take("n1") + arcs.take("n2")).unique()
         pos = {k: v for v, k in enumerate(nodes)}
         arc_dict = arcs.to_dict(
@@ -57,7 +58,27 @@ class Instance(InstanceCore):
             edge_weight_format=edge_weight_format,
             edge_weights=arc_weights,
         )
+
         return tsp.models.StandardProblem(**dict_data)
 
     def get_arcs(self) -> TupList:
         return self.data["arcs"]
+
+    def get_indexed_arcs(self) -> TupList:
+        return self.data["arcs"].to_dict(
+            result_col=None, indices=["n1", "n2"], is_list=False
+        )
+
+    def get_nodes(self) -> TupList:
+        arcs = self.get_arcs()
+        return (arcs.take("n1") + arcs.take("n2")).unique()
+
+    def get_graph(self) -> nx.Graph:
+        nodes = self.get_nodes()
+        arcs = self.get_arcs()
+        G = nx.DiGraph()
+        for node in nodes:
+            G.add_node(node)
+        for arc in arcs:
+            G.add_edge(arc["n1"], arc["n2"], weight=arc["w"])
+        return G

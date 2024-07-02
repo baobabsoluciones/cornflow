@@ -1,7 +1,7 @@
 """
 External endpoints to manage the executions: create new ones, list all of them, get one in particular
 or check the status of an ongoing one
-These endpoints hve different access url, but manage the same data entities
+These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries

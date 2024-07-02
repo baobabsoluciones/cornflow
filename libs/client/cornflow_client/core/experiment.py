@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Union, Dict
+import json
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
@@ -150,3 +151,33 @@ class ExperimentCore(ABC):
                 )
 
         return conf
+
+    def generate_report(self, report_path: str, report_name="report") -> None:
+        """
+        this method should write a report file into report_path, using the template in report_name.
+
+        :param report_path: the path of the report to export
+        :param report_name: the name of the template for the report
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            InstanceCore.from_dict(data["instance"]),
+            SolutionCore.from_dict(data["solution"]),
+        )
+
+    def to_dict(self) -> dict:
+        return dict(instance=self.instance.to_dict(), solution=self.solution.to_dict())
+
+    @classmethod
+    def from_json(cls, path: str) -> "ExperimentCore":
+        with open(path, "r") as f:
+            data_json = json.load(f)
+        return cls.from_dict(data_json)
+
+    def to_json(self, path: str) -> None:
+        data = self.to_dict()
+        with open(path, "w") as f:
+            json.dump(data, f, indent=4, sort_keys=True)

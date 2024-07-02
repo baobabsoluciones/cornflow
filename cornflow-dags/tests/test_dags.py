@@ -1,7 +1,10 @@
 import os, sys
 
-prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
-sys.path.insert(1, prev_dir)
+prev_dir = os.path.join(os.path.dirname(__file__), "../")
+my_paths = [prev_dir, os.path.join(prev_dir, "DAG")]
+for __my_path in my_paths:
+    sys.path.insert(1, __my_path)
+
 import unittest
 from unittest.mock import patch, Mock, MagicMock
 
@@ -158,6 +161,16 @@ class Tsp(BaseDAGTests.SolvingTests):
 
     def test_solve_cpsat(self):
         return self.test_try_solving_testcase(dict(solver="cpsat", **self.config))
+
+    def test_report(self):
+        tests = self.app.test_cases
+        my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
+        my_experim.solve(dict())
+        report_path = "./my_report.html"
+        my_experim.generate_report(report_path=report_path)
+        self.assertTrue(os.path.exists(report_path))
+        os.remove(report_path)
+        # check the file is created.
 
 
 class Vrp(BaseDAGTests.SolvingTests):
