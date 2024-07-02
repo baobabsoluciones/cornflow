@@ -90,8 +90,8 @@ class CustomTestCase(TestCase):
         self.roles_with_access = []
 
     @staticmethod
-    def get_header_with_auth(token):
-        return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
+    def get_header_with_auth(token, content_type="application/json"):
+        return {"Content-Type": content_type, "Authorization": "Bearer " + token}
 
     def create_user(self, data):
         return self.client.post(

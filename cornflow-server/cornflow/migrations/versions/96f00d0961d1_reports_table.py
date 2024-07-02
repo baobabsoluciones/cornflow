@@ -1,4 +1,5 @@
-"""reports table
+"""
+Adds reports table to database
 
 Revision ID: 96f00d0961d1
 Revises: 991b98e24225

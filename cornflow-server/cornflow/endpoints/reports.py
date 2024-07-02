@@ -2,10 +2,12 @@
 External endpoints to manage the reports: create new ones, list all of them, get one in particular
 These endpoints have different access url, but manage the same data entities
 """
+import os
 
 # Import from libraries
-from flask import current_app
+from flask import current_app, request
 from flask_apispec import marshal_with, use_kwargs, doc
+from werkzeug.utils import secure_filename
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
@@ -18,6 +20,7 @@ from cornflow.schemas.reports import (
     ReportRequest,
 )
 from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.exceptions import InvalidData
 
 
 class ReportEndpoint(BaseMetaResource):
@@ -49,11 +52,10 @@ class ReportEndpoint(BaseMetaResource):
         current_app.logger.info(f"User {self.get_user()} gets list of reports")
         return reports
 
-    @doc(description="Create an report", tags=["Reports"])
+    @doc(description="Create a report", tags=["Reports"])
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
-    @marshal_with(ReportSchema)
-    @use_kwargs(ReportRequest, location="json")
+    @use_kwargs(ReportRequest, location="form")
     def post(self, **kwargs):
         """
         API method to create a new report linked to an already existing report
@@ -64,14 +66,43 @@ class ReportEndpoint(BaseMetaResource):
           the reference_id for the newly created report if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: not sure if it should be possible to generate a report from the REST API
-        #  and if so, should we let them upload a new report file?
 
-        response = self.post_list(data=kwargs)
-        current_app.logger.info(
-            f"User {self.get_user()} creates report {response[0].id}"
+        if "file" not in request.files:
+            return {"message": "No file part"}, 400
+
+        file = request.files["file"]
+        filename = secure_filename(file.filename)
+        filename_extension = filename.split(".")[-1]
+
+        if filename_extension not in current_app.config["ALLOWED_EXTENSIONS"]:
+            return {
+                "message": f"Invalid file extension. Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
+            }, 400
+
+        save_path = os.path.join(
+            __file__,
+            f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['name']}.{filename_extension}",
         )
-        return response
+
+        try:
+            file.save(save_path)
+
+            report = ReportModel(
+                {
+                    "name": kwargs["name"],
+                    "file_url": save_path,
+                    "execution_id": kwargs["execution_id"],
+                    "user_id": self.get_user().id,
+                    "description": kwargs.get("description", ""),
+                }
+            )
+
+            report.save()
+
+            return {"message": "Report created"}, 201
+        except InvalidData as error:
+            os.remove(save_path)
+            raise error
 
 
 class ReportDetailsEndpointBase(BaseMetaResource):
