@@ -46,13 +46,10 @@ class TestReportsListEndpoint(CustomTestCase):
         self.url = REPORT_URL
         self.model = ReportModel
 
-        # self.payloads = [load_file_fk(f) for f in REPORTS_LIST]
-        # self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
         self.keys_to_check = [
             "id",
             "file_url",
             "name",
-            "user_id",
             "execution_id",
             "description",
             "created_at",
@@ -71,7 +68,12 @@ class TestReportsListEndpoint(CustomTestCase):
         )
 
         self.assertEqual(201, response.status_code)
-        self.assertTrue("message" in response.json)
+
+        for key in self.keys_to_check:
+            self.assertTrue(key in response.json)
+
+        for key, value in self.payload.items():
+            self.assertEqual(response.json[key], value)
 
         # check that the file in the test folder and the one generated on the static fodler are equal
         with open(REPORT_FILE_PATH, "rb") as f:
@@ -82,6 +84,8 @@ class TestReportsListEndpoint(CustomTestCase):
             file2 = f.read()
 
         self.assertEqual(file, file2)
+
+        return response.json
 
     def test_new_report_no_execution(self):
         payload = dict(self.payload)
@@ -102,3 +106,12 @@ class TestReportsListEndpoint(CustomTestCase):
 
     def test_get_no_reports(self):
         self.get_no_rows(self.url)
+
+    def test_get_all_reports(self):
+        item = self.test_new_report()
+        response = self.client.get(
+            self.url, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(1, len(response.json))
+        self.assertEqual(item, response.json[0])

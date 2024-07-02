@@ -56,6 +56,7 @@ class ReportEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     @use_kwargs(ReportRequest, location="form")
+    @marshal_with(ReportSchema)
     def post(self, **kwargs):
         """
         API method to create a new report linked to an already existing report
@@ -99,7 +100,7 @@ class ReportEndpoint(BaseMetaResource):
 
             report.save()
 
-            return {"message": "Report created"}, 201
+            return report, 201
         except InvalidData as error:
             os.remove(save_path)
             raise error
