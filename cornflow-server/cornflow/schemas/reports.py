@@ -1,5 +1,5 @@
 # Imports from libraries
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, INCLUDE
 
 # Imports from internal modules
 from .common import BaseQueryFilters
@@ -31,7 +31,9 @@ class ReportEditRequest(Schema):
 
 
 class ReportRequest(Schema):
+    class META:
+        unknown = INCLUDE
+
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     execution_id = fields.Str(required=True)
-    file_url = fields.Str(required=True)

@@ -22,6 +22,11 @@ class DefaultConfig(object):
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
+    # file support for reports
+    FILE_BACKEND = os.getenv("FILE_BACKEND", "local")
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "../../static")
+    ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ["pdf", "html"])
+
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 

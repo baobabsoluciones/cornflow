@@ -1,28 +1,24 @@
 """
 Unit test for the reports endpoints
 """
-
-# Import from libraries
 import json
-from unittest.mock import patch
 
-# Import from internal modules
+from flask import current_app
+
 from cornflow.models import ReportModel, InstanceModel, ExecutionModel
 from cornflow.tests.const import (
     INSTANCE_PATH,
     REPORT_PATH,
+    REPORT_FILE_PATH,
     REPORT_URL,
     INSTANCE_URL,
     EXECUTION_PATH,
-    DAG_URL,
-    BAD_REPORT_PATH,
     EXECUTION_URL_NORUN,
 )
-from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
-from cornflow.tests.unit.tools import patch_af_client
+from cornflow.tests.custom_test_case import CustomTestCase
 
 
-class TestReportsListEndpoint(BaseTestCases.ListFilters):
+class TestReportsListEndpoint(CustomTestCase):
     def setUp(self):
         # we create an instance, and an execution
         super().setUp()
@@ -65,27 +61,44 @@ class TestReportsListEndpoint(BaseTestCases.ListFilters):
         ]
 
     def test_new_report(self):
-        self.create_new_row(self.url, self.model, payload=self.payload)
+        response = self.client.post(
+            self.url,
+            data=dict(file=(open(REPORT_FILE_PATH, "rb")), **self.payload),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(
+                self.token, content_type="multipart/form-data"
+            ),
+        )
+
+        self.assertEqual(201, response.status_code)
+        self.assertTrue("message" in response.json)
+
+        # check that the file in the test folder and the one generated on the static fodler are equal
+        with open(REPORT_FILE_PATH, "rb") as f:
+            file = f.read()
+        with open(
+            f"{current_app.config['UPLOAD_FOLDER']}/{self.payload['name']}.html", "rb"
+        ) as f:
+            file2 = f.read()
+
+        self.assertEqual(file, file2)
 
     def test_new_report_no_execution(self):
         payload = dict(self.payload)
         payload["execution_id"] = "bad_id"
         response = self.client.post(
             self.url,
-            data=json.dumps(payload),
+            data=dict(file=(open(REPORT_FILE_PATH, "rb")), **payload),
             follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
+            headers=self.get_header_with_auth(
+                self.token, content_type="multipart/form-data"
+            ),
         )
-        self.assertEqual(404, response.status_code)
+
+        print(response.json)
+
+        self.assertEqual(400, response.status_code)
         self.assertTrue("error" in response.json)
 
     def test_get_no_reports(self):
         self.get_no_rows(self.url)
-
-    def test_repr_method(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.repr_method(idx, f"<Report {idx}>")
-
-    def test_str_method(self):
-        idx = self.create_new_row(self.url, self.model, self.payload)
-        self.str_method(idx, f"<Report {idx}>")

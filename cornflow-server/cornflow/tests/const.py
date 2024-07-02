@@ -35,6 +35,7 @@ FULL_CASE_PATH = _get_file("./data/full_case_raw.json")
 FULL_CASE_LIST = [FULL_CASE_PATH, _get_file("./data/full_case_raw_2.json")]
 
 REPORT_PATH = _get_file("./data/new_report.json")
+REPORT_FILE_PATH = _get_file("./data/new_report.html")
 BAD_REPORT_PATH = _get_file("./data/bad_report.json")
 REPORT_URL = PREFIX + "/report/"
 
