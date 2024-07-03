@@ -80,10 +80,11 @@ class ReportEndpoint(BaseMetaResource):
                 "message": f"Invalid file extension. Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
             }, 400
 
-        save_path = os.path.join(
-            __file__,
-            f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['name']}.{filename_extension}",
-        )
+        my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['execution_id']}"
+        # we create a directory for the execution
+        if not os.path.exists(my_directory):
+            os.mkdir(my_directory)
+        save_path = f"{my_directory}/{kwargs['name']}.{filename_extension}"
 
         try:
             file.save(save_path)

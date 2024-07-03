@@ -1,6 +1,9 @@
 """
 Unit test for the reports endpoints
 """
+
+import shutil
+import os
 import json
 
 from flask import current_app
@@ -57,6 +60,15 @@ class TestReportsListEndpoint(CustomTestCase):
             "deleted_at",
         ]
 
+    def tearDown(self):
+        super().tearDown()
+        my_directories = os.listdir(current_app.config["UPLOAD_FOLDER"])
+        for _dir in my_directories:
+            try:
+                shutil.rmtree(os.path.join(current_app.config["UPLOAD_FOLDER"], _dir))
+            except OSError:
+                pass
+
     def test_new_report(self):
         response = self.client.post(
             self.url,
@@ -78,13 +90,11 @@ class TestReportsListEndpoint(CustomTestCase):
         # check that the file in the test folder and the one generated on the static fodler are equal
         with open(REPORT_FILE_PATH, "rb") as f:
             file = f.read()
-        with open(
-            f"{current_app.config['UPLOAD_FOLDER']}/{self.payload['name']}.html", "rb"
-        ) as f:
+        my_upload_path = f"{current_app.config['UPLOAD_FOLDER']}/{self.payload['execution_id']}/{self.payload['name']}.html"
+        with open(my_upload_path, "rb") as f:
             file2 = f.read()
 
         self.assertEqual(file, file2)
-
         return response.json
 
     def test_new_report_no_execution(self):
