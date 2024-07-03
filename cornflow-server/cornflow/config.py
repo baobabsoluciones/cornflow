@@ -24,7 +24,10 @@ class DefaultConfig(object):
 
     # file support for reports
     FILE_BACKEND = os.getenv("FILE_BACKEND", "local")
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "../../static")
+    UPLOAD_FOLDER = os.getenv(
+        "UPLOAD_FOLDER",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../static")),
+    )
     ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ["pdf", "html"])
 
     # Open deployment (all dags accessible to all users)
@@ -89,7 +92,6 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
-
     """ """
 
     ENV = "development"
