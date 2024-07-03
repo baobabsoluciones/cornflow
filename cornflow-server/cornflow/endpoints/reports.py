@@ -3,16 +3,14 @@ External endpoints to manage the reports: create new ones, list all of them, get
 These endpoints have different access url, but manage the same data entities
 """
 import os
+from datetime import datetime
 
-# Import from libraries
-from flask import current_app, request
+from flask import current_app, request, send_from_directory
 from flask_apispec import marshal_with, use_kwargs, doc
 from werkzeug.utils import secure_filename
 
-# Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import ExecutionModel, ReportModel
-
 from cornflow.schemas.reports import (
     ReportSchema,
     ReportEditRequest,
@@ -20,7 +18,7 @@ from cornflow.schemas.reports import (
     ReportRequest,
 )
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.exceptions import InvalidData
+from cornflow.shared.exceptions import FileError, InvalidData, ObjectDoesNotExist
 
 
 class ReportEndpoint(BaseMetaResource):
@@ -68,6 +66,11 @@ class ReportEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
 
+        execution = ExecutionModel.get_one_object(id=kwargs["execution_id"])
+
+        if execution is None:
+            raise ObjectDoesNotExist("The execution does not exist")
+
         if "file" not in request.files:
             return {"message": "No file part"}, 400
 
@@ -77,37 +80,40 @@ class ReportEndpoint(BaseMetaResource):
 
         if filename_extension not in current_app.config["ALLOWED_EXTENSIONS"]:
             return {
-                "message": f"Invalid file extension. Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
+                "message": f"Invalid file extension. "
+                f"Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
             }, 400
-        # TODO: before writing, maybe we want to check for the execution existing/ being valid?
 
         my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['execution_id']}"
+
         # we create a directory for the execution
         if not os.path.exists(my_directory):
+            current_app.logger.info(f"Creating directory {my_directory}")
             os.mkdir(my_directory)
-        # TODO: maybe we want to generate a random string for the storage?
-        #  i.e., what happens if the file already exists?
+
         save_path = f"{my_directory}/{kwargs['name']}.{filename_extension}"
 
+        report = ReportModel(
+            {
+                "name": kwargs["name"],
+                "file_url": save_path,
+                "execution_id": kwargs["execution_id"],
+                "user_id": execution.user_id,
+                "description": kwargs.get("description", ""),
+            }
+        )
+
+        report.save()
+
         try:
+            # We try to save the file, if an error is raised then we delete the record on the database
             file.save(save_path)
-
-            report = ReportModel(
-                {
-                    "name": kwargs["name"],
-                    "file_url": save_path,
-                    "execution_id": kwargs["execution_id"],
-                    "user_id": self.get_user().id,
-                    "description": kwargs.get("description", ""),
-                }
-            )
-
-            report.save()
-
             return report, 201
-        except InvalidData as error:
-            os.remove(save_path)
-            raise error
+
+        except Exception as error:
+            report.delete()
+            current_app.logger.error(error)
+            raise FileError
 
 
 class ReportDetailsEndpointBase(BaseMetaResource):
@@ -138,7 +144,16 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} gets details of report {idx}")
-        return self.get_detail(user=self.get_user(), idx=idx)
+        report = self.get_detail(user_id=self.get_user_id(), idx=idx)
+        if report is None:
+            raise ObjectDoesNotExist
+
+        directory, file = report.file_url.split(report.name)
+        file = f"{report.name}{file}"
+        directory = directory[:-1]
+        current_app.logger.debug(f"Directory {directory}")
+        current_app.logger.debug(f"File {file}")
+        return send_from_directory(directory, file)
 
     @doc(description="Edit a report", tags=["Reports"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -169,4 +184,4 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} deleted report {idx}")
-        return self.delete_detail(user=self.get_user(), idx=idx)
+        return self.delete_detail(user_id=self.get_user_id(), idx=idx)

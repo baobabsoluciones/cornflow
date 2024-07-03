@@ -109,8 +109,6 @@ class TestReportsListEndpoint(CustomTestCase):
             ),
         )
 
-        print(response.json)
-
         self.assertEqual(400, response.status_code)
         self.assertTrue("error" in response.json)
 
@@ -125,3 +123,31 @@ class TestReportsListEndpoint(CustomTestCase):
 
         self.assertEqual(1, len(response.json))
         self.assertEqual(item, response.json[0])
+
+    def test_get_one_report(self):
+        item = self.test_new_report()
+        response = self.client.get(
+            f"{self.url}{item['id']}/", headers=self.get_header_with_auth(self.token)
+        )
+
+        content = response.get_data()
+
+        with open(REPORT_FILE_PATH, "rb") as f:
+            file = f.read()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(content, file)
+
+    def test_delete_report(self):
+        item = self.test_new_report()
+        response = self.client.delete(
+            f"{self.url}{item['id']}/", headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertTrue("message" in response.json)
+
+        response = self.client.get(
+            f"{self.url}{item['id']}/", headers=self.get_header_with_auth(self.token)
+        )
+        self.assertEqual(404, response.status_code)
