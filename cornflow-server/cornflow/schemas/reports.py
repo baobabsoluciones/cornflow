@@ -27,7 +27,6 @@ class ReportSchema(ReportSchemaBase):
 class ReportEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
-    file_url = fields.Str()
 
 
 class ReportRequest(Schema):
