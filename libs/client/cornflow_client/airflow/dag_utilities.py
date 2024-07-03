@@ -329,10 +329,8 @@ def cf_report(
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
-        # TODO: why not client.get_results? or get_status but for the config?
-        #  I just want to check the config as a first step
-        execution_data = client.get_data(exec_id)
-        config = execution_data["config"]
+        execution_info = client.get_results(exec_id)
+        config = execution_info["config"]
         report_config = config.get("report", {})
         if not report_config:
             # no need to write report since it's not requested
@@ -342,23 +340,30 @@ def cf_report(
         input_data = execution_data["data"]
         solution_data = execution_data["solution_data"]
 
-        report_name = report_config.get("name")
-        # maybe all of this should be abstracted inside the app
+        report_name = report_config.get("name", "report")
+        # maybe all of this should be abstracted inside the app?
+        # maybe the app should return an Experiment?
         experiment = app.get_solver(app.get_default_solver_name())
         my_experiment = experiment(
             app.instance(input_data), app.solution(solution_data)
         )
-        # this should return the path to the generated file
-        # TODO: add a get_report method in ExperimentCore
-        file_name = my_experiment.generate_report(report_name)
-        # TODO: store it in AWS/GCD/Azure bucket
-        # TODO: update execution with link to bucket
-        payload = dict(report_link="")
-        client.put_one_execution(exec_id, payload)
-        return True
+        report_path = os.path.abspath("./my_report.html")
+        my_experiment.generate_report(report_path=report_path, report_name=report_name)
+        if not os.path.exists(report_path):
+            raise AirflowDagException("The generation of the report failed")
 
+        # we assume the contents of the config match name + description
+        payload = dict(
+            filename=report_path,
+            execution_id=exec_id,
+            name=report_name,
+            description=report_config.get("description"),
+        )
+        client.create_report(**payload)
+    except CornFlowApiError:
+        raise AirflowDagException("The writing of the report failed")
     except Exception as e:
-        raise AirflowDagException("There was an error during the solving")
+        raise AirflowDagException("An unknown error occurred: " + str(e))
 
 
 def callback_email(context: dict):

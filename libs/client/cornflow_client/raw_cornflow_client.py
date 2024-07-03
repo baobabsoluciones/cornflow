@@ -309,15 +309,17 @@ class RawCornFlow(object):
         :param str filename: path to filename to upload
         :param str name: name for instance
         :param str description: description of the instance
+        :param bool minimize: minimize the problem if True
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
         with open(filename, "rb") as file:
-            return self.create_api(
+            result = self.create_api(
                 "instancefile/",
                 data=dict(name=name, description=description, minimize=minimize),
                 files=dict(file=file),
                 encoding=encoding,
             )
+        return result
 
     @log_call
     @ask_token
@@ -495,6 +497,29 @@ class RawCornFlow(object):
         return self.put_api_for_id(
             "dag/", id=execution_id, encoding=encoding, payload=kwargs
         )
+
+    @ask_token
+    @prepare_encoding
+    def create_report(self, name, filename, execution_id, encoding=None, **kwargs):
+        """
+        Edits an execution
+
+        :param str execution_id: id for the execution
+        :param str name: the name of the report
+        :param file file: the file object with the report (e.g., open(REPORT_FILE_PATH, "rb"))
+        :param kwargs: optional data to write (description)
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        """
+        with open(filename, "rb") as _file:
+            payload = (
+                dict(file=_file, name=name, execution_id=execution_id, **kwargs),
+            )
+            result = self.create_api(
+                "report/",
+                data=payload,
+                encoding=encoding,
+            )
+        return result
 
     @ask_token
     @prepare_encoding
