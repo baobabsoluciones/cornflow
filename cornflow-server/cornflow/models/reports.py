@@ -19,7 +19,7 @@ class ReportModel(TraceAttributesModel):
     - **id**: int, the report id, primary key for the reports.
     - **execution_id**: str, the foreign key for the execution (:class:`ExecutionModel`). It links the report to its
       parent execution.
-    - **file_url**: str, the link with the actual report. It should be a valid url to a cloud storage bucket.
+    - **file_url**: str, the link with the actual report. It should be a valid url to a cloud storage bucket or a file.
     - **name**: str, the name of the report given by the user.
     - **description**: str, the description of the report given by the user. It is optional.
     - **user_id**: int, the foreign key for the user (:class:`UserModel`). It links the report to its owner.

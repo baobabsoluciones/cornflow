@@ -16,6 +16,8 @@ class CornFlow:
         self.create_execution_data_check = self.expect_status(
             self.raw.create_execution_data_check, 201
         )
+        self.create_report = self.expect_status(self.raw.create_report, 201)
+
         self.create_instance_data_check = self.expect_status(
             self.raw.create_instance_data_check, 201
         )
