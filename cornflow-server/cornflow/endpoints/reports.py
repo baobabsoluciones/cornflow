@@ -59,12 +59,12 @@ class ReportEndpoint(BaseMetaResource):
     @marshal_with(ReportSchema)
     def post(self, **kwargs):
         """
-        API method to create a new report linked to an already existing report
+        API method to create a new report linked to an existing execution
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user
 
         :return: A dictionary with a message (error if authentication failed, error if data is not validated or
-          the reference_id for the newly created report if successful) and a integer wit the HTTP status code
+          the reference_id for the newly created report if successful) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
 
@@ -79,11 +79,14 @@ class ReportEndpoint(BaseMetaResource):
             return {
                 "message": f"Invalid file extension. Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
             }, 400
+        # TODO: before writing, maybe we want to check for the execution existing/ being valid?
 
         my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['execution_id']}"
         # we create a directory for the execution
         if not os.path.exists(my_directory):
             os.mkdir(my_directory)
+        # TODO: maybe we want to generate a random string for the storage?
+        #  i.e., what happens if the file already exists?
         save_path = f"{my_directory}/{kwargs['name']}.{filename_extension}"
 
         try:
