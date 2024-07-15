@@ -84,7 +84,7 @@ class ReportEndpoint(BaseMetaResource):
                 f"Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
             }, 400
 
-        my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{kwargs['execution_id']}"
+        my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{execution.id}"
 
         # we create a directory for the execution
         if not os.path.exists(my_directory):
