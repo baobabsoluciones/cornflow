@@ -36,10 +36,10 @@ Issue: The image is not installing any linux pkg.
     
     Possible solution: Try to use docker platform argument "—platform linux/amd64" for build image with extended compatibility.
 
-cornflow database
+Cornflow database
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Issue: cornflow can´t reach postgres internal database
+Issue: Cornflow can´t reach postgres internal database
 
     Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "host_database" to address: Name or service not known 
     
@@ -57,35 +57,35 @@ Issue: Users were not created when cornflow started
 Flower 
 ^^^^^^^^^^
 
-Issue: Can´t login to flower GUI
+Issue: Can't login to flower GUI
 
     Error: Access denied
     
     Possible solution: The admin user and password is the same than airflow.
 
-
 Scheduler
 ^^^^^^^^^^^
 Issue: Can't find Scheduler logs. 
-
+    
     Error: 
-
+    
     .. code-block:: bash
+
         FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/airflow/logs/scheduler/2024-07-01'
         PermissionError: [Errno 13] Permission denied: '/usr/local/airflow/logs/scheduler'
     
     Possible solution: Both errors usually occur when using the root user and root group as the owner of the directory. One possible solution is:
 
     .. code-block:: bash
+
         sudo chown -R 1000:1000 cornflow/cornflow-server/airflow_config/logs
       
     You should use 1000 because it is the UID and GID of the first user and group different from root.
 
-
 Airflow
 ^^^^^^^^^^^
 
-Issue: Can´t login to airflow GUI
+Issue: Can't login to airflow GUI
 
     Error: Bad Request The CSRF session token is missing
 
@@ -94,13 +94,13 @@ Issue: Can´t login to airflow GUI
 Ldap docker
 ^^^^^^^^^^^^^^^^
 
-Issue: Can´t login to flower GUI
+Issue: Can't login to flower GUI
 
     Error: Access denied
     
     Possible solution: If airflow goes to ldap config, and you don´t give any values to AIRFLOW_USER and AIRFLOW_PWD, the default values are "admin/admin"
 
-Issue: Can´t login to airflow GUI
+Issue: Can't login to airflow GUI
 
     Error: Access denied
 
