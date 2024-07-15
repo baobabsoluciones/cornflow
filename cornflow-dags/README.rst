@@ -1,5 +1,5 @@
 ===============
-Cornflow-dags
+cornflow-dags
 ===============
 
 Public DAGs for cornflow server

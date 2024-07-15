@@ -1,209 +1,2278 @@
 {
+  "paths": {
+    "/instance/": {
+      "get": {
+        "description": "Get all instances",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InstanceEndpointResponse"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "user_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "last_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "role_id",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "url_rule",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      },
+      "post": {
+        "description": "Create an instance",
+        "responses": {
+
+        },
+        "parameters": [],
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/instance/{idx}/": {
+      "get": {
+        "description": "Get one instance",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      },
+      "delete": {
+        "description": "Delete an instance",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      },
+      "put": {
+        "description": "Edit an instance",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/InstanceEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/instance/{idx}/data/": {
+      "get": {
+        "description": "Get input data of an instance",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/InstanceDataEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/instancefile/": {
+      "post": {
+        "description": "Create an instance from an mps file",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "name",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "minimize",
+            "type": "boolean",
+            "required": false
+          }
+        ],
+        "tags": [
+          "Instances"
+        ]
+      }
+    },
+    "/data-check/execution/{idx}/": {
+      "post": {
+        "description": "Create a data check execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Data checks"
+        ]
+      }
+    },
+    "/data-check/instance/{idx}/": {
+      "post": {
+        "description": "Create a data check execution for an existing instance",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Data checks"
+        ]
+      }
+    },
+    "/data-check/case/{idx}/": {
+      "post": {
+        "description": "Create a data check execution for an existing case",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Data checks"
+        ]
+      }
+    },
+    "/execution/{idx}/": {
+      "get": {
+        "description": "Get details of an execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      },
+      "post": {
+        "description": "Stop an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      },
+      "delete": {
+        "description": "Delete an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      },
+      "put": {
+        "description": "Edit an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ExecutionEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/execution/{idx}/status/": {
+      "get": {
+        "description": "Get status of an execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionStatusEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      },
+      "put": {
+        "description": "Change status of an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ExecutionStatusEndpointUpdate"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/execution/{idx}/data/": {
+      "get": {
+        "description": "Get solution data of an execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDataEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/execution/{idx}/log/": {
+      "get": {
+        "description": "Get log of an execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionLogEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/execution/{idx}/relaunch/": {
+      "post": {
+        "description": "Re-launch an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ReLaunchExecutionRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/execution/": {
+      "get": {
+        "description": "Get all executions",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "user_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "last_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "role_id",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "url_rule",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      },
+      "post": {
+        "description": "Create an execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ExecutionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Executions"
+        ]
+      }
+    },
+    "/dag/{idx}/": {
+      "get": {
+        "description": "Get input data and configuration for an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      },
+      "put": {
+        "description": "Edit an execution",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDagRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      }
+    },
+    "/dag/": {
+      "post": {
+        "description": "Create an execution manually.",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ExecutionDagPostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      }
+    },
+    "/dag/instance/{idx}/": {
+      "put": {
+        "description": "Endpoint to save instance checks performed on the DAG",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/InstanceCheckRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      }
+    },
+    "/dag/case/{idx}/": {
+      "put": {
+        "description": "Endpoint to save case checks performed on the DAG",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/CaseCheckRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      }
+    },
+    "/dag/deployed/": {
+      "get": {
+        "description": "Get list of deployed dags registered on the data base",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeployedDAG"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "DeployedDAGs"
+        ]
+      },
+      "post": {
+        "description": "Post a new deployed dag",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DeployedDAG"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/DeployedDAG"
+            }
+          }
+        ],
+        "tags": [
+          "DeployedDAGs"
+        ]
+      }
+    },
+    "/dag/deployed/{idx}/": {
+      "put": {
+        "description": "Endpoint to update the schemas of a deployed DAG",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/DeployedDAGEdit"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DAGs"
+        ]
+      }
+    },
+    "/user/": {
+      "get": {
+        "description": "Get all users",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserEndpointResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/user/{user_id}/": {
+      "get": {
+        "description": "Get a user",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UserDetailsEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "description": "Delete a user",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "description": "Edit a user",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/UserEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/user/{user_id}/{make_admin}/": {
+      "put": {
+        "description": "Toggle user into admin",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UserEndpointResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "make_admin",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/token/": {
+      "get": {
+        "description": "Check token",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TokenEndpointResponse"
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/schema/": {
+      "get": {
+        "description": "Get list of available apps",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SchemaListApp"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Schemas"
+        ]
+      }
+    },
+    "/schema/{dag_name}/": {
+      "get": {
+        "description": "Get instance, solution and config schema",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SchemaOneApp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dag_name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Schemas"
+        ]
+      }
+    },
+    "/example/{dag_name}/": {
+      "get": {
+        "description": "Get example data from DAG",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ExampleData"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dag_name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DAG"
+        ]
+      }
+    },
+    "/health/": {
+      "get": {
+        "description": "Health check",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HealthResponse"
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/case/instance/": {
+      "post": {
+        "description": "Create a new case from instance and execution",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/CaseFromInstanceExecution"
+            }
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/{idx}/copy/": {
+      "post": {
+        "description": "Copies a case to a new one",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/": {
+      "get": {
+        "description": "Get all cases",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CaseListAllWithIndicators"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "user_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "last_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "role_id",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "url_rule",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "post": {
+        "description": "Create a new case from raw data",
+        "responses": {
+
+        },
+        "parameters": [],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/{idx}/": {
+      "get": {
+        "description": "Get one case",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseListAllWithIndicators"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "delete": {
+        "description": "Delete a case",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "put": {
+        "description": "Edit a case",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/CaseEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/{idx}/data/": {
+      "get": {
+        "description": "Get data of a case",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseBase"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "patch": {
+        "description": "Patches the data of a given case",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "delete": {
+        "description": "Delete a case",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      },
+      "put": {
+        "description": "Edit a case",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/CaseEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/{idx}/instance/": {
+      "post": {
+        "description": "Copies the information stored in a case into a new instance",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseToInstanceResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/case/{idx1}/{idx2}/": {
+      "get": {
+        "description": "Compares the data and / or solution of two given cases",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CaseCompareResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "data",
+            "type": "boolean",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "solution",
+            "type": "boolean",
+            "required": false
+          },
+          {
+            "in": "path",
+            "name": "idx1",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "path",
+            "name": "idx2",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Cases"
+        ]
+      }
+    },
+    "/action/": {
+      "get": {
+        "description": "Get all the actions",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ActionsResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Actions"
+        ]
+      }
+    },
+    "/permission/": {
+      "get": {
+        "description": "Get all the permissions assigned to the roles",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PermissionViewRoleResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "PermissionViewRole"
+        ]
+      },
+      "post": {
+        "description": "Create a new permission",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PermissionViewRoleResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/PermissionViewRoleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PermissionViewRole"
+        ]
+      }
+    },
+    "/permission/{idx}/": {
+      "get": {
+        "description": "Get one permission",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PermissionViewRoleResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PermissionViewRole"
+        ]
+      },
+      "delete": {
+        "description": "Delete a permission",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PermissionViewRole"
+        ]
+      },
+      "put": {
+        "description": "Edit a permission",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/PermissionViewRoleEditRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "PermissionViewRole"
+        ]
+      }
+    },
+    "/roles/": {
+      "get": {
+        "description": "Gets all the roles",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RolesResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "Roles"
+        ]
+      },
+      "post": {
+        "description": "Creates a new role",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/RolesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Roles"
+        ]
+      }
+    },
+    "/roles/{idx}/": {
+      "get": {
+        "description": "Gets one role",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Roles"
+        ]
+      },
+      "delete": {
+        "description": "Deletes one role",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Roles"
+        ]
+      },
+      "put": {
+        "description": "Modifies one role",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Roles"
+        ]
+      }
+    },
+    "/apiview/": {
+      "get": {
+        "description": "Get all the api views",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ViewResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "ApiViews"
+        ]
+      }
+    },
+    "/user/role/": {
+      "get": {
+        "description": "Gets all the user role assignments",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserRoleResponse"
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "User roles"
+        ]
+      },
+      "post": {
+        "description": "Creates a new role assignment",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UserRoleResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/UserRoleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User roles"
+        ]
+      }
+    },
+    "/user/role/{user_id}/{role_id}/": {
+      "get": {
+        "description": "Gets one user role assignment",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UserRoleResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "User roles"
+        ]
+      },
+      "delete": {
+        "description": "Deletes one user role assignment",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "User roles"
+        ]
+      }
+    },
+    "/user/recover-password/": {
+      "put": {
+        "description": "Send email to create new password",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/RecoverPasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/licences/": {
+      "get": {
+        "description": "Get list of all the libraries and their license information",
+        "responses": {
+
+        },
+        "parameters": [],
+        "tags": [
+          "Licenses"
+        ]
+      }
+    },
+    "/table/{table_name}/": {
+      "get": {
+        "description": "Get all rows of a table",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "creation_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "deletion_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_gte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "update_date_lte",
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "user_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "last_name",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "role_id",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "url_rule",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "path",
+            "name": "table_name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Tables"
+        ]
+      }
+    },
+    "/table/{table_name}/{idx}/": {
+      "get": {
+        "description": "Get a row",
+        "responses": {
+
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idx",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "table_name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Tables"
+        ]
+      }
+    },
+    "/alarms/": {
+      "get": {
+        "description": "Get list of all the elements in the table",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AlarmsResponse"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "criticality",
+            "type": "number",
+            "required": false
+          }
+        ],
+        "tags": [
+          "None"
+        ]
+      },
+      "post": {
+        "description": "Add a new row to the table",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AlarmsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/AlarmsPostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "None"
+        ]
+      }
+    },
+    "/main-alarms/": {
+      "get": {
+        "description": "Get list of all the elements in the table",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MainAlarmsResponse"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "id_alarm",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "criticality",
+            "type": "number",
+            "required": false
+          }
+        ],
+        "tags": [
+          "None"
+        ]
+      },
+      "post": {
+        "description": "Add a new row to the table",
+        "responses": {
+          "default": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/MainAlarmsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "body",
+            "required": false,
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/MainAlarmsPostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "None"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "cornflow API docs",
+    "version": "v1"
+  },
+  "swagger": "2.0.0",
   "definitions": {
-    "ActionsResponse": {
+    "InstanceEndpointResponse": {
+      "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        }, 
         "name": {
-          "readOnly": true
-        }
-      }, 
-      "type": "object"
-    }, 
-    "ApiViewResponse": {
-      "properties": {
-        "description": {
-          "type": "string"
-        }, 
-        "id": {
-          "type": "integer"
-        }, 
-        "name": {
-          "readOnly": true
-        }, 
-        "url_rule": {
-          "type": "string"
-        }
-      }, 
-      "type": "object"
-    }, 
-    "CaseBase": {
-      "properties": {
-        "checks": {},
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data": {},
-        "data_hash": {
-          "type": "string"
-        },
-        "dependents": {
-          "items": {
-            "type": "integer"
-          },
-          "type": "array"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "is_dir": {},
-        "name": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "solution": {},
-        "solution_checks": {},
-        "solution_hash": {
-          "type": "string"
-        },
-        "updated_at": {
-          "format": "date-time",
           "type": "string"
         },
         "user_id": {
           "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "CaseCompareResponse": {
-      "properties": {
-        "data_patch": {
-          "items": {
-            "$ref": "#/definitions/PatchOperation"
-          },
-          "type": "array"
-        },
-        "solution_patch": {
-          "items": {
-            "$ref": "#/definitions/PatchOperation"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    },
-    "CaseEditRequest": {
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "CaseFromInstanceExecution": {
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "execution_id": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "parent_id": {
-          "type": "integer",
-          "x-nullable": true
         },
         "schema": {
           "type": "string"
-        }
-      },
-      "required": [
-        "name",
-        "schema"
-      ],
-      "type": "object"
-    },
-    "CaseListResponse": {
-      "properties": {
+        },
+        "id": {
+          "type": "string"
+        },
         "created_at": {
-          "format": "date-time",
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
           "type": "string"
         },
         "data_hash": {
           "type": "string"
-        },
-        "dependents": {
-          "items": {
-            "type": "integer"
-          },
-          "type": "array"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "is_dir": {},
-        "name": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "solution_hash": {
-          "type": "string"
-        },
-        "updated_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "CaseToInstanceResponse": {
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
         }
       },
       "required": [
-        "id",
-        "schema"
-      ],
-      "type": "object"
+        "id"
+      ]
     },
-    "Config": {
+    "InstanceEditRequest": {
+      "type": "object",
       "properties": {
-        "gapAbs": {
-          "type": "number"
+        "data": {
+
         },
-        "gapRel": {
-          "type": "number"
-        },
-        "keepFiles": {
-          "type": "boolean"
-        },
-        "logPath": {
+        "name": {
           "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "ConfigSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "MIPGap": {
+          "type": "number"
+        },
+        "solver": {
+          "type": "string",
+          "default": "PULP_CBC_CMD"
+        },
+        "seconds": {
+          "type": "integer"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "maxMemory": {
           "type": "integer"
@@ -211,687 +2280,291 @@
         "maxNodes": {
           "type": "integer"
         },
-        "mip": {
-          "type": "boolean"
+        "gapAbs": {
+          "type": "number"
         },
-        "msg": {
-          "type": "boolean"
-        },
-        "options": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "solver": {
-          "default": "PULP_CBC_CMD",
-          "type": "string"
+        "gapRel": {
+          "type": "number"
         },
         "threads": {
           "type": "integer"
         },
-        "timeLimit": {
-          "type": "integer"
+        "msg": {
+          "type": "boolean"
+        },
+        "keepFiles": {
+          "type": "boolean"
+        },
+        "checks_only": {
+          "type": "boolean"
         },
         "warmStart": {
           "type": "boolean"
+        },
+        "timeLimit": {
+          "type": "integer"
+        },
+        "logPath": {
+          "type": "string"
+        },
+        "mip": {
+          "type": "boolean"
         }
-      },
-      "type": "object"
+      }
     },
-    "DeployedDAG": {
+    "ExecutionDetailsEndpointResponse": {
+      "type": "object",
       "properties": {
-        "description": {
-          "type": "string",
-          "x-nullable": true
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "config": {
+          "$ref": "#/definitions/ConfigSchemaResponse"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "state": {
+          "type": "integer"
         },
         "id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "data_hash": {
           "type": "string"
         }
       },
       "required": [
         "id"
-      ],
-      "type": "object"
-    },
-    "ExecutionDagPostRequest": {
-      "properties": {
-        "checks": {},
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "data": {},
-        "description": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "log_json": {
-          "$ref": "#/definitions/Log"
-        },
-        "log_text": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "solution_schema": {
-          "type": "string",
-          "x-nullable": true
-        },
-        "state": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "config",
-        "instance_id",
-        "name"
-      ],
-      "type": "object"
-    },
-    "ExecutionDagRequest": {
-      "properties": {
-        "checks": {},
-        "data": {},
-        "log_json": {
-          "$ref": "#/definitions/Log"
-        },
-        "log_text": {
-          "type": "string"
-        },
-        "solution_schema": {
-          "type": "string",
-          "x-nullable": true
-        },
-        "state": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "ExecutionDataEndpointResponse": {
-      "properties": {
-        "checks": {},
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data": {},
-        "data_hash": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "state": {
-          "type": "integer"
-        },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "ExecutionDetailsEndpointResponse": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data_hash": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "state": {
-          "type": "integer"
-        },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "ExecutionDetailsEndpointWithIndicatorsResponse": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data_hash": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "state": {
-          "type": "integer"
-        },
-        "user_id": {
-          "type": "integer"
-        },
-        "indicators": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "ReLaunchExecutionRequest": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        }
-      },
-      "type": "object"
-    },
-    "ExecutionEditRequest": {
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "data": {}
-      },
-      "type": "object"
-    },
-    "ExecutionLogEndpointResponse": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data_hash": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "log": {
-          "$ref": "#/definitions/Log"
-        },
-        "message": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "state": {
-          "type": "integer"
-        },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "ExecutionRequest": {
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/Config"
-        },
-        "description": {
-          "type": "string"
-        },
-        "instance_id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "data": {}
-      },
-      "required": [
-        "config",
-        "instance_id",
-        "name"
-      ],
-      "type": "object"
-    },
-    "ExecutionStatusEndpointResponse": {
-      "properties": {
-        "data_hash": {
-          "readOnly": true,
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "state": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "FirstSolution": {
-      "properties": {
-        "BestInteger": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "CutsBestBound": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "Node": {
-          "type": "integer",
-          "x-nullable": true
-        },
-        "NodesLeft": {
-          "type": "integer",
-          "x-nullable": true
-        }
-      },
-      "required": [
-        "BestInteger",
-        "CutsBestBound",
-        "Node",
-        "NodesLeft"
-      ],
-      "type": "object"
-    },
-    "HealthResponse": {
-      "properties": {
-        "airflow_status": {
-          "type": "string"
-        },
-        "cornflow_status": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "InstanceCheckRequest": {
-      "properties": {
-        "checks": {}
-      },
-      "type": "object"
-    },
-    "InstanceDataEndpointResponse": {
-      "properties": {
-        "checks": {
-          "x-nullable": true
-        },
-        "created_at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "data": {},
-        "data_hash": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "data"
-      ],
-      "type": "object"
+      ]
     },
     "InstanceDetailsEndpointResponse": {
+      "type": "object",
       "properties": {
-        "created_at": {
-          "format": "date-time",
+        "name": {
           "type": "string"
         },
-        "data_hash": {
+        "user_id": {
+          "type": "integer"
+        },
+        "schema": {
           "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
         },
         "description": {
           "type": "string"
         },
         "executions": {
+          "type": "array",
           "items": {
             "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-          },
-          "type": "array"
+          }
+        },
+        "data_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "InstanceDataEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "schema": {
+          "type": "string"
         },
         "id": {
           "type": "string"
         },
+        "data": {
+
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "checks": {
+          "x-nullable": true
+        },
+        "data_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "data",
+        "id"
+      ]
+    },
+    "ExecutionEditRequest": {
+      "type": "object",
+      "properties": {
+        "data": {
+
+        },
         "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "ExecutionDetailsEndpointWithIndicatorsResponse": {
+      "type": "object",
+      "properties": {
+        "indicators": {
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "config": {
+          "$ref": "#/definitions/ConfigSchemaResponse"
+        },
+        "instance_id": {
           "type": "string"
         },
         "schema": {
           "type": "string"
         },
-        "user_id": {
+        "state": {
           "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "InstanceEditRequest": {
-      "properties": {
-        "description": {
+        },
+        "id": {
           "type": "string"
         },
-        "name": {
+        "message": {
           "type": "string"
         },
-        "data": {}
-      },
-      "type": "object"
-    },
-    "InstanceEndpointResponse": {
-      "properties": {
         "created_at": {
-          "format": "date-time",
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
           "type": "string"
         },
         "data_hash": {
           "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "ExecutionStatusEndpointUpdate": {
+      "type": "object",
+      "properties": {
         "id": {
           "type": "string"
         },
+        "status": {
+          "type": "integer"
+        }
+      }
+    },
+    "ExecutionStatusEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data_hash": {
+          "type": "string",
+          "readOnly": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "state": {
+          "type": "integer"
+        }
+      }
+    },
+    "ExecutionDataEndpointResponse": {
+      "type": "object",
+      "properties": {
         "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "config": {
+          "$ref": "#/definitions/ConfigSchemaResponse"
+        },
+        "instance_id": {
           "type": "string"
         },
         "schema": {
           "type": "string"
         },
-        "user_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "Log": {
-      "properties": {
-        "best_bound": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "best_solution": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "cut_info": {
-          "x-nullable": true
-        },
-        "first_relaxed": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "first_solution": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/FirstSolution"
-            }
-          ],
-          "x-nullable": true
-        },
-        "gap": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "matrix": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Matrix"
-            }
-          ],
-          "x-nullable": true
-        },
-        "matrix_post": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Matrix"
-            }
-          ],
-          "x-nullable": true
-        },
-        "nodes": {
-          "type": "integer",
-          "x-nullable": true
-        },
-        "presolve": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Presolve"
-            }
-          ],
-          "x-nullable": true
-        },
-        "progress": {
-          "$ref": "#/definitions/Progress"
-        },
-        "rootTime": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "sol_code": {
-          "type": "integer",
-          "x-nullable": true
-        },
-        "solver": {
-          "type": "string",
-          "x-nullable": true
-        },
-        "status": {
-          "type": "string",
-          "x-nullable": true
-        },
-        "status_code": {
-          "type": "integer",
-          "x-nullable": true
-        },
-        "time": {
-          "type": "number",
-          "x-nullable": true
-        },
-        "version": {
-          "type": "string",
-          "x-nullable": true
-        }
-      },
-      "type": "object"
-    },
-    "LoginEndpointRequest": {
-      "properties": {
-        "password": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "password",
-        "username"
-      ],
-      "type": "object"
-    },
-    "Matrix": {
-      "properties": {
-        "constraints": {
-          "type": "integer"
-        },
-        "nonzeros": {
-          "type": "integer"
-        },
-        "variables": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "PatchOperation": {
-      "properties": {
-        "op": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "value": {}
-      },
-      "required": [
-        "op",
-        "path"
-      ],
-      "type": "object"
-    },
-    "PermissionViewRoleEditRequest": {
-      "properties": {
-        "action": {
-          "readOnly": true
-        },
-        "action_id": {
-          "type": "integer"
-        },
-        "api_view": {
-          "readOnly": true
-        },
-        "api_view_id": {
-          "type": "integer"
-        },
-        "role": {
-          "readOnly": true
-        },
-        "role_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "PermissionViewRoleRequest": {
-      "properties": {
-        "action_id": {
-          "type": "integer"
-        },
-        "api_view_id": {
-          "type": "integer"
-        },
-        "role_id": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "PermissionViewRoleResponse": {
-      "properties": {
-        "action": {
-          "readOnly": true
-        },
-        "action_id": {
-          "type": "integer"
-        },
-        "api_view": {
-          "readOnly": true
-        },
-        "api_view_id": {
+        "state": {
           "type": "integer"
         },
         "id": {
-          "type": "integer"
+          "type": "string"
         },
-        "role": {
-          "readOnly": true
+        "message": {
+          "type": "string"
         },
-        "role_id": {
-          "type": "integer"
+        "data": {
+
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "checks": {
+
+        },
+        "data_hash": {
+          "type": "string"
         }
       },
-      "type": "object"
+      "required": [
+        "id"
+      ]
     },
     "Presolve": {
+      "type": "object",
       "properties": {
         "cols": {
           "type": "integer"
@@ -907,105 +2580,582 @@
         "cols",
         "rows",
         "time"
-      ],
-      "type": "object"
+      ]
+    },
+    "Matrix": {
+      "type": "object",
+      "properties": {
+        "constraints": {
+          "type": "integer"
+        },
+        "variables": {
+          "type": "integer"
+        },
+        "nonzeros": {
+          "type": "integer"
+        }
+      }
     },
     "Progress": {
+      "type": "object",
       "properties": {
-        "BestInteger": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "CutsBestBound": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "Depth": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "Gap": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "IInf": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "ItpNode": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "Node": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
-        },
-        "NodesLeft": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "Objective": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          }
         },
         "Time": {
+          "type": "array",
           "items": {
             "type": "string"
-          },
-          "type": "array"
+          }
+        },
+        "Gap": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "BestInteger": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Depth": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "IInf": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "NodesLeft": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ItpNode": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Objective": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "CutsBestBound": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "FirstSolution": {
+      "type": "object",
+      "properties": {
+        "Node": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "BestInteger": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "CutsBestBound": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "NodesLeft": {
+          "type": "integer",
+          "x-nullable": true
         }
       },
-      "type": "object"
+      "required": [
+        "BestInteger",
+        "CutsBestBound",
+        "Node",
+        "NodesLeft"
+      ]
     },
-    "RecoverPasswordRequest": {
+    "Log": {
+      "type": "object",
       "properties": {
-        "email": {
+        "best_bound": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "sol_code": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "nodes": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "best_solution": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "solver": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "cut_info": {
+          "x-nullable": true
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "presolve": {
+          "x-nullable": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/Presolve"
+            }
+          ]
+        },
+        "matrix_post": {
+          "x-nullable": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/Matrix"
+            }
+          ]
+        },
+        "status_code": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "progress": {
+          "$ref": "#/definitions/Progress"
+        },
+        "rootTime": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "matrix": {
+          "x-nullable": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/Matrix"
+            }
+          ]
+        },
+        "first_solution": {
+          "x-nullable": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/FirstSolution"
+            }
+          ]
+        },
+        "first_relaxed": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "gap": {
+          "type": "number",
+          "x-nullable": true
+        },
+        "status": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "time": {
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "ExecutionLogEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "indicators": {
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "config": {
+          "$ref": "#/definitions/ConfigSchemaResponse"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "state": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "log": {
+          "$ref": "#/definitions/Log"
+        },
+        "log_text": {
+          "type": "string"
+        },
+        "data_hash": {
           "type": "string"
         }
       },
       "required": [
-        "email"
-      ],
-      "type": "object"
+        "id"
+      ]
     },
-    "RolesRequest": {
+    "Config": {
+      "type": "object",
       "properties": {
-        "name": {
+        "MIPGap": {
+          "type": "number"
+        },
+        "solver": {
+          "type": "string",
+          "default": "PULP_CBC_CMD"
+        },
+        "seconds": {
+          "type": "integer"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxMemory": {
+          "type": "integer"
+        },
+        "maxNodes": {
+          "type": "integer"
+        },
+        "gapAbs": {
+          "type": "number"
+        },
+        "gapRel": {
+          "type": "number"
+        },
+        "threads": {
+          "type": "integer"
+        },
+        "msg": {
+          "type": "boolean"
+        },
+        "keepFiles": {
+          "type": "boolean"
+        },
+        "warmStart": {
+          "type": "boolean"
+        },
+        "timeLimit": {
+          "type": "integer"
+        },
+        "logPath": {
           "type": "string"
+        },
+        "mip": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ReLaunchExecutionRequest": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/Config"
         }
       },
-      "type": "object"
+      "required": [
+        "config"
+      ]
     },
-    "RolesResponse": {
+    "ExecutionRequest": {
+      "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
+        "config": {
+
         },
         "name": {
           "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "data": {
+
+        },
+        "description": {
+          "type": "string"
         }
       },
-      "type": "object"
+      "required": [
+        "config",
+        "instance_id",
+        "name"
+      ]
+    },
+    "ExecutionDagRequest": {
+      "type": "object",
+      "properties": {
+        "log_json": {
+          "$ref": "#/definitions/Log"
+        },
+        "state": {
+          "type": "integer"
+        },
+        "data": {
+
+        },
+        "log_text": {
+          "type": "string"
+        },
+        "checks": {
+
+        },
+        "solution_schema": {
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "ExecutionDagPostRequest": {
+      "type": "object",
+      "properties": {
+        "config": {
+
+        },
+        "log_json": {
+          "$ref": "#/definitions/Log"
+        },
+        "name": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "state": {
+          "type": "integer"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "data": {
+
+        },
+        "description": {
+          "type": "string"
+        },
+        "log_text": {
+          "type": "string"
+        },
+        "checks": {
+
+        },
+        "solution_schema": {
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": [
+        "config",
+        "instance_id",
+        "name"
+      ]
+    },
+    "InstanceCheckRequest": {
+      "type": "object",
+      "properties": {
+        "checks": {
+
+        }
+      }
+    },
+    "CaseCheckRequest": {
+      "type": "object",
+      "properties": {
+        "solution_checks": {
+
+        },
+        "checks": {
+
+        }
+      }
+    },
+    "DeployedDAG": {
+      "type": "object",
+      "properties": {
+        "config_schema": {
+
+        },
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "solution_checks_schema": {
+
+        },
+        "instance_schema": {
+
+        },
+        "solution_schema": {
+
+        },
+        "instance_checks_schema": {
+
+        }
+      },
+      "required": [
+        "config_schema",
+        "id",
+        "instance_checks_schema",
+        "instance_schema",
+        "solution_checks_schema",
+        "solution_schema"
+      ]
+    },
+    "DeployedDAGEdit": {
+      "type": "object",
+      "properties": {
+        "config_schema": {
+
+        },
+        "description": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "solution_checks_schema": {
+
+        },
+        "instance_schema": {
+
+        },
+        "solution_schema": {
+
+        },
+        "instance_checks_schema": {
+
+        }
+      },
+      "required": [
+        "instance_checks_schema",
+        "solution_checks_schema"
+      ]
+    },
+    "UserEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "email": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "pwd_last_change": {
+          "type": "string"
+        }
+      }
+    },
+    "UserEditRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "pwd_last_change": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "UserDetailsEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "pwd_last_change": {
+          "type": "string"
+        }
+      }
+    },
+    "TokenEndpointResponse": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "integer"
+        }
+      }
     },
     "SchemaListApp": {
+      "type": "object",
       "properties": {
         "name": {
           "type": "string"
@@ -1013,1647 +3163,561 @@
       },
       "required": [
         "name"
-      ],
-      "type": "object"
+      ]
     },
     "SchemaOneApp": {
+      "type": "object",
       "properties": {
-        "config": {},
-        "instance": {},
+        "solution_checks": {
+
+        },
         "name": {
           "type": "string"
         },
-        "solution": {}
+        "instance_checks": {
+
+        },
+        "config": {
+
+        },
+        "solution": {
+
+        },
+        "instance": {
+
+        }
       },
       "required": [
         "config",
         "instance",
+        "instance_checks",
         "name",
-        "solution"
-      ],
-      "type": "object"
+        "solution",
+        "solution_checks"
+      ]
     },
-    "TokenEndpointResponse": {
+    "ExampleData": {
+      "type": "object",
       "properties": {
-        "valid": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "UserDetailsEndpointResponse": {
-      "properties": {
-        "email": {
-          "type": "string"
+        "examples": {
+
         },
-        "first_name": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "username": {
+        "name": {
           "type": "string"
         }
       },
-      "type": "object"
+      "required": [
+        "examples",
+        "name"
+      ]
     },
-    "UserEditRequest": {
+    "HealthResponse": {
+      "type": "object",
       "properties": {
-        "email": {
+        "cornflow_status": {
           "type": "string"
         },
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "username": {
+        "airflow_status": {
           "type": "string"
         }
-      },
-      "type": "object"
+      }
     },
-    "UserEndpointResponse": {
+    "CaseFromInstanceExecution": {
+      "type": "object",
       "properties": {
-        "created_at": {
+        "name": {
           "type": "string"
         },
-        "email": {
+        "instance_id": {
           "type": "string"
         },
-        "first_name": {
+        "schema": {
           "type": "string"
         },
-        "id": {
-          "type": "integer"
-        },
-        "last_name": {
+        "execution_id": {
           "type": "string"
         },
-        "username": {
+        "description": {
           "type": "string"
+        },
+        "parent_id": {
+          "type": "integer",
+          "x-nullable": true
         }
       },
-      "type": "object"
+      "required": [
+        "name",
+        "schema"
+      ]
     },
-    "UserRoleRequest": {
+    "CaseListResponse": {
+      "type": "object",
       "properties": {
-        "role_id": {
-          "type": "integer"
+        "name": {
+          "type": "string"
         },
         "user_id": {
           "type": "integer"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "path": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "solution_hash": {
+          "type": "string"
+        },
+        "dependents": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "data_hash": {
+          "type": "string"
+        },
+        "is_dir": {
+
+        }
+      }
+    },
+    "CaseListAllWithIndicators": {
+      "type": "object",
+      "properties": {
+        "indicators": {
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "path": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "solution_hash": {
+          "type": "string"
+        },
+        "dependents": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "data_hash": {
+          "type": "string"
+        },
+        "is_dir": {
+
+        }
+      }
+    },
+    "CaseEditRequest": {
+      "type": "object",
+      "properties": {
+        "parent_id": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "CaseBase": {
+      "type": "object",
+      "properties": {
+        "solution_checks": {
+
+        },
+        "indicators": {
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "path": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "data": {
+
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "solution": {
+
+        },
+        "checks": {
+
+        },
+        "solution_hash": {
+          "type": "string"
+        },
+        "dependents": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "data_hash": {
+          "type": "string"
+        },
+        "is_dir": {
+
+        }
+      }
+    },
+    "CaseToInstanceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
         }
       },
-      "type": "object"
+      "required": [
+        "id",
+        "schema"
+      ]
     },
-    "UserRoleResponse": {
+    "BasePatchOperation": {
+      "type": "object",
+      "properties": {
+        "value": {
+
+        },
+        "path": {
+          "type": "string"
+        },
+        "op": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "path"
+      ]
+    },
+    "CaseCompareResponse": {
+      "type": "object",
+      "properties": {
+        "solution_patch": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BasePatchOperation"
+          }
+        },
+        "data_patch": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BasePatchOperation"
+          }
+        }
+      }
+    },
+    "ActionsResponse": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "integer"
+        },
+        "name": {
+          "readOnly": true
+        }
+      }
+    },
+    "PermissionViewRoleRequest": {
+      "type": "object",
+      "properties": {
+        "api_view_id": {
+          "type": "integer"
+        },
+        "action_id": {
+          "type": "integer"
+        },
+        "role_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "PermissionViewRoleResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "action_id": {
+          "type": "integer"
+        },
+        "role_id": {
+          "type": "integer"
+        },
+        "action": {
+          "readOnly": true
         },
         "role": {
           "readOnly": true
         },
+        "api_view": {
+          "readOnly": true
+        },
+        "api_view_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "PermissionViewRoleEditRequest": {
+      "type": "object",
+      "properties": {
         "role_id": {
+          "type": "integer"
+        },
+        "action_id": {
+          "type": "integer"
+        },
+        "action": {
+          "readOnly": true
+        },
+        "role": {
+          "readOnly": true
+        },
+        "api_view": {
+          "readOnly": true
+        },
+        "api_view_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "RolesRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "RolesResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "ViewResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "url_rule": {
+          "type": "string"
+        }
+      }
+    },
+    "UserRoleRequest": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "integer"
+        },
+        "role_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "UserRoleResponse": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "integer"
+        },
+        "id": {
           "type": "integer"
         },
         "user": {
           "readOnly": true
         },
-        "user_id": {
+        "role_id": {
           "type": "integer"
+        },
+        "role": {
+          "readOnly": true
         }
-      },
-      "type": "object"
+      }
     },
-    "UserSignupRequest": {
+    "RecoverPasswordRequest": {
+      "type": "object",
       "properties": {
         "email": {
-          "format": "email",
-          "type": "string"
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "username": {
           "type": "string"
         }
       },
       "required": [
-        "email",
-        "password",
-        "username"
-      ],
-      "type": "object"
+        "email"
+      ]
+    },
+    "AlarmsPostRequest": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "criticality": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "criticality",
+        "description",
+        "name"
+      ]
+    },
+    "AlarmsResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "criticality": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "criticality",
+        "description",
+        "id",
+        "name"
+      ]
+    },
+    "MainAlarmsPostRequest": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "id_alarm": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "criticality": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "criticality",
+        "id_alarm",
+        "message"
+      ]
+    },
+    "MainAlarmsResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "criticality": {
+          "type": "number"
+        },
+        "id_alarm": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "criticality",
+        "id",
+        "id_alarm",
+        "message"
+      ]
     }
-  },
-  "info": {
-    "title": "Cornflow API docs",
-    "version": "v1"
-  },
-  "paths": {
-    "/action/": {
-      "get": {
-        "description": "Get all the actions",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ActionsResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Actions"
-        ]
-      }
-    },
-    "/apiview/": {
-      "get": {
-        "description": "Get all the api views",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ApiViewResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "ApiViews"
-        ]
-      }
-    },
-    "/case/": {
-      "get": {
-        "description": "Get all cases",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_gte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_lte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "schema",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/CaseListResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      },
-      "post": {
-        "description": "Create a new case from raw data",
-        "parameters": [],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/instance/": {
-      "post": {
-        "description": "Create a new case from instance and execution",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/CaseFromInstanceExecution"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseListResponse"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/{idx1}/{idx2}/": {
-      "get": {
-        "description": "Compares the data and / or solution of two given cases",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "data",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "in": "query",
-            "name": "solution",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx1",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx2",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseCompareResponse"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/{idx}/": {
-      "delete": {
-        "description": "Delete a case",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      },
-      "get": {
-        "description": "Get one case",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseListResponse"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      },
-      "put": {
-        "description": "Edit a case",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/CaseEditRequest"
-            }
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/{idx}/copy/": {
-      "post": {
-        "description": "Copies a case to a new one",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseListResponse"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/{idx}/data/": {
-      "delete": {
-        "description": "Delete a case",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      },
-      "get": {
-        "description": "Get data of a case",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseBase"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      },
-      "patch": {
-        "description": "Patches the data of a given case",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      },
-      "put": {
-        "description": "Edit a case",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/CaseEditRequest"
-            }
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/case/{idx}/instance/": {
-      "post": {
-        "description": "Copies the information stored in a case into a new instance",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/CaseToInstanceResponse"
-            }
-          }
-        },
-        "tags": [
-          "Cases"
-        ]
-      }
-    },
-    "/dag/": {
-      "post": {
-        "description": "Create an execution manually.",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/ExecutionDagPostRequest"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "DAGs"
-        ]
-      }
-    },
-    "/dag/deployed/": {
-      "get": {
-        "description": "Get list of deployed dags registered on the data base",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/DeployedDAG"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "DeployedDAGs"
-        ]
-      },
-      "post": {
-        "description": "Post a new deployed dag",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/DeployedDAG"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/DeployedDAG"
-            }
-          }
-        },
-        "tags": [
-          "DeployedDAGs"
-        ]
-      }
-    },
-    "/dag/instance/{idx}/": {
-      "put": {
-        "description": "Endpoint to save instance checks performed on the DAG",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/InstanceCheckRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "DAGs"
-        ]
-      }
-    },
-    "/dag/{idx}/": {
-      "get": {
-        "description": "Get input data and configuration for an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "DAGs"
-        ]
-      },
-      "put": {
-        "description": "Edit an execution",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/ExecutionDagRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "DAGs"
-        ]
-      }
-    },
-    "/execution/": {
-      "get": {
-        "description": "Get all executions",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_gte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_lte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "schema",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      },
-      "post": {
-        "description": "Create an execution",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/ExecutionRequest"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      }
-    },
-    "/execution/{idx}/": {
-      "delete": {
-        "description": "Delete an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Executions"
-        ]
-      },
-      "get": {
-        "description": "Get details of an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionDetailsEndpointWithIndicatorsResponse"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      },
-      "post": {
-        "description": "Stop an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Executions"
-        ]
-      },
-      "put": {
-        "description": "Edit an execution",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/ExecutionEditRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Executions"
-        ]
-      }
-    },
-    "/execution/{idx}/data/": {
-      "get": {
-        "description": "Get solution data of an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionDataEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      }
-    },
-    "/execution/{idx}/log/": {
-      "get": {
-        "description": "Get log of an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionLogEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      }
-    },
-    "/execution/{idx}/status/": {
-      "get": {
-        "description": "Get status of an execution",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/ExecutionStatusEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Executions"
-        ]
-      }
-    },
-    "/health/": {
-      "get": {
-        "description": "Health check",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/HealthResponse"
-            }
-          }
-        },
-        "tags": [
-          "Health"
-        ]
-      }
-    },
-    "/instance/": {
-      "get": {
-        "description": "Get all instances",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_gte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "format": "date-time",
-            "in": "query",
-            "name": "creation_date_lte",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "schema",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/InstanceEndpointResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Instances"
-        ]
-      },
-      "post": {
-        "description": "Create an instance",
-        "parameters": [],
-        "responses": {},
-        "tags": [
-          "Instances"
-        ]
-      }
-    },
-    "/instance/{idx}/": {
-      "delete": {
-        "description": "Delete an instance",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Instances"
-        ]
-      },
-      "get": {
-        "description": "Get one instance",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Instances"
-        ]
-      },
-      "put": {
-        "description": "Edit an instance",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/InstanceEditRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Instances"
-        ]
-      }
-    },
-    "/instance/{idx}/data/": {
-      "get": {
-        "description": "Get input data of an instance",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/InstanceDataEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Instances"
-        ]
-      }
-    },
-    "/instancefile/": {
-      "post": {
-        "description": "Create an instance from an mps file",
-        "parameters": [
-          {
-            "in": "formData",
-            "name": "name",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "description",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "minimize",
-            "required": false,
-            "type": "boolean"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/InstanceDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Instances"
-        ]
-      }
-    },
-    "/login/": {
-      "post": {
-        "description": "Log in",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/LoginEndpointRequest"
-            }
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/permission/": {
-      "get": {
-        "description": "Get all the permissions assigned to the roles",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/PermissionViewRoleResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "PermissionViewRole"
-        ]
-      },
-      "post": {
-        "description": "Create a new permission",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/PermissionViewRoleRequest"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/PermissionViewRoleResponse"
-            }
-          }
-        },
-        "tags": [
-          "PermissionViewRole"
-        ]
-      }
-    },
-    "/permission/{idx}/": {
-      "delete": {
-        "description": "Delete a permission",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "PermissionViewRole"
-        ]
-      },
-      "get": {
-        "description": "Get one permission",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/PermissionViewRoleResponse"
-            }
-          }
-        },
-        "tags": [
-          "PermissionViewRole"
-        ]
-      },
-      "put": {
-        "description": "Edit a permission",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/PermissionViewRoleEditRequest"
-            }
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "PermissionViewRole"
-        ]
-      }
-    },
-    "/roles/": {
-      "get": {
-        "description": "Gets all the roles",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/RolesResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Roles"
-        ]
-      },
-      "post": {
-        "description": "Creates a new role",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/RolesRequest"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/RolesResponse"
-            }
-          }
-        },
-        "tags": [
-          "Roles"
-        ]
-      }
-    },
-    "/roles/{idx}/": {
-      "delete": {
-        "description": "Deletes one role",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Roles"
-        ]
-      },
-      "get": {
-        "description": "Gets one role",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/RolesResponse"
-            }
-          }
-        },
-        "tags": [
-          "Roles"
-        ]
-      },
-      "put": {
-        "description": "Modifies one role",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/RolesResponse"
-            }
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "idx",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Roles"
-        ]
-      }
-    },
-    "/schema/": {
-      "get": {
-        "description": "Get list of available apps",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/SchemaListApp"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Schemas"
-        ]
-      }
-    },
-    "/schema/{dag_name}/": {
-      "get": {
-        "description": "Get instance, solution and config schema",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "dag_name",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/SchemaOneApp"
-            }
-          }
-        },
-        "tags": [
-          "Schemas"
-        ]
-      }
-    },
-    "/signup/": {
-      "post": {
-        "description": "Sign up",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/UserSignupRequest"
-            }
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/token/": {
-      "get": {
-        "description": "Check token",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/TokenEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/user/": {
-      "get": {
-        "description": "Get all users",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/UserEndpointResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/user/recover-password/": {
-      "put": {
-        "description": "Send email to create new password",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/RecoverPasswordRequest"
-            }
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/user/role/": {
-      "get": {
-        "description": "Gets all the user role assignments",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/UserRoleResponse"
-              },
-              "type": "array"
-            }
-          }
-        },
-        "tags": [
-          "User roles"
-        ]
-      },
-      "post": {
-        "description": "Creates a new role assignment",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/UserRoleRequest"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/UserRoleResponse"
-            }
-          }
-        },
-        "tags": [
-          "User roles"
-        ]
-      }
-    },
-    "/user/role/{user_id}/{role_id}/": {
-      "delete": {
-        "description": "Deletes one user role assignment",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "role_id",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "User roles"
-        ]
-      },
-      "get": {
-        "description": "Gets one user role assignment",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "role_id",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/UserRoleResponse"
-            }
-          }
-        },
-        "tags": [
-          "User roles"
-        ]
-      }
-    },
-    "/user/{user_id}/": {
-      "delete": {
-        "description": "Delete a user",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {},
-        "tags": [
-          "Users"
-        ]
-      },
-      "get": {
-        "description": "Get a user",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/UserDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "put": {
-        "description": "Edit a user",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/UserEditRequest"
-            }
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/UserDetailsEndpointResponse"
-            }
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/user/{user_id}/{make_admin}/": {
-      "put": {
-        "description": "Toggle user into admin",
-        "parameters": [
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "make_admin",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "format": "int32",
-            "in": "path",
-            "name": "user_id",
-            "required": true, 
-            "type": "integer"
-          }
-        ], 
-        "responses": {
-          "default": {
-            "description": "", 
-            "schema": {
-              "$ref": "#/definitions/UserEndpointResponse"
-            }
-          }
-        }, 
-        "tags": [
-          "Users"
-        ]
-      }
-    }
-  }, 
-  "swagger": "2.0.0"
+  }
 }
