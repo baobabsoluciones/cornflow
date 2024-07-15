@@ -1,4 +1,4 @@
-requests<=2.31.0
+requests<=2.32.3
 genson<=1.2.2
 jsonschema<=4.19.1
 marshmallow<=3.19.0
