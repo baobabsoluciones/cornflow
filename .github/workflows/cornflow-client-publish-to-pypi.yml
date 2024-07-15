@@ -38,7 +38,7 @@ jobs:
         password: ${{ secrets.pypi_password }}
         packages_dir: libs/client/dist/
     - name: Get version number
-      uses: jungwinter/split@v2
+      uses: winterjung/split@v2
       id: split
       with:
         msg : ${{ github.ref_name}}

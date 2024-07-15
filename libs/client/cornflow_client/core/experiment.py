@@ -1,15 +1,16 @@
 """
 
 """
-# Partial imports
+
 from abc import ABC, abstractmethod
 from typing import Union, Dict
 
-# Imports from internal modules
+from cornflow_client.constants import (
+    PARAMETER_SOLVER_TRANSLATING_MAPPING,
+    SOLVER_CONVERTER,
+)
 from .instance import InstanceCore
 from .solution import SolutionCore
-from .tools import copy
-from cornflow_client.constants import PARAMETER_SOLVER_TRANSLATING_MAPPING, SOLVER_CONVERTER
 
 
 class ExperimentCore(ABC):
@@ -85,7 +86,9 @@ class ExperimentCore(ABC):
         raise NotImplementedError()
 
     @staticmethod
-    def get_solver_config(config, lib="pyomo", default_solver="cbc", remove_unknown=False):
+    def get_solver_config(
+        config, lib="pyomo", default_solver="cbc", remove_unknown=False
+    ):
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
@@ -122,7 +125,9 @@ class ExperimentCore(ABC):
 
         if remove_unknown:
             conf = {
-                mapping[k, lib, solver]: v for k, v in config.items() if (k, lib, solver) in mapping
+                mapping[k, lib, solver]: v
+                for k, v in config.items()
+                if (k, lib, solver) in mapping
             }
             if config.get("solver_config"):
                 conf.update(
@@ -133,9 +138,7 @@ class ExperimentCore(ABC):
                     }
                 )
         else:
-            conf = {
-                mapping.get((k, lib, solver), k): v for k, v in config.items()
-            }
+            conf = {mapping.get((k, lib, solver), k): v for k, v in config.items()}
             conf.pop("solver", None)
             conf.pop("solver_config", None)
             if config.get("solver_config"):

@@ -20,24 +20,18 @@ class BarCutting(ApplicationCore):
 
     @property
     def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
-        options_instance = ["data/example_instance_1.json"]
-
-        options_solution = ["data/example_solution_1.json"]
+        data_1 = load_json(
+            os.path.join(os.path.dirname(__file__), "data/example_instance_1.json")
+        )
+        data_out_1 = load_json(
+            os.path.join(os.path.dirname(__file__), "data/example_solution_1.json")
+        )
 
         return [
-            (
-                load_json(
-                    os.path.join(
-                        os.path.dirname(__file__),
-                        options_instance[i],
-                    )
-                ),
-                load_json(
-                    os.path.join(
-                        os.path.dirname(__file__),
-                        options_solution[i],
-                    )
-                ),
-            )
-            for i in range(len(options_instance))
+            {
+                "name": "Base case",
+                "instance": data_1,
+                "solution": data_out_1,
+                "description": "Base instance and solution",
+            }
         ]

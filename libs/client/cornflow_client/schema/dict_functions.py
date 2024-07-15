@@ -1,12 +1,10 @@
 """
 
 """
-# Partial imports
-
 from functools import partial
+
 from marshmallow import Schema, fields, INCLUDE
 
-# Imports from internal modules
 from cornflow_client.constants import (
     BOOLEAN_TYPE,
     STRING_TYPE,

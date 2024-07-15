@@ -3,16 +3,14 @@ Integration test for the cornflow client
 Base, admin and service user get tested
 Integration between Airflow and cornflow through airflow client and cornflow client tested as well
 """
-# Full imports
+
 import json
 import os
-import pulp as pl
 import time
-
-# Partial imports
 from unittest import TestCase
 
-# Internal imports
+import pulp as pl
+
 from cornflow_client import CornFlow
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
@@ -20,6 +18,7 @@ from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
 
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 # Helper functions
 def _load_file(_file):
@@ -43,6 +42,16 @@ class TestCornflowClientUser(TestCase):
 
     def tearDown(self):
         pass
+
+    def check_execution_statuses(self, execution_id):
+        statuses = []
+        response = self.client.get_status(execution_id)
+        statuses.append(response["state"])
+        while STATUS_OPTIMAL not in statuses and len(statuses) < 100:
+            time.sleep(2)
+            response = self.client.get_status(execution_id)
+            statuses.append(response["state"])
+        return statuses
 
     def test_health_endpoint(self):
         response = self.client.is_alive()
@@ -171,7 +180,8 @@ class TestCornflowClientUser(TestCase):
 
     def test_create_execution_data_check(self):
         exec_to_check = self.test_create_execution()
-        time.sleep(15)
+        statuses = self.check_execution_statuses(exec_to_check["id"])
+
         exec_to_check_id = exec_to_check["id"]
         execution = self.client.create_execution_data_check(exec_to_check_id)
         self.assertEqual(STATUS_QUEUED, execution["state"])
@@ -179,7 +189,9 @@ class TestCornflowClientUser(TestCase):
 
     def test_execution_data_check_solution(self):
         execution = self.test_create_execution_data_check()
-        time.sleep(15)
+
+        statuses = self.check_execution_statuses(execution["id"])
+
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["state"], 1)
 
@@ -207,7 +219,8 @@ class TestCornflowClientUser(TestCase):
 
     def test_execution_results(self):
         execution = self.test_create_execution()
-        time.sleep(10)
+        statuses = self.check_execution_statuses(execution["id"])
+
         response = self.client.get_results(execution["id"])
 
         items = [
@@ -228,24 +241,21 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
 
     def test_execution_status(self):
         execution = self.test_create_execution()
-        self.assertEqual(STATUS_QUEUED, execution["state"])
 
-        time.sleep(4)
-        response = self.client.get_status(execution["id"])
+        statuses = self.check_execution_statuses(execution["id"])
+
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
+
         items = ["id", "state", "message", "data_hash"]
-        for item in items:
-            self.assertIn(item, response.keys())
-        self.assertEqual(STATUS_NOT_SOLVED, response["state"])
-
-        time.sleep(10)
         response = self.client.get_status(execution["id"])
         for item in items:
             self.assertIn(item, response.keys())
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
 
     def test_stop_execution(self):
         execution = self.test_create_execution()
@@ -277,7 +287,9 @@ class TestCornflowClientUser(TestCase):
 
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
-        time.sleep(15)
+        response = self.client.get_status(execution["id"])
+        statuses = self.check_execution_statuses(execution["id"])
+
         response = self.client.get_solution(execution["id"])
         items = [
             "id",
@@ -299,13 +311,16 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertEqual(STATUS_OPTIMAL, response["state"])
+        self.assertIn(STATUS_NOT_SOLVED, statuses)
+        self.assertIn(STATUS_OPTIMAL, statuses)
 
         return response
 
     def test_put_one_execution(self):
         execution = self.test_create_execution()
-        response = self.client.put_one_execution(execution["id"], {"name": "new_execution_name"})
+        response = self.client.put_one_execution(
+            execution["id"], {"name": "new_execution_name"}
+        )
         self.assertEqual("Updated correctly", response["message"])
 
     def test_delete_one_execution(self):
@@ -390,7 +405,7 @@ class TestCornflowClientUser(TestCase):
         for item in items:
             self.assertIn(item, response.keys())
             self.assertEqual(instance[item], response[item])
-            
+
     def test_get_one_instance_data(self):
         instance = self.test_create_instance()
         response = self.client.get_one_instance_data(instance["id"])
@@ -401,7 +416,7 @@ class TestCornflowClientUser(TestCase):
             "created_at",
             "user_id",
             "data_hash",
-            "schema"
+            "schema",
         ]
 
         self.assertIn("data", response.keys())
@@ -411,7 +426,9 @@ class TestCornflowClientUser(TestCase):
 
     def test_put_one_instance(self):
         instance = self.test_create_instance()
-        response = self.client.put_one_instance(instance["id"], {"name": "new_instance_name"})
+        response = self.client.put_one_instance(
+            instance["id"], {"name": "new_instance_name"}
+        )
         self.assertEqual("Updated correctly", response["message"])
 
     def test_get_one_case(self):
@@ -434,7 +451,7 @@ class TestCornflowClientUser(TestCase):
         for item in items:
             self.assertIn(item, response.keys())
             self.assertEqual(case[item], response[item])
-            
+
     def test_get_one_case_data(self):
         case = self.test_create_case()
         response = self.client.get_one_case_data(case["id"])
@@ -508,7 +525,7 @@ class TestCornflowClientUser(TestCase):
         schema["config"]["properties"]["solver"]["enum"] = pl.listSolvers()
         schema["config"]["properties"]["solver"]["default"] = "PULP_CBC_CMD"
 
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             self.assertDictEqual(value, response[key])
 
     def test_get_all_schemas(self):
@@ -517,6 +534,15 @@ class TestCornflowClientUser(TestCase):
 
         for schema in PUBLIC_DAGS:
             self.assertIn(schema, read_schemas)
+
+    def test_get_example_list(self):
+        response = self.client.get_example_list("rostering")
+        self.assertEqual(7, len(response))
+
+    def test_get_one_example(self):
+        response = self.client.get_one_example("rostering", "Base case")
+        self.assertIn("instance", response)
+        self.assertIn("solution", response)
 
 
 class TestCornflowClientAdmin(TestCase):
@@ -618,7 +644,6 @@ class TestCornflowClientService(TestCase):
             self.assertIn(dag, deployed_dags)
 
     def test_post_deployed_dag(self):
-
         response = self.client.create_deployed_dag(
             name="test_dag",
             description="test_dag_description",
@@ -626,7 +651,7 @@ class TestCornflowClientService(TestCase):
             instance_checks_schema=dict(),
             solution_schema=dict(),
             solution_checks_schema=dict(),
-            config_schema=dict()
+            config_schema=dict(),
         )
 
         items = ["id", "description"]
