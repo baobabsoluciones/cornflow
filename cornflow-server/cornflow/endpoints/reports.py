@@ -18,7 +18,12 @@ from cornflow.schemas.reports import (
     ReportRequest,
 )
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.exceptions import FileError, InvalidData, ObjectDoesNotExist
+from cornflow.shared.exceptions import (
+    FileError,
+    InvalidData,
+    ObjectDoesNotExist,
+    NoPermission,
+)
 
 
 class ReportEndpoint(BaseMetaResource):
@@ -91,7 +96,12 @@ class ReportEndpoint(BaseMetaResource):
             current_app.logger.info(f"Creating directory {my_directory}")
             os.mkdir(my_directory)
 
-        save_path = f"{my_directory}/{kwargs['name']}.{filename_extension}"
+        report_name = f"{secure_filename(kwargs['name'])}.{filename_extension}"
+
+        save_path = os.path.normpath(os.path.join(my_directory, report_name))
+
+        if "static" not in save_path and ".." in save_path:
+            raise NoPermission("Invalid file name")
 
         report = ReportModel(
             {
