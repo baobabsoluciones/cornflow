@@ -26,7 +26,7 @@ class DefaultConfig(object):
     FILE_BACKEND = os.getenv("FILE_BACKEND", "local")
     UPLOAD_FOLDER = os.getenv(
         "UPLOAD_FOLDER",
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "../static")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "./static")),
     )
     ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ["pdf", "html"])
 
