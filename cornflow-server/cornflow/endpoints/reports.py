@@ -3,7 +3,6 @@ External endpoints to manage the reports: create new ones, list all of them, get
 These endpoints have different access url, but manage the same data entities
 """
 import os
-from datetime import datetime
 
 from flask import current_app, request, send_from_directory
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -18,9 +17,9 @@ from cornflow.schemas.reports import (
     ReportRequest,
 )
 from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.const import SERVICE_ROLE
 from cornflow.shared.exceptions import (
     FileError,
-    InvalidData,
     ObjectDoesNotExist,
     NoPermission,
 )
@@ -30,6 +29,8 @@ class ReportEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new report or get all the reports and their information back
     """
+
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -57,7 +58,6 @@ class ReportEndpoint(BaseMetaResource):
 
     @doc(description="Create a report", tags=["Reports"])
     @authenticate(auth_class=Auth())
-    @Auth.dag_permission_required
     @use_kwargs(ReportRequest, location="form")
     @marshal_with(ReportSchema)
     def post(self, **kwargs):
@@ -70,7 +70,6 @@ class ReportEndpoint(BaseMetaResource):
           the reference_id for the newly created report if successful) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-
         execution = ExecutionModel.get_one_object(id=kwargs["execution_id"])
 
         if execution is None:
@@ -100,7 +99,7 @@ class ReportEndpoint(BaseMetaResource):
 
         save_path = os.path.normpath(os.path.join(my_directory, report_name))
 
-        if "static" not in save_path and ".." in save_path:
+        if "static" not in save_path or ".." in save_path:
             raise NoPermission("Invalid file name")
 
         report = ReportModel(
@@ -161,8 +160,7 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         directory, file = report.file_url.split(report.name)
         file = f"{report.name}{file}"
         directory = directory[:-1]
-        current_app.logger.debug(f"Directory {directory}")
-        current_app.logger.debug(f"File {file}")
+
         return send_from_directory(directory, file)
 
     @doc(description="Edit a report", tags=["Reports"], inherit=False)
@@ -193,5 +191,14 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        current_app.logger.info(f"User {self.get_user()} deleted report {idx}")
+
+        # get report objet
+        report = self.get_detail(user_id=self.get_user_id(), idx=idx)
+
+        if report is None:
+            raise ObjectDoesNotExist
+
+        # delete file
+        os.remove(os.path.join(report.file_url))
+
         return self.delete_detail(user_id=self.get_user_id(), idx=idx)
