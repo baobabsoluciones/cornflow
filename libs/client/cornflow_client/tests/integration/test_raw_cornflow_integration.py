@@ -11,10 +11,15 @@ from unittest import TestCase
 
 import pulp as pl
 
-from cornflow_client import CornFlow
+from cornflow_client import CornFlow, CornFlowApiError
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
-from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE, HTML_REPORT
+from cornflow_client.tests.const import (
+    PUBLIC_DAGS,
+    PULP_EXAMPLE,
+    HTML_REPORT,
+    TEST_FOLDER,
+)
 
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +40,12 @@ def _get_file(relative_path):
 class TestRawCornflowClientUser(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.raw.login("user", "UserPassword1!")
+        try:
+            login_result = self.client.raw.login("user", "UserPassword1!")
+        except CornFlowApiError:
+            login_result = self.client.raw.sign_up(
+                username="user", pwd="UserPassword1!", email="user@cornflow.org"
+            )
         data = login_result.json()
         self.assertEqual(login_result.status_code, 200)
         self.assertIn("id", data.keys())
@@ -46,9 +56,9 @@ class TestRawCornflowClientUser(TestCase):
         pass
 
     def check_execution_statuses(
-        self, execution_id, end_state=STATUS_OPTIMAL, initial_state=None
+        self, execution_id, end_state=STATUS_OPTIMAL, initial_state=STATUS_QUEUED
     ):
-        if initial_state is None:
+        if initial_state is not None:
             statuses = [initial_state]
         else:
             statuses = []
@@ -332,7 +342,9 @@ class TestRawCornflowClientUser(TestCase):
     def test_get_execution_solution(self):
         execution = self.test_create_execution()
 
-        statuses = self.check_execution_statuses(execution["id"])
+        statuses = self.check_execution_statuses(
+            execution["id"], initial_state=STATUS_QUEUED
+        )
 
         response = self.client.raw.get_solution(execution["id"])
         self.assertEqual(response.status_code, 200)
@@ -612,9 +624,14 @@ class TestRawCornflowClientAdmin(TestCase):
         login_result = self.client.login("admin", "Adminpassword1!")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
-        self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
-            "user", "UserPassword1!"
-        )["id"]
+        try:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
+                "user", "UserPassword1!"
+            )["id"]
+        except CornFlowApiError:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").sign_up(
+                username="user", pwd="UserPassword1!", email="user@cornflow.org"
+            )["id"]
 
     def tearDown(self):
         pass
@@ -642,6 +659,14 @@ class TestRawCornflowClientService(TestCase):
         login_result = self.client.login("airflow", "Airflow_test_password1")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
+        try:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
+                "user", "UserPassword1!"
+            )["id"]
+        except CornFlowApiError:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").sign_up(
+                username="user", pwd="UserPassword1!", email="user@cornflow.org"
+            )["id"]
 
     def tearDown(self):
         pass
@@ -752,4 +777,35 @@ class TestRawCornflowClientService(TestCase):
             run=False,
         ).json()
 
-        client.raw.create_report("new_report", HTML_REPORT, execution["id"])
+        print(execution["id"])
+
+        response = self.client.raw.create_report(
+            "new_report", HTML_REPORT, execution["id"]
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        return response
+
+    def test_get_one_report(self):
+        response = self.test_post_report_html()
+        print(response.json())
+        report_id = response.json()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        response = client.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # read from TEST FOLDER
+        with open(os.path.join(TEST_FOLDER, "new_report.html"), "r") as f:
+            file = f.read()
+
+        # read from test/data folder
+        with open(HTML_REPORT, "r") as f:
+            file_2 = f.read()
+
+        self.assertEqual(file, file_2)

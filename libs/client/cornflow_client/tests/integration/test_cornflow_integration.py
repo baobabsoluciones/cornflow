@@ -11,7 +11,7 @@ from unittest import TestCase
 
 import pulp as pl
 
-from cornflow_client import CornFlow
+from cornflow_client import CornFlow, CornFlowApiError
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
 from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
@@ -551,9 +551,14 @@ class TestCornflowClientAdmin(TestCase):
         login_result = self.client.login("admin", "Adminpassword1!")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
-        self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
-            "user", "UserPassword1!"
-        )["id"]
+        try:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
+                "user", "UserPassword1!"
+            )["id"]
+        except CornFlowApiError:
+            self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").sign_up(
+                username="user", pwd="UserPassword1!", email="user@cornflow.org"
+            )["id"]
 
     def tearDown(self):
         pass
