@@ -4,6 +4,8 @@ from cornflow_client import ApplicationCore, InstanceCore, SolutionCore, Experim
 from cornflow_client.constants import SOLUTION_STATUS_FEASIBLE, STATUS_OPTIMAL
 import logging
 
+from xml.etree import ElementTree as ET
+
 
 class Instance(InstanceCore):
     schema = get_empty_schema()
@@ -32,6 +34,19 @@ class Solver(ExperimentCore):
 
     def check_solution(self, *args, **kwargs):
         return dict()
+
+    def generate_report(self, report_path: str, report_name="report") -> None:
+
+        html = ET.Element("html")
+        body = ET.Element("body")
+        html.append(body)
+        div = ET.Element("div", attrib={"class": "foo"})
+        body.append(div)
+        span = ET.Element("span", attrib={"class": "bar"})
+        div.append(span)
+        with open(report_path, "w") as f:
+            ET.ElementTree(html).write(f, encoding="unicode", method="html")
+        return
 
 
 class Timer(ApplicationCore):

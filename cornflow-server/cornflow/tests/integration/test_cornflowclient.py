@@ -141,6 +141,25 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         )
         return self.create_new_execution(payload)
 
+    def create_instance_and_execution_report(
+        self, schema="tsp", solver="cpsat", data=None, timeLimit=10
+    ):
+        name = "test_instance_1"
+        description = "description123"
+        if data is None:
+            data = load_file("./cornflow/tests/data/tsp_instance.json")
+        payload = dict(data=data, name=name, description=description, schema=schema)
+        one_instance = self.create_new_instance_payload(payload)
+        payload = dict(
+            instance_id=one_instance["id"],
+            config=dict(solver=solver, timeLimit=timeLimit),
+            description="test_execution_description_123",
+            name="test_execution_123",
+            schema=schema,
+            report=dict(name="report"),
+        )
+        return self.create_new_execution(payload)
+
     def create_timer_instance_and_execution(self, seconds=5):
         payload = dict(
             data=dict(seconds=seconds),
@@ -189,6 +208,31 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_new_execution(self):
         return self.create_instance_and_execution()
+
+    def test_new_execution_with_tsp_report(self):
+        return self.create_instance_and_execution_report()
+
+    def test_new_execution_with_tsp_report_wait(self):
+        execution = self.create_instance_and_execution_report()
+        time.sleep(10)
+        execution = self.client.raw.get_results(execution["id"])
+        id_report = execution["reports"][0]["id"]
+        my_report = self.client.raw.get_report(id_report)
+        with open("my_report.html", "wb") as f:
+            f.write(my_report)
+        return
+        # read header of file? we can parse it with beatifulsoup
+
+    def test_new_execution_with_timer_report_wait(self):
+        payload = dict(solver="default", schema="timer", data={}, timeLimit=1)
+        execution = self.create_instance_and_execution_report(**payload)
+        time.sleep(5)
+        execution = self.client.raw.get_results(execution["id"])
+        id_report = execution["reports"][0]["id"]
+        my_report = self.client.raw.get_report(id_report)
+        with open("my_report.html", "wb") as f:
+            f.write(my_report)
+        return
 
     def test_delete_execution(self):
         execution = self.test_new_execution()
