@@ -7,6 +7,8 @@ for __my_path in my_paths:
 
 import unittest
 from unittest.mock import patch, Mock, MagicMock
+import html
+import xml.etree.ElementTree as ET
 
 # we mock everything that's airflow related:
 mymodule = MagicMock()
@@ -168,9 +170,27 @@ class Tsp(BaseDAGTests.SolvingTests):
         my_experim.solve(dict())
         report_path = "./my_report.html"
         my_experim.generate_report(report_path=report_path)
-        self.assertTrue(os.path.exists(report_path))
-        os.remove(report_path)
         # check the file is created.
+        self.assertTrue(os.path.exists(report_path))
+
+        tree = ET.parse(report_path)
+        elements = [elem.tag for elem in tree.iter()]
+        self.assertSetEqual(set(elements), {"html", "div", "span", "body"})
+
+        # try:
+        #     os.remove(report_path)
+        # except FileNotFoundError:
+        #     pass
+
+    def test_export(self):
+        tests = self.app.test_cases
+        my_file_path = "export.json"
+        self.app.instance(tests[0]["instance"]).to_json(my_file_path)
+        self.assertTrue(os.path.exists(my_file_path))
+        try:
+            os.remove(my_file_path)
+        except FileNotFoundError:
+            pass
 
 
 class Vrp(BaseDAGTests.SolvingTests):
@@ -299,3 +319,19 @@ class Timer(BaseDAGTests.SolvingTests):
 
         self.app = Timer()
         self.config.update(dict(solver="default", seconds=10))
+
+    def test_report(self):
+        my_experim = self.app.solvers["default"](self.app.instance({}))
+        my_experim.solve(dict(timeLimit=0))
+        report_path = "./my_report.html"
+        my_experim.generate_report(report_path=report_path)
+        # check the file is created.
+        self.assertTrue(os.path.exists(report_path))
+        tree = ET.parse(report_path)
+        elements = [elem.tag for elem in tree.iter()]
+        self.assertSetEqual(set(elements), {"html", "div", "span", "body"})
+
+        try:
+            os.remove(report_path)
+        except FileNotFoundError:
+            pass
