@@ -3,6 +3,7 @@
 """
 
 import logging as log
+import os
 import re
 from functools import wraps
 from urllib.parse import urljoin
@@ -105,13 +106,19 @@ class RawCornFlow(object):
             for key, value in query_args.items():
                 url = f"{url}{key}={value}&"
             url = url[:-1]
-        return requests.request(
-            method=method,
-            url=url,
-            headers={
+
+        headers = {
+            **{
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
             },
+            **kwargs.pop("headers", {"content_type": "application/json"}),
+        }
+
+        return requests.request(
+            method=method,
+            url=url,
+            headers=headers,
             **kwargs,
         )
 
@@ -180,12 +187,17 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def create_api(self, api, encoding=None, **kwargs):
-        return requests.post(
-            urljoin(self.url, api),
-            headers={
+        headers = {
+            **{
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
             },
+            **kwargs.pop("headers", {"content_type": "application/json"}),
+        }
+
+        return requests.post(
+            urljoin(self.url, api),
+            headers=headers,
             **kwargs,
         )
 
@@ -499,14 +511,21 @@ class RawCornFlow(object):
         )
 
     @ask_token
+    @log_call
+    @prepare_encoding
+    def get_reports(self, params=None, encoding=None):
+        """ """
+        return self.get_api("report", params=params, encoding=encoding)
+
+    @ask_token
     @prepare_encoding
     def create_report(self, name, filename, execution_id, encoding=None, **kwargs):
         """
-        Edits an execution
+        Creates a report for an execution
 
         :param str execution_id: id for the execution
         :param str name: the name of the report
-        :param file file: the file object with the report (e.g., open(REPORT_FILE_PATH, "rb"))
+        :param file filename: the file object with the report (e.g., open(REPORT_FILE_PATH, "rb"))
         :param kwargs: optional data to write (description)
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
@@ -514,11 +533,28 @@ class RawCornFlow(object):
             payload = (
                 dict(file=_file, name=name, execution_id=execution_id, **kwargs),
             )
-            result = self.create_api(
-                "report/",
-                data=payload,
-                encoding=encoding,
-            )
+        result = self.create_api(
+            "report/",
+            data=payload,
+            encoding=encoding,
+            headers={"content_type": "multipart/form-data"},
+        )
+        return result
+
+    @ask_token
+    @prepare_encoding
+    def get_one_report(self, reference_id, folder_destination, encoding=None):
+        result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
+        content = result.content()
+
+        file_name = result.headers["Content-Disposition"].split["="][1]
+
+        path = os.path.normpath(os.path.join(folder_destination, file_name))
+
+        # write content to disk on path
+        with open(path, "wb") as f:
+            f.write(content)
+
         return result
 
     @ask_token
