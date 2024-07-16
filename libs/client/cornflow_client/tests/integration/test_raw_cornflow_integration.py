@@ -14,7 +14,7 @@ import pulp as pl
 from cornflow_client import CornFlow
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
-from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
+from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE, HTML_REPORT
 
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -732,3 +732,24 @@ class TestRawCornflowClientService(TestCase):
             self.assertIn(item, response.keys())
         self.assertEqual("test_dag_2", response["id"])
         self.assertEqual("test_dag_2_description", response["description"])
+
+    def test_post_report_html(self):
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        data = _load_file(PULP_EXAMPLE)
+
+        instance = client.raw.create_instance(
+            data, "test_example", "test_description"
+        ).json()
+
+        execution = client.raw.create_execution(
+            instance_id=instance["id"],
+            config={"solver": "PULP_CBC_CMD", "timeLimit": 60},
+            name="test_execution",
+            description="execution_description",
+            schema="solve_model_dag",
+            run=False,
+        ).json()
+
+        client.raw.create_report("new_report", HTML_REPORT, execution["id"])
