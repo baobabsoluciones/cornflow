@@ -70,7 +70,7 @@ class ReportEndpoint(BaseMetaResource):
           the reference_id for the newly created report if successful) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        execution = ExecutionModel.get_one_object(id=kwargs["execution_id"])
+        execution = ExecutionModel.get_one_object(idx=kwargs["execution_id"])
 
         if execution is None:
             raise ObjectDoesNotExist("The execution does not exist")

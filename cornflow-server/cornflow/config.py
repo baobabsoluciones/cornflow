@@ -95,6 +95,7 @@ class Development(DefaultConfig):
     """ """
 
     ENV = "development"
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/usr/src/app/static")
 
 
 class Testing(DefaultConfig):
@@ -126,6 +127,7 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/usr/src/app/static")
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}
