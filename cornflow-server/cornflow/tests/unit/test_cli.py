@@ -21,7 +21,7 @@ class CLITests(TestCase):
     def setUp(self):
         db.create_all()
         self.number_of_views = 51
-        self.number_of_permissions = 578
+        self.number_of_permissions = 569
         if int(os.getenv("CF_ALARMS_ENDPOINT")) != 1:
             self.number_of_views = 49
             self.number_of_permissions = 514

@@ -1,5 +1,9 @@
 from .raw_cornflow_client import RawCornFlow, CornFlowApiError
 
+# TODO: review the standard calls for the reports.
+# TODO: modify the headers on the calls that require a file.
+# TODO: have the download report method to receive the path to save it on the local machine.
+
 
 class CornFlow:
     def __init__(self, url, token=None):
