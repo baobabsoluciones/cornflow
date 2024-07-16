@@ -795,7 +795,7 @@ class TestRawCornflowClientService(TestCase):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
 
-        response = client.get_one_report(
+        response = client.raw.get_one_report(
             reference_id=report_id, folder_destination=TEST_FOLDER
         )
         self.assertEqual(response.status_code, 200)
@@ -809,3 +809,6 @@ class TestRawCornflowClientService(TestCase):
             file_2 = f.read()
 
         self.assertEqual(file, file_2)
+
+        # remove file from TEST_FOLDER
+        os.remove(os.path.join(TEST_FOLDER, "new_report.html"))
