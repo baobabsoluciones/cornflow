@@ -14,7 +14,12 @@ import pulp as pl
 from cornflow_client import CornFlow, CornFlowApiError
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
-from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
+from cornflow_client.tests.const import (
+    PUBLIC_DAGS,
+    PULP_EXAMPLE,
+    HTML_REPORT,
+    TEST_FOLDER,
+)
 
 # Constants
 path_to_tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -665,3 +670,104 @@ class TestCornflowClientService(TestCase):
             self.assertIn(item, response.keys())
         self.assertEqual("test_dag", response["id"])
         self.assertEqual("test_dag_description", response["description"])
+
+    def test_post_report_html(self):
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        data = _load_file(PULP_EXAMPLE)
+
+        instance = client.create_instance(data, "test_example", "test_description")
+
+        execution = client.create_execution(
+            instance_id=instance["id"],
+            config={"solver": "PULP_CBC_CMD", "timeLimit": 60},
+            name="test_execution",
+            description="execution_description",
+            schema="solve_model_dag",
+            run=False,
+        )
+
+        response = self.client.create_report("new_report", HTML_REPORT, execution["id"])
+
+        self.assertEqual(response["execution_id"], execution["id"])
+
+        return response
+
+    def test_get_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        content, headers = client.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
+
+        self.assertEqual(headers["File-Name"], response["name"])
+        self.assertEqual(headers["File-Description"], response["description"])
+
+        # read from TEST FOLDER
+        with open(os.path.join(TEST_FOLDER, "new_report.html"), "r") as f:
+            file = f.read()
+
+        # read from test/data folder
+        with open(HTML_REPORT, "r") as f:
+            file_2 = f.read()
+
+        self.assertEqual(file, file_2)
+
+        # remove file from TEST_FOLDER
+        os.remove(os.path.join(TEST_FOLDER, "new_report.html"))
+
+    def test_get_all_reports(self):
+        report_1 = self.test_post_report_html()["id"]
+        report_2 = self.test_post_report_html()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        response = client.get_reports()
+
+        self.assertGreaterEqual(len(response), 2)
+
+        client.delete_one_report(reference_id=report_1)
+        client.delete_one_report(reference_id=report_2)
+
+    def test_put_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        payload = {"name": "new_name", "description": "some_description"}
+
+        _ = client.put_one_report(reference_id=report_id, payload=payload)
+
+        content, headers = client.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
+
+        self.assertEqual(headers["File-Name"], payload["name"])
+        self.assertEqual(headers["File-Description"], payload["description"])
+        self.assertNotEqual(headers["File-Name"], "new_report")
+        self.assertNotEqual(headers["File-Description"], "")
+
+        _ = client.delete_one_report(reference_id=report_id)
+
+    def test_delete_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        reports_before = client.get_reports()
+
+        _ = client.delete_one_report(reference_id=report_id)
+
+        reports_after = client.get_reports()
+
+        self.assertLess(len(reports_after), len(reports_before))
