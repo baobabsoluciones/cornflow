@@ -187,6 +187,27 @@ class TestReportsListEndpoint(CustomTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(content, file)
 
+    def test_modify_report(self):
+        item = self.test_new_report_html()
+
+        payload = {"name": "new_name", "description": "some_description"}
+
+        response = self.client.put(
+            f"{self.url}{item['id']}/",
+            headers=self.get_header_with_auth(self.token),
+            json=payload,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(
+            f"{self.url}{item['id']}/", headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("new_name", dict(response.headers)["File-Name"])
+        self.assertEqual("some_description", dict(response.headers)["File-Description"])
+
     def test_delete_report(self):
         item = self.test_new_report_html()
         response = self.client.delete(
