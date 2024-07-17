@@ -617,6 +617,11 @@ class TestRawCornflowClientUser(TestCase):
         for schema in PUBLIC_DAGS:
             self.assertIn(schema, read_schemas)
 
+    def test_log_in_first(self):
+        client = CornFlow(url="http://127.0.0.1:5050/")
+
+        self.assertRaises(CornFlowApiError, client.raw.get_all_instances)
+
 
 class TestRawCornflowClientAdmin(TestCase):
     def setUp(self):
@@ -758,6 +763,19 @@ class TestRawCornflowClientService(TestCase):
         self.assertEqual("test_dag_2", response["id"])
         self.assertEqual("test_dag_2_description", response["description"])
 
+    def test_raises_post_deployed_dag(self):
+        self.assertRaises(
+            CornFlowApiError,
+            self.client.raw.create_deployed_dag,
+            name=None,
+            description="test_dag_2_description",
+            instance_schema=dict(),
+            instance_checks_schema=dict(),
+            solution_schema=dict(),
+            solution_checks_schema=dict(),
+            config_schema=dict(),
+        )
+
     def test_post_report_html(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
@@ -781,17 +799,12 @@ class TestRawCornflowClientService(TestCase):
             "new_report", HTML_REPORT, execution["id"]
         )
 
-        print(execution["id"])
-        print(response.status_code)
-        print(response.json())
-
         self.assertEqual(response.status_code, 201)
 
         return response
 
     def test_get_one_report(self):
         response = self.test_post_report_html()
-        print(response.json())
         report_id = response.json()["id"]
 
         client = CornFlow(url="http://127.0.0.1:5050/")
@@ -814,3 +827,59 @@ class TestRawCornflowClientService(TestCase):
 
         # remove file from TEST_FOLDER
         os.remove(os.path.join(TEST_FOLDER, "new_report.html"))
+
+    def test_get_all_reports(self):
+        report_1 = self.test_post_report_html().json()["id"]
+        report_2 = self.test_post_report_html().json()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        response = client.raw.get_reports()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.json()), 2)
+
+        client.raw.delete_one_report(reference_id=report_1)
+        client.raw.delete_one_report(reference_id=report_2)
+
+    def test_put_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response.json()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        payload = {"name": "new_name", "description": "some_description"}
+
+        response = client.raw.put_one_report(reference_id=report_id, payload=payload)
+
+        self.assertEqual(response.status_code, 200)
+
+        new_report = client.raw.get_one_report(reference_id=report_id)
+
+        self.assertEqual(new_report.json()["name"], paylaod["name"])
+        self.assertEqual(new_report.json()["description"], payload["description"])
+        self.assertNotEqual(new_report.json()["name"], "new_report")
+        self.assertNotEqual(new_report.json()["description"], "")
+
+        delete = client.raw.delete_one_report(reference_id=report_id)
+        self.assertEqual(delete.status_code, 200)
+
+    def test_delete_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response.json()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        reports_before = client.raw.get_reports()
+
+        self.assertEqual(reports_before.status_code, 200)
+
+        response = client.raw.delete_one_report(reference_id=report_id)
+        self.assertEqual(response.status_code, 200)
+
+        reports_after = client.raw.get_reports()
+
+        self.assertLess(len(reports_after.json()), len(reports_before.json()))
