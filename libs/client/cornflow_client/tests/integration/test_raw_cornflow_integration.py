@@ -856,7 +856,9 @@ class TestRawCornflowClientService(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        new_report = client.raw.get_one_report(reference_id=report_id)
+        new_report = client.raw.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
 
         self.assertEqual(new_report.headers["File-Name"], payload["name"])
         self.assertEqual(new_report.headers["File-Description"], payload["description"])
