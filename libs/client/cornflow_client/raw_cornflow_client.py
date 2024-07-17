@@ -6,9 +6,11 @@ import logging as log
 import os
 import re
 from functools import wraps
+from typing import Union, Dict
 from urllib.parse import urljoin
 
 import requests
+from requests import Response
 
 
 def ask_token(func: callable):
@@ -55,7 +57,7 @@ class RawCornFlow(object):
     Base class to access cornflow-server
     """
 
-    def __init__(self, url, token=None):
+    def __init__(self, url: str, token=None):
         self.url = url
         self.token = token
 
@@ -67,25 +69,25 @@ class RawCornFlow(object):
 
     def api_for_id(
         self,
-        api,
-        id=None,
-        method="GET",
-        post_url=None,
-        query_args=None,
-        encoding=None,
+        api: str,
+        id: Union[str, int] = None,
+        method: str = "GET",
+        post_url: str = None,
+        query_args: Dict = None,
+        encoding: str = None,
         **kwargs,
-    ):
+    ) -> Response:
         """
-        :param api: the resource in the server
+        :param str api: the resource in the server
         :param id: the id of the particular object
-        :param method: HTTP method to apply
-        :param post_url: optional action to apply
-        :param query_args: query arguments for the request
-        :param encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
+        :param str method: HTTP method to apply
+        :param str post_url: optional action to apply
+        :param Dict query_args: query arguments for the request
+        :param str encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
         options are: gzip, compress, deflate, br or identity
         :param kwargs: other arguments to requests.request
 
-        :return: requests.request
+        :return: :class:`requests.Response`
         """
         if api[0] == "/" and self.url[-1] == "/":
             api = api[1:]
@@ -125,7 +127,9 @@ class RawCornFlow(object):
             **kwargs,
         )
 
-    def get_api(self, api, method="GET", encoding=None, **kwargs):
+    def get_api(
+        self, api: str, method: str = "GET", encoding: str = None, **kwargs
+    ) -> Response:
         return requests.request(
             method=method,
             url=urljoin(self.url, api) + "/",
@@ -138,7 +142,14 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def get_api_for_id(self, api, id=None, post_url=None, encoding=None, **kwargs):
+    def get_api_for_id(
+        self,
+        api: str,
+        id: Union[str, id] = None,
+        post_url: str = None,
+        encoding: str = None,
+        **kwargs,
+    ) -> Response:
         """
         api_for_id with a GET request
         """
@@ -506,8 +517,8 @@ class RawCornFlow(object):
         Edits an execution
 
         :param str execution_id: id for the execution
-        :param kwargs: optional data to edit
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param kwargs: optional data to edit
         """
         return self.put_api_for_id(
             "dag/", id=execution_id, encoding=encoding, payload=kwargs
@@ -517,7 +528,14 @@ class RawCornFlow(object):
     @log_call
     @prepare_encoding
     def get_reports(self, params=None, encoding=None):
-        """ """
+        """
+        Gets all reports for a given user
+
+        :param dict params: optional filters
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
         return self.get_api("report", params=params, encoding=encoding)
 
     @ask_token
@@ -529,8 +547,8 @@ class RawCornFlow(object):
         :param str execution_id: id for the execution
         :param str name: the name of the report
         :param file filename: the file object with the report (e.g., open(REPORT_FILE_PATH, "rb"))
-        :param kwargs: optional data to write (description)
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param kwargs: optional data to write (description)
         """
         with open(filename, "rb") as _file:
             result = self.create_api(
@@ -544,8 +562,18 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def get_one_report(self, reference_id, folder_destination, encoding=None):
-        """"""
+    def get_one_report(
+        self, reference_id, folder_destination, encoding=None
+    ) -> Response:
+        """
+        Gets one specific report and downloads it to disk
+
+        :param int reference_id: id of the report to download
+        :param str folder_destination: Path on the local system where to save the downloaded report
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
         result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
         content = result.content
 
@@ -563,20 +591,31 @@ class RawCornFlow(object):
     @log_call
     @prepare_encoding
     def delete_one_report(self, reference_id, encoding=None):
-        """"""
+        """
+        Deletes a report
+
+        :param int reference_id: id of the report to download
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
         return self.delete_api_for_id(api="report", id=reference_id, encoding=encoding)
 
     @ask_token
     @log_call
     @prepare_encoding
-    def put_one_report(self, reference_id, payload, encoding=None):
+    def put_one_report(self, reference_id, payload, encoding=None) -> Response:
         """
+        Edits one specific report and downloads it to disk
 
+        :param int reference_id: id of the report to download
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
         """
         return self.put_api_for_id(
             api="report", id=reference_id, payload=payload, encoding=encoding
         )
-
 
     @ask_token
     @prepare_encoding
