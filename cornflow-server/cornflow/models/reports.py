@@ -53,6 +53,10 @@ class ReportModel(TraceAttributesModel):
         """
         return db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
+    @declared_attr
+    def user(self):
+        return db.relationship("UserModel")
+
     def __init__(self, data: dict):
         super().__init__()
         self.user_id = data.get("user_id")

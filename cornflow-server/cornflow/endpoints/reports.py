@@ -154,7 +154,7 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} gets details of report {idx}")
-        report = self.get_detail(user_id=self.get_user_id(), idx=idx)
+        report = self.get_detail(user=self.get_user(), idx=idx)
         if report is None:
             raise ObjectDoesNotExist
 
@@ -162,7 +162,10 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         file = f"{report.name}{file}"
         directory = directory[:-1]
 
-        return send_from_directory(directory, file)
+        response = send_from_directory(directory, file)
+        response.headers["File-Description"] = report.description
+        response.headers["File-Name"] = report.name
+        return response
 
     @doc(description="Edit a report", tags=["Reports"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -177,7 +180,33 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} edits report {idx}")
-        return self.put_detail(data, user_id=self.get_user_id(), idx=idx)
+
+        report = self.get_detail(user=self.get_user(), idx=idx)
+
+        try:
+            if report.name != data["name"]:
+                directory, file = report.file_url.split(report.name)
+
+                new_location = (
+                    f"{os.path.join(directory, secure_filename(data['name']))}{file}"
+                )
+                old_location = report.file_url
+
+                current_app.logger.debug(f"Old location: {old_location}")
+                current_app.logger.debug(f"New location: {new_location}")
+
+                os.rename(old_location, new_location)
+                data["file_url"] = new_location
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return {"error": "Error moving file"}, 400
+
+        report.update(data)
+
+        report.save()
+
+        return {"message": "Updated correctly"}, 200
 
     @doc(description="Delete a report", tags=["Reports"], inherit=False)
     @authenticate(auth_class=Auth())

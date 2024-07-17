@@ -858,10 +858,10 @@ class TestRawCornflowClientService(TestCase):
 
         new_report = client.raw.get_one_report(reference_id=report_id)
 
-        self.assertEqual(new_report.json()["name"], paylaod["name"])
-        self.assertEqual(new_report.json()["description"], payload["description"])
-        self.assertNotEqual(new_report.json()["name"], "new_report")
-        self.assertNotEqual(new_report.json()["description"], "")
+        self.assertEqual(new_report.headers["File-Name"], payload["name"])
+        self.assertEqual(new_report.headers["File-Description"], payload["description"])
+        self.assertNotEqual(new_report.headers["File-Name"], "new_report")
+        self.assertNotEqual(new_report.headers["File-Description"], "")
 
         delete = client.raw.delete_one_report(reference_id=report_id)
         self.assertEqual(delete.status_code, 200)
