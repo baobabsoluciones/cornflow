@@ -158,7 +158,7 @@ class TestReportsListEndpoint(CustomTestCase):
             ),
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(404, response.status_code)
         self.assertTrue("error" in response.json)
 
     def test_get_no_reports(self):
