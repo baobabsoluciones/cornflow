@@ -117,7 +117,7 @@ class ReportEndpoint(BaseMetaResource):
             report.save()
         except Exception as error:
             current_app.logger.error(error)
-            raise InvalidUsage("Error on POST report")
+            raise InvalidUsage(error=error)
 
         try:
             # We try to save the file, if an error is raised then we delete the record on the database
