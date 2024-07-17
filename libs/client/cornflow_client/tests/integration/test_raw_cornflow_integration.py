@@ -777,11 +777,13 @@ class TestRawCornflowClientService(TestCase):
             run=False,
         ).json()
 
-        print(execution["id"])
-
         response = self.client.raw.create_report(
             "new_report", HTML_REPORT, execution["id"]
         )
+
+        print(execution["id"])
+        print(response.status_code)
+        print(response.json())
 
         self.assertEqual(response.status_code, 201)
 
