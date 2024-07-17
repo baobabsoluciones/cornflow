@@ -22,7 +22,6 @@ from cornflow.shared.exceptions import (
     FileError,
     ObjectDoesNotExist,
     NoPermission,
-    InvalidUsage,
 )
 
 
@@ -71,53 +70,50 @@ class ReportEndpoint(BaseMetaResource):
           the reference_id for the newly created report if successful) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        try:
-            execution = ExecutionModel.get_one_object(idx=kwargs["execution_id"])
 
-            if execution is None:
-                raise ObjectDoesNotExist("The execution does not exist")
+        execution = ExecutionModel.get_one_object(idx=kwargs["execution_id"])
 
-            if "file" not in request.files:
-                return {"message": "No file part"}, 400
+        if execution is None:
+            raise ObjectDoesNotExist("The execution does not exist")
 
-            file = request.files["file"]
-            filename = secure_filename(file.filename)
-            filename_extension = filename.split(".")[-1]
+        if "file" not in request.files:
+            return {"message": "No file part"}, 400
 
-            if filename_extension not in current_app.config["ALLOWED_EXTENSIONS"]:
-                return {
-                    "message": f"Invalid file extension. "
-                    f"Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
-                }, 400
+        file = request.files["file"]
+        filename = secure_filename(file.filename)
+        filename_extension = filename.split(".")[-1]
 
-            my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{execution.id}"
+        if filename_extension not in current_app.config["ALLOWED_EXTENSIONS"]:
+            return {
+                "message": f"Invalid file extension. "
+                f"Valid extensions are: {current_app.config['ALLOWED_EXTENSIONS']}"
+            }, 400
 
-            # we create a directory for the execution
-            if not os.path.exists(my_directory):
-                current_app.logger.info(f"Creating directory {my_directory}")
-                os.mkdir(my_directory)
+        my_directory = f"{current_app.config['UPLOAD_FOLDER']}/{execution.id}"
 
-            report_name = f"{secure_filename(kwargs['name'])}.{filename_extension}"
+        # we create a directory for the execution
+        if not os.path.exists(my_directory):
+            current_app.logger.info(f"Creating directory {my_directory}")
+            os.mkdir(my_directory)
 
-            save_path = os.path.normpath(os.path.join(my_directory, report_name))
+        report_name = f"{secure_filename(kwargs['name'])}.{filename_extension}"
 
-            if "static" not in save_path or ".." in save_path:
-                raise NoPermission("Invalid file name")
+        save_path = os.path.normpath(os.path.join(my_directory, report_name))
 
-            report = ReportModel(
-                {
-                    "name": kwargs["name"],
-                    "file_url": save_path,
-                    "execution_id": kwargs["execution_id"],
-                    "user_id": execution.user_id,
-                    "description": kwargs.get("description", ""),
-                }
-            )
+        if "static" not in save_path or ".." in save_path:
+            raise NoPermission("Invalid file name")
 
-            report.save()
-        except Exception as error:
-            current_app.logger.error(error)
-            raise InvalidUsage(error=str(error))
+        report = ReportModel(
+            {
+                "name": kwargs["name"],
+                "file_url": save_path,
+                "execution_id": kwargs["execution_id"],
+                "user_id": execution.user_id,
+                "description": kwargs.get("description", ""),
+            }
+        )
+
+        report.save()
 
         try:
             # We try to save the file, if an error is raised then we delete the record on the database
@@ -127,7 +123,7 @@ class ReportEndpoint(BaseMetaResource):
         except Exception as error:
             report.delete()
             current_app.logger.error(error)
-            raise FileError
+            raise FileError(error=str(error))
 
 
 class ReportDetailsEndpointBase(BaseMetaResource):
@@ -181,7 +177,7 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} edits report {idx}")
-        return self.put_detail(data, user=self.get_user(), idx=idx)
+        return self.put_detail(data, user_id=self.get_user_id(), idx=idx)
 
     @doc(description="Delete a report", tags=["Reports"], inherit=False)
     @authenticate(auth_class=Auth())

@@ -1,5 +1,5 @@
 """
-
+Code for the main class to interact to cornflow from python code.
 """
 
 import logging as log
@@ -11,6 +11,45 @@ from urllib.parse import urljoin
 import requests
 
 
+def ask_token(func: callable):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if not self.token:
+            raise CornFlowApiError("Need to login first!")
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
+def log_call(func: callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        log.debug(result.json())
+        return result
+
+    return wrapper
+
+
+def prepare_encoding(func: callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        encoding = kwargs.get("encoding", "br")
+        if encoding not in [
+            "gzip",
+            "compress",
+            "deflate",
+            "br",
+            "identity",
+        ]:
+            encoding = "br"
+        kwargs["encoding"] = encoding
+        result = func(*args, **kwargs)
+        return result
+
+    return wrapper
+
+
 class RawCornFlow(object):
     """
     Base class to access cornflow-server
@@ -19,42 +58,6 @@ class RawCornFlow(object):
     def __init__(self, url, token=None):
         self.url = url
         self.token = token
-
-    def ask_token(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            if not self.token:
-                raise CornFlowApiError("Need to login first!")
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    def log_call(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            log.debug(result.json())
-            return result
-
-        return wrapper
-
-    def prepare_encoding(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            encoding = kwargs.get("encoding", "br")
-            if encoding not in [
-                "gzip",
-                "compress",
-                "deflate",
-                "br",
-                "identity",
-            ]:
-                encoding = "br"
-            kwargs["encoding"] = encoding
-            result = func(*args, **kwargs)
-            return result
-
-        return wrapper
 
     # def expect_201(func):
     #     return partial(expect_status, status=201)
@@ -352,7 +355,7 @@ class RawCornFlow(object):
         :param str instance_id: id for the instance
         :param str name: name for the execution
         :param str description: description of the execution
-        :param dict config: execution configuration
+        :param dict config: configuration for the execution
         :param str schema: name of the problem to solve
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
@@ -542,6 +545,7 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def get_one_report(self, reference_id, folder_destination, encoding=None):
+        """"""
         result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
         content = result.content
 
@@ -554,6 +558,25 @@ class RawCornFlow(object):
             f.write(content)
 
         return result
+
+    @ask_token
+    @log_call
+    @prepare_encoding
+    def delete_one_report(self, reference_id, encoding=None):
+        """"""
+        return self.delete_api_for_id(api="report", id=reference_id, encoding=encoding)
+
+    @ask_token
+    @log_call
+    @prepare_encoding
+    def put_one_report(self, reference_id, payload, encoding=None):
+        """
+
+        """
+        return self.put_api_for_id(
+            api="report", id=reference_id, payload=payload, encoding=encoding
+        )
+
 
     @ask_token
     @prepare_encoding
@@ -934,7 +957,7 @@ class RawCornFlow(object):
         encoding=None,
     ):
         if name is None:
-            return {"error": "No dag name was given"}
+            raise CornFlowApiError("No dag name was given")
         payload = dict(
             id=name,
             description=description,
@@ -1017,7 +1040,7 @@ def group_variables_by_name(_vars, names_list, **kwargs):
     # 2. key can be a tuple or a single string.
     # 3. if a tuple, they can be an integer or a string.
     #
-    # it dos not permit the nested dictionary format of variables
+    # it does not permit the nested dictionary format of variables
     # we copy it because we will be taking out already seen variables
     _vars = dict(_vars)
     __vars = {k: {} for k in names_list}
