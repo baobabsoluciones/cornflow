@@ -21,7 +21,10 @@ class InvalidUsage(Exception):
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
         if error is not None:
-            self.error = error
+            if isinstance(error, Exception):
+                self.error = str(error)
+            else:
+                self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
