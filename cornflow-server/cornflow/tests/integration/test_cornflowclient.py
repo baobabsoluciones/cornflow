@@ -4,6 +4,8 @@
 
 # Full imports
 import json
+import os
+
 import pulp
 import logging as log
 import time
@@ -21,7 +23,7 @@ from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
     STATUS_HEALTHY,
 )
-from cornflow.tests.const import INSTANCE_PATH, CASE_PATH
+from cornflow.tests.const import INSTANCE_PATH, CASE_PATH, INSTANCE_MPS, INSTANCE_TSP
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
 
@@ -128,7 +130,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         return execution
 
     def create_instance_and_execution(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         schema = "solve_model_dag"
@@ -147,16 +149,15 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         name = "test_instance_1"
         description = "description123"
         if data is None:
-            data = load_file("./cornflow/tests/data/tsp_instance.json")
+            data = load_file(INSTANCE_TSP)
         payload = dict(data=data, name=name, description=description, schema=schema)
         one_instance = self.create_new_instance_payload(payload)
         payload = dict(
             instance_id=one_instance["id"],
-            config=dict(solver=solver, timeLimit=timeLimit),
+            config=dict(solver=solver, timeLimit=timeLimit, report=dict(name="report")),
             description="test_execution_description_123",
             name="test_execution_123",
             schema=schema,
-            report=dict(name="report"),
         )
         return self.create_new_execution(payload)
 
@@ -183,10 +184,10 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     # TODO: infeasible execution
 
     def test_new_instance_file(self):
-        self.create_new_instance_file("./cornflow/tests/data/test_mps.mps")
+        self.create_new_instance_file(INSTANCE_MPS)
 
     def test_new_instance(self):
-        return self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        return self.create_new_instance(INSTANCE_MPS)
 
     # TODO: reactivate test with new version of cornflow client which allows to pass
     #  optional arguments for the headers of the request
@@ -212,27 +213,45 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_new_execution_with_tsp_report(self):
         return self.create_instance_and_execution_report()
 
+    #
     def test_new_execution_with_tsp_report_wait(self):
         execution = self.create_instance_and_execution_report()
-        time.sleep(10)
-        execution = self.client.raw.get_results(execution["id"])
-        id_report = execution["reports"][0]["id"]
-        my_report = self.client.raw.get_report(id_report)
-        with open("my_report.html", "wb") as f:
-            f.write(my_report)
-        return
-        # read header of file? we can parse it with beatifulsoup
+        reports_info = []
+        for _ in range(6):
+            time.sleep(5)
+            execution_info = self.client.raw.get_results(execution["id"])
+            reports_info = execution_info.json()["reports"]
+            if len(reports_info) > 0:
+                break
+        id_report = reports_info[0]["id"]
+        my_name = "./my_report.html"
+        self.client.raw.get_one_report(id_report, "./", my_name)
+        self.assertTrue(os.path.exists(my_name))
+        try:
+            os.remove(my_name)
+        except OSError:
+            pass
+
+    # read header of file? we can parse it with beatifulsoup
 
     def test_new_execution_with_timer_report_wait(self):
-        payload = dict(solver="default", schema="timer", data={}, timeLimit=1)
+        payload = dict(solver="default", schema="timer", data={"a": 1}, timeLimit=1)
         execution = self.create_instance_and_execution_report(**payload)
-        time.sleep(5)
-        execution = self.client.raw.get_results(execution["id"])
-        id_report = execution["reports"][0]["id"]
-        my_report = self.client.raw.get_report(id_report)
-        with open("my_report.html", "wb") as f:
-            f.write(my_report)
-        return
+        reports_info = []
+        for _ in range(6):
+            time.sleep(5)
+            execution_info = self.client.raw.get_results(execution["id"])
+            reports_info = execution_info.json()["reports"]
+            if len(reports_info) > 0:
+                break
+        id_report = reports_info[0]["id"]
+        my_name = "./my_report.html"
+        self.client.raw.get_one_report(id_report, "./", my_name)
+        self.assertTrue(os.path.exists(my_name))
+        try:
+            os.remove(my_name)
+        except OSError:
+            pass
 
     def test_delete_execution(self):
         execution = self.test_new_execution()
@@ -258,7 +277,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertTrue("error" in response.json())
 
     def test_new_execution_bad_dag_name(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         payload = dict(
@@ -272,7 +291,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _bad_func)
 
     def test_new_execution_with_schema(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         payload = dict(
@@ -449,7 +468,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertIsNone(execution_data["data"])
 
     def test_edit_one_execution(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         payload = dict(
             name="bla",
             config=dict(solver="CBC"),
@@ -500,7 +519,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _launch_too_soon_func)
 
     def test_check_instance(self):
-        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        instance = self.create_new_instance(INSTANCE_MPS)
         data_check_execution = self.client.create_instance_data_check(instance["id"])
         self.assertEqual(data_check_execution["instance_id"], instance["id"])
         status = self.client.get_status(data_check_execution["id"])

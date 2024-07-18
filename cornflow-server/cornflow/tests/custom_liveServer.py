@@ -39,7 +39,9 @@ class CustomTestCaseLive(LiveServerTestCase):
         if create_all:
             db.create_all()
         access_init_command(False)
-        register_deployed_dags_command_test(verbose=False)
+        register_deployed_dags_command_test(
+            verbose=False, dags=["solve_model_dag", "gc", "timer", "tsp"]
+        )
         user_data = dict(
             username="testname",
             email="test@test.com",

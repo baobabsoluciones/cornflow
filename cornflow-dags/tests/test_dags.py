@@ -7,8 +7,7 @@ for __my_path in my_paths:
 
 import unittest
 from unittest.mock import patch, Mock, MagicMock
-import html
-import xml.etree.ElementTree as ET
+from html.parser import HTMLParser
 
 # we mock everything that's airflow related:
 mymodule = MagicMock()
@@ -21,6 +20,8 @@ from cornflow_client import SchemaManager, ApplicationCore
 from cornflow_client.airflow.dag_utilities import cf_solve
 from jsonschema import Draft7Validator
 from pytups import SuperDict
+
+from typing import Dict, List, Tuple
 
 
 class BaseDAGTests:
@@ -173,14 +174,24 @@ class Tsp(BaseDAGTests.SolvingTests):
         # check the file is created.
         self.assertTrue(os.path.exists(report_path))
 
-        tree = ET.parse(report_path)
-        elements = [elem.tag for elem in tree.iter()]
-        self.assertSetEqual(set(elements), {"html", "div", "span", "body"})
+        # let's just check for an element inside the html that we know should exist
+        # in this case a few 'section' tags with an attribute with a specific id
+        things_to_look = dict(
+            section=[
+                ("id", "solution"),
+                ("id", "instance-statistics"),
+                ("id", "tsp"),
+            ]
+        )
+        parser = HTMLCheckTags(things_to_look)
+        with open(report_path, "r") as f:
+            content = f.read()
 
-        # try:
-        #     os.remove(report_path)
-        # except FileNotFoundError:
-        #     pass
+        try:
+            os.remove(report_path)
+        except FileNotFoundError:
+            pass
+        self.assertRaises(StopIteration, parser.feed, content)
 
     def test_export(self):
         tests = self.app.test_cases
@@ -327,11 +338,51 @@ class Timer(BaseDAGTests.SolvingTests):
         my_experim.generate_report(report_path=report_path)
         # check the file is created.
         self.assertTrue(os.path.exists(report_path))
-        tree = ET.parse(report_path)
-        elements = [elem.tag for elem in tree.iter()]
-        self.assertSetEqual(set(elements), {"html", "div", "span", "body"})
 
+        # let's just check for an element inside the html that we know should exist
+        # a 'div' tag with a 'foo' attribute
+
+        # class MyHTMLParser(HTMLParser):
+        #
+        #     def handle_starttag(self, tag, attrs):
+        #         print("Start tag:", tag)
+        #         for attr in attrs:
+        #             print("     attr:", attr)
+
+        parser = HTMLCheckTags(dict(div=[("class", "foo")], span=[("class", "bar")]))
+        with open(report_path, "r") as f:
+            content = f.read()
+        # parser.feed(content)
         try:
             os.remove(report_path)
         except FileNotFoundError:
             pass
+        self.assertRaises(StopIteration, parser.feed, content)
+
+
+class HTMLCheckTags(HTMLParser):
+    things_to_check: Dict[str, List[Tuple[str, str]]]
+
+    def __init__(self, things_to_check: Dict[str, List[Tuple[str, str]]]):
+        HTMLParser.__init__(self)
+        self.things_to_check = SuperDict(things_to_check).copy_deep()
+
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, str]]):
+        # print("Start tag:", tag)
+        if tag not in self.things_to_check:
+            return
+        for attr in attrs:
+            # print("     attr:", attr)
+            try:
+                # we find the element in the list and remove it
+                index = self.things_to_check[tag].index(attr)
+                self.things_to_check[tag].pop(index)
+            except ValueError:
+                continue
+            # if the list is empty, we take out the key
+            if not len(self.things_to_check[tag]):
+                self.things_to_check.pop(tag)
+                # if we have nothing else to check,
+                # we stop searching
+                if not (self.things_to_check):
+                    raise StopIteration

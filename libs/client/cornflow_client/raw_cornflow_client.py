@@ -530,25 +530,26 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
         with open(filename, "rb") as _file:
-            payload = (
-                dict(file=_file, name=name, execution_id=execution_id, **kwargs),
+            payload = dict(name=name, execution_id=execution_id, **kwargs)
+            result = self.create_api(
+                "report/",
+                data=payload,
+                files=dict(file=_file),
+                encoding=encoding,
+                headers={"content_type": "multipart/form-data"},
             )
-        result = self.create_api(
-            "report/",
-            data=payload,
-            encoding=encoding,
-            headers={"content_type": "multipart/form-data"},
-        )
         return result
 
     @ask_token
     @prepare_encoding
-    def get_one_report(self, reference_id, folder_destination, encoding=None):
+    def get_one_report(
+        self, reference_id, folder_destination, file_name, encoding=None
+    ):
         result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
-        content = result.content()
+        content = result.content
 
-        file_name = result.headers["Content-Disposition"].split["="][1]
-
+        if file_name is None:
+            file_name = result.headers["Content-Disposition"].split("=")[1]
         path = os.path.normpath(os.path.join(folder_destination, file_name))
 
         # write content to disk on path
