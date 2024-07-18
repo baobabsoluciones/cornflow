@@ -46,6 +46,9 @@ def create_app(env_name="development", dataconn=None):
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
+    if os.getenv("FLASK_ENV", None) is not None:
+        env_name = os.getenv("FLASK_ENV")
+
     dictConfig(log_config(app_config[env_name].LOG_LEVEL))
 
     app = Flask(__name__)

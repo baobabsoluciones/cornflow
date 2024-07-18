@@ -26,7 +26,7 @@ class DefaultConfig(object):
     FILE_BACKEND = os.getenv("FILE_BACKEND", "local")
     UPLOAD_FOLDER = os.getenv(
         "UPLOAD_FOLDER",
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "../static")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "./static")),
     )
     ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ["pdf", "html"])
 
@@ -95,6 +95,7 @@ class Development(DefaultConfig):
     """ """
 
     ENV = "development"
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/usr/src/app/static")
 
 
 class Testing(DefaultConfig):
@@ -114,6 +115,10 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    UPLOAD_FOLDER = os.getenv(
+        "UPLOAD_FOLDER",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "./static")),
+    )
 
 
 class Production(DefaultConfig):
@@ -126,6 +131,7 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/usr/src/app/static")
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}

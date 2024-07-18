@@ -195,7 +195,8 @@ dict_example.update(
 )
 
 PULP_EXAMPLE = _get_file("./data/pulp_example_data.json")
-HTML_REPORT = "../data/new_report.html"
+HTML_REPORT = _get_file("./data/new_report.html")
+TEST_FOLDER = "./"
 
 PUBLIC_DAGS = [
     "solve_model_dag",
