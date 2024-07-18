@@ -14,6 +14,7 @@ INSTANCE_URL = PREFIX + "/instance/"
 INSTANCE_MPS = _get_file("./data/test_mps.mps")
 INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
 INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
+INSTANCE_TSP = _get_file("./data/tsp_instance.json")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
 BAD_EXECUTION_PATH = _get_file("./data/bad_execution.json")

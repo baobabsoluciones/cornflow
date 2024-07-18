@@ -31,6 +31,7 @@ class ConfigSchema(Schema):
     threads = fields.Int(required=False)
     logPath = fields.Str(required=False)
     MIPGap = fields.Float(required=False)
+    report = fields.Raw(required=False)
 
 
 class ConfigSchemaResponse(ConfigSchema):

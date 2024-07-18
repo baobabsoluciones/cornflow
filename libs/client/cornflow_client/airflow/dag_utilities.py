@@ -334,8 +334,9 @@ def cf_report(
         report_config = config.get("report", {})
         if not report_config:
             # no need to write report since it's not requested
+            print("We did not find a report config")
             return None
-
+        print("Starting to write the report")
         execution_data = client.get_data(exec_id)
         input_data = execution_data["data"]
         solution_data = execution_data["solution_data"]
@@ -348,6 +349,7 @@ def cf_report(
             app.instance(input_data), app.solution(solution_data)
         )
         report_path = os.path.abspath("./my_report.html")
+        print("Preparing to write the report")
         my_experiment.generate_report(report_path=report_path, report_name=report_name)
         if not os.path.exists(report_path):
             raise AirflowDagException("The generation of the report failed")
@@ -359,6 +361,7 @@ def cf_report(
             name=report_name,
             description=report_config.get("description"),
         )
+        print("Saving the report in cornflow")
         client.create_report(**payload)
     except CornFlowApiError:
         raise AirflowDagException("The writing of the report failed")
