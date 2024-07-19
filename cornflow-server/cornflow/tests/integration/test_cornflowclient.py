@@ -26,8 +26,10 @@ from cornflow.shared.const import (
 from cornflow.tests.const import INSTANCE_PATH, CASE_PATH, INSTANCE_MPS, INSTANCE_TSP
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 
+from typing import Callable, Any
 
-def load_file(_file):
+
+def load_file(_file: str):
     with open(_file) as f:
         temp = json.load(f)
     return temp
@@ -216,13 +218,10 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     #
     def test_new_execution_with_tsp_report_wait(self):
         execution = self.create_instance_and_execution_report()
-        reports_info = []
-        for _ in range(6):
-            time.sleep(5)
-            execution_info = self.client.raw.get_results(execution["id"])
-            reports_info = execution_info.json()["reports"]
-            if len(reports_info) > 0:
-                break
+
+        func = lambda: self.client.raw.get_results(execution["id"]).json()["reports"]
+        condition = lambda v: len(v) > 0
+        reports_info = try_until_condition(func, condition, 10, 10)
         id_report = reports_info[0]["id"]
         my_name = "./my_report.html"
         self.client.raw.get_one_report(id_report, "./", my_name)
@@ -237,13 +236,9 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_new_execution_with_timer_report_wait(self):
         payload = dict(solver="default", schema="timer", data={"a": 1}, timeLimit=1)
         execution = self.create_instance_and_execution_report(**payload)
-        reports_info = []
-        for _ in range(6):
-            time.sleep(5)
-            execution_info = self.client.raw.get_results(execution["id"])
-            reports_info = execution_info.json()["reports"]
-            if len(reports_info) > 0:
-                break
+        func = lambda: self.client.raw.get_results(execution["id"]).json()["reports"]
+        condition = lambda v: len(v) > 0
+        reports_info = try_until_condition(func, condition, 10, 10)
         id_report = reports_info[0]["id"]
         my_name = "./my_report.html"
         self.client.raw.get_one_report(id_report, "./", my_name)
@@ -567,3 +562,17 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             api="case", id=case["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
+
+
+def try_until_condition(
+    func: Callable,
+    condition: Callable[[Any], bool],
+    number_of_times: int = 10,
+    sleep_time: float = 10,
+):
+    for i in range(number_of_times):
+        time.sleep(sleep_time)
+        result = func()
+        if condition(result):
+            return result
+    raise TimeoutError("Timed out after {} seconds".format(number_of_times))
