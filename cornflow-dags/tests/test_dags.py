@@ -17,7 +17,11 @@ sys.modules["airflow.models"] = mymodule
 sys.modules["airflow.secrets.environment_variables"] = mymodule
 
 from cornflow_client import SchemaManager, ApplicationCore
-from cornflow_client.airflow.dag_utilities import cf_solve
+from cornflow_client.airflow.dag_utilities import (
+    cf_solve,
+    cf_report,
+    AirflowDagException,
+)
 from jsonschema import Draft7Validator
 from pytups import SuperDict
 
@@ -193,6 +197,16 @@ class Tsp(BaseDAGTests.SolvingTests):
             pass
         self.assertRaises(StopIteration, parser.feed, content)
 
+    def test_report_error(self):
+        tests = self.app.test_cases
+        my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
+        my_experim.solve(dict())
+        report_path = "./my_report.html"
+        my_fun = my_experim.generate_report(
+            report_path=report_path, report_name="wrong_name"
+        )
+        self.assertRaises(FileNotFoundError, my_fun)
+
     def test_export(self):
         tests = self.app.test_cases
         my_file_path = "export.json"
@@ -202,6 +216,86 @@ class Tsp(BaseDAGTests.SolvingTests):
             os.remove(my_file_path)
         except FileNotFoundError:
             pass
+
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    def test_complete_report(self, connectCornflow, config=None):
+        config = config or self.config
+        config = dict(**config, report=dict(name="report"))
+        tests = self.app.test_cases
+        for test_case in tests:
+            instance_data = test_case.get("instance")
+            solution_data = test_case.get("solution", None)
+            if solution_data is None:
+                solution_data = dict(route=[])
+
+            mock = Mock()
+            mock.get_data.return_value = dict(
+                data=instance_data, solution_data=solution_data
+            )
+            mock.get_results.return_value = dict(config=config, state=1)
+            mock.create_report.return_value = dict(id=1)
+            connectCornflow.return_value = mock
+            dag_run = Mock()
+            dag_run.conf = dict(exec_id="exec_id")
+            cf_report(app=self.app, secrets="", dag_run=dag_run)
+            mock.create_report.assert_called_once()
+            mock.put_one_report.assert_called_once()
+
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    def test_complete_report_wrong_data(self, connectCornflow, config=None):
+        config = config or self.config
+        config = dict(**config, report=dict(name="report"))
+        tests = self.app.test_cases
+        for test_case in tests:
+            instance_data = test_case.get("instance")
+            solution_data = None
+
+            mock = Mock()
+            mock.get_data.return_value = dict(
+                data=instance_data, solution_data=solution_data
+            )
+            mock.get_results.return_value = dict(config=config, state=1)
+            mock.create_report.return_value = dict(id=1)
+            connectCornflow.return_value = mock
+            dag_run = Mock()
+            dag_run.conf = dict(exec_id="exec_id")
+            my_report = lambda: cf_report(app=self.app, secrets="", dag_run=dag_run)
+            self.assertRaises(AirflowDagException, my_report)
+            mock.create_report.assert_called_once()
+            mock.raw.put_api_for_id.assert_called_once()
+            args, kwargs = mock.raw.put_api_for_id.call_args
+            self.assertEqual(kwargs["data"], {"state": -1})
+
+    @patch("quarto.render")
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    def test_complete_report_no_quarto(self, connectCornflow, render, config=None):
+        config = config or self.config
+        config = dict(**config, report=dict(name="report"))
+        tests = self.app.test_cases
+        render.side_effect = ModuleNotFoundError()
+        render.return_value = dict(a=1)
+        for test_case in tests:
+            instance_data = test_case.get("instance")
+            solution_data = test_case.get("solution", None)
+            if solution_data is None:
+                solution_data = dict(route=[])
+
+            mock = Mock()
+            mock.get_data.return_value = dict(
+                data=instance_data,
+                solution_data=solution_data,
+            )
+            mock.get_results.return_value = dict(config=config, state=1)
+            mock.create_report.return_value = dict(id=1)
+            connectCornflow.return_value = mock
+            dag_run = Mock()
+            dag_run.conf = dict(exec_id="exec_id")
+            my_report = lambda: cf_report(app=self.app, secrets="", dag_run=dag_run)
+            self.assertRaises(AirflowDagException, my_report)
+            mock.create_report.assert_called_once()
+            mock.raw.put_api_for_id.assert_called_once()
+            args, kwargs = mock.raw.put_api_for_id.call_args
+            self.assertEqual(kwargs["data"], {"state": -10})
 
 
 class Vrp(BaseDAGTests.SolvingTests):

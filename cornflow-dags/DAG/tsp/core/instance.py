@@ -64,7 +64,7 @@ class Instance(InstanceCore):
     def get_arcs(self) -> TupList:
         return self.data["arcs"]
 
-    def get_indexed_arcs(self) -> TupList:
+    def get_indexed_arcs(self) -> SuperDict:
         return self.data["arcs"].to_dict(
             result_col=None, indices=["n1", "n2"], is_list=False
         )

@@ -7,7 +7,7 @@ from .instance import Instance
 from .solution import Solution
 
 import json, tempfile
-from quarto import render
+import quarto
 
 
 class Experiment(ExperimentCore):
@@ -51,8 +51,6 @@ class Experiment(ExperimentCore):
         # if solution is empty, we return 0
         if len(self.solution.data["route"]) == 0:
             return 0
-        # we get a sorted list of nodes by position
-        arcs = self.solution.get_used_arcs()
 
         # we sum all arc weights in the solution
         return sum(self.get_used_arc_weights().values())
@@ -93,13 +91,17 @@ class Experiment(ExperimentCore):
         if not os.path.exists(path_to_qmd):
             raise FileNotFoundError(f"Report with path {path_to_qmd} does not exist.")
         path_to_output = path_without_ext + ".html"
+        try:
+            quarto.quarto.find_quarto()
+        except FileNotFoundError:
+            raise ModuleNotFoundError("Quarto is not installed.")
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "experiment.json")
             # write a json with instance and solution to temp file
             self.to_json(path)
             # pass the path to the report to render
             # it generates a report with path = path_to_output
-            render(input=path_to_qmd, execute_params=dict(file_name=path))
+            quarto.render(input=path_to_qmd, execute_params=dict(file_name=path))
         # quarto always writes the report in the .qmd directory.
         # thus, we need to move it where we want to:
         os.replace(path_to_output, report_path)

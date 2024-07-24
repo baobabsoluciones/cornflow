@@ -38,7 +38,7 @@ from .execution import (
     ExecutionRelaunchEndpoint,
 )
 
-from .reports import ReportEndpoint, ReportDetailsEndpoint
+from .reports import ReportEndpoint, ReportDetailsEndpoint, ReportDetailsEditEndpoint
 from .health import HealthEndpoint
 from .instance import (
     InstanceEndpoint,
@@ -223,6 +223,11 @@ resources = [
         resource=ReportDetailsEndpoint,
         urls="/report/<int:idx>/",
         endpoint="report-detail",
+    ),
+    dict(
+        resource=ReportDetailsEditEndpoint,
+        urls="/report/<int:idx>/edit/",
+        endpoint="report-detail-edit",
     ),
     dict(resource=ReportEndpoint, urls="/report/", endpoint="report"),
 ]
