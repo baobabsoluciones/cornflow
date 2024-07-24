@@ -9,6 +9,7 @@ import json
 from flask import current_app
 
 from cornflow.models import ReportModel, InstanceModel, ExecutionModel
+from cornflow.endpoints.reports import get_report_path
 from cornflow.tests.const import (
     INSTANCE_PATH,
     REPORT_PATH,
@@ -73,9 +74,40 @@ class TestReportsListEndpoint(CustomTestCase):
                 pass
 
     def test_new_report_html(self):
+        with open(REPORT_HTML_FILE_PATH, "rb") as _file:
+            response = self.client.post(
+                self.url,
+                data=dict(file=_file, **self.payload),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(
+                    self.service_token, content_type="multipart/form-data"
+                ),
+            )
+
+        self.assertEqual(201, response.status_code)
+
+        for key in self.keys_to_check:
+            self.assertTrue(key in response.json)
+
+        for key, value in self.payload.items():
+            self.assertEqual(response.json[key], value)
+
+        # check that the file in the test folder and the one generated on the static fodler are equal
+        with open(REPORT_HTML_FILE_PATH, "rb") as f:
+            file = f.read()
+
+        my_upload_path = get_report_path(response.json)
+
+        with open(my_upload_path, "rb") as f:
+            file2 = f.read()
+
+        self.assertEqual(file, file2)
+        return response.json
+
+    def test_new_report_empty(self):
         response = self.client.post(
             self.url,
-            data=dict(file=(open(REPORT_HTML_FILE_PATH, "rb")), **self.payload),
+            data=dict(**self.payload),
             follow_redirects=True,
             headers=self.get_header_with_auth(
                 self.service_token, content_type="multipart/form-data"
@@ -90,17 +122,13 @@ class TestReportsListEndpoint(CustomTestCase):
         for key, value in self.payload.items():
             self.assertEqual(response.json[key], value)
 
-        # check that the file in the test folder and the one generated on the static fodler are equal
-        with open(REPORT_HTML_FILE_PATH, "rb") as f:
-            file = f.read()
+        # check that we did not save any file
         my_upload_path = (
             f"{current_app.config['UPLOAD_FOLDER']}/"
             f"{self.payload['execution_id']}/{self.payload['name']}.html"
         )
-        with open(my_upload_path, "rb") as f:
-            file2 = f.read()
+        self.assertFalse(os.path.exists(my_upload_path))
 
-        self.assertEqual(file, file2)
         return response.json
 
     def test_new_report_pdf(self):
@@ -124,10 +152,8 @@ class TestReportsListEndpoint(CustomTestCase):
         # check that the file in the test folder and the one generated on the static fodler are equal
         with open(REPORT_PDF_FILE_PATH, "rb") as f:
             file = f.read()
-        my_upload_path = (
-            f"{current_app.config['UPLOAD_FOLDER']}/"
-            f"{self.payload['execution_id']}/{self.payload['name']}.pdf"
-        )
+
+        my_upload_path = get_report_path(response.json)
         with open(my_upload_path, "rb") as f:
             file2 = f.read()
 
@@ -135,9 +161,24 @@ class TestReportsListEndpoint(CustomTestCase):
         return response.json
 
     def test_new_report_not_allowed(self):
-        response = self.client.post(
-            self.url,
-            data=dict(file=(open(REPORT_HTML_FILE_PATH, "rb")), **self.payload),
+        with open(REPORT_HTML_FILE_PATH, "rb") as _file:
+            response = self.client.post(
+                self.url,
+                data=dict(file=_file, **self.payload),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(
+                    self.token, content_type="multipart/form-data"
+                ),
+            )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_edit_report_not_allowed(self):
+        item = self.test_new_report_html()
+        payload = dict(name="new name2")
+        response = self.client.put(
+            f"{self.url}{item['id']}/edit/",
+            data=payload,
             follow_redirects=True,
             headers=self.get_header_with_auth(
                 self.token, content_type="multipart/form-data"
@@ -193,9 +234,41 @@ class TestReportsListEndpoint(CustomTestCase):
         payload = {"name": "new_name", "description": "some_description"}
 
         response = self.client.put(
+            f"{self.url}{item['id']}/edit/",
+            headers=self.get_header_with_auth(
+                self.service_token, content_type="multipart/form-data"
+            ),
+            follow_redirects=True,
+            data=payload,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(
+            f"{self.url}{item['id']}/", headers=self.get_header_with_auth(self.token)
+        )
+        # response.json
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("some_description", dict(response.headers)["File-Description"])
+
+    def test_modify_report_file(self):
+        item = self.test_new_report_empty()
+
+        payload = {"name": "new_name", "description": "some_description"}
+        response = self.client.get(
             f"{self.url}{item['id']}/",
             headers=self.get_header_with_auth(self.token),
-            json=payload,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIsNone(response.json["file_url"])
+
+        response = self.client.put(
+            f"{self.url}{item['id']}/edit/",
+            data=dict(file=(open(REPORT_HTML_FILE_PATH, "rb")), **payload),
+            headers=self.get_header_with_auth(
+                self.service_token, content_type="multipart/form-data"
+            ),
         )
 
         self.assertEqual(response.status_code, 200)
@@ -205,8 +278,16 @@ class TestReportsListEndpoint(CustomTestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual("new_name", dict(response.headers)["File-Name"])
         self.assertEqual("some_description", dict(response.headers)["File-Description"])
+
+        # check that the file in the test folder and the one generated on the static folder are equal
+        with open(REPORT_HTML_FILE_PATH, "rb") as f:
+            file = f.read()
+
+        content = response.get_data()
+
+        self.assertEqual(file, content)
+        return response.json
 
     def test_delete_report(self):
         item = self.test_new_report_html()
@@ -217,10 +298,7 @@ class TestReportsListEndpoint(CustomTestCase):
         self.assertEqual(200, response.status_code)
         self.assertTrue("message" in response.json)
 
-        my_upload_path = (
-            f"{current_app.config['UPLOAD_FOLDER']}/"
-            f"{self.payload['execution_id']}/{self.payload['name']}.html"
-        )
+        my_upload_path = get_report_path(item)
 
         self.assertFalse(os.path.exists(my_upload_path))
 

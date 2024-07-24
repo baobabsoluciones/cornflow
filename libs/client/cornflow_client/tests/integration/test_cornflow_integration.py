@@ -688,11 +688,29 @@ class TestCornflowClientService(TestCase):
             run=False,
         )
 
-        response = self.client.create_report("new_report", HTML_REPORT, execution["id"])
+        response = self.client.create_report("new_report", execution["id"], HTML_REPORT)
 
         self.assertEqual(response["execution_id"], execution["id"])
 
         return response
+
+    def test_put_one_report(self):
+        response = self.test_post_report_html()
+        report_id = response["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        payload = {"name": "new_name", "description": "some_description"}
+        self.client.put_one_report(reference_id=report_id, payload=payload)
+        content, headers = client.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
+
+        self.assertEqual(headers["File-Description"], payload["description"])
+        self.assertNotEqual(headers["File-Description"], "")
+
+        _ = client.delete_one_report(reference_id=report_id)
 
     def test_get_one_report(self):
         response = self.test_post_report_html()
@@ -705,11 +723,11 @@ class TestCornflowClientService(TestCase):
             reference_id=report_id, folder_destination=TEST_FOLDER
         )
 
-        self.assertEqual(headers["File-Name"], response["name"])
         self.assertEqual(headers["File-Description"], response["description"])
 
         # read from TEST FOLDER
-        with open(os.path.join(TEST_FOLDER, "new_report.html"), "r") as f:
+        my_file = os.path.join(TEST_FOLDER, response["file_url"])
+        with open(my_file, "r") as f:
             file = f.read()
 
         # read from test/data folder
@@ -719,7 +737,7 @@ class TestCornflowClientService(TestCase):
         self.assertEqual(file, file_2)
 
         # remove file from TEST_FOLDER
-        os.remove(os.path.join(TEST_FOLDER, "new_report.html"))
+        os.remove(my_file)
 
     def test_get_all_reports(self):
         report_1 = self.test_post_report_html()["id"]
@@ -734,28 +752,6 @@ class TestCornflowClientService(TestCase):
 
         client.delete_one_report(reference_id=report_1)
         client.delete_one_report(reference_id=report_2)
-
-    def test_put_one_report(self):
-        response = self.test_post_report_html()
-        report_id = response["id"]
-
-        client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
-
-        payload = {"name": "new_name", "description": "some_description"}
-
-        _ = client.put_one_report(reference_id=report_id, payload=payload)
-
-        content, headers = client.get_one_report(
-            reference_id=report_id, folder_destination=TEST_FOLDER
-        )
-
-        self.assertEqual(headers["File-Name"], payload["name"])
-        self.assertEqual(headers["File-Description"], payload["description"])
-        self.assertNotEqual(headers["File-Name"], "new_report")
-        self.assertNotEqual(headers["File-Description"], "")
-
-        _ = client.delete_one_report(reference_id=report_id)
 
     def test_delete_one_report(self):
         response = self.test_post_report_html()

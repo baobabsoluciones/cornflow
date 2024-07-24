@@ -776,7 +776,7 @@ class TestRawCornflowClientService(TestCase):
             config_schema=dict(),
         )
 
-    def test_post_report_html(self):
+    def test_post_report_html(self, uploadFile=True):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
 
@@ -794,10 +794,12 @@ class TestRawCornflowClientService(TestCase):
             schema="solve_model_dag",
             run=False,
         ).json()
-
-        response = self.client.raw.create_report(
-            "new_report", HTML_REPORT, execution["id"]
-        )
+        if uploadFile:
+            response = self.client.raw.create_report(
+                "new_report", execution["id"], HTML_REPORT
+            )
+        else:
+            response = self.client.raw.create_report("new_report", execution["id"])
 
         self.assertEqual(response.status_code, 201)
 
@@ -844,7 +846,7 @@ class TestRawCornflowClientService(TestCase):
         client.raw.delete_one_report(reference_id=report_2)
 
     def test_put_one_report(self):
-        response = self.test_post_report_html()
+        response = self.test_post_report_html(uploadFile=False)
         report_id = response.json()["id"]
 
         client = CornFlow(url="http://127.0.0.1:5050/")
@@ -853,6 +855,40 @@ class TestRawCornflowClientService(TestCase):
         payload = {"name": "new_name", "description": "some_description"}
 
         response = client.raw.put_one_report(reference_id=report_id, payload=payload)
+
+        self.assertEqual(response.status_code, 200)
+
+        new_report = client.raw.get_one_report(
+            reference_id=report_id, folder_destination=TEST_FOLDER
+        )
+
+        self.assertEqual(new_report.headers["File-Name"], payload["name"])
+        self.assertEqual(new_report.headers["File-Description"], payload["description"])
+        self.assertNotEqual(new_report.headers["File-Name"], "new_report")
+        self.assertNotEqual(new_report.headers["File-Description"], "")
+
+        delete = client.raw.delete_one_report(reference_id=report_id)
+        self.assertEqual(delete.status_code, 200)
+
+    def test_put_one_report_file(self):
+        response = self.test_post_report_html()
+        report_id = response.json()["id"]
+
+        client = CornFlow(url="http://127.0.0.1:5050/")
+        _ = client.login("user", "UserPassword1!")
+
+        with open(HTML_REPORT, "rb") as _file:
+            payload = {"name": "new_name", "description": "some_description"}
+            response = client.raw.put_one_report(
+                reference_id=report_id,
+                payload=payload,
+                files=dict(file=_file),
+                headers={"content_type": "multipart/form-data"},
+            )
+
+            response = client.raw.put_one_report(
+                reference_id=report_id, payload=payload
+            )
 
         self.assertEqual(response.status_code, 200)
 

@@ -90,12 +90,33 @@ def connect_to_cornflow(secrets):
     return airflow_user
 
 
-def try_to_save_error(client: CornFlow, exec_id: str, state=-1):
+def try_to_save_error(client: CornFlow, exec_id: str, state=-1, api="dag/", **kwargs):
     """
     Attempt at saving that the execution failed
     """
     try:
-        client.raw.put_api_for_id("dag/", id=exec_id, payload=dict(state=state))
+        client.raw.put_api_for_id(api, id=exec_id, payload=dict(state=state), **kwargs)
+    except Exception as e:
+        print(f"An exception trying to register the failed status: {e}")
+
+
+def try_to_save_error_report(
+    client: CornFlow, id: int, state=-1, api="report/", **kwargs
+):
+    """
+    Attempt at saving that the report failed
+    It's different than the execution, because put uses form data in reports
+    """
+    try:
+        client.raw.put_api_for_id(
+            api,
+            id=id,
+            payload=None,
+            data=dict(state=state),
+            headers={"content_type": "multipart/form-data"},
+            post_url="edit",
+            **kwargs,
+        )
     except Exception as e:
         print(f"An exception trying to register the failed status: {e}")
 
@@ -112,7 +133,7 @@ def try_to_save_airflow_log(client: CornFlow, exec_id: str, ti, base_log_folder:
         with open(log_file, "r") as fd:
             log_file_txt = fd.read()
         try:
-            client.raw.put_api_for_id(
+            client.put_api_for_id(
                 "dag/", id=exec_id, payload=dict(log_text=log_file_txt)
             )
         except Exception as e:
@@ -325,11 +346,17 @@ def cf_report(
     :return:
     """
     # TODO: if this task fails, the dagrun should still be valid
-    ti = kwargs["ti"]
     try:
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
+
         execution_info = client.get_results(exec_id)
+        # TODO: if execution does not have results, quit:
+        if execution_info["state"] < 1:
+            # no need to write report since it's not requested
+            print("Execution has not been solved")
+            return None
+
         config = execution_info["config"]
         report_config = config.get("report", {})
         if not report_config:
@@ -337,11 +364,25 @@ def cf_report(
             print("We did not find a report config")
             return None
         print("Starting to write the report")
+        report_name = report_config.get("name", "report")
+        # we assume the contents of the config match name + description
+        payload = dict(
+            execution_id=exec_id,
+            name=report_name,
+            description=report_config.get("description"),
+            state=0,  # RUNNING
+        )
+        # we create an empty report
+        report = client.create_report(**payload)
+
+        def my_try_to_save(state):
+            return try_to_save_error_report(client, report["id"], state)
+
+        # now we want to fill it with the report file
         execution_data = client.get_data(exec_id)
         input_data = execution_data["data"]
         solution_data = execution_data["solution_data"]
 
-        report_name = report_config.get("name", "report")
         # maybe all of this should be abstracted inside the app?
         # maybe the app should return an Experiment?
         experiment = app.get_solver(app.get_default_solver_name())
@@ -349,20 +390,27 @@ def cf_report(
             app.instance(input_data), app.solution(solution_data)
         )
         report_path = os.path.abspath("./my_report.html")
-        print("Preparing to write the report")
-        my_experiment.generate_report(report_path=report_path, report_name=report_name)
-        if not os.path.exists(report_path):
+        if os.path.exists(report_path):
+            try:
+                os.remove(report_path)
+            except:
+                pass
+        print(f"Preparing to write the report: {report_name}")
+        try:
+            my_experiment.generate_report(
+                report_path=report_path, report_name=report_name
+            )
+        except ModuleNotFoundError as e:
+            my_try_to_save(-10)
             raise AirflowDagException("The generation of the report failed")
-
-        # we assume the contents of the config match name + description
-        payload = dict(
-            filename=report_path,
-            execution_id=exec_id,
-            name=report_name,
-            description=report_config.get("description"),
-        )
-        print("Saving the report in cornflow")
-        client.create_report(**payload)
+        except:
+            my_try_to_save(-1)
+            raise AirflowDagException("The generation of the report failed")
+        if not os.path.exists(report_path):
+            my_try_to_save(-1)
+            raise AirflowDagException("The generation of the report failed")
+        print("Saving the actual report in cornflow")
+        client.put_one_report(report["id"], payload=dict(state=1), filename=report_path)
     except CornFlowApiError:
         raise AirflowDagException("The writing of the report failed")
     except Exception as e:
