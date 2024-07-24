@@ -719,6 +719,11 @@ class TestCornflowClientService(TestCase):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
 
+        my_file = os.path.join(TEST_FOLDER, response["file_url"])
+        try:
+            os.remove(my_file)
+        except OSError:
+            pass
         content, headers = client.get_one_report(
             reference_id=report_id, folder_destination=TEST_FOLDER
         )
@@ -726,7 +731,6 @@ class TestCornflowClientService(TestCase):
         self.assertEqual(headers["File-Description"], response["description"])
 
         # read from TEST FOLDER
-        my_file = os.path.join(TEST_FOLDER, response["file_url"])
         with open(my_file, "r") as f:
             file = f.read()
 

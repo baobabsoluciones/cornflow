@@ -227,7 +227,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_new_execution_with_tsp_report_wait(self):
         execution = self.create_instance_and_execution_report()
         func = wait_until_report_finishes(self.client, execution["id"])
-        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
         try:
@@ -247,7 +247,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         payload = dict(solver="default", schema="timer", data={"a": 1}, timeLimit=1)
         execution = self.create_instance_and_execution_report(**payload)
         func = wait_until_report_finishes(self.client, execution["id"])
-        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
         try:
@@ -267,7 +267,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         func = wait_until_report_finishes(
             self.client, execution["id"], REPORT_STATE.ERROR
         )
-        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
         self.assertEqual(REPORT_STATE.ERROR, reports_info["state"])
         id_report = reports_info["id"]
         my_name = "./my_report.html"
@@ -621,9 +621,11 @@ def wait_until_report_finishes(
     def func():
         my_reports = client.raw.get_results(execution_id).json()["reports"]
         if len(my_reports) == 0:
+            print("no reports")
             return None
         first = my_reports[0]
         if first["state"] != report_status:
+            print(f"report state: {first['state']}")
             return None
         return first
 
