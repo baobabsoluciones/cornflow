@@ -579,12 +579,17 @@ class RawCornFlow(object):
         :rtype: :class:`Response`
         """
         result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
-        # TODO: if the report does not have a file, we just return the result object
-        content = result.content
-        if not content:
-            return result
         if result.status_code != 200:
             return result
+
+        # if it returned a json: we did not get a report
+        # we just return the result "as is".
+        try:
+            content = result.json()
+            return result
+        except requests.exceptions.JSONDecodeError:
+            # if it fails, we assume there's an html file
+            content = result.content
         if folder_destination is None:
             raise ValueError(
                 "Argument folder_destination needs to be filled when there's a file"
