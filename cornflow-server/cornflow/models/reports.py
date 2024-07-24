@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # Imports from internal modules
 from cornflow.models.base_data_model import TraceAttributesModel
 from cornflow.shared import db
+from cornflow.shared.const import REPORT_STATE, REPORT_STATE_MSG
 
 
 class ReportModel(TraceAttributesModel):
@@ -44,7 +45,9 @@ class ReportModel(TraceAttributesModel):
     )
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(TEXT, nullable=True)
-    file_url = db.Column(db.String(256), nullable=False)
+    file_url = db.Column(db.String(256), nullable=True)
+    state = db.Column(db.SmallInteger, default=REPORT_STATE.CORRECT)
+    state_message = db.Column(TEXT, default=REPORT_STATE_MSG[REPORT_STATE.CORRECT])
 
     @declared_attr
     def user_id(self):
@@ -64,6 +67,15 @@ class ReportModel(TraceAttributesModel):
         self.name = data.get("name")
         self.description = data.get("description")
         self.file_url = data.get("file_url")
+        self.state = data.get("state")
+        if self.state is None:
+            if self.file_url is None:
+                self.state = REPORT_STATE.UNKNOWN
+            else:
+                self.state = REPORT_STATE.CORRECT
+        self.state_message = data.get("state_message")
+        if self.state_message is None:
+            self.state_message = REPORT_STATE_MSG.get(self.state)
 
     def update(self, data):
         """
@@ -73,6 +85,9 @@ class ReportModel(TraceAttributesModel):
         :return: None
         :rtype: None
         """
+        # we try to keep the state_message synced, by default
+        if "state" in data and "state_message" not in data:
+            data["state_message"] = REPORT_STATE_MSG[data["state"]]
         super().update(data)
 
     def update_link(self, file_url: str):

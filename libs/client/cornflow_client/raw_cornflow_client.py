@@ -540,30 +540,33 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def create_report(self, name, filename, execution_id, encoding=None, **kwargs):
+    def create_report(self, name, execution_id, filename=None, encoding=None, **kwargs):
         """
         Creates a report for an execution
 
         :param str execution_id: id for the execution
         :param str name: the name of the report
-        :param file filename: the file object with the report (e.g., open(REPORT_FILE_PATH, "rb"))
+        :param file filename: the file name with the report
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param kwargs: optional data to write (description)
         """
-        with open(filename, "rb") as _file:
-            result = self.create_api(
-                "report/",
-                data=dict(name=name, execution_id=execution_id, **kwargs),
-                files=dict(file=_file),
-                encoding=encoding,
-                headers={"content_type": "multipart/form-data"},
-            )
+        arguments = dict(
+            api="report/",
+            data=dict(name=name, execution_id=execution_id, **kwargs),
+            encoding=encoding,
+            headers={"content_type": "multipart/form-data"},
+        )
+        if filename is None:
+            result = self.create_api(**arguments)
+        else:
+            with open(filename, "rb") as _file:
+                result = self.create_api(**arguments, files=dict(file=_file))
         return result
 
     @ask_token
     @prepare_encoding
     def get_one_report(
-        self, reference_id, folder_destination, file_name=None, encoding=None
+        self, reference_id, folder_destination=None, file_name=None, encoding=None
     ) -> Response:
         """
         Gets one specific report and downloads it to disk
@@ -576,8 +579,16 @@ class RawCornFlow(object):
         :rtype: :class:`Response`
         """
         result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
+        # TODO: if the report does not have a file, we just return the result object
         content = result.content
-
+        if not content:
+            return result
+        if result.status_code != 200:
+            return result
+        if folder_destination is None:
+            raise ValueError(
+                "Argument folder_destination needs to be filled when there's a file"
+            )
         if file_name is None:
             file_name = result.headers["Content-Disposition"].split("=")[1]
         path = os.path.normpath(os.path.join(folder_destination, file_name))
@@ -605,18 +616,32 @@ class RawCornFlow(object):
     @ask_token
     @log_call
     @prepare_encoding
-    def put_one_report(self, reference_id, payload, encoding=None) -> Response:
+    def put_one_report(
+        self, reference_id, payload, filename=None, encoding=None, **kwargs
+    ) -> Response:
         """
-        Edits one specific report and downloads it to disk
+        Edits one specific report, potentially uploading a new file
 
         :param int reference_id: id of the report to download
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :return: the response object
         :rtype: :class:`Response`
         """
-        return self.put_api_for_id(
-            api="report", id=reference_id, payload=payload, encoding=encoding
+        arguments = dict(
+            api="report/",
+            id=reference_id,
+            payload=None,
+            data=payload,
+            encoding=encoding,
+            headers={"content_type": "multipart/form-data"},
+            post_url="edit",
         )
+        if filename is None:
+            result = self.put_api_for_id(**arguments)
+        else:
+            with open(filename, "rb") as _file:
+                result = self.put_api_for_id(**arguments, files=dict(file=_file))
+        return result
 
     @ask_token
     @prepare_encoding

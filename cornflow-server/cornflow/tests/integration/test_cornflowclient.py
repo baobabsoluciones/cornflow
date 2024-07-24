@@ -22,6 +22,7 @@ from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_QUEUED,
     STATUS_HEALTHY,
+    REPORT_STATE,
 )
 from cornflow.tests.const import INSTANCE_PATH, CASE_PATH, INSTANCE_MPS, INSTANCE_TSP
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
@@ -146,7 +147,12 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         return self.create_new_execution(payload)
 
     def create_instance_and_execution_report(
-        self, schema="tsp", solver="cpsat", data=None, timeLimit=10
+        self,
+        schema="tsp",
+        solver="cpsat",
+        data=None,
+        timeLimit=10,
+        report_name="report",
     ):
         name = "test_instance_1"
         description = "description123"
@@ -156,7 +162,9 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         one_instance = self.create_new_instance_payload(payload)
         payload = dict(
             instance_id=one_instance["id"],
-            config=dict(solver=solver, timeLimit=timeLimit, report=dict(name="report")),
+            config=dict(
+                solver=solver, timeLimit=timeLimit, report=dict(name=report_name)
+            ),
             description="test_execution_description_123",
             name="test_execution_123",
             schema=schema,
@@ -218,11 +226,9 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     #
     def test_new_execution_with_tsp_report_wait(self):
         execution = self.create_instance_and_execution_report()
-
-        func = lambda: self.client.raw.get_results(execution["id"]).json()["reports"]
-        condition = lambda v: len(v) > 0
-        reports_info = try_until_condition(func, condition, 10, 10)
-        id_report = reports_info[0]["id"]
+        func = wait_until_report_finishes(self.client, execution["id"])
+        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        id_report = reports_info["id"]
         my_name = "./my_report.html"
         self.client.raw.get_one_report(id_report, "./", my_name)
         self.assertTrue(os.path.exists(my_name))
@@ -236,10 +242,26 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_new_execution_with_timer_report_wait(self):
         payload = dict(solver="default", schema="timer", data={"a": 1}, timeLimit=1)
         execution = self.create_instance_and_execution_report(**payload)
-        func = lambda: self.client.raw.get_results(execution["id"]).json()["reports"]
-        condition = lambda v: len(v) > 0
-        reports_info = try_until_condition(func, condition, 10, 10)
-        id_report = reports_info[0]["id"]
+        func = wait_until_report_finishes(self.client, execution["id"])
+        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        id_report = reports_info["id"]
+        my_name = "./my_report.html"
+        self.client.raw.get_one_report(id_report, "./", my_name)
+        self.assertTrue(os.path.exists(my_name))
+        try:
+            os.remove(my_name)
+        except OSError:
+            pass
+
+    def test_new_execution_with_tsp_report_error(self):
+        payload = dict(report_name="wrong_name")
+        execution = self.create_instance_and_execution_report(**payload)
+        func = wait_until_report_finishes(
+            self.client, execution["id"], REPORT_STATE.ERROR
+        )
+        reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
+        self.assertEqual(REPORT_STATE.ERROR, reports_info["state"])
+        id_report = reports_info["id"]
         my_name = "./my_report.html"
         self.client.raw.get_one_report(id_report, "./", my_name)
         self.assertTrue(os.path.exists(my_name))
@@ -575,4 +597,21 @@ def try_until_condition(
         result = func()
         if condition(result):
             return result
-    raise TimeoutError("Timed out after {} seconds".format(number_of_times))
+    raise TimeoutError(
+        "Timed out after {} seconds".format(number_of_times * sleep_time)
+    )
+
+
+def wait_until_report_finishes(
+    client, execution_id, report_status=REPORT_STATE.CORRECT
+):
+    def func():
+        my_reports = client.raw.get_results(execution_id).json()["reports"]
+        if len(my_reports) == 0:
+            return None
+        first = my_reports[0]
+        if first["state"] != report_status:
+            return None
+        return first
+
+    return func
