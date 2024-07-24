@@ -230,6 +230,10 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
+        try:
+            os.remove(my_name)
+        except:
+            pass
         self.client.raw.get_one_report(id_report, "./", my_name)
         self.assertTrue(os.path.exists(my_name))
         try:
@@ -246,6 +250,10 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         reports_info = try_until_condition(func, lambda v: v is not None, 10, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
+        try:
+            os.remove(my_name)
+        except:
+            pass
         self.client.raw.get_one_report(id_report, "./", my_name)
         self.assertTrue(os.path.exists(my_name))
         try:
@@ -263,8 +271,13 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertEqual(REPORT_STATE.ERROR, reports_info["state"])
         id_report = reports_info["id"]
         my_name = "./my_report.html"
+        try:
+            os.remove(my_name)
+        except:
+            pass
         self.client.raw.get_one_report(id_report, "./", my_name)
-        self.assertTrue(os.path.exists(my_name))
+        # if we did not write a file, we should not have it:
+        self.assertFalse(os.path.exists(my_name))
         try:
             os.remove(my_name)
         except OSError:

@@ -202,7 +202,7 @@ class Tsp(BaseDAGTests.SolvingTests):
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
         report_path = "./my_report.html"
-        my_fun = my_experim.generate_report(
+        my_fun = lambda: my_experim.generate_report(
             report_path=report_path, report_name="wrong_name"
         )
         self.assertRaises(FileNotFoundError, my_fun)

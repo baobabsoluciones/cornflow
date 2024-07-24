@@ -191,7 +191,6 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         report = self.get_detail(user=self.get_user(), idx=idx)
 
         if report is None:
-            print("error")
             raise ObjectDoesNotExist
 
         # if there's no file, we do not return it:
@@ -199,8 +198,6 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
             return report, 200
 
         my_dir = get_report_dir(report.execution_id)
-        print(my_dir)
-        print(report.file_url)
         response = send_from_directory(my_dir, report.file_url)
         response.headers["File-Description"] = report.description
         response.headers["File-Name"] = report.file_url
