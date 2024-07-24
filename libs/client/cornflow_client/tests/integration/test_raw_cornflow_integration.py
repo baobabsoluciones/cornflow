@@ -812,13 +812,14 @@ class TestRawCornflowClientService(TestCase):
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
 
+        file_name = "new_report.html"
         response = client.raw.get_one_report(
-            reference_id=report_id, folder_destination=TEST_FOLDER
+            reference_id=report_id, folder_destination=TEST_FOLDER, file_name=file_name
         )
         self.assertEqual(response.status_code, 200)
 
         # read from TEST FOLDER
-        with open(os.path.join(TEST_FOLDER, "new_report.html"), "r") as f:
+        with open(os.path.join(TEST_FOLDER, file_name), "r") as f:
             file = f.read()
 
         # read from test/data folder
@@ -828,7 +829,7 @@ class TestRawCornflowClientService(TestCase):
         self.assertEqual(file, file_2)
 
         # remove file from TEST_FOLDER
-        os.remove(os.path.join(TEST_FOLDER, "new_report.html"))
+        os.remove(os.path.join(TEST_FOLDER, file_name))
 
     def test_get_all_reports(self):
         report_1 = self.test_post_report_html().json()["id"]
@@ -846,7 +847,7 @@ class TestRawCornflowClientService(TestCase):
         client.raw.delete_one_report(reference_id=report_2)
 
     def test_put_one_report(self):
-        response = self.test_post_report_html(uploadFile=False)
+        response = self.test_post_report_html()
         report_id = response.json()["id"]
 
         client = CornFlow(url="http://127.0.0.1:5050/")
@@ -854,7 +855,9 @@ class TestRawCornflowClientService(TestCase):
 
         payload = {"name": "new_name", "description": "some_description"}
 
-        response = client.raw.put_one_report(reference_id=report_id, payload=payload)
+        response = self.client.raw.put_one_report(
+            reference_id=report_id, payload=payload
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -862,33 +865,23 @@ class TestRawCornflowClientService(TestCase):
             reference_id=report_id, folder_destination=TEST_FOLDER
         )
 
-        self.assertEqual(new_report.headers["File-Name"], payload["name"])
         self.assertEqual(new_report.headers["File-Description"], payload["description"])
-        self.assertNotEqual(new_report.headers["File-Name"], "new_report")
         self.assertNotEqual(new_report.headers["File-Description"], "")
 
         delete = client.raw.delete_one_report(reference_id=report_id)
         self.assertEqual(delete.status_code, 200)
 
     def test_put_one_report_file(self):
-        response = self.test_post_report_html()
+        response = self.test_post_report_html(uploadFile=False)
         report_id = response.json()["id"]
 
         client = CornFlow(url="http://127.0.0.1:5050/")
         _ = client.login("user", "UserPassword1!")
 
-        with open(HTML_REPORT, "rb") as _file:
-            payload = {"name": "new_name", "description": "some_description"}
-            response = client.raw.put_one_report(
-                reference_id=report_id,
-                payload=payload,
-                files=dict(file=_file),
-                headers={"content_type": "multipart/form-data"},
-            )
-
-            response = client.raw.put_one_report(
-                reference_id=report_id, payload=payload
-            )
+        payload = {"name": "new_name", "description": "some_description"}
+        response = self.client.raw.put_one_report(
+            reference_id=report_id, payload=payload, filename=HTML_REPORT
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -896,9 +889,7 @@ class TestRawCornflowClientService(TestCase):
             reference_id=report_id, folder_destination=TEST_FOLDER
         )
 
-        self.assertEqual(new_report.headers["File-Name"], payload["name"])
         self.assertEqual(new_report.headers["File-Description"], payload["description"])
-        self.assertNotEqual(new_report.headers["File-Name"], "new_report")
         self.assertNotEqual(new_report.headers["File-Description"], "")
 
         delete = client.raw.delete_one_report(reference_id=report_id)
