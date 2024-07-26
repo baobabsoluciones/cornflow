@@ -102,7 +102,7 @@ class Testing(DefaultConfig):
 
     ENV = "testing"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DEBUG = False
+    DEBUG = True
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
     SECRET_TOKEN_KEY = "TESTINGSECRETKEY"
