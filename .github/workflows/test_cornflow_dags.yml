@@ -10,9 +10,10 @@ on:
   push:
     branches:
       - master
-      - development
+      - develop
     paths:
       - 'cornflow-dags/**'
+      - '.github/workflows/test_cornflow_dags.yml'
       - '!cornflow-dags/README.rst'
 
 jobs:  
