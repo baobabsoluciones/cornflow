@@ -86,8 +86,9 @@ jobs:
         python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip install -U orloge pulp
         python -m pip uninstall cornflow-client -y
-        python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
         python -m pip install -U -r airflow_config/requirements.txt
+        python -m pip uninstall cornflow-client -y
+        python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
         airflow db init
         airflow users create \
               --username admin \
