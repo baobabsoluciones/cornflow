@@ -30,13 +30,13 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "cornflow==${CORNFLOW_VERSION}"
+RUN pip install "cornflow@git+https://github.com/baobabsoluciones/cornflow@tsp_report#subdirectory=cornflow-server"
 
 
 # create folder for logs
 RUN mkdir -p /usr/src/app/log
 
-# create folder for object storage
+# create folder for static content
 RUN mkdir -p /usr/src/app/static
 
 # create folder for custom ssh keys
