@@ -36,7 +36,6 @@ class Solver(ExperimentCore):
         return dict()
 
     def generate_report(self, report_path: str, report_name="report") -> None:
-
         html = ET.Element("html")
         body = ET.Element("body")
         html.append(body)
