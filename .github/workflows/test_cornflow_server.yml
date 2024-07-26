@@ -11,9 +11,10 @@ on:
   push:
     branches:
       - master
-      - development
+      - develop
     paths: 
       - 'cornflow-server/**'
+      - '.github/workflows/test_cornflow_server.yml'
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
 
