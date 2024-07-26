@@ -30,7 +30,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "cornflow@git+https://github.com/baobabsoluciones/cornflow@tsp_report#subdirectory=cornflow-server"
+RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
 
 # create folder for logs
