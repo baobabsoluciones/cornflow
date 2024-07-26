@@ -11,9 +11,10 @@ on:
   push:
     branches:
       - master
-      - development
+      - develop
     paths:
       - 'libs/client/**'
+      - '.github/workflows/test_cornflow_client.yml'
       - '!libs/client/README.rst'
       - '!libs/client/setup.py'
 
