@@ -245,7 +245,9 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     # read header of file? we can parse it with beatifulsoup
 
     def test_new_execution_with_timer_report_wait(self):
-        payload = dict(solver="default", schema="timer", data={"a": 1}, timeLimit=1)
+        payload = dict(
+            solver="default", schema="timer", data={"seconds": 1}, timeLimit=1
+        )
         execution = self.create_instance_and_execution_report(**payload)
         func = wait_until_report_finishes(self.client, execution["id"])
         reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
