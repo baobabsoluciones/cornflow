@@ -40,6 +40,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
     def setUp(self, create_all=False):
         super().setUp()
         self.items_to_check = ["name", "description"]
+        log.debug(f"Start test case name: {self.id()}")
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
         statuses = [execution["state"]]
