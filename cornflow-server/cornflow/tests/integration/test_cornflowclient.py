@@ -1,20 +1,18 @@
 """
-
+Main script to run the integration tests of cornflow-server
 """
 
-# Full imports
+
 import json
+import logging as log
 import os
+import time
+from typing import Callable, Any
 
 import pulp
-import logging as log
-import time
-
-# Imports from environment
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
-# Import internal modules
 from cornflow.app import create_app
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
@@ -25,9 +23,7 @@ from cornflow.shared.const import (
     REPORT_STATE,
 )
 from cornflow.tests.const import INSTANCE_PATH, CASE_PATH, INSTANCE_MPS, INSTANCE_TSP
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
-
-from typing import Callable, Any
+from cornflow.tests.custom_live_server import CustomTestCaseLive
 
 
 def load_file(_file: str):
@@ -40,7 +36,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
     def setUp(self, create_all=False):
         super().setUp()
         self.items_to_check = ["name", "description"]
-        log.debug(f"Start test case name: {self.id()}")
+        log.info(f"Start test case name: {self.id()}")
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
         statuses = [execution["state"]]
@@ -189,6 +185,39 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         )
         return self.create_new_execution(payload)
 
+    @staticmethod
+    def try_until_condition(
+        func: Callable,
+        condition: Callable[[Any], bool],
+        number_of_times: int = 10,
+        sleep_time: float = 10,
+    ):
+        for i in range(number_of_times):
+            time.sleep(sleep_time)
+            result = func()
+            if condition(result):
+                return result
+        raise TimeoutError(
+            "Timed out after {} seconds".format(number_of_times * sleep_time)
+        )
+
+    @staticmethod
+    def wait_until_report_finishes(
+        client, execution_id, report_status=REPORT_STATE.CORRECT
+    ):
+        def func():
+            my_reports = client.raw.get_results(execution_id).json()["reports"]
+            if len(my_reports) == 0:
+                print("no reports")
+                return None
+            first = my_reports[0]
+            if first["state"] != report_status:
+                print(f"report state: {first['state']}")
+                return None
+            return first
+
+        return func
+
 
 class TestCornflowClientOpen(TestCornflowClientBasic):
     # TODO: user management
@@ -227,8 +256,8 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     #
     def test_new_execution_with_tsp_report_wait(self):
         execution = self.create_instance_and_execution_report()
-        func = wait_until_report_finishes(self.client, execution["id"])
-        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
+        func = self.wait_until_report_finishes(self.client, execution["id"])
+        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
         try:
@@ -249,8 +278,8 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
             solver="default", schema="timer", data={"seconds": 1}, timeLimit=1
         )
         execution = self.create_instance_and_execution_report(**payload)
-        func = wait_until_report_finishes(self.client, execution["id"])
-        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
+        func = self.wait_until_report_finishes(self.client, execution["id"])
+        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
         id_report = reports_info["id"]
         my_name = "./my_report.html"
         try:
@@ -267,10 +296,10 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_new_execution_with_tsp_report_error(self):
         payload = dict(report_name="wrong_name")
         execution = self.create_instance_and_execution_report(**payload)
-        func = wait_until_report_finishes(
+        func = self.wait_until_report_finishes(
             self.client, execution["id"], REPORT_STATE.ERROR
         )
-        reports_info = try_until_condition(func, lambda v: v is not None, 20, 5)
+        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
         self.assertEqual(REPORT_STATE.ERROR, reports_info["state"])
         id_report = reports_info["id"]
         my_name = "./my_report.html"
@@ -405,19 +434,6 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
 class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
-
-        # we create a service user:
-        self.create_service_user(
-            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
-        )
-
-        self.create_service_user(
-            dict(
-                username="service_user@cornflow.com",
-                pwd="Serviceuser_1234",
-                email="service_user@cornflow.com",
-            )
-        )
 
         # we create an admin user
         # we guarantee that the admin is there for airflow
@@ -600,36 +616,3 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             api="case", id=case["id"], post_url="data", encoding="br"
         ).json()
         self.assertIsNotNone(response["checks"])
-
-
-def try_until_condition(
-    func: Callable,
-    condition: Callable[[Any], bool],
-    number_of_times: int = 10,
-    sleep_time: float = 10,
-):
-    for i in range(number_of_times):
-        time.sleep(sleep_time)
-        result = func()
-        if condition(result):
-            return result
-    raise TimeoutError(
-        "Timed out after {} seconds".format(number_of_times * sleep_time)
-    )
-
-
-def wait_until_report_finishes(
-    client, execution_id, report_status=REPORT_STATE.CORRECT
-):
-    def func():
-        my_reports = client.raw.get_results(execution_id).json()["reports"]
-        if len(my_reports) == 0:
-            print("no reports")
-            return None
-        first = my_reports[0]
-        if first["state"] != report_status:
-            print(f"report state: {first['state']}")
-            return None
-        return first
-
-    return func
