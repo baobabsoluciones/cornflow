@@ -108,7 +108,7 @@ jobs:
         AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
         AIRFLOW__CORE__LOAD_EXAMPLES: 0
-        AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+        AIRFLOW_CONN_CF_URI: http://service_user:Airflow_test_password1@localhost:5050
     - name: Run unit tests
       run: |
         coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit
