@@ -2,7 +2,6 @@
 Main script to run the integration tests of cornflow-server
 """
 
-
 import json
 import logging as log
 import os
@@ -203,16 +202,14 @@ class TestCornflowClientBasic(CustomTestCaseLive):
 
     @staticmethod
     def wait_until_report_finishes(
-        client, execution_id, report_status=REPORT_STATE.CORRECT
+        client, execution_id: str, report_status=REPORT_STATE.CORRECT
     ):
         def func():
             my_reports = client.raw.get_results(execution_id).json()["reports"]
             if len(my_reports) == 0:
-                print("no reports")
                 return None
             first = my_reports[0]
             if first["state"] != report_status:
-                print(f"report state: {first['state']}")
                 return None
             return first
 
