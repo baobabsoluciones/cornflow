@@ -21,28 +21,18 @@ class GraphColoring(ApplicationCore):
 
     @property
     def test_cases(self) -> List[Dict]:
-        def read_file(filePath):
-            with open(filePath, "r") as f:
-                contents = f.read().splitlines()
-
-            pairs = (
-                pt.TupList(contents[1:])
-                .vapply(lambda v: v.split(" "))
-                .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
-            )
-            return dict(pairs=pairs)
 
         file_dir = os.path.join(os.path.dirname(__file__), "data")
-
+        get_file = lambda name: os.path.join(file_dir, name)
         return [
             {
                 "name": "gc_4_1",
-                "instance": read_file(os.path.join(file_dir, "gc_4_1")),
+                "instance": Instance.from_txt_file(get_file("gc_4_1")).to_dict(),
                 "description": "Example data with 4 pairs",
             },
             {
                 "name": "gc_50_1",
-                "instance": read_file(os.path.join(file_dir, "gc_50_1")),
+                "instance": Instance.from_txt_file(get_file("gc_50_1")).to_dict(),
                 "description": "Example data with 50 pairs",
             },
         ]
