@@ -158,6 +158,17 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.app = GraphColoring()
         self.config = dict(msg=False)
 
+    def test_incomplete_solution(self):
+        tests = self.app.test_cases
+        solution_data = dict(assignment=[dict(node=1, color=1), dict(node=3, color=1)])
+        my_experim = self.app.solvers["default"](
+            self.app.instance.from_dict(tests[0]["instance"]),
+            self.app.solution.from_dict(solution_data),
+        )
+        checks = my_experim.check_solution()
+        self.assertEqual(len(checks["missing"]), 2)
+        self.assertEqual(len(checks["pairs"]), 1)
+
 
 class Tsp(BaseDAGTests.SolvingTests):
     def setUp(self):

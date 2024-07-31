@@ -1,18 +1,26 @@
+# cornflow
 cornflow-client>=1.1.0
-orloge<=0.17.2
-PuLP<=2.7
+
+# data
 pandas<=2.1.1
-hackathonbaobab2020[solvers]
-pytups<=0.86.2
-ortools<=9.7.2996
+pytups
 xmltodict<=0.13.0
 openpyxl<=3.1.2
-pyomo<=6.6.2
-tsplib95<=0.7.1
-networkx
 scipy
 numpy<2.0.0
 
+# optimization:
+orloge
+PuLP
+ortools
+pyomo
+tsplib95<=0.7.1
+hackathonbaobab2020[solvers]
+networkx
+--index-url https://pip.hexaly.com
+hexaly
+
+# quarto and reports:
 matplotlib
 seaborn
 jupyter
