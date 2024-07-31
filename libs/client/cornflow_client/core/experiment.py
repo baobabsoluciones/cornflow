@@ -4,7 +4,8 @@
 
 from abc import ABC, abstractmethod
 from typing import Union, Dict
-import json
+import json, tempfile
+import os
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
@@ -181,3 +182,28 @@ class ExperimentCore(ABC):
         data = self.to_dict()
         with open(path, "w") as f:
             json.dump(data, f, indent=4, sort_keys=True)
+
+    def generate_report_quarto(self, quarto, report_path: str, report_name="report"):
+
+        # a user may give the full "report.qmd" name.
+        # We want to take out the extension
+        path_without_ext = os.path.splitext(report_name)[0]
+
+        path_to_qmd = path_without_ext + ".qmd"
+        if not os.path.exists(path_to_qmd):
+            raise FileNotFoundError(f"Report with path {path_to_qmd} does not exist.")
+        path_to_output = path_without_ext + ".html"
+        try:
+            quarto.quarto.find_quarto()
+        except FileNotFoundError:
+            raise ModuleNotFoundError("Quarto is not installed.")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "experiment.json")
+            # write a json with instance and solution to temp file
+            self.to_json(path)
+            # pass the path to the report to render
+            # it generates a report with path = path_to_output
+            quarto.render(input=path_to_qmd, execute_params=dict(file_name=path))
+        # quarto always writes the report in the .qmd directory.
+        # thus, we need to move it where we want to:
+        os.replace(path_to_output, report_path)

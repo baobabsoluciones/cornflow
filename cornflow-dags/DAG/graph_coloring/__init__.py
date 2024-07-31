@@ -18,6 +18,10 @@ class GraphColoring(ApplicationCore):
     schema = get_empty_schema(
         properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys())
     )
+    reports = ["report"]
+    schema["properties"]["report"] = dict(
+        type="string", default=reports[0], enum=reports
+    )
 
     @property
     def test_cases(self) -> List[Dict]:
