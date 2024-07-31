@@ -17,8 +17,6 @@ pyomo
 tsplib95<=0.7.1
 hackathonbaobab2020[solvers]
 networkx
---index-url https://pip.hexaly.com
-hexaly
 
 # quarto and reports:
 matplotlib
