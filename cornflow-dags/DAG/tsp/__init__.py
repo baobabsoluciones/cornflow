@@ -15,6 +15,10 @@ class TspApp(ApplicationCore):
     solution = Solution
     solvers = dict(naive=TSPNaive, cpsat=OrToolsCP)
     schema = load_json(os.path.join(os.path.dirname(__file__), "schemas/config.json"))
+    schema["properties"]["solver"]["enum"] = solvers.keys()
+    reports = ["report"]
+    schema["properties"]["report"]["enum"] = reports
+    schema["properties"]["report"]["default"] = reports[0]
 
     @property
     def test_cases(self) -> List[Dict]:

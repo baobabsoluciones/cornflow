@@ -25,7 +25,7 @@ from cornflow_client.airflow.dag_utilities import (
 from jsonschema import Draft7Validator
 from pytups import SuperDict
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 class BaseDAGTests:
@@ -54,6 +54,36 @@ class BaseDAGTests:
             self.assertEqual(len(dif), 0)
             self.assertIn("enum", props["solver"])
             self.assertGreater(len(props["solver"]["enum"]), 0)
+
+        def load_experiment_from_dataset(self, dataset):
+            instance_data = dataset.get("instance")
+            solution_data = dataset.get("solution", None)
+            instance = self.app.instance.from_dict(instance_data)
+            solution = self.app.solution.from_dict(solution_data)
+            s = self.app.get_default_solver_name()
+            return self.app.get_solver(s)(instance, solution)
+
+        def generate_check_report(
+            self,
+            my_experim,
+            things_to_look,
+            verbose=False,
+            report_path="./my_report.html",
+        ):
+
+            my_experim.generate_report(report_path=report_path)
+            # check the file is created.
+            self.assertTrue(os.path.exists(report_path))
+
+            parser = HTMLCheckTags(things_to_look, verbose)
+            with open(report_path, "r") as f:
+                content = f.read()
+
+            try:
+                os.remove(report_path)
+            except FileNotFoundError:
+                pass
+            self.assertRaises(StopIteration, parser.feed, content)
 
         def test_try_solving_testcase(self, config=None):
             config = config or self.config
@@ -169,6 +199,21 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.assertEqual(len(checks["missing"]), 2)
         self.assertEqual(len(checks["pairs"]), 1)
 
+    def test_report(self):
+        tests = self.app.test_cases
+        my_experim = self.load_experiment_from_dataset(tests[0])
+        my_experim.solve(dict())
+        things_to_look = dict(
+            section=[
+                ("id", "solution"),
+                ("id", "instance-statistics"),
+                ("id", "graph-coloring"),
+            ]
+        )
+        self.generate_check_report(
+            my_experim, things_to_look=things_to_look, verbose=False
+        )
+
 
 class Tsp(BaseDAGTests.SolvingTests):
     def setUp(self):
@@ -184,10 +229,6 @@ class Tsp(BaseDAGTests.SolvingTests):
         tests = self.app.test_cases
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
-        report_path = "./my_report.html"
-        my_experim.generate_report(report_path=report_path)
-        # check the file is created.
-        self.assertTrue(os.path.exists(report_path))
 
         # let's just check for an element inside the html that we know should exist
         # in this case a few 'section' tags with an attribute with a specific id
@@ -198,15 +239,7 @@ class Tsp(BaseDAGTests.SolvingTests):
                 ("id", "tsp"),
             ]
         )
-        parser = HTMLCheckTags(things_to_look)
-        with open(report_path, "r") as f:
-            content = f.read()
-
-        try:
-            os.remove(report_path)
-        except FileNotFoundError:
-            pass
-        self.assertRaises(StopIteration, parser.feed, content)
+        self.generate_check_report(my_experim, things_to_look)
 
     def test_report_error(self):
         tests = self.app.test_cases
@@ -438,46 +471,36 @@ class Timer(BaseDAGTests.SolvingTests):
 
     def test_report(self):
         my_experim = self.app.solvers["default"](self.app.instance({}))
-        my_experim.solve(dict(timeLimit=0))
-        report_path = "./my_report.html"
-        my_experim.generate_report(report_path=report_path)
-        # check the file is created.
-        self.assertTrue(os.path.exists(report_path))
-
-        # let's just check for an element inside the html that we know should exist
-        # a 'div' tag with a 'foo' attribute
-
-        # class MyHTMLParser(HTMLParser):
-        #
-        #     def handle_starttag(self, tag, attrs):
-        #         print("Start tag:", tag)
-        #         for attr in attrs:
-        #             print("     attr:", attr)
-
-        parser = HTMLCheckTags(dict(div=[("class", "foo")], span=[("class", "bar")]))
-        with open(report_path, "r") as f:
-            content = f.read()
-        # parser.feed(content)
-        try:
-            os.remove(report_path)
-        except FileNotFoundError:
-            pass
-        self.assertRaises(StopIteration, parser.feed, content)
+        things_to_look = dict(div=[("class", "foo")], span=[("class", "bar")])
+        self.generate_check_report(
+            my_experim, things_to_look=things_to_look, verbose=False
+        )
 
 
 class HTMLCheckTags(HTMLParser):
-    things_to_check: Dict[str, List[Tuple[str, str]]]
+    things_to_check: Optional[Dict[str, List[Tuple[str, str]]]]
 
-    def __init__(self, things_to_check: Dict[str, List[Tuple[str, str]]]):
+    def __init__(self, things_to_check: Dict[str, List[Tuple[str, str]]], verbose):
         HTMLParser.__init__(self)
-        self.things_to_check = SuperDict(things_to_check).copy_deep()
+        self.verbose = verbose
+        if things_to_check is None:
+            self.things_to_check = None
+        else:
+            self.things_to_check = SuperDict(things_to_check).copy_deep()
 
     def handle_starttag(self, tag: str, attrs: List[Tuple[str, str]]):
-        # print("Start tag:", tag)
-        if tag not in self.things_to_check:
+        # when things_to_check is None, we traverse everything
+        # when verbose=True, we print what we traverse
+        if self.verbose:
+            print("Start tag:", tag)
+        if self.things_to_check is not None and tag not in self.things_to_check:
             return
         for attr in attrs:
-            # print("     attr:", attr)
+            if self.verbose:
+                print("     attr:", attr)
+            # is we're not looking for keys, we just continue
+            if self.things_to_check is None:
+                continue
             try:
                 # we find the element in the list and remove it
                 index = self.things_to_check[tag].index(attr)
