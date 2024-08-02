@@ -94,6 +94,7 @@ Then we export the variables that we need to run airflow::
   export AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
   export AIRFLOW__WEBSERVER__SECRET_KEY=e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
   export AIRFLOW_CONN_CF_URI=http://service_user:Service_password1@localhost:5000
+  export AIRFLOW_HOME=./airflow_config/
   airflow webserver -p 8080 &
   airflow scheduler &
 
