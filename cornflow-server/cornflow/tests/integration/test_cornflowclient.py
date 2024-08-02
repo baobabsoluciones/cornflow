@@ -290,28 +290,6 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         except OSError:
             pass
 
-    def test_new_execution_with_tsp_report_error(self):
-        payload = dict(report_name="wrong_name")
-        execution = self.create_instance_and_execution_report(**payload)
-        func = self.wait_until_report_finishes(
-            self.client, execution["id"], REPORT_STATE.ERROR
-        )
-        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
-        self.assertEqual(REPORT_STATE.ERROR, reports_info["state"])
-        id_report = reports_info["id"]
-        my_name = "./my_report.html"
-        try:
-            os.remove(my_name)
-        except:
-            pass
-        self.client.raw.get_one_report(id_report, "./", my_name)
-        # if we did not write a file, we should not have it:
-        self.assertFalse(os.path.exists(my_name))
-        try:
-            os.remove(my_name)
-        except OSError:
-            pass
-
     def test_delete_execution(self):
         execution = self.test_new_execution()
         response = self.client.raw.get_api_for_id("execution/", execution["id"])

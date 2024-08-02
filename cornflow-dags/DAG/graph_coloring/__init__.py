@@ -1,9 +1,5 @@
-from cornflow_client import (
-    get_empty_schema,
-    ApplicationCore,
-)
+from cornflow_client import get_empty_schema, ApplicationCore, add_reports_to_schema
 from typing import List, Dict
-import pytups as pt
 import os
 
 from .solvers import OrToolsCP
@@ -18,10 +14,7 @@ class GraphColoring(ApplicationCore):
     schema = get_empty_schema(
         properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys())
     )
-    reports = ["report"]
-    schema["properties"]["report"] = dict(
-        type="string", default=reports[0], enum=reports
-    )
+    schema = add_reports_to_schema(schema, ["report"])
 
     @property
     def test_cases(self) -> List[Dict]:
