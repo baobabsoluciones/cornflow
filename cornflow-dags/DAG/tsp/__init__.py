@@ -15,7 +15,7 @@ class TspApp(ApplicationCore):
     solution = Solution
     solvers = dict(naive=TSPNaive, cpsat=OrToolsCP)
     schema = load_json(os.path.join(os.path.dirname(__file__), "schemas/config.json"))
-    schema["properties"]["solver"]["enum"] = solvers.keys()
+    schema["properties"]["solver"]["enum"] = list(solvers.keys())
     reports = ["report"]
     schema["properties"]["report"]["enum"] = reports
     schema["properties"]["report"]["default"] = reports[0]
