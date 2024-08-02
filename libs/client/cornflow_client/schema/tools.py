@@ -33,6 +33,18 @@ def get_empty_schema(properties=None, solvers=None):
     return schema
 
 
+def add_reports_to_schema(schema, reports):
+    """
+    assumes the first report is the default.
+    """
+    schema = dict(schema)
+    schema["report"] = dict(
+        type="object",
+        properties=dict(name=dict(type="string", enum=reports, default=reports[0])),
+    )
+    return schema
+
+
 def clean_none(dic):
     """
     Remove empty values from a dict
