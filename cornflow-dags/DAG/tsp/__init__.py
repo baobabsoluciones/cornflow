@@ -5,7 +5,7 @@ from cornflow_client.core.tools import load_json
 from typing import List, Dict
 import os
 
-from .solvers import TSPNaive, OrToolsCP
+from .solvers import TSPNaive, OrToolsCP, Hexaly
 from .core import Instance, Solution
 
 
@@ -13,7 +13,7 @@ class TspApp(ApplicationCore):
     name = "tsp"
     instance = Instance
     solution = Solution
-    solvers = dict(naive=TSPNaive, cpsat=OrToolsCP)
+    solvers = dict(naive=TSPNaive, cpsat=OrToolsCP, hexaly=Hexaly)
     schema = load_json(os.path.join(os.path.dirname(__file__), "schemas/config.json"))
     schema["properties"]["solver"]["enum"] = solvers.keys()
     reports = ["report"]

@@ -1,11 +1,8 @@
 from ortools.sat.python import cp_model
 from cornflow_client.constants import (
-    STATUS_OPTIMAL,
-    STATUS_INFEASIBLE,
-    STATUS_UNDEFINED,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    ORTOOLS_STATUS_MAPPING
+    ORTOOLS_STATUS_MAPPING,
 )
 from pytups import TupList, SuperDict
 from ..core import Solution, Experiment
@@ -45,7 +42,7 @@ class OrToolsCP(Experiment):
         if termination_condition not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
             return dict(
                 status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status_sol=SOLUTION_STATUS_INFEASIBLE,
             )
         next = (
             literals.vapply(solver.BooleanValue)
@@ -66,5 +63,5 @@ class OrToolsCP(Experiment):
 
         return dict(
             status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
-            status_sol=SOLUTION_STATUS_FEASIBLE
+            status_sol=SOLUTION_STATUS_FEASIBLE,
         )
