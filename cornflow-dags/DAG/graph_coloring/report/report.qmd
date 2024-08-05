@@ -119,7 +119,7 @@ See @fig-colors for a representation of the solution. Colors are kept from the n
 #| fig-cap: "Color assignment to nodes"
 
 def get_colors_from_cmap(cmap_name, num_colors):
-    cmap = plt.cm.get_cmap(cmap_name)
+    cmap = colormaps.get_cmap(cmap_name)
     colors = [cmap(i / num_colors) for i in range(num_colors)]
     return colors
 
