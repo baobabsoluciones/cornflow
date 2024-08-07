@@ -37,8 +37,7 @@ def add_reports_to_schema(schema, reports):
     """
     assumes the first report is the default.
     """
-    schema = dict(schema)
-    schema["report"] = dict(
+    schema["properties"]["report"] = dict(
         type="object",
         properties=dict(name=dict(type="string", enum=reports, default=reports[0])),
     )
