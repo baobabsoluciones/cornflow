@@ -46,12 +46,10 @@ class Experiment(ExperimentCore):
         ]
         return dict(pairs=errors, missing=missing_colors)
 
-    def generate_report(self, report_path: str, report_name="report") -> None:
+    def generate_report(self, report_name="report") -> str:
         if not os.path.isabs(report_name):
             report_name = os.path.join(
                 os.path.dirname(__file__), "../report/", report_name
             )
 
-        return self.generate_report_quarto(
-            quarto, report_path=report_path, report_name=report_name
-        )
+        return self.generate_report_quarto(quarto, report_name=report_name)

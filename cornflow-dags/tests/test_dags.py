@@ -63,15 +63,9 @@ class BaseDAGTests:
             s = self.app.get_default_solver_name()
             return self.app.get_solver(s)(instance, solution)
 
-        def generate_check_report(
-            self,
-            my_experim,
-            things_to_look,
-            verbose=False,
-            report_path="./my_report.html",
-        ):
+        def generate_check_report(self, my_experim, things_to_look, verbose=False):
 
-            my_experim.generate_report(report_path=report_path)
+            report_path = my_experim.generate_report()
             # check the file is created.
             self.assertTrue(os.path.exists(report_path))
 
@@ -245,10 +239,7 @@ class Tsp(BaseDAGTests.SolvingTests):
         tests = self.app.test_cases
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
-        report_path = "./my_report.html"
-        my_fun = lambda: my_experim.generate_report(
-            report_path=report_path, report_name="wrong_name"
-        )
+        my_fun = lambda: my_experim.generate_report(report_name="wrong_name")
         self.assertRaises(FileNotFoundError, my_fun)
 
     def test_export(self):

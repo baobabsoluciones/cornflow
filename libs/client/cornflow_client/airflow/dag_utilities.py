@@ -389,17 +389,10 @@ def cf_report(
         my_experiment = experiment(
             app.instance(input_data), app.solution(solution_data)
         )
-        report_path = os.path.abspath("./my_report.html")
-        if os.path.exists(report_path):
-            try:
-                os.remove(report_path)
-            except:
-                pass
+
         print(f"Preparing to write the report: {report_name}")
         try:
-            my_experiment.generate_report(
-                report_path=report_path, report_name=report_name
-            )
+            report_path = my_experiment.generate_report(report_name=report_name)
         except ModuleNotFoundError as e:
             my_try_to_save(-10)
             raise AirflowDagException("The generation of the report failed")

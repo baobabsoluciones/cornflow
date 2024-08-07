@@ -1,3 +1,5 @@
+import os.path
+
 import time
 from cornflow_client import get_empty_schema
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore, ExperimentCore
@@ -35,7 +37,8 @@ class Solver(ExperimentCore):
     def check_solution(self, *args, **kwargs):
         return dict()
 
-    def generate_report(self, report_path: str, report_name="report") -> None:
+    def generate_report(self, report_name="report") -> str:
+        report_path = os.path.abspath("./report.html")
         html = ET.Element("html")
         body = ET.Element("body")
         html.append(body)
@@ -45,7 +48,7 @@ class Solver(ExperimentCore):
         div.append(span)
         with open(report_path, "w") as f:
             ET.ElementTree(html).write(f, encoding="unicode", method="html")
-        return
+        return report_path
 
 
 class Timer(ApplicationCore):

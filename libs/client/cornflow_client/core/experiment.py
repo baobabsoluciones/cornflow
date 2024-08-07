@@ -153,9 +153,10 @@ class ExperimentCore(ABC):
 
         return conf
 
-    def generate_report(self, report_path: str, report_name="report") -> None:
+    def generate_report(self, report_name="report") -> str:
         """
-        this method should write a report file into report_path, using the template in report_name.
+        this method should write a report file, using the template in report_name.
+        It returns the path to the file
 
         :param report_path: the path of the report to export
         :param report_name: the name of the template for the report
@@ -183,7 +184,8 @@ class ExperimentCore(ABC):
         with open(path, "w") as f:
             json.dump(data, f, indent=4, sort_keys=True)
 
-    def generate_report_quarto(self, quarto, report_path: str, report_name="report"):
+    def generate_report_quarto(self, quarto, report_name: str = "report") -> str:
+        # it returns the path to the file being written
 
         # a user may give the full "report.qmd" name.
         # We want to take out the extension
@@ -193,6 +195,10 @@ class ExperimentCore(ABC):
         if not os.path.exists(path_to_qmd):
             raise FileNotFoundError(f"Report with path {path_to_qmd} does not exist.")
         path_to_output = path_without_ext + ".html"
+        try:
+            os.remove(path_to_output)
+        except FileNotFoundError:
+            pass
         try:
             quarto.quarto.find_quarto()
         except FileNotFoundError:
@@ -205,5 +211,5 @@ class ExperimentCore(ABC):
             # it generates a report with path = path_to_output
             quarto.render(input=path_to_qmd, execute_params=dict(file_name=path))
         # quarto always writes the report in the .qmd directory.
-        # thus, we need to move it where we want to:
-        os.replace(path_to_output, report_path)
+        # thus, we need to return it so the user can move it if needed
+        return path_to_output

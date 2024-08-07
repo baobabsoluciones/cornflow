@@ -76,7 +76,7 @@ class Experiment(ExperimentCore):
             missing_positions=self.check_missing_positions(),
         )
 
-    def generate_report(self, report_path: str, report_name="report") -> None:
+    def generate_report(self, report_name="report") -> str:
         # if someone gives the absolute path: we use that.
         # otherwise we assume it's a file on the report/ directory:
 
@@ -85,6 +85,4 @@ class Experiment(ExperimentCore):
                 os.path.dirname(__file__), "../report/", report_name
             )
 
-        return self.generate_report_quarto(
-            quarto, report_path=report_path, report_name=report_name
-        )
+        return self.generate_report_quarto(quarto, report_name=report_name)
