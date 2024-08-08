@@ -8,4 +8,8 @@ from cornflow_client.core import (
     SolutionCore,
     ExperimentCore,
 )
-from cornflow_client.schema.tools import get_empty_schema, get_pulp_jsonschema
+from cornflow_client.schema.tools import (
+    get_empty_schema,
+    get_pulp_jsonschema,
+    add_reports_to_schema,
+)

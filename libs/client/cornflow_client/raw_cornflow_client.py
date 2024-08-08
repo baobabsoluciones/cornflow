@@ -1,13 +1,55 @@
 """
-
+Code for the main class to interact to cornflow from python code.
 """
 
 import logging as log
+import os
 import re
 from functools import wraps
+from typing import Union, Dict
 from urllib.parse import urljoin
 
 import requests
+from requests import Response
+
+
+def ask_token(func: callable):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if not self.token:
+            raise CornFlowApiError("Need to login first!")
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
+def log_call(func: callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        log.debug(result.json())
+        return result
+
+    return wrapper
+
+
+def prepare_encoding(func: callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        encoding = kwargs.get("encoding", "br")
+        if encoding not in [
+            "gzip",
+            "compress",
+            "deflate",
+            "br",
+            "identity",
+        ]:
+            encoding = "br"
+        kwargs["encoding"] = encoding
+        result = func(*args, **kwargs)
+        return result
+
+    return wrapper
 
 
 class RawCornFlow(object):
@@ -15,45 +57,9 @@ class RawCornFlow(object):
     Base class to access cornflow-server
     """
 
-    def __init__(self, url, token=None):
+    def __init__(self, url: str, token=None):
         self.url = url
         self.token = token
-
-    def ask_token(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            if not self.token:
-                raise CornFlowApiError("Need to login first!")
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    def log_call(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            log.debug(result.json())
-            return result
-
-        return wrapper
-
-    def prepare_encoding(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            encoding = kwargs.get("encoding", "br")
-            if encoding not in [
-                "gzip",
-                "compress",
-                "deflate",
-                "br",
-                "identity",
-            ]:
-                encoding = "br"
-            kwargs["encoding"] = encoding
-            result = func(*args, **kwargs)
-            return result
-
-        return wrapper
 
     # def expect_201(func):
     #     return partial(expect_status, status=201)
@@ -63,25 +69,25 @@ class RawCornFlow(object):
 
     def api_for_id(
         self,
-        api,
-        id=None,
-        method="GET",
-        post_url=None,
-        query_args=None,
-        encoding=None,
+        api: str,
+        id: Union[str, int] = None,
+        method: str = "GET",
+        post_url: str = None,
+        query_args: Dict = None,
+        encoding: str = None,
         **kwargs,
-    ):
+    ) -> Response:
         """
-        :param api: the resource in the server
+        :param str api: the resource in the server
         :param id: the id of the particular object
-        :param method: HTTP method to apply
-        :param post_url: optional action to apply
-        :param query_args: query arguments for the request
-        :param encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
+        :param str method: HTTP method to apply
+        :param str post_url: optional action to apply
+        :param Dict query_args: query arguments for the request
+        :param str encoding: optional string with the type of encoding, if it is not specified it uses br encoding,
         options are: gzip, compress, deflate, br or identity
         :param kwargs: other arguments to requests.request
 
-        :return: requests.request
+        :return: :class:`requests.Response`
         """
         if api[0] == "/" and self.url[-1] == "/":
             api = api[1:]
@@ -105,17 +111,25 @@ class RawCornFlow(object):
             for key, value in query_args.items():
                 url = f"{url}{key}={value}&"
             url = url[:-1]
-        return requests.request(
-            method=method,
-            url=url,
-            headers={
+
+        headers = {
+            **{
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
             },
+            **kwargs.pop("headers", {"content_type": "application/json"}),
+        }
+
+        return requests.request(
+            method=method,
+            url=url,
+            headers=headers,
             **kwargs,
         )
 
-    def get_api(self, api, method="GET", encoding=None, **kwargs):
+    def get_api(
+        self, api: str, method: str = "GET", encoding: str = None, **kwargs
+    ) -> Response:
         return requests.request(
             method=method,
             url=urljoin(self.url, api) + "/",
@@ -128,7 +142,14 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def get_api_for_id(self, api, id=None, post_url=None, encoding=None, **kwargs):
+    def get_api_for_id(
+        self,
+        api: str,
+        id: Union[str, id] = None,
+        post_url: str = None,
+        encoding: str = None,
+        **kwargs,
+    ) -> Response:
         """
         api_for_id with a GET request
         """
@@ -180,12 +201,17 @@ class RawCornFlow(object):
     @ask_token
     @prepare_encoding
     def create_api(self, api, encoding=None, **kwargs):
-        return requests.post(
-            urljoin(self.url, api),
-            headers={
+        headers = {
+            **{
                 "Authorization": "access_token " + self.token,
                 "Content-Encoding": encoding,
             },
+            **kwargs.pop("headers", {"content_type": "application/json"}),
+        }
+
+        return requests.post(
+            urljoin(self.url, api),
+            headers=headers,
             **kwargs,
         )
 
@@ -309,15 +335,17 @@ class RawCornFlow(object):
         :param str filename: path to filename to upload
         :param str name: name for instance
         :param str description: description of the instance
+        :param bool minimize: minimize the problem if True
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         """
         with open(filename, "rb") as file:
-            return self.create_api(
+            result = self.create_api(
                 "instancefile/",
                 data=dict(name=name, description=description, minimize=minimize),
                 files=dict(file=file),
                 encoding=encoding,
             )
+        return result
 
     @log_call
     @ask_token
@@ -338,7 +366,7 @@ class RawCornFlow(object):
         :param str instance_id: id for the instance
         :param str name: name for the execution
         :param str description: description of the execution
-        :param dict config: execution configuration
+        :param dict config: configuration for the execution
         :param str schema: name of the problem to solve
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
@@ -489,12 +517,136 @@ class RawCornFlow(object):
         Edits an execution
 
         :param str execution_id: id for the execution
-        :param kwargs: optional data to edit
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param kwargs: optional data to edit
         """
         return self.put_api_for_id(
             "dag/", id=execution_id, encoding=encoding, payload=kwargs
         )
+
+    @ask_token
+    @log_call
+    @prepare_encoding
+    def get_reports(self, params=None, encoding=None):
+        """
+        Gets all reports for a given user
+
+        :param dict params: optional filters
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
+        return self.get_api("report", params=params, encoding=encoding)
+
+    @ask_token
+    @prepare_encoding
+    def create_report(self, name, execution_id, filename=None, encoding=None, **kwargs):
+        """
+        Creates a report for an execution
+
+        :param str execution_id: id for the execution
+        :param str name: the name of the report
+        :param file filename: the file name with the report
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :param kwargs: optional data to write (description)
+        """
+        arguments = dict(
+            api="report/",
+            data=dict(name=name, execution_id=execution_id, **kwargs),
+            encoding=encoding,
+            headers={"content_type": "multipart/form-data"},
+        )
+        if filename is None:
+            result = self.create_api(**arguments)
+        else:
+            with open(filename, "rb") as _file:
+                result = self.create_api(**arguments, files=dict(file=_file))
+        return result
+
+    @ask_token
+    @prepare_encoding
+    def get_one_report(
+        self, reference_id, folder_destination=None, file_name=None, encoding=None
+    ) -> Response:
+        """
+        Gets one specific report and downloads it to disk
+
+        :param int reference_id: id of the report to download
+        :param str folder_destination: Path on the local system where to save the downloaded report
+        :param str file_name: optional name for the report file to write
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
+        result = self.get_api_for_id(api="report", id=reference_id, encoding=encoding)
+        if result.status_code != 200:
+            return result
+
+        # if it returned a json: we did not get a report
+        # we just return the result "as is".
+        try:
+            content = result.json()
+            return result
+        except requests.exceptions.JSONDecodeError:
+            # if it fails, we assume there's an html file
+            content = result.content
+        if folder_destination is None:
+            raise ValueError(
+                "Argument folder_destination needs to be filled when there's a file"
+            )
+        if file_name is None:
+            file_name = result.headers["Content-Disposition"].split("=")[1]
+        path = os.path.normpath(os.path.join(folder_destination, file_name))
+
+        # write content to disk on path
+        with open(path, "wb") as f:
+            f.write(content)
+
+        return result
+
+    @ask_token
+    @log_call
+    @prepare_encoding
+    def delete_one_report(self, reference_id, encoding=None):
+        """
+        Deletes a report
+
+        :param int reference_id: id of the report to download
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
+        return self.delete_api_for_id(api="report", id=reference_id, encoding=encoding)
+
+    @ask_token
+    @log_call
+    @prepare_encoding
+    def put_one_report(
+        self, reference_id, payload, filename=None, encoding=None, **kwargs
+    ) -> Response:
+        """
+        Edits one specific report, potentially uploading a new file
+
+        :param int reference_id: id of the report to download
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+        :return: the response object
+        :rtype: :class:`Response`
+        """
+        arguments = dict(
+            api="report/",
+            id=reference_id,
+            payload=None,
+            data=payload,
+            encoding=encoding,
+            headers={"content_type": "multipart/form-data"},
+            post_url="edit",
+        )
+        if filename is None:
+            result = self.put_api_for_id(**arguments)
+        else:
+            with open(filename, "rb") as _file:
+                result = self.put_api_for_id(**arguments, files=dict(file=_file))
+        return result
 
     @ask_token
     @prepare_encoding
@@ -875,7 +1027,7 @@ class RawCornFlow(object):
         encoding=None,
     ):
         if name is None:
-            return {"error": "No dag name was given"}
+            raise CornFlowApiError("No dag name was given")
         payload = dict(
             id=name,
             description=description,
@@ -958,7 +1110,7 @@ def group_variables_by_name(_vars, names_list, **kwargs):
     # 2. key can be a tuple or a single string.
     # 3. if a tuple, they can be an integer or a string.
     #
-    # it dos not permit the nested dictionary format of variables
+    # it does not permit the nested dictionary format of variables
     # we copy it because we will be taking out already seen variables
     _vars = dict(_vars)
     __vars = {k: {} for k in names_list}

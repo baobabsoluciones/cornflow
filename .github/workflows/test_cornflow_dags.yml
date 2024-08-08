@@ -36,6 +36,13 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set up Quarto
+      uses: quarto-dev/quarto-actions/setup@v2
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # To install LaTeX to build PDF book
+        tinytex: true
     - name: Install cbc
       run: |
         sudo apt-get install -y coinor-cbc

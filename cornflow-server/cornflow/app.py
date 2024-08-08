@@ -46,6 +46,9 @@ def create_app(env_name="development", dataconn=None):
     :return: the application that is going to be running :class:`Flask`
     :rtype: :class:`Flask`
     """
+    if os.getenv("FLASK_ENV", None) is not None:
+        env_name = os.getenv("FLASK_ENV")
+
     dictConfig(log_config(app_config[env_name].LOG_LEVEL))
 
     app = Flask(__name__)
@@ -74,6 +77,7 @@ def create_app(env_name="development", dataconn=None):
     api = Api(app)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
+
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])

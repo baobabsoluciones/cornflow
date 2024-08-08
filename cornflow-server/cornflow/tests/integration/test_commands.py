@@ -3,7 +3,7 @@ from flask import current_app
 from cornflow.commands.dag import register_deployed_dags_command
 from cornflow.models import DeployedDAG
 from cornflow.tests.const import PUBLIC_DAGS
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
+from cornflow.tests.custom_live_server import CustomTestCaseLive
 
 
 class TestCornflowCommands(CustomTestCaseLive):

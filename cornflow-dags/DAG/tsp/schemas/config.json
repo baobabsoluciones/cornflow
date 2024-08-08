@@ -6,6 +6,12 @@
         "threads": {"type": "integer"},
         "seed": {"type": "integer"},
         "gap": {"type": "number"},
+        "report": {
+            "type": "object",
+            "properties": {
+                "name": {"type":  "string"}
+            }
+        },
         "solver": {
             "type": "string",
             "enum": ["naive", "cpsat"],

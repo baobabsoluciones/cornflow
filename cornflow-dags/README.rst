@@ -27,6 +27,11 @@ There are several things that are needed when submitting a new solver.
 4. a `Solver` class
 5. an `Application class`
 
+A few recommended additions:
+
+1. unit tests.
+2. a report.
+
 In its most minimalistic form: an app constitutes one file that contains all of this.
 In the following lines we will explain each of these concepts while using the graph-coloring example dag. This example can be found in the `DAG/graph_coloring` directory.
 
@@ -297,3 +302,26 @@ and add a reference to your solver::
 Then, you can execute the unittests for your solver with the following command::
 
     python -m unittest tests.test_dags.GraphColor
+
+The reports
+--------------
+
+The generation of reports needs to have the `quarto` app installed in the system.
+To downlodad and install quarto, check here: https://quarto.org/docs/download/.
+
+A report is a static/ self-contained view of an Experiment (solved or not).
+
+For example, to generate the `tsp` report, you execute::
+
+    quarto render cornflow-dags/DAG/tsp/report/report.qmd
+
+By default, it uses an example instance. If a new instance is needed, the path to it is required::
+
+   quarto render cornflow-dags/DAG/tsp/report/report.qmd -P file_name:PATH_TO_JSON.json
+
+Developing reports
+********************
+
+Quarto reports are easier to create using VS-code with the following extensions: `Python`, `Quarto`, `Jupyter`, `black (Microsoft)`.
+
+VS-code offers an interactive window to execute cells, and automatic re-run of the report by watching for changes.

@@ -64,6 +64,14 @@ class ExecutionModel(BaseDataModel):
         default=EXECUTION_STATE_MESSAGE_DICT[DEFAULT_EXECUTION_CODE],
         nullable=True,
     )
+    reports = db.relationship(
+        "ReportModel",
+        backref="executions",
+        lazy=True,
+        primaryjoin="and_(ExecutionModel.id==ReportModel.execution_id, "
+        "ReportModel.deleted_at==None)",
+        cascade="all,delete",
+    )
 
     def __init__(self, data):
         super().__init__(data)

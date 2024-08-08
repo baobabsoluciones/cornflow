@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.9.1
+ARG AIRFLOW_VERSION=2.9.3
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.10.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False

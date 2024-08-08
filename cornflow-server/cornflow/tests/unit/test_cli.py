@@ -20,6 +20,11 @@ from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
 class CLITests(TestCase):
     def setUp(self):
         db.create_all()
+        self.number_of_views = 52
+        self.number_of_permissions = 574
+        if int(os.getenv("CF_ALARMS_ENDPOINT", 0)) != 1:
+            self.number_of_views = 50
+            self.number_of_permissions = 519
 
     def tearDown(self):
         db.session.remove()
@@ -131,7 +136,7 @@ class CLITests(TestCase):
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
         views = ViewModel.get_all_objects().all()
-        self.assertEqual(len(views), 49)
+        self.assertEqual(len(views), self.number_of_views)
 
     def test_permissions_entrypoint(self):
         runner = CliRunner()
@@ -155,8 +160,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 49)
-        self.assertEqual(len(permissions), 546)
+        self.assertEqual(len(views), self.number_of_views)
+        self.assertEqual(len(permissions), self.number_of_permissions)
 
     def test_permissions_base_command(self):
         runner = CliRunner()
@@ -171,8 +176,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 49)
-        self.assertEqual(len(permissions), 546)
+        self.assertEqual(len(views), self.number_of_views)
+        self.assertEqual(len(permissions), self.number_of_permissions)
 
     def test_service_entrypoint(self):
         runner = CliRunner()

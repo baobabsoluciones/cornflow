@@ -15,6 +15,8 @@ from cornflow_client.constants import (
 )
 import cornflow_client.airflow.dag_utilities as utils
 
+import tempfile
+from quarto import render
 import pulp as pl
 import orloge as ol
 import os
@@ -69,6 +71,32 @@ class PuLPSolve(ExperimentCore):
 
     def check_solution(self, *args, **kwargs) -> dict:
         return dict()
+
+    def generate_report(self, report_path: str, report_name="report") -> None:
+        # a user may give the full "report.qmd" name.
+        # We want to take out the extension
+        path_without_ext = os.path.splitext(report_name)[0]
+
+        # if someone gives the absolute path: we use that.
+        # otherwise we assume it's a file on the report/ directory:
+        if not os.path.isabs(path_without_ext):
+            path_without_ext = os.path.join(
+                os.path.dirname(__file__), "../report/", path_without_ext
+            )
+        path_to_qmd = path_without_ext + ".qmd"
+        if not os.path.exists(path_to_qmd):
+            raise FileNotFoundError(f"Report with path {path_to_qmd} does not exist.")
+        path_to_output = path_without_ext + ".html"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "experiment.json")
+            # write a json with instance and solution to temp file
+            self.to_json(path)
+            # pass the path to the report to render
+            # it generates a report with path = path_to_output
+            render(input=path_to_qmd, execute_params=dict(file_name=path))
+        # quarto always writes the report in the .qmd directory.
+        # thus, we need to move it where we want to:
+        os.replace(path_to_output, report_path)
 
 
 class PuLP(ApplicationCore):

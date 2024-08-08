@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.1.0
+ARG CORNFLOW_VERSION=1.1.1a1
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
@@ -35,6 +35,9 @@ RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
 # create folder for logs
 RUN mkdir -p /usr/src/app/log
+
+# create folder for static content
+RUN mkdir -p /usr/src/app/static
 
 # create folder for custom ssh keys
 RUN mkdir /usr/src/app/.ssh

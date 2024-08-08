@@ -1,17 +1,17 @@
 """
-
+Main script to run the integration tests of cornflow-server
 """
-# Full imports
-import json
-import pulp
-import logging as log
-import time
 
-# Imports from environment
+import json
+import logging as log
+import os
+import time
+from typing import Callable, Any
+
+import pulp
 from cornflow_client import CornFlowApiError
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 
-# Import internal modules
 from cornflow.app import create_app
 from cornflow.shared.const import (
     EXEC_STATE_CORRECT,
@@ -19,12 +19,13 @@ from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_QUEUED,
     STATUS_HEALTHY,
+    REPORT_STATE,
 )
-from cornflow.tests.const import INSTANCE_PATH, CASE_PATH
-from cornflow.tests.custom_liveServer import CustomTestCaseLive
+from cornflow.tests.const import INSTANCE_PATH, CASE_PATH, INSTANCE_MPS, INSTANCE_TSP
+from cornflow.tests.custom_live_server import CustomTestCaseLive
 
 
-def load_file(_file):
+def load_file(_file: str):
     with open(_file) as f:
         temp = json.load(f)
     return temp
@@ -34,6 +35,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
     def setUp(self, create_all=False):
         super().setUp()
         self.items_to_check = ["name", "description"]
+        log.info(f"Start test case name: {self.id()}")
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
         statuses = [execution["state"]]
@@ -127,7 +129,7 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         return execution
 
     def create_instance_and_execution(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         schema = "solve_model_dag"
@@ -136,6 +138,31 @@ class TestCornflowClientBasic(CustomTestCaseLive):
             config=dict(solver="PULP_CBC_CMD", timeLimit=10),
             description=description,
             name=name,
+            schema=schema,
+        )
+        return self.create_new_execution(payload)
+
+    def create_instance_and_execution_report(
+        self,
+        schema="tsp",
+        solver="cpsat",
+        data=None,
+        timeLimit=10,
+        report_name="report",
+    ):
+        name = "test_instance_1"
+        description = "description123"
+        if data is None:
+            data = load_file(INSTANCE_TSP)
+        payload = dict(data=data, name=name, description=description, schema=schema)
+        one_instance = self.create_new_instance_payload(payload)
+        payload = dict(
+            instance_id=one_instance["id"],
+            config=dict(
+                solver=solver, timeLimit=timeLimit, report=dict(name=report_name)
+            ),
+            description="test_execution_description_123",
+            name="test_execution_123",
             schema=schema,
         )
         return self.create_new_execution(payload)
@@ -157,16 +184,47 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         )
         return self.create_new_execution(payload)
 
+    @staticmethod
+    def try_until_condition(
+        func: Callable,
+        condition: Callable[[Any], bool],
+        number_of_times: int = 10,
+        sleep_time: float = 10,
+    ):
+        for i in range(number_of_times):
+            time.sleep(sleep_time)
+            result = func()
+            if condition(result):
+                return result
+        raise TimeoutError(
+            "Timed out after {} seconds".format(number_of_times * sleep_time)
+        )
+
+    @staticmethod
+    def wait_until_report_finishes(
+        client, execution_id: str, report_status=REPORT_STATE.CORRECT
+    ):
+        def func():
+            my_reports = client.raw.get_results(execution_id).json()["reports"]
+            if len(my_reports) == 0:
+                return None
+            first = my_reports[0]
+            if first["state"] != report_status:
+                return None
+            return first
+
+        return func
+
 
 class TestCornflowClientOpen(TestCornflowClientBasic):
     # TODO: user management
     # TODO: infeasible execution
 
     def test_new_instance_file(self):
-        self.create_new_instance_file("./cornflow/tests/data/test_mps.mps")
+        self.create_new_instance_file(INSTANCE_MPS)
 
     def test_new_instance(self):
-        return self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        return self.create_new_instance(INSTANCE_MPS)
 
     # TODO: reactivate test with new version of cornflow client which allows to pass
     #  optional arguments for the headers of the request
@@ -188,6 +246,49 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
 
     def test_new_execution(self):
         return self.create_instance_and_execution()
+
+    def test_new_execution_with_tsp_report(self):
+        return self.create_instance_and_execution_report()
+
+    #
+    def test_new_execution_with_tsp_report_wait(self):
+        execution = self.create_instance_and_execution_report()
+        func = self.wait_until_report_finishes(self.client, execution["id"])
+        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
+        id_report = reports_info["id"]
+        my_name = "./my_report.html"
+        try:
+            os.remove(my_name)
+        except:
+            pass
+        self.client.raw.get_one_report(id_report, "./", my_name)
+        self.assertTrue(os.path.exists(my_name))
+        try:
+            os.remove(my_name)
+        except OSError:
+            pass
+
+    # read header of file? we can parse it with beatifulsoup
+
+    def test_new_execution_with_timer_report_wait(self):
+        payload = dict(
+            solver="default", schema="timer", data={"seconds": 1}, timeLimit=1
+        )
+        execution = self.create_instance_and_execution_report(**payload)
+        func = self.wait_until_report_finishes(self.client, execution["id"])
+        reports_info = self.try_until_condition(func, lambda v: v is not None, 20, 5)
+        id_report = reports_info["id"]
+        my_name = "./my_report.html"
+        try:
+            os.remove(my_name)
+        except:
+            pass
+        self.client.raw.get_one_report(id_report, "./", my_name)
+        self.assertTrue(os.path.exists(my_name))
+        try:
+            os.remove(my_name)
+        except OSError:
+            pass
 
     def test_delete_execution(self):
         execution = self.test_new_execution()
@@ -213,7 +314,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertTrue("error" in response.json())
 
     def test_new_execution_bad_dag_name(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         payload = dict(
@@ -227,7 +328,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _bad_func)
 
     def test_new_execution_with_schema(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         name = "test_execution_name_123"
         description = "test_execution_description_123"
         payload = dict(
@@ -308,19 +409,6 @@ class TestCornflowClientNotOpen(TestCornflowClientBasic):
 class TestCornflowClientAdmin(TestCornflowClientBasic):
     def setUp(self, create_all=False):
         super().setUp()
-
-        # we create a service user:
-        self.create_service_user(
-            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
-        )
-
-        self.create_service_user(
-            dict(
-                username="service_user@cornflow.com",
-                pwd="Serviceuser_1234",
-                email="service_user@cornflow.com",
-            )
-        )
 
         # we create an admin user
         # we guarantee that the admin is there for airflow
@@ -404,7 +492,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertIsNone(execution_data["data"])
 
     def test_edit_one_execution(self):
-        one_instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        one_instance = self.create_new_instance(INSTANCE_MPS)
         payload = dict(
             name="bla",
             config=dict(solver="CBC"),
@@ -455,7 +543,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.assertRaises(CornFlowApiError, _launch_too_soon_func)
 
     def test_check_instance(self):
-        instance = self.create_new_instance("./cornflow/tests/data/test_mps.mps")
+        instance = self.create_new_instance(INSTANCE_MPS)
         data_check_execution = self.client.create_instance_data_check(instance["id"])
         self.assertEqual(data_check_execution["instance_id"], instance["id"])
         status = self.client.get_status(data_check_execution["id"])

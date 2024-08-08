@@ -22,6 +22,14 @@ class DefaultConfig(object):
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
+    # file support for reports
+    FILE_BACKEND = os.getenv("FILE_BACKEND", "local")
+    UPLOAD_FOLDER = os.getenv(
+        "UPLOAD_FOLDER",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "./static")),
+    )
+    ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ["pdf", "html"])
+
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 
@@ -84,7 +92,6 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
-
     """ """
 
     ENV = "development"
@@ -95,7 +102,7 @@ class Testing(DefaultConfig):
 
     ENV = "testing"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DEBUG = False
+    DEBUG = True
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
     SECRET_TOKEN_KEY = "TESTINGSECRETKEY"
@@ -119,6 +126,7 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/usr/src/app/static")
 
 
 app_config = {"development": Development, "testing": Testing, "production": Production}

@@ -21,7 +21,10 @@ class InvalidUsage(Exception):
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
         if error is not None:
-            self.error = error
+            if isinstance(error, Exception):
+                self.error = str(error)
+            else:
+                self.error = error
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
@@ -122,10 +125,21 @@ class ConfigurationError(InvalidUsage):
     error = "No authentication method configured on the server"
 
 
+class FileError(InvalidUsage):
+    """
+    Exception used when there is an error regarding the upload of a file to the server
+    """
+
+    status_code = 400
+    error = "Error uploading the file"
+
+
 INTERNAL_SERVER_ERROR_MESSAGE = "500 Internal Server Error"
-INTERNAL_SERVER_ERROR_MESSAGE_DETAIL = "The server encountered an internal error and was unable " \
-                                       "to complete your request. Either the server is overloaded or " \
-                                       "there is an error in the application."
+INTERNAL_SERVER_ERROR_MESSAGE_DETAIL = (
+    "The server encountered an internal error and was unable "
+    "to complete your request. Either the server is overloaded or "
+    "there is an error in the application."
+)
 
 
 def initialize_errorhandlers(app):
@@ -187,10 +201,7 @@ def initialize_errorhandlers(app):
             status_code = error.code or status_code
             error_msg = f"{status_code} {error.name or INTERNAL_SERVER_ERROR_MESSAGE}"
             error_str = f"{error_msg}. {str(error.description or '') or INTERNAL_SERVER_ERROR_MESSAGE_DETAIL}"
-            response_dict = {
-                "message": error_msg,
-                "error": error_str
-            }
+            response_dict = {"message": error_msg, "error": error_str}
             response = jsonify(response_dict)
 
         elif app.config["ENV"] == "production":
@@ -202,7 +213,7 @@ def initialize_errorhandlers(app):
 
             response_dict = {
                 "message": INTERNAL_SERVER_ERROR_MESSAGE,
-                "error": INTERNAL_SERVER_ERROR_MESSAGE_DETAIL
+                "error": INTERNAL_SERVER_ERROR_MESSAGE_DETAIL,
             }
             response = jsonify(response_dict)
         else:

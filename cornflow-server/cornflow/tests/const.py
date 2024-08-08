@@ -14,6 +14,7 @@ INSTANCE_URL = PREFIX + "/instance/"
 INSTANCE_MPS = _get_file("./data/test_mps.mps")
 INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
 INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
+INSTANCE_TSP = _get_file("./data/tsp_instance.json")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
 BAD_EXECUTION_PATH = _get_file("./data/bad_execution.json")
@@ -33,6 +34,12 @@ CASE_INSTANCE_URL = PREFIX + "/case/instance/"
 
 FULL_CASE_PATH = _get_file("./data/full_case_raw.json")
 FULL_CASE_LIST = [FULL_CASE_PATH, _get_file("./data/full_case_raw_2.json")]
+
+REPORT_PATH = _get_file("./data/new_report.json")
+REPORT_HTML_FILE_PATH = _get_file("./data/new_report.html")
+REPORT_PDF_FILE_PATH = _get_file("./data/new_report_2.pdf")
+BAD_REPORT_PATH = _get_file("./data/bad_report.json")
+REPORT_URL = PREFIX + "/report/"
 
 JSON_PATCH_GOOD_PATH = _get_file("./data/json_patch_good.json")
 JSON_PATCH_BAD_PATH = _get_file("./data/json_patch_bad.json")
