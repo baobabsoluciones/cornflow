@@ -1,5 +1,5 @@
 # cornflow
-cornflow-client==1.1.1a
+cornflow-client==1.1.1a2
 
 # data
 pandas<=2.1.1
