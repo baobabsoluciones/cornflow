@@ -1,0 +1,36 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "parameters": {
+            "description": "Main parameters",
+            "type": "object",
+            "properties": {
+                "size": {
+                    "type": "integer"
+                }
+            },
+            "required": ["size"]
+        },
+        "initial_values": {
+            "description": "Values for each row and column",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "row": {
+                        "type": "integer"
+                    },
+                    "col": {
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["row", "col", "value"]
+            }
+        }
+    },
+    "required": ["initial_values", "parameters"]
+}

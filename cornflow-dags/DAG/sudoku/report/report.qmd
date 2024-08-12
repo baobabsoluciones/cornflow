@@ -1,0 +1,105 @@
+---
+title: "Sudoku"
+execute:
+  echo: false
+  warning: false
+format:
+  html:
+    embed-resources: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{python}
+#| tags: [parameters]
+
+file_name = "../data/example_2"
+```
+
+## Sudoku
+
+From [wikipedia](https://en.wikipedia.org/wiki/Sudoku):
+
+> Sudoku (/suːˈdoʊkuː, -ˈdɒk-, sə-/; Japanese: 数独, romanized: sūdoku, lit. 'digit-single'; originally called Number Place)[1] is a logic-based,[2][3] combinatorial[4] number-placement puzzle. In classic Sudoku, the objective is to fill a 9 × 9 grid with digits so that each column, each row, and each of the nine 3 × 3 subgrids that compose the grid (also called "boxes", "blocks", or "regions") contains all of the digits from 1 to 9. The puzzle setter provides a partially completed grid, which for a well-posed puzzle has a single solution.
+
+```{python}
+#| echo: false
+import os
+import sys
+module_path = os.path.abspath(os.path.join('../..'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+from sudoku import Sudoku
+import pytups as pt
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+
+extension = os.path.splitext(file_name)[1]
+if extension=='.txt' or extension=='':
+  # it's an instance, so we should solve it, I guess
+  my_instance = Sudoku.instance.from_txt_file(file_name)
+  my_experiment = Sudoku.solvers['cpsat'](instance=my_instance, solution=None)
+  status = my_experiment.solve({'timeLimit': 5})
+elif extension=='.json':
+  my_experiment = Sudoku.solvers['cpsat'].from_json(file_name)
+  my_instance = my_experiment.instance
+else:
+  raise ValueError("Unknown extension: {}".format(extension))
+
+
+```
+
+
+## Instance
+
+The problem has `{python} my_instance.get_size()` rows, cols and squares.
+
+See @fig-instance for a representation of the unsolved Sudoku.
+
+```{python}
+#| label: fig-instance
+#| fig-cap: "Initial values"
+
+my_instance.print()
+
+```
+
+
+
+## Solution statistics
+
+```{python}
+objective = my_experiment.get_objective()
+checks = my_experiment.check_solution()
+feasible = len(checks) == 0
+
+```
+
+```{python}
+#| output: asis
+
+# The following code shows (1) a box with feasibility + objective function OR (2) root cause of infeasibility.
+
+if feasible:
+  print("::: {{.callout-tip}}\n\n## Solution is feasible.\n\n:::".format(objective))
+else:
+  my_text = ""
+  if checks['missing_values']:
+    my_text += 'The solution is missing the following values: {}\n\n'.format(checks['missing_values'])
+
+  print("::: {{.callout-important}}\n\n## Solution is infeasible\n\n{}\n\n:::".format(my_text))
+
+```
+
+## Solution
+
+See @fig-solution for a representation of the final Sudoku.
+
+```{python}
+#| label: fig-solution
+#| fig-cap: "Sudoku"
+
+my_experiment.print()
+
+```
