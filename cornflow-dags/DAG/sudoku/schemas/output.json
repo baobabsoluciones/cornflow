@@ -1,0 +1,26 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "assignment": {
+            "description": "Missing values for each row and column",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "row": {
+                        "type": "integer"
+                    },
+                    "col": {
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["row", "col", "value"]
+            }
+        }
+    },
+    "required": ["assignment"]
+}
