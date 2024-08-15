@@ -129,7 +129,6 @@ class ReportDetailsEditEndpoint(ReportDetailsEndpointBase):
           a message) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        # TODO: forbid non-service users from running put
         current_app.logger.info(f"User {self.get_user()} edits report {idx}")
 
         report = self.get_detail(idx=idx)
@@ -189,7 +188,6 @@ class ReportDetailsEndpoint(ReportDetailsEndpointBase):
         # TODO: are we able to download the name in the database and not as part of the file?
         current_app.logger.info(f"User {self.get_user()} gets details of report {idx}")
         report = self.get_detail(user=self.get_user(), idx=idx)
-
         if report is None:
             raise ObjectDoesNotExist
 
