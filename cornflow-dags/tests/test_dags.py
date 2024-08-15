@@ -468,6 +468,30 @@ class Timer(BaseDAGTests.SolvingTests):
         )
 
 
+class Sudoku(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.sudoku import Sudoku
+
+        self.app = Sudoku()
+
+    def test_report(self):
+        tests = self.app.test_cases
+        my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
+        my_experim.solve(dict())
+
+        # let's just check for an element inside the html that we know should exist
+        # in this case a few 'section' tags with an attribute with a specific id
+        things_to_look = dict(
+            section=[
+                ("id", "solution"),
+                ("id", "instance"),
+                ("id", "sudoku"),
+            ]
+        )
+        self.generate_check_report(my_experim, things_to_look)
+
+
 class HTMLCheckTags(HTMLParser):
     things_to_check: Optional[Dict[str, List[Tuple[str, str]]]]
 
