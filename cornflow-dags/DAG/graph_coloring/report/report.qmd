@@ -112,7 +112,7 @@ else:
 ## Solution
 
 
-See @fig-colors for a representation of the solution. Colors are kept from the network representation of the instance.
+See @fig-colors for a representation of the solution. Positions are kept from the network representation of the instance.
 
 ```{python}
 #| label: fig-colors

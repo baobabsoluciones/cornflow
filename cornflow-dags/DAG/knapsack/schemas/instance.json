@@ -17,7 +17,7 @@
                         "type": "integer"
                     }
                 },
-                "required": ["weight", "value", "id"]
+                "required": ["id", "weight", "value"]
             }
         },
         "parameters": {
