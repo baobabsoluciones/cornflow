@@ -386,8 +386,8 @@ def cf_report(
         # maybe all of this should be abstracted inside the app?
         # maybe the app should return an Experiment?
         experiment = app.get_solver(app.get_default_solver_name())
-        my_experiment = experiment(
-            app.instance(input_data), app.solution(solution_data)
+        my_experiment = experiment.from_dict(
+            dict(instance=input_data, solution=solution_data)
         )
 
         print(f"Preparing to write the report: {report_name}")
