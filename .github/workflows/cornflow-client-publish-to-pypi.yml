@@ -30,13 +30,13 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.test_pypi_password }}
-        repository_url: https://test.pypi.org/legacy/
-        packages_dir: libs/client/dist/
+        repository-url: https://test.pypi.org/legacy/
+        packages-dir: libs/client/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.pypi_password }}
-        packages_dir: libs/client/dist/
+        packages-dir: libs/client/dist/
     - name: Get version number
       uses: winterjung/split@v2
       id: split
