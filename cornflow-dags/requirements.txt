@@ -16,7 +16,7 @@ ortools
 pyomo
 tsplib95<=0.7.1
 hackathonbaobab2020[solvers]
-git+ssh://git@github.com/pchtsp/windenergybattery.git@article_case_validation#egg=windenergybattery
+git+ssh://git@github.com/baobabsoluciones/windenergybattery.git@main#egg=windenergybattery
 networkx
 
 # quarto and reports:

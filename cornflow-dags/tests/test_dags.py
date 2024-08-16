@@ -209,6 +209,38 @@ class GraphColor(BaseDAGTests.SolvingTests):
         )
 
 
+class WindProblem(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from DAG.wind_problem import WindEnergyBattery
+
+        self.app = WindEnergyBattery()
+
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    def test_complete_report(self, connectCornflow, config=None):
+        config = config or self.config
+        config = dict(**config, report=dict(name="report"))
+        tests = self.app.test_cases
+        for test_case in tests:
+            instance_data = test_case.get("instance")
+            solution_data = test_case.get("solution", None)
+            if solution_data is None:
+                solution_data = dict(solution_node_values=[])
+
+            mock = Mock()
+            mock.get_data.return_value = dict(
+                data=instance_data, solution_data=solution_data
+            )
+            mock.get_results.return_value = dict(config=config, state=1)
+            mock.create_report.return_value = dict(id=1)
+            connectCornflow.return_value = mock
+            dag_run = Mock()
+            dag_run.conf = dict(exec_id="exec_id")
+            cf_report(app=self.app, secrets="", dag_run=dag_run)
+            mock.create_report.assert_called_once()
+            mock.put_one_report.assert_called_once()
+
+
 class Tsp(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
