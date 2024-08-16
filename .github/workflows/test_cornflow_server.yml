@@ -50,9 +50,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set up Quarto
+      uses: quarto-dev/quarto-actions/setup@v2
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # To install LaTeX to build PDF book
+        tinytex: true
     - name: Copy DAG files
       run: |
         cd ..
@@ -80,8 +87,9 @@ jobs:
         python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
         python -m pip install -U orloge pulp
         python -m pip uninstall cornflow-client -y
-        python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
         python -m pip install -U -r airflow_config/requirements.txt
+        python -m pip uninstall cornflow-client -y
+        python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
         airflow db init
         airflow users create \
               --username admin \
@@ -101,9 +109,9 @@ jobs:
         AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
         AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
         AIRFLOW__CORE__LOAD_EXAMPLES: 0
-        AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+        AIRFLOW_CONN_CF_URI: http://service_user:Airflow_test_password1@localhost:5050
     - name: Run unit tests
-      run: | 
+      run: |
         coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit
         coverage report -m
       env:
@@ -115,7 +123,7 @@ jobs:
         AIRFLOW_PWD: notadmin
         CF_ALARMS_ENDPOINT: 1
     - name: Run ldap unit tests
-      run: | 
+      run: |
         coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
         coverage report -m
       env:
@@ -143,7 +151,7 @@ jobs:
         LOG_LEVEL: 30
         CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
-      run: | 
+      run: |
         coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
         coverage report -m
       env:

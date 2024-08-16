@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
-from cornflow_client import CornFlow, CornFlowApiError
+from cornflow_client import CornFlow, CornFlowApiError, ApplicationCore
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
@@ -38,7 +38,7 @@ default_args = {
 }
 
 
-def get_schemas_from_file(_dir, dag_name):
+def get_schemas_from_file(_dir: str, dag_name: str):
     # TODO: check if in use
     with open(os.path.join(_dir, dag_name + "_input.json"), "r") as f:
         instance = json.load(f)
@@ -47,7 +47,7 @@ def get_schemas_from_file(_dir, dag_name):
     return instance, solution
 
 
-def get_requirements(path):
+def get_requirements(path: str):
     """
     Read requirements.txt from a project and return a list of packages.
 
@@ -90,17 +90,38 @@ def connect_to_cornflow(secrets):
     return airflow_user
 
 
-def try_to_save_error(client, exec_id, state=-1):
+def try_to_save_error(client: CornFlow, exec_id: str, state=-1, api="dag/", **kwargs):
     """
     Attempt at saving that the execution failed
     """
     try:
-        client.raw.put_api_for_id("dag/", id=exec_id, payload=dict(state=state))
+        client.raw.put_api_for_id(api, id=exec_id, payload=dict(state=state), **kwargs)
     except Exception as e:
         print(f"An exception trying to register the failed status: {e}")
 
 
-def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+def try_to_save_error_report(
+    client: CornFlow, id: int, state=-1, api="report/", **kwargs
+):
+    """
+    Attempt at saving that the report failed
+    It's different than the execution, because put uses form data in reports
+    """
+    try:
+        client.raw.put_api_for_id(
+            api,
+            id=id,
+            payload=None,
+            data=dict(state=state),
+            headers={"content_type": "multipart/form-data"},
+            post_url="edit",
+            **kwargs,
+        )
+    except Exception as e:
+        print(f"An exception trying to register the failed status: {e}")
+
+
+def try_to_save_airflow_log(client: CornFlow, exec_id: str, ti, base_log_folder: str):
     log_file = os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
@@ -112,14 +133,14 @@ def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
         with open(log_file, "r") as fd:
             log_file_txt = fd.read()
         try:
-            client.raw.put_api_for_id(
+            client.put_api_for_id(
                 "dag/", id=exec_id, payload=dict(log_text=log_file_txt)
             )
         except Exception as e:
             print(f"An exception occurred while trying to register airflow log: {e}")
 
 
-def try_to_write_solution(client, exec_id, payload):
+def try_to_write_solution(client: CornFlow, exec_id: str, payload: dict):
     """
     Tries to write the payload into cornflow
     If it fails tries to write again that it failed.
@@ -147,7 +168,7 @@ def try_to_write_solution(client, exec_id, payload):
             raise AirflowDagException("The writing of the instance checks failed")
 
 
-def get_schema(dag_name):
+def get_schema(dag_name: str):
     # TODO: check if in use
     _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
     with open(_file, "r") as f:
@@ -155,14 +176,14 @@ def get_schema(dag_name):
     return schema
 
 
-def cf_solve_app(app, secrets, **kwargs):
+def cf_solve_app(app: ApplicationCore, secrets, **kwargs):
     if kwargs["dag_run"].conf.get("checks_only"):
         return cf_check(app.check, app.name, secrets, **kwargs)
     else:
         return cf_solve(app.solve, app.name, secrets, **kwargs)
 
 
-def cf_solve(fun, dag_name, secrets, **kwargs):
+def cf_solve(fun: callable, dag_name: str, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, solve the problem and write the solution in cornflow
 
@@ -239,7 +260,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException("There was an error during the solving")
 
 
-def cf_check(fun, dag_name, secrets, **kwargs):
+def cf_check(fun: callable, dag_name: str, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
     :param fun: The function to use to check the data
@@ -311,7 +332,85 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         )
 
 
-def callback_email(context):
+def cf_report(
+    app: ApplicationCore,
+    secrets,
+    **kwargs,
+):
+    """
+    Connect to cornflow, ask for data, generate the report for the execution
+
+    :param app: the application from which to generate the report
+    :param secrets: Environment variables
+    :param kwargs: other kwargs passed to the dag task.
+    :return:
+    """
+    # TODO: if this task fails, the dagrun should still be valid
+    try:
+        client = connect_to_cornflow(secrets)
+        exec_id = kwargs["dag_run"].conf["exec_id"]
+
+        execution_info = client.get_results(exec_id)
+        # TODO: if execution does not have results, quit:
+        if execution_info["state"] < 1:
+            # no need to write report since it's not requested
+            print("Execution has not been solved")
+            return None
+
+        config = execution_info["config"]
+        report_config = config.get("report", {})
+        if not report_config:
+            # no need to write report since it's not requested
+            print("We did not find a report config")
+            return None
+        print("Starting to write the report")
+        report_name = report_config.get("name", "report")
+        # we assume the contents of the config match name + description
+        payload = dict(
+            execution_id=exec_id,
+            name=report_name,
+            description=report_config.get("description"),
+            state=0,  # RUNNING
+        )
+        # we create an empty report
+        report = client.create_report(**payload)
+
+        def my_try_to_save(state):
+            return try_to_save_error_report(client, report["id"], state)
+
+        # now we want to fill it with the report file
+        execution_data = client.get_data(exec_id)
+        input_data = execution_data["data"]
+        solution_data = execution_data["solution_data"]
+
+        # maybe all of this should be abstracted inside the app?
+        # maybe the app should return an Experiment?
+        experiment = app.get_solver(app.get_default_solver_name())
+        my_experiment = experiment.from_dict(
+            dict(instance=input_data, solution=solution_data)
+        )
+
+        print(f"Preparing to write the report: {report_name}")
+        try:
+            report_path = my_experiment.generate_report(report_name=report_name)
+        except ModuleNotFoundError as e:
+            my_try_to_save(-10)
+            raise AirflowDagException("The generation of the report failed")
+        except:
+            my_try_to_save(-1)
+            raise AirflowDagException("The generation of the report failed")
+        if not os.path.exists(report_path):
+            my_try_to_save(-1)
+            raise AirflowDagException("The generation of the report failed")
+        print("Saving the actual report in cornflow")
+        client.put_one_report(report["id"], payload=dict(state=1), filename=report_path)
+    except CornFlowApiError:
+        raise AirflowDagException("The writing of the report failed")
+    except Exception as e:
+        raise AirflowDagException("An unknown error occurred: " + str(e))
+
+
+def callback_email(context: dict):
     from airflow.utils.email import send_email
     from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 

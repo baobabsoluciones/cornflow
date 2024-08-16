@@ -1,5 +1,8 @@
 from .raw_cornflow_client import RawCornFlow, CornFlowApiError
 
+# TODO: review the standard calls for the reports.
+# TODO: have the download report method to receive the path to save it on the local machine.
+
 
 class CornFlow:
     def __init__(self, url, token=None):
@@ -16,6 +19,14 @@ class CornFlow:
         self.create_execution_data_check = self.expect_status(
             self.raw.create_execution_data_check, 201
         )
+        self.create_report = self.expect_status(self.raw.create_report, 201)
+        self.get_reports = self.expect_status(self.raw.get_reports, 200)
+        self.get_one_report = self.expect_status(
+            self.raw.get_one_report, 200, json=False
+        )
+        self.put_one_report = self.expect_status(self.raw.put_one_report, 200)
+        self.delete_one_report = self.expect_status(self.raw.delete_one_report, 200)
+
         self.create_instance_data_check = self.expect_status(
             self.raw.create_instance_data_check, 201
         )
@@ -84,10 +95,13 @@ class CornFlow:
         self.raw.token = token
 
     @staticmethod
-    def expect_status(func, expected_status=None):
+    def expect_status(func, expected_status=None, json=True):
         """
         Gets the response of the call
         and raise an exception if the status of the response is not the expected
+
+        The response of the call is the json in the body for those calls that are application/json
+        For the calls that are form/data the response of the call is the content and the headers
         """
 
         def decorator(*args, **kwargs):
@@ -96,7 +110,11 @@ class CornFlow:
                 raise CornFlowApiError(
                     f"Expected a code {expected_status}, got a {response.status_code} error instead: {response.text}"
                 )
-            return response.json()
+
+            if json:
+                return response.json()
+            else:
+                return response.content, response.headers
 
         return decorator
 

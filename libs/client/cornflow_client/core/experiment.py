@@ -4,6 +4,8 @@
 
 from abc import ABC, abstractmethod
 from typing import Union, Dict
+import json, tempfile
+import os
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
@@ -150,3 +152,64 @@ class ExperimentCore(ABC):
                 )
 
         return conf
+
+    def generate_report(self, report_name="report") -> str:
+        """
+        this method should write a report file, using the template in report_name.
+        It returns the path to the file
+
+        :param report_path: the path of the report to export
+        :param report_name: the name of the template for the report
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            InstanceCore.from_dict(data["instance"]),
+            SolutionCore.from_dict(data["solution"]),
+        )
+
+    def to_dict(self) -> dict:
+        return dict(instance=self.instance.to_dict(), solution=self.solution.to_dict())
+
+    @classmethod
+    def from_json(cls, path: str) -> "ExperimentCore":
+        with open(path, "r") as f:
+            data_json = json.load(f)
+        return cls.from_dict(data_json)
+
+    def to_json(self, path: str) -> None:
+        data = self.to_dict()
+        with open(path, "w") as f:
+            json.dump(data, f, indent=4, sort_keys=True)
+
+    def generate_report_quarto(self, quarto, report_name: str = "report") -> str:
+        # it returns the path to the file being written
+
+        # a user may give the full "report.qmd" name.
+        # We want to take out the extension
+        path_without_ext = os.path.splitext(report_name)[0]
+
+        path_to_qmd = path_without_ext + ".qmd"
+        if not os.path.exists(path_to_qmd):
+            raise FileNotFoundError(f"Report with path {path_to_qmd} does not exist.")
+        path_to_output = path_without_ext + ".html"
+        try:
+            os.remove(path_to_output)
+        except FileNotFoundError:
+            pass
+        try:
+            quarto.quarto.find_quarto()
+        except FileNotFoundError:
+            raise ModuleNotFoundError("Quarto is not installed.")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "experiment.json")
+            # write a json with instance and solution to temp file
+            self.to_json(path)
+            # pass the path to the report to render
+            # it generates a report with path = path_to_output
+            quarto.render(input=path_to_qmd, execute_params=dict(file_name=path))
+        # quarto always writes the report in the .qmd directory.
+        # thus, we need to return it so the user can move it if needed
+        return path_to_output

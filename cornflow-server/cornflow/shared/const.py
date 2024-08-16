@@ -43,6 +43,25 @@ AIRFLOW_TO_STATE_MAP = dict(
     queued=EXEC_STATE_QUEUED,
 )
 
+# Reports codes
+
+
+class REPORT_STATE:
+    RUNNING = 0
+    CORRECT = 1
+    ERROR = -1
+    UNKNOWN = -5
+    ERROR_NO_QUARTO = -10
+
+
+REPORT_STATE_MSG = {
+    REPORT_STATE.RUNNING: "The report is currently running.",
+    REPORT_STATE.CORRECT: "The report has been solved correctly.",
+    REPORT_STATE.ERROR: "The report has an error.",
+    REPORT_STATE.UNKNOWN: "The report has an unknown error.",
+    REPORT_STATE.ERROR_NO_QUARTO: "The report failed because Quarto was not found.",
+}
+
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
 AUTH_DB = 1
@@ -122,4 +141,6 @@ BASE_PERMISSION_ASSIGNATION = [
 
 EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
+    (VIEWER_ROLE, GET_ACTION, "report"),
+    (PLANNER_ROLE, GET_ACTION, "report"),
 ]

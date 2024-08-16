@@ -90,8 +90,8 @@ class CustomTestCase(TestCase):
         self.roles_with_access = []
 
     @staticmethod
-    def get_header_with_auth(token):
-        return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
+    def get_header_with_auth(token, content_type="application/json"):
+        return {"Content-Type": content_type, "Authorization": "Bearer " + token}
 
     def create_user(self, data):
         return self.client.post(
@@ -169,7 +169,6 @@ class CustomTestCase(TestCase):
         self.assertEqual(row.id, response.json["id"])
 
         for key in self.get_keys_to_check(payload):
-            getattr(row, key)
             if key in payload:
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id

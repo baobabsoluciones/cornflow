@@ -1,0 +1,143 @@
+---
+title: "Graph Coloring report"
+execute:
+  echo: false
+  warning: false
+format:
+  html:
+    embed-resources: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{python}
+#| tags: [parameters]
+
+file_name = "../data/gc_50_1"
+```
+
+## Graph Coloring
+
+From [wikipedia](https://en.wikipedia.org/wiki/Graph_coloring):
+
+> In graph theory, graph coloring is a special case of graph labeling; it is an assignment of labels traditionally called "colors" to elements of a graph subject to certain constraints. In its simplest form, it is a way of coloring the vertices of a graph such that no two adjacent vertices are of the same color; this is called a vertex coloring.
+
+```{python}
+#| echo: false
+import os
+import sys
+module_path = os.path.abspath(os.path.join('../..'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+from graph_coloring import GraphColoring
+import networkx as nx
+import numpy as np
+import pytups as pt
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+
+extension = os.path.splitext(file_name)[1]
+if extension=='':
+  # it's an instance, so we should solve it, I guess
+  my_instance = GraphColoring.instance.from_txt_file(file_name)
+  my_experiment = GraphColoring.solvers['default'](instance=my_instance, solution=None)
+  status = my_experiment.solve({'timeLimit': 5})
+elif extension=='.json':
+  my_experiment = GraphColoring.solvers['default'].from_json(file_name)
+  my_instance = my_experiment.instance
+else:
+  raise ValueError("Unknown extension: {}".format(extension))
+
+
+```
+
+
+## Instance statistics
+
+The problem has `{python} len(my_instance.get_nodes())` nodes and `{python} len(my_instance.get_pairs())` arcs.
+
+
+## The network
+
+See @fig-network for a representation of the network of nodes to color.
+
+
+```{python}
+#| echo: false
+#| label: fig-network
+#| fig-cap: "Network with forbidden pairs."
+G = my_instance.get_graph()
+pos = nx.kamada_kawai_layout(G)
+__nodes = nx.draw_networkx_nodes(G, pos=pos)
+__edges = nx.draw_networkx_edges(G, pos=pos)
+
+__labels = nx.draw_networkx_labels(G, pos=pos, font_color='white')
+
+ax = plt.gca()
+ax.margins(0.05)
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```
+
+## Solution statistics
+
+```{python}
+objective = my_experiment.get_objective()
+checks = my_experiment.check_solution()
+feasible = len(checks['missing']) == 0 and len(checks['pairs']) == 0
+
+```
+
+```{python}
+#| output: asis
+
+# The following code shows (1) a box with feasibility + objective function OR (2) root cause of infeasibility.
+
+if feasible:
+  print("::: {{.callout-tip}}\n\n## Solution is feasible\n\nThe least number of colors is {}.\n\n:::".format(objective))
+else:
+  my_text = ""
+  if checks['missing']:
+    my_text += 'The solution is missing the following nodes: {}\n\n'.format(checks['missing'])
+  if checks['pairs']:
+    my_text += 'The solution violates the following arcs: {}\n\n'.format(checks['pairs'])
+
+  print("::: {{.callout-important}}\n\n## Solution is infeasible\n\n{}\n\n:::".format(my_text))
+
+```
+
+## Solution
+
+
+See @fig-colors for a representation of the solution. Positions are kept from the network representation of the instance.
+
+```{python}
+#| label: fig-colors
+#| fig-cap: "Color assignment to nodes"
+
+def get_colors_from_cmap(cmap_name, num_colors):
+    cmap = colormaps.get_cmap(cmap_name)
+    colors = [cmap(i / num_colors) for i in range(num_colors)]
+    return colors
+
+# Example usage
+color_id = my_experiment.solution.get_assignments()
+num_colors = len(color_id.values_tl().unique2())
+cmap_name = 'viridis'  # Name of the colormap
+colors = get_colors_from_cmap(cmap_name, num_colors)
+
+my_colors = pt.TupList(G.nodes).vapply(lambda v: colors[color_id[v]])
+
+__nodes = nx.draw_networkx_nodes(G, pos=pos, node_color=my_colors)
+__edges = nx.draw_networkx_edges(G, pos=pos)
+
+__labels = nx.draw_networkx_labels(G, pos=pos, font_color='white')
+
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```

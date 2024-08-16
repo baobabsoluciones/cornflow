@@ -6,7 +6,7 @@ import warnings
 
 def get_app():
     env = os.getenv("FLASK_ENV", "development")
-    data_conn = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
+    data_conn = os.getenv("DATABASE_URL")
     if env == "production":
         warnings.filterwarnings("ignore")
     external = int(os.getenv("EXTERNAL_APP", 0))

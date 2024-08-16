@@ -1,9 +1,5 @@
-from cornflow_client import (
-    get_empty_schema,
-    ApplicationCore,
-)
+from cornflow_client import get_empty_schema, ApplicationCore, add_reports_to_schema
 from typing import List, Dict
-import pytups as pt
 import os
 
 from .solvers import OrToolsCP
@@ -18,31 +14,22 @@ class GraphColoring(ApplicationCore):
     schema = get_empty_schema(
         properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys())
     )
+    schema = add_reports_to_schema(schema, ["report"])
 
     @property
     def test_cases(self) -> List[Dict]:
-        def read_file(filePath):
-            with open(filePath, "r") as f:
-                contents = f.read().splitlines()
-
-            pairs = (
-                pt.TupList(contents[1:])
-                .vapply(lambda v: v.split(" "))
-                .vapply(lambda v: dict(n1=int(v[0]), n2=int(v[1])))
-            )
-            return dict(pairs=pairs)
 
         file_dir = os.path.join(os.path.dirname(__file__), "data")
-
+        get_file = lambda name: os.path.join(file_dir, name)
         return [
             {
                 "name": "gc_4_1",
-                "instance": read_file(os.path.join(file_dir, "gc_4_1")),
+                "instance": Instance.from_txt_file(get_file("gc_4_1")).to_dict(),
                 "description": "Example data with 4 pairs",
             },
             {
                 "name": "gc_50_1",
-                "instance": read_file(os.path.join(file_dir, "gc_50_1")),
+                "instance": Instance.from_txt_file(get_file("gc_50_1")).to_dict(),
                 "description": "Example data with 50 pairs",
             },
         ]
