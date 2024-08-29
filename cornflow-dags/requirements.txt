@@ -1,6 +1,6 @@
 cornflow-client>=1.1.0
 orloge<=0.17.2
-PuLP<=2.7
+PuLP<=2.9.0
 pandas<=2.1.1
 hackathonbaobab2020[solvers]
 pytups<=0.86.2
