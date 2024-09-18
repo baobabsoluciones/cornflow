@@ -1,17 +1,12 @@
-
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-accent-color="violet" data-content_root="">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Cornflow-client - Cornflow 1.1.0 documentation</title>
-    <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" />
-
-  <script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cornflow-client - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
-    setColorMode(sessionStorage._theme||"auto");
-  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=aecf457f" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=bb1fd5f2" />
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=36d120a7" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,36 +21,27 @@
     <meta property="og:type" content="website"/><meta property="og:title" content="Cornflow-client"/>
 <meta name="twitter:card" content="summary"/>
   </head>
-<body><div class="document"><div class="sy-head">
+<body><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
-    <a class="sy-head-brand mr-4" href="../index.html">
+    <a class="sy-head-brand" href="../index.html">
       
       
       <strong>Cornflow</strong>
     </a>
-    <div class="sy-head-links" id="NavLinks">
-      <nav class="sy-head-nav"></nav>
-      <div class="sy-head-extra flex items-center print:hidden">
-        
-<form class="searchbox flex items-center" action="../search.html" method="get">
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
-</form>
-        
-        
-        <div class="sy-head-socials flex items-center">
-</div>
-      </div>
+</form><div class="sy-head-socials"></div></div>
     </div>
-    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
-      <button class="js-theme theme-switch flex items-center"
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
 data-aria-auto="Switch to light color mode"
 data-aria-light="Switch to dark color mode"
 data-aria-dark="Switch to auto color mode">
 <i class="i-lucide theme-icon"></i>
-</button>
-      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="NavLinks" aria-expanded="false">
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
         <div class="hamburger">
           <span class="hamburger_1"></span>
           <span class="hamburger_2 -translate-x-2"></span>
@@ -111,7 +97,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../deploy/problems.html">Known problems</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
@@ -128,44 +113,39 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 
         </div>
-      </div>
-      
-    </div>
+      </div></div>
   </aside>
   <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
   <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4">
-  <div class="localtoc">
-    <h3>On this page</h3>
-    <ul>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#core-classes">Core classes</a><ul>
 <li><a class="reference internal" href="#module-cornflow_client.core.application">ApplicationCore</a><ul>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore"><code class="docutils literal notranslate"><span class="pre">ApplicationCore</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.name"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.name</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.description"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.description</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.default_args"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.default_args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.extra_args"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.extra_args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.instance"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.instance</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solution"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.solution</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.schema"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.schema</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.test_cases"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.test_cases</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solvers"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.solvers</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solve"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.solve()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.check"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.check()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_solver"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.get_solver()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.get_default_solver_name()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_schemas"><code class="docutils literal notranslate"><span class="pre">ApplicationCore.get_schemas()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.name"><code class="docutils literal notranslate">name</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.description"><code class="docutils literal notranslate">description</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.default_args"><code class="docutils literal notranslate">default_args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.extra_args"><code class="docutils literal notranslate">extra_args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.instance"><code class="docutils literal notranslate">instance</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solution"><code class="docutils literal notranslate">solution</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.schema"><code class="docutils literal notranslate">schema</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.test_cases"><code class="docutils literal notranslate">test_cases</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solvers"><code class="docutils literal notranslate">solvers</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solve"><code class="docutils literal notranslate">solve()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_solver"><code class="docutils literal notranslate">get_solver()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name"><code class="docutils literal notranslate">get_default_solver_name()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_schemas"><code class="docutils literal notranslate">get_schemas()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.core.instance">InstanceCore</a><ul>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore"><code class="docutils literal notranslate"><span class="pre">InstanceCore</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.check"><code class="docutils literal notranslate"><span class="pre">InstanceCore.check()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.schema_checks"><code class="docutils literal notranslate"><span class="pre">InstanceCore.schema_checks</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -176,61 +156,61 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.core.instance_solution">InstanceSolution</a><ul>
 <li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.data</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.from_dict()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.to_dict()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.from_json()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.to_json()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.schema</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.check_schema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.generate_schema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.from_excel()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_excel"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.to_excel()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.dict_to_int_or_float()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_element_or_list_to_dict"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.from_element_or_list_to_dict()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_date_from_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_datetime_from_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_from_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_datetimesec_from_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_date_hour"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_datetime_from_date_hour()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_date_hour_from_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_date_string_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_string_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_datetime_string_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_datetimesec_string_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_next_hour_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_next_hour_datetimesec_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_next_hour()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_previous_hour_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_previous_hour_datetimesec_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_previous_hour()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_date_string_from_ts_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_hour_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.add_time_to_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_date_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.add_time_to_date_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.add_time_to_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.add_time_to_datetimesec_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_week_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_date_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_week_from_date_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_week_from_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_week_from_datetimesec_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_ts"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_weekday_from_ts()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_date_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_weekday_from_date_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_weekday_from_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_weekday_from_datetimesec_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetime_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_hour_from_datetime_string()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetimesec_string"><code class="docutils literal notranslate"><span class="pre">InstanceSolutionCore.get_hour_from_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data"><code class="docutils literal notranslate">data</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict"><code class="docutils literal notranslate">from_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json"><code class="docutils literal notranslate">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_json"><code class="docutils literal notranslate">to_json()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema"><code class="docutils literal notranslate">schema</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.check_schema"><code class="docutils literal notranslate">check_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema"><code class="docutils literal notranslate">generate_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel"><code class="docutils literal notranslate">from_excel()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.to_excel"><code class="docutils literal notranslate">to_excel()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float"><code class="docutils literal notranslate">dict_to_int_or_float()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_element_or_list_to_dict"><code class="docutils literal notranslate">from_element_or_list_to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string"><code class="docutils literal notranslate">get_date_from_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_string"><code class="docutils literal notranslate">get_datetime_from_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_from_string"><code class="docutils literal notranslate">get_datetimesec_from_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_date_hour"><code class="docutils literal notranslate">get_datetime_from_date_hour()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string"><code class="docutils literal notranslate">get_date_hour_from_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts"><code class="docutils literal notranslate">get_date_string_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_string_from_ts"><code class="docutils literal notranslate">get_datetime_string_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts"><code class="docutils literal notranslate">get_datetimesec_string_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetime_string"><code class="docutils literal notranslate">get_next_hour_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string"><code class="docutils literal notranslate">get_next_hour_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour"><code class="docutils literal notranslate">get_next_hour()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetime_string"><code class="docutils literal notranslate">get_previous_hour_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetimesec_string"><code class="docutils literal notranslate">get_previous_hour_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour"><code class="docutils literal notranslate">get_previous_hour()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts_string"><code class="docutils literal notranslate">get_date_string_from_ts_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts"><code class="docutils literal notranslate">get_hour_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_ts"><code class="docutils literal notranslate">add_time_to_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_date_string"><code class="docutils literal notranslate">add_time_to_date_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetime_string"><code class="docutils literal notranslate">add_time_to_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetimesec_string"><code class="docutils literal notranslate">add_time_to_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_ts"><code class="docutils literal notranslate">get_week_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_date_string"><code class="docutils literal notranslate">get_week_from_date_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetime_string"><code class="docutils literal notranslate">get_week_from_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetimesec_string"><code class="docutils literal notranslate">get_week_from_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_ts"><code class="docutils literal notranslate">get_weekday_from_ts()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_date_string"><code class="docutils literal notranslate">get_weekday_from_date_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetime_string"><code class="docutils literal notranslate">get_weekday_from_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetimesec_string"><code class="docutils literal notranslate">get_weekday_from_datetimesec_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetime_string"><code class="docutils literal notranslate">get_hour_from_datetime_string()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetimesec_string"><code class="docutils literal notranslate">get_hour_from_datetimesec_string()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.core.experiment">ExperimentCore</a><ul>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore"><code class="docutils literal notranslate"><span class="pre">ExperimentCore</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.instance"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.instance</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solution"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.solution</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solve"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.solve()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_objective"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.get_objective()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.check_solution()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.schema_checks</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate"><span class="pre">ExperimentCore.get_solver_config()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.instance"><code class="docutils literal notranslate">instance</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solution"><code class="docutils literal notranslate">solution</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solve"><code class="docutils literal notranslate">solve()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_objective"><code class="docutils literal notranslate">get_objective()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate">check_solution()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate">get_solver_config()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -240,48 +220,48 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#module-cornflow_client.cornflow_client">Cornflow client</a></li>
 <li><a class="reference internal" href="#constants">Constants</a><ul>
 <li><a class="reference internal" href="#solving-status">Solving status</a><ul>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_NOT_SOLVED</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_OPTIMAL</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_INFEASIBLE</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_UNBOUNDED</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_UNDEFINED</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_FEASIBLE"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_FEASIBLE</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_MEMORY_LIMIT</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_NODE_LIMIT</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_TIME_LIMIT</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_LICENSING_PROBLEM"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_LICENSING_PROBLEM</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_QUEUED"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.STATUS_QUEUED</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED"><code class="docutils literal notranslate">constants.STATUS_NOT_SOLVED</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_OPTIMAL"><code class="docutils literal notranslate">constants.STATUS_OPTIMAL</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_INFEASIBLE"><code class="docutils literal notranslate">constants.STATUS_INFEASIBLE</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNBOUNDED"><code class="docutils literal notranslate">constants.STATUS_UNBOUNDED</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_UNDEFINED"><code class="docutils literal notranslate">constants.STATUS_UNDEFINED</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_FEASIBLE"><code class="docutils literal notranslate">constants.STATUS_FEASIBLE</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_MEMORY_LIMIT"><code class="docutils literal notranslate">constants.STATUS_MEMORY_LIMIT</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NODE_LIMIT"><code class="docutils literal notranslate">constants.STATUS_NODE_LIMIT</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_TIME_LIMIT"><code class="docutils literal notranslate">constants.STATUS_TIME_LIMIT</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_LICENSING_PROBLEM"><code class="docutils literal notranslate">constants.STATUS_LICENSING_PROBLEM</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_QUEUED"><code class="docutils literal notranslate">constants.STATUS_QUEUED</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#solution-status">Solution status</a><ul>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE"><code class="docutils literal notranslate"><span class="pre">cornflow_client.constants.SOLUTION_STATUS_FEASIBLE</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE"><code class="docutils literal notranslate">constants.SOLUTION_STATUS_INFEASIBLE</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE"><code class="docutils literal notranslate">constants.SOLUTION_STATUS_FEASIBLE</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.AirflowError"><code class="docutils literal notranslate"><span class="pre">AirflowError</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.status_code"><code class="docutils literal notranslate"><span class="pre">AirflowError.status_code</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.log_txt"><code class="docutils literal notranslate"><span class="pre">AirflowError.log_txt</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.to_dict"><code class="docutils literal notranslate"><span class="pre">AirflowError.to_dict()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.args"><code class="docutils literal notranslate"><span class="pre">AirflowError.args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.with_traceback"><code class="docutils literal notranslate"><span class="pre">AirflowError.with_traceback()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.status_code"><code class="docutils literal notranslate">status_code</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.log_txt"><code class="docutils literal notranslate">log_txt</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.NoSolverException"><code class="docutils literal notranslate"><span class="pre">NoSolverException</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.args"><code class="docutils literal notranslate"><span class="pre">NoSolverException.args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.with_traceback"><code class="docutils literal notranslate"><span class="pre">NoSolverException.with_traceback()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration"><code class="docutils literal notranslate"><span class="pre">BadConfiguration</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.args"><code class="docutils literal notranslate"><span class="pre">BadConfiguration.args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.with_traceback"><code class="docutils literal notranslate"><span class="pre">BadConfiguration.with_traceback()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstance"><code class="docutils literal notranslate"><span class="pre">BadInstance</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.BadInstance.args"><code class="docutils literal notranslate"><span class="pre">BadInstance.args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.BadInstance.with_traceback"><code class="docutils literal notranslate"><span class="pre">BadInstance.with_traceback()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstance.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstance.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution"><code class="docutils literal notranslate"><span class="pre">BadSolution</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.BadSolution.args"><code class="docutils literal notranslate"><span class="pre">BadSolution.args</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.BadSolution.with_traceback"><code class="docutils literal notranslate"><span class="pre">BadSolution.with_traceback()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolution.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolution.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -303,31 +283,31 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.schema.manager">Schema manager</a><ul>
 <li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager"><code class="docutils literal notranslate"><span class="pre">SchemaManager</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.from_filepath"><code class="docutils literal notranslate"><span class="pre">SchemaManager.from_filepath()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_jsonschema"><code class="docutils literal notranslate"><span class="pre">SchemaManager.get_jsonschema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_validation_errors"><code class="docutils literal notranslate"><span class="pre">SchemaManager.get_validation_errors()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_data"><code class="docutils literal notranslate"><span class="pre">SchemaManager.validate_data()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_schema"><code class="docutils literal notranslate"><span class="pre">SchemaManager.validate_schema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_file_errors"><code class="docutils literal notranslate"><span class="pre">SchemaManager.get_file_errors()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_file"><code class="docutils literal notranslate"><span class="pre">SchemaManager.validate_file()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_dict_schema"><code class="docutils literal notranslate"><span class="pre">SchemaManager.to_dict_schema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj"><code class="docutils literal notranslate"><span class="pre">SchemaManager.to_schema_dict_obj()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_marshmallow"><code class="docutils literal notranslate"><span class="pre">SchemaManager.to_marshmallow()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.export_schema_dict"><code class="docutils literal notranslate"><span class="pre">SchemaManager.export_schema_dict()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.draft_schema_from"><code class="docutils literal notranslate"><span class="pre">SchemaManager.draft_schema_from()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_template"><code class="docutils literal notranslate"><span class="pre">SchemaManager.to_template()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.load_json"><code class="docutils literal notranslate"><span class="pre">SchemaManager.load_json()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.dict_to_flask"><code class="docutils literal notranslate"><span class="pre">SchemaManager.dict_to_flask()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.load_schema"><code class="docutils literal notranslate"><span class="pre">SchemaManager.load_schema()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask"><code class="docutils literal notranslate"><span class="pre">SchemaManager.jsonschema_to_flask()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict"><code class="docutils literal notranslate"><span class="pre">SchemaManager.jsonschema_to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.from_filepath"><code class="docutils literal notranslate">from_filepath()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_jsonschema"><code class="docutils literal notranslate">get_jsonschema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_validation_errors"><code class="docutils literal notranslate">get_validation_errors()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_data"><code class="docutils literal notranslate">validate_data()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_schema"><code class="docutils literal notranslate">validate_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.get_file_errors"><code class="docutils literal notranslate">get_file_errors()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.validate_file"><code class="docutils literal notranslate">validate_file()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_dict_schema"><code class="docutils literal notranslate">to_dict_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_schema_dict_obj"><code class="docutils literal notranslate">to_schema_dict_obj()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_marshmallow"><code class="docutils literal notranslate">to_marshmallow()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.export_schema_dict"><code class="docutils literal notranslate">export_schema_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.draft_schema_from"><code class="docutils literal notranslate">draft_schema_from()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.to_template"><code class="docutils literal notranslate">to_template()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.load_json"><code class="docutils literal notranslate">load_json()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.dict_to_flask"><code class="docutils literal notranslate">dict_to_flask()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.load_schema"><code class="docutils literal notranslate">load_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_flask"><code class="docutils literal notranslate">jsonschema_to_flask()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.manager.SchemaManager.jsonschema_to_dict"><code class="docutils literal notranslate">jsonschema_to_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.schema.dictSchema">Dictionary schema</a><ul>
 <li><a class="reference internal" href="#cornflow_client.schema.dictSchema.DictSchema"><code class="docutils literal notranslate"><span class="pre">DictSchema</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema"><code class="docutils literal notranslate"><span class="pre">DictSchema.get_empty_schema()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema"><code class="docutils literal notranslate">get_empty_schema()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -335,41 +315,28 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 </ul>
-
-  </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div>
-    </div>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
-  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
-    <div class="sy-breadcrumbs" role="navigation">
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
   <div class="sy-breadcrumbs-inner flex items-center">
     <div class="md:hidden mr-3">
       <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
         <i class="i-lucide menu"></i>
       </button>
     </div>
-    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
-      
-      
-      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
-      </li>
-      
-      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <a itemprop="item" href="index.html"><span itemprop="name">Code documentation</span></a>
         <span>/</span>
         <meta itemprop="position" content="2" />
-      </li>
-      
-      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <strong itemprop="name">Cornflow-client</strong>
         <meta itemprop="position" content="3" />
-      </li>
-      
-      
-    </ol>
+      </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
         aria-expanded="false">
@@ -377,8 +344,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
   </div>
-</div>
-    <div class="flex flex-col break-words justify-between">
+</div><div class="flex flex-col break-words justify-between">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="cornflow-client">
@@ -1684,27 +1650,18 @@ table3: {config1: a, config2: b},
 </section>
 </section>
 
-        </article>
-        <button class="back-to-top" type="button">
+        </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
   </svg>
   <span>Back to top</span>
-</button>
-        
-        <div class="navigation flex print:hidden">
-  <div class="navigation-prev">
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
     <a href="auxiliar_endpoints.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span>
-        
-        <div class="title">Auxiliar endpoints</div>
-        
-      </div>
+        <span>Previous</span><div class="title">Auxiliar endpoints</div></div>
     </a>
-  </div>
-  <div class="navigation-next">
+  </div><div class="navigation-next">
     <a href="../stable-rest-api-ref.html">
       <div class="page-info">
         <span>Next</span>
@@ -1712,16 +1669,12 @@ table3: {config1: a, config2: b},
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
-  </div>
-</div>
-        
-      </div>
+  </div></div></div>
     </div>
   </main>
 </div>
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
-    
     <div class="sy-foot-reserved md:flex justify-between items-center">
       <div class="sy-foot-copyright"><p>2020-, cornflow documentation team.</p>
   
@@ -1733,16 +1686,13 @@ table3: {config1: a, config2: b},
     <a href="https://shibuya.lepture.com">Shibuya theme</a>.
   </p>
 </div>
-      <div class="sy-foot-socials">
-</div>
+      <div class="sy-foot-socials"></div>
     </div>
   </div>
-</footer></div>
+</footer>
       <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
       <script src="../_static/doctools.js?v=888ff710"></script>
       <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
       <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=5f0e4c24"></script>
-    
-</body>
+      <script src="../_static/shibuya.js?v=c5fc9e80"></script></body>
 </html>
