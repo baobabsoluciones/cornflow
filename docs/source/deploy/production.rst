@@ -1,12 +1,12 @@
 Production deployment and security
 ---------------------------------------
 
-It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself `production-ready <https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html>`_.
+It is time to deploy cornflow in production. To do this, first, you need to make sure that the airflow is itself `production-ready <https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html>`_.
 
 Database backend
 *****************
 
-Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
+Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config::
 
     DATABASE_URL=postgresql://myuser:myuserpwd@myserverip:5432/cornflow
@@ -62,7 +62,7 @@ Flower has by default a `basic authentication <https://flower.readthedocs.io/en/
 LDAP Authentication
 **********************
 
-Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
+cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.
 
 In the `repository <https://raw.githubusercontent.com/baobabsoluciones/cornflow/master/docker-compose-cornflow-ldap.yml>`_ we have an example of deployment with docker to configure access with LDAP protocol::
