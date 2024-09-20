@@ -12,17 +12,18 @@ This project requires python 3.7 or above::
     python -m venv venv
     venv/Scripts/activate
     pip install -r requirements.txt
+    pip install -U ../libs/client
 
 Optionally, to generate reports, it is required to install quarto: https://quarto.org/docs/download/.
 
 Testing
 ~~~~~~~~~~~~~~~~~~~~~
 
-To run all tests you may want to do the following:
+To run all tests you may want to do the following::
 
     python -m unittest tests.test_dags
 
-To run the specific tests for one of the apps, just choose the name of the DAG (example: Tsp):
+To run the specific tests for one of the apps, just choose the name of the DAG (example: Tsp)::
 
     python -m unittest tests.test_dags.Tsp
 
