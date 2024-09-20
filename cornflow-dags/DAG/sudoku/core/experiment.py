@@ -5,6 +5,8 @@ from .instance import Instance
 from .solution import Solution
 import os
 import quarto
+import plotnine as pn
+import pandas as pd
 
 
 class Experiment(ExperimentCore):
@@ -33,9 +35,15 @@ class Experiment(ExperimentCore):
     def get_objective(self) -> float:
         return 0
 
-    def get_complete_solution(self):
-        initial_values = self.instance.get_initial_values()
-        solution_values = self.solution.get_assignments(self.instance.get_size())
+    def get_complete_solution(self, id=None):
+        initial_values = self.instance.get_initial_values().vapply(pt.SuperDict)
+        initial_values.vapply_col("initial", lambda v: True)
+        if id is None:
+            solution_values = self.solution.get_assignments(self.instance.get_size())
+        else:
+            solution_values = self.solution.get_others(self.instance.get_size(), id=id)
+        solution_values = solution_values.vapply(pt.SuperDict)
+        solution_values.vapply_col("initial", lambda v: False)
         return solution_values + initial_values
 
     def check_solution(self, *args, **kwargs) -> dict:
@@ -64,7 +72,30 @@ class Experiment(ExperimentCore):
 
         return self.generate_report_quarto(quarto, report_name=report_name)
 
-    def print(self):
-        values = self.get_complete_solution()
+    def print(self, id=None):
+        values = self.get_complete_solution(id=id)
         board = self.instance.values_to_matrix(values)
         return self.instance.generate_board(board)
+
+    def plot(self, id=None):
+
+        my_solution = self.get_complete_solution(id=id)
+        my_table = pd.DataFrame(my_solution)
+        a = pt.TupList(range(10)).vapply(lambda v: v - 0.5)
+        return (
+            pn.ggplot(my_table, pn.aes(x="row", y="col", fill="initial"))
+            + pn.geom_tile(pn.aes(width=1, height=1))
+            + pn.geom_text(pn.aes(label="value"), size=10)
+            + pn.theme_void()
+            # + pn.labs(fill='')
+            + pn.scale_fill_manual(values=["white", "lightgreen"], guide=None)
+            + pn.geom_vline(xintercept=a, color="black", size=0.5, linetype="dashed")
+            + pn.geom_hline(yintercept=a, color="black", size=0.5, linetype="dashed")
+            + pn.geom_vline(xintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
+            + pn.geom_hline(yintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
+            + pn.xlim(-0.5, 8.5)
+            + pn.ylim(-0.5, 8.5)
+        )
+
+    def get_others(self):
+        return self.solution.get_others(self.instance.get_size())

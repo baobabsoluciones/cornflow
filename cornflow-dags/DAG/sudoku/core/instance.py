@@ -5,6 +5,8 @@ import pytups as pt
 import math
 from .tools import pos_to_row_col, add_pos_square, row_col_to_pos, row_col_to_square
 
+from typing import Optional
+
 
 class Instance(InstanceCore):
     schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
@@ -17,9 +19,16 @@ class Instance(InstanceCore):
         super().__init__(data)
 
     @classmethod
-    def from_txt_file(cls, filePath, line_number: int = 0):
-        with open(filePath, "r") as f:
-            contents = f.read().splitlines()
+    def from_txt_file(
+        cls, filePath, line_number: int = 0, contents: Optional[str] = None
+    ):
+        # if content is given, filePath is ignored:
+        if contents is None:
+            with open(filePath, "r") as f:
+                contents = f.read().splitlines()
+        else:
+            contents = [contents]
+            line_number = 0
         empty_chars = {".", "0"}
         my_chars = [
             el if el not in empty_chars else None for el in contents[line_number]

@@ -45,25 +45,60 @@ class OrToolsCP(Experiment):
         solver.parameters.max_time_in_seconds = options.get("timeLimit", 10)
         if options.get("msg"):
             solver.parameters.log_search_progress = True
-        termination_condition = solver.Solve(model)
+        # we want to find all the potential solutions for the sudoku
+        solver.parameters.enumerate_all_solutions = True
+
+        # we want all sudokus, in case of more than one solution
+        class VarArraySolutionCollector(cp_model.CpSolverSolutionCallback):
+
+            def __init__(self, variables):
+                cp_model.CpSolverSolutionCallback.__init__(self)
+                self.__variables = variables
+                self.solution_list = []
+
+            def on_solution_callback(self):
+                # my_elements
+                self.solution_list.append(self.__variables.vapply(self.Value))
+
+        solution_collector = VarArraySolutionCollector(my_elements)
+        termination_condition = solver.Solve(model, solution_collector)
+        all_solutions = solution_collector.solution_list
+        other_solutions = []
+        if len(all_solutions) >= 1:
+            assignment_values = solution_collector.solution_list[0]
+        if len(all_solutions) > 1:
+            other_solutions = solution_collector.solution_list[1:]
         if termination_condition not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
             return dict(
                 status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
                 status_sol=SOLUTION_STATUS_INFEASIBLE,
             )
 
-        assignment_values = my_elements.vapply(solver.Value)
-
         def solution_enc(pos, value):
             row, col = pos_to_row_col(pos, size)
             return pt.SuperDict(row=row, col=col, value=value)
 
-        solution_data = (
-            assignment_values.kfilter(lambda k: k not in value_per_pos)
-            .kvapply(solution_enc)
-            .values_tl()
+        def assignment_to_solution(values: pt.SuperDict) -> pt.TupList[pt.SuperDict]:
+            return (
+                values.kfilter(lambda k: k not in value_per_pos)
+                .kvapply(solution_enc)
+                .values_tl()
+            )
+
+        def treat_others(others):
+            result = pt.TupList()
+            for position, solution in enumerate(others):
+                values = assignment_to_solution(solution)
+                values.vapply_col("id", lambda v: position)
+                result.extend(values)
+            return result
+
+        self.solution = Solution.from_dict(
+            dict(
+                assignment=assignment_to_solution(assignment_values),
+                alternatives=treat_others(other_solutions),
+            )
         )
-        self.solution = Solution(dict(assignment=solution_data))
 
         return dict(
             status=ORTOOLS_STATUS_MAPPING.get(termination_condition),

@@ -65,14 +65,13 @@ my_instance.print()
 
 ```
 
-
-
 ## Solution statistics
 
 ```{python}
 objective = my_experiment.get_objective()
 checks = my_experiment.check_solution()
 feasible = len(checks) == 0
+indicators = my_experiment.solution.get_indicators()
 
 ```
 
@@ -82,7 +81,11 @@ feasible = len(checks) == 0
 # The following code shows (1) a box with feasibility + objective function OR (2) root cause of infeasibility.
 
 if feasible:
-  print("::: {{.callout-tip}}\n\n## Solution is feasible.\n\n:::".format(objective))
+  my_text = "Solution is feasible"
+  if "num_fails" in indicators:
+    my_text += ' and difficulty is {}'.format(indicators['num_fails'])
+  print("::: {{.callout-tip}}\n\n## {}.\n\n:::".format(my_text))
+
 else:
   my_text = ""
   if checks['missing_values']:
@@ -100,6 +103,22 @@ See @fig-solution for a representation of the final Sudoku.
 #| label: fig-solution
 #| fig-cap: "Sudoku"
 
-my_experiment.print()
+my_experiment.plot()
 
 ```
+
+## Alternative solutions
+
+
+In case there are alternative solutions to the problem, they are shown here:
+
+```{python}
+#| label: fig-solution-alternatives
+#| fig-cap: "Alternative solutions"
+
+my_ids = my_experiment.get_others().take('id').unique()
+for _id in my_ids:
+  display(my_experiment.plot(_id))
+  plt.show()
+```
+

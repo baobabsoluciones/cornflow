@@ -20,6 +20,39 @@
                 },
                 "required": ["row", "col", "value"]
             }
+        },
+        "alternatives": {
+            "description": "alternative sudokus (in case of multiple solutions)",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "row": {
+                        "type": "integer"
+                    },
+                    "col": {
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "integer"
+                    }
+                },
+                "required": ["id", "row", "col", "value"]
+            }
+        },
+        "indicators": {
+            "description": "Main indicators",
+            "type": "object",
+            "properties": {
+                "num_fails": {
+                    "description": "Number of fail searches (the more, the harder the problem)",
+                    "type": "integer"
+                }
+            },
+            "required": []
         }
     },
     "required": ["assignment"]

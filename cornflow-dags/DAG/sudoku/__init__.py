@@ -2,7 +2,7 @@ from cornflow_client import get_empty_schema, ApplicationCore, add_reports_to_sc
 from typing import List, Dict
 import os
 
-from .solvers import OrToolsCP
+from .solvers import OrToolsCP, Norvig
 from .core import Instance, Solution
 
 
@@ -10,7 +10,7 @@ class Sudoku(ApplicationCore):
     name = "sudoku"
     instance = Instance
     solution = Solution
-    solvers = dict(cpsat=OrToolsCP)
+    solvers = dict(cpsat=OrToolsCP, norvig=Norvig)
     schema = get_empty_schema(
         properties=dict(timeLimit=dict(type="number")), solvers=list(solvers.keys())
     )

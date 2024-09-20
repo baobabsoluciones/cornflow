@@ -528,6 +528,99 @@ class Sudoku(BaseDAGTests.SolvingTests):
         )
         self.generate_check_report(my_experim, things_to_look)
 
+    def test_two_solutions(self):
+        my_instance = self.app.instance.from_txt_file(
+            filePath=None,
+            contents="..........12.34567.345.6182..1.582.6..86....1.2...7.5...37.5.28.8..6.7..2.7..3615",
+        )
+        my_experim = self.app.solvers["cpsat"](my_instance)
+        my_experim.solve(dict())
+        my_experim.solution.check_schema()
+        indicators = my_experim.solution.get_indicators()
+        self.assertFalse("num_fails" in indicators)
+        others = my_experim.solution.get_others(my_experim.instance.get_size())
+        required_keys = ["pos", "square", "id", "col", "row", "value"]
+        self.assertTrue(
+            len(others[0].keys_tl().intersect(required_keys)) == len(required_keys)
+        )
+
+    def test_easy_norvig(self):
+        dataset = [t for t in self.app.test_cases if t["name"].startswith("hardest")][0]
+        # we try solving in the standard way:
+        self.app.solve(dataset["instance"], dict(solver="norvig"))
+
+        # we solve it in more detail
+        my_experim = self.app.solvers["norvig"](
+            self.app.instance.from_dict(dataset["instance"])
+        )
+        my_experim.solve(dict())
+        my_experim.solution.check_schema()
+        indicators = my_experim.solution.get_indicators()
+        self.assertTrue("num_fails" in indicators)
+        others = my_experim.solution.get_others(my_experim.instance.get_size())
+        self.assertTrue(len(others) == 0)
+
+    def test_print(self):
+        my_instance = self.app.instance.from_txt_file(
+            filePath=None,
+            contents="..........12.34567.345.6182..1.582.6..86....1.2...7.5...37.5.28.8..6.7..2.7..3615",
+        )
+        my_experim = self.app.solvers["cpsat"](my_instance)
+        my_experim.solve(dict())
+        my_ids = my_experim.get_others().take("id").unique()
+        for _id in my_ids:
+            my_experim.print(_id)
+
+    def test_plot(self):
+        my_instance = self.app.instance.from_txt_file(
+            filePath=None,
+            contents="..........12.34567.345.6182..1.582.6..86....1.2...7.5...37.5.28.8..6.7..2.7..3615",
+        )
+        my_experim = self.app.solvers["cpsat"](my_instance)
+        my_experim.solve(dict())
+        my_experim.plot()
+
+    def test_report2(self):
+        my_instance = self.app.instance.from_txt_file(
+            filePath=None,
+            contents="..........12.34567.345.6182..1.582.6..86....1.2...7.5...37.5.28.8..6.7..2.7..3615",
+        )
+        my_experim = self.app.solvers["cpsat"](my_instance)
+        my_experim.solve(dict())
+
+        # let's just check for an element inside the html that we know should exist
+        # in this case a few 'section' tags with an attribute with a specific id
+        things_to_look = dict(
+            section=[
+                ("id", "solution"),
+                ("id", "instance"),
+                ("id", "sudoku"),
+            ]
+        )
+        self.generate_check_report(my_experim, things_to_look)
+
+    def test_report3(self):
+        dataset = [t for t in self.app.test_cases if t["name"].startswith("hardest")][0]
+        # we try solving in the standard way:
+        self.app.solve(dataset["instance"], dict(solver="norvig"))
+
+        # we solve it in more detail
+        my_experim = self.app.solvers["norvig"](
+            self.app.instance.from_dict(dataset["instance"])
+        )
+        my_experim.solve(dict())
+
+        # let's just check for an element inside the html that we know should exist
+        # in this case a few 'section' tags with an attribute with a specific id
+        things_to_look = dict(
+            section=[
+                ("id", "solution"),
+                ("id", "instance"),
+                ("id", "sudoku"),
+            ]
+        )
+        self.generate_check_report(my_experim, things_to_look)
+
 
 class HTMLCheckTags(HTMLParser):
     things_to_check: Optional[Dict[str, List[Tuple[str, str]]]]
