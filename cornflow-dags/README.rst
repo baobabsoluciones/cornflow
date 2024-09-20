@@ -4,17 +4,54 @@ Cornflow-dags
 
 Public DAGs for cornflow server
 
-Uploading a new app / solver
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Setting the environment
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This project requires python 3.7 or above::
 
     python -m venv venv
     venv/Scripts/activate
     pip install -r requirements.txt
+
+Optionally, to generate reports, it is required to install quarto: https://quarto.org/docs/download/.
+
+Testing
+~~~~~~~~~~~~~~~~~~~~~
+
+To run all tests you may want to do the following:
+
+    python -m unittest tests.test_dags
+
+To run the specific tests for one of the apps, just choose the name of the DAG (example: Tsp):
+
+    python -m unittest tests.test_dags.Tsp
+
+Running an app
+~~~~~~~~~~~~~~~~~~~~~
+
+from python (example with GraphColoring)::
+
+    from DAG.graph_coloring import GraphColoring
+
+    app = GraphColoring()
+    # we load an example dataset:
+    tests = app.get_unittest_cases()
+    instance_data = tests[0].get("instance")
+    # we instantiate the instance
+    instance = app.instance.from_dict(instance_data)
+    # we get the default solver (solvers available in app.solvers)
+    s = app.get_default_solver_name()
+    my_experim = app.get_solver(s)(instance, None)
+    # we solve the problem
+    my_experim.solve(dict())
+    # the solution is stored in solution:
+    my_experim.solution.to_dict()
+    # some apps allow generating an html report (Quarto required)
+    path_to_report = my_experim.generate_report()
+
+
+Uploading a new app / solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Introduction
 -------------
@@ -307,7 +344,7 @@ The reports
 --------------
 
 The generation of reports needs to have the `quarto` app installed in the system.
-To downlodad and install quarto, check here: https://quarto.org/docs/download/.
+To download and install quarto, check here: https://quarto.org/docs/download/.
 
 A report is a static/ self-contained view of an Experiment (solved or not).
 
@@ -325,3 +362,4 @@ Developing reports
 Quarto reports are easier to create using VS-code with the following extensions: `Python`, `Quarto`, `Jupyter`, `black (Microsoft)`.
 
 VS-code offers an interactive window to execute cells, and automatic re-run of the report by watching for changes.
+

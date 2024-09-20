@@ -81,7 +81,7 @@ class BaseDAGTests:
 
         def test_try_solving_testcase(self, config=None):
             config = config or self.config
-            tests = self.app.test_cases
+            tests = self.app.get_unittest_cases()
 
             for test_case in tests:
                 instance_data = test_case.get("instance")
@@ -144,7 +144,7 @@ class BaseDAGTests:
         @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
         def test_complete_solve(self, connectCornflow, config=None):
             config = config or self.config
-            tests = self.app.test_cases
+            tests = self.app.get_unittest_cases()
             for test_case in tests:
                 instance_data = test_case.get("instance")
                 solution_data = test_case.get("solution", None)
@@ -183,7 +183,7 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.config = dict(msg=False)
 
     def test_incomplete_solution(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         solution_data = dict(assignment=[dict(node=1, color=1), dict(node=3, color=1)])
         my_experim = self.app.solvers["default"](
             self.app.instance.from_dict(tests[0]["instance"]),
@@ -194,7 +194,7 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.assertEqual(len(checks["pairs"]), 1)
 
     def test_report(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         my_experim = self.load_experiment_from_dataset(tests[0])
         my_experim.solve(dict())
         things_to_look = dict(
@@ -222,7 +222,7 @@ try:
         def test_complete_report(self, connectCornflow, config=None):
             config = config or self.config
             config = dict(**config, report=dict(name="report"))
-            tests = self.app.test_cases
+            tests = self.app.get_unittest_cases()
             for test_case in tests:
                 instance_data = test_case.get("instance")
                 solution_data = test_case.get("solution", None)
@@ -257,7 +257,7 @@ class Tsp(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="cpsat", **self.config))
 
     def test_report(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
 
@@ -273,14 +273,14 @@ class Tsp(BaseDAGTests.SolvingTests):
         self.generate_check_report(my_experim, things_to_look)
 
     def test_report_error(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
         my_fun = lambda: my_experim.generate_report(report_name="wrong_name")
         self.assertRaises(FileNotFoundError, my_fun)
 
     def test_export(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         my_file_path = "export.json"
         self.app.instance(tests[0]["instance"]).to_json(my_file_path)
         self.assertTrue(os.path.exists(my_file_path))
@@ -293,7 +293,7 @@ class Tsp(BaseDAGTests.SolvingTests):
     def test_complete_report(self, connectCornflow, config=None):
         config = config or self.config
         config = dict(**config, report=dict(name="report"))
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         for test_case in tests:
             instance_data = test_case.get("instance")
             solution_data = test_case.get("solution", None)
@@ -317,7 +317,7 @@ class Tsp(BaseDAGTests.SolvingTests):
     def test_complete_report_wrong_data(self, connectCornflow, config=None):
         config = config or self.config
         config = dict(**config, report=dict(name="report"))
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         for test_case in tests:
             instance_data = test_case.get("instance")
             solution_data = None
@@ -343,7 +343,7 @@ class Tsp(BaseDAGTests.SolvingTests):
     def test_complete_report_no_quarto(self, connectCornflow, render, config=None):
         config = config or self.config
         config = dict(**config, report=dict(name="report"))
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         render.side_effect = ModuleNotFoundError()
         render.return_value = dict(a=1)
         for test_case in tests:
@@ -513,7 +513,7 @@ class Sudoku(BaseDAGTests.SolvingTests):
         self.app = Sudoku()
 
     def test_report(self):
-        tests = self.app.test_cases
+        tests = self.app.get_unittest_cases()
         my_experim = self.app.solvers["cpsat"](self.app.instance(tests[0]["instance"]))
         my_experim.solve(dict())
 
@@ -545,7 +545,9 @@ class Sudoku(BaseDAGTests.SolvingTests):
         )
 
     def test_easy_norvig(self):
-        dataset = [t for t in self.app.test_cases if t["name"].startswith("hardest")][0]
+        dataset = [
+            t for t in self.app.get_unittest_cases() if t["name"].startswith("hardest")
+        ][0]
         # we try solving in the standard way:
         self.app.solve(dataset["instance"], dict(solver="norvig"))
 
@@ -600,7 +602,9 @@ class Sudoku(BaseDAGTests.SolvingTests):
         self.generate_check_report(my_experim, things_to_look)
 
     def test_report3(self):
-        dataset = [t for t in self.app.test_cases if t["name"].startswith("hardest")][0]
+        dataset = [
+            t for t in self.app.get_unittest_cases() if t["name"].startswith("hardest")
+        ][0]
         # we try solving in the standard way:
         self.app.solve(dataset["instance"], dict(solver="norvig"))
 

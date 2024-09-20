@@ -1,11 +1,12 @@
 """
 
 """
+
 # Partial imports
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
-
+import warnings
 from jsonschema import Draft7Validator
 from pytups import SuperDict
 
@@ -127,9 +128,26 @@ class ApplicationCore(ABC):
           * **description** optional field with a description of the test case.
           * **instance**: the instance data.
           * **solution**: the solution data (optional)
+          * **unittest**: flag indicating whether the test case is a unittest
         """
         # TODO: Phase out older list implementation
         raise NotImplementedError()
+
+    def get_unittest_cases(self):
+        # we raise old deprecation warnings
+        # and we filter to only get tests than run fast.
+        my_cases = self.test_cases
+        if len(my_cases) == 0:
+            return []
+        if isinstance(my_cases[0], tuple):
+            warnings.warn(
+                "tuple format is deprecated, use a dict(name, description, instance, solution)"
+            )
+        if "instance" not in my_cases[0]:
+            warnings.warn(
+                "old-dict format is deprecated, use a dict(name, description, instance, solution)"
+            )
+        return [t for t in my_cases if t.get("unittest", True)]
 
     @property
     @abstractmethod
