@@ -1,3 +1,14 @@
+version 1.1.1
+--------------
+
+- released: 2024-09-18
+- description: small security fixes
+- changelog:
+    - bump PuLP to version 2.9.0
+    - bump requests to version 2.32.3
+    - modified branch structure on repository.
+    - minor changes to documentation
+
 version 1.1.0
 --------------
 
