@@ -2,6 +2,11 @@
 In this files we import the values for different constants on cornflow server
 """
 
+# CORNFLOW BACKEND
+AIRFLOW_BACKEND = 1
+DATABRICKS_BACKEND = 2
+
+
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
 STATUS_UNHEALTHY = "unhealthy"

@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE
+from .shared.const import AUTH_DB, PLANNER_ROLE, AIRFLOW_BACKEND
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -9,9 +9,7 @@ class DefaultConfig(object):
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
-    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
-    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
-    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+    
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
@@ -21,6 +19,20 @@ class DefaultConfig(object):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
+
+    # To change the tasks backend used by cornflow to solve the optimization models
+    CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
+
+    # AIRFLOW config
+    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
+    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
+    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
+    # DATABRICKS config
+    DATABRICKS_URL = os.getenv("DATABRICKS_URL")
+    DATABRICKS_USER = os.getenv("DATABRICKS_USER")
+    DATABRICKS_PWD = os.getenv("DATABRICKS_PWD")
+    DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
