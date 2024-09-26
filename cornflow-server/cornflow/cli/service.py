@@ -16,7 +16,7 @@ from cornflow.commands import (
     update_schemas_command,
     update_dag_registry_command,
 )
-from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, DATABRICKS_BACKEND, SERVICE_ROLE, AIRFLOW_BACKEND
 from cornflow.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
@@ -37,14 +37,26 @@ def init_cornflow_service():
     ###################################
     # Global defaults and back-compat #
     ###################################
+    # cornflow backend selection
+    cornflow_backend = os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND)
+    os.environ["CORNFLOW_BACKEND"] = cornflow_backend
+
     # Airflow global default conn
-    airflow_user = os.getenv("AIRFLOW_USER", "admin")
-    airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
-    airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
-    cornflow_url = os.environ.setdefault("cornflow_url", "http://cornflow:5000")
-    os.environ["AIRFLOW_USER"] = airflow_user
-    os.environ["AIRFLOW_PWD"] = airflow_pwd
-    os.environ["AIRFLOW_URL"] = airflow_url
+    if int(cornflow_backend) == AIRFLOW_BACKEND:
+        airflow_user = os.getenv("AIRFLOW_USER", "admin")
+        airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
+        airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
+        os.environ["AIRFLOW_USER"] = airflow_user
+        os.environ["AIRFLOW_PWD"] = airflow_pwd
+        os.environ["AIRFLOW_URL"] = airflow_url
+    elif int(cornflow_backend) == DATABRICKS_BACKEND:
+        databricks_url = os.getenv("DATABRICKS_URL")
+        databricks_token = os.getenv("DATABRICKS_TOKEN")
+        os.environ["DATABRICKS_URL"] = databricks_url
+        os.environ["DATABRICKS_TOKEN"] = databricks_token
+    else:
+        raise Exception("Selected backend not among valid options")
+
     os.environ["FLASK_APP"] = "cornflow.app"
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
@@ -150,11 +162,17 @@ def init_cornflow_service():
                     SERVICE_ROLE,
                     verbose=True,
                 )
-            register_deployed_dags_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
-            register_dag_permissions_command(open_deployment, verbose=True)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
+
+            if cornflow_backend == AIRFLOW_BACKEND:
+                register_deployed_dags_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+                register_dag_permissions_command(open_deployment, verbose=True)
+                update_schemas_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+            else:
+                register_dag_permissions_command(open_deployment, verbose=True)
 
         # execute gunicorn application
         os.system(
@@ -207,14 +225,21 @@ def init_cornflow_service():
                     SERVICE_ROLE,
                     verbose=True,
                 )
-            register_deployed_dags_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
-            register_dag_permissions_command(open_deployment, verbose=True)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
-            update_dag_registry_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
+
+            if cornflow_backend == AIRFLOW_BACKEND:
+                register_deployed_dags_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+
+                register_dag_permissions_command(open_deployment, verbose=True)
+                update_schemas_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+                update_dag_registry_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+            else:
+                register_dag_permissions_command(open_deployment, verbose=True)
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
