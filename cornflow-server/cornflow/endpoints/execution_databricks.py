@@ -246,9 +246,9 @@ class ExecutionEndpoint(BaseMetaResource):
                     + err,
                 )
         # TODO AGA: revisar si hay que hacer alguna verificación a los JOBS
-        
+
         try:
-            response = orq_client.run_dag(execution.id, dag_name=schema)
+            response = orq_client.run_workflow(execution.id, dag_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)
@@ -375,7 +375,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(execution.id, dag_name=schema)
+            response = af_client.run_workflow(execution.id, dag_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)

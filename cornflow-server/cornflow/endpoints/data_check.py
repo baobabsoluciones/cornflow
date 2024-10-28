@@ -112,7 +112,7 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
+            response = af_client.run_workflow(
                 execution.id, dag_name=schema, checks_only=True
             )
         except AirflowError as err:
@@ -226,7 +226,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
+            response = af_client.run_workflow(
                 execution.id, dag_name=schema, checks_only=True
             )
         except AirflowError as err:
@@ -386,7 +386,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
+            response = af_client.run_workflow(
                 execution.id, dag_name=schema, checks_only=True, case_id=idx
             )
 

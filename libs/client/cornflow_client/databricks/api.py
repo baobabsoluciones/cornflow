@@ -37,4 +37,14 @@ class Databricks:
         if "error_code" in schema_info.keys():
             raise DatabricksError("JOB not available")
         return schema_info
+        
+    def run_workflow(
+            self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+        ):
+            conf = dict(exec_id=execution_id, checks_only=checks_only)
+            if case_id is not None:
+                conf["case_id"] = case_id
+            payload = dict(conf=conf)
+            return self.consume_dag_run(dag_name, payload=payload, method="POST")
+        
 
