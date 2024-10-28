@@ -109,9 +109,12 @@ class Airflow(object):
     def get_all_dag_runs(self, dag_name):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
-    def get_dag_info(self, dag_name, method="GET"):
-        url = f"{self.url}/dags/{dag_name}"
-        return self.request_headers_auth(method=method, url=url)
+   def get_orq_info(self, orq_name, method="GET"):
+        url = f"{self.url}/dags/{orq_name}"
+        schema_info =  self.request_headers_auth(method=method, url=url) 
+        if schema_info.status_code!=200:
+            raise AirflowError("DAG not available")
+        return schema_info
 
     def get_one_variable(self, variable):
         url = f"{self.url}/variables/{variable}"

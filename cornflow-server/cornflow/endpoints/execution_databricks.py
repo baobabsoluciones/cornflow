@@ -5,7 +5,13 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow
+import datetime
+import logging
+import time
+from databricks.sdk import WorkspaceClient
+import databricks.sdk.service.jobs as j
+from cornflow-server.cornflow.constants import *
+
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -39,7 +45,7 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
-from cornflow.shared.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
+from cornflow.shared.exceptions import AirflowError,DatabricksError, ObjectDoesNotExist, InvalidData
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
     json_schema_extend_and_validate_as_string,
@@ -139,6 +145,7 @@ class ExecutionEndpoint(BaseMetaResource):
         """
         # TODO: should validation should be done even if the execution is not going to be run?
         # TODO: should the schema field be cross validated with the instance schema field?
+        # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
 
         if "schema" not in kwargs:
@@ -159,24 +166,18 @@ class ExecutionEndpoint(BaseMetaResource):
             return execution, 201
 
         # We now try to launch the task in airflow
-        af_client = Airflow.from_config(config)
-        if not af_client.is_alive():
-            err = "Airflow is not accessible"
-            current_app.logger.error(err)
-            execution.update_state(EXEC_STATE_ERROR_START)
-            raise AirflowError(
-                error=err,
-                payload=dict(
-                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                    state=EXEC_STATE_ERROR_START,
-                ),
-                log_txt=f"Error while user {self.get_user()} tries to create an execution "
-                + err,
-            )
-        # ask airflow if dag_name exists
+        # We try to create an orq client
         schema = execution.schema
-        schema_info = af_client.get_orq_info(schema)
+        orq_client, schema_info = get_orq_client(schema)
+        ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
+        # endregion
 
+
+        # region VALIDACIONES
+        # Note schema is a string with the name of the job/dag
+        schema = execution.schema
+        # We check if the job/dag exists 
+        orq_client.get_orq_info(schema)
         # Validate config before running the dag
         config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
         new_config, config_errors = json_schema_extend_and_validate_as_string(
@@ -228,24 +229,26 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
                 execution.update_log_txt(f"{solution_errors}")
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
-
-        info = schema_info.json()
-        if info["is_paused"]:
-            err = "The dag exists but it is paused in airflow"
-            current_app.logger.error(err)
-            execution.update_state(EXEC_STATE_ERROR_START)
-            raise AirflowError(
-                error=err,
-                payload=dict(
-                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                    state=EXEC_STATE_ERROR_START,
-                ),
-                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
-                + err,
-            )
-
+        # endregion
+        if ORQ_TYPE==AIRFLOW_BACKEND:
+            info = schema_info.json()
+            if info["is_paused"]:
+                err = "The dag exists but it is paused in airflow"
+                current_app.logger.error(err)
+                execution.update_state(EXEC_STATE_ERROR_START)
+                raise AirflowError(
+                    error=err,
+                    payload=dict(
+                        message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                        state=EXEC_STATE_ERROR_START,
+                    ),
+                    log_txt=f"Error while user {self.get_user()} tries to create an execution. "
+                    + err,
+                )
+        # TODO AGA: revisar si hay que hacer alguna verificación a los JOBS
+        
         try:
-            response = af_client.run_dag(execution.id, dag_name=schema)
+            response = orq_client.run_dag(execution.id, dag_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)
@@ -351,6 +354,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 + err,
             )
+        
         # ask airflow if dag_name exists
         schema = execution.schema
         schema_info = af_client.get_orq_info(schema)
@@ -671,3 +675,82 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
         """
         current_app.logger.info(f"User {self.get_user()} gets log of execution {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
+
+
+def submit_one_job(cid):
+    # trigger one-time-run job and get waiter object
+    waiter = w.jobs.submit(run_name=f'cornflow-job-{time.time()}', tasks=[
+        j.SubmitTask(
+            task_key='nippon_production_scheduling',
+            existing_cluster_id=cid,
+            libraries=[],
+            spark_python_task=j.SparkPythonTask(
+                python_file='/Workspace/Repos/nippon/nippon_production_scheduling/main.py',
+            ),
+            timeout_seconds=0,
+        )
+    ])
+    logging.info(f'starting to poll: {waiter.run_id}')
+    # callback, that receives a polled entity between state updates
+    # If you want to perform polling in a separate thread, process, or service,
+    # you can use w.jobs.wait_get_run_job_terminated_or_skipped(
+    #   run_id=waiter.run_id,
+    #   timeout=datetime.timedelta(minutes=15),
+    #   callback=print_status) to achieve the same results.
+    #
+    # Waiter interface allows for `w.jobs.submit(..).result()` simplicity in
+    # the scenarios, where you need to block the calling thread for the job to finish.
+    run = waiter.result(timeout=datetime.timedelta(minutes=15),
+                        callback=print_status)
+    logging.info(f'job finished: {run.run_page_url}')
+    return waiter.run_id
+
+def print_status(run: j.Run):
+    statuses = [f'{t.task_key}: {t.state.life_cycle_state}' for t in run.tasks]
+    logging.info(f'workflow intermediate status: {", ".join(statuses)}')
+
+def get_orq_client(schema):
+        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:
+            return get_airflow(schema)
+        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:
+            return get_databricks(schema)
+        else:
+            raise EndpointNotImplemented()
+            
+
+def get_airflow(schema):
+    af_client = Airflow.from_config(current_app.config)
+    schema_info = af_client.get_orq_info(schema)
+    if not af_client.is_alive():
+        err = "Airflow is not accessible"
+        current_app.logger.error(err)
+        execution.update_state(EXEC_STATE_ERROR_START)
+        raise AirflowError(
+            error=err,
+            payload=dict(
+                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                state=EXEC_STATE_ERROR_START,
+            ),
+            log_txt=f"Error while user {self.get_user()} tries to create an execution "
+            + err,
+        )
+    return af_client,schema_info
+
+
+def get_databricks(schema):
+    db_client = Databricks.from_config(current_app.config)
+    schema_info = db_client.get_orq_info
+    if not db_client.is_alive():
+        err = "Databricks is not accessible"
+        current_app.logger.error(err)
+        execution.update_state(EXEC_STATE_ERROR_START)
+        raise DatabricksError(
+            error=err,
+            payload=dict(
+                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                state=EXEC_STATE_ERROR_START,
+            ),
+            log_txt=f"Error while user {self.get_user()} tries to create an execution "
+            + err,
+        )
+    return db_client

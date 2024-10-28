@@ -16,7 +16,8 @@ from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
-
+# TODO AGA: cambiar nombre a la clase para que sea general
+# Aí como a los permisos etc
 class DeployedDAG(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
