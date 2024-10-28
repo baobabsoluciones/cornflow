@@ -95,7 +95,7 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orq_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -208,7 +208,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
 
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orq_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -369,7 +369,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + err
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orq_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
