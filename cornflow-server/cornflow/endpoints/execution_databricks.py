@@ -50,6 +50,7 @@ from cornflow.shared.validators import (
     json_schema_validate_as_string,
     json_schema_extend_and_validate_as_string,
 )
+from cornflow.orchestrator_constants import config_orchestrator
 
 
 class ExecutionEndpoint(BaseMetaResource):
@@ -145,19 +146,27 @@ class ExecutionEndpoint(BaseMetaResource):
         """
         # TODO: should validation should be done even if the execution is not going to be run?
         # TODO: should the schema field be cross validated with the instance schema field?
-        # region INDEPENDIENTE A AIRFLOW
-        config = current_app.config
+
+        ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
+        if ORQ_TYPE==AIRFLOW_BACKEND:
+            orq_const= config_orchestrator["airflow"]
+            ORQ_ERROR=AirflowError
+        elif ORQ_TYPE==DATABRICKS_BACKEND:
+            orq_const= config_orchestrator["databricks"]
+            # TODO AGA: Revisar si esto funcionaría correctamente
+            ORQ_ERROR=DatabricksError
 
         if "schema" not in kwargs:
-            kwargs["schema"] = "solve_model_dag"
-
+            kwargs["schema"] = orq_const["def_schema"]
+        # region INDEPENDIENTE A AIRFLOW
+        config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
         )
 
         current_app.logger.debug(f"The request is: {request.args.get('run')}")
-        # this allows testing without airflow interaction:
+        # this allows testing without  orchestrator interaction:
         if request.args.get("run", "1") == "0":
             current_app.logger.info(
                 f"User {self.get_user_id()} creates execution {execution.id} but does not run it."
@@ -165,24 +174,16 @@ class ExecutionEndpoint(BaseMetaResource):
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
 
-        # We now try to launch the task in airflow
+        # We now try to launch the task in the orchestrator
         # We try to create an orch client
+        # Note schema is a string with the name of the job/dag
         schema = execution.schema
         # In case we are dealing with DataBricks, the schema will 
         #   be the job id
-        orch_client, schema_info = get_orch_client(schema)
-        ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        # TODO AGA: Revisar si esto funcionaría correctamente
-        if ORQ_TYPE==AIRFLOW_BACKEND:
-            ORQ_ERROR=AirflowError
-        else: 
-            ORQ_ERROR=DatabricksError
+        orch_client, schema_info = get_orch_client(schema,ORQ_TYPE)
         # endregion
 
-
         # region VALIDACIONES
-        # Note schema is a string with the name of the job/dag
-        schema = execution.schema
         # We check if the job/dag exists 
         orch_client.get_orch_info(schema)
         # Validate config before running the dag
@@ -237,6 +238,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 execution.update_log_txt(f"{solution_errors}")
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
         # endregion
+        
         if ORQ_TYPE==AIRFLOW_BACKEND:
             info = schema_info.json()
             if info["is_paused"]:
@@ -257,11 +259,10 @@ class ExecutionEndpoint(BaseMetaResource):
         try:
             # TODO AGA: Hay que genestionar la posible eliminación de execution.id como 
             #   parámetro, ya que no se puede seleccionar el id en databricks
+            #   revisar las consecuencias que puede tener
             response = orch_client.run_workflow(execution.id, dag_name=schema)
         except ORQ_ERROR as err:
-            # TODO AGA: Poner mejor el mensaje
-            error = str(current_app.config["CORNFLOW_BACKEND"])
-            error = error + " responded with an error: {}".format(err)
+            error = orq_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
             raise ORQ_ERROR(
@@ -276,12 +277,8 @@ class ExecutionEndpoint(BaseMetaResource):
 
         # if we succeed, we register the dag_run_id in the execution table:
         orq_data = response.json()
-        if ORQ_TYPE==AIRFLOW_BACKEND:
-            execution.dag_run_id = orq_data["dag_run_id"]
-        # If we start working with other orchestrators, we will need to add 
-        # more specific condition
-        else:
-            execution.dag_run_id = orq_data["run_id"]
+        # TODO AGA: revisar el nombre del modelo de ejecuciones
+        execution.dag_run_id = orq_data[orq_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
             "User {} creates execution {}".format(self.get_user_id(), execution.id)
@@ -692,7 +689,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
         current_app.logger.info(f"User {self.get_user()} gets log of execution {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
 
-
+# region aux_functions
 def submit_one_job(cid):
     # trigger one-time-run job and get waiter object
     waiter = w.jobs.submit(run_name=f'cornflow-job-{time.time()}', tasks=[
@@ -725,10 +722,10 @@ def print_status(run: j.Run):
     statuses = [f'{t.task_key}: {t.state.life_cycle_state}' for t in run.tasks]
     logging.info(f'workflow intermediate status: {", ".join(statuses)}')
 
-def get_orch_client(schema):
-        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:
+def get_orch_client(schema, orq_type):
+        if orq_type == AIRFLOW_BACKEND:
             return get_airflow(schema)
-        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:
+        elif orq_type == DATABRICKS_BACKEND:
             return get_databricks(schema)
         else:
             raise EndpointNotImplemented()
@@ -770,3 +767,4 @@ def get_databricks(schema):
             + err,
         )
     return db_client
+    # endregion
