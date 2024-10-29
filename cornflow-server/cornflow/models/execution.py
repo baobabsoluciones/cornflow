@@ -78,7 +78,7 @@ class ExecutionModel(BaseDataModel):
                 + str(self.instance_id)
             ).encode()
         ).hexdigest()
-
+        # TODO AGA: modificar a run_id, tanto la columna como el parámetro.
         self.dag_run_id = data.get("dag_run_id")
         self.state = data.get("state", DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
