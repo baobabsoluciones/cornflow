@@ -29,22 +29,24 @@ class Databricks:
           current_app.logger.error(f"Error: {err}")
           return False
     
-    def get_orq_info(self, orq_name, method="GET"):
+    def get_orch_info(self, orch_name, method="GET"):
         # TODO AGA: revisar si la url esta bien/ si acepta asi los parámetros
-        url = f"{self.url}/api/2.1/jobs/get/{orq_name}"
+        url = f"{self.url}/api/2.1/jobs/get/{orch_name}"
         schema_info = self.request_headers_auth(method=method, url=url) 
         list_all_jobs_id = [job["job_id"] for job in list_all_jobs_info["jobs"]]
         if "error_code" in schema_info.keys():
             raise DatabricksError("JOB not available")
         return schema_info
-        
+    # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
+    #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
             self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
         ):
-            conf = dict(exec_id=execution_id, checks_only=checks_only)
-            if case_id is not None:
-                conf["case_id"] = case_id
-            payload = dict(conf=conf)
-            return self.consume_dag_run(dag_name, payload=payload, method="POST")
-        
-
+        # TODO AGA: revisar si la url esta bien/si acepta asi los parámetros
+        # TODO AGA: cambiar los nombres para que sean genéricos
+        url = f"{self.url}/api/2.1/jobs/run-now/"
+        run_id = self.request_headers_auth(method=method, url=url)
+        # TODO AGA: revisar si deben ser notebook parameters o job parameters. 
+        #   Entender cómo se usa checks_only
+        payload = dict(job_id=dag_name, notebook_parameters=dict(checks_only=checks_only))
+        return self.request_headers_auth(method="POST", url=url, json=payload)
