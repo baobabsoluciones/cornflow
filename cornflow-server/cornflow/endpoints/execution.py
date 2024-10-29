@@ -175,7 +175,7 @@ class ExecutionEndpoint(BaseMetaResource):
             )
         # ask airflow if dag_name exists
         schema = execution.schema
-        schema_info = af_client.get_orq_info(schema)
+        schema_info = af_client.get_orch_info(schema)
 
         # Validate config before running the dag
         config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
@@ -353,7 +353,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             )
         # ask airflow if dag_name exists
         schema = execution.schema
-        schema_info = af_client.get_orq_info(schema)
+        schema_info = af_client.get_orch_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:

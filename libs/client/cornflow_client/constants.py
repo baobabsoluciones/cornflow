@@ -225,7 +225,7 @@ SOLVER_CONVERTER = {
     "HiGHS": "highs",
 }
 
-class OrqError(Exception):
+class OrchError(Exception):
     status_code = 400
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
@@ -244,10 +244,10 @@ class OrqError(Exception):
         rv["error"] = self.error
         return rv
 
-class AirflowError(OrqError):
+class AirflowError(OrchError):
     log_txt = "Airflow error"
 
-class DatabricksError(OrqError):
+class DatabricksError(OrchError):
     log_txt = "Databricks error"
 
 
