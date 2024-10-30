@@ -4,11 +4,13 @@ Python class to implement the Databricks client wrapper
 
 from databricks.sdk import WorkspaceClient
 from flask import current_app
+from cornflow.orchestrator_constants import config_orchestrator
 
 
 class Databricks:
     def __init__(self, url, token):
         self.client = WorkspaceClient(host=url, token=token)
+        self.constants=config_orchestrator["databricks"]
 
     @classmethod
     def from_config(cls, config):
@@ -40,7 +42,7 @@ class Databricks:
     # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
     #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
-            self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+            self, execution_id, orch_name=self.constants["def_schema"], checks_only=False, case_id=None
         ):
         # TODO AGA: revisar si la url esta bien/si acepta asi los parámetros
         # TODO AGA: cambiar los nombres para que sean genéricos
@@ -48,5 +50,5 @@ class Databricks:
         run_id = self.request_headers_auth(method=method, url=url)
         # TODO AGA: revisar si deben ser notebook parameters o job parameters. 
         #   Entender cómo se usa checks_only
-        payload = dict(job_id=dag_name, notebook_parameters=dict(checks_only=checks_only))
+        payload = dict(job_id=orch_name, notebook_parameters=dict(checks_only=checks_only))
         return self.request_headers_auth(method="POST", url=url, json=payload)
