@@ -245,7 +245,7 @@ class ExecutionEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_workflow(execution.id, dag_name=schema)
+            response = af_client.run_workflow(execution.id, orch_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)
@@ -371,7 +371,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_workflow(execution.id, dag_name=schema)
+            response = af_client.run_workflow(execution.id, orch_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)

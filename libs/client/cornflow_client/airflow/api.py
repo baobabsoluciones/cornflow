@@ -12,12 +12,14 @@ from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
 from cornflow_client.constants import AirflowError
+from cornflow.orchestrator_constants import config_orchestrator
 
 
 class Airflow(object):
     def __init__(self, url, user, pwd):
         self.url = f"{url}/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
+        self.constants=config_orchestrator["airflow"]
 
     @classmethod
     def from_config(cls, config):
@@ -66,13 +68,13 @@ class Airflow(object):
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
     def run_workflow(
-        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+        self, execution_id, orch_name=self.constants["def_schema"], checks_only=False, case_id=None
     ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
-        return self.consume_dag_run(dag_name, payload=payload, method="POST")
+        return self.consume_dag_run(orch_name, payload=payload, method="POST")
 
     def update_schemas(self, dag_name="update_all_schemas"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
