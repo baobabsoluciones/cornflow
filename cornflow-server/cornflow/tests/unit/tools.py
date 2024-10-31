@@ -8,6 +8,6 @@ def patch_af_client(af_client_class):
     af_client_mock.is_alive.return_value = True
     af_client_mock.get_orch_info.return_value = responses_mock
     af_client_mock.run_workflow.return_value = responses_mock
-    af_client_mock.get_dag_run_status.return_value = responses_mock
+    af_client_mock.get_run_status.return_value = responses_mock
     af_client_mock.set_dag_run_to_fail.return_value = None
     af_client_class.from_config.return_value = af_client_mock

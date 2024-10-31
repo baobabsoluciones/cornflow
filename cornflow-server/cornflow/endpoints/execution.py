@@ -106,7 +106,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 continue
 
             try:
-                response = af_client.get_dag_run_status(
+                response = af_client.get_run_status(
                     dag_name=execution.schema, dag_run_id=dag_run_id
                 )
             except AirflowError as err:
@@ -573,7 +573,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
         try:
             # TODO: get the dag_name from somewhere!
-            response = af_client.get_dag_run_status(
+            response = af_client.get_run_status(
                 dag_name=execution.schema, dag_run_id=dag_run_id
             )
         except AirflowError as err:

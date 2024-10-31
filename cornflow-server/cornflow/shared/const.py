@@ -47,6 +47,19 @@ AIRFLOW_TO_STATE_MAP = dict(
     failed=EXEC_STATE_ERROR,
     queued=EXEC_STATE_QUEUED,
 )
+# TODO AGA : revisar si la correspondencia de estados es correcta
+DATABRICKS_TO_STATE_MAP = dict(
+    BLOCKED=EXEC_STATE_QUEUED,
+    PENDING=EXEC_STATE_QUEUED,
+    QUEUED=EXEC_STATE_QUEUED,
+    RUNNING=EXEC_STATE_RUNNING,
+    TERMINATING=EXEC_STATE_RUNNING,
+    TERMINATED="TERMINATED",
+)
+
+DATABRICKS_FINISH_TO_STATE_MAP = dict(
+    SUCCESS=EXEC_STATE_CORRECT,
+    USER_CANCELED=EXEC_STATE_STOPPED)
 
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow

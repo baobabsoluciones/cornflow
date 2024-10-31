@@ -82,10 +82,12 @@ class Airflow(object):
     def update_dag_registry(self, dag_name="update_dag_registry"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
-    def get_dag_run_status(self, dag_name, dag_run_id):
-        return self.consume_dag_run(
-            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
-        )
+    def get_run_status(self, dag_name, dag_run_id):
+        # TODO AGA DUDA: queremos devolver toda la información o solo el estado?
+        info = self.request_headers_auth(method="POST", url=url, json=payload)
+        info = info.json()
+        state = info["status"]
+        return state
 
     def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
         # here, two calls have to be done:
