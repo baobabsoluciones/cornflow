@@ -34,6 +34,11 @@ class Databricks:
           return False
     
     def get_orch_info(self, orch_name, method="GET"):
+        """
+        Get information about a job in Databricks
+        https://docs.databricks.com/api/workspace/jobs/get
+        """
+        # TODO AGA: decidir si incluir las url de documentacion en el código
         # TODO AGA: revisar si la url esta bien/ si acepta asi los parámetros
         url = f"{self.url}/api/2.1/jobs/get/{orch_name}"
         schema_info = self.request_headers_auth(method=method, url=url) 
@@ -45,9 +50,23 @@ class Databricks:
     def run_workflow(
             self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
         ):
+        """
+        Run a job in Databricks
+        """
         # TODO AGA: revisar si la url esta bien/si acepta asi los parámetros
         url = f"{self.url}/api/2.1/jobs/run-now/"
         # TODO AGA: revisar si deben ser notebook parameters o job parameters. 
         #   Entender cómo se usa checks_only
         payload = dict(job_id=orch_name, notebook_parameters=dict(checks_only=checks_only))
         return self.request_headers_auth(method="POST", url=url, json=payload)
+    
+    def get_run_status(self, workflow_name, run_id):
+        """
+        Get the status of a run in Databricks
+        """
+        url = f"{self.url}/api/2.1/jobs/runs/get"
+        payload = dict(run_id=run_id)
+        info = self.request_headers_auth(method="POST", url=url, json=payload)
+        info = info.json()
+        state = info["status"]
+        return state

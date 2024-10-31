@@ -50,6 +50,8 @@ from cornflow.shared.const import (
     EXEC_STATE_UNKNOWN,
     EXECUTION_STATE_MESSAGE_DICT,
     AIRFLOW_TO_STATE_MAP,
+    DATABRICKS_TO_STATE_MAP,
+    DATABRICKS_FINISH_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
@@ -121,7 +123,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 continue
 
             try:
-                response = af_client.get_dag_run_status(
+                response = af_client.get_run_status(
                     dag_name=execution.schema, dag_run_id=dag_run_id
                 )
             except AirflowError as err:
@@ -561,6 +563,14 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
+        if ORQ_TYPE==AIRFLOW_BACKEND:
+            orq_const= config_orchestrator["airflow"]
+            ORQ_ERROR=AirflowError
+        elif ORQ_TYPE==DATABRICKS_BACKEND:
+            orq_const= config_orchestrator["databricks"]
+            # TODO AGA: Revisar si esto funcionaría correctamente
+            ORQ_ERROR=DatabricksError
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -572,7 +582,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             EXEC_STATE_QUEUED,
             EXEC_STATE_UNKNOWN,
         ]:
-            # we only care on asking airflow if the status is unknown, queued or running.
+            # we only care on asking orchestrator if the status is unknown, queued or running.
             return execution, 200
 
         def _raise_af_error(execution, error, state=EXEC_STATE_UNKNOWN, log_txt=None):
@@ -580,7 +590,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 log_txt = error
             message = EXECUTION_STATE_MESSAGE_DICT[state]
             execution.update_state(state)
-            raise AirflowError(
+            raise ORQ_ERROR(
                 error=error, payload=dict(message=message, state=state), log_txt=log_txt
             )
 
@@ -594,10 +604,12 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
                 f"The execution has no associated dag run id.",
             )
+        schema = execution.schema
+        # TODO AGA: Revisar si merece la pena hacer una funcion que solo
+        orch_client, schema_info, execution= get_orch_client(schema ,ORQ_TYPE,execution)
 
-        af_client = Airflow.from_config(current_app.config)
-        if not af_client.is_alive():
-            err = "Airflow is not accessible"
+        if not orch_client.is_alive():
+            err = orq_const["name"] +" is not accessible"
             _raise_af_error(
                 execution,
                 err,
@@ -607,11 +619,11 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
         try:
             # TODO: get the dag_name from somewhere!
-            response = af_client.get_dag_run_status(
+            state = orch_client.get_run_status(
                 dag_name=execution.schema, dag_run_id=dag_run_id
             )
-        except AirflowError as err:
-            error = f"Airflow responded with an error: {err}"
+        except ORQ_ERROR as err:
+            error = orq_const["name"] +f" responded with an error: {err}"
             _raise_af_error(
                 execution,
                 error,
@@ -619,8 +631,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 + str(err),
             )
 
-        data = response.json()
-        state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
+        state = map_run_state(state, ORQ_TYPE)
         execution.update_state(state)
         current_app.logger.info(
             f"User {self.get_user()} gets status of execution {idx}"
@@ -740,15 +751,21 @@ def print_status(run: j.Run):
     logging.info(f'workflow intermediate status: {", ".join(statuses)}')
 
 def get_orch_client(schema, orq_type, execution):
-        if orq_type == AIRFLOW_BACKEND:
-            return get_airflow(schema, execution=execution)
-        elif orq_type == DATABRICKS_BACKEND:
-            return get_databricks(schema,execution=execution)
-        else:
-            raise EndpointNotImplemented()
+    """
+    Get the orchestrator client and the schema info
+    """
+    if orq_type == AIRFLOW_BACKEND:
+        return get_airflow(schema, execution=execution)
+    elif orq_type == DATABRICKS_BACKEND:
+        return get_databricks(schema,execution=execution)
+    else:
+        raise EndpointNotImplemented()
             
 
 def get_airflow(schema, execution):
+    """
+    Get the Airflow client and the schema info
+    """
     af_client = Airflow.from_config(current_app.config)
     schema_info = af_client.get_orch_info(schema)
     if not af_client.is_alive():
@@ -770,6 +787,9 @@ def get_airflow(schema, execution):
 
 
 def get_databricks(schema, execution):
+    """
+    Get the Databricks client and the schema info
+    """
     db_client = Databricks.from_config(current_app.config)
     schema_info = db_client.get_orch_info
     if not db_client.is_alive():
@@ -787,3 +807,16 @@ def get_databricks(schema, execution):
         )
     return db_client, schema_info, execution
     # endregion
+
+def map_run_state(state,ORQ_TYPE):
+    """
+    Maps the state of the execution in the orchestrator to the state of the execution in cornflow
+    """
+    if ORQ_TYPE==AIRFLOW_BACKEND:
+        return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
+    elif ORQ_TYPE==DATABRICKS_BACKEND:
+        preliminar_state = DATABRICKS_TO_STATE_MAP.get(state,EXEC_STATE_UNKNOWN)
+        if preliminar_state =="TERMINATED":
+            # TODO AGA DUDA: Revisar si es correcto el error predeterminado
+            return DATABRICKS_FINISH_TO_STATE_MAP.get(state,EXEC_STATE_ERROR)
+        return preliminar_state
