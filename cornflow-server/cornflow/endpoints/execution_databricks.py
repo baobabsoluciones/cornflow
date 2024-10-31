@@ -178,7 +178,7 @@ class ExecutionEndpoint(BaseMetaResource):
         # We try to create an orch client
         # Note schema is a string with the name of the job/dag
         schema = execution.schema
-        # In case we are dealing with DataBricks, the schema will 
+        # If we are dealing with DataBricks, the schema will 
         #   be the job id
         orch_client, schema_info = get_orch_client(schema,ORQ_TYPE)
         # endregion
@@ -260,7 +260,7 @@ class ExecutionEndpoint(BaseMetaResource):
             # TODO AGA: Hay que genestionar la posible eliminación de execution.id como 
             #   parámetro, ya que no se puede seleccionar el id en databricks
             #   revisar las consecuencias que puede tener
-            response = orch_client.run_workflow(execution.id, dag_name=schema)
+            response = orch_client.run_workflow(execution.id, orch_name=schema)
         except ORQ_ERROR as err:
             error = orq_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
@@ -307,10 +307,18 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        config = current_app.config
+        ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
+        if ORQ_TYPE==AIRFLOW_BACKEND:
+            orq_const= config_orchestrator["airflow"]
+            ORQ_ERROR=AirflowError
+        elif ORQ_TYPE==DATABRICKS_BACKEND:
+            orq_const= config_orchestrator["databricks"]
+            # TODO AGA: Revisar si esto funcionaría correctamente
+            ORQ_ERROR=DatabricksError
 
+        config = current_app.config
         if "schema" not in kwargs:
-            kwargs["schema"] = "solve_model_dag"
+            kwargs["schema"] = orq_const["def_schema"]
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
@@ -388,7 +396,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_workflow(execution.id, dag_name=schema)
+            response = af_client.run_workflow(execution.id, orch_name=schema)
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
             current_app.logger.error(error)
