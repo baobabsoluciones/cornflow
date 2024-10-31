@@ -17,11 +17,10 @@ from cornflow.shared.const import (
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
 )
-
+from cornflow.shared.databricks import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from cornflow_client.airflow.api import Airflow
 # TODO AGA: Porqué el import no funcina correctamente 
-from cornflow_client.databricks.api import Databricks
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
@@ -435,7 +434,7 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a certain execution. But not the data!
     """
-
+    # TODO AGA DUDA: Se usa? Qué debería devolver?
     def __init__(self):
         super().__init__()
         self.data_model = ExecutionModel
