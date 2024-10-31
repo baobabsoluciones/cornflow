@@ -1,3 +1,11 @@
+version 1.1.2
+--------------
+
+- released: 2024-10-31
+- description: security fix
+- changelog:
+    - bump Werkzeug to version 3.0.6 due to CVE-2024-49766 and CVE-2024-49767.
+
 version 1.1.1
 --------------
 
