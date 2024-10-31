@@ -10,15 +10,24 @@ import logging
 import time
 from databricks.sdk import WorkspaceClient
 import databricks.sdk.service.jobs as j
-from cornflow-server.cornflow.constants import *
+from cornflow.constants import *
+from cornflow.shared.const import (
+    AIRFLOW_BACKEND,
+    DATABRICKS_BACKEND,
+    STATUS_HEALTHY,
+    STATUS_UNHEALTHY,
+)
 
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
+from cornflow_client.airflow.api import Airflow
+# TODO AGA: Porqué el import no funcina correctamente 
+from cornflow_client.databricks.api import Databricks
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, DeployedDAG, ExecutionModel
+from cornflow.models import InstanceModel, DeployedOrch, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
@@ -45,7 +54,7 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
-from cornflow.shared.exceptions import AirflowError,DatabricksError, ObjectDoesNotExist, InvalidData
+from cornflow.shared.exceptions import AirflowError, DatabricksError, ObjectDoesNotExist, InvalidData
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
     json_schema_extend_and_validate_as_string,
@@ -180,14 +189,14 @@ class ExecutionEndpoint(BaseMetaResource):
         schema = execution.schema
         # If we are dealing with DataBricks, the schema will 
         #   be the job id
-        orch_client, schema_info = get_orch_client(schema,ORQ_TYPE)
+        orch_client, schema_info, execution= get_orch_client(schema,ORQ_TYPE,execution)
         # endregion
 
         # region VALIDACIONES
         # We check if the job/dag exists 
         orch_client.get_orch_info(schema)
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
+        config_schema = DeployedOrch.get_one_schema(config, schema, CONFIG_SCHEMA)
         new_config, config_errors = json_schema_extend_and_validate_as_string(
             config_schema, kwargs["config"]
         )
@@ -207,7 +216,7 @@ class ExecutionEndpoint(BaseMetaResource):
             execution.update_config(new_config)
 
         # Validate instance data before running the dag
-        instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        instance_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
         instance_errors = json_schema_validate_as_string(instance_schema, instance.data)
         if instance_errors:
             execution.update_state(
@@ -223,7 +232,7 @@ class ExecutionEndpoint(BaseMetaResource):
             )
         # Validate solution data before running the dag (if it exists)
         if kwargs.get("data") is not None:
-            solution_schema = DeployedDAG.get_one_schema(
+            solution_schema = DeployedOrch.get_one_schema(
                 config, schema, SOLUTION_SCHEMA
             )
             solution_errors = json_schema_validate_as_string(
@@ -349,7 +358,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(
+        config_schema = DeployedOrch.get_one_schema(
             config, kwargs["schema"], CONFIG_SCHEMA
         )
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
@@ -359,14 +368,13 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-
-        # We now try to launch the task in airflow
-        af_client = Airflow.from_config(config)
-        if not af_client.is_alive():
-            err = "Airflow is not accessible"
+        orch_client, schema_info, execution = get_orch_client(schema,ORQ_TYPE,execution)
+        
+        if not orch_client.is_alive():
+            err = orq_const["name"]+" is not accessible"
             current_app.logger.error(err)
             execution.update_state(EXEC_STATE_ERROR_START)
-            raise AirflowError(
+            raise ORQ_ERROR(
                 error=err,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
@@ -378,30 +386,31 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         
         # ask airflow if dag_name exists
         schema = execution.schema
-        schema_info = af_client.get_orch_info(schema)
+        schema_info = orch_client.get_orch_info(schema)
 
         info = schema_info.json()
-        if info["is_paused"]:
-            err = "The dag exists but it is paused in airflow"
-            current_app.logger.error(err)
-            execution.update_state(EXEC_STATE_ERROR_START)
-            raise AirflowError(
-                error=err,
-                payload=dict(
-                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                    state=EXEC_STATE_ERROR_START,
-                ),
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
-                + err,
-            )
-
+        if ORQ_TYPE==AIRFLOW_BACKEND:
+            if info["is_paused"]:
+                err = "The dag exists but it is paused in airflow"
+                current_app.logger.error(err)
+                execution.update_state(EXEC_STATE_ERROR_START)
+                raise ORQ_ERROR(
+                    error=err,
+                    payload=dict(
+                        message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                        state=EXEC_STATE_ERROR_START,
+                    ),
+                    log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                    + err,
+                )
+        # TODO AGA: revisar si hay que hacer alguna comprobación del estilo a databricks
         try:
-            response = af_client.run_workflow(execution.id, orch_name=schema)
-        except AirflowError as err:
-            error = "Airflow responded with an error: {}".format(err)
+            response = orch_client.run_workflow(execution.id, orch_name=schema)
+        except ORQ_ERROR as err:
+            error = orq_const["name"]+" responded with an error: {}".format(err)
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
-            raise AirflowError(
+            raise ORQ_ERROR(
                 error=error,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
@@ -412,8 +421,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
-        af_data = response.json()
-        execution.dag_run_id = af_data["dag_run_id"]
+        orq_data = response.json()
+        # TODO AGA: revisar el nombre del modelo de ejecuciones
+        execution.dag_run_id = orq_data[orq_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
             "User {} relaunches execution {}".format(self.get_user_id(), execution.id)
@@ -470,7 +480,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if data.get("data") is not None and schema is not None:
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedOrch.get_one_schema(
                 config, schema, SOLUTION_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(
@@ -730,16 +740,16 @@ def print_status(run: j.Run):
     statuses = [f'{t.task_key}: {t.state.life_cycle_state}' for t in run.tasks]
     logging.info(f'workflow intermediate status: {", ".join(statuses)}')
 
-def get_orch_client(schema, orq_type):
+def get_orch_client(schema, orq_type, execution):
         if orq_type == AIRFLOW_BACKEND:
-            return get_airflow(schema)
+            return get_airflow(schema, execution=execution)
         elif orq_type == DATABRICKS_BACKEND:
-            return get_databricks(schema)
+            return get_databricks(schema,execution=execution)
         else:
             raise EndpointNotImplemented()
             
 
-def get_airflow(schema):
+def get_airflow(schema, execution):
     af_client = Airflow.from_config(current_app.config)
     schema_info = af_client.get_orch_info(schema)
     if not af_client.is_alive():
@@ -755,10 +765,12 @@ def get_airflow(schema):
             log_txt=f"Error while user {self.get_user()} tries to create an execution "
             + err,
         )
-    return af_client,schema_info
+    # TODO AGA: revisar si tiene sentido que se devuelva execution o si 
+    #  es un puntero
+    return af_client,schema_info, execution
 
 
-def get_databricks(schema):
+def get_databricks(schema, execution):
     db_client = Databricks.from_config(current_app.config)
     schema_info = db_client.get_orch_info
     if not db_client.is_alive():
@@ -774,5 +786,5 @@ def get_databricks(schema):
             log_txt=f"Error while user {self.get_user()} tries to create an execution "
             + err,
         )
-    return db_client
+    return db_client, schema_info, execution
     # endregion

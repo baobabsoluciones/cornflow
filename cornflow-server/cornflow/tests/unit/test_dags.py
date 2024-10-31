@@ -12,7 +12,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
+from cornflow.models import DeployedOrch, PermissionsDAG, UserModel, UserRoleModel
 from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.shared import db
 from cornflow.tests.const import (
@@ -232,7 +232,7 @@ class TestDeployedDAG(TestCase):
     def test_permission_cascade_deletion(self):
         before = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertIsNotNone(before)
-        dag = DeployedDAG.query.get("solve_model_dag")
+        dag = DeployedOrch.query.get("solve_model_dag")
         dag.delete()
         after = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertNotEqual(before, after)

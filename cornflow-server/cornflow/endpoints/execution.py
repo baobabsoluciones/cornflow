@@ -12,7 +12,7 @@ from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, DeployedDAG, ExecutionModel
+from cornflow.models import InstanceModel, DeployedOrch, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
@@ -178,7 +178,7 @@ class ExecutionEndpoint(BaseMetaResource):
         schema_info = af_client.get_orch_info(schema)
 
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(config, schema, CONFIG_SCHEMA)
+        config_schema = DeployedOrch.get_one_schema(config, schema, CONFIG_SCHEMA)
         new_config, config_errors = json_schema_extend_and_validate_as_string(
             config_schema, kwargs["config"]
         )
@@ -198,7 +198,7 @@ class ExecutionEndpoint(BaseMetaResource):
             execution.update_config(new_config)
 
         # Validate instance data before running the dag
-        instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        instance_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
         instance_errors = json_schema_validate_as_string(instance_schema, instance.data)
         if instance_errors:
             execution.update_state(
@@ -214,7 +214,7 @@ class ExecutionEndpoint(BaseMetaResource):
             )
         # Validate solution data before running the dag (if it exists)
         if kwargs.get("data") is not None:
-            solution_schema = DeployedDAG.get_one_schema(
+            solution_schema = DeployedOrch.get_one_schema(
                 config, schema, SOLUTION_SCHEMA
             )
             solution_errors = json_schema_validate_as_string(
@@ -325,7 +325,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedDAG.get_one_schema(
+        config_schema = DeployedOrch.get_one_schema(
             config, kwargs["schema"], CONFIG_SCHEMA
         )
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
@@ -445,7 +445,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
 
         if data.get("data") is not None and schema is not None:
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedOrch.get_one_schema(
                 config, schema, SOLUTION_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(

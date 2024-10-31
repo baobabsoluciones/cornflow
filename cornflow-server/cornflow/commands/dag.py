@@ -10,7 +10,7 @@ def register_deployed_dags_command(
 
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedOrch
     from cornflow.shared import db
 
     af_client = Airflow(url, user, pwd)
@@ -27,7 +27,7 @@ def register_deployed_dags_command(
             current_app.logger.info("Airflow is not reachable")
         return False
 
-    dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
+    dags_registered = [dag.id for dag in DeployedOrch.get_all_objects()]
 
     response = af_client.get_model_dags()
     dag_list = response.json()["dags"]
@@ -39,7 +39,7 @@ def register_deployed_dags_command(
     }
 
     processed_dags = [
-        DeployedDAG(
+        DeployedOrch(
             {
                 "id": dag["dag_id"],
                 "description": dag["description"],
@@ -75,7 +75,7 @@ def register_deployed_dags_command(
 
 
 def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedOrch
     from flask import current_app
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
@@ -83,7 +83,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
         dags = ["solve_model_dag", "gc", "timer"]
 
     deployed_dag = [
-        DeployedDAG(
+        DeployedOrch(
             {
                 "id": "solve_model_dag",
                 "description": None,
@@ -95,7 +95,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
             }
         )
     ] + [
-        DeployedDAG(
+        DeployedOrch(
             {
                 "id": dag,
                 "description": None,

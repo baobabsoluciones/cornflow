@@ -1,3 +1,5 @@
+# TODO AGA: revisar dónde tiene sentido que esté el fichero de cosntantes
+
 config_orchestrator = {
     "airflow": {
         "name":"Airflow",

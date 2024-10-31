@@ -12,7 +12,7 @@ from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
 from cornflow_client.constants import AirflowError
-from cornflow.orchestrator_constants import config_orchestrator
+from orchestrator_constants import config_orchestrator
 
 
 class Airflow(object):
@@ -68,7 +68,7 @@ class Airflow(object):
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
     def run_workflow(
-        self, execution_id, orch_name=self.constants["def_schema"], checks_only=False, case_id=None
+        self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
     ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
@@ -111,7 +111,7 @@ class Airflow(object):
     def get_all_dag_runs(self, dag_name):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
-   def get_orch_info(self, orch_name, method="GET"):
+    def get_orch_info(self, orch_name, method="GET"):
         url = f"{self.url}/dags/{orch_name}"
         schema_info =  self.request_headers_auth(method=method, url=url) 
         if schema_info.status_code!=200:
