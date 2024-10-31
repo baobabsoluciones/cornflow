@@ -4,8 +4,9 @@ Python class to implement the Databricks client wrapper
 
 from databricks.sdk import WorkspaceClient
 from flask import current_app
-from cornflow.orchestrator_constants import config_orchestrator
-
+from orchestrator_constants import config_orchestrator
+# TODO AGA: revisar si el import está bien
+from cornflow_client.constants import DatabricksError
 
 class Databricks:
     def __init__(self, url, token):
@@ -35,19 +36,16 @@ class Databricks:
         # TODO AGA: revisar si la url esta bien/ si acepta asi los parámetros
         url = f"{self.url}/api/2.1/jobs/get/{orch_name}"
         schema_info = self.request_headers_auth(method=method, url=url) 
-        list_all_jobs_id = [job["job_id"] for job in list_all_jobs_info["jobs"]]
         if "error_code" in schema_info.keys():
             raise DatabricksError("JOB not available")
         return schema_info
     # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
     #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
-            self, execution_id, orch_name=self.constants["def_schema"], checks_only=False, case_id=None
+            self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
         ):
         # TODO AGA: revisar si la url esta bien/si acepta asi los parámetros
-        # TODO AGA: cambiar los nombres para que sean genéricos
         url = f"{self.url}/api/2.1/jobs/run-now/"
-        run_id = self.request_headers_auth(method=method, url=url)
         # TODO AGA: revisar si deben ser notebook parameters o job parameters. 
         #   Entender cómo se usa checks_only
         payload = dict(job_id=orch_name, notebook_parameters=dict(checks_only=checks_only))

@@ -4,7 +4,7 @@ on a flask REST API server
 """
 from flask import jsonify
 from webargs.flaskparser import parser
-from cornflow_client.constants import AirflowError
+from cornflow_client.constants import AirflowError, DatabricksError
 from werkzeug.exceptions import HTTPException
 import traceback
 
@@ -143,6 +143,8 @@ def initialize_errorhandlers(app):
     @app.errorhandler(InvalidCredentials)
     @app.errorhandler(EndpointNotImplemented)
     @app.errorhandler(AirflowError)
+    # TODO AGA: revisar si está bien implementado el nuevo error
+    @app.errorhandler(DatabricksError)
     @app.errorhandler(InvalidData)
     @app.errorhandler(InvalidPatch)
     @app.errorhandler(ConfigurationError)
