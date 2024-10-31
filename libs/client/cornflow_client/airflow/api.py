@@ -115,8 +115,8 @@ class Airflow(object):
 
     def get_orch_info(self, orch_name, method="GET"):
         url = f"{self.url}/dags/{orch_name}"
-        schema_info =  self.request_headers_auth(method=method, url=url) 
-        if schema_info.status_code!=200:
+        schema_info = self.request_headers_auth(method=method, url=url)
+        if schema_info.status_code != 200:
             raise AirflowError("DAG not available")
         return schema_info
 
