@@ -1,7 +1,7 @@
 Access control
 -----------------------
 
-Cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
+cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
 In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.
 
 User access data
@@ -13,7 +13,7 @@ The second method is AUTH_LDAP. This method allows you to link cornflow with you
 With Auth-DB (default)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Cornflow has an environment variable to control the type of authentication we want to activate::
+cornflow has an environment variable to control the type of authentication we want to activate::
 
     AUTH_TYPE = 1 (Auth-DB default method)
 
@@ -103,7 +103,7 @@ Master data of roles in application::
 Roles with Auth-LDAP
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the cornflow server deployment, the LDAP server roles will be configured through environment variables. Cornflow roles to bind to ldap server::
+In the cornflow server deployment, the LDAP server roles will be configured through environment variables. cornflow roles to bind to ldap server::
 
     LDAP_GROUP_TO_ROLE_SERVICE
     LDAP_GROUP_TO_ROLE_ADMIN 
@@ -112,10 +112,10 @@ In the cornflow server deployment, the LDAP server roles will be configured thro
 
 In this way, the user permissions and their defined roles are always done within the cornflow application and allow the authentication configuration to be changed in the future.
 
-Cornflow interactions with airflow (service user)
+cornflow interactions with airflow (service user)
 *****************************************************
 
-Cornflow ⇒ Airflow
+cornflow ⇒ Airflow
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Not all cornflow users can access airflow. A role defined in the application will give access to perform actions that involve communication with airflow through the user defined in the previous point.
@@ -138,9 +138,9 @@ The user who operates airflow through cornflow may not be the same user who has 
 
 **User access to dags**
 
-The user access to each dag in airflow can be controlled in cornflow. Cornflow store a table with dags and have roles that give access to each dag individually.
+The user access to each dag in airflow can be controlled in cornflow. cornflow store a table with dags and have roles that give access to each dag individually.
 
-Airflow ⇒ Cornflow
+Airflow ⇒ cornflow
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
