@@ -1,10 +1,9 @@
 """
 Python class to implement the Databricks client wrapper
 """
-
 from databricks.sdk import WorkspaceClient
 from flask import current_app
-from orchestrator_constants import config_orchestrator
+from cornflow_client.orchestrator_constants import config_orchestrator
 # TODO AGA: CODIGO REPETIDO
 # TODO AGA: revisar si el import está bien
 from cornflow_client.constants import DatabricksError
@@ -49,7 +48,7 @@ class Databricks:
     # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
     #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
-            self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
+            self, execution_id, orch_name=config_orchestrator["databricks"]["def_schema"], checks_only=False, case_id=None
         ):
         """
         Run a job in Databricks
