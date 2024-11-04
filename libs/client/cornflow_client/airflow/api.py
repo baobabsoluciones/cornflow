@@ -12,7 +12,7 @@ from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
 from cornflow_client.constants import AirflowError
-from orchestrator_constants import config_orchestrator
+from cornflow_client.orchestrator_constants import config_orchestrator
 
 
 class Airflow(object):

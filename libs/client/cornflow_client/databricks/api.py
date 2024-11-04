@@ -1,10 +1,9 @@
 """
 Python class to implement the Databricks client wrapper
 """
-
 from databricks.sdk import WorkspaceClient
 from flask import current_app
-from orchestrator_constants import config_orchestrator
+from cornflow_client.orchestrator_constants import config_orchestrator
 # TODO AGA: CODIGO REPETIDO
 # TODO AGA: revisar si el import está bien
 from cornflow_client.constants import DatabricksError
