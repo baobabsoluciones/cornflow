@@ -11,6 +11,7 @@ from cornflow_client.constants import DatabricksError
 
 class Databricks:
     def __init__(self, url, token):
+        self.url = f"https://adb-3109346743730783.3.azuredatabricks.net"
         self.client = WorkspaceClient(host=url, token=token)
         self.constants=config_orchestrator["databricks"]
 
@@ -26,7 +27,7 @@ class Databricks:
         try:
           # TODO: this url is project specific. Either it has to be a config option or some other way has to be found
           self.client.workspace.get_status(
-              path="/Workspace/Repos/nippon/nippon_production_scheduling/main_2.py"
+              path="/Workspace/Repos/nippon/nippon_production_scheduling/requirements.txt"
           )
           return True
         except Exception as err:

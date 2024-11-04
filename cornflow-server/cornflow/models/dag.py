@@ -36,7 +36,7 @@ class DeployedOrch(TraceAttributesModel):
         "PermissionsDAG",
         cascade="all,delete",
         backref="deployed_dags",
-        primaryjoin="and_(DeployedDAG.id==PermissionsDAG.dag_id)",
+        primaryjoin="and_(DeployedOrch.id==PermissionsDAG.dag_id)",
     )
 
     def __init__(self, data):
