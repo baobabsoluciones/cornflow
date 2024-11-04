@@ -47,7 +47,7 @@ class Databricks:
     # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
     #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
-            self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
+            self, execution_id, orch_name=config_orchestrator["databricks"]["def_schema"], checks_only=False, case_id=None
         ):
         """
         Run a job in Databricks

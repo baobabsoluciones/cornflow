@@ -19,7 +19,7 @@ class Airflow(object):
     def __init__(self, url, user, pwd):
         self.url = f"{url}/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
-        self.constants=config_orchestrator["airflow"]
+        self.constants = config_orchestrator["airflow"]
 
     @classmethod
     def from_config(cls, config):
@@ -68,7 +68,7 @@ class Airflow(object):
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
     def run_workflow(
-        self, execution_id, orch_name=config_orchestrator["def_schema"], checks_only=False, case_id=None
+        self, execution_id, orch_name=config_orchestrator["airflow"]["def_schema"], checks_only=False, case_id=None
     ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
