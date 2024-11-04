@@ -1,4 +1,4 @@
-# TODO AGA: revisar dónde tiene sentido que esté el fichero de cosntantes
+# TODO AGA: revisar dónde tiene sentido que esté el fichero de constantes
 
 config_orchestrator = {
     "airflow": {
