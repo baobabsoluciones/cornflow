@@ -1,6 +1,7 @@
 """
 Python class to implement the Databricks client wrapper
 """
+import requests
 from databricks.sdk import WorkspaceClient
 from flask import current_app
 from cornflow.orchestrator_constants import config_orchestrator
@@ -13,6 +14,7 @@ class Databricks:
         self.url = f"https://adb-3109346743730783.3.azuredatabricks.net"
         self.client = WorkspaceClient(host=url, token=token)
         self.constants=config_orchestrator["databricks"]
+        self.token=token
 
     @classmethod
     def from_config(cls, config):
@@ -39,10 +41,9 @@ class Databricks:
         https://docs.databricks.com/api/workspace/jobs/get
         """
         # TODO AGA: decidir si incluir las url de documentacion en el código
-        # TODO AGA: revisar si la url esta bien/ si acepta asi los parámetros
-        url = f"{self.url}/api/2.1/jobs/get/{orch_name}"
+        url = f"{self.url}/api/2.1/jobs/get/?job_id={orch_name}"
         schema_info = self.request_headers_auth(method=method, url=url) 
-        if "error_code" in schema_info.keys():
+        if "error_code" in schema_info.json().keys():
             raise DatabricksError("JOB not available")
         return schema_info
     # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro. 
@@ -70,3 +71,12 @@ class Databricks:
         info = info.json()
         state = info["status"]
         return state
+    def request_headers_auth(self, status=200, **kwargs):
+        def_headers = {"Authorization": "Bearer "+ str(self.token)}
+        headers = kwargs.get("headers", def_headers)
+        response = requests.request(headers=headers, **kwargs)
+        if status is None:
+            return response
+        if response.status_code != status:
+            raise DatabricksError(error=response.text, status_code=response.status_code)
+        return response
