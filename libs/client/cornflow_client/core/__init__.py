@@ -3,3 +3,4 @@ from .experiment import ExperimentCore
 from .instance_solution import InstanceSolutionCore
 from .instance import InstanceCore
 from .solution import SolutionCore
+from .check_instance_solution import CheckInstanceSolution
