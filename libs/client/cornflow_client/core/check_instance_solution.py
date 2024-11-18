@@ -1,14 +1,12 @@
 
 from ..airflow.dag_utilities import connect_to_cornflow
-#  TODO: if we want to limit the requirements, we may need to do that in another way.
-from mango.logging.logger import get_basic_logger
 from pytups import TupList
 from .tools import as_list
 
 
 class CheckInstanceSolution:
 
-    logger = get_basic_logger(logger_name="airflow.task")
+
     alarm_url = "/alarms/"
     main_alarm_url = "/main-alarms/"
     # this should be set depending on the project
@@ -16,9 +14,10 @@ class CheckInstanceSolution:
     default_id_alarm = 1
     default_criticality = 2
 
-    def __init__(self, instance, solution=None, ):
+    def __init__(self, instance, solution=None, logger=None):
         self.inst = instance
         self.sol = solution
+        self.logger = logger
         self.checks = {}
         self.cf_client = self.get_cf_client()
 
