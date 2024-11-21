@@ -59,6 +59,7 @@ def init_cornflow_service():
         f"postgresql://{cornflow_db_user}:{cornflow_db_password}@{cornflow_db_host}:{cornflow_db_port}/{cornflow_db}",
     )
     os.environ["DATABASE_URL"] = cornflow_db_conn
+    os.system(f"export DATABASE_URL={cornflow_db_conn}")
 
     # Platform auth config and service users
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
