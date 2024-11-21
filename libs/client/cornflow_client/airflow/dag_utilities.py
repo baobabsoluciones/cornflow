@@ -221,7 +221,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         try_to_write_solution(client, exec_id, payload)
 
         # The validation went correctly: can save the solution without problem
-        return "Solution saved"
+        return log_json
 
     except NoSolverException as e:
         if config.get("msg", True):
@@ -302,7 +302,7 @@ def cf_check(fun, dag_name, secrets, **kwargs):
                 raise AirflowDagException("The writing of the case checks failed")
 
         # # The validation went correctly: can save the solution without problem
-        return "Checks saved"
+        return log_json
 
     except Exception as e:
         if config.get("msg", True):
@@ -315,7 +315,13 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         )
 
 
-def callback_email(context):
+def callback_email(
+    context,
+    title=None,
+    body=None,
+    success=False,
+    notification_email_var=None,
+):
     from airflow.utils.email import send_email
     from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 
@@ -325,26 +331,58 @@ def callback_email(context):
     )
 
     environment = EnvironmentVariablesBackend().get_variable("ENVIRONMENT")
-    notification_email = EnvironmentVariablesBackend().get_variable(
-        "NOTIFICATION_EMAIL"
+    notification_email_var = notification_email_var or "NOTIFICATION_EMAIL"
+    notification_emails = (
+        EnvironmentVariablesBackend()
+        .get_variable(notification_email_var)
+        .replace(" ", "")
+        .split(",")
     )
     environment_name = os.getenv("AIRFLOW__WEBSERVER__INSTANCE_NAME", "CornflowEnv")
 
-    title = f"Airflow. {environment_name} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
-    body = f"""
-        The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has failed.
-        <br>
-        The log is attached.
-        """
+    title = title or default_email_title(
+        context,
+        success,
+        environment,
+        environment_name,
+    )
+
+    body = body or default_email_body(context, success)
 
     send_email(
-        to=[
-            notification_email,
-        ],
+        to=notification_emails,
         subject=title,
         html_content=body,
         files=[path_to_log],
     )
+
+
+def default_email_title(context, success, environment, environment_name):
+    if success:
+        return (
+            f"Airflow. {environment_name} ({environment}). "
+            f"DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} finished successfully."
+        )
+    else:
+        return (
+            f"Airflow. {environment_name} ({environment}). "
+            f"DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} failed."
+        )
+
+
+def default_email_body(context, success):
+    if success:
+        return f"""
+                The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has finished successfully.
+                <br>
+                The log is attached.
+                """
+    else:
+        return f"""
+                The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has failed.
+                <br>
+                The log is attached.
+                """
 
 
 class NoSolverException(Exception):
