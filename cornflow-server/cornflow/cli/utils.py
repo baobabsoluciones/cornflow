@@ -30,8 +30,7 @@ def get_app():
 
 
 def get_db_conn():
-    print(os.getenv("DOCKER_CONTAINER", 0))
-    if os.getenv("DOCKER_CONTAINER", 0):
+    if int(os.getenv("DOCKER_CONTAINER", 0)) == 0:
         return os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
     else:
         cornflow_db_host = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
