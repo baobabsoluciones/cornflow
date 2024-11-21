@@ -1,6 +1,7 @@
 """
 
 """
+
 # Partial imports
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
@@ -20,11 +21,12 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstance,
 )
-from .experiment import ExperimentCore
 
 # Imports from internal modules
 from .instance import InstanceCore
+from .experiment import ExperimentCore
 from .solution import SolutionCore
+from ..airflow.dag_utilities import callback_email
 
 
 class ApplicationCore(ABC):
@@ -33,8 +35,10 @@ class ApplicationCore(ABC):
     """
 
     # We create a new attribute controlling the use of the notification mail function
-    def __init__(self):
-        self._notify = False
+    _notify = False
+    _notify_success = False
+    _notification_failures_var = "NOTIFICATION_EMAIL"
+    _notification_successes_var = "NOTIFICATION_EMAIL"
 
     @property
     def notify(self) -> bool:
@@ -307,3 +311,45 @@ class ApplicationCore(ABC):
             instance_checks=self.instance.schema_checks,
             solution_checks=list(self.solvers.values())[0].schema_checks,
         )
+
+    def on_failure_callback(self, context):
+        """
+        Callback to be executed on failure. Sends an email with the error message and the log.
+        """
+        if self._notify:
+            callback_email(
+                context,
+                success=False,
+                title=self.generate_email_title(context, success=False),
+                body=self.generate_email_body(context, success=False),
+                notification_email_var=self._notification_failures_var,
+            )
+
+    def on_success_callback(self, context):
+        """
+        Callback to be executed on success. Sends an email with the success message and the log.
+        """
+        if self._notify_success:
+            callback_email(
+                context,
+                success=True,
+                title=self.generate_email_title(context, success=True),
+                body=self.generate_email_body(context, success=True),
+                notification_email_var=self._notification_failures_var,
+            )
+
+    @staticmethod
+    def generate_email_title(context, success) -> Union[str, None]:
+        """
+        Generates the title for the email.
+        Can be overwritten by the user. If it returns None, the default title will be used.
+        """
+        return None
+
+    @staticmethod
+    def generate_email_body(context, success) -> Union[str, None]:
+        """
+        Generates the body for the email.
+        Can be overwritten by the user. If it returns None, the default body will be used.
+        """
+        return None
