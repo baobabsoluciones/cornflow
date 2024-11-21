@@ -1,6 +1,7 @@
 """
 
 """
+
 # Imports from libraries
 import os
 from datetime import datetime, timedelta
@@ -34,6 +35,11 @@ class Rostering(ApplicationCore):
     }
 
     extra_args = {"max_active_runs": 2}
+
+    _notification_failures_var = "NOTIFICATION_ROSTERING_FAILURE"
+    _notification_successes_var = "NOTIFICATION_ROSTERING_SUCCESS"
+    _notify_success = False
+    _notify = False
 
     @property
     def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
@@ -126,3 +132,34 @@ class Rostering(ApplicationCore):
         else:
             solver = name
         return self.solvers.get(solver)
+
+    @staticmethod
+    def generate_email_title(context, success):
+        # App specific email titles
+        if success:
+            return (
+                f"Airflow - Rostering. "
+                f"DAG/task success: {context['dag'].dag_id}/{context['ti'].task_id} finished successfully."
+            )
+        else:
+            return (
+                f"Airflow - Rostering. "
+                f"DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} failed."
+            )
+
+    @staticmethod
+    def generate_email_body(context, success):
+        if success:
+            # App specific email body
+            return_value = context["ti"].xcom_pull(
+                task_ids=context["ti"].task_id, key="return_value"
+            )
+            return f"""
+                The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has finished successfully.
+                The task returned the following value: {return_value}.
+                <br>
+                The log is attached.
+                """
+        else:
+            # Default body will be used
+            return None
