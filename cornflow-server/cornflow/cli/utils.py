@@ -6,7 +6,7 @@ import warnings
 
 def get_app():
     env = os.getenv("FLASK_ENV", "development")
-    data_conn = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
+    data_conn = get_db_conn()
     if env == "production":
         warnings.filterwarnings("ignore")
     external = int(os.getenv("EXTERNAL_APP", 0))
@@ -23,4 +23,23 @@ def get_app():
     else:
         app = create_app(env, data_conn)
 
+    with app.app_context():
+        app.logger.info(f"Database connection: {data_conn}")
+
     return app
+
+
+def get_db_conn():
+    print(os.getenv("DOCKER_CONTAINER", 0))
+    if os.getenv("DOCKER_CONTAINER", 0):
+        return os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
+    else:
+        cornflow_db_host = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
+        cornflow_db_port = os.getenv("CORNFLOW_DB_PORT", "5432")
+        cornflow_db_user = os.getenv("CORNFLOW_DB_USER", "cornflow")
+        cornflow_db_password = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
+        cornflow_db = os.getenv("CORNFLOW_DB", "cornflow")
+        return os.getenv(
+            "cornflow_db_conn",
+            f"postgresql://{cornflow_db_user}:{cornflow_db_password}@{cornflow_db_host}:{cornflow_db_port}/{cornflow_db}",
+        )
