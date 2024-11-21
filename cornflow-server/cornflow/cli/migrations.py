@@ -3,7 +3,7 @@ import os.path
 
 import click
 from cornflow.shared import db
-from flask_migrate import Migrate, migrate, upgrade, init
+from flask_migrate import Migrate, migrate, upgrade, downgrade, init
 
 from .utils import get_app
 
@@ -39,6 +39,20 @@ def upgrade_migrations():
     with app.app_context():
         migration_client = Migrate(app=app, db=db, directory=path)
         upgrade()
+
+
+@migrations.command(name="downgrade", help="Downgrade migrations")
+def downgrade_migrations():
+    app = get_app()
+    external = int(os.getenv("EXTERNAL_APP", 0))
+    if external == 0:
+        path = "./cornflow/migrations"
+    else:
+        path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
+
+    with app.app_context():
+        migration_client = Migrate(app=app, db=db, directory=path)
+        downgrade()
 
 
 @migrations.command(

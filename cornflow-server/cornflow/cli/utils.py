@@ -23,9 +23,6 @@ def get_app():
     else:
         app = create_app(env, data_conn)
 
-    with app.app_context():
-        app.logger.info(f"Database connection: {data_conn}")
-
     return app
 
 
