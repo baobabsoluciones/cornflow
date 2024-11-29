@@ -50,7 +50,9 @@ def init_cornflow_service():
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
     # Cornflow db defaults
-    os.environ["DATABASE_URL"] = get_db_conn()
+    os.environ["DEFAULT_POSTGRES"] = "1"
+    cornflow_db_conn = get_db_conn()
+    os.environ["DATABASE_URL"] = cornflow_db_conn
 
     # Platform auth config and service users
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
