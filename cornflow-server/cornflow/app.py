@@ -41,7 +41,7 @@ from cornflow.shared.log_config import log_config
 from cornflow.shared.socket import initialize_socket
 
 
-monkey.patch_all()
+#monkey.patch_all()
 socketio = SocketIO(cors_allowed_origins="*")
 
 
