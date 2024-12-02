@@ -15,7 +15,7 @@ from cornflow.shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAG
 class ExecutionModel(BaseDataModel):
     """
     Model class for the Executions.
-    It inherits from :class:`BaseDataModel` to have the trace fields and user field
+    It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field.
 
     - **id**: str, the primary key for the executions, a hash generated upon creation of the execution
       and the id given back to the user.
@@ -98,6 +98,16 @@ class ExecutionModel(BaseDataModel):
         if "data" in data.keys():
             self.checks = None
         super().update(data)
+
+    def update_config(self, config: dict):
+        """
+        Method to update the config of the execution after extending with default values
+
+        :param dict config: The config to store
+        :return: nothing
+        """
+        self.config = config
+        super().update({})
 
     def update_state(self, code, message=None):
         """

@@ -6,6 +6,8 @@ import json
 import importlib.util
 from distutils.dir_util import copy_tree
 from unittest.mock import MagicMock
+
+import click
 from flask_sqlalchemy import SQLAlchemy
 import shutil
 from pytups import TupList, SuperDict
@@ -15,7 +17,6 @@ from sqlalchemy.sql.sqltypes import Integer
 
 class SchemaGenerator:
     def __init__(self, path, output_path=None, ignore_files=None, leave_bases=False):
-
         self.path = path
         self.tmp_path = os.path.join(os.getcwd(), "tmp_files")
         self.output_path = output_path or "./output_schema.json"
@@ -76,7 +77,6 @@ class SchemaGenerator:
         db = SQLAlchemy()
         try:
             for file_path, file_name in files:
-
                 spec = importlib.util.spec_from_file_location(file_name, file_path)
                 mod = importlib.util.module_from_spec(spec)
 
@@ -142,7 +142,7 @@ class SchemaGenerator:
 
             db.session.close()
         except Exception as err:
-            print(err)
+            click.echo(err)
 
     def inherit(self):
         all_classes = set(self.parents.keys())

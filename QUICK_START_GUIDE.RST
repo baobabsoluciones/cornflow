@@ -122,14 +122,6 @@ If on Windows export should be changed to set.
 .. raw:: html
 
   </details>
- 
-
-..
-
-Docker
-------
-
-You will also need to install `Docker Community Edition <https://docs.docker.com/engine/install/>`_ and `Docker Compose <https://docs.docker.com/compose/install/>`_. See `here   <https://baobabsoluciones.github.io/cornflow/deploy/index.html>`_ how to deploy your own cornflow server.
 
    
 For cornflow-app
@@ -192,10 +184,10 @@ If it is the first time you use cornflow-server, you will then need to setup cor
 
   export FLASK_APP=cornflow.app
   export DATABASE_URL=sqlite:///cornflow.db
-  python manage.py db upgrade
-  python manage.py access_init
-  python manage.py create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
-  python manage.py create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
+  flask db upgrade
+  flask access_init
+  flask create_service_user  --username=airflow --email=airflow_test@admin.com --password=airflow_test_password
+  flask create_admin_user  --username=cornflow --email=cornflow_admin@admin.com --password=cornflow_admin_password
     
 From there, you can launch cornflow-server by navigating to the cornflow-server repository and running:
 
@@ -243,7 +235,9 @@ To do so, you need to clone the repository and create a new folder with the name
   - :code:`/schemas`
   
     - :code:`instance.json`: jsonschema that describes the input data.
+    - :code:`instance_checks.json`: jsonschema that describes the output of the instance checks.
     - :code:`solution.json`: jsonschema that describes the output data.
+    - :code:`solution_checks.json`: jsonschema that describes the output of the solution checks.
     - :code:`config.json` (optional): jsonschema that describes the configuration.
     
   - :code:`/solvers`

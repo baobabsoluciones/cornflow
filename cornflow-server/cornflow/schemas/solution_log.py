@@ -1,4 +1,4 @@
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, EXCLUDE
 
 options = dict(required=True, allow_none=True)
 log_options = dict(required=False, allow_none=True)
@@ -49,10 +49,18 @@ class FirstSolution(Schema):
     CutsBestBound = fields.Float(**options)
 
 
-class LogSchema(Schema):
+class BasicLogSchema(Schema):
+    status = fields.Str(**log_options)
+    status_code = fields.Int(**log_options)
+    sol_code = fields.Int(**log_options)
+
+
+class LogSchema(BasicLogSchema):
+    class Meta:
+        unknown = EXCLUDE
+
     version = fields.Str(**log_options)
     solver = fields.Str(**log_options)
-    status = fields.Str(**log_options)
     best_bound = fields.Float(**log_options)
     best_solution = fields.Float(**log_options)
     gap = fields.Float(**log_options)
@@ -63,8 +71,6 @@ class LogSchema(Schema):
     presolve = fields.Nested(PresolveSchema, **log_options)
     first_relaxed = fields.Float(**log_options)
     first_solution = fields.Nested(FirstSolution, **log_options)
-    status_code = fields.Int(**log_options)
-    sol_code = fields.Int(**log_options)
     nodes = fields.Int(**log_options)
     progress = fields.Nested(ProgressSchema, required=False)
     cut_info = fields.Raw(**log_options)

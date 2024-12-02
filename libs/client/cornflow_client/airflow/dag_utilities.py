@@ -1,19 +1,13 @@
 """
 
 """
-# Full imports
-import json
-import logging
-import os
 
-# Partial imports
+import json
+import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
-
-# Imports from modules
 from cornflow_client import CornFlow, CornFlowApiError
-
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
@@ -45,6 +39,7 @@ default_args = {
 
 
 def get_schemas_from_file(_dir, dag_name):
+    # TODO: check if in use
     with open(os.path.join(_dir, dag_name + "_input.json"), "r") as f:
         instance = json.load(f)
     with open(os.path.join(_dir, dag_name + "_output.json"), "r") as f:
@@ -59,6 +54,7 @@ def get_requirements(path):
     :param path: The path of the project
     :return: A list of required packages
     """
+    # TODO: check if in use
     req_path = f"{path}/requirements.txt"
 
     try:
@@ -79,7 +75,7 @@ def connect_to_cornflow(secrets):
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
-    uri = secrets.get_conn_uri("CF_URI")
+    uri = secrets.get_conn_value("CF_URI")
     conn = urlparse(uri)
     scheme = conn.scheme
     if scheme == "cornflow":
@@ -152,6 +148,7 @@ def try_to_write_solution(client, exec_id, payload):
 
 
 def get_schema(dag_name):
+    # TODO: check if in use
     _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
     with open(_file, "r") as f:
         schema = json.load(f)
@@ -229,6 +226,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     except NoSolverException as e:
         if config.get("msg", True):
             print("No solver found !")
+        # We reconnect in case the solver has been more than 24 hours solving before the error is raised
+        client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
@@ -236,6 +235,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
+        # We reconnect in case the solver has been more than 24 hours solving before the error is raised
+        client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
@@ -312,6 +313,38 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )
+
+
+def callback_email(context):
+    from airflow.utils.email import send_email
+    from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
+    path_to_log = (
+        f"./logs/dag_id={context['dag'].dag_id}/run_id={context['run_id']}"
+        f"/task_id={context['ti'].task_id}/attempt=1.log"
+    )
+
+    environment = EnvironmentVariablesBackend().get_variable("ENVIRONMENT")
+    notification_email = EnvironmentVariablesBackend().get_variable(
+        "NOTIFICATION_EMAIL"
+    )
+    environment_name = os.getenv("AIRFLOW__WEBSERVER__INSTANCE_NAME", "CornflowEnv")
+
+    title = f"Airflow. {environment_name} ({environment}). DAG/task error: {context['dag'].dag_id}/{context['ti'].task_id} Failed"
+    body = f"""
+        The DAG/task {context['dag'].dag_id}/{context['ti'].task_id} has failed.
+        <br>
+        The log is attached.
+        """
+
+    send_email(
+        to=[
+            notification_email,
+        ],
+        subject=title,
+        html_content=body,
+        files=[path_to_log],
+    )
 
 
 class NoSolverException(Exception):
