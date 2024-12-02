@@ -4,14 +4,13 @@
 # Imports from libraries
 import os
 import pickle
+from datetime import datetime
+
 from pytups import SuperDict, TupList
 
 # Imports from cornflow libraries
 from cornflow_client import SolutionCore
 from cornflow_client.core.tools import load_json
-
-# Imports from internal modules
-from .tools import get_week_from_string
 
 
 class Solution(SolutionCore):
@@ -21,7 +20,6 @@ class Solution(SolutionCore):
 
     @classmethod
     def from_dict(cls, data: dict) -> "Solution":
-
         data_p = {
             el: {(v["id_employee"], v["time_slot"]): v for v in data[el]}
             for el in ["works"]
@@ -61,9 +59,19 @@ class Solution(SolutionCore):
         Returns a SuperDict with the amount of time slots worked by each employee in each week.
         For example: {(0, 1): 40, ...}
         """
+
+        def get_week_from_datetime_string_wo_seconds(string: str) -> int:
+            """Returns the integer value of the week for the given string"""
+            datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M")
+            return datetime_object.isocalendar()[1]
+
         return (
             TupList(
-                {"id_employee": id_employee, "ts": ts, "week": get_week_from_string(ts)}
+                {
+                    "id_employee": id_employee,
+                    "ts": ts,
+                    "week": get_week_from_datetime_string_wo_seconds(ts),
+                }
                 for (id_employee, ts) in self.data["works"]
             )
             .to_dict(result_col="ts", indices=["week", "id_employee"])

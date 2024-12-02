@@ -1,0 +1,9 @@
+[run]
+branch = True
+
+omit =
+    */tests/*
+
+[report]
+exclude_also =
+    raise NotImplementedError

@@ -1,14 +1,12 @@
-cornflow-client
-orloge>=0.13
-PuLP>=2.3
-pandas>=1.0
-hackathonbaobab2020[solvers] @ git+https://github.com/baobabsoluciones/hackathonbaobab2020@main
-marshmallow
-pytups
-ortools
-xmltodict
-openpyxl
-pyomo
-acopy
-tsplib95
-matplotlib
+cornflow-client>=1.1.0
+orloge<=0.17.2
+PuLP<=2.9.0
+pandas<=2.1.1
+hackathonbaobab2020[solvers]
+pytups<=0.86.2
+ortools<=9.7.2996
+xmltodict<=0.13.0
+openpyxl<=3.1.2
+pyomo<=6.6.2
+tsplib95<=0.7.1
+numpy<2.0.0

@@ -2,17 +2,19 @@ import configparser
 import os
 
 from click.testing import CliRunner
+from flask_testing import TestCase
+
 from cornflow.app import create_app
 from cornflow.cli import cli
-from cornflow.models import UserModel
 from cornflow.models import (
     ActionModel,
     RoleModel,
     ViewModel,
     PermissionViewRoleModel,
 )
+from cornflow.models import UserModel
 from cornflow.shared import db
-from flask_testing import TestCase
+from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
 
 
 class CLITests(TestCase):
@@ -129,7 +131,7 @@ class CLITests(TestCase):
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
         views = ViewModel.get_all_objects().all()
-        self.assertEqual(len(views), 48)
+        self.assertEqual(len(views), 49)
 
     def test_permissions_entrypoint(self):
         runner = CliRunner()
@@ -153,8 +155,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 530)
+        self.assertEqual(len(views), 49)
+        self.assertEqual(len(permissions), 546)
 
     def test_permissions_base_command(self):
         runner = CliRunner()
@@ -169,8 +171,8 @@ class CLITests(TestCase):
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 4)
-        self.assertEqual(len(views), 48)
-        self.assertEqual(len(permissions), 530)
+        self.assertEqual(len(views), 49)
+        self.assertEqual(len(permissions), 546)
 
     def test_service_entrypoint(self):
         runner = CliRunner()
@@ -208,6 +210,7 @@ class CLITests(TestCase):
 
     def test_service_user_command(self):
         runner = CliRunner()
+        self.test_roles_init_command()
         result = runner.invoke(
             cli,
             [
@@ -222,7 +225,144 @@ class CLITests(TestCase):
                 "test@test.org",
             ],
         )
-        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.exit_code, 0)
         user = UserModel.get_one_user_by_email("test@test.org")
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@test.org")
+        self.assertEqual(user.roles, {4: "service"})
+        self.assertTrue(user.is_service_user())
+
+    def test_viewer_user_command(self):
+        runner = CliRunner()
+        self.test_roles_init_command()
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "test@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("test@test.org")
+        self.assertEqual(user.username, "test")
+        self.assertEqual(user.email, "test@test.org")
+        self.assertEqual(user.roles, {1: "viewer"})
+        self.assertFalse(user.is_service_user())
+
+    def test_generate_token(self):
+        runner = CliRunner()
+
+        self.test_roles_init_command()
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "viewer_user",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "viewer@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 0)
+
+        user_id = UserModel.get_one_user_by_username("viewer_user").id
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "service",
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+                "-e",
+                "test@test.org",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 0)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIn("ey", result.output)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "test",
+                "-p",
+                "Otherpassword",
+            ],
+        )
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertIsInstance(result.exception, NoPermission)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                user_id,
+                "-u",
+                "viewer_user",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIsInstance(result.exception, NoPermission)
+
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "token",
+                "-i",
+                100,
+                "-u",
+                "test",
+                "-p",
+                "testPassword1!",
+            ],
+        )
+
+        self.assertIsInstance(result.exception, ObjectDoesNotExist)

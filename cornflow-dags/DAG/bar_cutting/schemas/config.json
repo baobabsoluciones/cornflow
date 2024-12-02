@@ -4,8 +4,8 @@
     "properties": {
         "solver": {
 			"type": "string",
-			"enum": ["mip", "CG"],
-			"default": "mip"
+			"enum": ["mip", "CG", "mip.cbc", "mip.gurobi", "CG.cbc", "CG.gurobi"],
+			"default": "mip.cbc"
 			},
         "timeLimit": {
 			"type": "number"

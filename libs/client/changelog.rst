@@ -1,3 +1,48 @@
+version 1.1.1
+--------------
+
+- released: 2024-09-18
+- description: small security fixes
+- changelog:
+    - bump PuLP to version 2.9.0
+    - bump requests to version 2.32.3
+    - modified branch structure on repository.
+    - minor changes to documentation
+
+version 1.1.0
+--------------
+
+- released: 2024-05-22
+- description: Changed the way test cases are stored
+- changelog:
+  - changed the way test cases are stored.
+  - changed what the log stores when solverolving the application.
+
+
+version 1.0.16
+---------------
+
+- released: 2023-10-20
+- description: Small fixes to the cornflow-client
+- changelog:
+
+version 1.0.15
+---------------
+
+- released: 2023-10-04
+- description: dropped Python 3.7 support
+- changelog:
+    - dropped python 3.7 support as will the rest of components.
+
+
+version 1.0.14
+---------------
+
+- released: 2023-10-03
+- description: added pandas dependency due to ortools missing pandas as their own dependency
+- changelog:
+    - added pandas (>=1.5.2) dependency due to ortools missing pandas as their own dependency
+
 version 1.0.13
 ---------------
 

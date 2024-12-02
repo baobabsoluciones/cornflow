@@ -16,6 +16,8 @@ from cornflow.tests.const import (
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
     DAG_URL,
+    BAD_EXECUTION_PATH,
+    EXECUTION_SOLUTION_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client
@@ -38,7 +40,24 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             return temp
 
         self.payload = load_file_fk(EXECUTION_PATH)
+        self.bad_payload = load_file_fk(BAD_EXECUTION_PATH)
         self.payloads = [load_file_fk(f) for f in EXECUTIONS_LIST]
+        self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
+        self.keys_to_check = [
+            "data_hash",
+            "created_at",
+            "config",
+            "state",
+            "message",
+            "schema",
+            "description",
+            "id",
+            "user_id",
+            "log",
+            "instance_id",
+            "name",
+            "indicators",
+        ]
 
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
@@ -48,6 +67,55 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         patch_af_client(af_client_class)
 
         self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_bad_config(self, af_client_class):
+        patch_af_client(af_client_class)
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.bad_payload,
+            expected_status=400,
+            check_payload=False,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_partial_config(self, af_client_class):
+        patch_af_client(af_client_class)
+        self.payload["config"].pop("solver")
+        response = self.create_new_row(
+            EXECUTION_URL, self.model, payload=self.payload, check_payload=False
+        )
+        self.assertIn("solver", response["config"])
+        self.assertEqual(response["config"]["solver"], "cbc")
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_with_solution(self, af_client_class):
+        patch_af_client(af_client_class)
+        self.payload["data"] = self.solution
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+        )
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_with_solution_bad(self, af_client_class):
+        patch_af_client(af_client_class)
+        patch_af_client(af_client_class)
+        self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+            expected_status=400,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
 
     def test_new_execution_no_instance(self):
         payload = dict(self.payload)
@@ -62,13 +130,13 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.assertTrue("error" in response.json)
 
     def test_get_executions(self):
-        self.get_rows(self.url, self.payloads)
+        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
 
     def test_get_no_executions(self):
         self.get_no_rows(self.url)
 
     def test_get_executions_superadmin(self):
-        self.get_rows(self.url, self.payloads)
+        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
         token = self.create_service_user()
         rows = self.client.get(
             self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
@@ -222,15 +290,42 @@ class TestExecutionsDetailEndpoint(
 
     def test_create_delete_instance_load(self):
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        keys_to_check = [
+            "message",
+            "id",
+            "schema",
+            "data_hash",
+            "config",
+            "instance_id",
+            "user_id",
+            "indicators",
+            "description",
+            "name",
+            "created_at",
+            "state",
+        ]
         execution = self.get_one_row(
-            self.url + idx, payload={**self.payload, **dict(id=idx)}
+            self.url + idx,
+            payload={**self.payload, **dict(id=idx)},
+            keys_to_check=keys_to_check,
         )
         self.delete_row(self.url + idx + "/")
+        keys_to_check = [
+            "id",
+            "schema",
+            "description",
+            "name",
+            "user_id",
+            "executions",
+            "created_at",
+            "data_hash",
+        ]
         instance = self.get_one_row(
             INSTANCE_URL + execution["instance_id"] + "/",
             payload={},
             expected_status=200,
             check_payload=False,
+            keys_to_check=keys_to_check,
         )
         executions = [execution["id"] for execution in instance["executions"]]
         self.assertFalse(idx in executions)
@@ -281,11 +376,7 @@ class TestExecutionsDetailEndpoint(
     def test_stop_execution(self, af_client_class):
         patch_af_client(af_client_class)
 
-        idx = self.create_new_row(
-            EXECUTION_URL,
-            self.model,
-            payload=self.payload
-        )
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
         response = self.client.post(
             self.url + str(idx) + "/",
@@ -302,20 +393,41 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         super().setUp()
         self.response_items = {"id", "name", "data"}
         self.items_to_check = ["name"]
+        self.keys_to_check = [
+            "created_at",
+            "checks",
+            "instance_id",
+            "schema",
+            "data",
+            "user_id",
+            "message",
+            "data_hash",
+            "log",
+            "config",
+            "description",
+            "state",
+            "name",
+            "id",
+        ]
 
     def test_get_one_execution(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         self.url = EXECUTION_URL + idx + "/data/"
         payload = dict(self.payload)
         payload["id"] = idx
-        self.get_one_row(self.url, payload)
+        self.get_one_row(self.url, payload, keys_to_check=self.keys_to_check)
 
     def test_get_one_execution_superadmin(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
         token = self.create_service_user()
-        self.get_one_row(EXECUTION_URL + idx + "/data/", payload, token=token)
+        self.get_one_row(
+            EXECUTION_URL + idx + "/data/",
+            payload,
+            token=token,
+            keys_to_check=self.keys_to_check,
+        )
 
 
 class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
@@ -323,19 +435,42 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         super().setUp()
         self.response_items = {"id", "name", "log", "indicators"}
         self.items_to_check = ["name"]
+        self.keys_to_check = [
+            "created_at",
+            "id",
+            "log_text",
+            "instance_id",
+            "state",
+            "message",
+            "description",
+            "data_hash",
+            "name",
+            "log",
+            "schema",
+            "user_id",
+            "config",
+            "indicators",
+        ]
 
     def test_get_one_execution(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
-        self.get_one_row(EXECUTION_URL + idx + "/log/", payload)
+        self.get_one_row(
+            EXECUTION_URL + idx + "/log/", payload, keys_to_check=self.keys_to_check
+        )
 
     def test_get_one_execution_superadmin(self):
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
         token = self.create_service_user()
-        self.get_one_row(EXECUTION_URL + idx + "/log/", payload, token=token)
+        self.get_one_row(
+            EXECUTION_URL + idx + "/log/",
+            payload,
+            token=token,
+            keys_to_check=self.keys_to_check,
+        )
 
 
 class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
@@ -347,11 +482,17 @@ class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
     @patch("cornflow.endpoints.execution.Airflow")
     def test_get_one_status(self, af_client_class):
         patch_af_client(af_client_class)
-    
+
         idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
         payload = dict(self.payload)
         payload["id"] = idx
-        data = self.get_one_row(EXECUTION_URL + idx + "/status/", payload, check_payload=False)
+        keys_to_check = ["state", "message", "id", "data_hash"]
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/",
+            payload,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
         self.assertEqual(data["state"], 1)
 
     @patch("cornflow.endpoints.execution.Airflow")

@@ -11,7 +11,7 @@ from cornflow_client import (
 from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PULP_STATUS_MAPPING
+    PULP_STATUS_MAPPING,
 )
 import cornflow_client.airflow.dag_utilities as utils
 
@@ -54,13 +54,13 @@ class PuLPSolve(ExperimentCore):
         if model.status not in [pl.LpStatusOptimal]:
             return dict(
                 status=PULP_STATUS_MAPPING[model.status],
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status_sol=SOLUTION_STATUS_INFEASIBLE,
             )
 
         self.solution = Solution(model.toDict())
         return dict(
             status=PULP_STATUS_MAPPING[model.status],
-            status_sol=SOLUTION_STATUS_FEASIBLE
+            status_sol=SOLUTION_STATUS_FEASIBLE,
         )
 
     def get_objective(self) -> float:
@@ -88,7 +88,14 @@ class PuLP(ApplicationCore):
         prob += x + y <= 5, "c1"
         prob += x + z >= 10, "c2"
         prob += -y + z == 7.5, "c3"
-        return [prob.toDict()]
+
+        return [
+            {
+                "name": "Base case with 3 variables",
+                "instance": prob.toDict(),
+                "description": "Simple MIP with 3 variables",
+            }
+        ]
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         return PuLPSolve
@@ -96,7 +103,6 @@ class PuLP(ApplicationCore):
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
     ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
-
         # we overwrite the logPath argument before solving.
         log_path = config["logPath"] = "temp.log"
         algo = PuLPSolve(Instance.from_dict(data), None)

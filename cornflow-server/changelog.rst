@@ -1,3 +1,81 @@
+version 1.1.1
+--------------
+
+- released: 2024-09-18
+- description: small security fixes
+- changelog:
+    - bump PuLP to version 2.9.0
+    - bump requests to version 2.32.3
+    - modified branch structure on repository.
+    - minor changes to documentation
+
+version 1.1.0
+--------------
+
+- released: 2024-05-22
+- description: new version of cornflow with new features and bug fixes.
+- changelog: 
+  - custom token duration.
+  - fixed errors on login.
+  - added password rotation capabilities.
+  - migrated some deprecated functions on dependencies.
+  - updated documentation.
+
+version 1.0.11
+---------------
+
+- released: 2024-05-10
+- description: release to fix security vulnerabilities
+- changelog:
+    - Upgraded flask-cors version to 4.0.1
+    - Upgraded Werkzeug version to 3.0.3
+    - Upgraded Airflow to version 2.9.1
+    - Fixed Werkzeug version on airflow image to 3.0.3
+
+version 1.0.10
+---------------
+
+- released: 2024-04-17
+- description: changed libraries versions due to discovered vulnerabilities
+- changelog:
+    - Upgraded cryptography version to 42.0.5
+    - Upgraded gunicorn version to 22.0.0
+    - Upgraded requests version to 2.31.0
+    - Upgraded Werkzeug version to 2.3.8
+
+version 1.0.9
+--------------
+
+- released: 2023-12-27
+- description: added new authentication for BI endpoints where the token does not expire
+- changelog:
+    - Added new auth method.
+    - Added new token generation that can be used only through the cli.
+    - Added new token decodification that doe snot check for expiry date on token.
+
+version 1.0.8
+--------------
+
+- released: 2023-10-20
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - This version of cornflow is only compatible with Python versions 3.8 or higher, with the desired version for deployment being Python version 3.10 (preferred version for baobab development as well).
+    - This version of cornflow updates the version of airflow to 2.7.1.
+    - Almost all library versions have been fixed to avoid dependency problems in future deployments.
+    - In the ApplicationCore you can define a new class-level argument (like schemas) which is notify. This argument, when True, automatically adds a callback that will send us an email with the log attached in case the model fails when running in Airflow.
+    - There is a new default DAG (run_deployed_models) that allows us to automatically launch all the models that we have deployed and for which we have defined a test instance in the ApplicationCore definition, so that once deployed we can do a quick test of the correct functioning of the model.
+    - If we create an execution and in the configuration we have not included all the information, the default values defined in the configuration json schema are taken.
+    - A command that used to convert models from an external app to jsonschemas is now disabled.
+
+
+version 1.0.7
+--------------
+
+- released: 2023-10-03
+- description: security version of cornflow to update vulnerability on dependency
+- changelog:
+    - updated version of gevent to 23.9.0.post1 due to security reasons.
+
 version 1.0.5
 --------------
 

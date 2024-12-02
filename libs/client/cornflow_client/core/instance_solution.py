@@ -1,18 +1,16 @@
 """
 
 """
-# Full imports
-import json
 
-# Partial imports
+import json
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
+from typing import List
+
 from genson import SchemaBuilder
 from jsonschema import Draft7Validator
 from pytups import SuperDict
-from typing import List
-from datetime import datetime, timedelta
 
-# Imports from internal modules
 from .read_tools import read_excel, is_xl_type
 
 
@@ -335,22 +333,42 @@ class InstanceSolutionCore(ABC):
         return ts + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
 
     @staticmethod
-    def add_time_to_date_string(string: str, weeks=0, days=0, minutes=0, seconds=0) -> str:
+    def add_time_to_date_string(
+        string: str, weeks=0, days=0, minutes=0, seconds=0
+    ) -> str:
         """Adds time to a date string"""
         date = datetime.strptime(string, "%Y-%m-%d").date()
-        return (date + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%d")
+        return (
+            date + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
+        ).strftime("%Y-%m-%d")
 
     @staticmethod
-    def add_time_to_datetime_string(string: str, weeks=0, days=0, minutes=0, seconds=0) -> str:
+    def add_time_to_datetime_string(
+        string: str, weeks=0, days=0, minutes=0, seconds=0
+    ) -> str:
         """Adds time to a datetime"""
         datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
-        return (datetime_object + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%S")
+        return (
+            datetime_object
+            + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
+        ).strftime("%Y-%m-%dT%H:%M:%S")
 
     @staticmethod
-    def add_time_to_datetimesec_string(string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0) -> str:
+    def add_time_to_datetimesec_string(
+        string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0
+    ) -> str:
         """Adds time to a datetime"""
         datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
-        return (datetime_object + timedelta(weeks=weeks, days=7 * weeks + days, hours=hours, minutes=minutes, seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%S")
+        return (
+            datetime_object
+            + timedelta(
+                weeks=weeks,
+                days=7 * weeks + days,
+                hours=hours,
+                minutes=minutes,
+                seconds=seconds,
+            )
+        ).strftime("%Y-%m-%dT%H:%M:%S")
 
     @staticmethod
     def get_week_from_ts(ts: datetime) -> int:
@@ -366,7 +384,7 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_week_from_datetime_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M")
         return datetime_object.isocalendar()[1]
 
     @staticmethod
@@ -383,29 +401,29 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_weekday_from_date_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DD'"""
-        date = datetime.strptime(string, '%Y-%m-%d').date()
+        date = datetime.strptime(string, "%Y-%m-%d").date()
         return date.isocalendar()[2]
 
     @staticmethod
     def get_weekday_from_datetime_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
         return datetime_obj.isocalendar()[2]
 
     @staticmethod
     def get_weekday_from_datetimesec_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDT:h:m:s'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
         return datetime_obj.isocalendar()[2]
 
     @staticmethod
     def get_hour_from_datetime_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
         return datetime_obj.hour
 
     @staticmethod
     def get_hour_from_datetimesec_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m:s'"""
-        datetime_obj = datetime.strptime(string, '%Y-%m-%dT%H:%M:%S')
+        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
         return datetime_obj.hour
