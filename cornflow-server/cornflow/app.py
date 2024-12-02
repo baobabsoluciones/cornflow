@@ -1,6 +1,9 @@
 """
 Main file with the creation of the app logic
 """
+from gevent import monkey
+monkey.patch_all()
+
 # Full imports
 import os
 import click
@@ -13,7 +16,6 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_socketio import SocketIO
-from gevent import monkey
 from logging.config import dictConfig
 
 # Module imports
@@ -41,7 +43,6 @@ from cornflow.shared.log_config import log_config
 from cornflow.shared.socket import initialize_socket
 
 
-#monkey.patch_all()
 socketio = SocketIO(cors_allowed_origins="*")
 
 
