@@ -103,7 +103,6 @@ class ExperimentCore(ABC):
         """
         pass
 
-    @abstractmethod
     def check_solution(self) -> dict:
         """
         Mandatory method

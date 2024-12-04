@@ -33,7 +33,7 @@ class Solver(ExperimentCore):
     def get_objective(self) -> float:
         return 0
 
-    def check(self):
+    def check_solution(self):
         return dict()
 
 
