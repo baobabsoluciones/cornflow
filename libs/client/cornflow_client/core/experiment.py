@@ -1,9 +1,11 @@
 """
-
+Boilerplate code for the experiment template.
 """
 
 from abc import ABC, abstractmethod
-from typing import Union, Dict
+from typing import List, Union, Dict
+
+from jsonschema import Draft7Validator
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
@@ -75,6 +77,19 @@ class ExperimentCore(ABC):
           inside represents one error of that particular type.
         """
         pass
+
+    def validate_checks(self, checks: dict) -> List:
+        """
+        Validate the check of the solution against its json schema
+
+        :param dict checks: the dictionary returned by the method ExperimentCore.check_solution()
+        :return: a list of errors
+        :rtype: List[jsonschema.exceptions.ValidationError]
+        """
+        validator = Draft7Validator(self.schema_checks)
+        if not validator.is_valid(checks):
+            return [e for e in validator.iter_errors(checks)]
+        return []
 
     @property
     @abstractmethod

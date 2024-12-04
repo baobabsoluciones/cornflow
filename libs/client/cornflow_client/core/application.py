@@ -1,6 +1,7 @@
 """
 
 """
+
 # Partial imports
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
@@ -19,6 +20,8 @@ from cornflow_client.constants import (
     BadConfiguration,
     BadSolution,
     BadInstance,
+    BadInstanceChecks,
+    BadSolutionChecks,
 )
 from .experiment import ExperimentCore
 
@@ -181,6 +184,12 @@ class ApplicationCore(ABC):
 
         instance_checks = SuperDict(inst.check())
 
+        inst_errors = inst.validate_checks(instance_checks)
+        if inst_errors:
+            raise BadInstanceChecks(
+                f"The instance does not match the schema:\n{inst_errors}"
+            )
+
         warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
             .vfilter(lambda v: v.get("is_warning", False))
@@ -233,10 +242,20 @@ class ApplicationCore(ABC):
             log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
 
         if log_json["sol_code"] > 0:
+            sol_errors = algo.solution.check_schema()
+            if sol_errors:
+                raise BadSolution(
+                    f"The solution does not match the schema:\n{sol_errors}"
+                )
             sol = algo.solution.to_dict()
 
         if sol != {} and sol is not None:
             checks = algo.check_solution()
+            sol_errors = algo.solution.validate_checks(checks)
+            if sol_errors:
+                raise BadSolutionChecks(
+                    f"The solution does not match the schema:\n{sol_errors}"
+                )
         else:
             checks = None
 

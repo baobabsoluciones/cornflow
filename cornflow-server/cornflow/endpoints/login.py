@@ -34,6 +34,7 @@ class LoginBaseEndpoint(BaseMetaResource):
     """
     Base endpoint to perform a login action from a user
     """
+
     def __init__(self):
         super().__init__()
         self.ldap_class = LDAPBase
@@ -102,7 +103,9 @@ class LoginBaseEndpoint(BaseMetaResource):
             raise InvalidCredentials()
         user = self.data_model.get_one_object(username=username)
         if not user:
-            current_app.logger.info(f"LDAP user {username} does not exist and is created")
+            current_app.logger.info(
+                f"LDAP user {username} does not exist and is created"
+            )
             email = ldap_obj.get_user_email(username)
             if not email:
                 email = ""
@@ -122,10 +125,14 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         except IntegrityError as e:
             db.session.rollback()
-            current_app.logger.error(f"Integrity error on user role assignment on log in: {e}")
+            current_app.logger.error(
+                f"Integrity error on user role assignment on log in: {e}"
+            )
         except DBAPIError as e:
             db.session.rollback()
-            current_app.logger.error(f"Unknown error on user role assignment on log in: {e}")
+            current_app.logger.error(
+                f"Unknown error on user role assignment on log in: {e}"
+            )
 
         return user
 
@@ -163,7 +170,9 @@ class LoginBaseEndpoint(BaseMetaResource):
         user = self.data_model.get_one_object(username=username)
 
         if not user:
-            current_app.logger.info(f"OpenID user {username} does not exist and is created")
+            current_app.logger.info(
+                f"OpenID user {username} does not exist and is created"
+            )
 
             data = {"username": username, "email": username}
 
@@ -183,7 +192,11 @@ class LoginBaseEndpoint(BaseMetaResource):
 
 def check_last_password_change(user):
     if user.pwd_last_change:
-        if user.pwd_last_change + timedelta(days=int(current_app.config["PWD_ROTATION_TIME"])) < datetime.utcnow():
+        if (
+            user.pwd_last_change
+            + timedelta(days=int(current_app.config["PWD_ROTATION_TIME"]))
+            < datetime.utcnow()
+        ):
             return True
     return False
 
