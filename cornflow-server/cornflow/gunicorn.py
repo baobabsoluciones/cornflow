@@ -1,4 +1,9 @@
 """gunicorn WSGI server configuration."""
+
+from gevent import monkey
+
+monkey.patch_all()
+
 import os
 from multiprocessing import cpu_count
 
@@ -11,7 +16,7 @@ pidfile = "/usr/src/app/gunicorn.pid"
 chdir = "/usr/src/app"
 bind = "0.0.0.0:5000"
 max_requests = 1000
-worker_class = "gevent"
+worker_class = "geventwebsocket.gunicorn.workers.GeventWebSocketWorker"
 workers = 3
 timeout = 300
 keepalive = 300

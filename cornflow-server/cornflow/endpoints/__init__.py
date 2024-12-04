@@ -3,6 +3,7 @@ Initialization file for the endpoints module
 All references to endpoints should be imported from here
 The login resource gets created on app startup as it depends on configuration
 """
+
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint
 from .apiview import ApiViewListEndpoint
@@ -15,6 +16,7 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
+from .connection_cleanup import ConnectionCleanupEndpoint
 from .dag import (
     DAGDetailEndpoint,
     DAGEndpointManual,
@@ -215,6 +217,11 @@ resources = [
         resource=TablesDetailsEndpoint,
         urls="/table/<string:table_name>/<string:idx>/",
         endpoint="tables-detail",
+    ),
+    dict(
+        resource=ConnectionCleanupEndpoint,
+        urls="/connection-cleanup/",
+        endpoint="connection-cleanup",
     ),
 ]
 

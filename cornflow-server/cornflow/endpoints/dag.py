@@ -2,6 +2,7 @@
 Internal endpoint for getting and posting execution data
 These are the endpoints used by airflow in its communication with cornflow
 """
+
 # Import from libraries
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
@@ -112,14 +113,16 @@ class DAGDetailEndpoint(BaseMetaResource):
         if solution_schema is not None:
             config = current_app.config
 
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedDAG.get_one_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=solution_errors),
                     log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
-                            f"Solution data do not match the jsonschema.",
+                    f"Solution data do not match the jsonschema.",
                 )
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
@@ -153,11 +156,11 @@ class DAGDetailEndpoint(BaseMetaResource):
                     "execution_id": idx,
                     "state": state,
                 },
-                "text": f"Execution {execution.name} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
-                "type": "info"
+                "message": f"Execution {execution.name} is finished. {EXECUTION_STATE_MESSAGE_DICT[state]}",
+                "type": "info",
             },
             "message",
-            execution.user_id
+            execution.user_id,
         )
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
@@ -229,14 +232,16 @@ class DAGEndpointManual(BaseMetaResource):
             solution_schema = "solve_model_dag"
         if solution_schema is not None:
             config = current_app.config
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedDAG.get_one_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=solution_errors),
                     log_txt=f"Error while user {self.get_user()} tries to manually create an execution. "
-                            f"Solution data do not match the jsonschema.",
+                    f"Solution data do not match the jsonschema.",
                 )
 
         kwargs_copy = dict(kwargs)

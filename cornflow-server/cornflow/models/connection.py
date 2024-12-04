@@ -20,6 +20,7 @@ class ConnectionModel(EmptyBaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     session_id = db.Column(db.String(256), nullable=False, primary_key=False)
     created_at = db.Column(db.DateTime, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
 
     user = db.relationship("UserModel", viewonly=True)
 
@@ -28,6 +29,10 @@ class ConnectionModel(EmptyBaseModel):
         self.session_id = data.get("session_id")
         self.user_id = data.get("user_id")
         self.created_at = datetime.utcnow()
+        self.expires_at = data.get("expires_at")
+
+    def is_expired(self):
+        return self.expires_at < datetime.utcnow()
 
     def __repr__(self):
         return f"<Connection {self.id}>"

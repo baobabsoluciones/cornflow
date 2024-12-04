@@ -1,30 +1,40 @@
-from datetime import datetime, timedelta
 from flask import request
 from flask_socketio import SocketIO
 
 from cornflow.shared.authentication import Auth
-from cornflow.models import ConnectionModel
+from cornflow.models import ConnectionModel, UserModel
 
 
 def initialize_socket(socket_app: SocketIO):
 
-    @socket_app.on('connect')
-    def handle_connection():
+    @socket_app.on("connect")
+    def handle_connection(auth):
         from flask import current_app
+
         current_app.logger.info("Connection attempt")
+
         try:
-            user = Auth().get_user_from_header(request.headers)
+            token = auth.get("token")
+            decoded_token = Auth().decode_token(token)
+            user_id = decoded_token["user_id"]
             current_app.logger.info("User authenticated")
-            ConnectionModel({"user_id": user.id, "session_id": request.sid}).save()
+            ConnectionModel(
+                {
+                    "user_id": user_id,
+                    "session_id": request.sid,
+                    "expires_at": decoded_token["expiration"],
+                }
+            ).save()
             current_app.logger.info("Returning True")
             return True
         except Exception as e:
             current_app.logger.info(f"Returning False: {e}")
             return False
 
-    @socket_app.on('disconnect')
+    @socket_app.on("disconnect")
     def handle_disconnection():
         from flask import current_app
+
         current_app.logger.info(f"User with sid {request.sid} disconnected")
         connections = ConnectionModel.get_all_objects(session_id=request.sid).all()
         for connection in connections:
@@ -32,56 +42,32 @@ def initialize_socket(socket_app: SocketIO):
         return True
 
 
-def clean_disconnected():
-    # Remove connections created more than a day ago
-    disconnected = [
-        conn
-        for conn in ConnectionModel.get_all_objects()
-        if conn.created_at <= datetime.utcnow() - timedelta(days=1)
-    ]
-    for conn in disconnected:
-        conn.delete()
-
-
-def emit_socket(data, event=None, user_id=None):
+def emit_socket(data, event, user_id=None):
     from flask import current_app
+
     socketio = getattr(current_app, "__socketio_obj")
     current_app.logger.info(
-        f"Sending message '{data['text']}' "
+        f"Sending message '{data['message']}' "
         f"to {'all users' if user_id is None else 'user ' + str(user_id)}"
     )
 
     try:
-        current_app.logger.info("Trying")
-        clean_disconnected()
-
-        if event is None:
-            if user_id is None:
-                socketio.send(data=data)
-                current_app.logger.info("Here: 0")
-                return
+        if user_id is None:
+            current_app.logger.info("Sending message to all connected devices")
+            socketio.emit(event, data)
+        else:
+            # Sending message to all connected devices of a user.
             sessions_ids = [
                 conn.session_id
                 for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
+                if not conn.is_expired()
             ]
-            for session_id in sessions_ids:
-                socketio.send(data, to=session_id)
-            current_app.logger.info("Here: 1")
-            return
-
-        if user_id is not None:
-            sessions_ids = [
-                conn.session_id
-                for conn in ConnectionModel.get_all_objects(user_id=user_id).all()
-            ]
-
+            current_app.logger.info(
+                f"Sending message to {len(sessions_ids)} {'devices' if len(sessions_ids) > 1 else 'device'}"
+            )
             for session_id in sessions_ids:
                 socketio.emit(event, data, to=session_id)
-            current_app.logger.info("Here: 2")
-            return
-        socketio.emit(event, data)
-        current_app.logger.info("Here: 3")
+
     except Exception as e:
         current_app.logger.info(str(e))
         raise e
-

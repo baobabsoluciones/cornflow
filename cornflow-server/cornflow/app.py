@@ -1,8 +1,6 @@
 """
 Main file with the creation of the app logic
 """
-from gevent import monkey
-monkey.patch_all()
 
 # Full imports
 import os
@@ -43,7 +41,9 @@ from cornflow.shared.log_config import log_config
 from cornflow.shared.socket import initialize_socket
 
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(
+    cors_allowed_origins=os.getenv("CORS_ORIGINS", "*"), message_queue="redis://"
+)
 
 
 def create_app(env_name="development", dataconn=None):
