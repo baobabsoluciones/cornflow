@@ -251,7 +251,7 @@ class ApplicationCore(ABC):
 
         if sol != {} and sol is not None:
             checks = algo.check_solution()
-            sol_errors = algo.solution.validate_checks(checks)
+            sol_errors = algo.validate_checks(checks)
             if sol_errors:
                 raise BadSolutionChecks(
                     f"The solution does not match the schema:\n{sol_errors}"
