@@ -10,7 +10,7 @@ import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import request, g, current_app, Request
 from functools import wraps
 from typing import Union, Tuple
@@ -103,7 +103,8 @@ class Auth:
             )
 
         payload = {
-            "exp": datetime.utcnow() + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
+            "exp": datetime.utcnow()
+            + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user_id,
         }
@@ -130,7 +131,10 @@ class Auth:
             payload = jwt.decode(
                 token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
             )
-            return {"user_id": payload["sub"]}
+            return {
+                "user_id": payload["sub"],
+                "expiration": datetime.fromtimestamp(payload["exp"], timezone.utc),
+            }
         except jwt.ExpiredSignatureError:
             raise InvalidCredentials(
                 "The token has expired, please login again",
