@@ -9,6 +9,9 @@ class Instance(InstanceCore):
     schema = get_empty_schema()
     schema_checks = get_empty_schema()
 
+    def check(self):
+        return dict()
+
 
 class Solution(SolutionCore):
     schema = get_empty_schema()
@@ -30,7 +33,7 @@ class Solver(ExperimentCore):
     def get_objective(self) -> float:
         return 0
 
-    def check_solution(self, *args, **kwargs):
+    def check(self):
         return dict()
 
 
