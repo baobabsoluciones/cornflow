@@ -399,6 +399,9 @@ class SimpleInstance(InstanceCore):
     schema = get_empty_schema()
     schema_checks = get_empty_schema()
 
+    def check(self) -> dict:
+        return {}
+
 
 class Instance(InstanceCore):
     schema = _load_file(_get_file("../data/graph_coloring_input.json"))
@@ -417,6 +420,9 @@ class Instance(InstanceCore):
 
         data_p = {el: self.data[el].values_l() for el in tables}
         return pickle.loads(pickle.dumps(data_p, -1))
+
+    def check(self) -> dict:
+        return {}
 
 
 class SimpleExperiment(ExperimentCore):

@@ -1,15 +1,17 @@
 """
-Boilerplate code for the experiment template.
+Base code for the experiment template.
 """
 
+import warnings
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict
+from typing import Union, Dict
 
 from jsonschema import Draft7Validator
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
     SOLVER_CONVERTER,
+    BadSolutionChecks,
 )
 from .instance import InstanceCore
 from .solution import SolutionCore
@@ -68,8 +70,31 @@ class ExperimentCore(ABC):
         """
         pass
 
-    @abstractmethod
-    def check_solution(self, *args, **kwargs) -> Dict[str, Dict]:
+    def data_checks(self) -> dict:
+        """
+        Method that executes the ExperimentCore.check() method and validates the result against the schema_checks
+        """
+        try:
+            checks = self.check()
+            if checks is None:
+                checks = self.check_solution()
+        except NotImplementedError:
+            # Add a deprecation warning here
+            warnings.warn(
+                "The check_solution() method is deprecated. Please use check() instead. "
+                "Support for check_solution() will be removed on cornflow-client 2.0.0",
+                DeprecationWarning,
+            )
+            checks = self.check_solution()
+        validator = Draft7Validator(self.schema_checks)
+        if not validator.is_valid(checks):
+            raise BadSolutionChecks(
+                f"The solution checks do not match the schema: {[e for e in validator.iter_errors(checks)]}"
+            )
+        return checks
+
+    # TODO: make this method abstract on cornflow-client 2.0.0
+    def check(self) -> Dict[str, Dict]:
         """
         Mandatory method
 
@@ -78,18 +103,15 @@ class ExperimentCore(ABC):
         """
         pass
 
-    def validate_checks(self, checks: dict) -> List:
+    @abstractmethod
+    def check_solution(self) -> dict:
         """
-        Validate the check of the solution against its json schema
+        Mandatory method
 
-        :param dict checks: the dictionary returned by the method ExperimentCore.check_solution()
-        :return: a list of errors
-        :rtype: List[jsonschema.exceptions.ValidationError]
+        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+          inside represents one error of that particular type.
         """
-        validator = Draft7Validator(self.schema_checks)
-        if not validator.is_valid(checks):
-            return [e for e in validator.iter_errors(checks)]
-        return []
+        pass
 
     @property
     @abstractmethod
