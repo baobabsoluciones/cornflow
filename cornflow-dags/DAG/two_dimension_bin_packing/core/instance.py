@@ -32,6 +32,9 @@ class Instance(InstanceCore):
         data_p["parameters"] = self.data["parameters"]
         return pickle.loads(pickle.dumps(data_p, -1))
 
+    def check(self):
+        return dict()
+
     def _get_property(self, key, prop) -> SuperDict:
         return self.data[key].get_property(prop)
 
