@@ -1,3 +1,11 @@
+version 1.1.4
+--------------
+
+- released: 2024-12-05
+- description: same version as previous one.
+- changelog:
+    - new version due to pypi outage and problems with the version uploaded
+
 version 1.1.3
 --------------
 
