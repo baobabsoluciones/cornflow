@@ -1,6 +1,7 @@
 """
 
 """
+
 from functools import partial
 
 from marshmallow import Schema, fields, INCLUDE
@@ -71,6 +72,12 @@ def gen_schema(cls_name, params, possible_dict=None):
             p.pop("many", None)
         valid_values = p.pop("valid_values", None)
         name = p.pop("name")
+        # Move strict to metadata if it exists
+        strict = p.pop("strict", True)
+        metadata = p.pop("metadata", {})
+        metadata["strict"] = strict
+        p["metadata"] = metadata
+
         if valid_values is not None:
             dict_fields[name] = field_type(
                 validate=partial(validator, valid_values), **p
