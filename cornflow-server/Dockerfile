@@ -27,6 +27,7 @@ WORKDIR /usr/src/app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV DEFAULT_POSTGRES=1
 
 # install dependencies
 RUN pip install --upgrade pip

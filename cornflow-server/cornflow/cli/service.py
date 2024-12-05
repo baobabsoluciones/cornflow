@@ -6,6 +6,7 @@ from logging import error
 
 
 import click
+from .utils import get_db_conn
 import cornflow
 from cornflow.app import create_app
 from cornflow.commands import (
@@ -49,15 +50,8 @@ def init_cornflow_service():
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
     # Cornflow db defaults
-    cornflow_db_host = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
-    cornflow_db_port = os.getenv("CORNFLOW_DB_PORT", "5432")
-    cornflow_db_user = os.getenv("CORNFLOW_DB_USER", "cornflow")
-    cornflow_db_password = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
-    cornflow_db = os.getenv("CORNFLOW_DB", "cornflow")
-    cornflow_db_conn = os.getenv(
-        "cornflow_db_conn",
-        f"postgresql://{cornflow_db_user}:{cornflow_db_password}@{cornflow_db_host}:{cornflow_db_port}/{cornflow_db}",
-    )
+    os.environ["DEFAULT_POSTGRES"] = "1"
+    cornflow_db_conn = get_db_conn()
     os.environ["DATABASE_URL"] = cornflow_db_conn
 
     # Platform auth config and service users
