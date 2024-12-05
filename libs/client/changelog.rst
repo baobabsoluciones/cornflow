@@ -1,7 +1,18 @@
+version 1.1.3
+------------
+
+- released: 2024-12-05
+- description: changes to json schemas validation on airflow.
+- changelog:
+    - changed the json schema validation on airflow so that solution, instance checks and solution checks are correctly reviewed.
+    - added some small changes to make sure that future compatibility with new version of libraries is ready.
+    - added a reconnect from airflow to cornflow to make sure that if the model fails we can get back as much as possible.
+
+
 version 1.1.1
 --------------
 
-- released: 2024-08-29
+- released: 2024-09-18
 - description: small security fixes
 - changelog:
     - bump PuLP to version 2.9.0
