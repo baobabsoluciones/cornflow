@@ -145,6 +145,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#module-cornflow_client.core.instance">InstanceCore</a><ul>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore"><code class="docutils literal notranslate"><span class="pre">InstanceCore</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
 </ul>
@@ -209,6 +210,8 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solution"><code class="docutils literal notranslate">solution</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solve"><code class="docutils literal notranslate">solve()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_objective"><code class="docutils literal notranslate">get_objective()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate">check_solution()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate">get_solver_config()</span></code></a></li>
@@ -263,6 +266,16 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution"><code class="docutils literal notranslate"><span class="pre">BadSolution</span></code></a><ul>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks"><code class="docutils literal notranslate"><span class="pre">BadInstanceChecks</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks"><code class="docutils literal notranslate"><span class="pre">BadSolutionChecks</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -354,6 +367,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Core classes<a class="headerlink" href="#core-classes" title="Permalink to this heading">¶</a></h2>
 <section id="module-cornflow_client.core.application">
 <span id="applicationcore"></span><h3>ApplicationCore<a class="headerlink" href="#module-cornflow_client.core.application" title="Permalink to this heading">¶</a></h3>
+<p>Base code for the application core.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.application.</span></span><span class="sig-name descname"><span class="pre">ApplicationCore</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Permalink to this definition">¶</a></dt>
@@ -490,7 +504,7 @@ if each element in the list is:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks the instance and solution data
 :param instance_data: json data of the instance
 :param solution_data: json data of the solution
@@ -541,8 +555,28 @@ if each element in the list is:</p>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The instance template.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.data_checks">
+<span class="sig-name descname"><span class="pre">data_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.data_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that executes the InstanceCore.check() method and validates the result against the schema_checks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The dictionary returned by the InstanceCore.check() method</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks" title="cornflow_client.constants.BadInstanceChecks"><strong>BadInstanceChecks</strong></a> – if the instance checks do not match the schema</p>
+</dd>
+<dt class="field-even">Author<span class="colon">:</span></dt>
+<dd class="field-even"><p>baobab soluciones</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that checks if there are inconsistencies in the data of the instance and if the problem is feasible</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -892,6 +926,7 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 </section>
 <section id="module-cornflow_client.core.experiment">
 <span id="experimentcore"></span><h3>ExperimentCore<a class="headerlink" href="#module-cornflow_client.core.experiment" title="Permalink to this heading">¶</a></h3>
+<p>Base code for the experiment template.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Permalink to this definition">¶</a></dt>
@@ -944,8 +979,26 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.data_checks">
+<span class="sig-name descname"><span class="pre">data_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.data_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that executes the ExperimentCore.check() method and validates the result against the schema_checks</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mandatory method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+inside represents one error of that particular type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check_solution">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">check_solution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1239,6 +1292,42 @@ set self.__traceback__ to tb and return self.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolution.with_traceback">
 <span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolution.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstanceChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolutionChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks.with_traceback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exception.with_traceback(tb) –
 set self.__traceback__ to tb and return self.</p>
 </dd></dl>
