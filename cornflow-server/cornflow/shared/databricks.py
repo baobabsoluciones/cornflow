@@ -10,27 +10,48 @@ from cornflow.orchestrator_constants import config_orchestrator
 from cornflow_client.constants import DatabricksError
 
 class Databricks:
-    def __init__(self, url, token):
-        self.url = f"https://adb-3109346743730783.3.azuredatabricks.net"
-        self.client = WorkspaceClient(host=url, token=token)
+    def __init__(self, url, auth_secret, token_endpoint, ep_clusters, client_id):
+        self.url = url
         self.constants=config_orchestrator["databricks"]
-        self.token=token
-
+        self.auth_secret=auth_secret
+        self.token_endpoint=token_endpoint
+        self.ep_clusters=ep_clusters
+        self.client_id = client_id
+        
     @classmethod
     def from_config(cls, config):
         data = dict(
             url=config["DATABRICKS_URL"],
-            token=config["DATABRICKS_TOKEN"],
+            auth_secret=config["DATABRICKS_AUTH_SECRET"],
+            token_endpoint=config["DATABRICKS_TOKEN_ENDPOINT"],
+            ep_clusters=config["DATABRICKS_EP_CLUSTERS"],
+            client_id=config["DATABRICKS_CLIENT_ID"],
         )
         return cls(**data)
 
+    def get_token(self):
+        import requests
+        url = f'{self.url}{self.token_endpoint}'
+        data = {
+            "grant_type": "client_credentials",
+            "scope": "all-apis"
+        }
+        auth = (self.client_id,self.auth_secret)
+        oauth_response = requests.post(url,data=data,auth=auth)
+        oauth_response.json()
+        oauth_token = oauth_response.json()["access_token"]
+        return oauth_token
+    
     def is_alive(self):
         try:
           # TODO: this url is project specific. Either it has to be a config option or some other way has to be found
-          self.client.workspace.get_status(
-              path="/Workspace/Repos/nippon/nippon_production_scheduling/requirements.txt"
-          )
-          return True
+            path="/Workspace/Repos/nippon/nippon_production_scheduling/requirements.txt"
+            url = f"{self.url}/api/2.0/workspace/get-status?path={path}"
+            response = self.request_headers_auth(method="GET", url=url) 
+            if "error_code"  in response.json().keys():
+                return False
+            return True
+    
         except Exception as err:
           current_app.logger.error(f"Error: {err}")
           return False
@@ -40,7 +61,6 @@ class Databricks:
         Get information about a job in Databricks
         https://docs.databricks.com/api/workspace/jobs/get
         """
-        # TODO AGA: decidir si incluir las url de documentacion en el código
         url = f"{self.url}/api/2.1/jobs/get/?job_id={orch_name}"
         schema_info = self.request_headers_auth(method=method, url=url) 
         if "error_code" in schema_info.json().keys():
@@ -72,7 +92,8 @@ class Databricks:
         state = info["status"]
         return state
     def request_headers_auth(self, status=200, **kwargs):
-        def_headers = {"Authorization": "Bearer "+ str(self.token)}
+        token =self.get_token()
+        def_headers = {"Authorization": "Bearer "+ str(token)}
         headers = kwargs.get("headers", def_headers)
         response = requests.request(headers=headers, **kwargs)
         if status is None:

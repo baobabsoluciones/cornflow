@@ -50,10 +50,16 @@ def init_cornflow_service():
         os.environ["AIRFLOW_PWD"] = airflow_pwd
         os.environ["AIRFLOW_URL"] = airflow_url
     elif int(cornflow_backend) == DATABRICKS_BACKEND:
-        databricks_url = os.getenv("DATABRICKS_URL")
-        databricks_token = os.getenv("DATABRICKS_TOKEN")
-        os.environ["DATABRICKS_URL"] = databricks_url
-        os.environ["DATABRICKS_TOKEN"] = databricks_token
+        databricks_url = os.getenv("DATABRICKS_HOST")
+        databricks_auth_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+        databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+        databricks_ep_clusters = os.getenv("DATABRICKS_EP_CLUSTERS")
+        databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")
+        os.environ["DATABRICKS_HOST"] = databricks_url
+        os.environ["DATABRICKS_CLIENT_SECRET"] = databricks_auth_secret
+        os.environ["DATABRICKS_TOKEN_ENDPOINT"] = databricks_token_endpoint
+        os.environ["DATABRICKS_EP_CLUSTERS"] = databricks_ep_clusters
+        os.environ["DATABRICKS_CLIENT_ID"] = databricks_client_id
     else:
         raise Exception("Selected backend not among valid options")
 

@@ -792,7 +792,7 @@ def get_databricks(schema, execution):
     Get the Databricks client and the schema info
     """
     db_client = Databricks.from_config(current_app.config)
-    schema_info = db_client.get_orch_info
+    schema_info = db_client.get_orch_info(schema)
     if not db_client.is_alive():
         err = "Databricks is not accessible"
         current_app.logger.error(err)
