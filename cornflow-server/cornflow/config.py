@@ -29,11 +29,12 @@ class DefaultConfig(object):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
 
     # DATABRICKS config
-    DATABRICKS_URL = os.getenv("DATABRICKS_URL")
-    DATABRICKS_USER = os.getenv("DATABRICKS_USER")
-    DATABRICKS_PWD = os.getenv("DATABRICKS_PWD")
-    DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
-
+    DATABRICKS_URL = os.getenv("DATABRICKS_HOST")
+    DATABRICKS_AUTH_SECRET = os.getenv("DATABRICKS_CLIENT_SECRET")
+    DATABRICKS_TOKEN_ENDPOINT = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+    DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
+    DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
+    
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 
