@@ -77,6 +77,7 @@ OID_NONE = 0
 OID_AZURE = 1
 OID_GOOGLE = 2
 
+
 # AZURE OPEN ID URLS
 OID_AZURE_DISCOVERY_COMMON_URL = (
     "https://login.microsoftonline.com/common/.well-known/openid-configuration"
