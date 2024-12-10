@@ -594,6 +594,10 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             raise ORQ_ERROR(
                 error=error, payload=dict(message=message, state=state), log_txt=log_txt
             )
+        print("The execution is ", execution)
+        print("The execution user is ", self.get_user())
+        print("The execution id is ", idx)
+        print("The parameter is ", execution.dag_run_id)
 
         dag_run_id = execution.dag_run_id
         if not dag_run_id:
@@ -621,7 +625,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         try:
             # TODO: get the dag_name from somewhere!
             state = orch_client.get_run_status(
-                dag_name=execution.schema, dag_run_id=dag_run_id
+                dag_run_id
             )
         except ORQ_ERROR as err:
             error = orq_const["name"] +f" responded with an error: {err}"
@@ -631,8 +635,9 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
                 + str(err),
             )
-
+        print("The state before mapping is ", state)
         state = map_run_state(state, ORQ_TYPE)
+        print("The state prev to updating is ", state)
         execution.update_state(state)
         current_app.logger.info(
             f"User {self.get_user()} gets status of execution {idx}"
@@ -816,8 +821,10 @@ def map_run_state(state,ORQ_TYPE):
     if ORQ_TYPE==AIRFLOW_BACKEND:
         return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
     elif ORQ_TYPE==DATABRICKS_BACKEND:
+        print("The state is ", state)
         preliminar_state = DATABRICKS_TO_STATE_MAP.get(state,EXEC_STATE_UNKNOWN)
-        if preliminar_state =="TERMINATED":
-            # TODO AGA DUDA: Revisar si es correcto el error predeterminado
-            return DATABRICKS_FINISH_TO_STATE_MAP.get(state,EXEC_STATE_ERROR)
+        # print("The preliminar state is ", preliminar_state)
+        # if preliminar_state =="TERMINATED":
+        #     # TODO AGA DUDA: Revisar si es correcto el error predeterminado
+        #     return DATABRICKS_FINISH_TO_STATE_MAP.get(state,EXEC_STATE_ERROR)
         return preliminar_state
