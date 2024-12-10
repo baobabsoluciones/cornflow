@@ -8,6 +8,7 @@ from cornflow.orchestrator_constants import config_orchestrator
 # TODO AGA: CODIGO REPETIDO
 # TODO AGA: revisar si el import está bien
 from cornflow_client.constants import DatabricksError
+from cornflow.shared.const import DATABRICKS_TO_STATE_MAP,DATABRICKS_TERMINATE_STATE, DATABRICKS_FINISH_TO_STATE_MAP
 
 class Databricks:
     def __init__(self, url, auth_secret, token_endpoint, ep_clusters, client_id):
@@ -81,15 +82,22 @@ class Databricks:
         payload = dict(job_id=orch_name, notebook_parameters=dict(checks_only=checks_only))
         return self.request_headers_auth(method="POST", url=url, json=payload)
     
-    def get_run_status(self, workflow_name, run_id):
+    def get_run_status(self, run_id):
         """
         Get the status of a run in Databricks
         """
+        print( "asking for run id ", run_id)
         url = f"{self.url}/api/2.1/jobs/runs/get"
         payload = dict(run_id=run_id)
-        info = self.request_headers_auth(method="POST", url=url, json=payload)
+        info = self.request_headers_auth(method="GET", url=url, json=payload)
         info = info.json()
-        state = info["status"]
+        print("info is ", info)
+        state = info["status"]["state"]
+        if state == DATABRICKS_TERMINATE_STATE:
+            if info["status"]["termination_details"]["code"] in DATABRICKS_FINISH_TO_STATE_MAP.keys():
+                return info["status"]["termination_details"]["code"]
+            else: 
+                return "OTHER_FINISH_ERROR"
         return state
     def request_headers_auth(self, status=200, **kwargs):
         token =self.get_token()
