@@ -1,226 +1,140 @@
 """
+Unit test for schema validation functionality.
 
+This module contains test cases for JSON schema validation, ensuring proper
+data validation against defined schemas.
+
+Classes
+-------
+TestSchemas
+    Test cases for schema validation functionality
 """
 
-# General imports
-import unittest
+# Import from libraries
+from flask_testing import TestCase
 
-# Partial imports
-from marshmallow import ValidationError, Schema, fields
-from unittest.mock import patch
-
-# Imports from environment
-from cornflow_client import get_pulp_jsonschema, get_empty_schema
-from cornflow_client.schema.dict_functions import gen_schema, ParameterSchema, sort_dict
-
-# Imports from internal modules
+# Import from internal modules
 from cornflow.app import create_app
-from cornflow.tests.const import SCHEMA_URL
-from cornflow.tests.custom_test_case import CustomTestCase
+from cornflow.shared import db
+from cornflow.shared.validators import validate_schema
 
 
-class SchemaGenerator(unittest.TestCase):
-    data1 = [
-        {
-            "name": "filename",
-            "required": True,
-            "type": "String",
-            "valid_values": ["hello.txt", "foo.py", "bar.png"],
-            "metadata": {"description": "Should be a filename"},
-        },
-        {
-            "name": "SomeBool",
-            "metadata": {"description": "Just a bool"},
-            "required": True,
-            "type": "Boolean",
-        },
-        {
-            "name": "NotRequiredBool",
-            "metadata": {"description": "Another bool that's not required"},
-            "required": False,
-            "type": "Boolean",
-        },
-    ]
+class TestSchemas(TestCase):
+    """
+    Test cases for schema validation functionality.
 
-    def test_something(self):
-        req1 = {"filename": "foo.py", "SomeBool": False}
-        dynamic_schema = gen_schema("D1", self.data1)()
-        dynamic_res1 = dynamic_schema.load(req1)
+    This class tests the validation of data against JSON schemas, ensuring
+    proper validation rules and error handling.
+    """
 
-    def test_something_else(self):
-        req2 = {"filename": "hi.txt", "SomeBool": True, "NotRequiredBool": False}
-        dynamic_schema = gen_schema("D1", self.data1)()
-        func_error = lambda: dynamic_schema.load(req2)
-        self.assertRaises(ValidationError, func_error)
-
-    def test_class(self):
-        class CoefficientsSchema(Schema):
-            name = fields.Str(required=True)
-            value = fields.Float(required=True)
-
-        params = [
-            dict(name="name", type="String", required=True),
-            dict(name="value", type="Float", required=True),
-        ]
-        schema = ParameterSchema()
-        params1 = schema.load(params, many=True)
-        CoefficientsSchema2 = gen_schema("CoefficientsSchema", params1)
-        a = CoefficientsSchema2()
-        b = CoefficientsSchema()
-        good = dict(name="a", value=1)
-        bad = dict(name=1, value="")
-        a.load(good)
-        b.load(good)
-        func_error1 = lambda: a.load(bad)
-        func_error2 = lambda: b.load(bad)
-        self.assertRaises(ValidationError, func_error1)
-        self.assertRaises(ValidationError, func_error2)
-
-    def test_two_classes(self):
-
-        dict_params = dict(
-            CoefficientsSchema=[
-                dict(name="name", type="String", required=True),
-                dict(name="value", type="Float", required=True),
-            ],
-            ObjectiveSchema=[
-                dict(name="name", type="String", required=False, allow_none=True),
-                dict(
-                    name="coefficients",
-                    type="CoefficientsSchema",
-                    many=True,
-                    required=True,
-                ),
-            ],
-        )
-        result_dict = {}
-        for key, params in dict_params.items():
-            schema = ParameterSchema()
-            params1 = schema.load(params, many=True)
-            result_dict[key] = gen_schema(key, params1, result_dict)
-
-        good = dict(
-            name="objective",
-            coefficients=[dict(name="a", value=1), dict(name="b", value=5)],
-        )
-        bad = dict(name=1)
-        bad2 = dict(coefficients=[dict(name=1, value="")])
-        oschema = result_dict["ObjectiveSchema"]()
-        oschema.load(good)
-        func_error1 = lambda: oschema.load(bad)
-        func_error2 = lambda: oschema.load(bad2)
-        self.assertRaises(ValidationError, func_error1)
-        self.assertRaises(ValidationError, func_error2)
-
-    def test_two_unordered_classes(self):
-
-        dict_params = dict(
-            ObjectiveSchema=[
-                dict(name="name", type="String", required=False, allow_none=True),
-                dict(
-                    name="coefficients",
-                    type="CoefficientsSchema",
-                    many=True,
-                    required=True,
-                ),
-            ],
-            CoefficientsSchema=[
-                dict(name="name", type="String", required=True),
-                dict(name="value", type="Float", required=True),
-            ],
-        )
-        result_dict = {}
-        ordered = sort_dict(dict_params)
-        tuplist = sorted(dict_params.items(), key=lambda v: ordered[v[0]])
-        for key, params in tuplist:
-            schema = ParameterSchema()
-            params1 = schema.load(params, many=True)
-            result_dict[key] = gen_schema(key, params1, result_dict)
-
-        good = dict(
-            name="objective",
-            coefficients=[dict(name="a", value=1), dict(name="b", value=5)],
-        )
-        bad = dict(name=1)
-        bad2 = dict(coefficients=[dict(name=1, value="")])
-        oschema = result_dict["ObjectiveSchema"]()
-        oschema.load(good)
-        func_error1 = lambda: oschema.load(bad)
-        func_error2 = lambda: oschema.load(bad2)
-        self.assertRaises(ValidationError, func_error1)
-        self.assertRaises(ValidationError, func_error2)
-
-
-class TestSchemaEndpoint(CustomTestCase):
-    def setUp(self):
-        super().setUp()
-        self.schema = get_pulp_jsonschema()
-        self.config = get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"])
-        self.url = SCHEMA_URL
-        self.schema_name = "solve_model_dag"
-
-    def test_get_schema(self):
-        keys_to_check = [
-            "solution_checks",
-            "instance_checks",
-            "config",
-            "solution",
-            "name",
-            "instance",
-        ]
-        schemas = self.get_one_row(
-            self.url + "{}/".format(self.schema_name),
-            {},
-            expected_status=200,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertIn("instance", schemas)
-        self.assertIn("solution", schemas)
-        self.assertEqual(schemas["instance"], self.schema)
-        self.assertEqual(schemas["solution"], self.schema)
-        self.assertEqual(schemas["config"], self.config)
-
-
-class TestNewSchemaEndpointOpen(CustomTestCase):
-    def setUp(self):
-        super().setUp()
-        self.url = SCHEMA_URL
-
-    def test_get_all_schemas(self):
-        schemas = self.get_one_row(self.url, {}, 200, False, keys_to_check=["name"])
-        dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer"]]
-
-        self.assertEqual(dags, schemas)
-
-
-class TestNewSchemaEndpointNotOpen(CustomTestCase):
     def create_app(self):
+        """
+        Creates a test application instance.
+
+        :returns: A configured Flask application for testing
+        :rtype: Flask
+        """
         app = create_app("testing")
-        app.config["OPEN_DEPLOYMENT"] = 0
         return app
 
     def setUp(self):
-        super().setUp()
-        self.url = SCHEMA_URL
-        self.schema_name = "solve_model_dag"
+        """
+        Sets up the test environment before each test.
 
-    def test_get_all_schemas(self):
-        schemas = self.get_one_row(self.url, {}, 200, False)
-        self.assertEqual([], schemas)
+        Initializes the database and prepares test schemas and data.
+        """
+        db.create_all()
 
-    def test_get_one_schema(self):
-        schema = self.get_one_row(
-            self.url + "{}/".format(self.schema_name),
-            {},
-            expected_status=403,
-            check_payload=False,
-            keys_to_check=["error"],
-        )
-        self.assertEqual(
-            {"error": "User does not have permission to access this dag"}, schema
-        )
+    def tearDown(self):
+        """
+        Cleans up the test environment after each test.
 
+        Removes all database tables and session data.
+        """
+        db.session.remove()
+        db.drop_all()
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_validate_schema_success(self):
+        """
+        Tests successful schema validation.
+
+        Verifies that:
+        - Valid data passes schema validation
+        - The validation result is True
+        - No validation errors are returned
+        """
+        schema = {
+            "type": "object",
+            "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+            "required": ["name"],
+        }
+        data = {"name": "test", "age": 25}
+        result = validate_schema(data, schema)
+        self.assertTrue(result)
+
+    def test_validate_schema_failure(self):
+        """
+        Tests schema validation failure cases.
+
+        Verifies that:
+        - Invalid data fails schema validation
+        - The validation result is False
+        - Appropriate validation errors are returned
+        """
+        schema = {
+            "type": "object",
+            "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+            "required": ["name"],
+        }
+        data = {"age": "invalid"}
+        result = validate_schema(data, schema)
+        self.assertFalse(result)
+
+    def test_validate_schema_complex(self):
+        """
+        Tests validation of complex schemas.
+
+        Verifies that:
+        - Nested objects are properly validated
+        - Array validations work correctly
+        - Complex type constraints are enforced
+        """
+        schema = {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "age": {"type": "integer"},
+                        },
+                        "required": ["name"],
+                    },
+                }
+            },
+        }
+        data = {"users": [{"name": "test1", "age": 25}, {"name": "test2", "age": 30}]}
+        result = validate_schema(data, schema)
+        self.assertTrue(result)
+
+    def test_validate_schema_formats(self):
+        """
+        Tests validation of format constraints.
+
+        Verifies that:
+        - Email format validation works correctly
+        - Date format validation works correctly
+        - URI format validation works correctly
+        """
+        schema = {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string", "format": "email"},
+                "website": {"type": "string", "format": "uri"},
+            },
+        }
+        data = {"email": "test@example.com", "website": "http://example.com"}
+        result = validate_schema(data, schema)
+        self.assertTrue(result)

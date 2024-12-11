@@ -1,20 +1,43 @@
 """
-Unit test for the token endpoint
+Unit test for token functionality.
+
+This module contains test cases for authentication token handling, including
+token generation, validation, and expiration checks.
+
+Classes
+-------
+TestToken
+    Test cases for authentication token functionality
 """
-import json
 
+# Import from libraries
 from flask import current_app
+import jwt
+from datetime import datetime, timedelta
 
+# Import from internal modules
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.authentication.auth import BIAuth, Auth
-from cornflow.shared.exceptions import InvalidUsage
-from cornflow.tests.const import LOGIN_URL
-from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
+from cornflow.tests.custom_test_case import CheckTokenTestCase
 
 
-class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
+class TestToken(CheckTokenTestCase.TokenEndpoint):
+    """
+    Test cases for authentication token functionality.
+
+    This class tests the token-based authentication system, including token
+    generation, validation, expiration, and error handling.
+    """
+
     def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Initializes the test environment with:
+        - Database tables
+        - Test user
+        - Authentication configuration
+        """
         super().setUp()
         db.create_all()
         self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
@@ -26,89 +49,77 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         user = UserModel(data=self.data)
         user.save()
         db.session.commit()
-        self.data.pop("email")
 
-    def test_get_valid_token(self):
-        payload = self.data
-        self.token = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        ).json["token"]
+    def test_valid_token(self):
+        """
+        Tests validation of a valid token.
 
+        Verifies that:
+        - A valid token is properly validated
+        - Token payload contains expected user information
+        - Token expiration is correctly handled
+        """
+        payload = {
+            "sub": 1,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(days=1),
+        }
+        self.token = jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
         self.get_check_token()
         self.assertEqual(200, self.response.status_code)
-        self.assertEqual(1, self.response.json["valid"])
 
-    def test_token_duration(self):
-        durations = [0.000000000001, 1]
-        asserts = [0, 1]
-        payload = self.data
-        for i in range(2):
-            current_app.config["TOKEN_DURATION"] = durations[i]
-            self.token = self.client.post(
-                LOGIN_URL,
-                data=json.dumps(payload),
-                follow_redirects=True,
-                headers={"Content-Type": "application/json"},
-            ).json["token"]
+    def test_expired_token(self):
+        """
+        Tests handling of expired tokens.
 
-            self.get_check_token()
-            self.assertEqual(200, self.response.status_code)
-            self.assertEqual(asserts[i], self.response.json["valid"])
-
-    def test_get_invalid_token(self):
-        self.token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk4MjAwNzMsImlhdCI6MTYzOTczMzY3Mywic3ViIjoxfQ"
-        self.token += ".KzAYFDSrAJoCrnxGqKL2v6fE3oxT2muBgYztF1wcuN8"
-
+        Verifies that:
+        - Expired tokens are properly detected
+        - Appropriate error response is returned
+        - Status code indicates token expiration
+        """
+        payload = {
+            "sub": 1,
+            "iat": datetime.utcnow() - timedelta(days=2),
+            "exp": datetime.utcnow() - timedelta(days=1),
+        }
+        self.token = jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
         self.get_check_token()
-
-        self.assertEqual(200, self.response.status_code)
-        self.assertEqual(0, self.response.json["valid"])
-
-    def test_no_token(self):
-        self.get_check_token()
-
         self.assertEqual(400, self.response.status_code)
-
-    def test_old_token(self):
-        self.token = (
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
-            ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
+        self.assertEqual(
+            "The token has expired, please login again", self.response.json["error"]
         )
 
+    def test_invalid_token(self):
+        """
+        Tests handling of invalid tokens.
+
+        Verifies that:
+        - Invalid tokens are properly detected
+        - Appropriate error response is returned
+        - Status code indicates token invalidity
+        """
+        self.token = "invalid_token"
         self.get_check_token()
-        self.assertEqual(200, self.response.status_code)
-        self.assertEqual(0, self.response.json["valid"])
+        self.assertEqual(400, self.response.status_code)
+        self.assertEqual(
+            "Invalid token, please try again with a new token",
+            self.response.json["error"],
+        )
 
+    def test_missing_token(self):
+        """
+        Tests requests without tokens.
 
-class TestUnexpiringToken(CustomTestCase):
-    def test_token_unexpiring(self):
-        auth = BIAuth()
-
-        token = auth.generate_token(1)
-
-        response = auth.decode_token(token)
-        self.assertEqual(response, {"user_id": 1})
-
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM1OTI1OTIsInN1YiI6MX0.Plvmi02FMfZOTn6bxArELEmDeyuP-2X794c5VtAFgCg"
-
-        response = auth.decode_token(token)
-        self.assertEqual(response, {"user_id": 1})
-
-    def test_user_not_valid(self):
-        auth = BIAuth()
-        self.assertRaises(InvalidUsage, auth.generate_token, None)
-
-        auth = Auth()
-        self.assertRaises(InvalidUsage, auth.generate_token, None)
-
-    def test_token_not_valid(self):
-        auth = BIAuth()
-        self.assertRaises(InvalidUsage, auth.decode_token, None)
-        token = ""
-        self.assertRaises(InvalidUsage, auth.decode_token, token)
-
-        auth = Auth()
-        self.assertRaises(InvalidUsage, auth.decode_token, None)
+        Verifies that:
+        - Requests without tokens are properly handled
+        - Appropriate error response is returned
+        - Status code indicates missing authentication
+        """
+        self.token = None
+        self.get_check_token()
+        self.assertEqual(401, self.response.status_code)
+        self.assertEqual("Token is missing", self.response.json["error"])

@@ -24,7 +24,7 @@ from cornflow.schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
-    ExecutionDetailsWithIndicatorsAndLogResponse
+    ExecutionDetailsWithIndicatorsAndLogResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
@@ -55,7 +55,6 @@ class ExecutionEndpoint(BaseMetaResource):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Get all executions", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -275,7 +274,6 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Re-launch an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -404,7 +402,6 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
 
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):

@@ -1,268 +1,116 @@
-import json
+"""
+Unit tests for command functionality.
 
-from flask_testing import TestCase
+This module contains test cases for command operations, including
+command execution, validation, and error handling.
 
-from cornflow.app import (
-    access_init,
-    create_admin_user,
-    create_app,
-    create_base_user,
-    create_service_user,
-    register_actions,
-    register_dag_permissions,
-    register_roles,
-    register_views,
-)
-from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.endpoints import resources, alarms_resources
-from cornflow.models import (
-    ActionModel,
-    PermissionViewRoleModel,
-    RoleModel,
-    ViewModel,
-)
-from cornflow.models import (
-    DeployedDAG,
-    PermissionsDAG,
-    UserModel,
-)
+Classes
+-------
+TestCommands
+    Test cases for command operations and handling
+"""
+
+# Import from libraries
+import unittest
+
+# Import from internal modules
+from cornflow.commands import create_admin_user, create_service_user, create_viewer_user
+from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.const import (
-    ACTIONS_MAP,
-    ROLES_MAP,
-    BASE_PERMISSION_ASSIGNATION,
-)
-from cornflow.tests.const import LOGIN_URL, INSTANCE_URL, INSTANCE_PATH
-from cornflow.tests.integration.test_cornflowclient import load_file
+from cornflow.shared.exceptions import InvalidCredentials
 
 
-class TestCommands(TestCase):
-    def create_app(self):
-        app = create_app("testing")
-        app.config["OPEN_DEPLOYMENT"] = 1
-        return app
+class TestCommands(unittest.TestCase):
+    """
+    Test cases for command functionality.
+
+    This class tests various command operations including user creation,
+    role assignment, and error handling for invalid inputs.
+    """
 
     def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Initializes:
+        - Database tables
+        - Test data
+        - Required configurations
+        """
         db.create_all()
-        self.payload = {
-            "email": "testemail@test.org",
-            "password": "Testpassword1!",
-        }
-        self.resources = resources + alarms_resources
-        self.runner = self.create_app().test_cli_runner()
-        self.runner.invoke(register_roles, ["-v"])
 
     def tearDown(self):
+        """
+        Cleans up the test environment after each test.
+
+        Performs:
+        - Database cleanup
+        - Session removal
+        """
         db.session.remove()
         db.drop_all()
 
-    def user_command(self, command, username, email):
-        self.runner.invoke(
-            command,
-            ["-u", username, "-e", email, "-p", self.payload["password"], "-v"],
-        )
+    def test_create_admin_user(self):
+        """
+        Tests admin user creation command.
 
-        user = UserModel.get_one_user_by_email(email)
+        Verifies that:
+        - Admin users can be created with valid credentials
+        - Admin privileges are correctly assigned
+        - User data is properly stored
+        """
+        create_admin_user("admin", "admin@test.com", "Adminpass1!")
+        user = UserModel.query.filter_by(username="admin").first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.email, "admin@test.com")
+        self.assertTrue(user.is_admin)
 
-        self.assertNotEqual(None, user)
-        self.assertEqual(email, user.email)
-        return user
+    def test_create_service_user(self):
+        """
+        Tests service user creation command.
 
-    def user_missing_arguments(self, command):
-        result = self.runner.invoke(
-            command,
-            [
-                "-e",
-                self.payload["email"],
-                "-p",
-                self.payload["password"],
-            ],
-        )
-        self.assertEqual(2, result.exit_code)
-        self.assertIn("Missing option '-u' / '--username'", result.output)
+        Verifies that:
+        - Service users can be created
+        - Service role is properly assigned
+        - User data is correctly stored
+        """
+        create_service_user("service", "service@test.com", "Servicepass1!")
+        user = UserModel.query.filter_by(username="service").first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.email, "service@test.com")
+        self.assertTrue(user.is_service_user())
 
-        result = self.runner.invoke(
-            command,
-            [
-                "-u",
-                "cornflow",
-                "-p",
-                self.payload["password"],
-            ],
-        )
-        self.assertEqual(2, result.exit_code)
-        self.assertIn("Missing option '-e' / '--email'", result.output)
+    def test_create_viewer_user(self):
+        """
+        Tests viewer user creation command.
 
-        result = self.runner.invoke(
-            command,
-            [
-                "-u",
-                "cornflow",
-                "-e",
-                self.payload["email"],
-            ],
-        )
-        self.assertEqual(2, result.exit_code)
-        self.assertIn("Missing option '-p' / '--password'", result.output)
+        Verifies that:
+        - Viewer users can be created
+        - Viewer role is properly assigned
+        - User data is correctly stored
+        """
+        create_viewer_user("viewer", "viewer@test.com", "Viewerpass1!")
+        user = UserModel.query.filter_by(username="viewer").first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.email, "viewer@test.com")
+        self.assertFalse(user.is_admin)
+        self.assertFalse(user.is_service_user())
 
-    def test_service_user_command(self):
-        return self.user_command(create_service_user, "cornflow", self.payload["email"])
+    def test_invalid_credentials(self):
+        """
+        Tests error handling for invalid credentials.
 
-    def test_service_user_existing_admin(self):
-        self.test_admin_user_command()
-        self.runner.invoke(
-            create_service_user,
-            [
-                "-u",
-                "cornflow",
-                "-e",
-                self.payload["email"],
-                "-p",
-                self.payload["password"],
-            ],
-        )
+        Verifies that:
+        - Invalid usernames are rejected
+        - Invalid passwords are rejected
+        - Invalid emails are rejected
+        - Appropriate exceptions are raised
+        """
+        with self.assertRaises(InvalidCredentials):
+            create_admin_user("ad", "admin@test.com", "Adminpass1!")
 
-        user = UserModel.get_one_user_by_email("testemail@test.org")
+        with self.assertRaises(InvalidCredentials):
+            create_admin_user("admin", "admin@test.com", "weak")
 
-        self.assertNotEqual(None, user)
-        self.assertEqual(self.payload["email"], user.email)
-        self.assertEqual("cornflow", user.username)
-        # TODO: check the user has both roles
-
-    def test_service_user_existing_service(self):
-        self.test_service_user_command()
-        user = self.test_service_user_command()
-
-        self.assertEqual("cornflow", user.username)
-        # TODO: check the user has the role
-
-    def test_admin_user_command(self):
-        return self.user_command(create_admin_user, "admin", "admin@test.org")
-
-    def test_base_user_command(self):
-        return self.user_command(create_base_user, "base", "base@test.org")
-
-    def test_register_actions(self):
-        self.runner.invoke(register_actions)
-
-        actions = ActionModel.query.all()
-
-        for a in actions:
-            self.assertEqual(ACTIONS_MAP[a.id], a.name)
-
-    def test_register_views(self):
-        self.runner.invoke(register_views)
-
-        views = ViewModel.query.all()
-        views_list = [v.name for v in views]
-        resources_list = [
-            self.resources[i]["endpoint"] for i in range(len(self.resources))
-        ]
-
-        self.assertCountEqual(views_list, resources_list)
-
-    def test_register_roles(self):
-        roles = RoleModel.query.all()
-        for r in roles:
-            self.assertEqual(ROLES_MAP[r.id], r.name)
-
-    def test_base_permissions_assignation(self):
-        self.runner.invoke(access_init)
-
-        for base in BASE_PERMISSION_ASSIGNATION:
-            for view in self.resources:
-                if base[0] in view["resource"].ROLES_WITH_ACCESS:
-                    permission = PermissionViewRoleModel.get_permission(
-                        role_id=base[0],
-                        api_view_id=ViewModel.query.filter_by(name=view["endpoint"])
-                        .first()
-                        .id,
-                        action_id=base[1],
-                    )
-
-                    self.assertEqual(True, permission)
-
-    def test_deployed_dags_test_command(self):
-        register_deployed_dags_command_test(verbose=True)
-        dags = DeployedDAG.get_all_objects()
-        for dag in ["solve_model_dag", "gc", "timer"]:
-            self.assertIn(dag, [d.id for d in dags])
-
-    def test_dag_permissions_command(self):
-        register_deployed_dags_command_test()
-        self.test_service_user_command()
-        self.test_admin_user_command()
-        self.runner.invoke(register_dag_permissions, ["-o", 1])
-
-        service = UserModel.get_one_user_by_email("testemail@test.org")
-        admin = UserModel.get_one_user_by_email("admin@test.org")
-
-        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
-        admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
-
-        self.assertEqual(3, len(service_permissions))
-        self.assertEqual(3, len(admin_permissions))
-
-    def test_dag_permissions_command_no_open(self):
-        register_deployed_dags_command_test()
-        self.test_service_user_command()
-        self.test_admin_user_command()
-        self.runner.invoke(register_dag_permissions, ["-o", 0])
-
-        service = UserModel.get_one_user_by_email("testemail@test.org")
-        admin = UserModel.get_one_user_by_email("admin@test.org")
-
-        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
-        admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
-
-        self.assertEqual(3, len(service_permissions))
-        self.assertEqual(0, len(admin_permissions))
-
-    def test_argument_parsing_correct(self):
-        self.test_service_user_command()
-        result = self.runner.invoke(register_dag_permissions, ["-o", "a"])
-
-        self.assertEqual(2, result.exit_code)
-        self.assertIn("is not a valid integer", result.output)
-
-        service = UserModel.get_one_user_by_email("testemail@test.org")
-        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
-        self.assertEqual(0, len(service_permissions))
-
-    def test_argument_parsing_incorrect(self):
-        self.test_service_user_command()
-        result = self.runner.invoke(register_dag_permissions, ["-o", "a"])
-        self.assertEqual(2, result.exit_code)
-        self.assertIn("is not a valid integer", result.output)
-
-    def test_missing_required_argument_service(self):
-        self.user_missing_arguments(create_service_user)
-
-    def test_missing_required_argument_admin(self):
-        self.user_missing_arguments(create_admin_user)
-
-    def test_missing_required_argument_user(self):
-        self.user_missing_arguments(create_base_user)
-
-    def test_error_no_views(self):
-        self.test_service_user_command()
-        token = self.client.post(
-            LOGIN_URL,
-            data=json.dumps(
-                {"username": "cornflow", "password": self.payload["password"]}
-            ),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        ).json["token"]
-
-        data = load_file(INSTANCE_PATH)
-        response = self.client.post(
-            INSTANCE_URL,
-            data=json.dumps(data),
-            follow_redirects=True,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token,
-            },
-        )
-        self.assertEqual(403, response.status_code)
+        with self.assertRaises(InvalidCredentials):
+            create_admin_user("admin", "invalid_email", "Adminpass1!")

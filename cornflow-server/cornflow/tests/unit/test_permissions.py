@@ -5,21 +5,21 @@ Unit test for the permissions table
 # Import from libraries
 import json
 
-from cornflow.models import (
-    ActionModel,
-    PermissionViewRoleModel,
-    RoleModel,
-    ViewModel,
-)
-
 # Import from internal modules
 from cornflow.app import create_app
 from cornflow.endpoints import (
     PermissionsViewRoleEndpoint,
     PermissionsViewRoleDetailEndpoint,
 )
+from cornflow.models import (
+    ActionModel,
+    PermissionViewRoleModel,
+    RoleModel,
+    ViewModel,
+)
 from cornflow.models import InstanceModel
 from cornflow.shared.const import GET_ACTION, ROLES_MAP, VIEWER_ROLE
+from cornflow.shared.exceptions import InvalidData
 from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, PERMISSION_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -242,3 +242,18 @@ class TestPermissionsViewModel(CustomTestCase):
         api_view.delete()
         after_permissions = PermissionViewRoleModel.get_all_objects()
         self.assertNotEqual(before_permissions, after_permissions)
+
+    def test_permission_role_foreign_key(self):
+        payload = {"role_id": 10, "action_id": 1, "api_view_id": 1}
+        permission = PermissionViewRoleModel(payload)
+        self.assertRaises(InvalidData, permission.save)
+
+    def test_permission_action_foreign_key(self):
+        payload = {"role_id": 1, "action_id": 10, "api_view_id": 1}
+        permission = PermissionViewRoleModel(payload)
+        self.assertRaises(InvalidData, permission.save)
+
+    def test_permission_api_view_foreign_key(self):
+        payload = {"role_id": 1, "action_id": 1, "api_view_id": 1000}
+        permission = PermissionViewRoleModel(payload)
+        self.assertRaises(InvalidData, permission.save)

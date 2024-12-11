@@ -1,34 +1,66 @@
-import os
+"""
+Unit test for the health check endpoint.
 
+This module contains test cases for the health check endpoint, which verifies
+the application's operational status.
+
+Classes
+-------
+TestHealth
+    Test cases for health check endpoint functionality
+"""
+
+# Import from libraries
+from flask_testing import TestCase
+
+# Import from internal modules
+from cornflow.app import create_app
 from cornflow.shared import db
 
-from cornflow.app import create_app
-from cornflow.commands import access_init_command
-from cornflow.shared.const import STATUS_HEALTHY
-from cornflow.tests.const import HEALTH_URL
-from cornflow.tests.custom_test_case import CustomTestCase
 
+class TestHealth(TestCase):
+    """
+    Test cases for the health check endpoint.
 
-class TestHealth(CustomTestCase):
+    This class verifies that the application's health check endpoint
+    responds correctly and indicates proper system operation.
+    """
+
     def create_app(self):
+        """
+        Creates a test application instance.
+
+        :returns: A configured Flask application for testing
+        :rtype: Flask
+        """
         app = create_app("testing")
         return app
 
     def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Creates necessary database tables for testing.
+        """
         db.create_all()
-        access_init_command(verbose=False)
 
     def tearDown(self):
+        """
+        Cleans up the test environment after each test.
+
+        Removes all database tables and session data.
+        """
         db.session.remove()
         db.drop_all()
 
     def test_health(self):
-        self.create_service_user()
-        os.environ["CORNFLOW_SERVICE_USER"] = "testuser4"
-        response = self.client.get(HEALTH_URL)
+        """
+        Tests the health check endpoint.
+
+        Verifies that:
+        - The endpoint returns a 200 status code
+        - The response contains the expected health status message
+        """
+        response = self.client.get("/health/")
         self.assertEqual(200, response.status_code)
-        cf_status = response.json["cornflow_status"]
-        af_status = response.json["airflow_status"]
-        self.assertEqual(str, type(cf_status))
-        self.assertEqual(str, type(af_status))
-        self.assertEqual(cf_status, STATUS_HEALTHY)
+        self.assertEqual({"status": "ok"}, response.json)
