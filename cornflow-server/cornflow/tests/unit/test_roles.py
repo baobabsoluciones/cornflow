@@ -1,9 +1,9 @@
 """
 Unit test for the role endpoints
 """
+
 import json
 import logging as log
-from cornflow.models import PermissionViewRoleModel, RoleModel
 
 # Import from internal modules
 from cornflow.endpoints import (
@@ -12,6 +12,7 @@ from cornflow.endpoints import (
     UserRoleListEndpoint,
     UserRoleDetailEndpoint,
 )
+from cornflow.models import PermissionViewRoleModel, RoleModel
 from cornflow.models import (
     UserModel,
     UserRoleModel,
@@ -22,6 +23,7 @@ from cornflow.shared.const import (
     ROLES_MAP,
     VIEWER_ROLE,
 )
+from cornflow.shared.exceptions import InvalidData
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
@@ -250,7 +252,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
                 },
             )
             self.assertEqual(200, response.status_code)
-            self.assertEqual(self.payload, response.json)
+            self.assertCountEqual(self.payload, response.json)
 
     def test_get_user_roles_not_authorized_user(self):
         for role in ROLES_MAP:
@@ -472,3 +474,15 @@ class TestRolesModelMethods(CustomTestCase):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.str_method(idx, "<Role test_role>")
+
+
+class TestUserRolesModelMethods(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.url = USER_ROLE_URL
+        self.model = UserRoleModel
+
+    def test_user_role_role_foreign_key(self):
+        payload = {"user_id": 1, "role_id": 10}
+        user_role = self.model(payload)
+        self.assertRaises(InvalidData, user_role.save)

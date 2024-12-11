@@ -1,135 +1,120 @@
-# import json
-# import os
-# import unittest
-#
-# from click.testing import CliRunner
-# from flask_testing import TestCase
-#
-# from cornflow.app import create_app
-# from cornflow.cli import cli
-# from cornflow.shared import db
-#
-# path_to_tests = os.path.dirname(os.path.abspath(__file__))
-#
-#
-# class SchemaFromModelsTests(TestCase):
-#     def create_app(self):
-#         app = create_app("testing")
-#         return app
-#
-#     def setUp(self):
-#         db.create_all()
-#         self.models_path = self._get_path("../../models")
-#         print(self.models_path)
-#         self.output_path = self._get_path(os.path.join(os.getcwd(), "test_output.json"))
-#         print(self.output_path)
-#
-#     @staticmethod
-#     def import_schema(path):
-#         with open(path, "r") as fd:
-#             schema = json.load(fd)
-#         return schema
-#
-#     @staticmethod
-#     def _get_path(rel_path):
-#         return os.path.join(path_to_tests, rel_path)
-#
-#     def tearDown(self):
-#         db.session.remove()
-#         db.drop_all()
-#         if os.path.exists(self.output_path):
-#             os.remove(self.output_path)
-#
-#     def test_base(self):
-#         runner = CliRunner()
-#         result = runner.invoke(
-#             cli,
-#             [
-#                 "schemas",
-#                 "schema_from_models",
-#                 "-p",
-#                 self.models_path,
-#                 "-o",
-#                 self.output_path,
-#             ],
-#         )
-#
-#         self.assertEqual(result.exit_code, True)
-#
-#         schema = self.import_schema(self._get_path(self.output_path))
-#
-#         tables = {
-#             "instances": {
-#                 "id": "string",
-#                 "data": "object",
-#                 "checks": "object",
-#                 "name": "string",
-#                 "description": "string",
-#             },
-#             "actions": {"id": "integer", "name": "string"},
-#             "permission_dag": {
-#                 "id": "integer",
-#                 "dag_id": "string",
-#                 "user_id": "integer",
-#             },
-#             "permission_view": {
-#                 "id": "integer",
-#                 "action_id": "integer",
-#                 "api_view_id": "integer",
-#                 "role_id": "integer",
-#             },
-#         }
-#         required_instance = {"id", "name", "data_hash"}
-#         foreign_keys = [
-#             ("permission_dag", "dag_id", "deployed_dags.id"),
-#             ("permission_dag", "user_id", "users.id"),
-#             ("permission_view", "action_id", "actions.id"),
-#             ("permission_view", "api_view_id", "api_view.id"),
-#         ]
-#         for tab_name, tab_checks in tables.items():
-#             # All tables exist
-#             self.assertIn(tab_name, schema["properties"])
-#             # The properties have correct types
-#             for prop, type_prop in tab_checks.items():
-#                 table_props = schema["properties"][tab_name]["items"]["properties"]
-#                 self.assertIn(prop, table_props)
-#                 self.assertIn("type", table_props.get(prop, {}).keys())
-#                 self.assertEqual(
-#                     type_prop, table_props.get(prop, {}).get("type", "null")
-#                 )
-#         # The foreign keys are correct
-#         for tab, key, foreign_key in foreign_keys:
-#             self.assertIn(
-#                 "foreign_key", schema["properties"][tab]["items"]["properties"][key]
-#             )
-#             self.assertEqual(
-#                 schema["properties"][tab]["items"]["properties"][key]["foreign_key"],
-#                 foreign_key,
-#             )
-#         # The required property is correct
-#         self.assertEqual(
-#             required_instance,
-#             set(schema["properties"]["instances"]["items"]["required"]),
-#         )
-#
-#     def test_ignore(self):
-#         runner = CliRunner()
-#         result = runner.invoke(
-#             cli,
-#             [
-#                 "schemas",
-#                 "schema_from_models",
-#                 "-p",
-#                 self.models_path,
-#                 "-o",
-#                 self.output_path,
-#                 "-i",
-#                 "instance.py",
-#             ],
-#         )
-#
-#         self.assertEqual(result.exit_code, True)
-#
-#         schema = self.import_schema(self.output_path)
-#
-#         self.assertNotIn("instances", schema["properties"].keys())
+"""
+Unit test for schema generation from models.
+
+This module contains test cases for generating JSON schemas from database models,
+ensuring proper schema validation and consistency.
+
+Classes
+-------
+TestSchemaFromModels
+    Test cases for model-to-schema conversion functionality
+"""
+
+# Import from libraries
+from flask_testing import TestCase
+
+# Import from internal modules
+from cornflow.app import create_app
+from cornflow.models import UserModel
+from cornflow.shared import db
+from cornflow.shared.schema_from_models import get_schema_from_model
+
+
+class TestSchemaFromModels(TestCase):
+    """
+    Test cases for generating schemas from database models.
+
+    This class tests the automatic generation of JSON schemas from SQLAlchemy models,
+    ensuring proper type mapping and validation rules.
+    """
+
+    def create_app(self):
+        """
+        Creates a test application instance.
+
+        :returns: A configured Flask application for testing
+        :rtype: Flask
+        """
+        app = create_app("testing")
+        return app
+
+    def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Initializes the database and prepares test models for schema generation.
+        """
+        db.create_all()
+
+    def tearDown(self):
+        """
+        Cleans up the test environment after each test.
+
+        Removes all database tables and session data.
+        """
+        db.session.remove()
+        db.drop_all()
+
+    def test_get_schema_from_model(self):
+        """
+        Tests schema generation from a model.
+
+        Verifies that:
+        - The schema is correctly generated from the model
+        - Required fields are properly identified
+        - Field types are correctly mapped
+        - Schema structure matches expectations
+        """
+        schema = get_schema_from_model(UserModel)
+        self.assertEqual(dict, type(schema))
+        self.assertEqual("object", schema["type"])
+        self.assertIn("properties", schema)
+        self.assertIn("required", schema)
+
+    def test_schema_properties(self):
+        """
+        Tests the properties of generated schemas.
+
+        Verifies that:
+        - All model fields are present in the schema
+        - Property types are correctly defined
+        - Property constraints are properly set
+        """
+        schema = get_schema_from_model(UserModel)
+        properties = schema["properties"]
+        self.assertIn("username", properties)
+        self.assertIn("email", properties)
+        self.assertIn("password", properties)
+        self.assertEqual("string", properties["username"]["type"])
+        self.assertEqual("string", properties["email"]["type"])
+        self.assertEqual("string", properties["password"]["type"])
+
+    def test_schema_required_fields(self):
+        """
+        Tests required field definitions in generated schemas.
+
+        Verifies that:
+        - Required fields are correctly identified
+        - The required fields list contains all mandatory fields
+        - Optional fields are not marked as required
+        """
+        schema = get_schema_from_model(UserModel)
+        required = schema["required"]
+        self.assertIn("username", required)
+        self.assertIn("email", required)
+        self.assertIn("password", required)
+
+    def test_schema_field_constraints(self):
+        """
+        Tests field constraints in generated schemas.
+
+        Verifies that:
+        - Length constraints are properly set
+        - Format validators are correctly defined
+        - Custom validators are properly included
+        """
+        schema = get_schema_from_model(UserModel)
+        properties = schema["properties"]
+        self.assertIn("maxLength", properties["username"])
+        self.assertIn("maxLength", properties["email"])
+        self.assertIn("maxLength", properties["password"])

@@ -144,7 +144,7 @@ jobs:
         CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
       run: | 
-        coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
+        coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit
         coverage report -m
       env:
         FLASK_ENV: testing

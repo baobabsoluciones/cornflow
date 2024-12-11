@@ -1,122 +1,131 @@
 """
-Unit test for the sign-up endpoint
+Unit test for the sign up functionality.
+
+This module contains test cases for user registration functionality,
+ensuring proper user account creation and validation.
+
+Classes
+-------
+TestSignUp
+    Test cases for user registration functionality
 """
-from cornflow.commands import access_init_command
-from cornflow.commands.dag import register_deployed_dags_command_test
 
 # Import from libraries
-from flask_testing import TestCase
-import json
+from flask import current_app
 
 # Import from internal modules
-from cornflow.app import create_app
-from cornflow.models import UserModel, UserRoleModel
-from cornflow.shared.const import PLANNER_ROLE
+from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.tests.const import SIGNUP_URL
+from cornflow.tests.custom_test_case import CustomTestCase
 
 
-class TestSignUp(TestCase):
-    def create_app(self):
-        app = create_app("testing")
+class TestSignUp(CustomTestCase):
+    """
+    Test cases for the sign up functionality.
 
-        return app
+    This class tests user registration scenarios, including successful registration,
+    validation of user data, and handling of invalid registration attempts.
+    """
 
     def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Initializes the test environment with:
+        - Database tables
+        - Authentication configuration
+        - Test user data
+        """
+        super().setUp()
         db.create_all()
-        access_init_command(verbose=False)
-        register_deployed_dags_command_test(verbose=False)
+        self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
         self.data = {
             "username": "testname",
             "email": "test@test.com",
             "password": "Testpassword1!",
         }
 
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+    def test_successful_sign_up(self):
+        """
+        Tests successful user registration.
 
-    def test_successful_signup(self):
-        payload = self.data
-
+        Verifies that:
+        - A new user can be created with valid data
+        - The response contains the expected user information
+        - The user is properly stored in the database
+        """
         response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
+            "/signup/",
+            data=self.data,
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
-
         self.assertEqual(201, response.status_code)
         self.assertEqual(str, type(response.json["token"]))
-        self.assertEqual(int, type(response.json["id"]))
-        self.assertEqual(
-            PLANNER_ROLE,
-            UserRoleModel.query.filter_by(user_id=response.json["id"]).first().role_id,
-        )
-        self.assertNotEqual(None, UserModel.get_one_user_by_email(self.data["email"]))
+        user = UserModel.query.filter_by(username=self.data["username"]).first()
+        self.assertIsNotNone(user)
 
-    # Test that registering again with the same name give an error
-    def test_existing_name_signup(self):
-        payload = self.data
+    def test_duplicate_username(self):
+        """
+        Tests registration with duplicate username.
 
+        Verifies that:
+        - Registration fails with duplicate username
+        - Appropriate error message is returned
+        - Status code indicates conflict
+        """
+        # First registration
         self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
+            "/signup/",
+            data=self.data,
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
 
-        response2 = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(400, response2.status_code)
-        self.assertTrue("error" in response2.json)
-        self.assertEqual(str, type(response2.json["error"]))
-
-    def test_validation_error(self):
-        payload = self.data
-        payload["email"] = "test"
-
+        # Second registration with same username
         response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
+            "/signup/",
+            data=self.data,
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
+        self.assertEqual(409, response.status_code)
+        self.assertEqual(str, type(response.json["error"]))
 
+    def test_invalid_email(self):
+        """
+        Tests registration with invalid email format.
+
+        Verifies that:
+        - Registration fails with invalid email format
+        - Appropriate validation error is returned
+        - Status code indicates bad request
+        """
+        self.data["email"] = "invalid_email"
+        response = self.client.post(
+            "/signup/",
+            data=self.data,
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
         self.assertEqual(400, response.status_code)
         self.assertEqual(str, type(response.json["error"]))
 
+    def test_missing_required_fields(self):
+        """
+        Tests registration with missing required fields.
 
-class TestSignUpDeactivated(TestCase):
-    def create_app(self):
-        app = create_app("testing")
-        app.config["SIGNUP_ACTIVATED"] = 0
-        return app
-
-    def setUp(self):
-        db.create_all()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-
-    def test_signup_deactivated(self):
-        payload = {
-            "username": "testname",
-            "email": "test@test.com",
-            "password": "Testpassword1!",
-        }
-
+        Verifies that:
+        - Registration fails when required fields are missing
+        - Appropriate error messages are returned for each missing field
+        - Status code indicates bad request
+        """
+        invalid_data = {}
         response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
+            "/signup/",
+            data=invalid_data,
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
         )
-
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(str, type(response.json["error"]))

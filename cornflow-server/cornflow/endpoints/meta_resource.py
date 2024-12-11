@@ -1,16 +1,19 @@
 """
 This file has all the logic shared for all the resources
 """
-# Import from external libraries
-from flask_restful import Resource
+
+from functools import wraps
+
 from flask import g, request
 from flask_apispec.views import MethodResource
-from functools import wraps
+
+# Import from external libraries
+from flask_restful import Resource
 from pytups import SuperDict
 
 # Import from internal modules
 from cornflow.shared.const import ALL_DEFAULT_ROLES
-from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist
 
 
 class BaseMetaResource(Resource, MethodResource):
@@ -25,7 +28,6 @@ class BaseMetaResource(Resource, MethodResource):
         super().__init__()
         self.data_model = None
         self.user = None
-        self.foreign_data = None
         self.auth_class = None
         self.dependents = None
         self.unique = None
@@ -64,13 +66,6 @@ class BaseMetaResource(Resource, MethodResource):
         data = dict(data)
         data[trace_field] = self.get_user_id()
         item = self.data_model(data)
-        if self.foreign_data is not None:
-            for fk in self.foreign_data:
-                owner = self.foreign_data[fk].query.get(getattr(item, fk))
-                if owner is None:
-                    raise ObjectDoesNotExist()
-                if self.user.id != owner.user_id:
-                    raise NoPermission()
         item.save()
         return item, 201
 

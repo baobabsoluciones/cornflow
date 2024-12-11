@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 # Import from internal modules
 from cornflow.models import ExecutionModel, InstanceModel
+from cornflow.shared.exceptions import InvalidData
 from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
@@ -126,8 +127,8 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             follow_redirects=True,
             headers=self.get_header_with_auth(self.token),
         )
-        self.assertEqual(404, response.status_code)
-        self.assertTrue("error" in response.json)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue("Integrity error on saving with data" in response.json["error"])
 
     def test_get_executions(self):
         self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
@@ -514,6 +515,12 @@ class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):
+    def test_correct_instance_foreign_key(self):
+        payload = self.payload
+        payload["instance_id"] = "bad_id"
+        execution = ExecutionModel(payload)
+        self.assertRaises(InvalidData, execution.save)
+
     def test_repr_method(self):
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         self.repr_method(idx, f"<Execution {idx}>")

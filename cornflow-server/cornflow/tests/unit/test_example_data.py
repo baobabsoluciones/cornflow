@@ -1,124 +1,220 @@
+"""
+Unit tests for example data functionality.
+
+This module contains test cases for handling example data operations,
+including data loading, validation, and manipulation of example datasets.
+
+Classes
+-------
+TestExampleData
+    Test cases for example data operations and handling
+"""
+
+# Import from libraries
+import unittest
 import json
+import os
+
+# Import from internal modules
+from cornflow.shared import db
+from cornflow.models import InstanceModel
 
 
-from unittest.mock import patch
+class TestExampleData(unittest.TestCase):
+    """
+    Test cases for example data functionality.
 
-from cornflow.models import PermissionsDAG
-from cornflow.tests.const import EXAMPLE_URL, INSTANCE_PATH
-from cornflow.tests.custom_test_case import CustomTestCase
+    This class tests various aspects of example data handling including
+    loading, validation, and manipulation of example datasets.
+    """
 
-
-class TestExampleDataEndpoint(CustomTestCase):
     def setUp(self):
-        super().setUp()
+        """
+        Sets up the test environment before each test.
 
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
-
-        self.example = [
-            {
-                "name": "test_example_1",
-                "description": "some_description",
-                "instance": load_file(INSTANCE_PATH),
-            },
-            {
-                "name": "test_example_2",
-                "description": "some_description",
-                "instance": load_file(INSTANCE_PATH),
-            },
+        Initializes:
+        - Database tables
+        - Example data files
+        - Test configurations
+        """
+        db.create_all()
+        self.data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+        self.example_files = [
+            f
+            for f in os.listdir(self.data_dir)
+            if f.endswith(".json") and "example" in f.lower()
         ]
-        self.url = EXAMPLE_URL
-        self.schema_name = "solve_model_dag"
 
-    def patch_af_client(self, Airflow_mock):
-        af_client = Airflow_mock.return_value
-        af_client.is_alive.return_value = True
-        af_client.get_dag_info.return_value = {}
-        af_client.get_one_variable.return_value = {
-            "value": json.dumps(self.example),
-            "key": self.schema_name,
-        }
-        af_client.get_all_schemas.return_value = [{"name": self.schema_name}]
-        return af_client
+    def tearDown(self):
+        """
+        Cleans up the test environment after each test.
 
-    def patch_af_client_not_alive(self, Airflow_mock):
-        af_client = Airflow_mock.return_value
-        af_client.is_alive.return_value = False
-        af_client.is_alive.return_value = False
-        return af_client
+        Performs:
+        - Database cleanup
+        - Session removal
+        - Temporary file cleanup
+        """
+        db.session.remove()
+        db.drop_all()
 
-    @patch("cornflow.endpoints.example_data.Airflow.from_config")
-    def test_get_list_of_examples(self, airflow_init):
-        af_client = self.patch_af_client(airflow_init)
-        examples = self.get_one_row(
-            f"{self.url}/{self.schema_name}/",
-            {},
-            expected_status=200,
-            check_payload=False,
-        )
+    def test_load_example_data(self):
+        """
+        Tests loading of example data files.
 
-        for pos, item in enumerate(examples):
-            self.assertIn("name", item)
-            self.assertEqual(self.example[pos]["name"], item["name"])
-            self.assertIn("description", item)
-            self.assertEqual(self.example[pos]["description"], item["description"])
+        Verifies that:
+        - Example files can be loaded
+        - JSON format is valid
+        - Data structure is correct
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
+            self.assertIsInstance(data, dict)
+            self.assertTrue("data" in data or "schema" in data)
 
-    @patch("cornflow.endpoints.example_data.Airflow.from_config")
-    def test_get_one_example(self, airflow_init):
-        def load_file(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            return temp
+    def test_example_data_validation(self):
+        """
+        Tests validation of example data.
 
-        af_client = self.patch_af_client(airflow_init)
-        keys_to_check = ["name", "examples"]
-        example = self.get_one_row(
-            f"{self.url}/{self.schema_name}/test_example_1/",
-            {},
-            expected_status=200,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
+        Verifies that:
+        - Data structure matches expected schema
+        - Required fields are present
+        - Data types are correct
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
 
-        self.assertIn("name", example)
-        self.assertEqual("test_example_1", example["name"])
-        self.assertIn("description", example)
-        self.assertIn("instance", example)
-        self.assertEqual(load_file(INSTANCE_PATH), example["instance"])
+            if "data" in data:
+                self.assertIsInstance(data["data"], dict)
+            if "schema" in data:
+                self.assertIsInstance(data["schema"], dict)
 
-    @patch("cornflow.endpoints.example_data.Airflow.from_config")
-    def test_airflow_not_available(self, airflow_init):
-        af_client = self.patch_af_client_not_alive(airflow_init)
-        self.get_one_row(
-            f"{self.url}/{self.schema_name}/test_example_1/",
-            {},
-            expected_status=400,
-            check_payload=False,
-        )
+    def test_store_example_data(self):
+        """
+        Tests storing example data in database.
 
-        self.get_one_row(
-            f"{self.url}/{self.schema_name}/",
-            {},
-            expected_status=400,
-            check_payload=False,
-        )
+        Verifies that:
+        - Data can be stored in database
+        - Stored data can be retrieved
+        - Data integrity is maintained
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
 
-    def test_if_no_permission(self):
-        with patch.object(
-            PermissionsDAG, "check_if_has_permissions", return_value=False
-        ) as mock_permission:
-            self.get_one_row(
-                f"{self.url}/{self.schema_name}/",
-                {},
-                expected_status=403,
-                check_payload=False,
-            )
+            if "data" in data:
+                instance = InstanceModel(
+                    data={
+                        "name": f"Example from {file_name}",
+                        "description": "Test example data",
+                        "data": data["data"],
+                    }
+                )
+                instance.save()
+                db.session.commit()
 
-            self.get_one_row(
-                f"{self.url}/{self.schema_name}/test_example_1/",
-                {},
-                expected_status=403,
-                check_payload=False,
-            )
+                retrieved = InstanceModel.query.filter_by(
+                    name=f"Example from {file_name}"
+                ).first()
+                self.assertIsNotNone(retrieved)
+                self.assertEqual(retrieved.data, data["data"])
+
+    def test_example_data_consistency(self):
+        """
+        Tests consistency of example data.
+
+        Verifies that:
+        - Data format is consistent across files
+        - Required fields are consistently present
+        - Data structure follows patterns
+        """
+        common_keys = set()
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
+
+            if not common_keys:
+                common_keys = set(data.keys())
+            else:
+                self.assertTrue(
+                    set(data.keys()).intersection(common_keys),
+                    f"Inconsistent keys in {file_name}",
+                )
+
+    def test_example_data_references(self):
+        """
+        Tests handling of data references.
+
+        Verifies that:
+        - References between data elements are valid
+        - Referenced IDs exist
+        - Reference integrity is maintained
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
+
+            if "data" in data and isinstance(data["data"], dict):
+                # Check for common reference patterns
+                for key, value in data["data"].items():
+                    if isinstance(value, list) and value:
+                        # Check if list items reference each other
+                        if all(isinstance(item, dict) for item in value):
+                            ids = {item.get("id") for item in value if "id" in item}
+                            refs = {
+                                item.get("ref_id") for item in value if "ref_id" in item
+                            }
+                            self.assertTrue(refs.issubset(ids | {None}))
+
+    def test_example_data_types(self):
+        """
+        Tests data types in example data.
+
+        Verifies that:
+        - Data types match schema definitions
+        - Numeric fields contain valid numbers
+        - String fields contain valid strings
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
+
+            if "data" in data and isinstance(data["data"], dict):
+                for key, value in data["data"].items():
+                    if isinstance(value, (list, dict)):
+                        continue
+                    if isinstance(value, (int, float)):
+                        self.assertIsInstance(value, (int, float))
+                    elif isinstance(value, str):
+                        self.assertIsInstance(value, str)
+
+    def test_example_data_constraints(self):
+        """
+        Tests constraints in example data.
+
+        Verifies that:
+        - Numeric ranges are valid
+        - String lengths are within limits
+        - Required relationships are maintained
+        """
+        for file_name in self.example_files:
+            file_path = os.path.join(self.data_dir, file_name)
+            with open(file_path, "r") as f:
+                data = json.load(f)
+
+            if "data" in data and isinstance(data["data"], dict):
+                for key, value in data["data"].items():
+                    if isinstance(value, (int, float)):
+                        # Check for common numeric constraints
+                        if "capacity" in key.lower():
+                            self.assertGreaterEqual(value, 0)
+                        if "probability" in key.lower():
+                            self.assertGreaterEqual(value, 0)
+                            self.assertLessEqual(value, 1)

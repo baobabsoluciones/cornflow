@@ -18,13 +18,15 @@ from cornflow.shared.const import (
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
     EXEC_STATE_NOT_RUN,
-    EXECUTION_STATE_MESSAGE_DICT, VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE,
+    EXECUTION_STATE_MESSAGE_DICT,
+    PLANNER_ROLE,
+    ADMIN_ROLE,
 )
 from cornflow.shared.exceptions import (
     AirflowError,
     ObjectDoesNotExist,
     InvalidUsage,
-    InvalidData
+    InvalidData,
 )
 from cornflow.shared.validators import json_schema_validate_as_string
 
@@ -33,13 +35,13 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Create a data check execution", tags=["Data checks"])
     @authenticate(auth_class=Auth())
@@ -62,7 +64,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
             err = "The execution to check does not exist"
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. "
+                + err,
             )
 
         schema = execution.schema
@@ -72,7 +75,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
             err = "The execution is still running"
             raise InvalidUsage(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. "
+                + err,
             )
 
         # this allows testing without airflow interaction:
@@ -92,7 +96,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. "
+                + err,
             )
         # ask airflow if dag_name exists
         schema_info = af_client.get_dag_info(schema)
@@ -108,7 +113,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. "
+                + err,
             )
 
         try:
@@ -125,7 +131,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + error
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. "
+                + error,
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -144,12 +151,13 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(
         description="Create a data check execution for an existing instance",
@@ -175,7 +183,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             err = "The instance to check does not exist"
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. "
+                + err,
             )
         payload = dict(
             config=dict(checks_only=True),
@@ -204,8 +213,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. " + err
-
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. "
+                + err,
             )
         # ask airflow if dag_name exists
         schema_info = af_client.get_dag_info(schema)
@@ -221,8 +230,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. " + err
-
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. "
+                + err,
             )
 
         try:
@@ -239,7 +248,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. " + error
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on instance {idx}. "
+                + error,
             )
 
         # if we succeed, we register the dag_run_id in the execution table:
@@ -258,12 +268,13 @@ class DataCheckCaseEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(
         description="Create a data check execution for an existing case",
@@ -289,7 +300,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             err = "The case to check does not exist"
             raise ObjectDoesNotExist(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. "
+                + err,
             )
 
         schema = case.schema or "solve_model_dag"
@@ -301,7 +313,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
         )
 
         self.data_model = InstanceModel
-        self.foreign_data = dict()
+
         if schema is None:
             instance, _ = self.post_list(data=instance_payload)
         else:
@@ -309,14 +321,18 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             if schema == "pulp":
                 validation_schema = "solve_model_dag"
 
-            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, INSTANCE_SCHEMA)
-            validation_errors = json_schema_validate_as_string(data_jsonschema, instance_payload["data"])
+            data_jsonschema = DeployedDAG.get_one_schema(
+                config, validation_schema, INSTANCE_SCHEMA
+            )
+            validation_errors = json_schema_validate_as_string(
+                data_jsonschema, instance_payload["data"]
+            )
 
             if validation_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=validation_errors),
                     log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}.  "
-                            f"Instance data does not match the jsonschema.",
+                    f"Instance data does not match the jsonschema.",
                 )
 
             instance, _ = self.post_list(data=instance_payload)
@@ -334,18 +350,21 @@ class DataCheckCaseEndpoint(BaseMetaResource):
 
             payload["data"] = case.solution
 
-            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, SOLUTION_SCHEMA)
-            validation_errors = json_schema_validate_as_string(data_jsonschema, payload["data"])
+            data_jsonschema = DeployedDAG.get_one_schema(
+                config, validation_schema, SOLUTION_SCHEMA
+            )
+            validation_errors = json_schema_validate_as_string(
+                data_jsonschema, payload["data"]
+            )
 
             if validation_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=validation_errors),
                     log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}.  "
-                            f"Solution data does not match the jsonschema.",
+                    f"Solution data does not match the jsonschema.",
                 )
 
         self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
 
         execution, _ = self.post_list(data=payload)
 
@@ -366,7 +385,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. "
+                + err,
             )
         # ask airflow if dag_name exists
         schema_info = af_client.get_dag_info(schema)
@@ -382,7 +402,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + err
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. "
+                + err,
             )
 
         try:
@@ -400,7 +421,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
                     state=EXEC_STATE_ERROR,
                 ),
-                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + error
+                log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. "
+                + error,
             )
 
         # if we succeed, we register the dag_run_id in the execution table:

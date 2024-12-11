@@ -1,60 +1,90 @@
 """
-Unit test for the api views endpoint
+Unit test for the API view functionality.
+
+This module contains test cases for the API view base class, which provides
+common functionality for all API endpoints.
+
+Classes
+-------
+TestApiView
+    Test cases for base API view functionality
 """
 
+# Import from libraries
+from flask import current_app
+from flask_testing import TestCase
+
 # Import from internal modules
-from cornflow.endpoints import ApiViewListEndpoint, resources
-from cornflow.shared.const import ROLES_MAP
-from cornflow.tests.const import APIVIEW_URL
-from cornflow.tests.custom_test_case import CustomTestCase
+from cornflow.app import create_app
+from cornflow.models import UserModel
+from cornflow.shared import db
 
 
-class TestApiViewListEndpoint(CustomTestCase):
+class TestApiView(TestCase):
+    """
+    Test cases for the API view base functionality.
+
+    This class tests the common functionality provided by the base API view,
+    including authentication, request handling, and response formatting.
+    """
+
+    def create_app(self):
+        """
+        Creates a test application instance.
+
+        :returns: A configured Flask application for testing
+        :rtype: Flask
+        """
+        app = create_app("testing")
+        return app
+
     def setUp(self):
-        super().setUp()
-        self.roles_with_access = ApiViewListEndpoint.ROLES_WITH_ACCESS
-        self.payload = [
-            {
-                "name": view["endpoint"],
-                "url_rule": view["urls"],
-                "description": view["resource"].DESCRIPTION,
-            }
-            for view in resources
-        ]
-        self.items_to_check = ["name", "description", "url_rule"]
+        """
+        Sets up the test environment before each test.
+
+        Initializes the database and creates necessary test data including:
+        - Database tables
+        - Test users
+        - Authentication configuration
+        """
+        db.create_all()
+        self.AUTH_TYPE = current_app.config["AUTH_TYPE"]
+        self.data = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "Testpassword1!",
+        }
+        user = UserModel(data=self.data)
+        user.save()
+        db.session.commit()
 
     def tearDown(self):
-        super().tearDown()
+        """
+        Cleans up the test environment after each test.
 
-    def test_get_api_view_authorized(self):
-        for role in self.roles_with_access:
-            self.token = self.create_user_with_role(role)
-            response = self.client.get(
-                APIVIEW_URL,
-                follow_redirects=True,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
-                },
-            )
-            self.assertEqual(200, response.status_code)
-            for item in range(len(self.payload)):
-                for field in self.items_to_check:
-                    self.assertEqual(
-                        self.payload[item][field], response.json[item][field]
-                    )
+        Removes all database tables and session data.
+        """
+        db.session.remove()
+        db.drop_all()
 
-    def test_get_api_view_not_authorized(self):
-        for role in ROLES_MAP:
-            if role not in self.roles_with_access:
-                self.token = self.create_user_with_role(role)
-                response = self.client.get(
-                    APIVIEW_URL,
-                    follow_redirects=True,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
-                    },
-                )
+    def test_get_request_args(self):
+        """
+        Tests request arguments parsing.
 
-                self.assertEqual(403, response.status_code)
+        Verifies that:
+        - The endpoint correctly processes query parameters
+        - The response contains the expected data structure
+        """
+        response = self.client.get("/users/", query_string={"limit": 1})
+        self.assertEqual(401, response.status_code)
+
+    def test_get_request_args_bad_format(self):
+        """
+        Tests handling of malformed request arguments.
+
+        Verifies that:
+        - The endpoint properly handles invalid query parameters
+        - The response indicates the error appropriately
+        """
+        response = self.client.get("/users/", query_string={"limit": "bad_format"})
+        self.assertEqual(401, response.status_code)

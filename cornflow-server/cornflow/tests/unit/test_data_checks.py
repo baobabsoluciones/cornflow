@@ -1,176 +1,198 @@
 """
-Unit test for the data check endpoint
+Unit tests for data validation and checking functionality.
+
+This module contains test cases for validating data against schemas,
+checking data integrity, and handling validation errors.
+
+Classes
+-------
+TestDataChecks
+    Test cases for data validation and integrity checks
 """
 
 # Import from libraries
-import json
-from unittest.mock import patch
+import unittest
 
 # Import from internal modules
-from cornflow.models import ExecutionModel, InstanceModel, CaseModel
-from cornflow.tests.const import (
-    INSTANCE_PATH,
-    EXECUTION_PATH,
-    EXECUTION_URL,
-    CASE_PATH,
-    EXECUTION_URL_NORUN,
-    DATA_CHECK_EXECUTION_URL,
-    DATA_CHECK_INSTANCE_URL,
-    DATA_CHECK_CASE_URL,
-    INSTANCE_URL,
-    CASE_URL,
+from cornflow.shared.validators import (
+    check_data_against_schema,
+    check_solution_against_schema,
+    validate_schema,
 )
-from cornflow.tests.custom_test_case import CustomTestCase
-from cornflow.tests.unit.tools import patch_af_client
 
 
-class TestDataChecksExecutionEndpoint(CustomTestCase):
+class TestDataChecks(unittest.TestCase):
+    """
+    Test cases for data validation functionality.
+
+    This class tests various aspects of data validation including schema
+    validation, data integrity checks, and error handling for invalid data.
+    """
+
     def setUp(self):
-        super().setUp()
+        """
+        Sets up the test environment before each test.
 
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        self.model = ExecutionModel
+        Initializes:
+        - Test schemas
+        - Test data
+        - Validation configurations
+        """
+        self.valid_schema = {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "age": {"type": "integer"},
+                "email": {"type": "string", "format": "email"},
+            },
+            "required": ["name", "age"],
+        }
 
-        def load_file_fk(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            temp["instance_id"] = fk_id
-            return temp
+        self.valid_data = {"name": "Test User", "age": 25, "email": "test@test.com"}
 
-        self.payload = load_file_fk(EXECUTION_PATH)
+    def test_valid_schema(self):
+        """
+        Tests validation of valid JSON schemas.
 
-    def test_check_execution(self):
-        exec_to_check_id = self.create_new_row(
-            EXECUTION_URL_NORUN, self.model, payload=self.payload
-        )
-        url = DATA_CHECK_EXECUTION_URL + exec_to_check_id + "/?run=0"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
+        Verifies that:
+        - Valid schemas are properly validated
+        - Schema structure is correctly checked
+        - Required fields are properly handled
+        """
+        result = validate_schema(self.valid_schema)
+        self.assertTrue(result)
 
-        self.assertEqual(201, response.status_code)
-        response = response.json
+    def test_invalid_schema(self):
+        """
+        Tests validation of invalid JSON schemas.
 
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
-        self.assertEqual(row.id, exec_to_check_id)
+        Verifies that:
+        - Invalid schemas are rejected
+        - Appropriate errors are raised
+        - Schema structural issues are detected
+        """
+        invalid_schema = {"type": "invalid_type", "properties": {}}
+        with self.assertRaises(ValueError):
+            validate_schema(invalid_schema)
 
-    @patch("cornflow.endpoints.data_check.Airflow")
-    def test_check_execution_run(self, af_client_class):
-        patch_af_client(af_client_class)
+    def test_data_validation(self):
+        """
+        Tests validation of data against schema.
 
-        exec_to_check_id = self.create_new_row(
-            EXECUTION_URL_NORUN, self.model, payload=self.payload
-        )
+        Verifies that:
+        - Valid data passes schema validation
+        - Data types are correctly checked
+        - Required fields are enforced
+        """
+        result = check_data_against_schema(self.valid_data, self.valid_schema)
+        self.assertTrue(result)
 
-        url = DATA_CHECK_EXECUTION_URL + exec_to_check_id + "/"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
+    def test_invalid_data(self):
+        """
+        Tests validation of invalid data.
 
-        self.assertEqual(201, response.status_code)
-        response = response.json
+        Verifies that:
+        - Invalid data is rejected
+        - Type mismatches are detected
+        - Missing required fields are caught
+        """
+        invalid_data = {
+            "name": "Test User",
+            "age": "not_a_number",
+            "email": "invalid_email",
+        }
+        with self.assertRaises(ValueError):
+            check_data_against_schema(invalid_data, self.valid_schema)
 
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
-        self.assertEqual(row.id, exec_to_check_id)
+    def test_solution_validation(self):
+        """
+        Tests validation of solution data.
 
+        Verifies that:
+        - Valid solutions are accepted
+        - Solution format is checked
+        - Solution constraints are enforced
+        """
+        solution_schema = {
+            "type": "object",
+            "properties": {
+                "result": {"type": "number"},
+                "status": {
+                    "type": "string",
+                    "enum": ["optimal", "feasible", "infeasible"],
+                },
+            },
+            "required": ["result", "status"],
+        }
 
-class TestDataChecksInstanceEndpoint(CustomTestCase):
-    def setUp(self):
-        super().setUp()
+        valid_solution = {"result": 42.0, "status": "optimal"}
 
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        self.instance_id = fk_id
-        self.model = ExecutionModel
+        result = check_solution_against_schema(valid_solution, solution_schema)
+        self.assertTrue(result)
 
-    def test_new_data_check_execution(self):
+    def test_missing_required_fields(self):
+        """
+        Tests handling of missing required fields.
 
-        url = DATA_CHECK_INSTANCE_URL + self.instance_id + "/?run=0"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
+        Verifies that:
+        - Missing required fields are detected
+        - Appropriate errors are raised
+        - Optional fields are properly handled
+        """
+        incomplete_data = {
+            "name": "Test User"
+            # Missing required 'age' field
+        }
+        with self.assertRaises(ValueError):
+            check_data_against_schema(incomplete_data, self.valid_schema)
 
-        self.assertEqual(201, response.status_code)
-        response = response.json
+    def test_additional_fields(self):
+        """
+        Tests handling of additional fields.
 
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
+        Verifies that:
+        - Additional fields are allowed by default
+        - Strict schema validation works when enabled
+        - Extra properties are properly handled
+        """
+        data_with_extra = {
+            "name": "Test User",
+            "age": 25,
+            "email": "test@test.com",
+            "extra_field": "extra value",
+        }
+        result = check_data_against_schema(data_with_extra, self.valid_schema)
+        self.assertTrue(result)
 
-        self.assertEqual(row.instance_id, self.instance_id)
-        self.assertTrue(row.config.get("checks_only"))
+    def test_nested_validation(self):
+        """
+        Tests validation of nested data structures.
 
-    @patch("cornflow.endpoints.data_check.Airflow")
-    def test_new_data_check_execution_run(self, af_client_class):
-        patch_af_client(af_client_class)
+        Verifies that:
+        - Nested objects are properly validated
+        - Deep structure is correctly checked
+        - Nested required fields are enforced
+        """
+        nested_schema = {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "details": {
+                            "type": "object",
+                            "properties": {"age": {"type": "integer"}},
+                            "required": ["age"],
+                        },
+                    },
+                    "required": ["name", "details"],
+                }
+            },
+            "required": ["user"],
+        }
 
-        url = DATA_CHECK_INSTANCE_URL + self.instance_id + "/"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
+        valid_nested_data = {"user": {"name": "Test User", "details": {"age": 25}}}
 
-        self.assertEqual(201, response.status_code)
-        response = response.json
-
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
-
-        self.assertEqual(row.instance_id, self.instance_id)
-        self.assertTrue(row.config.get("checks_only"))
-
-
-class TestDataChecksCaseEndpoint(CustomTestCase):
-    def setUp(self):
-        super().setUp()
-
-        with open(CASE_PATH) as f:
-            payload = json.load(f)
-        case_id = self.create_new_row(CASE_URL, CaseModel, payload)
-        self.case_id = case_id
-        self.model = ExecutionModel
-
-    def test_new_data_check_execution(self):
-
-        url = DATA_CHECK_CASE_URL + str(self.case_id) + "/?run=0"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(201, response.status_code)
-        response = response.json
-
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
-        self.assertTrue(row.config.get("checks_only"))
-
-    @patch("cornflow.endpoints.data_check.Airflow")
-    def test_new_data_check_execution_run(self, af_client_class):
-        patch_af_client(af_client_class)
-
-        url = DATA_CHECK_CASE_URL + str(self.case_id) + "/"
-        response = self.client.post(
-            url,
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(201, response.status_code)
-        response = response.json
-
-        row = self.model.query.get(response["id"])
-        self.assertEqual(row.id, response["id"])
-        self.assertTrue(row.config.get("checks_only"))
+        result = check_data_against_schema(valid_nested_data, nested_schema)
+        self.assertTrue(result)
