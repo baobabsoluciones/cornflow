@@ -19,7 +19,7 @@ Now you can start all services::
 
     docker-compose up -d
 
-Cornflow service available at http://localhost:5000
+cornflow service available at http://localhost:5000
 Airflow service available at http://localhost:8080
 
 In the second terminal you can check the condition of the containers and make sure that no containers are in unhealthy condition::
