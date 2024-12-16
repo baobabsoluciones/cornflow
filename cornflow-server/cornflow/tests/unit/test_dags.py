@@ -71,7 +71,7 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
             data=payload["data"],
             state=EXEC_STATE_MANUAL,
         )
-        payload_to_send = {--self.payload, --data}
+        payload_to_send = {**self.payload, **data}
         token = self.create_service_user()
 
         self.items_to_check = [
@@ -108,7 +108,7 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
             data=payload["data"],
             state=EXEC_STATE_MANUAL,
         )
-        payload_to_send = {--self.payload, --data}
+        payload_to_send = {**self.payload, **data}
         token = self.create_planner()
 
         self.items_to_check = [
@@ -171,10 +171,10 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
             state=EXEC_STATE_CORRECT,
             log_json=log_json,
         )
-        payload_to_check = {--self.payload, --data}
+        payload_to_check = {**self.payload, **data}
         token = self.create_service_user()
         self.update_row(
-            url=DAG_URL + idx + "/",
+            url=f"{DAG_URL}{idx}/",
             payload_to_check=payload_to_check,
             change=data,
             token=token,
@@ -182,7 +182,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
         data = self.get_one_row(
-            url=EXECUTION_URL + idx + "/log/",
+            url=f"{EXECUTION_URL}{idx}/log/",
             token=token,
             check_payload=False,
             payload=self.payload,
