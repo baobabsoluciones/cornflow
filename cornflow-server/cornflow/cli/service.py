@@ -38,18 +38,18 @@ def init_cornflow_service():
     # Global defaults and back-compat #
     ###################################
     # cornflow backend selection
-    cornflow_backend = os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND)
+    cornflow_backend = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
     os.environ["CORNFLOW_BACKEND"] = cornflow_backend
 
     # Airflow global default conn
-    if int(cornflow_backend) == AIRFLOW_BACKEND:
+    if cornflow_backend == AIRFLOW_BACKEND:
         airflow_user = os.getenv("AIRFLOW_USER", "admin")
         airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
         airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
         os.environ["AIRFLOW_USER"] = airflow_user
         os.environ["AIRFLOW_PWD"] = airflow_pwd
         os.environ["AIRFLOW_URL"] = airflow_url
-    elif int(cornflow_backend) == DATABRICKS_BACKEND:
+    elif cornflow_backend == DATABRICKS_BACKEND:
         databricks_url = os.getenv("DATABRICKS_HOST")
         databricks_auth_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
         databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
