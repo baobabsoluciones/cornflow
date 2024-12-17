@@ -232,6 +232,7 @@ def init_cornflow_service():
                     verbose=True,
                 )
 
+            click.echo(f"Selected backend is: {cornflow_backend}")
             if cornflow_backend == AIRFLOW_BACKEND:
                 register_deployed_dags_command(
                     airflow_url, airflow_user, airflow_pwd, verbose=True
