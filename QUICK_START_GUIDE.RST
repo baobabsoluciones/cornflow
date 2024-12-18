@@ -8,7 +8,7 @@ Quick Start Guide
 Presentation
 ------------
 
-This is the **contributors's quick start guide** for the **Cornflow** project. This project is divided into four directories: `cornflow-Server <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-server>`_, `cornflow-client <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-client>`_, `cornflow-dags <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags>`_, and `cornflow-app <https://github.com/baobabsoluciones/cornflow-app>`_. 
+This is the **contributors's quick start guide** for the **cornflow** project. This project is divided into four directories: `cornflow-Server <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-server>`_, `cornflow-client <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-client>`_, `cornflow-dags <https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags>`_, and `cornflow-app <https://github.com/baobabsoluciones/cornflow-app>`_. 
 
 **cornflow-server** allows you to run a local server on your computer, that will manage the instances of your problems, the created executions, and the communication with Airflow.
 
@@ -21,7 +21,7 @@ This is the **contributors's quick start guide** for the **Cornflow** project. T
 -----------
 First steps
 -----------
-The first steps to using Cornflow is to clone the **cornflow** repository, which contains the code for the **cornflow-server**, **cornflow-dags** and **cornflow-client** and the **cornflow-app** repository.:
+The first steps to using cornflow is to clone the **cornflow** repository, which contains the code for the **cornflow-server**, **cornflow-dags** and **cornflow-client** and the **cornflow-app** repository.:
 
 .. code-block:: console
 
@@ -96,7 +96,7 @@ To run cornflow-server, you need Linux or Windows with WSL installed.
   <details open>
     <summary>Apache-Airflow</summary>
 
-Cornflow-server needs a running airflow server to operate. Once your virtual environment is activated, you can install airflow with pip: 
+cornflow-server needs a running airflow server to operate. Once your virtual environment is activated, you can install airflow with pip: 
 
 .. code-block:: shell
 
@@ -151,7 +151,7 @@ For each of the repositories, if you are going to modify the source code, you sh
   git checkout name_of_your_branch
   
 
-Cornflow-server
+cornflow-server
 ===============
 
 .. raw:: html
@@ -209,7 +209,7 @@ See the `documentation <https://baobabsoluciones.github.io/cornflow/main/install
 
   </details>
 
-Cornflow-dags
+cornflow-dags
 =============
 
 .. raw:: html
@@ -285,7 +285,7 @@ Use your solution method
 Once your dag is entirely developed, you can use the cornflow-client package to access it on the server. See an example `here <https://baobabsoluciones.github.io/cornflow/guides/use_solver.html>`_.
 
 
-Cornflow-app
+cornflow-app
 ============
 
 .. raw:: html

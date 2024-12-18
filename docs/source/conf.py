@@ -54,7 +54,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "Cornflow"
+project = "cornflow"
 copyright = "2020-, cornflow documentation team."
 
 # The version info for the project you're documenting, acts as replacement for
@@ -236,7 +236,7 @@ OPENAPI_FILE = os.path.join(
 )
 redoc = [
     {
-        "name": "Cornflow REST API",
+        "name": "cornflow REST API",
         "page": "stable-rest-api-ref",
         "spec": OPENAPI_FILE,
         "opts": {
