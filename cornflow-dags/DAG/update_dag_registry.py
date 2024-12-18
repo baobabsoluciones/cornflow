@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 from airflow import DAG
 from airflow.models import DagModel
@@ -21,6 +22,8 @@ default_args = {
     "catchup": False,
 }
 
+logger = logging.getLogger("airflow.task")
+
 
 def update_dag_registry(**kwargs):
     with create_session() as session:
@@ -30,16 +33,19 @@ def update_dag_registry(**kwargs):
             for tag in dag.tags
             if tag.name == "model"
         ]
-        print(f"MODEL DAGS: {model_dags}")
+        logger.info(f"MODEL DAGS: {model_dags}")
         cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
         deployed_dags = [
             dag["id"] for dag in cf_client.get_deployed_dags(encoding="br")
         ]
-        print(f"DEPLOYED DAGS: {deployed_dags}")
+        logger.info(f"DEPLOYED DAGS: {deployed_dags}")
         all_apps = dict()
         for app in get_new_apps():
             all_apps[app.name] = app
         for model in model_dags:
+            if model.dag_id not in all_apps:
+                logger.warning(f"App {model.dag_id} is registered in Airflow database but there is no app for it. Skipping")
+                continue
             app = all_apps[model.dag_id]
             if model.dag_id not in deployed_dags:
                 response = cf_client.create_deployed_dag(
@@ -54,7 +60,7 @@ def update_dag_registry(**kwargs):
                     config_schema=app.schema,
                     encoding="br",
                 )
-                print(f"DAG: {response['id']} registered")
+                logger.info(f"DAG: {response['id']} registered")
             else:
                 # Even if the dag is registered, we still update its schemas
                 response = cf_client.put_deployed_dag(
@@ -71,7 +77,7 @@ def update_dag_registry(**kwargs):
                     ),
                     encoding="br",
                 )
-                print(f"DAG: {model.dag_id} registered")
+                logger.info(f"DAG: {model.dag_id} registered")
 
 
 dag = DAG(
