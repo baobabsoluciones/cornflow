@@ -86,7 +86,7 @@ jobs:
           cd cornflow-server
           python -m venv afvenv
           source afvenv/bin/activate
-          AIRFLOW_VERSION=2.7.1
+          AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
