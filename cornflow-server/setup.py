@@ -24,7 +24,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Development Status :: 5 - Production/Stable",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     entry_points={
         "console_scripts": [
             "cornflow = cornflow.cli:cli",
