@@ -122,7 +122,7 @@ def get_all_example_data(apps):
 
 
 def update_all_schemas(**kwargs):
-    sys.setrecursionlimit(250)
+    sys.setrecursionlimit(2000)
 
     # first we delete all variables (this helps to keep it clean)
     with create_session() as session:
