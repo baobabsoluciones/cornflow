@@ -5,6 +5,8 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 
 class DefaultConfig(object):
+    APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
+    EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
@@ -84,7 +86,6 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
-
     """ """
 
     ENV = "development"
@@ -109,6 +110,14 @@ class Testing(DefaultConfig):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
 
+class TestingApplicationRoot(Testing):
+    """
+    Configuration class for testing with application root
+    """
+
+    APPLICATION_ROOT = "/test"
+
+
 class Production(DefaultConfig):
     """ """
 
@@ -121,4 +130,9 @@ class Production(DefaultConfig):
     PROPAGATE_EXCEPTIONS = True
 
 
-app_config = {"development": Development, "testing": Testing, "production": Production}
+app_config = {
+    "development": Development,
+    "testing": Testing,
+    "testing-root": TestingApplicationRoot,
+    "production": Production,
+}

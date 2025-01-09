@@ -1,6 +1,7 @@
 """
 Main file with the creation of the app logic
 """
+
 # Full imports
 import os
 import click
@@ -13,6 +14,8 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 from logging.config import dictConfig
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.exceptions import NotFound
 
 # Module imports
 from cornflow.commands import (
@@ -111,6 +114,11 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(access_init)
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
+
+    if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
+        app.wsgi_app = DispatcherMiddleware(
+            NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
+        )
 
     return app
 
