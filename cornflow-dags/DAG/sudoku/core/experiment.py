@@ -5,8 +5,6 @@ from .instance import Instance
 from .solution import Solution
 import os
 import quarto
-import plotnine as pn
-import pandas as pd
 
 
 class Experiment(ExperimentCore):
@@ -80,22 +78,7 @@ class Experiment(ExperimentCore):
     def plot(self, id=None):
 
         my_solution = self.get_complete_solution(id=id)
-        my_table = pd.DataFrame(my_solution)
-        a = pt.TupList(range(10)).vapply(lambda v: v - 0.5)
-        return (
-            pn.ggplot(my_table, pn.aes(x="row", y="col", fill="initial"))
-            + pn.geom_tile(pn.aes(width=1, height=1))
-            + pn.geom_text(pn.aes(label="value"), size=10)
-            + pn.theme_void()
-            # + pn.labs(fill='')
-            + pn.scale_fill_manual(values=["white", "lightgreen"], guide=None)
-            + pn.geom_vline(xintercept=a, color="black", size=0.5, linetype="dashed")
-            + pn.geom_hline(yintercept=a, color="black", size=0.5, linetype="dashed")
-            + pn.geom_vline(xintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
-            + pn.geom_hline(yintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
-            + pn.xlim(-0.5, 8.5)
-            + pn.ylim(-0.5, 8.5)
-        )
+        return self.instance.generate_plot(my_solution)
 
     def get_others(self):
         return self.solution.get_others(self.instance.get_size())

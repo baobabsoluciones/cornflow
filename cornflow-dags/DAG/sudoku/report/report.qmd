@@ -61,7 +61,7 @@ See @fig-instance for a representation of the unsolved Sudoku.
 #| label: fig-instance
 #| fig-cap: "Initial values"
 
-my_instance.print()
+my_instance.plot()
 
 ```
 

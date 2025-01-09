@@ -63,7 +63,9 @@ class BaseDAGTests:
             s = self.app.get_default_solver_name()
             return self.app.get_solver(s)(instance, solution)
 
-        def generate_check_report(self, my_experim, things_to_look, verbose=False):
+        def generate_check_report(
+            self, my_experim, things_to_look, verbose=False, delete_file=True
+        ):
 
             report_path = my_experim.generate_report()
             # check the file is created.
@@ -73,10 +75,11 @@ class BaseDAGTests:
             with open(report_path, "r") as f:
                 content = f.read()
 
-            try:
-                os.remove(report_path)
-            except FileNotFoundError:
-                pass
+            if delete_file:
+                try:
+                    os.remove(report_path)
+                except FileNotFoundError:
+                    pass
             self.assertRaises(StopIteration, parser.feed, content)
 
         def test_try_solving_testcase(self, config=None):
@@ -580,7 +583,14 @@ class Sudoku(BaseDAGTests.SolvingTests):
         )
         my_experim = self.app.solvers["cpsat"](my_instance)
         my_experim.solve(dict())
-        my_experim.plot()
+        a = my_experim.plot()
+
+    def test_instance_plot(self):
+        my_instance = self.app.instance.from_txt_file(
+            filePath=None,
+            contents="..........12.34567.345.6182..1.582.6..86....1.2...7.5...37.5.28.8..6.7..2.7..3615",
+        )
+        a = my_instance.plot()
 
     def test_report2(self):
         my_instance = self.app.instance.from_txt_file(

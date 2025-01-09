@@ -1,4 +1,3 @@
-# from ortools.sat.python import cp_model
 from cornflow_client.constants import (
     STATUS_OPTIMAL,
     STATUS_UNDEFINED,

@@ -3,6 +3,8 @@ from cornflow_client import InstanceCore, get_empty_schema
 from cornflow_client.core.tools import load_json
 import pytups as pt
 import math
+import plotnine as pn
+import pandas as pd
 from .tools import pos_to_row_col, add_pos_square, row_col_to_pos, row_col_to_square
 
 from typing import Optional
@@ -124,3 +126,27 @@ class Instance(InstanceCore):
         for r in range(1, side + 1):
             print("".join(n + s for n, s in zip(nums[r - 1], line1.split("."))))
             print([line2, line3, line4][(r % side == 0) + (r % base == 0)])
+
+    def plot(self):
+        values = self.get_initial_values()
+        values = values.copy_deep().vapply_col("initial", lambda v: True)
+        return self.generate_plot(values)
+
+    def generate_plot(self, my_data):
+        my_table = pd.DataFrame(my_data)
+        a = pt.TupList(range(10)).vapply(lambda v: v - 0.5)
+        return (
+            pn.ggplot(my_table, pn.aes(x="col", y="row", fill="initial"))
+            + pn.geom_tile(pn.aes(width=1, height=1))
+            + pn.geom_text(pn.aes(label="value"), size=10)
+            + pn.theme_void()
+            # + pn.labs(fill='')
+            + pn.scale_fill_manual(values=["white", "lightgreen"], guide=None)
+            + pn.geom_vline(xintercept=a, color="black", size=0.5, linetype="dashed")
+            + pn.geom_hline(yintercept=a, color="black", size=0.5, linetype="dashed")
+            + pn.geom_vline(xintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
+            + pn.geom_hline(yintercept=[-0.5, 2.5, 5.5, 8.5], color="black", size=3)
+            + pn.xlim(-0.5, 8.5)
+            + pn.ylim(-0.5, 8.5)
+            + pn.scale_y_reverse()
+        )
