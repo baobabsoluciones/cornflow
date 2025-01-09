@@ -136,58 +136,89 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         return user
 
-    def auth_oid_authenticate(self, token):
+    def auth_oid_authenticate(
+        self, token: str = None, username: str = None, password: str = None
+    ):
         """
-        Method  in charge of performing the log in with the token issued by an Open ID provider
+        Method  in charge of performing the log in with the token issued by an Open ID provider.
+        It has an exception and thus accepts username and password for service users if needed.
 
         :param str token: the token that the user has obtained from the Open ID provider
+        :param str username: the username of the user to log in
+        :param str password: the password of the user to log in
         :return: the user object or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
-        oid_provider = int(current_app.config["OID_PROVIDER"])
 
-        client_id = current_app.config["OID_CLIENT_ID"]
-        tenant_id = current_app.config["OID_TENANT_ID"]
-        issuer = current_app.config["OID_ISSUER"]
+        if token:
 
-        if client_id is None or tenant_id is None or issuer is None:
-            raise ConfigurationError("The OID provider configuration is not valid")
+            oid_provider = int(current_app.config["OID_PROVIDER"])
 
-        if oid_provider == OID_AZURE:
-            decoded_token = self.auth_class().validate_oid_token(
-                token, client_id, tenant_id, issuer, oid_provider
-            )
+            client_id = current_app.config["OID_CLIENT_ID"]
+            tenant_id = current_app.config["OID_TENANT_ID"]
+            issuer = current_app.config["OID_ISSUER"]
 
-        elif oid_provider == OID_GOOGLE:
-            raise EndpointNotImplemented("The selected OID provider is not implemented")
-        elif oid_provider == OID_NONE:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
+            if client_id is None or tenant_id is None or issuer is None:
+                raise ConfigurationError("The OID provider configuration is not valid")
+
+            if oid_provider == OID_AZURE:
+                decoded_token = self.auth_class().validate_oid_token(
+                    token, client_id, tenant_id, issuer, oid_provider
+                )
+
+            elif oid_provider == OID_GOOGLE:
+                raise EndpointNotImplemented(
+                    "The selected OID provider is not implemented"
+                )
+            elif oid_provider == OID_NONE:
+                raise EndpointNotImplemented(
+                    "The OID provider configuration is not valid"
+                )
+            else:
+                raise EndpointNotImplemented(
+                    "The OID provider configuration is not valid"
+                )
+
+            username = decoded_token["preferred_username"]
+
+            user = self.data_model.get_one_object(username=username)
+
+            if not user:
+                current_app.logger.info(
+                    f"OpenID user {username} does not exist and is created"
+                )
+
+                data = {"username": username, "email": username}
+
+                user = self.data_model(data=data)
+                user.save()
+
+                self.user_role_association(user.id)
+
+                user_role = self.user_role_association(
+                    {
+                        "user_id": user.id,
+                        "role_id": int(current_app.config["DEFAULT_ROLE"]),
+                    }
+                )
+
+                user_role.save()
+
+            return user
+        elif (
+            username
+            and password
+            and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1
+        ):
+
+            user = self.auth_db_authenticate(username, password)
+
+            if user.is_service_user():
+                return user
+            else:
+                raise InvalidUsage("Invalid request")
         else:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-
-        username = decoded_token["preferred_username"]
-
-        user = self.data_model.get_one_object(username=username)
-
-        if not user:
-            current_app.logger.info(
-                f"OpenID user {username} does not exist and is created"
-            )
-
-            data = {"username": username, "email": username}
-
-            user = self.data_model(data=data)
-            user.save()
-
-            self.user_role_association(user.id)
-
-            user_role = self.user_role_association(
-                {"user_id": user.id, "role_id": int(current_app.config["DEFAULT_ROLE"])}
-            )
-
-            user_role.save()
-
-        return user
+            raise InvalidUsage("Invalid request")
 
 
 def check_last_password_change(user):

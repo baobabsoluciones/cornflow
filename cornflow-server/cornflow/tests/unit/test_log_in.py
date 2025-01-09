@@ -2,13 +2,21 @@
 Unit test for the log in endpoint
 """
 
-# Import from libraries
+import json
+import logging as log
+
+
 from flask import current_app
 
-# Import from internal modules
+
+from cornflow.app import create_app
+from cornflow.commands.access import access_init_command
+from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.tests.custom_test_case import LoginTestCases
+from cornflow.shared.const import SERVICE_ROLE
+from cornflow.tests.const import LOGIN_URL
+from cornflow.tests.custom_test_case import CustomTestCase, LoginTestCases
 
 
 class TestLogIn(LoginTestCases.LoginEndpoint):
@@ -29,5 +37,190 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.idx = UserModel.query.filter_by(username="testname").first().id
 
     def test_successful_log_in(self):
+        """
+        Test the successful log in
+        """
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
+
+
+class TestLogInOpenAuth(CustomTestCase):
+    def create_app(self):
+        """
+        Creates and configures a Flask application for testing.
+
+        :returns: A configured Flask application instance
+        :rtype: Flask
+        """
+        app = create_app("testing-oauth")
+        app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] = 0
+        return app
+
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "Testpassword1!",
+        }
+
+        test_user = UserModel(data=self.user_data)
+        test_user.save()
+
+        self.user_data.pop("email")
+
+        self.test_user_id = test_user.id
+
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!",
+        }
+
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+
+    def test_service_user_login(self):
+        """
+        Tests that a service user can not log in with username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.service_data),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Invalid request")
+
+    def test_other_user_password(self):
+        """
+        Tests that a user can not log in with username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.user_data),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Invalid request")
+
+
+class TestLogInOpenAuthService(CustomTestCase):
+
+    def create_app(self):
+        """
+        Creates and configures a Flask application for testing.
+
+        :returns: A configured Flask application instance
+        :rtype: Flask
+        """
+        app = create_app("testing-oauth")
+        return app
+
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "Testpassword1!",
+        }
+
+        test_user = UserModel(data=self.user_data)
+        test_user.save()
+
+        self.user_data.pop("email")
+
+        self.test_user_id = test_user.id
+
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!",
+        }
+
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+
+    def test_service_user_login(self):
+        """
+        Tests that a service user can log in with username and password
+        """
+
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.service_data),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.service_user_id, response.json["id"])
+
+    def test_validation_error(self):
+        """
+        Tests that a user can not log in without token or username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+
+    def test_other_user_password(self):
+        """
+        Tests that a user can not log in with username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.user_data),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Invalid request")
+
+    def test_token_login(self):
+        """
+        Tests that a user can log in with a token
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "test"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(501, response.status_code)
+        self.assertEqual(
+            response.json["error"], "The OID provider configuration is not valid"
+        )
+
+    def test_log_in_with_all_fields(self):
+        """
+        Tests that a user can not log in with username and password and a token
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({**self.service_data, "token": "test"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
