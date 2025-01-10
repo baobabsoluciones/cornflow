@@ -181,6 +181,9 @@ class LoginBaseEndpoint(BaseMetaResource):
                 )
 
             username = decoded_token["preferred_username"]
+            email = decoded_token.get("email", f"{username}@test.org")
+            first_name = decoded_token.get("given_name", "")
+            last_name = decoded_token.get("family_name", "")
 
             user = self.data_model.get_one_object(username=username)
 
@@ -189,7 +192,12 @@ class LoginBaseEndpoint(BaseMetaResource):
                     f"OpenID user {username} does not exist and is created"
                 )
 
-                data = {"username": username, "email": username}
+                data = {
+                    "username": username,
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                }
 
                 user = self.data_model(data=data)
                 user.save()

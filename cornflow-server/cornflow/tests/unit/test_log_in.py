@@ -212,12 +212,36 @@ class TestLogInOpenAuthAzure(CustomTestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        print(response.json)
-
         self.assertEqual(400, response.status_code)
         self.assertIn(
             "Error getting issuer discovery meta from", response.json["error"]
         )
+
+    @mock.patch("cornflow.endpoints.login.Auth.validate_oid_token")
+    def test_service_user_login_no_fail(self, mock_auth):
+        mock_auth.return_value = {"preferred_username": "service_user"}
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        print(response.json)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.service_user_id, response.json["id"])
+
+    @mock.patch("cornflow.endpoints.login.Auth.validate_oid_token")
+    def test_new_user_login_no_fail(self, mock_auth):
+        mock_auth.return_value = {"preferred_username": "test_user"}
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.service_user_id + 1, response.json["id"])
 
 
 class TestLogInOpenAuthGoogle(CustomTestCase):
