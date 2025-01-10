@@ -43,12 +43,15 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
 
-    @mock.patch("cornflow.endpoints.login.LoginBaseEndpoint.auth_class")
-    def test_exception_on_token_generation(self, mock_token):
-        mock_token.generate_token.side_effect = Exception("Custom exception")
+    @mock.patch("cornflow.endpoints.login.Auth.generate_token")
+    def test_exception_on_token_generation(self, mock_generate_token):
+        # Simulate an exception when generate_token is called
+        mock_generate_token.side_effect = Exception("Custom exception")
 
+        # Prepare login payload
         payload = self.data
 
+        # Make a login request
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps(payload),
@@ -56,10 +59,10 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
             headers={"Content-Type": "application/json"},
         )
 
+        # Assert that the response is a 400 error
         self.assertEqual(400, response.status_code)
+        # Assert that the error message contains the expected text
         self.assertIn("Error in generating user token", response.json["error"])
-
-        pass
 
 
 class TestLogInOpenAuthNoConfig(CustomTestCase):
@@ -369,7 +372,7 @@ class TestLogInOpenAuthOther(CustomTestCase):
 
         self.assertEqual(501, response.status_code)
         self.assertEqual(
-            response.json["error"], "The selected OID provider is not implemented"
+            response.json["error"], "The OID provider configuration is not valid"
         )
 
 
