@@ -38,6 +38,7 @@ class LoginBaseEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.ldap_class = LDAPBase
+        self.user_role_association = UserRoleModel
 
     def log_in(self, **kwargs):
         """
@@ -192,8 +193,6 @@ class LoginBaseEndpoint(BaseMetaResource):
 
                 user = self.data_model(data=data)
                 user.save()
-
-                self.user_role_association(user.id)
 
                 user_role = self.user_role_association(
                     {

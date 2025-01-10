@@ -43,6 +43,24 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
 
+    @mock.patch("cornflow.endpoints.login.LoginBaseEndpoint.auth_class")
+    def test_exception_on_token_generation(self, mock_token):
+        mock_token.generate_token.side_effect = Exception("Custom exception")
+
+        payload = self.data
+
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("Error in generating user token", response.json["error"])
+
+        pass
+
 
 class TestLogInOpenAuthNoConfig(CustomTestCase):
     def create_app(self):
