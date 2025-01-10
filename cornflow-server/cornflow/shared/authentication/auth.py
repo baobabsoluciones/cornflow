@@ -14,6 +14,8 @@ from datetime import datetime, timedelta
 from flask import request, g, current_app, Request
 from functools import wraps
 from typing import Union, Tuple
+
+from jwt import DecodeError
 from werkzeug.datastructures import Headers
 
 # Imports from internal modules
@@ -103,7 +105,8 @@ class Auth:
             )
 
         payload = {
-            "exp": datetime.utcnow() + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
+            "exp": datetime.utcnow()
+            + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user_id,
         }
@@ -314,7 +317,10 @@ class Auth:
         :return: the key identifier
         :rtype: str
         """
-        headers = jwt.get_unverified_header(token)
+        try:
+            headers = jwt.get_unverified_header(token)
+        except DecodeError as err:
+            raise InvalidCredentials("Token is not valid")
         if not headers:
             raise InvalidCredentials("Token is missing the headers")
         try:
@@ -346,9 +352,9 @@ class Auth:
         try:
             response = requests.get(discovery_url)
             response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
+        except requests.exceptions.HTTPError:
             raise CommunicationError(
-                f"Error getting issuer discovery meta from {discovery_url}", error
+                f"Error getting issuer discovery meta from {discovery_url}"
             )
         return response.json()
 

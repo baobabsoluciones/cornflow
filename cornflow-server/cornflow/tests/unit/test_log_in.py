@@ -4,7 +4,7 @@ Unit test for the log in endpoint
 
 import json
 import logging as log
-
+from unittest import mock
 
 from flask import current_app
 
@@ -14,7 +14,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.const import SERVICE_ROLE
+from cornflow.shared.const import SERVICE_ROLE, OID_GOOGLE, OID_AZURE
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CustomTestCase, LoginTestCases
 
@@ -44,7 +44,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertEqual(self.idx, self.response.json["id"])
 
 
-class TestLogInOpenAuth(CustomTestCase):
+class TestLogInOpenAuthNoConfig(CustomTestCase):
     def create_app(self):
         """
         Creates and configures a Flask application for testing.
@@ -113,6 +113,142 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Invalid request")
+
+
+class TestLogInOpenAuthAzure(CustomTestCase):
+    def create_app(self):
+        """
+        Creates and configures a Flask application for testing.
+
+        :returns: A configured Flask application instance
+        :rtype: Flask
+        """
+        app = create_app("testing-oauth")
+        app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] = 0
+        app.config["OID_PROVIDER"] = OID_AZURE
+        app.config["OID_CLIENT_ID"] = "SOME_SECRET"
+        app.config["OID_TENANT_ID"] = "SOME_SECRET"
+        app.config["OID_ISSUER"] = "SOME_SECRET"
+        return app
+
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!",
+        }
+
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+
+    def test_service_user_login_first_fail(self):
+        """
+        Tests that a service user can not log in with username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Token is not valid")
+
+    @mock.patch("cornflow.shared.authentication.auth.jwt")
+    def test_service_user_login_second_fail(self, mock_header):
+        """
+        Tests second exit point on token validation
+        """
+        mock_header.get_unverified_header.return_value = None
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Token is missing the headers")
+
+    @mock.patch("cornflow.shared.authentication.auth.jwt")
+    def test_service_user_login_third_fail(self, mock_header):
+        """
+        Tests third exit point on token validation
+        """
+        mock_header.get_unverified_header.return_value = {"kid": "some_value"}
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        print(response.json)
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn(
+            "Error getting issuer discovery meta from", response.json["error"]
+        )
+
+
+class TestLogInOpenAuthGoogle(CustomTestCase):
+    def create_app(self):
+        """
+        Creates and configures a Flask application for testing.
+
+        :returns: A configured Flask application instance
+        :rtype: Flask
+        """
+        app = create_app("testing-oauth")
+        app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] = 0
+        app.config["OID_PROVIDER"] = OID_GOOGLE
+        app.config["OID_CLIENT_ID"] = "SOME_SECRET"
+        app.config["OID_TENANT_ID"] = "SOME_SECRET"
+        app.config["OID_ISSUER"] = "SOME_SECRET"
+        return app
+
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!",
+        }
+
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+
+    def test_service_user_login(self):
+        """
+        Tests that a service user can not log in with username and password
+        """
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+        self.assertEqual(501, response.status_code)
+        self.assertEqual(
+            response.json["error"], "The selected OID provider is not implemented"
+        )
 
 
 class TestLogInOpenAuthService(CustomTestCase):
