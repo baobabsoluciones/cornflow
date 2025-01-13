@@ -1,12 +1,14 @@
 """
 This file contains the schemas used for the users defined in the application
 """
-from marshmallow import fields, Schema
+
+from marshmallow import fields, Schema, validates_schema, ValidationError
 from .instance import InstanceSchema
 
 
 class UserSchema(Schema):
     """ """
+
     id = fields.Int(dump_only=True)
     first_name = fields.Str()
     last_name = fields.Str()
@@ -66,9 +68,23 @@ class LoginEndpointRequest(Schema):
 class LoginOpenAuthRequest(Schema):
     """
     This is the schema used by the login endpoint with Open ID protocol
+    Validates that either a token is provided, or both username and password are present
     """
 
-    token = fields.Str(required=True)
+    token = fields.Str(required=False)
+    username = fields.Str(required=False)
+    password = fields.Str(required=False)
+
+    @validates_schema
+    def validate_fields(self, data, **kwargs):
+        if data.get("token") is None:
+            if not data.get("username") or not data.get("password"):
+                raise ValidationError(
+                    "A token needs to be provided when using Open ID authentication"
+                )
+        else:
+            if data.get("username") or data.get("password"):
+                raise ValidationError("The login needs to be done with a token only")
 
 
 class SignupRequest(Schema):
