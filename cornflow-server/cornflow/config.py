@@ -9,6 +9,8 @@ class DefaultConfig(object):
     Default configuration class
     """
 
+    APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
+    EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
@@ -129,6 +131,14 @@ class TestingOpenAuth(Testing):
     AUTH_TYPE = 0
 
 
+class TestingApplicationRoot(Testing):
+    """
+    Configuration class for testing with application root
+    """
+
+    APPLICATION_ROOT = "/test"
+
+
 class Production(DefaultConfig):
     """
     Configuration class for production
@@ -148,4 +158,5 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
+    "testing-root": TestingApplicationRoot,
 }
