@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.1.4
+ARG CORNFLOW_VERSION=1.1.5
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
