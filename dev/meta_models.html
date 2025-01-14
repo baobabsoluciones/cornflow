@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Meta models - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Main endpoints" href="endpoints.html" /><link rel="prev" title="Auxiliar models" href="auxiliar_models.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -190,13 +190,13 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="meta-models">
-<h1>Meta models<a class="headerlink" href="#meta-models" title="Permalink to this heading">¶</a></h1>
+<h1>Meta models<a class="headerlink" href="#meta-models" title="Link to this heading">¶</a></h1>
 <p>This section of the documentation contains the code reference for the meta models available on cornflow.</p>
 <section id="empty-base-model">
-<h2>Empty base model<a class="headerlink" href="#empty-base-model" title="Permalink to this heading">¶</a></h2>
+<h2>Empty base model<a class="headerlink" href="#empty-base-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.meta_models.</span></span><span class="sig-name descname"><span class="pre">EmptyBaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.meta_models.</span></span><span class="sig-name descname"><span class="pre">EmptyBaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <p>This is an empty abstract model that just implements some basic logic to be shared across all models.</p>
 <p>A simple constructor that allows initialization from kwargs.</p>
@@ -207,7 +207,7 @@ attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.commit_changes">
-<span class="sig-name descname"><span class="pre">commit_changes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.commit_changes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">commit_changes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.commit_changes" title="Link to this definition">¶</a></dt>
 <dd><p>This method is in charge to commit the changes to the database and perform a rollback in case there is an error,
 raising then an class:<cite>InvalidData</cite> exception</p>
 <dl class="field-list simple">
@@ -225,7 +225,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.save" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.save" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to save a new object to the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -239,7 +239,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.delete">
-<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.delete" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.delete" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to delete an object from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -253,7 +253,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.update" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to update an object from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -270,7 +270,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.pre_update">
-<span class="sig-name descname"><span class="pre">pre_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.pre_update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pre_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.pre_update" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to update the values of an object but not write it to the database
 :param dict data: the data of the object
 :return: None
@@ -279,7 +279,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.get_all_objects">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get_all_objects" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get_all_objects" title="Link to this definition">¶</a></dt>
 <dd><p>Method to get all the objects from the database applying the filters passed as keyword arguments</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -299,7 +299,7 @@ raising then an class:<cite>InvalidData</cite> exception</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.get_one_object">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get_one_object" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get_one_object" title="Link to this definition">¶</a></dt>
 <dd><p>Method to retrieve an specific object from the database. This object can be retrieved with the primary key id
 or with a set of filters that should give back just one object, because the method is going
 to pick the first one. An example would be to filter by a column that has a unique constraint.</p>
@@ -321,7 +321,7 @@ to pick the first one. An example would be to filter by a column that has a uniq
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.EmptyBaseModel.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.EmptyBaseModel.get" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to get the value of any attribute of the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -340,10 +340,10 @@ to pick the first one. An example would be to filter by a column that has a uniq
 
 </section>
 <section id="trace-attributes">
-<h2>Trace attributes<a class="headerlink" href="#trace-attributes" title="Permalink to this heading">¶</a></h2>
+<h2>Trace attributes<a class="headerlink" href="#trace-attributes" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.meta_models.</span></span><span class="sig-name descname"><span class="pre">TraceAttributesModel</span></span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.meta_models.</span></span><span class="sig-name descname"><span class="pre">TraceAttributesModel</span></span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel" title="cornflow.models.meta_models.EmptyBaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmptyBaseModel</span></code></a></p>
 <p>This abstract model is used to create the trace columns on all dependent models.</p>
 <p>The trace columns are:</p>
@@ -364,7 +364,7 @@ attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.update" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to update an object from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -381,7 +381,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.pre_update">
-<span class="sig-name descname"><span class="pre">pre_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.pre_update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pre_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.pre_update" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to update the values of an object but not write it to the database
 :param dict data: the data of the object
 :return: None
@@ -390,7 +390,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.disable">
-<span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.disable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.disable" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to deactivate an object on the database (set the deleted_at date to the actual time stamp)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -404,7 +404,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.activate">
-<span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.activate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.activate" title="Link to this definition">¶</a></dt>
 <dd><p>Method used to activate an object on the database (set the deleted_at date to None)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -418,7 +418,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.get_all_objects">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.get_all_objects" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.get_all_objects" title="Link to this definition">¶</a></dt>
 <dd><p>Method to get all the objects from the database applying the filters passed as keyword arguments</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -444,7 +444,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.meta_models.TraceAttributesModel.get_one_object">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.get_one_object" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.meta_models.TraceAttributesModel.get_one_object" title="Link to this definition">¶</a></dt>
 <dd><p>Method to retrieve an specific object from the database. This object can be retrieved with the primary key id
 or with a set of filters that should give back just one object, because the method is going
 to pick the first one. An example would be to filter by a column that has a unique constraint.</p>
@@ -468,10 +468,10 @@ to pick the first one. An example would be to filter by a column that has a uniq
 
 </section>
 <section id="base-data-model">
-<h2>Base data model<a class="headerlink" href="#base-data-model" title="Permalink to this heading">¶</a></h2>
+<h2>Base data model<a class="headerlink" href="#base-data-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.base_data_model.BaseDataModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.base_data_model.</span></span><span class="sig-name descname"><span class="pre">BaseDataModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.base_data_model.</span></span><span class="sig-name descname"><span class="pre">BaseDataModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel" title="cornflow.models.meta_models.TraceAttributesModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributesModel</span></code></a></p>
 <p>A simple constructor that allows initialization from kwargs.</p>
 <p>Sets attributes on the constructed instance using the names and
@@ -481,7 +481,7 @@ attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.base_data_model.BaseDataModel.get_all_objects">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get all objects from a user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -516,7 +516,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.base_data_model.BaseDataModel.get_one_object">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_one_object" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_one_object" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get one object from the user and the id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -579,9 +579,9 @@ for example, any mapped columns or relationships.</p>
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

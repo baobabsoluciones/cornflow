@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Concepts - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Cornflow-server architecture" href="architecture.html" /><link rel="prev" title="Introduction" href="introduction.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -166,9 +166,9 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="concepts">
-<h1>Concepts<a class="headerlink" href="#concepts" title="Permalink to this heading">¶</a></h1>
+<h1>Concepts<a class="headerlink" href="#concepts" title="Link to this heading">¶</a></h1>
 <section id="decision-optimization-problem">
-<h2>Decision (Optimization) problem<a class="headerlink" href="#decision-optimization-problem" title="Permalink to this heading">¶</a></h2>
+<h2>Decision (Optimization) problem<a class="headerlink" href="#decision-optimization-problem" title="Link to this heading">¶</a></h2>
 <p>A quote from the first paragraph of the <a class="reference external" href="https://en.wikipedia.org/wiki/Decision_problem">Wikipedia article on Decision problem</a>:</p>
 <blockquote>
 <div><p>In computability theory and computational complexity theory, a decision problem is a problem that can be posed as a yes-no question of the input values. An example of a decision problem is deciding whether a given natural number is prime. Another is the problem “given two numbers x and y, does x evenly divide y?”. The answer is either ‘yes’ or ‘no’ depending upon the values of x and y. A method for solving a decision problem, given in the form of an algorithm, is called a decision procedure for that problem. A decision procedure for the decision problem “given two numbers x and y, does x evenly divide y?” would give the steps for determining whether x evenly divides y. One such algorithm is long division. If the remainder is zero the answer is ‘yes’, otherwise it is ‘no’. A decision problem which can be solved by an algorithm is called decidable.</p>
@@ -179,66 +179,66 @@ data-aria-dark="Switch to auto color mode">
 <figure class="align-default" id="id1">
 <span id="concepts1"></span><img alt="../_images/concepts1.png" src="../_images/concepts1.png" />
 <figcaption>
-<p><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="instance">
-<h2>Instance<a class="headerlink" href="#instance" title="Permalink to this heading">¶</a></h2>
+<h2>Instance<a class="headerlink" href="#instance" title="Link to this heading">¶</a></h2>
 <p>An Instance represents all the data needed to completely formulate one case of a decision problem.</p>
 <p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “input data”. It needs to follow the input data schema.</p>
 </section>
 <section id="feasible-solution-space">
-<h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Permalink to this heading">¶</a></h2>
+<h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Link to this heading">¶</a></h2>
 <p>Is the set of all Solutions that are valid given an Instance of a Problem. In most problems this set is never calculated since it is too big to calculate or store.</p>
 </section>
 <section id="solution">
-<h2>Solution<a class="headerlink" href="#solution" title="Permalink to this heading">¶</a></h2>
+<h2>Solution<a class="headerlink" href="#solution" title="Link to this heading">¶</a></h2>
 <p>A Solution represents all data needed to completely represent a feasible solution to an Instance.</p>
 <p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”. It needs to follow the output data schema.</p>
 </section>
 <section id="experiment">
-<h2>Experiment<a class="headerlink" href="#experiment" title="Permalink to this heading">¶</a></h2>
+<h2>Experiment<a class="headerlink" href="#experiment" title="Link to this heading">¶</a></h2>
 <p>This is just a convenient way to tie an Instance and a Solution together to be able to validate and compare solutions. It represents a “solved Instance”.</p>
 </section>
 <section id="solution-method">
-<h2>Solution Method<a class="headerlink" href="#solution-method" title="Permalink to this heading">¶</a></h2>
+<h2>Solution Method<a class="headerlink" href="#solution-method" title="Link to this heading">¶</a></h2>
 <p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).</p>
 <p>In Cornflow, A Solution Method is a subclass of Experiment.</p>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
 <p>Each Solution Method has ways to configure certain characteristics. The solve Configuration stores that personalization, such as the time limit, the gap tolerance, among other.</p>
 </section>
 <section id="execution">
-<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this heading">¶</a></h2>
+<h2>Execution<a class="headerlink" href="#execution" title="Link to this heading">¶</a></h2>
 <p>Consists of: (1) an Instance with (2) a Solve Configuration and (3) a Solution Method. It is the actual solving of the Decision Problem. It returns a Solution.</p>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
 <p>In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.</p>
 <figure class="align-default" id="id2">
 <span id="concepts2"></span><img alt="../_images/concepts2.png" src="../_images/concepts2.png" />
 <figcaption>
-<p><span class="caption-text">Implementation of main concepts</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Implementation of main concepts</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="an-example-with-tsp">
-<h2>An example with TSP<a class="headerlink" href="#an-example-with-tsp" title="Permalink to this heading">¶</a></h2>
+<h2>An example with TSP<a class="headerlink" href="#an-example-with-tsp" title="Link to this heading">¶</a></h2>
 <p>Let’s take the classical (and famous) problem of the TSP. We need to find the shortest path that joins all nodes in a graph and passes only once through each node. The input data is the distance matrix between each pair of nodes. The output data is an ordered list of nodes (to visit).</p>
 <p>Solution methods can be many: a MIP model, a CP model, a call to the <a class="reference external" href="https://www.math.uwaterloo.ca/tsp/concorde.html">Concorde solver</a>, a 2-opt heuristic implementation among many others.</p>
 <figure class="align-default" id="id3">
 <span id="concepts-tsp"></span><img alt="../_images/concepts_tsp.png" src="../_images/concepts_tsp.png" />
 <figcaption>
-<p><span class="caption-text">Implementation of concepts for a TSP</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Implementation of concepts for a TSP</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The following figure shows the schemas and python code required to build the smallest possible TSP Optimization Problem. The solve method consists of returning the nodes in an arbitrary order. Although the solution complies with the schema, the quality of this solution will probable be very low.</p>
 <figure class="align-default" id="id4">
 <span id="concepts-tsp2"></span><img alt="../_images/concepts_tsp2.png" src="../_images/concepts_tsp2.png" />
 <figcaption>
-<p><span class="caption-text">Schemas and solve method for TSP implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Schemas and solve method for TSP implementation</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>For more details on these schemas, check <a class="reference internal" href="../guides/jsonschema.html#write-a-json-schema"><span class="std std-ref">the json-schema section</span></a>. That section includes also the complete <a class="reference internal" href="../guides/jsonschema.html#example-with-tsp"><span class="std std-ref">TSP schemas in text form</span></a>.</p>
@@ -285,9 +285,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

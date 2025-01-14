@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cornflow-server architecture - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Installation instructions" href="install.html" /><link rel="prev" title="Concepts" href="concepts.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,42 +165,42 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="cornflow-server-architecture">
-<h1>Cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Permalink to this heading">¶</a></h1>
+<h1>Cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Link to this heading">¶</a></h1>
 <section id="components">
-<h2>Components<a class="headerlink" href="#components" title="Permalink to this heading">¶</a></h2>
+<h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id2">
 <span id="architecture"></span><img alt="../_images/architecture.png" src="../_images/architecture.png" />
 <figcaption>
-<p><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">Components with the connections between them</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <section id="cornflow-server">
-<h3>Cornflow-server<a class="headerlink" href="#cornflow-server" title="Permalink to this heading">¶</a></h3>
+<h3>Cornflow-server<a class="headerlink" href="#cornflow-server" title="Link to this heading">¶</a></h3>
 <p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.</p>
 </section>
 <section id="airflow-service">
-<h3>Airflow service<a class="headerlink" href="#airflow-service" title="Permalink to this heading">¶</a></h3>
+<h3>Airflow service<a class="headerlink" href="#airflow-service" title="Link to this heading">¶</a></h3>
 <p>Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.</p>
 <p>Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
 <p>A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.</p>
 <p>Airflow is also built on top of flask+python. The project’s site is: <a class="reference external" href="airflow.apache.org/">airflow.apache.org/</a></p>
 </section>
 <section id="worker">
-<h3>Worker<a class="headerlink" href="#worker" title="Permalink to this heading">¶</a></h3>
+<h3>Worker<a class="headerlink" href="#worker" title="Link to this heading">¶</a></h3>
 <p>A worker is a machine that is capable of executing an airflow task. Some of these workers will have a commercial solver license (e.g., Gurobi or CPLEX) in order to use these solvers.</p>
 </section>
 <section id="client">
-<h3>Client<a class="headerlink" href="#client" title="Permalink to this heading">¶</a></h3>
+<h3>Client<a class="headerlink" href="#client" title="Link to this heading">¶</a></h3>
 <p>Any library that uses the REST API to use Cornflow. There are two official clients that are currently maintained: a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-admin">SPA web app</a> and a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-client">python package</a>.</p>
 <p>The REST API is created with Open API standards (see <a class="reference internal" href="../stable-rest-api-ref.html#rest-api-reference"><span class="std std-ref">REST API</span></a>), so it should be fairly easy to build new apis.</p>
 </section>
 </section>
 <section id="main-data-flows">
-<h2>Main data flows<a class="headerlink" href="#main-data-flows" title="Permalink to this heading">¶</a></h2>
+<h2>Main data flows<a class="headerlink" href="#main-data-flows" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id3">
 <span id="id1"></span><img alt="../_images/main_flows.png" src="../_images/main_flows.png" />
 <figcaption>
-<p><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">The main data flows between components</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>Create instance (data):</p>
@@ -227,11 +227,11 @@ data-aria-dark="Switch to auto color mode">
 </ol>
 </section>
 <section id="secondary-flows">
-<h2>Secondary flows<a class="headerlink" href="#secondary-flows" title="Permalink to this heading">¶</a></h2>
+<h2>Secondary flows<a class="headerlink" href="#secondary-flows" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id4">
 <img alt="../_images/secondary_flows.png" src="../_images/secondary_flows.png" />
 <figcaption>
-<p><span class="caption-text">The secondary data flows between components</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">The secondary data flows between components</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>Interrupt execution (execution):</p>
@@ -306,9 +306,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

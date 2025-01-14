@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Production deployment and security - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Access control" href="access.html" /><link rel="prev" title="Deployment options" href="options.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -161,10 +161,10 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="production-deployment-and-security">
-<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Permalink to this heading">¶</a></h1>
+<h1>Production deployment and security<a class="headerlink" href="#production-deployment-and-security" title="Link to this heading">¶</a></h1>
 <p>It is time to deploy Cornflow in production. To do this, first, you need to make sure that the airflow is itself <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/production-deployment.html">production-ready</a>.</p>
 <section id="database-backend">
-<h2>Database backend<a class="headerlink" href="#database-backend" title="Permalink to this heading">¶</a></h2>
+<h2>Database backend<a class="headerlink" href="#database-backend" title="Link to this heading">¶</a></h2>
 <p>Running the default docker-compose setup in production can lead to data loss in multiple scenarios. If you want to run production-grade Cornflow, make sure you configure the backend to be an external PostgreSQL.
 You can change the backend using the following config:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="p">:</span><span class="o">//</span><span class="n">myuser</span><span class="p">:</span><span class="n">myuserpwd</span><span class="nd">@myserverip</span><span class="p">:</span><span class="mi">5432</span><span class="o">/</span><span class="n">cornflow</span>
@@ -172,7 +172,7 @@ You can change the backend using the following config:</p>
 </div>
 </section>
 <section id="ssl">
-<h2>SSL<a class="headerlink" href="#ssl" title="Permalink to this heading">¶</a></h2>
+<h2>SSL<a class="headerlink" href="#ssl" title="Link to this heading">¶</a></h2>
 <p>At the moment cornflow does not have built-in <a class="reference external" href="https://en.wikipedia.org/wiki/Transport_Layer_Security">SSL</a> support. You can use a reverse proxy service such as <a class="reference external" href="http://nginx.org/">Nginx</a> to give adequate security to the connection with your server.
 Please go to the <a class="reference external" href="http://nginx.org/en/docs/http/configuring_https_servers.html">Nginx documentation page</a> to correctly configure your server’s certificates.</p>
 <p>This is a Nginx configuration template (<code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/mysite.conf</span></code>) that we can use to configure the ssl encryption with the cornflow service:</p>
@@ -207,7 +207,7 @@ Please go to the <a class="reference external" href="http://nginx.org/en/docs/ht
 </div>
 </section>
 <section id="enforce-security">
-<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Permalink to this heading">¶</a></h2>
+<h2>Enforce security<a class="headerlink" href="#enforce-security" title="Link to this heading">¶</a></h2>
 <p>When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the <a class="reference external" href="https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose">docker secret manager</a>.</p>
 <p>It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key:</p>
@@ -217,7 +217,7 @@ If you are running docker services in production, it is also convenient to use t
 <p>Flower has by default a <a class="reference external" href="https://flower.readthedocs.io/en/latest/auth.html">basic authentication</a> shared with the airflow server in the deployment.</p>
 </section>
 <section id="ldap-authentication">
-<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Permalink to this heading">¶</a></h2>
+<h2>LDAP Authentication<a class="headerlink" href="#ldap-authentication" title="Link to this heading">¶</a></h2>
 <p>Cornflow supports user authentication through LDAP protocol. This means that you can configure the application to point to your security application server and cornflow reads the user management of your organization.
 To activate the functionality that supports this type of access, it is necessary set the value of the ldap environment variables before starting the cornflow service.</p>
 <p>In the <a class="reference external" href="https://raw.githubusercontent.com/baobabsoluciones/cornflow/master/docker-compose-cornflow-ldap.yml">repository</a> we have an example of deployment with docker to configure access with LDAP protocol:</p>
@@ -234,7 +234,7 @@ To activate the functionality that supports this type of access, it is necessary
 <p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>
 </section>
 <section id="airflow-user">
-<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Permalink to this heading">¶</a></h2>
+<h2>Airflow user<a class="headerlink" href="#airflow-user" title="Link to this heading">¶</a></h2>
 <p>It is not necessary to use the admin user to communicate cornflow with airflow. We recommend giving cornflow a user who has restricted permissions on airflow.
 A good start is to create a role for the cornflow application (cornflowrole) with permissions to manage DAGs, tasks, and jobs. Something that is not necessary is to give permissions to manage other users or configurations of the platform.</p>
 </section>
@@ -280,9 +280,9 @@ A good start is to create a role for the cornflow application (cornflowrole) wit
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

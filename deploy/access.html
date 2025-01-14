@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Access control - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging and monitoring" href="logs.html" /><link rel="prev" title="Production deployment and security" href="production.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -173,15 +173,15 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="access-control">
-<h1>Access control<a class="headerlink" href="#access-control" title="Permalink to this heading">¶</a></h1>
+<h1>Access control<a class="headerlink" href="#access-control" title="Link to this heading">¶</a></h1>
 <p>Cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
 In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.</p>
 <section id="user-access-data">
-<h2>User access data<a class="headerlink" href="#user-access-data" title="Permalink to this heading">¶</a></h2>
+<h2>User access data<a class="headerlink" href="#user-access-data" title="Link to this heading">¶</a></h2>
 <p>Right now cornflow has two valid user authentication methods. The first is AUTH_DB, which in addition to being the one that is activated by default, is the easiest to configure since the authentication is carried out against the application itself that stores the credentials in encrypted form.
 The second method is AUTH_LDAP. This method allows you to link cornflow with your own security directory and thus the application will delegate the authentication of the users.</p>
 <section id="with-auth-db-default">
-<h3>With Auth-DB (default)<a class="headerlink" href="#with-auth-db-default" title="Permalink to this heading">¶</a></h3>
+<h3>With Auth-DB (default)<a class="headerlink" href="#with-auth-db-default" title="Link to this heading">¶</a></h3>
 <p>Cornflow has an environment variable to control the type of authentication we want to activate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AUTH_TYPE</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">(</span><span class="n">Auth</span><span class="o">-</span><span class="n">DB</span> <span class="n">default</span> <span class="n">method</span><span class="p">)</span>
 </span></pre></div>
@@ -199,7 +199,7 @@ The second method is AUTH_LDAP. This method allows you to link cornflow with you
 <p>The password is stored encrypted in the database. If a user does not have a password an email will be sent with the temporary access password.</p>
 </section>
 <section id="with-auth-ldap">
-<h3>With Auth-LDAP<a class="headerlink" href="#with-auth-ldap" title="Permalink to this heading">¶</a></h3>
+<h3>With Auth-LDAP<a class="headerlink" href="#with-auth-ldap" title="Link to this heading">¶</a></h3>
 <p>As we saw previously cornflow has an environment variable to control the type of authentication we want to activate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AUTH_TYPE</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">(</span><span class="n">Auth</span><span class="o">-</span><span class="n">LDAP</span> <span class="n">authentication</span><span class="p">)</span>
 </span></pre></div>
@@ -227,7 +227,7 @@ In the event that you consult the connection through LDAP, the following informa
 </span><span data-line="3"><span class="n">LDAP_BIND_PASSWORD</span> <span class="o">-</span> <span class="n">ldap</span> <span class="n">admin</span> <span class="n">search</span> <span class="n">password</span>
 </span><span data-line="4"><span class="n">LDAP_USERNAME_ATTRIBUTE</span> <span class="o">-</span> <span class="n">The</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">attribute</span> <span class="n">that</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">unique</span> <span class="n">ID</span> <span class="n">of</span> <span class="n">the</span> <span class="n">user</span>
 </span><span data-line="5"><span class="n">LDAP_USER_BASE</span> <span class="o">-</span> <span class="n">The</span> <span class="n">base</span> <span class="n">DN</span> <span class="n">subtree</span> <span class="n">that</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">when</span> <span class="n">searching</span> <span class="k">for</span> <span class="n">user</span> <span class="n">entries</span> <span class="n">on</span> <span class="n">the</span> <span class="n">LDAP</span> <span class="n">server</span>
-</span><span data-line="6"><span class="n">LDAP_USER_OBJECT_CLASS</span> <span class="o">-</span> <span class="n">The</span> <span class="nb">object</span> <span class="n">classes</span> <span class="n">are</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">LDAP</span> <span class="n">directory</span> <span class="n">schema</span> <span class="p">(</span><span class="n">they</span> <span class="n">constitute</span> <span class="n">a</span> <span class="k">class</span> <span class="nc">hierarchy</span> <span class="n">there</span><span class="p">)</span>
+</span><span data-line="6"><span class="n">LDAP_USER_OBJECT_CLASS</span> <span class="o">-</span> <span class="n">The</span> <span class="nb">object</span> <span class="n">classes</span> <span class="n">are</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">LDAP</span> <span class="n">directory</span> <span class="n">schema</span> <span class="p">(</span><span class="n">they</span> <span class="n">constitute</span> <span class="n">a</span> <span class="k">class</span><span class="w"> </span><span class="nc">hierarchy</span> <span class="n">there</span><span class="p">)</span>
 </span><span data-line="7"><span class="n">LDAP_GROUP_OBJECT_CLASS</span> <span class="o">-</span> <span class="n">Filter</span> <span class="n">used</span> <span class="k">for</span> <span class="n">returning</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">group</span> <span class="n">member</span> <span class="n">entries</span> <span class="n">that</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">LDAP</span> <span class="n">base</span> <span class="n">DN</span> <span class="p">(</span><span class="n">groups</span><span class="p">)</span> <span class="n">subtree</span>
 </span><span data-line="8"><span class="n">LDAP_GROUP_ATTRIBUTE</span> <span class="o">-</span> <span class="n">The</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">group</span> <span class="n">search</span> <span class="nb">filter</span> <span class="n">that</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">group</span> <span class="n">name</span>
 </span><span data-line="9"><span class="n">LDAP_GROUP_BASE</span> <span class="o">-</span> <span class="n">The</span> <span class="n">base</span> <span class="n">DN</span> <span class="n">subtree</span> <span class="n">that</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">when</span> <span class="n">searching</span> <span class="k">for</span> <span class="n">group</span> <span class="n">entries</span> <span class="n">on</span> <span class="n">the</span> <span class="n">LDAP</span> <span class="n">server</span>
@@ -238,7 +238,7 @@ In the event that you consult the connection through LDAP, the following informa
 </section>
 </section>
 <section id="roles-definition">
-<h2>Roles definition<a class="headerlink" href="#roles-definition" title="Permalink to this heading">¶</a></h2>
+<h2>Roles definition<a class="headerlink" href="#roles-definition" title="Link to this heading">¶</a></h2>
 <p>In cornflow there is a differentiation between three user roles with different characteristics:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">Admin</span> <span class="o">-</span> <span class="n">admin</span> <span class="n">user</span> <span class="n">can</span> <span class="n">manage</span> <span class="n">the</span> <span class="n">rest</span> <span class="n">of</span> <span class="n">cornflow</span> <span class="n">users</span> <span class="ow">and</span> <span class="n">also</span> <span class="n">has</span> <span class="n">access</span> <span class="n">to</span> <span class="n">make</span> <span class="n">changes</span> <span class="n">to</span> <span class="n">the</span> <span class="n">airflow</span> <span class="n">platform</span>
 </span><span data-line="2"><span class="n">Service</span> <span class="o">-</span> <span class="n">service</span> <span class="n">user</span> <span class="n">role</span> <span class="k">for</span> <span class="n">cornflow</span> <span class="ow">and</span> <span class="n">airflow</span> <span class="n">communication</span>
@@ -262,7 +262,7 @@ In addition, there is a temporary link between the user and his role that will n
 </span></pre></div>
 </div>
 <section id="roles-with-auth-ldap">
-<h3>Roles with Auth-LDAP<a class="headerlink" href="#roles-with-auth-ldap" title="Permalink to this heading">¶</a></h3>
+<h3>Roles with Auth-LDAP<a class="headerlink" href="#roles-with-auth-ldap" title="Link to this heading">¶</a></h3>
 <p>In the cornflow server deployment, the LDAP server roles will be configured through environment variables. Cornflow roles to bind to ldap server:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">LDAP_GROUP_TO_ROLE_SERVICE</span>
 </span><span data-line="2"><span class="n">LDAP_GROUP_TO_ROLE_ADMIN</span>
@@ -274,9 +274,9 @@ In addition, there is a temporary link between the user and his role that will n
 </section>
 </section>
 <section id="cornflow-interactions-with-airflow-service-user">
-<h2>Cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Permalink to this heading">¶</a></h2>
+<h2>Cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Link to this heading">¶</a></h2>
 <section id="cornflow-airflow">
-<h3>Cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Permalink to this heading">¶</a></h3>
+<h3>Cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Link to this heading">¶</a></h3>
 <p>Not all cornflow users can access airflow. A role defined in the application will give access to perform actions that involve communication with airflow through the user defined in the previous point.
 If the user has access to airflow, in each communication, the username and password that provides access to the platform will be provided by this environment variables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">user</span> <span class="n">name</span> <span class="k">for</span> <span class="n">login</span> <span class="ow">in</span> <span class="n">airflow</span> <span class="ow">and</span> <span class="n">manage</span> <span class="n">dags</span>
@@ -298,7 +298,7 @@ The user who operates airflow through cornflow may not be the same user who has 
 <p>The user access to each dag in airflow can be controlled in cornflow. Cornflow store a table with dags and have roles that give access to each dag individually.</p>
 </section>
 <section id="airflow-cornflow">
-<h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Permalink to this heading">¶</a></h3>
+<h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Link to this heading">¶</a></h3>
 <p>Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
 Service user is a good solution for doing all the data interaction between applications. You have only to pay attention to one account for set permissions and key values on deployment:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
@@ -314,7 +314,7 @@ Service user is a good solution for doing all the data interaction between appli
 </section>
 </section>
 <section id="manage-cornflow-users">
-<h2>Manage cornflow users<a class="headerlink" href="#manage-cornflow-users" title="Permalink to this heading">¶</a></h2>
+<h2>Manage cornflow users<a class="headerlink" href="#manage-cornflow-users" title="Link to this heading">¶</a></h2>
 <p>In the cornflow image, if no environment variables are set, an admin user is created with these credentials:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow_admin</span>
 </span><span data-line="2"><span class="n">CORNFLOW_ADMIN_EMAIL</span> <span class="o">-</span> <span class="n">cornflow_admin</span><span class="nd">@cornflow</span><span class="o">.</span><span class="n">com</span>
@@ -325,7 +325,7 @@ Service user is a good solution for doing all the data interaction between appli
 <p>To create a user, you must interact with the cornflow application through an <a class="reference external" href="https://baobabsoluciones.github.io/cornflow/dev/endpoints.html#module-cornflow.endpoints.user">endpoint of its API</a>. Check the API docs for the users <a class="reference external" href="https://baobabsoluciones.github.io/corn/stable-rest-api-ref.html#tag/Users">here</a>. It is only possible to create new cornflow admin user using another one with those privileges.</p>
 </section>
 <section id="manage-airflow-users">
-<h2>Manage airflow users<a class="headerlink" href="#manage-airflow-users" title="Permalink to this heading">¶</a></h2>
+<h2>Manage airflow users<a class="headerlink" href="#manage-airflow-users" title="Link to this heading">¶</a></h2>
 <p>The default administrator user for airflow and flower will be:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">admin</span>
 </span><span data-line="2"><span class="n">AIRFLOW_PWD</span> <span class="o">-</span> <span class="n">admin</span>
@@ -336,7 +336,7 @@ Service user is a good solution for doing all the data interaction between appli
 <p>Remember to configure all authentication, users and access before passing to production. Check the previous section for more information: <a class="reference internal" href="production.html#production-deployment-and-security"><span class="std std-ref">Production deployment and security</span></a>.</p>
 </section>
 <section id="external-ldap-authentication-server-requirements">
-<h2>External LDAP authentication server requirements<a class="headerlink" href="#external-ldap-authentication-server-requirements" title="Permalink to this heading">¶</a></h2>
+<h2>External LDAP authentication server requirements<a class="headerlink" href="#external-ldap-authentication-server-requirements" title="Link to this heading">¶</a></h2>
 <p>The requirements to communicate cornflow with an LDAP server are the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">An</span> <span class="n">authentication</span> <span class="n">server</span> <span class="k">with</span> <span class="n">support</span> <span class="k">for</span> <span class="n">the</span> <span class="n">LDAPv3</span> <span class="n">protocol</span><span class="o">.</span>
 </span><span data-line="2"><span class="n">The</span> <span class="n">LDAP</span> <span class="n">server</span> <span class="n">must</span> <span class="n">be</span> <span class="n">visible</span> <span class="n">at</span> <span class="nb">all</span> <span class="n">times</span> <span class="n">on</span> <span class="n">the</span> <span class="n">network</span> <span class="n">by</span> <span class="n">the</span> <span class="n">cornflow</span> <span class="n">server</span><span class="o">.</span>
@@ -396,9 +396,9 @@ Service user is a good solution for doing all the data interaction between appli
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

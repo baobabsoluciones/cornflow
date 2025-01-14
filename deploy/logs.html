@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Logging and monitoring - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Code documentation" href="../dev/index.html" /><link rel="prev" title="Access control" href="access.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -167,9 +167,9 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="logging-and-monitoring">
-<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Permalink to this heading">¶</a></h1>
+<h1>Logging and monitoring<a class="headerlink" href="#logging-and-monitoring" title="Link to this heading">¶</a></h1>
 <section id="cornflow-logs">
-<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Permalink to this heading">¶</a></h2>
+<h2>Cornflow logs<a class="headerlink" href="#cornflow-logs" title="Link to this heading">¶</a></h2>
 <p>Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
 </span></pre></div>
@@ -195,10 +195,10 @@ To permanently store the logs even if the service is destroyed, you can mount a 
 <p>The compressed logs will have this format: <code class="docutils literal notranslate"><span class="pre">info.log.1.gz</span></code></p>
 </section>
 <section id="airflow-logs">
-<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Permalink to this heading">¶</a></h2>
+<h2>Airflow logs<a class="headerlink" href="#airflow-logs" title="Link to this heading">¶</a></h2>
 <p>Airflow supports a variety of logging and monitoring mechanisms as shown on it’s <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/index.html#logging-monitoring">documentation page</a>.</p>
 <section id="scheduler-log">
-<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Permalink to this heading">¶</a></h3>
+<h3>Scheduler log<a class="headerlink" href="#scheduler-log" title="Link to this heading">¶</a></h3>
 <p>The logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.</p>
 <p>The scheduler logs are named after the DAGs handled by the service. Navigate to where the log file is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">docker exec -it `docker ps -q --filter name=scheduler` bash -c &quot;ls -l ${AIRFLOW_HOME}logs/scheduler/latest/&quot;
@@ -212,7 +212,7 @@ To permanently store the logs even if the service is destroyed, you can mount a 
 </div>
 </section>
 <section id="worker-logs">
-<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Permalink to this heading">¶</a></h3>
+<h3>Worker logs<a class="headerlink" href="#worker-logs" title="Link to this heading">¶</a></h3>
 <p>As in the rest of airflow services, the logs are stored in the logs folder within the <code class="docutils literal notranslate"><span class="pre">$AIRFLOW_HOME</span></code> directory.
 The logs are divided into folders with the name of the DAGs and into subfolders with their execution dates.</p>
 <p>If we want to view logs with a command, here things get a bit complicated since we can have different workers deployed, with different DAGs. We must help ourselves with the linux bash commands to filter the search as much as possible. Let’s say we want to review today logs of the DAG <code class="docutils literal notranslate"><span class="pre">update_all_squemas</span></code> in every worker:</p>
@@ -234,9 +234,9 @@ The logs are divided into folders with the name of the DAGs and into subfolders 
 </section>
 </section>
 <section id="monitoring">
-<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this heading">¶</a></h2>
+<h2>Monitoring<a class="headerlink" href="#monitoring" title="Link to this heading">¶</a></h2>
 <section id="cornflow-monitoring">
-<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Permalink to this heading">¶</a></h3>
+<h3>Cornflow monitoring<a class="headerlink" href="#cornflow-monitoring" title="Link to this heading">¶</a></h3>
 <p>You can call the <code class="docutils literal notranslate"><span class="pre">/health</span></code> endpoint to obtain the status of the cornflow and airflow servers. It should return a 200 code as well as “healthy” of status for both <code class="docutils literal notranslate"><span class="pre">cornflow_status</span></code> and <code class="docutils literal notranslate"><span class="pre">airflow_status</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2">  <span class="s2">&quot;airflow_status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
@@ -247,7 +247,7 @@ The logs are divided into folders with the name of the DAGs and into subfolders 
 <p>Check the <a class="reference external" href="https://baobabsoluciones.github.io/cornflow/stable-rest-api-ref.html#tag/Health">API docs</a> for more information.</p>
 </section>
 <section id="airflow-monitoring">
-<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Permalink to this heading">¶</a></h3>
+<h3>Airflow monitoring<a class="headerlink" href="#airflow-monitoring" title="Link to this heading">¶</a></h3>
 <p>To check the <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html#checking-airflow-health-status">health status of your Airflow instance</a> directly without using cornflow, you can simply access the endpoint <code class="docutils literal notranslate"><span class="pre">/health</span></code>. It will return a JSON object in which a high-level glance is provided.</p>
 </section>
 </section>
@@ -293,9 +293,9 @@ The logs are divided into folders with the name of the DAGs and into subfolders 
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

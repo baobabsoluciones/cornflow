@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Installation instructions - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="User guides and how-to" href="../guides/index.html" /><link rel="prev" title="Cornflow-server architecture" href="architecture.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,21 +169,21 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="installation-instructions">
-<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this heading">¶</a></h1>
+<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Link to this heading">¶</a></h1>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Linux or Windows with WSL.</p></li>
 <li><p>python &gt;= 3.8, preferably 3.10.</p></li>
 </ul>
 </section>
 <section id="install-cornflow">
-<h2>Install cornflow<a class="headerlink" href="#install-cornflow" title="Permalink to this heading">¶</a></h2>
+<h2>Install cornflow<a class="headerlink" href="#install-cornflow" title="Link to this heading">¶</a></h2>
 <p>There are several ways to install cornflow and set it up and running. First we are going to cover how to set up cornflow and airflow locally on a Linux machine. Then how to deploy cornflow building the docker containers and how to set it up using the official docker hub images.</p>
 <section id="local-installation-from-repository">
-<h3>Local installation from repository<a class="headerlink" href="#local-installation-from-repository" title="Permalink to this heading">¶</a></h3>
+<h3>Local installation from repository<a class="headerlink" href="#local-installation-from-repository" title="Link to this heading">¶</a></h3>
 <section id="set-up-cornflow">
-<h4>Set up cornflow<a class="headerlink" href="#set-up-cornflow" title="Permalink to this heading">¶</a></h4>
+<h4>Set up cornflow<a class="headerlink" href="#set-up-cornflow" title="Link to this heading">¶</a></h4>
 <p>We first start by cloning the repository:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>
 </span></pre></div>
@@ -225,7 +225,7 @@ data-aria-dark="Switch to auto color mode">
 <p>We should kill the process and set up and run airflow before coming back to launch cornflow.</p>
 </section>
 <section id="set-up-and-run-airflow">
-<h4>Set up and run airflow<a class="headerlink" href="#set-up-and-run-airflow" title="Permalink to this heading">¶</a></h4>
+<h4>Set up and run airflow<a class="headerlink" href="#set-up-and-run-airflow" title="Link to this heading">¶</a></h4>
 <p>First if we have followed cornflow installation instructions we should exit the virtual environment first and go back to the root folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">deactivate</span>
 </span><span data-line="2"><span class="n">cd</span> <span class="o">..</span>
@@ -270,7 +270,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="run-cornflow">
-<h4>Run cornflow<a class="headerlink" href="#run-cornflow" title="Permalink to this heading">¶</a></h4>
+<h4>Run cornflow<a class="headerlink" href="#run-cornflow" title="Link to this heading">¶</a></h4>
 <p>Once airflow is running and cornflow set up we can run it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">source</span> <span class="n">cenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </span><span data-line="2"><span class="n">flask</span> <span class="n">register_deployed_dags</span> <span class="o">-</span><span class="n">r</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">8080</span> <span class="o">-</span><span class="n">u</span> <span class="n">admin</span> <span class="o">-</span><span class="n">p</span> <span class="n">admin</span>
@@ -282,7 +282,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 </section>
 <section id="docker-build-images-from-local">
-<h3>Docker. Build images from local<a class="headerlink" href="#docker-build-images-from-local" title="Permalink to this heading">¶</a></h3>
+<h3>Docker. Build images from local<a class="headerlink" href="#docker-build-images-from-local" title="Link to this heading">¶</a></h3>
 <p>More information about how to deploy with docker containers can be found of the <a class="reference internal" href="../deploy/index.html#deploy-cornflow"><span class="std std-ref">Deploy your own cornflow-server</span></a> section of the documentation.</p>
 <p>We first start by cloning the repository:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span>
@@ -334,11 +334,11 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="docker-pull-images-from-docker-hub">
-<h3>Docker. Pull images from docker hub<a class="headerlink" href="#docker-pull-images-from-docker-hub" title="Permalink to this heading">¶</a></h3>
+<h3>Docker. Pull images from docker hub<a class="headerlink" href="#docker-pull-images-from-docker-hub" title="Link to this heading">¶</a></h3>
 <p>To run the environment with the official images then we just have to copy the <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">docker-compose-cornflow-celery.yml</span></code> file to our system and run the docker-compose up command to use the official docker hub images.</p>
 </section>
 <section id="troubleshooting">
-<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">¶</a></h3>
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h3>
 <p>To install all the dependencies, additional packages may be needed. For example, in Ubuntu 20.04, the following packages are needed:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libpq</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="mf">.10</span><span class="o">-</span><span class="n">venv</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span>
 </span></pre></div>
@@ -387,9 +387,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

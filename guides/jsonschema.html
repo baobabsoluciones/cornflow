@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Write a json-schema - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Test your solution method" href="testing_app.html" /><link rel="prev" title="Coding style and rules" href="coding_style.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -172,9 +172,9 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="write-a-json-schema">
-<h1>Write a json-schema<a class="headerlink" href="#write-a-json-schema" title="Permalink to this heading">¶</a></h1>
+<h1>Write a json-schema<a class="headerlink" href="#write-a-json-schema" title="Link to this heading">¶</a></h1>
 <section id="basics-of-schemas">
-<h2>Basics of schemas<a class="headerlink" href="#basics-of-schemas" title="Permalink to this heading">¶</a></h2>
+<h2>Basics of schemas<a class="headerlink" href="#basics-of-schemas" title="Link to this heading">¶</a></h2>
 <p>The schemas are descriptions of the data accepted by the application.</p>
 <p>In particular, a schema must describe a dictionary of tables, each table described as a list of dictionaries whose keys are the name of the columns.</p>
 <p>Let’s take an example of data with two tables <code class="docutils literal notranslate"><span class="pre">customers</span></code> and <code class="docutils literal notranslate"><span class="pre">allowedTrailers</span></code>.</p>
@@ -274,7 +274,7 @@ data-aria-dark="Switch to auto color mode">
 <p>This basically means that our input data should be an object containing two tables (<code class="docutils literal notranslate"><span class="pre">customers</span></code> and <code class="docutils literal notranslate"><span class="pre">allowedTrailers</span></code>) represented as arrays of objects.
 It is important to note three things:</p>
 <section id="no-nested-list-types">
-<h3>No nested list types<a class="headerlink" href="#no-nested-list-types" title="Permalink to this heading">¶</a></h3>
+<h3>No nested list types<a class="headerlink" href="#no-nested-list-types" title="Link to this heading">¶</a></h3>
 <p>If your data previously looked like this:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -303,12 +303,12 @@ It is important to note three things:</p>
 <p>Then it should be converted into two tables like shown before. The cells of a table must only contain unidimensional values</p>
 </section>
 <section id="required-property">
-<h3>Required property<a class="headerlink" href="#required-property" title="Permalink to this heading">¶</a></h3>
+<h3>Required property<a class="headerlink" href="#required-property" title="Link to this heading">¶</a></h3>
 <p>The property “required” must be included for all objects that are needed to solve the problem.</p>
 <p>In real problems, pure data is usually complemented by auxiliary information (such as that used to display in screens: names, comments, coordinates, etc.). This information should not be included in the “required” property because it is not required to produce a solution for the problem (it is still useful to be defined so it can be validated by the schema).</p>
 </section>
 <section id="exception-for-simple-objects">
-<h3>Exception for “simple objects”<a class="headerlink" href="#exception-for-simple-objects" title="Permalink to this heading">¶</a></h3>
+<h3>Exception for “simple objects”<a class="headerlink" href="#exception-for-simple-objects" title="Link to this heading">¶</a></h3>
 <p>Even though most properties of our schema object must be arrays, an exception is made for the parameters of the problems that are unidimensional and can not be represented as lists. For instance, if in our previous example we had two parameters <code class="docutils literal notranslate"><span class="pre">trailersCapacity</span></code> and <code class="docutils literal notranslate"><span class="pre">timeHorizon</span></code>, we would add a property <code class="docutils literal notranslate"><span class="pre">parameters</span></code> to our schema:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
 </span><span data-line="2"><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
@@ -338,7 +338,7 @@ It is important to note three things:</p>
 </div>
 </section>
 <section id="naming-conventions">
-<h3>Naming conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this heading">¶</a></h3>
+<h3>Naming conventions<a class="headerlink" href="#naming-conventions" title="Link to this heading">¶</a></h3>
 <p>When naming columns in a “master table”, we refer to the unique id of each row
 as “id” (see the <code class="docutils literal notranslate"><span class="pre">shifts</span></code> property below. When an id is used as a foreign
 key in another table (see the <code class="docutils literal notranslate"><span class="pre">resources_not_available</span></code> property), we use
@@ -403,10 +403,10 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </section>
 </section>
 <section id="example-with-tsp">
-<h2>Example with TSP<a class="headerlink" href="#example-with-tsp" title="Permalink to this heading">¶</a></h2>
+<h2>Example with TSP<a class="headerlink" href="#example-with-tsp" title="Link to this heading">¶</a></h2>
 <p>Let’s take the well known TSP problem and generate an instance, a solution and a configuration following these guidelines.</p>
 <section id="instance-schema">
-<h3>Instance schema<a class="headerlink" href="#instance-schema" title="Permalink to this heading">¶</a></h3>
+<h3>Instance schema<a class="headerlink" href="#instance-schema" title="Link to this heading">¶</a></h3>
 <p>An instance of a TSP is a simple graph with positive weights in each arc. We will represent the graph by a list of arcs:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">    </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
@@ -445,7 +445,7 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </div>
 </section>
 <section id="solution-schema">
-<h3>Solution schema<a class="headerlink" href="#solution-schema" title="Permalink to this heading">¶</a></h3>
+<h3>Solution schema<a class="headerlink" href="#solution-schema" title="Link to this heading">¶</a></h3>
 <p>A solution to a TSP, is the sequence in which nodes should be visited. We <em>could</em> use an ordered array of nodes. Nevertheless, we need to use an array of objects. We will also add a new property with the position of the node in the sequence.:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">    </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
@@ -483,7 +483,7 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </div>
 </section>
 <section id="configuration-schema">
-<h3>Configuration schema<a class="headerlink" href="#configuration-schema" title="Permalink to this heading">¶</a></h3>
+<h3>Configuration schema<a class="headerlink" href="#configuration-schema" title="Link to this heading">¶</a></h3>
 <p>The configuration will depend on the application. We usually have some default configuration tailored to MIP problems. Here is a minimalistic proposal:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">    </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://json-schema.org/schema#&quot;</span><span class="p">,</span>
@@ -505,17 +505,17 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </section>
 </section>
 <section id="generating-jsonschema-from-data">
-<h2>Generating jsonschema from data<a class="headerlink" href="#generating-jsonschema-from-data" title="Permalink to this heading">¶</a></h2>
+<h2>Generating jsonschema from data<a class="headerlink" href="#generating-jsonschema-from-data" title="Link to this heading">¶</a></h2>
 <p>Usually, the instance data is tedious to describe via json-schema format. At the same time, an example instance is <em>usually</em> available by default in some format (xml, Excel, csv, custom file).</p>
 <p>In this case, the first method of the Instance will be something along the lines of <code class="docutils literal notranslate"><span class="pre">from_xml</span></code> that will create an Instance from that file.</p>
 <p>Imagine the second and third methods are <code class="docutils literal notranslate"><span class="pre">to_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">from_dict</span></code>. With this, it’s already possible to generate an json with the right schema: both <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceCore</span></code></a> and <a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolutionCore</span></code></a> have a method called <code class="docutils literal notranslate"><span class="pre">generate_schema</span></code> that will do just that. They return an schema that is compatible with the current object.</p>
 <p>An example code to do just that is available in the following <a class="reference external" href="https://github.com/baobabsoluciones/hackathonbaobab2021">https://github.com/baobabsoluciones/hackathonbaobab2021</a> project. Here is an excerpt:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span> <span class="nn">json</span>
-</span><span data-line="2"><span class="kn">from</span> <span class="nn">hackathonbaobab2021.core</span> <span class="kn">import</span> <span class="n">Instance</span>
-</span><span data-line="3"><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">hackathonbaobab2021.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Instance</span>
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 </span><span data-line="4">
 </span><span data-line="5">
-</span><span data-line="6"><span class="k">def</span> <span class="nf">generate_schema</span><span class="p">():</span>
+</span><span data-line="6"><span class="k">def</span><span class="w"> </span><span class="nf">generate_schema</span><span class="p">():</span>
 </span><span data-line="7">    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;../data/ITC2021_Test1.xml&quot;</span><span class="p">)</span>
 </span><span data-line="8">    <span class="n">instance</span> <span class="o">=</span> <span class="n">Instance</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 </span><span data-line="9">    <span class="n">schema</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">generate_schema</span><span class="p">()</span>
@@ -529,11 +529,11 @@ key in another table (see the <code class="docutils literal notranslate"><span c
 </div>
 </section>
 <section id="json-schema-validations">
-<h2>Json-schema validations<a class="headerlink" href="#json-schema-validations" title="Permalink to this heading">¶</a></h2>
+<h2>Json-schema validations<a class="headerlink" href="#json-schema-validations" title="Link to this heading">¶</a></h2>
 <p>The json-schema are validated through their parent classes (<a class="reference internal" href="../dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">SolutionCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ApplicationCore</span></code>). This is usually done before solving a problem (e.g., see <code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code>). In any case, the app user can choose to take advantage of the schema to validate the input or output at any point in time by using <code class="xref py py-func docutils literal notranslate"><span class="pre">check_schema()</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">check_schema()</span></code>.</p>
 </section>
 <section id="other-jsonschema-properties">
-<h2>Other jsonschema properties<a class="headerlink" href="#other-jsonschema-properties" title="Permalink to this heading">¶</a></h2>
+<h2>Other jsonschema properties<a class="headerlink" href="#other-jsonschema-properties" title="Link to this heading">¶</a></h2>
 <p>In order to visualize more information on the user interface on <code class="docutils literal notranslate"><span class="pre">cornflow-app</span></code> we can use some other properties of the <code class="docutils literal notranslate"><span class="pre">jsonschema</span></code> in order to convey more information about our data structure.</p>
 <p>The main properties used are: <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code> and <code class="docutils literal notranslate"><span class="pre">$comment</span></code>:</p>
 <ul class="simple">
@@ -589,9 +589,9 @@ key in another table (see the <code class="docutils literal notranslate"><span c
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Introduction - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Concepts" href="concepts.html" /><link rel="prev" title="Main topics" href="index.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,25 +158,32 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="introduction">
-<span id="introduction-label"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
-<a class="reference external image-reference" href="https://github.com/baobabsoluciones/cornflow/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/baobabsoluciones/cornflow/build_docs.yml?label=docs&amp;logo=github&amp;style=for-the-badge" /></a>
-<a class="reference external image-reference" href="https://pypi.python.org/pypi/cornflow"><img alt="PyPI" src="https://img.shields.io/pypi/v/cornflow?label=cornflow&amp;style=for-the-badge" /></a>
-<a class="reference external image-reference" href="https://pypi.python.org/pypi/cornflow-client"><img alt="PyPI" src="https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&amp;style=for-the-badge" /></a>
-<a class="reference external image-reference" href="https://github.com/baobabsoluciones/cornflow/blob/master/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/cornflow-client?color=blue&amp;style=for-the-badge" /></a>
-<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=server-tests&amp;label=cornflow&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" /></a>
-<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=client-tests&amp;label=client&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" /></a>
-<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=dags-tests&amp;label=dags&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" /></a>
+<span id="introduction-label"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h1>
+<a class="reference external image-reference" href="https://github.com/baobabsoluciones/cornflow/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/baobabsoluciones/cornflow/build_docs.yml?label=docs&amp;logo=github&amp;style=for-the-badge" />
+</a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/cornflow"><img alt="PyPI" src="https://img.shields.io/pypi/v/cornflow?label=cornflow&amp;style=for-the-badge" />
+</a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/cornflow-client"><img alt="PyPI" src="https://img.shields.io/pypi/v/cornflow-client?label=cornflow-client&amp;style=for-the-badge" />
+</a>
+<a class="reference external image-reference" href="https://github.com/baobabsoluciones/cornflow/blob/master/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/cornflow-client?color=blue&amp;style=for-the-badge" />
+</a>
+<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=server-tests&amp;label=cornflow&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" />
+</a>
+<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=client-tests&amp;label=client&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" />
+</a>
+<a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=dags-tests&amp;label=dags&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" />
+</a>
 <p>Cornflow is a collection of projects that allow for the rapid prototyping and deployment of optimization-based applications. Contrary to other existing deployment servers, Cornflow is centered around the applications and the problems, not in the techniques. It offers several other advantages such as being completely free (as in freedom) and very flexible.</p>
 <p>Cornflow uses input and output schemas to define “optimization problems” and then accepts any (for now python) code that reads data in the input schema and returns a solution in the output schema. We use JSONSchema to define these schemas. By working like this, Cornflow becomes technique-agnostic without losing data-validation and re-usability (e.g., we can have more than one “solution method” for the same problem).</p>
 <p>Being technique-agnostic implies we sometimes use CP models built with ortools, MIP models built with pyomo and some heuristics in pure python. But again, we could also have a localsolver model or any metaheuristic as long as it complies with the interface format for the particular optimization problem. In the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section we describe some of the demo solution methods we have built and deployed.</p>
 <section id="ways-it-can-be-used">
-<h2>Ways it can be used<a class="headerlink" href="#ways-it-can-be-used" title="Permalink to this heading">¶</a></h2>
+<h2>Ways it can be used<a class="headerlink" href="#ways-it-can-be-used" title="Link to this heading">¶</a></h2>
 <p>Cornflow main advantage is its flexibility and so it can be used and deployed in many ways. The easiest is to use the test server we already have deployed to test the current offer of solvers. For this, check the <a class="reference internal" href="../guides/use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a> section on how to test the server and then the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section to see what solvers are available.</p>
 <p>If you want to have your solution available in the server, feel free to propose a new solution method via a Pull Request. This is explained in section <a class="reference internal" href="../guides/deploy_solver_new.html#how-to-deploy-a-new-solution-method-2-0"><span class="std std-ref">How to deploy a new solution method (2.0)</span></a>.</p>
 <p>Finally, if you want to deploy your own Cornflow-server privately and deploy your own private solution methods, you can check the several ways in which you can do that in <a class="reference internal" href="../deploy/index.html#deploy-your-own-cornflow-server"><span class="std std-ref">Deploy your own cornflow-server</span></a>.</p>
 </section>
 <section id="components">
-<h2>Components<a class="headerlink" href="#components" title="Permalink to this heading">¶</a></h2>
+<h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
 <p>Cornflow is composed of several components:</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-p-2 docutils">
 <div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
@@ -261,9 +268,9 @@ airflow</div>
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

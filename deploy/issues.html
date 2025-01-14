@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Known issues - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,12 +163,12 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="known-issues">
-<h1>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this heading">¶</a></h1>
+<h1>Known issues<a class="headerlink" href="#known-issues" title="Link to this heading">¶</a></h1>
 <p>When deploying cornflow through docker, you may run into one of the following problems. It is difficult to cover all the possibilities but we will try to update the documentation to include at least those that happen to us.</p>
 <section id="situations">
-<h2>Situations<a class="headerlink" href="#situations" title="Permalink to this heading">¶</a></h2>
+<h2>Situations<a class="headerlink" href="#situations" title="Link to this heading">¶</a></h2>
 <section id="development">
-<h3>Development<a class="headerlink" href="#development" title="Permalink to this heading">¶</a></h3>
+<h3>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h3>
 <p>Issue: Possible error with psycopg2</p>
 <blockquote>
 <div><p>Error: Error pg_config executable not found.</p>
@@ -176,7 +176,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="docker-build">
-<h3>Docker build<a class="headerlink" href="#docker-build" title="Permalink to this heading">¶</a></h3>
+<h3>Docker build<a class="headerlink" href="#docker-build" title="Link to this heading">¶</a></h3>
 <p>Issue: The volume airflow_config can´t be mounted.</p>
 <blockquote>
 <div><p>Error: Unable to prepare context: path “local_path_to_docker-compose.yml/airflow_config”</p>
@@ -194,7 +194,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="cornflow-database">
-<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Permalink to this heading">¶</a></h3>
+<h3>Cornflow database<a class="headerlink" href="#cornflow-database" title="Link to this heading">¶</a></h3>
 <p>Issue: Cornflow can´t reach postgres internal database</p>
 <blockquote>
 <div><p>Error: sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name “host_database” to address: Name or service not known</p>
@@ -202,7 +202,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="running-cornflow-server">
-<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Permalink to this heading">¶</a></h3>
+<h3>Running cornflow-server<a class="headerlink" href="#running-cornflow-server" title="Link to this heading">¶</a></h3>
 <p>Issue: Users were not created when cornflow started</p>
 <blockquote>
 <div><p>Error: usage: flask [-?] {db,create_admin_user,create_service_user,access_init,register_base_assignations,register_actions,register_views,register_roles,update_views,clean_historic_data,shell,runserver} …</p>
@@ -210,7 +210,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="flower">
-<h3>Flower<a class="headerlink" href="#flower" title="Permalink to this heading">¶</a></h3>
+<h3>Flower<a class="headerlink" href="#flower" title="Link to this heading">¶</a></h3>
 <p>Issue: Can’t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
@@ -218,7 +218,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="scheduler">
-<h3>Scheduler<a class="headerlink" href="#scheduler" title="Permalink to this heading">¶</a></h3>
+<h3>Scheduler<a class="headerlink" href="#scheduler" title="Link to this heading">¶</a></h3>
 <p>Issue: Can’t find Scheduler logs.</p>
 <blockquote>
 <div><p>Error:</p>
@@ -234,7 +234,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="airflow">
-<h3>Airflow<a class="headerlink" href="#airflow" title="Permalink to this heading">¶</a></h3>
+<h3>Airflow<a class="headerlink" href="#airflow" title="Link to this heading">¶</a></h3>
 <p>Issue: Can’t login to airflow GUI</p>
 <blockquote>
 <div><p>Error: Bad Request The CSRF session token is missing</p>
@@ -242,7 +242,7 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 </section>
 <section id="ldap-docker">
-<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Permalink to this heading">¶</a></h3>
+<h3>Ldap docker<a class="headerlink" href="#ldap-docker" title="Link to this heading">¶</a></h3>
 <p>Issue: Can’t login to flower GUI</p>
 <blockquote>
 <div><p>Error: Access denied</p>
@@ -293,9 +293,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

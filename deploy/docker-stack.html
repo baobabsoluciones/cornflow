@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Docker stack - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Running with simultaneous resolutions" href="simultaneous.html" /><link rel="prev" title="docker-compose.yml" href="docker-compose.yml.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -162,9 +162,9 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="docker-stack">
-<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Permalink to this heading">¶</a></h1>
+<h1>Docker stack<a class="headerlink" href="#docker-stack" title="Link to this heading">¶</a></h1>
 <section id="image-build">
-<h2>Image build<a class="headerlink" href="#image-build" title="Permalink to this heading">¶</a></h2>
+<h2>Image build<a class="headerlink" href="#image-build" title="Link to this heading">¶</a></h2>
 <p>The Dockerfile in <a class="reference external" href="https://github.com/baobabsoluciones/corn">cornflow github project</a> is builded from python3-slim-buster docker image.
 Installation path of cornflow app is <code class="docutils literal notranslate"><span class="pre">/usr/src/app</span></code>.
 There is no docker volumes attached to deployment for cornflow app.</p>
@@ -175,14 +175,14 @@ There is no docker volumes attached to deployment for cornflow app.</p>
 <p>Where my-image is the name you want to name it and my-tag is the tag you want to tag the image with.</p>
 </section>
 <section id="official-image-build">
-<h2>Official image build<a class="headerlink" href="#official-image-build" title="Permalink to this heading">¶</a></h2>
+<h2>Official image build<a class="headerlink" href="#official-image-build" title="Link to this heading">¶</a></h2>
 <p>The cornflow image is built from the Dockerfile file hosted in the official repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">cornflow</span><span class="p">:</span><span class="n">latest</span>
 </span></pre></div>
 </div>
 </section>
 <section id="environment-variables">
-<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading">¶</a></h2>
+<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h2>
 <p>Main cornflow environment variables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">CORNFLOW_ADMIN_USER</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">user</span>
 </span><span data-line="2"><span class="n">CORNFLOW_ADMIN_PWD</span> <span class="o">-</span> <span class="n">cornflow</span> <span class="n">root</span> <span class="n">admin</span> <span class="n">pwd</span>
@@ -200,7 +200,7 @@ There is no docker volumes attached to deployment for cornflow app.</p>
 </div>
 </section>
 <section id="entrypoint">
-<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Permalink to this heading">¶</a></h2>
+<h2>Entrypoint<a class="headerlink" href="#entrypoint" title="Link to this heading">¶</a></h2>
 <p>If you are using the default entrypoint of the production image, it will execute the <code class="docutils literal notranslate"><span class="pre">init_cornflow_service.py</span></code> script which uses and initializes environment variables to work with postgresql and airflow defined in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>.
 The image entrypoint works as follows:</p>
 <ol class="arabic simple">
@@ -212,7 +212,7 @@ The image entrypoint works as follows:</p>
 </ol>
 </section>
 <section id="airflow-personalized-image">
-<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Permalink to this heading">¶</a></h2>
+<h2>Airflow personalized image<a class="headerlink" href="#airflow-personalized-image" title="Link to this heading">¶</a></h2>
 <p>For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
 The airflow personalized image is built from the Dockerfile file hosted in the official cornflow repository. The image is built from the new changes on the main development branch, creating an image with the label “latest”:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">docker</span> <span class="n">pull</span> <span class="n">baobabsoluciones</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">airflow</span><span class="p">:</span><span class="n">latest</span>
@@ -238,7 +238,7 @@ The default executor is set to <code class="docutils literal notranslate"><span 
 <p>These volumes allow you to persist the DAG files and also link the development packages necessary for their execution.</p>
 </section>
 <section id="postgresql-docker-image">
-<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Permalink to this heading">¶</a></h2>
+<h2>PostgreSQL docker image<a class="headerlink" href="#postgresql-docker-image" title="Link to this heading">¶</a></h2>
 <p>The image displayed in the container will be the official image of the popular <a class="reference external" href="https://hub.docker.com/_/postgres">PostgreSQL</a> database engine.
 The postgresql environment variables included in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> are:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">POSTGRES_USER - database username of service
@@ -293,9 +293,9 @@ The postgresql environment variables included in <code class="docutils literal n
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

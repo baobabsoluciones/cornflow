@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Coding style and rules - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Write a json-schema" href="jsonschema.html" /><link rel="prev" title="How to deploy a new solution method (2.0)" href="deploy_solver_new.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,10 +165,10 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="coding-style-and-rules">
-<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Permalink to this heading">¶</a></h1>
+<h1>Coding style and rules<a class="headerlink" href="#coding-style-and-rules" title="Link to this heading">¶</a></h1>
 <p>The following rules and notation come from examples in PR-revisions that we think can become common rules. Each rule will have an example and a description.</p>
 <section id="commenting-out-code">
-<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Permalink to this heading">¶</a></h2>
+<h2>Commenting out code<a class="headerlink" href="#commenting-out-code" title="Link to this heading">¶</a></h2>
 <p>Having commented code makes no sense. It should be eliminated from the commit altogether. If for some reason you fear losing the piece of code in the future, remember that it will be present in the git history if it has taken part of the <strong>master branch</strong> at some point:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="cm">/* LMapPoints () {</span>
 </span><span data-line="2"><span class="cm">  var points = []</span>
@@ -191,7 +191,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="argument-type-checking">
-<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Permalink to this heading">¶</a></h2>
+<h2>Argument type checking<a class="headerlink" href="#argument-type-checking" title="Link to this heading">¶</a></h2>
 <p>Both python and javascript can be very lax with type validations in arguments and interfaces. This is usually very practical but it can sometimes lead to the following (incorrect) “runtime validations” inside a function:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Experiment</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">ExperimentCore</span><span class="w"> </span><span class="p">{</span>
 </span><span data-line="2"><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">MyInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Instance</span>
@@ -248,7 +248,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="indentation">
-<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this heading">¶</a></h2>
+<h2>Indentation<a class="headerlink" href="#indentation" title="Link to this heading">¶</a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
 </span><span data-line="2"><span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
@@ -294,7 +294,7 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>On top of that, if you have all this indentation and long for loops you can just create a function called <cite>_get_route_cost(stop)</cite> and use it inside the function. Something like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span> <span class="nf">_get_route_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">_get_route_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">):</span>
 </span><span data-line="2">
 </span><span data-line="3">    <span class="n">current_stop</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span data-line="4">    <span class="n">layover</span> <span class="o">=</span> <span class="kc">False</span>
@@ -325,7 +325,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="29">        <span class="n">cost</span> <span class="o">+=</span> <span class="n">layover_cost</span>
 </span><span data-line="30">    <span class="k">return</span> <span class="n">cost</span>
 </span><span data-line="31">
-</span><span data-line="32"><span class="k">def</span> <span class="nf">_get_shift_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
+</span><span data-line="32"><span class="k">def</span><span class="w"> </span><span class="nf">_get_shift_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
 </span><span data-line="33">    <span class="n">total_cost</span> <span class="o">=</span> <span class="mi">0</span>
 </span><span data-line="34">    <span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
 </span><span data-line="35">    <span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
@@ -337,14 +337,14 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="41">        <span class="n">total_cost</span> <span class="o">+=</span> <span class="n">_get_route_cost</span><span class="p">(</span><span class="n">shift</span><span class="p">[</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">)</span>
 </span><span data-line="42">    <span class="k">return</span> <span class="n">total_cost</span>
 </span><span data-line="43">
-</span><span data-line="44"><span class="k">def</span> <span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span data-line="45">    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_shift_cost</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </span></pre></div>
 </div>
 <p>Of course, this can be greatly improved with more tweaks.</p>
 </section>
 <section id="no-repetition">
-<h2>No repetition<a class="headerlink" href="#no-repetition" title="Permalink to this heading">¶</a></h2>
+<h2>No repetition<a class="headerlink" href="#no-repetition" title="Link to this heading">¶</a></h2>
 <p>original code:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </span><span data-line="2"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -359,7 +359,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="filtering-lists-or-dictionaries">
-<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Permalink to this heading">¶</a></h2>
+<h2>Filtering lists or dictionaries<a class="headerlink" href="#filtering-lists-or-dictionaries" title="Link to this heading">¶</a></h2>
 <p>Filtering lists with list comprehensions is the easiest way to filter one. With <cite>pytups</cite>, you make it a little shorter.</p>
 <p>For example, instead of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">used_routes</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
@@ -373,12 +373,12 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="working-with-superdicts">
-<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Permalink to this heading">¶</a></h2>
+<h2>Working with SuperDicts<a class="headerlink" href="#working-with-superdicts" title="Link to this heading">¶</a></h2>
 <section id="accessing-properties">
-<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Permalink to this heading">¶</a></h3>
+<h3>Accessing properties<a class="headerlink" href="#accessing-properties" title="Link to this heading">¶</a></h3>
 <p>If we have our data in <cite>SuperDicts</cite> there is a set of operations that can be done in a much simplier way.</p>
 <p>For example, instead of:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
 </span><span data-line="2">    <span class="k">return</span> <span class="n">SuperDict</span><span class="p">(</span>
 </span><span data-line="3">        <span class="p">{</span>
 </span><span data-line="4">            <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">):</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">])</span>
@@ -388,7 +388,7 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>Where we are taking one of the keys of a nested dictionary can be done:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span> <span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
 </span><span data-line="2">    <span class="k">return</span> <span class="p">(</span>
 </span><span data-line="3">        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;production_scheduling&quot;</span><span class="p">]</span>
 </span><span data-line="4">        <span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">)</span>
@@ -441,9 +441,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>

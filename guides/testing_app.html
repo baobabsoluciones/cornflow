@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="">
+<html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Test your solution method - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="User your solution method" href="use_solver.html" /><link rel="prev" title="Write a json-schema" href="jsonschema.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=83eaa723" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -159,26 +159,26 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="test-your-solution-method">
-<h1>Test your solution method<a class="headerlink" href="#test-your-solution-method" title="Permalink to this heading">¶</a></h1>
+<h1>Test your solution method<a class="headerlink" href="#test-your-solution-method" title="Link to this heading">¶</a></h1>
 <section id="basics-of-testing">
-<h2>Basics of testing<a class="headerlink" href="#basics-of-testing" title="Permalink to this heading">¶</a></h2>
+<h2>Basics of testing<a class="headerlink" href="#basics-of-testing" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference external" href="https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags">cornflow-dags</a> project includes some unit tests that can be run to be sure the projects are “ready to be merged”. These unit tests use as input data the output of the function <code class="docutils literal notranslate"><span class="pre">test_cases()</span></code> defined in cornflow-dags/DAG/my_project/__init__.py. The tests themselves load the data, validate it with the schema, solve the problem, get a solution and validate it.</p>
 <p>In order for your dag to be tested along with the others, you should add it to the unit tests to be run. The file to modify is <code class="docutils literal notranslate"><span class="pre">cornflow-dags/tests/test_dags.py</span></code>. In this file, you must add a class corresponding to your project. It should look something like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nc">MyProject</span><span class="p">(</span><span class="n">BaseDAGTests</span><span class="o">.</span><span class="n">SolvingTests</span><span class="p">):</span>
-</span><span data-line="2">   <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span><span class="w"> </span><span class="nc">MyProject</span><span class="p">(</span><span class="n">BaseDAGTests</span><span class="o">.</span><span class="n">SolvingTests</span><span class="p">):</span>
+</span><span data-line="2">   <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span data-line="3">       <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
-</span><span data-line="4">       <span class="kn">from</span> <span class="nn">DAG.MyProject</span> <span class="kn">import</span> <span class="n">MyApp</span>
+</span><span data-line="4">       <span class="kn">from</span><span class="w"> </span><span class="nn">DAG.MyProject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyApp</span>
 </span><span data-line="5">       <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="p">()</span>                   <span class="c1"># Will test the default solver</span>
 </span><span data-line="6">
 </span><span data-line="7">
-</span><span data-line="8">   <span class="k">def</span> <span class="nf">test_solve_algo_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="8">   <span class="k">def</span><span class="w"> </span><span class="nf">test_solve_algo_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span data-line="9">       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_try_solving_testcase</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s2">&quot;algorithm1&quot;</span><span class="p">))</span>
 </span><span data-line="10">                                                 <span class="c1"># Will test another solver</span>
 </span></pre></div>
 </div>
 </section>
 <section id="test-locally">
-<h2>Test locally<a class="headerlink" href="#test-locally" title="Permalink to this heading">¶</a></h2>
+<h2>Test locally<a class="headerlink" href="#test-locally" title="Link to this heading">¶</a></h2>
 <p>Once the tests are defined, it’s possible to run them in the local machine. To do this, you need to do the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>tests/test_dags.py
 </span></pre></div>
@@ -189,7 +189,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 </section>
 <section id="test-in-github">
-<h2>Test in github<a class="headerlink" href="#test-in-github" title="Permalink to this heading">¶</a></h2>
+<h2>Test in github<a class="headerlink" href="#test-in-github" title="Link to this heading">¶</a></h2>
 <p>When the source code for your application is uploaded to the git repository, github will perform the same unit tests for each of the dags to check whether the code produces errors. It will also run some additional tests.</p>
 </section>
 </section>
@@ -234,9 +234,9 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=def9ab29"></script>
-      <script src="../_static/doctools.js?v=888ff710"></script>
-      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-      <script src="../_static/design-tabs.js?v=36754332"></script>
-      <script src="../_static/shibuya.js?v=e2e99575"></script></body>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
 </html>
