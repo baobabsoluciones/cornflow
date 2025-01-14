@@ -1,5 +1,5 @@
 """
-Integration test for the Cornflow client
+Integration test for the cornflow client
 Base, admin and service user get tested
 Integration between Airflow and cornflow through airflow client and cornflow client tested as well
 """

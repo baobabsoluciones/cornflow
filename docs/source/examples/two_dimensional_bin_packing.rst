@@ -1,2 +1,1 @@
-two_dimensional_bin_packing
-============================
+.. include:: ../../../cornflow-dags/DAG/two_dimension_bin_packing/README.rst
