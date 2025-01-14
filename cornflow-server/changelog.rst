@@ -1,3 +1,15 @@
+version 1.1.5
+--------------
+
+- released: 2025-01-14
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - when authenticating with Open Auth the service user can still log in with username and password.
+    - allowed the application root to be changed.
+    - bump minimal version from 3.8 to 3.9.
+    - improved unit tests coverage.
+    - added test descriptions.
+
 version 1.1.4
 --------------
 
