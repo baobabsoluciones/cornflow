@@ -1,4 +1,4 @@
-# VERSION 1.1.0
+# VERSION 1.1.5
 # AUTHOR: sistemas@baobabsoluciones.es
 
 FROM python:3.12-slim
