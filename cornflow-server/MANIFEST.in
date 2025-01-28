@@ -4,3 +4,4 @@ include README.rst
 include setup.py
 include cornflow/migrations/*
 include cornflow/migrations/versions/*
+include requirements.txt

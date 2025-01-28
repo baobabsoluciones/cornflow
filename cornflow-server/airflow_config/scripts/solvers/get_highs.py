@@ -23,10 +23,10 @@ def install():
 
         HiGHS = git.Repo.clone_from("https://github.com/ERGO-Code/HiGHS", "HiGHS")
         os.chdir(HiGHS.working_dir)
-        subprocess.check_output(["mkdir", "build"])
+        subprocess.check_output(["cmake -S . -B build"], shell=True)
+        subprocess.check_output("cmake --build build", shell=True)
         os.chdir(f"{HiGHS.working_dir}/build")
-        subprocess.check_output(["cmake .."], shell=True)
-        subprocess.check_output("make")
+        subprocess.check_output("ctest", shell=True)
         subprocess.check_output(["cp", "bin/highs", "/usr/local/bin/highs"])
         subprocess.check_output(["chmod", "+x", "/usr/local/bin/highs"])
         uid = pwd.getpwnam("cornflow").pw_uid
