@@ -1,4 +1,5 @@
 # Imports from libraries
+from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
 
 # Import from internal modules
@@ -57,3 +58,54 @@ class AlarmsEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         return self.post_list(data=kwargs)
+
+
+class AlarmDetailEndpoint(BaseMetaResource):
+    """
+    Endpoint use to get the information of one single alarm
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = AlarmsModel
+        self.unique = ["id"]
+
+    @doc(
+        description="Get an alarm",
+        tags=["None"],
+    )
+    @authenticate(auth_class=Auth())
+    @marshal_with(AlarmsResponse(many=True))
+    @BaseMetaResource.get_data_or_404
+    def get_detail(self, alarm_id):
+        """
+        API method to get all the rows of the table.
+        It requires authentication to be passed in the form of a token that has to be linked to
+        an existing session (login) made by a user.
+        :return: A list of objects with the data, and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+
+        current_app.logger.info(
+            f"User {self.get_user()} gets details of alarm {alarm_id}"
+        )
+
+        return self.get_detail(idx=alarm_id)
+
+    @doc(description="Disable an alarm", tags=["None"])
+    @authenticate(auth_class=Auth())
+    def disable(self, alarm_id):
+        """
+        :param int alarm_id: Alarm id.
+        :return:
+        :rtype: Tuple(dict, integer)
+        """
+                
+        current_app.logger.info(
+            f"Alarm {alarm_id} was disabled by user {self.get_user()}"
+        )
+        return self.disable_detail(idx=alarm_id)
+
+
+
+
