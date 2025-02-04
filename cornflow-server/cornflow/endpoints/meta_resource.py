@@ -13,9 +13,6 @@ from cornflow.shared.const import ALL_DEFAULT_ROLES
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
-class ObjectNotFound(Exception):
-    pass
-
 
 class BaseMetaResource(Resource, MethodResource):
     """
@@ -181,16 +178,16 @@ class BaseMetaResource(Resource, MethodResource):
 
     def disable_detail(self, idx):
         """
-        Method to DELETE an object from the database
+        Method to DISABLE an object from the database
 
-        :param kwargs: the keyword arguments to identify the object
+        :param idx: the idx which identifies the object
         :return: the object and a status code.
         """
         row = self.data_model.query.get(idx)
         if row is None:
-            raise ObjectNotFound(f"Object with id {idx} not found.")
+            raise ObjectDoesNotExist(f"Object with id {idx} not found.")
         row.disable()
-        return {"message": "Object marked as deleted"}, 200
+        return {"message": "Object marked as disabled"}, 200
 
     def activate_detail(self, **kwargs):
         """
