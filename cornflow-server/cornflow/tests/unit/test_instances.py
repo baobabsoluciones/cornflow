@@ -52,6 +52,9 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
         self.create_new_row(self.url, self.model, self.payload)
 
     def test_empty_instance(self):
+        """
+        testing what happend with empty data 
+        """
         self.create_new_row(self.url, self.model, self.payload2)
 
     def test_new_instance_missing_info(self):
