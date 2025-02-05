@@ -53,9 +53,13 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
 
     def test_empty_instance(self):
         """
-        testing what happend with empty data 
+        testing what happend when empty dictionary get saved
         """
         self.create_new_row(self.url, self.model, self.payload2)
+
+        active_rows = self.model.query.filter(self.model.deleted_at == None).all()
+        has_empty_dict = any(getattr(row, "data", None) == {} for row in active_rows)
+        self.assertTrue(has_empty_dict, "Error: Not an empty dicctionary")
 
     def test_new_instance_missing_info(self):
         del self.payload["data"]["parameters"]
