@@ -227,7 +227,7 @@ alarms_resources = [
     ),
     dict(
         resource=AlarmDetailEndpoint,
-        urls="/alarms/<int:user_id>/",
+        urls="/alarms/<int:alarm_id>/",
         endpoint="alarms-detail",
     ),
     dict(

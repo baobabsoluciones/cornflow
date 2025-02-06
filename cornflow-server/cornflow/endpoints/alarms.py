@@ -77,12 +77,12 @@ class AlarmDetailEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @marshal_with(AlarmsResponse(many=True))
     @BaseMetaResource.get_data_or_404
-    def get_detail(self, alarm_id):
+    def get(self, alarm_id):
         """
-        API method to get all the rows of the table.
+        API method to get all the data of a specific alarm.
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
-        :return: A list of objects with the data, and an integer with the HTTP status code.
+        :return: The data of the alarm, and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
 
