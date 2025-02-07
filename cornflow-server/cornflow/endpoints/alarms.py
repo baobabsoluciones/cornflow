@@ -94,7 +94,7 @@ class AlarmDetailEndpoint(BaseMetaResource):
 
     @doc(description="Disable an alarm", tags=["None"])
     @authenticate(auth_class=Auth())
-    def disable(self, alarm_id):
+    def delete(self, alarm_id):
         """
         :param int alarm_id: Alarm id.
         :return:

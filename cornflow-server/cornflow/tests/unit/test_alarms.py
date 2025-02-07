@@ -85,3 +85,34 @@ class TestAlarmsEndpoint(CustomTestCase):
                 self.assertIn(key, rows_data[i])
                 if key in data[i]:
                     self.assertEqual(rows_data[i][key], data[i][key])
+
+    def test_get_alarm_detail(self):
+        """
+        The idea would be to read the alarm_id of the query and be able to return the characteristics associated with said alarm_id.
+        To check this, I would use an example data set of different alarms and, after giving a specific id, be able to return the expected result.
+
+        Verifies:
+        - Retrieval of a single alarm using its ID
+        - Correct validation of alarm data fields
+
+        NOT IMPLEMENTED
+
+        """
+
+        raise NotImplemented
+
+    def test_disable_alarm_detail(self):
+        """
+        The idea would be to read the alarm_id from the query and be able to disable the entire row for that alarm in the database.
+        To check this, I would use an example data set of different alarms and, after giving a specific id, be able to return the same data set,
+        excluding those related to the given alarm_id.
+
+        Verifies:
+        - Retrieval of a single alarm using its ID
+        - Correct validation of alarm data fields
+
+        NOT IMPLEMENTED
+
+        """
+
+        raise NotImplemented
