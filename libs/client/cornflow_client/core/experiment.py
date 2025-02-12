@@ -168,7 +168,7 @@ class ExperimentCore(ABC):
             if config.get("solver_config"):
                 conf.update(
                     {
-                        mapping[k, lib, solver]: v
+                        mapping.get((k, lib, solver), k): v
                         for k, v in config["solver_config"].items()
                     }
                 )

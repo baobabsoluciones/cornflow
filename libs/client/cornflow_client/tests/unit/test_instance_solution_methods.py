@@ -406,6 +406,38 @@ class TestExperimentCore(TestCase):
         res = self.class_to_use.get_solver_config(config, remove_unknown= False)
         self.assertEqual(res, {"TimeLimit": 600, "MIPGap": 0.001 ,"MIPGapAbs": 5, "additional":True, "msg" : True })
 
+    def test_get_solver_config_without_remove_unknow_and_solver_config(self):
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+        )
+        res = self.class_to_use.get_solver_config(config, remove_unknown=False)
+        self.assertEqual(res, {"MIPGapAbs": 5, "msg": True})
+
+    def test_get_solver_config_with_remove_unknow_without_solver_config(self):
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+        )
+        res = self.class_to_use.get_solver_config(config, remove_unknown=True)
+        self.assertEqual(res, {"MIPGapAbs": 5})
+
+    def test_get_solver_config_empty(self):
+        config = dict(
+        )
+        res = self.class_to_use.get_solver_config(config)
+        self.assertEqual(res, {})
+
+    def test_get_solver_config(self):
+        config = dict(
+            solver="milp_solver.gurobi",
+            solver_config=dict(time_limit=10 * 60, rel_gap=0.001)
+        )
+        res = self.class_to_use.get_solver_config(config)
+        self.assertEqual(res, {"TimeLimit": 600, "MIPGap": 0.001})
+
     def test_get_solver_config_pyomo_2(self):
         initial_config = {
             "solver": "mip.scip",
