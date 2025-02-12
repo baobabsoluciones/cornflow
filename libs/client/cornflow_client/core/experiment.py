@@ -170,7 +170,6 @@ class ExperimentCore(ABC):
                     {
                         mapping[k, lib, solver]: v
                         for k, v in config["solver_config"].items()
-                        if (k, lib, solver) in mapping
                     }
                 )
         else:
