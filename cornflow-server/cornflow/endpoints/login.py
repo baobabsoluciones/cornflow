@@ -249,7 +249,7 @@ class LoginBaseEndpoint(BaseMetaResource):
                 decoded_token = self.auth_class().validate_cognito_token(token)
 
                 # Get user info from token
-                username = decoded_token.get('preferred_username')
+                username = decoded_token.get('sub')
                 email = decoded_token.get('email', f"{username}@test.org")
                 first_name = decoded_token.get('given_name', '')
                 last_name = decoded_token.get('family_name', '')

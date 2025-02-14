@@ -99,7 +99,6 @@ def create_app(env_name="development", dataconn=None):
     elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_OID or auth_type == AUTH_EXTERNAL:
-        print(f"auth_type: {auth_type}")
         api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
 
     initialize_errorhandlers(app)
