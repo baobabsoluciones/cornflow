@@ -93,6 +93,11 @@ class DefaultConfig(object):
     # Password rotation time in days
     PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
 
+    # Cognito configuration
+    COGNITO_REGION = os.getenv("COGNITO_REGION", None)
+    COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID", None)
+    COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID", None)
+
 
 class Development(DefaultConfig):
     """

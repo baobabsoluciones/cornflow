@@ -36,7 +36,7 @@ from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
-from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
+from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID, AUTH_EXTERNAL
 from cornflow.shared.exceptions import initialize_errorhandlers
 from cornflow.shared.log_config import log_config
 
@@ -98,7 +98,8 @@ def create_app(env_name="development", dataconn=None):
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
-    elif auth_type == AUTH_OID:
+    elif auth_type == AUTH_OID or auth_type == AUTH_EXTERNAL:
+        print(f"auth_type: {auth_type}")
         api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
 
     initialize_errorhandlers(app)

@@ -30,6 +30,7 @@ from cornflow.shared.const import (
     OID_AZURE_DISCOVERY_TENANT_URL,
     OID_AZURE_DISCOVERY_COMMON_URL,
     OID_GOOGLE,
+    OID_COGNITO,
     PERMISSION_METHOD_MAP,
 )
 from cornflow.shared.exceptions import (
@@ -46,6 +47,8 @@ from cornflow.shared.exceptions import (
 class Auth:
     def __init__(self, user_model=UserModel):
         self.user_model = user_model
+        self._cognito_jwks = None
+        self._cognito_jwks_last_update = None
 
     def authenticate(self):
         user = self.get_user_from_header(request.headers)
@@ -465,6 +468,80 @@ class Auth:
         kid = self._get_key_id(token)
         jwk = self._get_jwk(kid, tenant_id, provider)
         return self._rsa_pem_from_jwk(jwk)
+
+    def validate_cognito_token(self, token: str) -> dict:
+        """
+        Validates a JWT token from AWS Cognito and returns the decoded payload.
+        
+        :param str token: The JWT token from Cognito
+        :return: The decoded token payload
+        :rtype: dict
+        """
+        try:
+            headers = jwt.get_unverified_header(token)
+            kid = headers['kid']
+            
+            # Get the public key for this specific key ID
+            public_key = self._get_cognito_public_key(kid)
+            
+            # Decode and verify the token
+            decoded = jwt.decode(
+                token,
+                public_key,
+                algorithms=['RS256'],
+                audience=current_app.config['COGNITO_APP_CLIENT_ID'],
+                issuer=f"https://cognito-idp.{current_app.config['COGNITO_REGION']}.amazonaws.com/{current_app.config['COGNITO_USER_POOL_ID']}"
+            )
+            
+            return decoded
+            
+        except jwt.ExpiredSignatureError:
+            raise InvalidCredentials(
+                "The token has expired, please login again",
+                log_txt="Error while trying to validate Cognito token. The token has expired."
+            )
+        except jwt.InvalidTokenError as e:
+            raise InvalidCredentials(
+                "Invalid token, please try again with a new token",
+                log_txt=f"Error while trying to validate Cognito token. The token is invalid: {str(e)}"
+            )
+
+    def _get_cognito_public_key(self, kid: str) -> str:
+        """
+        Gets the public key from Cognito's JWKS endpoint for a specific key ID.
+        Implements caching to avoid requesting the keys on every validation.
+        
+        :param str kid: The key ID from the token header
+        :return: The public key in PEM format
+        :rtype: str
+        """
+        # Check if we need to refresh the JWKS
+        now = datetime.utcnow()
+        if (self._cognito_jwks is None or 
+            self._cognito_jwks_last_update is None or
+            now - self._cognito_jwks_last_update > timedelta(hours=24)):
+            
+            jwks_url = f"https://cognito-idp.{current_app.config['COGNITO_REGION']}.amazonaws.com/{current_app.config['COGNITO_USER_POOL_ID']}/.well-known/jwks.json"
+            try:
+                response = requests.get(jwks_url)
+                response.raise_for_status()
+                self._cognito_jwks = response.json()['keys']
+                self._cognito_jwks_last_update = now
+            except requests.RequestException as e:
+                raise CommunicationError(
+                    f"Failed to fetch Cognito JWKS: {str(e)}",
+                    log_txt="Error while trying to fetch Cognito JWKS."
+                )
+
+        # Find the key matching the kid
+        key = next((k for k in self._cognito_jwks if k['kid'] == kid), None)
+        if not key:
+            raise InvalidCredentials(
+                "Invalid token key ID",
+                log_txt=f"Error while trying to validate Cognito token. Key ID {kid} not found in JWKS."
+            )
+
+        return self._rsa_pem_from_jwk(key)
 
 
 class BIAuth(Auth):

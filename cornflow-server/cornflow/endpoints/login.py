@@ -18,9 +18,11 @@ from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
+    AUTH_EXTERNAL,
     OID_AZURE,
     OID_GOOGLE,
     OID_NONE,
+    OID_COGNITO,
 )
 from cornflow.shared.exceptions import (
     ConfigurationError,
@@ -59,6 +61,8 @@ class LoginBaseEndpoint(BaseMetaResource):
             user = self.auth_ldap_authenticate(**kwargs)
         elif auth_type == AUTH_OID:
             user = self.auth_oid_authenticate(**kwargs)
+        elif auth_type == AUTH_EXTERNAL:
+            user = self.auth_external_authenticate(**kwargs)
         else:
             raise ConfigurationError()
 
@@ -227,8 +231,83 @@ class LoginBaseEndpoint(BaseMetaResource):
         else:
             raise InvalidUsage("Invalid request")
 
+    def auth_external_authenticate(self, token=None):
+        """
+        Method in charge of performing the authentication using external JWT tokens.
+        Currently supports Cognito tokens, but can be extended to support other providers.
+
+        :param str token: the JWT token from the external provider
+        :return: the user object or it raises an error if it has not been possible to log in
+        :rtype: :class:`UserModel`
+        """
+        if token:
+            # Get the provider from config (default to Cognito)
+            provider = int(current_app.config.get("OID_PROVIDER", OID_COGNITO))
+            
+            if provider == OID_COGNITO:
+                # Validate token
+                decoded_token = self.auth_class().validate_cognito_token(token)
+
+                # Get user info from token
+                username = decoded_token.get('preferred_username')
+                email = decoded_token.get('email', f"{username}@test.org")
+                first_name = decoded_token.get('given_name', '')
+                last_name = decoded_token.get('family_name', '')
+
+                # Try to get existing user
+                user = self.data_model.get_one_object(username=username)
+
+                if not user:
+                    current_app.logger.info(
+                        f"External auth user {username} does not exist and is created"
+                    )
+
+                    data = {
+                        "username": username,
+                        "email": email,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                    }
+
+                    user = self.data_model(data=data)
+                    user.save()
+
+                    user_role = self.user_role_association(
+                        {
+                            "user_id": user.id,
+                            "role_id": int(current_app.config["DEFAULT_ROLE"]),
+                        }
+                    )
+                    user_role.save()
+
+                return user
+            else:
+                raise EndpointNotImplemented("The selected external provider is not implemented")
+
+        elif (
+            username
+            and password
+            and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1
+        ):
+
+            user = self.auth_db_authenticate(username, password)
+
+            if user.is_service_user():
+                return user
+            else:
+                raise InvalidUsage("Invalid request")
+        else:
+            raise InvalidUsage("Invalid request")
+
 
 def check_last_password_change(user):
+    """
+    Check if the user needs to change their password based on the password rotation time.
+    
+    :param user: The user object to check
+    :return: True if password needs to be changed, False otherwise
+    :rtype: bool
+    """
     if user.pwd_last_change:
         if (
             user.pwd_last_change
