@@ -1,6 +1,6 @@
 import sys
 from importlib import import_module
-
+import click
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
@@ -134,11 +134,11 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
 def register_dag_permissions_command(
     open_deployment: int = None, verbose: bool = False
 ):
-
+    click.echo(f"Checkpoint 1")
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
+    from cornflow.models import DeployedOrch, PermissionsDAG, UserModel
     from cornflow.shared import db
 
     if open_deployment is None:
@@ -148,7 +148,7 @@ def register_dag_permissions_command(
         (permission.dag_id, permission.user_id)
         for permission in PermissionsDAG.get_all_objects()
     ]
-
+    click.echo(f"Checkpoint 2")
     try:
         db.session.commit()
     except DBAPIError as e:
@@ -156,15 +156,17 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users().all()
-    all_dags = DeployedDAG.get_all_objects().all()
+    all_dags = DeployedOrch.get_all_objects().all()
 
     if open_deployment == 1:
+        click.echo(f"Checkpoint 3")
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users
             for dag in all_dags
             if (dag.id, user.id) not in existing_permissions
         ]
+        click.echo(f"Checkpoint 4")
 
     else:
         permissions = [
@@ -173,10 +175,10 @@ def register_dag_permissions_command(
             for dag in all_dags
             if (dag.id, user.id) not in existing_permissions and user.is_service_user()
         ]
-
+        click.echo(f"Checkpoint 5")
     if len(permissions) > 1:
         db.session.bulk_save_objects(permissions)
-
+    click.echo(f"Checkpoint 6")
     try:
         db.session.commit()
     except IntegrityError as e:
@@ -185,7 +187,7 @@ def register_dag_permissions_command(
     except DBAPIError as e:
         db.session.rollback()
         current_app.logger.error(f"Unknown error on dag permissions register: {e}")
-
+    click.echo(f"Checkpoint 7")
     if "postgres" in str(db.session.get_bind()):
         db.engine.execute(
             "SELECT setval(pg_get_serial_sequence('permission_dag', 'id'), MAX(id)) FROM permission_dag;"
@@ -198,11 +200,11 @@ def register_dag_permissions_command(
             current_app.logger.error(
                 f"Unknown error on dag permissions sequence updating: {e}"
             )
-
+    click.echo(f"Checkpoint 7")
     if verbose:
         if len(permissions) > 1:
             current_app.logger.info(f"DAG permissions registered: {permissions}")
         else:
             current_app.logger.info("No new DAG permissions")
-
+    click.echo(f"Checkpoint 8")
     pass

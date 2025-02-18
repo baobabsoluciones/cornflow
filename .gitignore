@@ -173,3 +173,9 @@ cornssh.pub
 
 # airflow logs
 cornflow-server/airflow_config/logs
+
+# additional files: 
+cornflow-dags/DAG/databricks_test_job
+cornflow-dags/DAG/activate_jobs.py
+cornflow-server/cornflow/constants.py
+Dockerfile
