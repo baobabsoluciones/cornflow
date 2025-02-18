@@ -10,18 +10,21 @@ import logging
 import time
 from databricks.sdk import WorkspaceClient
 import databricks.sdk.service.jobs as j
-from cornflow.constants import *
+
+
 from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
 )
+
 # TODO AGA: Modificar import para sacarlo de cornflow_client
 from cornflow.shared.databricks import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from cornflow_client.airflow.api import Airflow
-# TODO AGA: Porqué el import no funcina correctamente 
+
+# TODO AGA: Porqué el import no funcina correctamente
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
@@ -39,7 +42,7 @@ from cornflow.schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
-    ExecutionDetailsWithIndicatorsAndLogResponse
+    ExecutionDetailsWithIndicatorsAndLogResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
@@ -56,7 +59,12 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
-from cornflow.shared.exceptions import AirflowError, DatabricksError, ObjectDoesNotExist, InvalidData
+from cornflow.shared.exceptions import (
+    AirflowError,
+    DatabricksError,
+    ObjectDoesNotExist,
+    InvalidData,
+)
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
     json_schema_extend_and_validate_as_string,
@@ -159,13 +167,13 @@ class ExecutionEndpoint(BaseMetaResource):
         # TODO: should the schema field be cross validated with the instance schema field?
 
         ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        if ORQ_TYPE==AIRFLOW_BACKEND:
-            orq_const= config_orchestrator["airflow"]
-            ORQ_ERROR=AirflowError
-        elif ORQ_TYPE==DATABRICKS_BACKEND:
-            orq_const= config_orchestrator["databricks"]
+        if ORQ_TYPE == AIRFLOW_BACKEND:
+            orq_const = config_orchestrator["airflow"]
+            ORQ_ERROR = AirflowError
+        elif ORQ_TYPE == DATABRICKS_BACKEND:
+            orq_const = config_orchestrator["databricks"]
             # TODO AGA: Revisar si esto funcionaría correctamente
-            ORQ_ERROR=DatabricksError
+            ORQ_ERROR = DatabricksError
 
         if "schema" not in kwargs:
             kwargs["schema"] = orq_const["def_schema"]
@@ -189,13 +197,15 @@ class ExecutionEndpoint(BaseMetaResource):
         # We try to create an orch client
         # Note schema is a string with the name of the job/dag
         schema = execution.schema
-        # If we are dealing with DataBricks, the schema will 
+        # If we are dealing with DataBricks, the schema will
         #   be the job id
-        orch_client, schema_info, execution= get_orch_client(schema,ORQ_TYPE,execution)
+        orch_client, schema_info, execution = get_orch_client(
+            schema, ORQ_TYPE, execution
+        )
         # endregion
 
         # region VALIDACIONES
-        # We check if the job/dag exists 
+        # We check if the job/dag exists
         orch_client.get_orch_info(schema)
         # Validate config before running the dag
         config_schema = DeployedOrch.get_one_schema(config, schema, CONFIG_SCHEMA)
@@ -249,8 +259,8 @@ class ExecutionEndpoint(BaseMetaResource):
                 execution.update_log_txt(f"{solution_errors}")
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
         # endregion
-        
-        if ORQ_TYPE==AIRFLOW_BACKEND:
+
+        if ORQ_TYPE == AIRFLOW_BACKEND:
             info = schema_info.json()
             if info["is_paused"]:
                 err = "The dag exists but it is paused in airflow"
@@ -268,7 +278,7 @@ class ExecutionEndpoint(BaseMetaResource):
         # TODO AGA: revisar si hay que hacer alguna verificación a los JOBS
 
         try:
-            # TODO AGA: Hay que genestionar la posible eliminación de execution.id como 
+            # TODO AGA: Hay que genestionar la posible eliminación de execution.id como
             #   parámetro, ya que no se puede seleccionar el id en databricks
             #   revisar las consecuencias que puede tener
             response = orch_client.run_workflow(execution.id, orch_name=schema)
@@ -319,13 +329,13 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        if ORQ_TYPE==AIRFLOW_BACKEND:
-            orq_const= config_orchestrator["airflow"]
-            ORQ_ERROR=AirflowError
-        elif ORQ_TYPE==DATABRICKS_BACKEND:
-            orq_const= config_orchestrator["databricks"]
+        if ORQ_TYPE == AIRFLOW_BACKEND:
+            orq_const = config_orchestrator["airflow"]
+            ORQ_ERROR = AirflowError
+        elif ORQ_TYPE == DATABRICKS_BACKEND:
+            orq_const = config_orchestrator["databricks"]
             # TODO AGA: Revisar si esto funcionaría correctamente
-            ORQ_ERROR=DatabricksError
+            ORQ_ERROR = DatabricksError
 
         config = current_app.config
         if "schema" not in kwargs:
@@ -370,10 +380,12 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-        orch_client, schema_info, execution = get_orch_client(schema,ORQ_TYPE,execution)
-        
+        orch_client, schema_info, execution = get_orch_client(
+            schema, ORQ_TYPE, execution
+        )
+
         if not orch_client.is_alive():
-            err = orq_const["name"]+" is not accessible"
+            err = orq_const["name"] + " is not accessible"
             current_app.logger.error(err)
             execution.update_state(EXEC_STATE_ERROR_START)
             raise ORQ_ERROR(
@@ -385,13 +397,13 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 + err,
             )
-        
+
         # ask airflow if dag_name exists
         schema = execution.schema
         schema_info = orch_client.get_orch_info(schema)
 
         info = schema_info.json()
-        if ORQ_TYPE==AIRFLOW_BACKEND:
+        if ORQ_TYPE == AIRFLOW_BACKEND:
             if info["is_paused"]:
                 err = "The dag exists but it is paused in airflow"
                 current_app.logger.error(err)
@@ -409,7 +421,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         try:
             response = orch_client.run_workflow(execution.id, orch_name=schema)
         except ORQ_ERROR as err:
-            error = orq_const["name"]+" responded with an error: {}".format(err)
+            error = orq_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
             raise ORQ_ERROR(
@@ -437,6 +449,7 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a certain execution. But not the data!
     """
+
     # TODO AGA DUDA: Se usa? Qué debería devolver?
     def __init__(self):
         super().__init__()
@@ -565,13 +578,13 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        if ORQ_TYPE==AIRFLOW_BACKEND:
-            orq_const= config_orchestrator["airflow"]
-            ORQ_ERROR=AirflowError
-        elif ORQ_TYPE==DATABRICKS_BACKEND:
-            orq_const= config_orchestrator["databricks"]
+        if ORQ_TYPE == AIRFLOW_BACKEND:
+            orq_const = config_orchestrator["airflow"]
+            ORQ_ERROR = AirflowError
+        elif ORQ_TYPE == DATABRICKS_BACKEND:
+            orq_const = config_orchestrator["databricks"]
             # TODO AGA: Revisar si esto funcionaría correctamente
-            ORQ_ERROR=DatabricksError
+            ORQ_ERROR = DatabricksError
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -594,6 +607,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             raise ORQ_ERROR(
                 error=error, payload=dict(message=message, state=state), log_txt=log_txt
             )
+
         print("The execution is ", execution)
         print("The execution user is ", self.get_user())
         print("The execution id is ", idx)
@@ -611,10 +625,12 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             )
         schema = execution.schema
         # TODO AGA: Revisar si merece la pena hacer una funcion que solo
-        orch_client, schema_info, execution= get_orch_client(schema ,ORQ_TYPE,execution)
+        orch_client, schema_info, execution = get_orch_client(
+            schema, ORQ_TYPE, execution
+        )
 
         if not orch_client.is_alive():
-            err = orq_const["name"] +" is not accessible"
+            err = orq_const["name"] + " is not accessible"
             _raise_af_error(
                 execution,
                 err,
@@ -624,11 +640,9 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
         try:
             # TODO: get the dag_name from somewhere!
-            state = orch_client.get_run_status(
-                dag_run_id
-            )
+            state = orch_client.get_run_status(dag_run_id)
         except ORQ_ERROR as err:
-            error = orq_const["name"] +f" responded with an error: {err}"
+            error = orq_const["name"] + f" responded with an error: {err}"
             _raise_af_error(
                 execution,
                 error,
@@ -723,21 +737,25 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
         current_app.logger.info(f"User {self.get_user()} gets log of execution {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
 
+
 # region aux_functions
 def submit_one_job(cid):
     # trigger one-time-run job and get waiter object
-    waiter = w.jobs.submit(run_name=f'cornflow-job-{time.time()}', tasks=[
-        j.SubmitTask(
-            task_key='nippon_production_scheduling',
-            existing_cluster_id=cid,
-            libraries=[],
-            spark_python_task=j.SparkPythonTask(
-                python_file='/Workspace/Repos/nippon/nippon_production_scheduling/main.py',
-            ),
-            timeout_seconds=0,
-        )
-    ])
-    logging.info(f'starting to poll: {waiter.run_id}')
+    waiter = w.jobs.submit(
+        run_name=f"cornflow-job-{time.time()}",
+        tasks=[
+            j.SubmitTask(
+                task_key="nippon_production_scheduling",
+                existing_cluster_id=cid,
+                libraries=[],
+                spark_python_task=j.SparkPythonTask(
+                    python_file="/Workspace/Repos/nippon/nippon_production_scheduling/main.py",
+                ),
+                timeout_seconds=0,
+            )
+        ],
+    )
+    logging.info(f"starting to poll: {waiter.run_id}")
     # callback, that receives a polled entity between state updates
     # If you want to perform polling in a separate thread, process, or service,
     # you can use w.jobs.wait_get_run_job_terminated_or_skipped(
@@ -747,14 +765,15 @@ def submit_one_job(cid):
     #
     # Waiter interface allows for `w.jobs.submit(..).result()` simplicity in
     # the scenarios, where you need to block the calling thread for the job to finish.
-    run = waiter.result(timeout=datetime.timedelta(minutes=15),
-                        callback=print_status)
-    logging.info(f'job finished: {run.run_page_url}')
+    run = waiter.result(timeout=datetime.timedelta(minutes=15), callback=print_status)
+    logging.info(f"job finished: {run.run_page_url}")
     return waiter.run_id
 
+
 def print_status(run: j.Run):
-    statuses = [f'{t.task_key}: {t.state.life_cycle_state}' for t in run.tasks]
+    statuses = [f"{t.task_key}: {t.state.life_cycle_state}" for t in run.tasks]
     logging.info(f'workflow intermediate status: {", ".join(statuses)}')
+
 
 def get_orch_client(schema, orq_type, execution):
     """
@@ -763,10 +782,10 @@ def get_orch_client(schema, orq_type, execution):
     if orq_type == AIRFLOW_BACKEND:
         return get_airflow(schema, execution=execution)
     elif orq_type == DATABRICKS_BACKEND:
-        return get_databricks(schema,execution=execution)
+        return get_databricks(schema, execution=execution)
     else:
         raise EndpointNotImplemented()
-            
+
 
 def get_airflow(schema, execution):
     """
@@ -787,9 +806,9 @@ def get_airflow(schema, execution):
             log_txt=f"Error while user {self.get_user()} tries to create an execution "
             + err,
         )
-    # TODO AGA: revisar si tiene sentido que se devuelva execution o si 
+    # TODO AGA: revisar si tiene sentido que se devuelva execution o si
     #  es un puntero
-    return af_client,schema_info, execution
+    return af_client, schema_info, execution
 
 
 def get_databricks(schema, execution):
@@ -814,15 +833,16 @@ def get_databricks(schema, execution):
     return db_client, schema_info, execution
     # endregion
 
-def map_run_state(state,ORQ_TYPE):
+
+def map_run_state(state, ORQ_TYPE):
     """
     Maps the state of the execution in the orchestrator to the state of the execution in cornflow
     """
-    if ORQ_TYPE==AIRFLOW_BACKEND:
+    if ORQ_TYPE == AIRFLOW_BACKEND:
         return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
-    elif ORQ_TYPE==DATABRICKS_BACKEND:
+    elif ORQ_TYPE == DATABRICKS_BACKEND:
         print("The state is ", state)
-        preliminar_state = DATABRICKS_TO_STATE_MAP.get(state,EXEC_STATE_UNKNOWN)
+        preliminar_state = DATABRICKS_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
         # print("The preliminar state is ", preliminar_state)
         # if preliminar_state =="TERMINATED":
         #     # TODO AGA DUDA: Revisar si es correcto el error predeterminado
