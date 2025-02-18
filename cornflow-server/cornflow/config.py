@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE
+from .shared.const import AUTH_DB, PLANNER_ROLE, AIRFLOW_BACKEND
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -15,9 +15,7 @@ class DefaultConfig(object):
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
-    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
-    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
-    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
@@ -32,6 +30,21 @@ class DefaultConfig(object):
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
     )
+
+    # To change the tasks backend used by cornflow to solve the optimization models
+    CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
+
+    # AIRFLOW config
+    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
+    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
+    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
+    # DATABRICKS config
+    DATABRICKS_URL = os.getenv("DATABRICKS_HOST")
+    DATABRICKS_AUTH_SECRET = os.getenv("DATABRICKS_CLIENT_SECRET")
+    DATABRICKS_TOKEN_ENDPOINT = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+    DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
+    DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)

@@ -16,8 +16,9 @@ from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
-
-class DeployedDAG(TraceAttributesModel):
+# TODO AGA: cambiar nombre a la clase para que sea general
+# Aí como a los permisos etc
+class DeployedOrch(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """
@@ -35,7 +36,7 @@ class DeployedDAG(TraceAttributesModel):
         "PermissionsDAG",
         cascade="all,delete",
         backref="deployed_dags",
-        primaryjoin="and_(DeployedDAG.id==PermissionsDAG.dag_id)",
+        primaryjoin="and_(DeployedOrch.id==PermissionsDAG.dag_id)",
     )
 
     def __init__(self, data):
@@ -53,7 +54,7 @@ class DeployedDAG(TraceAttributesModel):
 
     @staticmethod
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
-        item = DeployedDAG.get_one_object(dag_name)
+        item = DeployedOrch.get_one_object(dag_name)
 
         if item is None:
             err = f"The DAG {dag_name} does not exist in the database."

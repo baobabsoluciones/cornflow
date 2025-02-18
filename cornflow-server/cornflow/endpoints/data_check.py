@@ -10,7 +10,7 @@ from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
+from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedOrch
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -95,7 +95,7 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to run data checks on execution {idx}. " + err
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orch_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -112,8 +112,8 @@ class DataCheckExecutionEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
-                execution.id, dag_name=schema, checks_only=True
+            response = af_client.run_workflow(
+                execution.id, orch_name=schema, checks_only=True
             )
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
@@ -208,7 +208,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
 
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orch_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -226,8 +226,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
-                execution.id, dag_name=schema, checks_only=True
+            response = af_client.run_workflow(
+                execution.id, orch_name=schema, checks_only=True
             )
         except AirflowError as err:
             error = "Airflow responded with an error: {}".format(err)
@@ -309,7 +309,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             if schema == "pulp":
                 validation_schema = "solve_model_dag"
 
-            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, INSTANCE_SCHEMA)
+            data_jsonschema = DeployedOrch.get_one_schema(config, validation_schema, INSTANCE_SCHEMA)
             validation_errors = json_schema_validate_as_string(data_jsonschema, instance_payload["data"])
 
             if validation_errors:
@@ -334,7 +334,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
 
             payload["data"] = case.solution
 
-            data_jsonschema = DeployedDAG.get_one_schema(config, validation_schema, SOLUTION_SCHEMA)
+            data_jsonschema = DeployedOrch.get_one_schema(config, validation_schema, SOLUTION_SCHEMA)
             validation_errors = json_schema_validate_as_string(data_jsonschema, payload["data"])
 
             if validation_errors:
@@ -369,7 +369,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to run data checks on case {idx}. " + err
             )
         # ask airflow if dag_name exists
-        schema_info = af_client.get_dag_info(schema)
+        schema_info = af_client.get_orch_info(schema)
 
         info = schema_info.json()
         if info["is_paused"]:
@@ -386,8 +386,8 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             )
 
         try:
-            response = af_client.run_dag(
-                execution.id, dag_name=schema, checks_only=True, case_id=idx
+            response = af_client.run_workflow(
+                execution.id, orch_name=schema, checks_only=True, case_id=idx
             )
 
         except AirflowError as err:

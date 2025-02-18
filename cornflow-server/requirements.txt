@@ -1,8 +1,9 @@
 alembic==1.9.2
 apispec<=6.3.0
 click<=8.1.7
-cornflow-client>=1.1.0
+cornflow-client==2.0.0a5
 cryptography<=42.0.5
+databricks-sdk==0.29.0
 disposable-email-domains>=0.0.86
 Flask==2.3.2
 flask-apispec<=0.11.4

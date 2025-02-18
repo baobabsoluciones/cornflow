@@ -218,11 +218,8 @@ SOLVER_CONVERTER = {
     "HiGHS": "highs",
 }
 
-
-class AirflowError(Exception):
+class OrchError(Exception):
     status_code = 400
-    log_txt = "Airflow error"
-
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
         if error is not None:
@@ -239,6 +236,12 @@ class AirflowError(Exception):
         rv = dict(self.payload or ())
         rv["error"] = self.error
         return rv
+
+class AirflowError(OrchError):
+    log_txt = "Airflow error"
+
+class DatabricksError(OrchError):
+    log_txt = "Databricks error"
 
 
 class NoSolverException(Exception):
