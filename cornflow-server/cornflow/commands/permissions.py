@@ -200,9 +200,10 @@ def register_dag_permissions_command(
             )
 
     if verbose:
+        click.echo(f"DAG permissions registered")
         if len(permissions) > 1:
             current_app.logger.info(f"DAG permissions registered: {permissions}")
         else:
             current_app.logger.info("No new DAG permissions")
-    click.echo(f"DAG permissions registered")
+    
     pass
