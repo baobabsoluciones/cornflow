@@ -16,9 +16,10 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         from cornflow.endpoints import resources, alarms_resources
 
         resources_to_register = resources
+        extra_permissions = EXTRA_PERMISSION_ASSIGNATION
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register += alarms_resources
-            extra_permissions = EXTRA_PERMISSION_ASSIGNATION
+
     elif external_app is not None:
         sys.path.append("./")
         external_module = import_module(external_app)
