@@ -14,13 +14,23 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     if external_app is None:
         from cornflow.endpoints import resources, alarms_resources
+
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = resources + alarms_resources
+            resources_to_register += alarms_resources
+            extra_permissions = EXTRA_PERMISSION_ASSIGNATION
     elif external_app is not None:
         sys.path.append("./")
         external_module = import_module(external_app)
         resources_to_register = external_module.endpoints.resources
+        try:
+            extra_permissions = (
+                EXTRA_PERMISSION_ASSIGNATION
+                + external_module.shared.const.EXTRA_PERMISSION_ASSIGNATION
+            )
+        except AttributeError:
+            extra_permissions = EXTRA_PERMISSION_ASSIGNATION
+
     else:
         resources_to_register = []
         exit()
@@ -52,7 +62,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
                 "api_view_id": views_in_db[endpoint],
             }
         )
-        for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
+        for role, action, endpoint in extra_permissions
     ]
 
     permissions_in_app_keys = [
