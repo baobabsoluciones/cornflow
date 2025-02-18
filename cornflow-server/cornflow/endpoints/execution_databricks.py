@@ -5,24 +5,8 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-import datetime
-import logging
-import time
-from databricks.sdk import WorkspaceClient
-import databricks.sdk.service.jobs as j
-
-
-from cornflow.shared.const import (
-    AIRFLOW_BACKEND,
-    DATABRICKS_BACKEND,
-    STATUS_HEALTHY,
-    STATUS_UNHEALTHY,
-)
-
-# TODO AGA: Modificar import para sacarlo de cornflow_client
-from cornflow.shared.databricks import Databricks
-from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 
 # TODO AGA: Porqué el import no funcina correctamente
 from flask import request, current_app
@@ -31,6 +15,7 @@ from flask_apispec import marshal_with, use_kwargs, doc
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, DeployedOrch, ExecutionModel
+from cornflow.orchestrator_constants import config_orchestrator
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
@@ -47,6 +32,10 @@ from cornflow.schemas.execution import (
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
+    AIRFLOW_BACKEND,
+    DATABRICKS_BACKEND,
+)
+from cornflow.shared.const import (
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
@@ -55,21 +44,23 @@ from cornflow.shared.const import (
     EXECUTION_STATE_MESSAGE_DICT,
     AIRFLOW_TO_STATE_MAP,
     DATABRICKS_TO_STATE_MAP,
-    DATABRICKS_FINISH_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
+
+# TODO AGA: Modificar import para sacarlo de cornflow_client
+from cornflow.shared.databricks import Databricks
 from cornflow.shared.exceptions import (
     AirflowError,
     DatabricksError,
     ObjectDoesNotExist,
     InvalidData,
+    EndpointNotImplemented,
 )
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
     json_schema_extend_and_validate_as_string,
 )
-from cornflow.orchestrator_constants import config_orchestrator
 
 
 class ExecutionEndpoint(BaseMetaResource):
@@ -381,7 +372,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 f"Configuration data does not match the jsonschema.",
             )
         orch_client, schema_info, execution = get_orch_client(
-            schema, ORQ_TYPE, execution
+            kwargs["schema"], ORQ_TYPE, execution
         )
 
         if not orch_client.is_alive():
@@ -739,40 +730,6 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
 
 
 # region aux_functions
-def submit_one_job(cid):
-    # trigger one-time-run job and get waiter object
-    waiter = w.jobs.submit(
-        run_name=f"cornflow-job-{time.time()}",
-        tasks=[
-            j.SubmitTask(
-                task_key="nippon_production_scheduling",
-                existing_cluster_id=cid,
-                libraries=[],
-                spark_python_task=j.SparkPythonTask(
-                    python_file="/Workspace/Repos/nippon/nippon_production_scheduling/main.py",
-                ),
-                timeout_seconds=0,
-            )
-        ],
-    )
-    logging.info(f"starting to poll: {waiter.run_id}")
-    # callback, that receives a polled entity between state updates
-    # If you want to perform polling in a separate thread, process, or service,
-    # you can use w.jobs.wait_get_run_job_terminated_or_skipped(
-    #   run_id=waiter.run_id,
-    #   timeout=datetime.timedelta(minutes=15),
-    #   callback=print_status) to achieve the same results.
-    #
-    # Waiter interface allows for `w.jobs.submit(..).result()` simplicity in
-    # the scenarios, where you need to block the calling thread for the job to finish.
-    run = waiter.result(timeout=datetime.timedelta(minutes=15), callback=print_status)
-    logging.info(f"job finished: {run.run_page_url}")
-    return waiter.run_id
-
-
-def print_status(run: j.Run):
-    statuses = [f"{t.task_key}: {t.state.life_cycle_state}" for t in run.tasks]
-    logging.info(f'workflow intermediate status: {", ".join(statuses)}')
 
 
 def get_orch_client(schema, orq_type, execution):
@@ -803,7 +760,7 @@ def get_airflow(schema, execution):
                 message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                 state=EXEC_STATE_ERROR_START,
             ),
-            log_txt=f"Error while user {self.get_user()} tries to create an execution "
+            log_txt=f"Error while user {execution.user_id} tries to create an execution "
             + err,
         )
     # TODO AGA: revisar si tiene sentido que se devuelva execution o si
@@ -827,7 +784,7 @@ def get_databricks(schema, execution):
                 message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                 state=EXEC_STATE_ERROR_START,
             ),
-            log_txt=f"Error while user {self.get_user()} tries to create an execution "
+            log_txt=f"Error while user {execution.user_id} tries to create an execution "
             + err,
         )
     return db_client, schema_info, execution
@@ -839,6 +796,7 @@ def map_run_state(state, ORQ_TYPE):
     Maps the state of the execution in the orchestrator to the state of the execution in cornflow
     """
     if ORQ_TYPE == AIRFLOW_BACKEND:
+        state = state.json()["state"]
         return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
     elif ORQ_TYPE == DATABRICKS_BACKEND:
         print("The state is ", state)

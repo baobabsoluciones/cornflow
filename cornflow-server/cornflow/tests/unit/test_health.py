@@ -28,7 +28,7 @@ class TestHealth(CustomTestCase):
         response = self.client.get(HEALTH_URL)
         self.assertEqual(200, response.status_code)
         cf_status = response.json["cornflow_status"]
-        af_status = response.json["airflow_status"]
+        backend_status = response.json["backend_status"]
         self.assertEqual(str, type(cf_status))
-        self.assertEqual(str, type(af_status))
+        self.assertEqual(str, type(backend_status))
         self.assertEqual(cf_status, STATUS_HEALTHY)
