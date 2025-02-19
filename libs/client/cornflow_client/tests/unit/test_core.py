@@ -18,11 +18,16 @@ from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     NoSolverException,
     BadSolution,
+    BadInstanceChecks,
+    BadSolutionChecks,
 )
 
 
 class TestCore(TestCase):
     def setUp(self):
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
         class DummyInstance(InstanceCore):
             schema = get_empty_schema(properties=dict(seconds=dict(type="number")))
             schema_checks = get_empty_schema(
@@ -31,9 +36,6 @@ class TestCore(TestCase):
 
             def check(self):
                 return dict(check=[1]) if self.data.get("seconds", 1) == 2 else dict()
-
-        class DummySolution(SolutionCore):
-            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
 
         class DummySolver(ExperimentCore):
             schema_checks = get_empty_schema()
@@ -170,3 +172,76 @@ class TestCore(TestCase):
 
     def test_notify(self):
         self.assertFalse(self.app.notify)
+
+    def test_bad_instance_checks(self):
+
+        class BadCheckInstance(InstanceCore):
+            schema = get_empty_schema()
+            schema_checks = get_empty_schema(properties=dict(check=dict(type="number")))
+
+            def check(self):
+
+                return dict(check=[1, 2, 3])
+
+        class BadCheckApp(self.app.__class__):
+            instance = BadCheckInstance
+
+        bad_app = BadCheckApp()
+        self.assertRaises(BadInstanceChecks, bad_app.solve, {}, self.config)
+
+    def test_bad_solution_checks(self):
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        class BadCheckSolver(ExperimentCore):
+            schema_checks = get_empty_schema(properties=dict(check=dict(type="string")))
+
+            def solve(self, options):
+                self.solution = DummySolution({"sleep": 1})
+
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def check_solution(self, *args, **kwargs):
+
+                return dict(check=123)
+
+            def get_objective(self):
+                return 0
+
+        class BadCheckApp(self.app.__class__):
+            solvers = dict(default=BadCheckSolver)
+            solution = DummySolution
+
+        bad_app = BadCheckApp()
+        self.assertRaises(BadSolutionChecks, bad_app.solve, {}, self.config)
+
+    def test_bad_solution_after_solve(self):
+        # Create a dummy solution class with a strict schema
+        class StrictSolution(SolutionCore):
+            schema = get_empty_schema(
+                properties=dict(value=dict(type="number", minimum=0, maximum=10))
+            )
+
+        # Create a solver that returns an invalid solution
+        class BadSolutionSolver(ExperimentCore):
+            schema_checks = get_empty_schema()
+
+            def solve(self, options):
+                # Set an invalid solution (value outside allowed range)
+                self.solution = StrictSolution({"value": 100})
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def check_solution(self, *args, **kwargs):
+                return dict()
+
+            def get_objective(self):
+                return 0
+
+        # Create an app with our test classes
+        class BadSolutionApp(self.app.__class__):
+            solution = StrictSolution
+            solvers = dict(default=BadSolutionSolver)
+
+        bad_app = BadSolutionApp()
+        self.assertRaises(BadSolution, bad_app.solve, {}, self.config)

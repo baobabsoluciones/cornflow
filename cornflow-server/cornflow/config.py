@@ -5,6 +5,12 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 
 class DefaultConfig(object):
+    """
+    Default configuration class
+    """
+
+    APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
+    EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
@@ -35,6 +41,11 @@ class DefaultConfig(object):
     DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
     DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
     
+    # If service user is allow to log with username and password
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
+        os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
+    )
+
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 
@@ -97,14 +108,17 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
-
-    """ """
+    """
+    Configuration class for development
+    """
 
     ENV = "development"
 
 
 class Testing(DefaultConfig):
-    """ """
+    """
+    Configuration class for testing
+    """
 
     ENV = "testing"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -122,8 +136,26 @@ class Testing(DefaultConfig):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
 
+class TestingOpenAuth(Testing):
+    """
+    Configuration class for testing some edge cases with Open Auth login
+    """
+
+    AUTH_TYPE = 0
+
+
+class TestingApplicationRoot(Testing):
+    """
+    Configuration class for testing with application root
+    """
+
+    APPLICATION_ROOT = "/test"
+
+
 class Production(DefaultConfig):
-    """ """
+    """
+    Configuration class for production
+    """
 
     ENV = "production"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -134,4 +166,10 @@ class Production(DefaultConfig):
     PROPAGATE_EXCEPTIONS = True
 
 
-app_config = {"development": Development, "testing": Testing, "production": Production}
+app_config = {
+    "development": Development,
+    "testing": Testing,
+    "production": Production,
+    "testing-oauth": TestingOpenAuth,
+    "testing-root": TestingApplicationRoot,
+}

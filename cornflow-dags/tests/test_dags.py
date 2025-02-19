@@ -36,6 +36,7 @@ class BaseDAGTests:
             self.assertIsInstance(self.app.instance.schema, dict)
             self.assertIsInstance(self.app.solution.schema, dict)
             self.assertIsInstance(self.app.schema, dict)
+            self.assertIsInstance(self.app.instance.schema_checks, dict)
 
         def test_config_requirements(self):
             keys = {"solver", "timeLimit"}
@@ -85,8 +86,9 @@ class BaseDAGTests:
                 instance = self.app.instance.from_dict(instance_data)
                 solution = self.app.solution.from_dict(solution_test)
                 s = self.app.get_default_solver_name()
-                experim = self.app.get_solver(s)(instance, solution)
-                checks = experim.check_solution()
+                experiment = self.app.get_solver(s)(instance, solution)
+                self.assertIsInstance(experiment.schema_checks, dict)
+                checks = experiment.check_solution()
                 failed_checks = [k for k, v in checks.items() if len(v) > 0]
                 if len(failed_checks) > 0:
                     print(
@@ -97,9 +99,9 @@ class BaseDAGTests:
                         if len(values) > 0:
                             print(f"{check}: {values}")
 
-                experim.get_objective()
+                experiment.get_objective()
 
-                validator = Draft7Validator(experim.schema_checks)
+                validator = Draft7Validator(experiment.schema_checks)
                 if not validator.is_valid(solution_check):
                     raise Exception("The solution checks have invalid format")
 
