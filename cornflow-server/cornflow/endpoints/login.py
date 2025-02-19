@@ -256,7 +256,7 @@ class LoginBaseEndpoint(BaseMetaResource):
             
             if provider == OID_COGNITO:
                 # Validate token
-                decoded_token = self.auth_class().validate_cognito_token(token)
+                decoded_token = self.auth_class().validate_external_cognito_token(token)
 
                 # Get user info from token
                 username = decoded_token.get('sub')

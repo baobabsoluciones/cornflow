@@ -142,7 +142,7 @@ class Auth:
                         token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
                     )
                     # Check if it's a service user with password login enabled
-                    user = self.user_model.get_one_user(payload["sub"])
+                    user = UserModel.get_one_user(payload["sub"])
                     if user and user.is_service_user() and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1:
                         return {"user_id": payload["sub"]}
                 except jwt.InvalidTokenError:
@@ -548,16 +548,10 @@ class Auth:
             now - self._cognito_jwks_last_update > timedelta(hours=24)):
             
             jwks_url = f"https://cognito-idp.{current_app.config['COGNITO_REGION']}.amazonaws.com/{current_app.config['COGNITO_USER_POOL_ID']}/.well-known/jwks.json"
-            try:
-                response = requests.get(jwks_url)
-                response.raise_for_status()
-                self._cognito_jwks = response.json()['keys']
-                self._cognito_jwks_last_update = now
-            except requests.RequestException as e:
-                raise CommunicationError(
-                    f"Failed to fetch Cognito JWKS: {str(e)}",
-                    log_txt="Error while trying to fetch Cognito JWKS."
-                )
+            response = requests.get(jwks_url)
+            response.raise_for_status()
+            self._cognito_jwks = response.json()['keys']
+            self._cognito_jwks_last_update = now
 
         # Find the key matching the kid
         key = next((k for k in self._cognito_jwks if k['kid'] == kid), None)
