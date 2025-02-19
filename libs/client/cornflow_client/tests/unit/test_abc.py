@@ -65,6 +65,13 @@ class TestABC(unittest.TestCase):
         self.assertIsInstance(log, dict)
         self.assertEqual(log.get("status"), "Optimal")
 
+    def test_check_data_no_solution(self):
+        inst_check, sol_check, log = GoodApp().check(dict(number=""))
+        self.assertIsInstance(inst_check, dict)
+        self.assertIsNone(sol_check)
+        self.assertIsInstance(log, dict)
+        self.assertEqual(log.get("status"), "Optimal")
+
 
 class GoodInstanceClass(InstanceCore):
     schema = get_empty_schema(dict(number=dict(type="number")))

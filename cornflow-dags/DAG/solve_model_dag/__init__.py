@@ -29,6 +29,9 @@ class Instance(InstanceCore):
     schema = get_pulp_jsonschema()
     schema_checks = get_empty_schema()
 
+    def check(self):
+        return dict()
+
 
 class Solution(SolutionCore):
     schema = get_pulp_jsonschema()

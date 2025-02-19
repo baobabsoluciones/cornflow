@@ -2,6 +2,7 @@
 This file contains the different exceptions created to report errors and the handler that registers them
 on a flask REST API server
 """
+
 from flask import jsonify
 from webargs.flaskparser import parser
 from cornflow_client.constants import AirflowError, DatabricksError
@@ -123,9 +124,11 @@ class ConfigurationError(InvalidUsage):
 
 
 INTERNAL_SERVER_ERROR_MESSAGE = "500 Internal Server Error"
-INTERNAL_SERVER_ERROR_MESSAGE_DETAIL = "The server encountered an internal error and was unable " \
-                                       "to complete your request. Either the server is overloaded or " \
-                                       "there is an error in the application."
+INTERNAL_SERVER_ERROR_MESSAGE_DETAIL = (
+    "The server encountered an internal error and was unable "
+    "to complete your request. Either the server is overloaded or "
+    "there is an error in the application."
+)
 
 
 def initialize_errorhandlers(app):
@@ -148,6 +151,7 @@ def initialize_errorhandlers(app):
     @app.errorhandler(InvalidData)
     @app.errorhandler(InvalidPatch)
     @app.errorhandler(ConfigurationError)
+    @app.errorhandler(CommunicationError)
     def handle_invalid_usage(error):
         """
         Method to handle the error given by the different exceptions.
@@ -189,10 +193,7 @@ def initialize_errorhandlers(app):
             status_code = error.code or status_code
             error_msg = f"{status_code} {error.name or INTERNAL_SERVER_ERROR_MESSAGE}"
             error_str = f"{error_msg}. {str(error.description or '') or INTERNAL_SERVER_ERROR_MESSAGE_DETAIL}"
-            response_dict = {
-                "message": error_msg,
-                "error": error_str
-            }
+            response_dict = {"message": error_msg, "error": error_str}
             response = jsonify(response_dict)
 
         elif app.config["ENV"] == "production":
@@ -204,7 +205,7 @@ def initialize_errorhandlers(app):
 
             response_dict = {
                 "message": INTERNAL_SERVER_ERROR_MESSAGE,
-                "error": INTERNAL_SERVER_ERROR_MESSAGE_DETAIL
+                "error": INTERNAL_SERVER_ERROR_MESSAGE_DETAIL,
             }
             response = jsonify(response_dict)
         else:

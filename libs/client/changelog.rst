@@ -1,3 +1,32 @@
+version 1.1.5
+--------------
+
+- released: 2025-01-14 
+- description: added support for python 3.12
+- changelog:
+    - added support for python 3.12.
+    - dropped support for python 3.8.
+    - updated requirements versions.
+
+version 1.1.4
+------------
+
+- released: 2024-12-05
+- description: same version as previous one.
+- changelog:
+    - new version due to pypi outage and problems with the version uploaded
+
+version 1.1.3
+------------
+
+- released: 2024-12-05
+- description: changes to json schemas validation on airflow.
+- changelog:
+    - changed the json schema validation on airflow so that solution, instance checks and solution checks are correctly reviewed.
+    - added some small changes to make sure that future compatibility with new version of libraries is ready.
+    - added a reconnect from airflow to cornflow to make sure that if the model fails we can get back as much as possible.
+
+
 version 1.1.1
 --------------
 

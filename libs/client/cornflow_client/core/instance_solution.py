@@ -153,11 +153,11 @@ class InstanceSolutionCore(ABC):
                 content = data[table]
                 if isinstance(content, list):
                     pd.DataFrame.from_records(content).to_excel(
-                        writer, table, index=False
+                        writer, sheet_name=table, index=False
                     )
                 elif isinstance(content, dict):
                     pd.DataFrame.from_dict(content, orient="index").to_excel(
-                        writer, table, header=False
+                        writer, sheet_name=table, header=False
                     )
 
     """
