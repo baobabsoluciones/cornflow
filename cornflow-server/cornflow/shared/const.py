@@ -1,5 +1,5 @@
 """
-In this files we import the values for different constants on cornflow server
+In this file we import the values for different constants on cornflow server
 """
 
 # CORNFLOW BACKEND
@@ -62,7 +62,7 @@ DATABRICKS_TO_STATE_MAP = dict(
 DATABRICKS_FINISH_TO_STATE_MAP = dict(
     SUCCESS=EXEC_STATE_CORRECT,
     USER_CANCELED=EXEC_STATE_STOPPED,
-    )
+)
 
 DATABRICKS_TERMINATE_STATE = "TERMINATED"
 # These codes and names are inherited from flask app builder in order to have the same names and values

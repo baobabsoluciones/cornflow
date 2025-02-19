@@ -117,7 +117,6 @@ class ExecutionModel(BaseDataModel):
         :param str message: Message for the error
         :return: nothing
         """
-        print("Updating state to ", code)
         self.state = code
         if message is None:
             self.state_message = EXECUTION_STATE_MESSAGE_DICT[code]
