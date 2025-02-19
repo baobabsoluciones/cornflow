@@ -68,7 +68,11 @@ class Airflow(object):
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
     def run_workflow(
-        self, execution_id, orch_name=config_orchestrator["airflow"]["def_schema"], checks_only=False, case_id=None
+        self,
+        execution_id,
+        orch_name=config_orchestrator["airflow"]["def_schema"],
+        checks_only=False,
+        case_id=None,
     ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
@@ -83,11 +87,9 @@ class Airflow(object):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
     def get_run_status(self, dag_name, dag_run_id):
-        # TODO AGA DUDA: queremos devolver toda la información o solo el estado?
-        info = self.request_headers_auth(method="POST", url=url, json=payload)
-        info = info.json()
-        state = info["status"]
-        return state
+        return self.consume_dag_run(
+            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+        )
 
     def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
         # here, two calls have to be done:

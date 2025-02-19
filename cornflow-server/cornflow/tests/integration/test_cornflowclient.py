@@ -1,6 +1,7 @@
 """
 
 """
+
 # Full imports
 import json
 import pulp
@@ -279,7 +280,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_server_alive(self):
         data = self.client.is_alive()
         cf_status = data["cornflow_status"]
-        af_status = data["airflow_status"]
+        af_status = data["backend_status"]
         self.assertEqual(str, type(cf_status))
         self.assertEqual(str, type(af_status))
         self.assertEqual(cf_status, STATUS_HEALTHY)

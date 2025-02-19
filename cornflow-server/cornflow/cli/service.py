@@ -16,7 +16,13 @@ from cornflow.commands import (
     update_schemas_command,
     update_dag_registry_command,
 )
-from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, DATABRICKS_BACKEND, SERVICE_ROLE, AIRFLOW_BACKEND
+from cornflow.shared.const import (
+    AUTH_DB,
+    ADMIN_ROLE,
+    DATABRICKS_BACKEND,
+    SERVICE_ROLE,
+    AIRFLOW_BACKEND,
+)
 from cornflow.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
@@ -106,7 +112,7 @@ def init_cornflow_service():
 
     # Check LDAP parameters for active directory and show message
     if os.getenv("AUTH_TYPE") == 2:
-        print(
+        click.echo(
             "WARNING: Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
         )
 
@@ -129,10 +135,10 @@ def init_cornflow_service():
                 f"cat > /etc/logrotate.d/cornflow <<EOF\n {conf} \nEOF", shell=True
             )
             out_logrotate = logrotate.stdout
-            print(out_logrotate)
+            click.echo(out_logrotate)
 
         except error:
-            print(error)
+            click.echo(error)
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     if external_application == 0:
