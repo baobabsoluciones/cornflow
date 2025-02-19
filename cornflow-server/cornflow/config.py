@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE
+from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_EXTERNAL, AUTH_OID
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -132,8 +132,14 @@ class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
     """
+    AUTH_TYPE = AUTH_OID
 
-    AUTH_TYPE = 0
+
+class TestingExternalAuth(Testing):
+    """
+    Configuration class for testing external authentication
+    """
+    AUTH_TYPE = AUTH_EXTERNAL
 
 
 class TestingApplicationRoot(Testing):
@@ -164,4 +170,5 @@ app_config = {
     "production": Production,
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
+    "testing-external": TestingExternalAuth,
 }

@@ -509,3 +509,144 @@ class TestLogInOpenAuthService(CustomTestCase):
         )
 
         self.assertEqual(400, response.status_code)
+
+
+# External Auth tests at the end
+class TestExternalServiceUser(CustomTestCase):
+    """
+    Tests for service user with external authentication
+    """
+    def create_app(self):
+        app = create_app("testing-external")
+        app.config["COGNITO_REGION"] = "us-east-1"
+        app.config["COGNITO_USER_POOL_ID"] = "us-east-1_example"
+        app.config["COGNITO_APP_CLIENT_ID"] = "example_client_id"
+        return app
+    
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!"
+        }
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+    
+    @mock.patch("cornflow.shared.authentication.auth.jwt")
+    def test_missing_token_headers(self, mock_header):
+        mock_header.get_unverified_header.return_value = None
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Token is missing the headers")
+    
+    @mock.patch("cornflow.shared.authentication.auth.jwt")
+    def test_invalid_key_id(self, mock_header):
+        mock_header.get_unverified_header.return_value = {"kid": "some_value"}
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "some_token"}),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertIn("Failed to fetch Cognito JWKS", response.json["error"])
+    
+    @mock.patch("cornflow.endpoints.login.Auth.validate_cognito_token")
+    def test_successful_token_login(self, mock_validate):
+        decoded = {
+            "sub": "service_user",
+            "email": "service@test.com",
+            "given_name": "Service",
+            "family_name": "User"
+        }
+        mock_validate.return_value = decoded
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "valid_token"}),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.service_user_id, response.json["id"])
+        self.assertEqual("valid_token", response.json["token"])
+    
+    @mock.patch("cornflow.endpoints.login.Auth.validate_cognito_token")
+    def test_new_user_token_login(self, mock_validate):
+        decoded = {
+            "sub": "new_user",
+            "email": "new@test.com",
+            "given_name": "New",
+            "family_name": "User"
+        }
+        mock_validate.return_value = decoded
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"token": "new_token"}),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(200, response.status_code)
+        # Check that a new user is created (id greater than service_user's id)
+        self.assertGreater(response.json["id"], self.service_user_id)
+        self.assertEqual("new_token", response.json["token"])
+
+
+class TestExternalServiceUserWithPassword(CustomTestCase):
+    """
+    Tests for service user with external authentication and password login enabled
+    """
+    def create_app(self):
+        app = create_app("testing-external")
+        app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] = 1
+        return app
+    
+    def setUp(self):
+        log.root.setLevel(current_app.config["LOG_LEVEL"])
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.service_data = {
+            "username": "service_user",
+            "email": "service@test.com",
+            "password": "Testpassword1!"
+        }
+        service_user = UserModel(data=self.service_data)
+        service_user.save()
+        self.service_data.pop("email")
+        self.service_user_id = service_user.id
+        self.assign_role(self.service_user_id, SERVICE_ROLE)
+        self.user_data = {
+            "username": "testname",
+            "email": "test@test.com",
+            "password": "Testpassword1!"
+        }
+        test_user = UserModel(data=self.user_data)
+        test_user.save()
+        self.user_data.pop("email")
+        self.test_user_id = test_user.id
+    
+    def test_service_user_password_login_enabled(self):
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.service_data),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.service_user_id, response.json["id"])
+    
+    def test_other_user_password_login(self):
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(self.user_data),
+            headers={"Content-Type": "application/json"}
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json["error"], "Invalid request")

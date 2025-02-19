@@ -32,6 +32,7 @@ from cornflow.shared.const import (
     OID_GOOGLE,
     OID_COGNITO,
     PERMISSION_METHOD_MAP,
+    AUTH_EXTERNAL,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -124,7 +125,7 @@ class Auth:
         Decodes a given JSON Web token and extracts the sub from it to give it back.
 
         :param str token: the given JSON Web Token
-        :return: the sub field of the token as the user_id
+        :return: the sub field of the token as the user_id or username depending on auth type
         :rtype: dict
         """
         if token is None:
@@ -133,6 +134,25 @@ class Auth:
                 err, log_txt="Error while trying to decode token. " + err
             )
         try:
+            # If we're using external auth, first try to decode as internal token for service users
+            if current_app.config["AUTH_TYPE"] == AUTH_EXTERNAL:
+                try:
+                    # Try to decode as internal token
+                    payload = jwt.decode(
+                        token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
+                    )
+                    # Check if it's a service user with password login enabled
+                    user = self.user_model.get_one_user(payload["sub"])
+                    if user and user.is_service_user() and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1:
+                        return {"user_id": payload["sub"]}
+                except jwt.InvalidTokenError:
+                    pass  # Not an internal token, continue with Cognito validation
+                
+                # For non-service users or invalid internal tokens, validate with Cognito
+                decoded = Auth().validate_external_cognito_token(token)
+                return {"username": decoded["sub"]}
+            
+            # Otherwise use our internal token
             payload = jwt.decode(
                 token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
             )
@@ -233,8 +253,14 @@ class Auth:
             )
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
-        user_id = data["user_id"]
-        user = self.user_model.get_one_user(user_id)
+        
+        # For external auth, we get the username
+        if "username" in data:
+            user = self.user_model.get_one_object(username=data["username"])
+        # For internal auth, we get the user_id
+        else:
+            user = self.user_model.get_one_user(data["user_id"])
+            
         if user is None:
             err = "User does not exist, invalid token."
             raise ObjectDoesNotExist(
@@ -469,9 +495,9 @@ class Auth:
         jwk = self._get_jwk(kid, tenant_id, provider)
         return self._rsa_pem_from_jwk(jwk)
 
-    def validate_cognito_token(self, token: str) -> dict:
+    def validate_external_cognito_token(self, token: str) -> dict:
         """
-        Validates a JWT token from AWS Cognito and returns the decoded payload.
+        Validates a JWT token when the application is in external auth mode using AWS Cognito.
         
         :param str token: The JWT token from Cognito
         :return: The decoded token payload

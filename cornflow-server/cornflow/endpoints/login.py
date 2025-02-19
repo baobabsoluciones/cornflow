@@ -57,12 +57,22 @@ class LoginBaseEndpoint(BaseMetaResource):
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
             response.update({"change_password": check_last_password_change(user)})
+            current_app.logger.info(f"User {user.email} logged in successfully using database authentication")
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
+            current_app.logger.info(f"User {user.email} logged in successfully using LDAP authentication")
         elif auth_type == AUTH_OID:
             user = self.auth_oid_authenticate(**kwargs)
+            current_app.logger.info(f"User {user.email} logged in successfully using OpenID authentication")
         elif auth_type == AUTH_EXTERNAL:
             user = self.auth_external_authenticate(**kwargs)
+            current_app.logger.info(f"User {user.email} logged in successfully using external authentication")
+            if user.is_service_user():
+                token = self.auth_class.generate_token(user.id)
+            else:
+                token = kwargs.get('token') 
+            response.update({"token": token, "id": user.id})
+            return response, 200
         else:
             raise ConfigurationError()
 
@@ -231,7 +241,7 @@ class LoginBaseEndpoint(BaseMetaResource):
         else:
             raise InvalidUsage("Invalid request")
 
-    def auth_external_authenticate(self, token=None):
+    def auth_external_authenticate(self, token: str = None, username: str = None, password: str = None):
         """
         Method in charge of performing the authentication using external JWT tokens.
         Currently supports Cognito tokens, but can be extended to support other providers.
