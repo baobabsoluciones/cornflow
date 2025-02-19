@@ -631,7 +631,7 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
         try:
             # TODO: get the dag_name from somewhere!
-            state = orch_client.get_run_status(dag_run_id)
+            state = orch_client.get_run_status(schema, dag_run_id)
         except ORQ_ERROR as err:
             error = orq_const["name"] + f" responded with an error: {err}"
             _raise_af_error(
