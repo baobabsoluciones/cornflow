@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AIRFLOW_BACKEND
+from .shared.const import AUTH_DB, PLANNER_ROLE
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
