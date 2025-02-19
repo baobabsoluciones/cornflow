@@ -10,7 +10,6 @@ import logging
 import time
 from databricks.sdk import WorkspaceClient
 import databricks.sdk.service.jobs as j
-from cornflow.constants import *
 from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
