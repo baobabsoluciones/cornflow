@@ -2,6 +2,8 @@
 
 """
 
+import functools
+import inspect
 import json
 import pickle
 
@@ -29,23 +31,3 @@ def save_json(data, path):
 
 def copy(dictionary):
     return pickle.loads(pickle.dumps(dictionary, -1))
-
-
-def as_list(x):
-    """
-    Transform an object into a list without nesting lists or iterating over strings.
-    Behave like [x] if x is a scalar or a string and list(x) if x is another iterable.
-
-    as_list(1) -> [1]
-    as_list("one") -> ["one"]
-    as_list([1,2]) -> [1,2]
-    as_list({1,2}) -> [1,2]
-    as_list((1,2)) -> [1,2]
-
-    :param x: an object
-    :return: a list
-    """
-    if isinstance(x, Iterable) and not isinstance(x, str) and not isinstance(x, dict):
-        return list(x)
-    else:
-        return [x]

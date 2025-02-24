@@ -4,7 +4,7 @@ Base code for the experiment template.
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Union, Dict
+from typing import List, Dict, Union
 
 from jsonschema import Draft7Validator
 
@@ -93,24 +93,51 @@ class ExperimentCore(ABC):
             )
         return checks
 
-    # TODO: make this method abstract on cornflow-client 2.0.0
-    def check(self) -> Dict[str, Dict]:
+    def check(self) -> Dict[str, Union[List, Dict]]:
+        """
+        Method that runs all the checks on the class.
+
+        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+          inside represents one error of that particular type.
+        """
+        return self.launch_all_checks()
+
+    def check_solution(self) -> Dict[str, Union[List, Dict]]:
         """
         Mandatory method
 
         :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
           inside represents one error of that particular type.
         """
-        pass
+        return self.launch_all_checks()
 
-    def check_solution(self) -> dict:
+    def get_check_methods(self) -> list:
         """
-        Mandatory method
+        Finds all class methods starting with check_ and returns them in a list.
 
-        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
-          inside represents one error of that particular type.
+        :return: A list of check methods.
         """
-        pass
+        check_methods = [
+            m
+            for m in dir(self)
+            if m.startswith("check_")
+            and callable(getattr(self, m))
+            and m != "check_schema"
+            and m != "check_solution"
+        ]
+        return check_methods
+
+    def launch_all_checks(self) -> dict:
+        """
+        Launch every check method and return a dict with the check method name as key
+        and the list of errors / warnings as value.
+
+        It will only return those checks that return a non-empty list.
+        """
+        check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
+        negative_checks = {k: v for k, v in check_methods.items() if len(v)}
+
+        return dict(negative_checks)
 
     @property
     @abstractmethod
