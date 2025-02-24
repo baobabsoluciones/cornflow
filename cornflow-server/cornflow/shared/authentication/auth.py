@@ -109,6 +109,7 @@ class Auth:
             + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user_id,
+            "iss": "cornflow",
         }
 
         return jwt.encode(

@@ -1,6 +1,7 @@
 """
 This file contains the base abstract models from which the rest of the models inherit
 """
+
 # Imports from libraries
 from datetime import datetime
 from flask import current_app
@@ -33,7 +34,9 @@ class EmptyBaseModel(db.Model):
 
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {self}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {self}"
+            )
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -99,7 +102,9 @@ class EmptyBaseModel(db.Model):
         action = "bulk create"
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {cls}"
+            )
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -120,7 +125,9 @@ class EmptyBaseModel(db.Model):
         action = "bulk create update"
         try:
             db.session.commit()
-            current_app.logger.debug(f"Transaction type: {action}, performed correctly on {cls}")
+            current_app.logger.debug(
+                f"Transaction type: {action}, performed correctly on {cls}"
+            )
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -136,12 +143,7 @@ class EmptyBaseModel(db.Model):
         return instances
 
     @classmethod
-    def get_all_objects(
-        cls,
-        offset=0,
-        limit=None,
-        **kwargs
-    ):
+    def get_all_objects(cls, offset=0, limit=None, **kwargs):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
 
@@ -154,7 +156,9 @@ class EmptyBaseModel(db.Model):
         """
         if "user" in kwargs:
             kwargs.pop("user")
-        query = cls.query.filter_by(**kwargs).offset(offset)
+        query = cls.query.filter_by(**kwargs)
+        if offset:
+            query = query.offset(offset)
         if limit:
             query = query.limit(limit)
         return query
@@ -261,7 +265,7 @@ class TraceAttributesModel(EmptyBaseModel):
         update_date_lte=None,
         offset=0,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
@@ -300,7 +304,8 @@ class TraceAttributesModel(EmptyBaseModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
 
-        query = query.offset(offset)
+        if offset:
+            query = query.offset(offset)
         if limit:
             query = query.limit(limit)
         return query
