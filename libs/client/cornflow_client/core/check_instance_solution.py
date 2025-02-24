@@ -1,14 +1,8 @@
-
-from ..airflow.dag_utilities import connect_to_cornflow
-from pytups import TupList
 from .tools import as_list
 
 
 class CheckInstanceSolution:
 
-
-    alarm_url = "/alarms/"
-    main_alarm_url = "/main-alarms/"
     # this should be set depending on the project
     default_message = "Problem detected: {}"
     default_id_alarm = 1
@@ -19,7 +13,6 @@ class CheckInstanceSolution:
         self.sol = solution
         self.logger = logger
         self.checks = {}
-        self.cf_client = self.get_cf_client()
 
     def get_all_checks(self):
         """
@@ -70,7 +63,7 @@ class CheckInstanceSolution:
                 self.create_alarm(id_alarm, check["msg_args"], criticality=criticality)
         return True
 
-    def create_alarm(self, id_alarm, msg_args, criticality=2):
+    def create_alarm(self, msg_args):
         """
         Create an alarm for failed checks.
         If the app is not connected to cornflow, then generate warnings
@@ -80,53 +73,5 @@ class CheckInstanceSolution:
         :param criticality: criticality of the alarm.
         :return: None
         """
-        if self.cf_client is not None:
-            self.post_main_alarm(
-                id_alarm=id_alarm,
-                criticality=criticality,
-                msg_args=msg_args,
-            )
-        else:
-            msg = self.default_message.format(*as_list(msg_args))
-            self.logger.warning(msg)
-
-
-    @staticmethod
-    def get_cf_client():
-        """
-        Attempt to connect to cornflow and return the client object.
-        Used to connect to default cornflow endpoints.
-        Return None if connection fail.
-
-        :return: a Cornflow object or None
-        """
-        try:
-            from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-
-            secrets = EnvironmentVariablesBackend()
-            cf_client = connect_to_cornflow(secrets)
-            return cf_client
-        except ImportError:
-            return None
-
-    def post_main_alarm(self, id_alarm, criticality, msg_args):
-        """
-        Connect to cornflow and post a port alarm.
-
-        :param id_alarm: id of the alarm
-        :param criticality: criticality
-        :param msg_args: arguments of the alarm message
-        :return: cornflow response
-        """
-        alarms = TupList(self.cf_client.raw.api_for_id(self.alarm_url, method="GET").json())
-        message = alarms.vfilter(lambda v: v["id"] == id_alarm).take("description")[0]
-        alarm = {
-            "id_alarm": id_alarm,
-            "criticality": criticality,
-            "message": message.format(*as_list(msg_args)),
-        }
-
-        response = self.cf_client.raw.api_for_id(self.main_alarm_url, method="POST", json=alarm)
-
-        self.logger.info(f"Alarm created: {response.json()}")
-        return response
+        msg = self.default_message.format(*as_list(msg_args))
+        self.logger.warning(msg)
