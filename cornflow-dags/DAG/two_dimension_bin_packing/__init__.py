@@ -24,4 +24,15 @@ class TwoDimensionBinPackingProblem(ApplicationCore):
             os.path.join(os.path.dirname(__file__), "data/test_instance_2.json")
         )
 
-        return [data1, data2]
+        return [
+            {
+                "name": "example_1",
+                "instance": data1,
+                "description": "Example with 31 objects",
+            },
+            {
+                "name": "example_2",
+                "instance": data2,
+                "description": "Example with 25 objects",
+            },
+        ]

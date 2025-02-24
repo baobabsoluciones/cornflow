@@ -6,7 +6,7 @@ from .permissions import (
     register_dag_permissions_command,
 )
 from .roles import register_roles_command
-from .schemas import update_schemas_command
+from .schemas import update_schemas_command, update_dag_registry_command
 from .users import (
     create_user_with_role,
     create_service_user_command,

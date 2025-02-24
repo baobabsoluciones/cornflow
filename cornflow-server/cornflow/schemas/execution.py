@@ -4,7 +4,7 @@ from marshmallow import fields, Schema, validate
 # Imports from internal modules
 from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
 from .common import QueryFilters, BaseDataEndpointResponse
-from .solution_log import LogSchema
+from .solution_log import LogSchema, BasicLogSchema
 
 
 class QueryFiltersExecution(QueryFilters):
@@ -114,6 +114,12 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
     indicators = fields.Method("get_indicators")
 
 
+class ExecutionDetailsWithIndicatorsAndLogResponse(
+    ExecutionDetailsEndpointWithIndicatorsResponse
+):
+    log = fields.Nested(BasicLogSchema, attribute="log_json")
+
+
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.Str()
     state = fields.Int()
@@ -129,6 +135,7 @@ class ExecutionStatusEndpointUpdate(Schema):
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
+    log = fields.Nested(BasicLogSchema, attribute="log_json")
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):

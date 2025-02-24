@@ -1,10 +1,25 @@
 """
 This file contains the different custom test classes used to generalize the unit testing of cornflow.
+It provides base test cases and utilities for testing authentication, API endpoints, and database operations.
+
+Classes
+-------
+CustomTestCase
+    Base test case class with common testing utilities
+BaseTestCases
+    Container for common test case scenarios
+CheckTokenTestCase
+    Test cases for token validation
+LoginTestCases
+    Test cases for login functionality
 """
 
 # Import from libraries
 import logging as log
 from datetime import datetime, timedelta
+
+from typing import List
+
 from flask import current_app
 from flask_testing import TestCase
 import json
@@ -27,7 +42,6 @@ from cornflow.tests.const import (
     TOKEN_URL,
 )
 
-
 try:
     date_from_str = datetime.fromisoformat
 except:
@@ -37,12 +51,34 @@ except:
 
 
 class CustomTestCase(TestCase):
+    """
+    Base test case class that provides common utilities for testing Cornflow applications.
+
+    This class sets up a test environment with a test database, user authentication,
+    and common test methods for CRUD operations.
+    """
+
     def create_app(self):
+        """
+        Creates and configures a Flask application for testing.
+
+        :returns: A configured Flask application instance
+        :rtype: Flask
+        """
         app = create_app("testing")
         return app
 
     @staticmethod
     def load_file(_file, fk=None, fk_id=None):
+        """
+        Loads and optionally modifies a JSON file.
+
+        :param str _file: Path to the JSON file to load
+        :param str fk: Foreign key field name to modify (optional)
+        :param int fk_id: Foreign key ID value to set (optional)
+        :returns: The loaded and potentially modified JSON data
+        :rtype: dict
+        """
         with open(_file) as f:
             temp = json.load(f)
         if fk is not None and fk_id is not None:
@@ -50,6 +86,11 @@ class CustomTestCase(TestCase):
         return temp
 
     def setUp(self):
+        """
+        Sets up the test environment before each test.
+
+        Creates database tables, initializes access controls, and creates a test user.
+        """
         log.root.setLevel(current_app.config["LOG_LEVEL"])
         db.create_all()
         access_init_command(verbose=False)
@@ -89,9 +130,23 @@ class CustomTestCase(TestCase):
 
     @staticmethod
     def get_header_with_auth(token):
+        """
+        Creates HTTP headers with authentication token.
+
+        :param str token: JWT authentication token
+        :returns: Headers dictionary with content type and authorization
+        :rtype: dict
+        """
         return {"Content-Type": "application/json", "Authorization": "Bearer " + token}
 
     def create_user(self, data):
+        """
+        Creates a new user through the API.
+
+        :param dict data: Dictionary containing user data (username, email, password)
+        :returns: API response from user creation
+        :rtype: Response
+        """
         return self.client.post(
             SIGNUP_URL,
             data=json.dumps(data),
@@ -101,6 +156,14 @@ class CustomTestCase(TestCase):
 
     @staticmethod
     def assign_role(user_id, role_id):
+        """
+        Assigns a role to a user in the database.
+
+        :param int user_id: ID of the user
+        :param int role_id: ID of the role to assign
+        :returns: The created or existing user role association
+        :rtype: UserRoleModel
+        """
         if UserRoleModel.check_if_role_assigned(user_id, role_id):
             user_role = UserRoleModel.query.filter_by(
                 user_id=user_id, role_id=role_id
@@ -111,6 +174,15 @@ class CustomTestCase(TestCase):
         return user_role
 
     def create_role_endpoint(self, user_id, role_id, token):
+        """
+        Creates a role assignment through the API endpoint.
+
+        :param int user_id: ID of the user
+        :param int role_id: ID of the role to assign
+        :param str token: Authentication token
+        :returns: API response from role assignment
+        :rtype: Response
+        """
         return self.client.post(
             USER_ROLE_URL,
             data=json.dumps({"user_id": user_id, "role_id": role_id}),
@@ -119,6 +191,13 @@ class CustomTestCase(TestCase):
         )
 
     def create_user_with_role(self, role_id):
+        """
+        Creates a new user and assigns them a specific role.
+
+        :param int role_id: ID of the role to assign
+        :returns: Authentication token for the created user
+        :rtype: str
+        """
         data = {
             "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
@@ -136,21 +215,54 @@ class CustomTestCase(TestCase):
         ).json["token"]
 
     def create_service_user(self):
+        """
+        Creates a new user with service role.
+
+        :returns: Authentication token for the service user
+        :rtype: str
+        """
         return self.create_user_with_role(SERVICE_ROLE)
 
     def create_admin(self):
+        """
+        Creates a new user with admin role.
+
+        :returns: Authentication token for the admin user
+        :rtype: str
+        """
         return self.create_user_with_role(ADMIN_ROLE)
 
     def create_planner(self):
+        """
+        Creates a new user with planner role.
+
+        :returns: Authentication token for the planner user
+        :rtype: str
+        """
         return self.create_user_with_role(PLANNER_ROLE)
 
     def tearDown(self):
+        """
+        Cleans up the test environment after each test.
+        """
         db.session.remove()
         db.drop_all()
 
     def create_new_row(
         self, url, model, payload, expected_status=201, check_payload=True, token=None
     ):
+        """
+        Creates a new database row through the API.
+
+        :param str url: API endpoint URL
+        :param class model: Database model class
+        :param dict payload: Data to create the row
+        :param int expected_status: Expected HTTP status code (default: 201)
+        :param bool check_payload: Whether to verify the created data (default: True)
+        :param str token: Authentication token (optional)
+        :returns: ID of the created row
+        :rtype: int
+        """
         token = token or self.token
 
         response = self.client.post(
@@ -172,7 +284,20 @@ class CustomTestCase(TestCase):
                 self.assertEqual(getattr(row, key), payload[key])
         return row.id
 
-    def get_rows(self, url, data, token=None, check_data=True):
+    def get_rows(
+        self, url, data, token=None, check_data=True, keys_to_check: List[str] = None
+    ):
+        """
+        Retrieves multiple rows through the API and verifies their contents.
+
+        :param str url: API endpoint URL
+        :param list data: List of data dictionaries to create and verify
+        :param str token: Authentication token (optional)
+        :param bool check_data: Whether to verify the retrieved data (default: True)
+        :param list keys_to_check: Specific keys to verify in the response (optional)
+        :returns: API response containing the rows
+        :rtype: Response
+        """
         token = token or self.token
 
         codes = [
@@ -187,6 +312,8 @@ class CustomTestCase(TestCase):
         if check_data:
             for i in range(len(data)):
                 self.assertEqual(rows_data[i]["id"], codes[i])
+                if keys_to_check:
+                    self.assertCountEqual(list(rows_data[i].keys()), keys_to_check)
                 for key in self.get_keys_to_check(data[i]):
                     self.assertIn(key, rows_data[i])
                     if key in data[i]:
@@ -194,13 +321,38 @@ class CustomTestCase(TestCase):
         return rows
 
     def get_keys_to_check(self, payload):
+        """
+        Determines which keys should be checked in API responses.
+
+        :param dict payload: Data dictionary containing keys
+        :returns: List of keys to check
+        :rtype: list
+        """
         if len(self.items_to_check):
             return self.items_to_check
         return payload.keys()
 
     def get_one_row(
-        self, url, payload, expected_status=200, check_payload=True, token=None
+        self,
+        url,
+        payload,
+        expected_status=200,
+        check_payload=True,
+        token=None,
+        keys_to_check: List[str] = None,
     ):
+        """
+        Retrieves a single row through the API and verifies its contents.
+
+        :param str url: API endpoint URL
+        :param dict payload: Expected data dictionary
+        :param int expected_status: Expected HTTP status code (default: 200)
+        :param bool check_payload: Whether to verify the retrieved data (default: True)
+        :param str token: Authentication token (optional)
+        :param list keys_to_check: Specific keys to verify in the response (optional)
+        :returns: API response data
+        :rtype: dict
+        """
         token = token or self.token
 
         row = self.client.get(
@@ -210,6 +362,8 @@ class CustomTestCase(TestCase):
         self.assertEqual(expected_status, row.status_code)
         if not check_payload:
             return row.json
+        if keys_to_check:
+            self.assertCountEqual(list(row.json.keys()), keys_to_check)
         self.assertEqual(row.json["id"], payload["id"])
         for key in self.get_keys_to_check(payload):
             self.assertIn(key, row.json)
@@ -218,6 +372,14 @@ class CustomTestCase(TestCase):
         return row.json
 
     def get_no_rows(self, url, token=None):
+        """
+        Verifies that no rows are returned from the API endpoint.
+
+        :param str url: API endpoint URL
+        :param str token: Authentication token (optional)
+        :returns: Empty list from API response
+        :rtype: list
+        """
         token = token or self.token
         rows = self.client.get(
             url, follow_redirects=True, headers=self.get_header_with_auth(token)
@@ -235,6 +397,18 @@ class CustomTestCase(TestCase):
         check_payload=True,
         token=None,
     ):
+        """
+        Updates a row through the API and verifies the changes.
+
+        :param str url: API endpoint URL
+        :param dict change: Dictionary of changes to apply
+        :param dict payload_to_check: Expected data after update
+        :param int expected_status: Expected HTTP status code (default: 200)
+        :param bool check_payload: Whether to verify the updated data (default: True)
+        :param str token: Authentication token (optional)
+        :returns: Updated row data
+        :rtype: dict
+        """
         token = token or self.token
 
         response = self.client.put(
@@ -266,6 +440,15 @@ class CustomTestCase(TestCase):
     def patch_row(
         self, url, json_patch, payload_to_check, expected_status=200, check_payload=True
     ):
+        """
+        Patches a row through the API and verifies the changes.
+
+        :param str url: API endpoint URL
+        :param dict json_patch: JSON patch operations to apply
+        :param dict payload_to_check: Expected data after patch
+        :param int expected_status: Expected HTTP status code (default: 200)
+        :param bool check_payload: Whether to verify the patched data (default: True)
+        """
         response = self.client.patch(
             url,
             data=json.dumps(json_patch),
@@ -287,6 +470,13 @@ class CustomTestCase(TestCase):
         self.assertEqual(payload_to_check["solution"], row.json["solution"])
 
     def delete_row(self, url):
+        """
+        Deletes a row through the API and verifies its removal.
+
+        :param str url: API endpoint URL
+        :returns: API response from the delete operation
+        :rtype: Response
+        """
         response = self.client.delete(
             url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
         )
@@ -300,6 +490,13 @@ class CustomTestCase(TestCase):
         return response
 
     def apply_filter(self, url, _filter, result):
+        """
+        Tests API filtering functionality.
+
+        :param str url: API endpoint URL
+        :param dict _filter: Filter parameters to apply
+        :param list result: Expected filtered results
+        """
         # we take out the potential query (e.g., ?param=1) arguments inside the url
         get_with_opts = lambda data: self.client.get(
             url.split("?")[0],
@@ -314,16 +511,39 @@ class CustomTestCase(TestCase):
         return
 
     def repr_method(self, idx, representation):
+        """
+        Tests the string representation of a model instance.
+
+        :param int idx: ID of the model instance
+        :param str representation: Expected string representation
+        """
         row = self.model.query.get(idx)
         self.assertEqual(repr(row), representation)
 
     def str_method(self, idx, string: str):
+        """
+        Tests the string conversion of a model instance.
+
+        :param int idx: ID of the model instance
+        :param str string: Expected string value
+        """
         row = self.model.query.get(idx)
         self.assertEqual(str(row), string)
 
     def cascade_delete(
         self, url, model, payload, url_2, model_2, payload_2, parent_key
     ):
+        """
+        Tests cascade deletion functionality between related models.
+
+        :param str url: Parent model API endpoint
+        :param class model: Parent model class
+        :param dict payload: Parent model data
+        :param str url_2: Child model API endpoint
+        :param class model_2: Child model class
+        :param dict payload_2: Child model data
+        :param str parent_key: Foreign key field linking child to parent
+        """
         parent_object_idx = self.create_new_row(url, model, payload)
         payload_2[parent_key] = parent_object_idx
         child_object_idx = self.create_new_row(url_2, model_2, payload_2)
@@ -342,24 +562,44 @@ class CustomTestCase(TestCase):
 
 
 class BaseTestCases:
+    """
+    Container class for common test case scenarios.
+    """
+
     class ListFilters(CustomTestCase):
+        """
+        Test cases for list endpoint filtering functionality.
+        """
+
         def setUp(self):
+            """
+            Sets up the test environment for filter tests.
+            """
             super().setUp()
             self.payload = None
 
         def test_opt_filters_limit(self):
+            """
+            Tests the limit filter option.
+            """
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
 
         def test_opt_filters_offset(self):
+            """
+            Tests the offset filter option.
+            """
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
 
         def test_opt_filters_schema(self):
+            """
+            Tests the schema filter option.
+            """
             # (we patch the request to airflow to check if the schema is valid)
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
@@ -368,6 +608,9 @@ class BaseTestCases:
             self.apply_filter(self.url, dict(schema="timer"), allrows.json[:1])
 
         def test_opt_filters_date_lte(self):
+            """
+            Tests the less than or equal to date filter.
+            """
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
             allrows = self.get_rows(self.url, data_many)
@@ -383,6 +626,9 @@ class BaseTestCases:
             )
 
         def test_opt_filters_date_gte(self):
+            """
+            Tests the greater than or equal to date filter.
+            """
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
             allrows = self.get_rows(self.url, data_many)
@@ -399,13 +645,26 @@ class BaseTestCases:
             return
 
     class DetailEndpoint(CustomTestCase):
+        """
+        Test cases for detail endpoint functionality.
+        """
+
         def setUp(self):
+            """
+            Sets up the test environment for detail endpoint tests.
+            """
             super().setUp()
             self.payload = None
             self.response_items = None
             self.query_arguments = None
 
         def url_with_query_arguments(self):
+            """
+            Constructs URL with query arguments.
+
+            :returns: URL with query parameters
+            :rtype: str
+            """
             if self.query_arguments is None:
                 return self.url
             else:
@@ -416,6 +675,9 @@ class BaseTestCases:
                 )
 
         def test_get_one_row(self):
+            """
+            Tests retrieving a single row.
+            """
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
@@ -426,6 +688,9 @@ class BaseTestCases:
             self.assertEqual(len(diff), 0)
 
         def test_get_one_row_superadmin(self):
+            """
+            Tests retrieving a single row as superadmin.
+            """
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
@@ -435,11 +700,17 @@ class BaseTestCases:
             )
 
         def test_get_nonexistent_row(self):
+            """
+            Tests attempting to retrieve a non-existent row.
+            """
             self.get_one_row(
                 self.url + "500" + "/", {}, expected_status=404, check_payload=False
             )
 
         def test_update_one_row(self):
+            """
+            Tests updating a single row.
+            """
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
@@ -451,6 +722,9 @@ class BaseTestCases:
             )
 
         def test_update_one_row_bad_format(self):
+            """
+            Tests updating a row with invalid format.
+            """
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
@@ -471,6 +745,9 @@ class BaseTestCases:
             )
 
         def test_delete_one_row(self):
+            """
+            Tests deleting a single row.
+            """
             idx = self.create_new_row(
                 self.url_with_query_arguments(), self.model, self.payload
             )
@@ -478,6 +755,9 @@ class BaseTestCases:
 
         # TODO: move to base endpoint custom class
         def test_incomplete_payload(self):
+            """
+            Tests creating a row with incomplete payload.
+            """
             payload = {"description": "arg"}
             self.create_new_row(
                 self.url_with_query_arguments(),
@@ -489,6 +769,9 @@ class BaseTestCases:
 
         # TODO: move to base endpoint custom class
         def test_payload_bad_format(self):
+            """
+            Tests creating a row with invalid payload format.
+            """
             payload = {"name": 1}
             self.create_new_row(
                 self.url_with_query_arguments(),
@@ -500,22 +783,45 @@ class BaseTestCases:
 
 
 class CheckTokenTestCase:
+    """
+    Container class for token validation test cases.
+    """
+
     class TokenEndpoint(TestCase):
+        """
+        Test cases for token endpoint functionality.
+        """
+
         def create_app(self):
+            """
+            Creates test application instance.
+
+            :returns: Test Flask application
+            :rtype: Flask
+            """
             app = create_app("testing")
             return app
 
         def setUp(self):
+            """
+            Sets up test environment for token tests.
+            """
             db.create_all()
             self.data = None
             self.token = None
             self.response = None
 
         def tearDown(self):
+            """
+            Cleans up test environment after token tests.
+            """
             db.session.remove()
             db.drop_all()
 
         def get_check_token(self):
+            """
+            Tests token validation endpoint.
+            """
             if self.token:
                 self.response = self.client.get(
                     TOKEN_URL,
@@ -536,22 +842,45 @@ class CheckTokenTestCase:
 
 
 class LoginTestCases:
+    """
+    Container class for login-related test cases.
+    """
+
     class LoginEndpoint(TestCase):
+        """
+        Test cases for login endpoint functionality.
+        """
+
         def create_app(self):
+            """
+            Creates test application instance.
+
+            :returns: Test Flask application
+            :rtype: Flask
+            """
             app = create_app("testing")
             return app
 
         def setUp(self):
+            """
+            Sets up test environment for login tests.
+            """
             log.root.setLevel(current_app.config["LOG_LEVEL"])
             db.create_all()
             self.data = None
             self.response = None
 
         def tearDown(self):
+            """
+            Cleans up test environment after login tests.
+            """
             db.session.remove()
             db.drop_all()
 
         def test_successful_log_in(self):
+            """
+            Tests successful login attempt.
+            """
             payload = self.data
 
             self.response = self.client.post(
@@ -565,6 +894,9 @@ class LoginTestCases:
             self.assertEqual(str, type(self.response.json["token"]))
 
         def test_validation_error(self):
+            """
+            Tests login with invalid data.
+            """
             payload = self.data
             payload["email"] = "test"
 
@@ -579,6 +911,9 @@ class LoginTestCases:
             self.assertEqual(str, type(response.json["error"]))
 
         def test_missing_username(self):
+            """
+            Tests login with missing username.
+            """
             payload = self.data
             payload.pop("username", None)
             response = self.client.post(
@@ -592,6 +927,9 @@ class LoginTestCases:
             self.assertEqual(str, type(response.json["error"]))
 
         def test_missing_password(self):
+            """
+            Tests login with missing password.
+            """
             payload = self.data
             payload.pop("password", None)
             response = self.client.post(
@@ -605,6 +943,9 @@ class LoginTestCases:
             self.assertEqual(str, type(response.json["error"]))
 
         def test_invalid_username(self):
+            """
+            Tests login with invalid username.
+            """
             payload = self.data
             payload["username"] = "invalid_username"
 
@@ -620,6 +961,9 @@ class LoginTestCases:
             self.assertEqual("Invalid credentials", response.json["error"])
 
         def test_invalid_password(self):
+            """
+            Tests login with invalid password.
+            """
             payload = self.data
             payload["password"] = "testpassword_2"
 
@@ -635,6 +979,9 @@ class LoginTestCases:
             self.assertEqual("Invalid credentials", response.json["error"])
 
         def test_old_token(self):
+            """
+            Tests using an expired token.
+            """
             token = (
                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
                 ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
@@ -666,6 +1013,9 @@ class LoginTestCases:
             )
 
         def test_bad_format_token(self):
+            """
+            Tests using a malformed token.
+            """
             response = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(self.data),
@@ -687,6 +1037,9 @@ class LoginTestCases:
             self.assertEqual(400, response.status_code)
 
         def test_invalid_token(self):
+            """
+            Tests using an invalid token.
+            """
             token = (
                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
                 ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
@@ -718,6 +1071,9 @@ class LoginTestCases:
             )
 
         def test_token(self):
+            """
+            Tests token generation and validation.
+            """
             payload = self.data
 
             self.response = self.client.post(

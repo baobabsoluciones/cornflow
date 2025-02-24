@@ -1,12 +1,11 @@
 """
 
 """
-# Full imports
-import math
 
-# Partial imports
-from pytups import TupList, SuperDict
+import math
 import numbers
+
+from pytups import TupList, SuperDict
 
 
 def read_excel(

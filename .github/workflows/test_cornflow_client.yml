@@ -11,9 +11,10 @@ on:
   push:
     branches:
       - master
-      - development
+      - develop
     paths:
       - 'libs/client/**'
+      - '.github/workflows/test_cornflow_client.yml'
       - '!libs/client/README.rst'
       - '!libs/client/setup.py'
 
@@ -28,7 +29,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [ 3.8, 3.9, '3.10', '3.11' ]
+        python-version: [ 3.9, '3.10', '3.11', '3.12' ]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
@@ -44,7 +45,7 @@ jobs:
         pip install .
     - name: Test
       run: |
-        coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+        coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
         coverage report -m
   
   integration:
@@ -58,7 +59,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11']
+        python-version: [3.9, '3.10', '3.11', '3.12']
         os: [ ubuntu-latest ]
 
     steps:
@@ -85,7 +86,7 @@ jobs:
           cd cornflow-server
           python -m venv afvenv
           source afvenv/bin/activate
-          AIRFLOW_VERSION=2.7.1
+          AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
@@ -140,11 +141,11 @@ jobs:
           CORNFLOW_SERVICE_USER: airflow
       - name: Run unit tests
         run: |
-          coverage run --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/unit
+          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
           coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow_client/ -m unittest discover -s cornflow_client/tests/integration
+          coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
           coverage report -m
           coverage xml
       - name: Upload coverage to codecov

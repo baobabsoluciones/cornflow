@@ -1,7 +1,7 @@
 # AIRFLOW VERSION 2.9.0
 # AUTHOR: cornflow@baobabsoluciones.es
 # DESCRIPTION: Airflow 2.9.0 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
-# baobab code version is 1.0.10
+# baobab code version is 1.1.0
 
 FROM baobabsoluciones/pysolver:1.0
 LABEL maintainer="cornflow@baobabsoluciones"
@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.9.0
+ARG AIRFLOW_VERSION=2.9.1
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.10.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
@@ -20,7 +20,7 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 # install Airflow and extras: celery,postgres and redis
 RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 # We add these overruns due to security reasons as suggested here: https://airflow.apache.org/docs/apache-airflow/stable/installation/installing-from-pypi.html#upgrading-and-installing-dependencies-including-providers
-RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==42.0.5" "gunicorn==22.0.0" "requests==2.31.0" "Werkzeug==2.3.8"
+RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==42.0.5" "requests==2.31.0" "Werkzeug==2.3.8"
 
 # copy init script and config to container
 COPY scripts ${AIRFLOW_HOME}/scripts
