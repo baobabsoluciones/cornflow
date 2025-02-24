@@ -1,6 +1,7 @@
 """
 Unit test for the role endpoints
 """
+
 import json
 import logging as log
 from cornflow.models import PermissionViewRoleModel, RoleModel
@@ -472,3 +473,21 @@ class TestRolesModelMethods(CustomTestCase):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.str_method(idx, "<Role test_role>")
+
+    def test_get_all_objects(self):
+        """
+        Tests the get_all_objects method
+        """
+        objective = 4
+
+        instances = RoleModel.get_all_objects().all()
+        self.assertEqual(len(instances), objective)
+
+        instances = RoleModel.get_all_objects(offset=1).all()
+        self.assertEqual(len(instances), 3)
+
+        instances = RoleModel.get_all_objects(offset=1, limit=1).all()
+        self.assertEqual(len(instances), 1)
+
+        instances = RoleModel.get_all_objects(limit=1, name="admin").all()
+        self.assertEqual(len(instances), 1)

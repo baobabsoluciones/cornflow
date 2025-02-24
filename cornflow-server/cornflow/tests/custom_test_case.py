@@ -587,6 +587,14 @@ class BaseTestCases:
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
 
+        def test_opt_filters_limit_none(self):
+            """
+            Tests the limit filter option
+            """
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(limit=None), allrows.json)
+
         def test_opt_filters_offset(self):
             """
             Tests the offset filter option.

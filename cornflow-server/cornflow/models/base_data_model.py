@@ -1,6 +1,7 @@
 """
 
 """
+
 # Import from libraries
 from flask import current_app
 from sqlalchemy import desc
@@ -100,6 +101,12 @@ class BaseDataModel(TraceAttributesModel):
             and user_access == 0
         ):
             query = query.filter(cls.user_id == user.id)
+
+        if offset is None:
+            offset = 0
+
+        if limit is None:
+            limit = 10
 
         if schema:
             query = query.filter(cls.schema == schema)
