@@ -1,25 +1,19 @@
 """
-
+Base code for the application core.
 """
+
 # Partial imports
 from abc import ABC, abstractmethod
-from jsonschema import Draft7Validator
-from pytups import SuperDict
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
-# Imports from internal modules
-from .instance import InstanceCore
-from .solution import SolutionCore
-from .experiment import ExperimentCore
+from jsonschema import Draft7Validator
+from pytups import SuperDict
 
 from cornflow_client.constants import (
     STATUS_CONV,
     STATUS_OPTIMAL,
-    STATUS_NOT_SOLVED,
     STATUS_INFEASIBLE,
-    STATUS_UNDEFINED,
-    STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
     NoSolverException,
@@ -27,12 +21,18 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstance,
 )
+from .experiment import ExperimentCore
+
+# Imports from internal modules
+from .instance import InstanceCore
+from .solution import SolutionCore
 
 
 class ApplicationCore(ABC):
     """
     The application template.
     """
+
     # We create a new attribute controlling the use of the notification mail function
     def __init__(self):
         self._notify = False
@@ -110,7 +110,9 @@ class ApplicationCore(ABC):
 
     @property
     @abstractmethod
-    def test_cases(self) -> List[Union[Dict, Tuple[Dict, Dict]]]:
+    def test_cases(
+        self,
+    ) -> Union[List[Dict[str, Union[str, Dict]]], List[Union[Dict, Tuple[Dict, Dict]]]]:
         """
         Mandatory property
 
@@ -119,7 +121,15 @@ class ApplicationCore(ABC):
 
           * **dict**: each element is an instance
           * **tuple**: the first part is the instance, the second its solution
+
+          it can also return a list of dicts, where the keys are:
+
+          * **name**: name of the test case.
+          * **description** optional field with a description of the test case.
+          * **instance**: the instance data.
+          * **solution**: the solution data (optional)
         """
+        # TODO: Phase out older list implementation
         raise NotImplementedError()
 
     @property
@@ -154,6 +164,7 @@ class ApplicationCore(ABC):
         if solver is None:
             solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
+        # TODO: I think this exception is unreachable
         if solver_class is None:
             raise NoSolverException(f"Solver {solver} is not available")
         inst = self.instance.from_dict(data)
@@ -169,7 +180,7 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
-        instance_checks = SuperDict(inst.check())
+        instance_checks = SuperDict(inst.data_checks())
 
         warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
@@ -196,13 +207,17 @@ class ApplicationCore(ABC):
             output = dict(status=output)
         status = output.get("status")
         status_sol = output.get("status_sol")
-        log = dict(
-            time=timer() - start,
-            solver=solver,
-            status=STATUS_CONV.get(status, "Unknown"),
-            status_code=status,
-            sol_code=SOLUTION_STATUS_INFEASIBLE,
-        )
+
+        log_json = {
+            **output,
+            **{
+                "time": timer() - start,
+                "solver": solver,
+                "status": STATUS_CONV.get(status, "Unknown"),
+                "status_code": status,
+                "sol_code": SOLUTION_STATUS_INFEASIBLE,
+            },
+        }
 
         try:
             log_txt = algo.log
@@ -214,22 +229,27 @@ class ApplicationCore(ABC):
         #  because there may be already an initial solution in the solver
         # TODO: review whole status types and meaning
         if status_sol is not None:
-            log["sol_code"] = status_sol
+            log_json["sol_code"] = status_sol
         elif algo.solution is not None and len(algo.solution.data):
-            log["sol_code"] = SOLUTION_STATUS_FEASIBLE
+            log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
 
-        if log["sol_code"] > 0:
+        if log_json["sol_code"] > 0:
+            sol_errors = algo.solution.check_schema()
+            if sol_errors:
+                raise BadSolution(
+                    f"The solution does not match the schema:\n{sol_errors}"
+                )
             sol = algo.solution.to_dict()
 
         if sol != {} and sol is not None:
-            checks = algo.check_solution()
+            checks = algo.data_checks()
         else:
             checks = None
 
-        return sol, checks, instance_checks, log_txt, log
+        return sol, checks, instance_checks, log_txt, log_json
 
     def check(
-        self, instance_data: dict, solution_data: dict, *args, **kwargs
+        self, instance_data: dict, solution_data: dict = None
     ) -> Tuple[Dict, Dict, Dict]:
         """
         Checks the instance and solution data
@@ -243,13 +263,13 @@ class ApplicationCore(ABC):
             raise NoSolverException(f"No solver is available")
         inst = self.instance.from_dict(instance_data)
 
-        instance_checks = inst.check(*args, **kwargs)
+        instance_checks = inst.data_checks()
 
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
             algo = solver_class(inst, sol)
             start = timer()
-            solution_checks = algo.check_solution(*args, **kwargs)
+            solution_checks = algo.data_checks()
         else:
             start = timer()
             solution_checks = None

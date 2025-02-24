@@ -13,32 +13,30 @@ jobs:
         working-directory: ./libs/client
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.8
-    - name: Install wheel
-      run: >-
-        python -m
-        pip install
-        wheel
-        --user
-    - name: Build a binary wheel and a source tarball
-      run: python setup.py sdist bdist_wheel
+        python-version: 3.9
+    - name: Install build
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+    - name: Build a binary wheel and a source
+      run: python -m build
     - name: Publish distribution 📦 to Test PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.test_pypi_password }}
         repository_url: https://test.pypi.org/legacy/
         packages_dir: libs/client/dist/
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.pypi_password }}
         packages_dir: libs/client/dist/
     - name: Get version number
-      uses: jungwinter/split@v2
+      uses: winterjung/split@v2
       id: split
       with:
         msg : ${{ github.ref_name}}

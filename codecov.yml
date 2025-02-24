@@ -23,3 +23,30 @@ flag_management:
       paths: 
         - cornflow-dags/
       
+comment:
+  layout: "header, diff, flags, components"
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+        threshold: 5%
+        branches:
+          - "!master"
+  individual_components:
+    - component_id: server
+      name: server
+      paths:
+        - cornflow-server/**
+        - "!cornflow-server/cornflow/tests/**"
+    - component_id: client
+      name: client
+      paths:
+        - libs/client/**
+        - "!libs/client/tests/**"
+    - component_id: dags
+      name: dags
+      paths:
+        - cornflow-dags/**
+        - "!cornflow-dags/tests/**"

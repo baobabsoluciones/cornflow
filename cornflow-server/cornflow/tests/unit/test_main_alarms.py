@@ -1,6 +1,7 @@
 """
 
 """
+
 import json
 
 # Imports from internal modules
@@ -19,7 +20,7 @@ class TestMainAlarmsEndpoint(CustomTestCase):
         payload = {
             "name": "Alarm 1",
             "description": "Description Alarm 1",
-            "criticality": 1
+            "criticality": 1,
         }
         self.id_alarm = self.client.post(
             ALARMS_URL,
@@ -32,7 +33,7 @@ class TestMainAlarmsEndpoint(CustomTestCase):
         payload = {
             "message": "Message Main Alarm 1",
             "criticality": 1,
-            "id_alarm": self.id_alarm
+            "id_alarm": self.id_alarm,
         }
         self.create_new_row(self.url, self.model, payload)
 
@@ -41,19 +42,18 @@ class TestMainAlarmsEndpoint(CustomTestCase):
             {
                 "message": "Message Main Alarm 1",
                 "criticality": 1,
-                "id_alarm": self.id_alarm
+                "id_alarm": self.id_alarm,
             },
             {
                 "message": "Message Main Alarm 2",
                 "criticality": 2,
                 "schema": "solve_model_dag",
-                "id_alarm": self.id_alarm
+                "id_alarm": self.id_alarm,
             },
         ]
+        keys_to_check = ["schema", "id_alarm", "criticality", "id", "message"]
         rows = self.get_rows(
-            self.url,
-            data,
-            check_data=False
+            self.url, data, check_data=False, keys_to_check=keys_to_check
         )
         rows_data = list(rows.json)
         for i in range(len(data)):

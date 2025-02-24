@@ -1,11 +1,10 @@
 """
 
 """
-# Full imports
+
 import json
 import os
 
-# Imports from internal modules
 from cornflow_client.core import InstanceSolutionCore
 from cornflow_client.core.read_tools import read_excel
 

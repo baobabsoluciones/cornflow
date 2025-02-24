@@ -4,8 +4,8 @@ All references to endpoints should be imported from here
 The login resource gets created on app startup as it depends on configuration
 """
 from .action import ActionListEndpoint
+from .alarms import AlarmsEndpoint
 from .apiview import ApiViewListEndpoint
-
 from .case import (
     CaseEndpoint,
     CaseFromInstanceExecutionEndpoint,
@@ -15,7 +15,6 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
-
 from .dag import (
     DAGDetailEndpoint,
     DAGEndpointManual,
@@ -24,7 +23,12 @@ from .dag import (
     DeployedDAGEndpoint,
     DeployedDagDetailEndpoint,
 )
-
+from .data_check import (
+    DataCheckExecutionEndpoint,
+    DataCheckInstanceEndpoint,
+    DataCheckCaseEndpoint,
+)
+from .example_data import ExampleDataListEndpoint, ExampleDataDetailEndpoint
 from .execution import (
     ExecutionEndpoint,
     ExecutionDetailsEndpoint,
@@ -33,36 +37,22 @@ from .execution import (
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
 )
-
 from .health import HealthEndpoint
-
 from .instance import (
     InstanceEndpoint,
     InstanceDetailsEndpoint,
     InstanceFileEndpoint,
     InstanceDataEndpoint,
 )
-
-from .data_check import (
-    DataCheckExecutionEndpoint,
-    DataCheckInstanceEndpoint,
-    DataCheckCaseEndpoint,
-)
 from .licenses import LicensesEndpoint
+from .main_alarms import MainAlarmsEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
-
 from .roles import RolesListEndpoint, RoleDetailEndpoint
-
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
+from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
-from .example_data import ExampleDataDetailsEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
-from .alarms import AlarmsEndpoint
-from .main_alarms import MainAlarmsEndpoint
-
-from .tables import TablesEndpoint, TablesDetailsEndpoint
-
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -157,9 +147,14 @@ resources = [
         endpoint="schema-details",
     ),
     dict(
-        resource=ExampleDataDetailsEndpoint,
+        resource=ExampleDataListEndpoint,
         urls="/example/<string:dag_name>/",
         endpoint="example-data",
+    ),
+    dict(
+        resource=ExampleDataDetailEndpoint,
+        urls="/example/<string:dag_name>/<string:example_name>/",
+        endpoint="example-data-detail",
     ),
     dict(resource=HealthEndpoint, urls="/health/", endpoint="health"),
     dict(

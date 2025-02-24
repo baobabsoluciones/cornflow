@@ -1,15 +1,20 @@
 """
-
+Base code for the experiment template.
 """
-# Partial imports
+
+import warnings
 from abc import ABC, abstractmethod
 from typing import Union, Dict
 
-# Imports from internal modules
+from jsonschema import Draft7Validator
+
+from cornflow_client.constants import (
+    PARAMETER_SOLVER_TRANSLATING_MAPPING,
+    SOLVER_CONVERTER,
+    BadSolutionChecks,
+)
 from .instance import InstanceCore
 from .solution import SolutionCore
-from .tools import copy
-from cornflow_client.constants import PARAMETER_SOLVER_TRANSLATING_MAPPING, SOLVER_CONVERTER
 
 
 class ExperimentCore(ABC):
@@ -65,8 +70,40 @@ class ExperimentCore(ABC):
         """
         pass
 
-    @abstractmethod
-    def check_solution(self, *args, **kwargs) -> Dict[str, Dict]:
+    def data_checks(self) -> dict:
+        """
+        Method that executes the ExperimentCore.check() method and validates the result against the schema_checks
+        """
+        try:
+            checks = self.check()
+            if checks is None:
+                checks = self.check_solution()
+        except NotImplementedError:
+            # Add a deprecation warning here
+            warnings.warn(
+                "The check_solution() method is deprecated. Please use check() instead. "
+                "Support for check_solution() will be removed on cornflow-client 2.0.0",
+                DeprecationWarning,
+            )
+            checks = self.check_solution()
+        validator = Draft7Validator(self.schema_checks)
+        if not validator.is_valid(checks):
+            raise BadSolutionChecks(
+                f"The solution checks do not match the schema: {[e for e in validator.iter_errors(checks)]}"
+            )
+        return checks
+
+    # TODO: make this method abstract on cornflow-client 2.0.0
+    def check(self) -> Dict[str, Dict]:
+        """
+        Mandatory method
+
+        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
+          inside represents one error of that particular type.
+        """
+        pass
+
+    def check_solution(self) -> dict:
         """
         Mandatory method
 
@@ -85,7 +122,9 @@ class ExperimentCore(ABC):
         raise NotImplementedError()
 
     @staticmethod
-    def get_solver_config(config, lib="pyomo", default_solver="cbc", remove_unknown=False):
+    def get_solver_config(
+        config, lib="pyomo", default_solver="cbc", remove_unknown=False
+    ):
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
@@ -122,7 +161,9 @@ class ExperimentCore(ABC):
 
         if remove_unknown:
             conf = {
-                mapping[k, lib, solver]: v for k, v in config.items() if (k, lib, solver) in mapping
+                mapping[k, lib, solver]: v
+                for k, v in config.items()
+                if (k, lib, solver) in mapping
             }
             if config.get("solver_config"):
                 conf.update(
@@ -133,9 +174,7 @@ class ExperimentCore(ABC):
                     }
                 )
         else:
-            conf = {
-                mapping.get((k, lib, solver), k): v for k, v in config.items()
-            }
+            conf = {mapping.get((k, lib, solver), k): v for k, v in config.items()}
             conf.pop("solver", None)
             conf.pop("solver_config", None)
             if config.get("solver_config"):

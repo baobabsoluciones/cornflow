@@ -11,9 +11,10 @@ on:
   push:
     branches:
       - master
-      - development
+      - develop
     paths: 
       - 'cornflow-server/**'
+      - '.github/workflows/test_cornflow_server.yml'
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
 
@@ -28,7 +29,7 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11']
+        python-version: [3.9, '3.10', '3.11', '3.12']
         os: [ubuntu-latest]
 
     services:
@@ -47,9 +48,9 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Copy DAG files
@@ -72,7 +73,7 @@ jobs:
       run: |
         python -m venv afvenv
         source afvenv/bin/activate
-        AIRFLOW_VERSION=2.7.1
+        AIRFLOW_VERSION=2.9.1
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
         CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
@@ -103,7 +104,7 @@ jobs:
         AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
     - name: Run unit tests
       run: | 
-        coverage run --source=./cornflow/ --omit="*/tests/data/*" -m unittest discover -s cornflow/tests/unit
+        coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit
         coverage report -m
       env:
         FLASK_ENV: testing
@@ -115,7 +116,7 @@ jobs:
         CF_ALARMS_ENDPOINT: 1
     - name: Run ldap unit tests
       run: | 
-        coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/ldap
+        coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
         coverage report -m
       env:
         FLASK_ENV: testing
@@ -143,7 +144,7 @@ jobs:
         CORNFLOW_SERVICE_USER: cornflow
     - name: Run postgres unit tests
       run: | 
-        coverage run -a --source=./cornflow/ -m unittest cornflow/tests/unit/test_commands.py
+        coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
         coverage report -m
       env:
         FLASK_ENV: testing
@@ -153,7 +154,7 @@ jobs:
         CF_ALARMS_ENDPOINT: 1
     - name: Run integration tests
       run: |
-        coverage run -a --source=./cornflow/ -m unittest discover -s cornflow/tests/integration
+        coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/integration
         coverage report -m
         coverage xml
       env:
