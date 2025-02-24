@@ -2,13 +2,12 @@
 This file contains the base abstract models from which the rest of the models inherit
 """
 
-# Imports from libraries
 from datetime import datetime
-from flask import current_app
-from sqlalchemy.exc import DBAPIError, IntegrityError
 from typing import Dict, List
 
-# Imports from internal modules
+from flask import current_app
+from sqlalchemy.exc import DBAPIError, IntegrityError
+
 from cornflow.shared import db
 from cornflow.shared.exceptions import InvalidData
 
