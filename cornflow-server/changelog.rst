@@ -1,3 +1,52 @@
+version 1.1.5
+--------------
+
+- released: 2025-01-14
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - when authenticating with Open Auth the service user can still log in with username and password.
+    - allowed the application root to be changed.
+    - bump minimal version from 3.8 to 3.9.
+    - improved unit tests coverage.
+    - added test descriptions.
+
+version 1.1.4
+--------------
+
+- released: 2024-12-05
+- description: same version as previous one.
+- changelog:
+    - new version due to pypi outage and problems with the version uploaded
+
+version 1.1.3
+--------------
+
+- released: 2024-12-05
+- description: small changes
+- changelog:
+    - changed the json schema validation on airflow so that solution, instance checks and solution checks are correctly reviewed.
+    - added some small changes to make sure that future compatibility with new version of libraries is ready.
+    - added a reconnect from airflow to cornflow to make sure that if the model fails we can get back as much as possible.
+
+version 1.1.2
+--------------
+
+- released: 2024-10-31
+- description: security fix
+- changelog:
+    - bump Werkzeug to version 3.0.6 due to CVE-2024-49766 and CVE-2024-49767.
+
+version 1.1.1
+--------------
+
+- released: 2024-09-18
+- description: small security fixes
+- changelog:
+    - bump PuLP to version 2.9.0
+    - bump requests to version 2.32.3
+    - modified branch structure on repository.
+    - minor changes to documentation
+
 version 1.1.0
 --------------
 

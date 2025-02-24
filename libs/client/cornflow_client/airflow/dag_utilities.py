@@ -226,6 +226,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     except NoSolverException as e:
         if config.get("msg", True):
             print("No solver found !")
+        # We reconnect in case the solver has been more than 24 hours solving before the error is raised
+        client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
@@ -233,6 +235,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     except Exception as e:
         if config.get("msg", True):
             print("Some unknown error happened")
+        # We reconnect in case the solver has been more than 24 hours solving before the error is raised
+        client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
