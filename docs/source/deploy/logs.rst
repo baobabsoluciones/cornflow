@@ -2,10 +2,10 @@
 Logging and monitoring
 --------------------------
 
-Cornflow logs
+cornflow logs
 ****************
 
-Cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command::
+cornflow logs are written to console output (stdout) by default. In this way you can visualize them by launching the following command::
 
     docker logs `docker ps -q --filter ancestor=baobabsoluciones/cornflow`
 
@@ -76,7 +76,7 @@ Note that we can get an error of the type (``No such file or directory``) becaus
 Monitoring
 *************
 
-Cornflow monitoring
+cornflow monitoring
 ^^^^^^^^^^^^^^^^^^^^^
 
 You can call the ``/health`` endpoint to obtain the status of the cornflow and airflow servers. It should return a 200 code as well as "healthy" of status for both ``cornflow_status`` and ``airflow_status``::
