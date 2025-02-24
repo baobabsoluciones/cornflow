@@ -32,7 +32,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
+from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, INTERNAL_TOKEN_ISSUER
 from cornflow.shared import db
 from cornflow.tests.const import (
     LOGIN_URL,
@@ -121,7 +121,8 @@ class CustomTestCase(TestCase):
             headers={"Content-Type": "application/json"},
         ).json["token"]
 
-        self.user = Auth.return_user_from_token(self.token)
+        data = Auth().decode_token(self.token)
+        self.user = UserModel.get_one_object(username=data["username"])
         self.url = None
         self.model = None
         self.copied_items = set()
@@ -982,34 +983,43 @@ class LoginTestCases:
             """
             Tests using an expired token.
             """
-            token = (
-                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1MzYwNjUsImlhdCI6MTYxMDQ0OTY2NSwic3ViIjoxfQ"
-                ".QEfmO-hh55PjtecnJ1RJT3aW2brGLadkg5ClH9yrRnc "
-            )
-
+            # First log in to get a valid user
             payload = self.data
-
             response = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(payload),
                 follow_redirects=True,
                 headers={"Content-Type": "application/json"},
             )
-
             self.idx = response.json["id"]
 
+            # Generate an expired token
+            expired_payload = {
+                "exp": datetime.utcnow() - timedelta(hours=1),  # Token expired 1 hour ago
+                "iat": datetime.utcnow() - timedelta(hours=2),  # Token created 2 hours ago
+                "sub": self.idx,
+                "iss": INTERNAL_TOKEN_ISSUER,
+            }
+            expired_token = jwt.encode(
+                expired_payload,
+                current_app.config["SECRET_TOKEN_KEY"],
+                algorithm="HS256"
+            )
+
+            # Try to use the expired token
             response = self.client.get(
                 USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token,
+                    "Authorization": "Bearer " + expired_token,
                 },
             )
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "The token has expired, please login again", response.json["error"]
+                "The token has expired, please login again",
+                response.json["error"]
             )
 
         def test_bad_format_token(self):
@@ -1040,13 +1050,8 @@ class LoginTestCases:
             """
             Tests using an invalid token.
             """
-            token = (
-                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MTA1Mzk5NTMsImlhdCI6MTYxMDQ1MzU1Mywic3ViIjoxfQ"
-                ".g3Gh7k7twXZ4K2MnQpgpSr76Sl9VX6TkDWusX5YzImo"
-            )
-
+            # First log in to get a valid user
             payload = self.data
-
             response = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(payload),
@@ -1055,18 +1060,32 @@ class LoginTestCases:
             )
             self.idx = response.json["id"]
 
+            # Generate an invalid token with wrong issuer
+            invalid_payload = {
+                "exp": datetime.utcnow() + timedelta(hours=1),
+                "iat": datetime.utcnow(),
+                "sub": self.idx,
+                "iss": "invalid_issuer",  # This makes the token invalid
+            }
+            invalid_token = jwt.encode(
+                invalid_payload,
+                current_app.config["SECRET_TOKEN_KEY"],
+                algorithm="HS256"
+            )
+
+            # Try to use the invalid token
             response = self.client.get(
                 USER_URL + str(self.idx) + "/",
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token,
+                    "Authorization": "Bearer " + invalid_token,
                 },
             )
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "Invalid token, please try again with a new token",
+                "Invalid token issuer. Token must be issued by a valid provider",
                 response.json["error"],
             )
 

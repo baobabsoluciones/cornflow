@@ -20,7 +20,6 @@ from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
-    AUTH_EXTERNAL,
     ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
@@ -137,10 +136,10 @@ def init_cornflow_service():
         app = create_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
-            migrate = Migrate(app=app, db=db, directory=path)
+            Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(verbose=False)
-            if auth == AUTH_DB or auth == AUTH_OID or auth == AUTH_EXTERNAL:
+            if auth == AUTH_DB or auth == AUTH_OID:
                 # create cornflow admin user
                 create_user_with_role(
                     cornflow_admin_user,
@@ -197,7 +196,7 @@ def init_cornflow_service():
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(verbose=False)
-            if auth == AUTH_DB or auth == AUTH_OID or auth == AUTH_EXTERNAL:
+            if auth == AUTH_DB or auth == AUTH_OID:
                 # create cornflow admin user
                 create_user_with_role(
                     cornflow_admin_user,

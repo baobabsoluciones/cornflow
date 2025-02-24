@@ -1,6 +1,8 @@
 """
-In this files we import the values for different constants on cornflow server
+In these files we import the values for different constants on cornflow server
 """
+
+INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
@@ -49,21 +51,6 @@ AUTH_DB = 1
 AUTH_LDAP = 2
 AUTH_OAUTH = 4
 AUTH_OID = 0
-AUTH_EXTERNAL = 5
-
-# OpenID providers
-OID_NONE = 0
-OID_AZURE = 1
-OID_GOOGLE = 2
-OID_COGNITO = 3
-
-# AZURE OPEN ID URLS
-OID_AZURE_DISCOVERY_COMMON_URL = (
-    "https://login.microsoftonline.com/common/.well-known/openid-configuration"
-)
-OID_AZURE_DISCOVERY_TENANT_URL = (
-    "https://login.microsoftonline.com/{tenant_id}/.well-known/openid-configuration"
-)
 
 GET_ACTION = 1
 PATCH_ACTION = 2

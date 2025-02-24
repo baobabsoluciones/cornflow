@@ -67,24 +67,10 @@ class LoginEndpointRequest(Schema):
 
 class LoginOpenAuthRequest(Schema):
     """
-    This is the schema used by the login endpoint with Open ID protocol
-    Validates that either a token is provided, or both username and password are present
+    Schema for the login request with OpenID authentication
     """
-
-    token = fields.Str(required=False)
-    username = fields.Str(required=False)
-    password = fields.Str(required=False)
-
-    @validates_schema
-    def validate_fields(self, data, **kwargs):
-        if data.get("token") is None:
-            if not data.get("username") or not data.get("password"):
-                raise ValidationError(
-                    "A token needs to be provided when using Open ID authentication"
-                )
-        else:
-            if data.get("username") or data.get("password"):
-                raise ValidationError("The login needs to be done with a token only")
+    username = fields.String(required=False)
+    password = fields.String(required=False)
 
 
 class SignupRequest(Schema):

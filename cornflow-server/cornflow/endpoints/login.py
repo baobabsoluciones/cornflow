@@ -1,9 +1,9 @@
 """
-External endpoint for the user to login to the cornflow webserver
+External endpoint for the user to log in to the cornflow webserver
 """
 
 # Partial imports
-from flask import current_app
+from flask import current_app, request
 from flask_apispec import use_kwargs, doc
 from sqlalchemy.exc import IntegrityError, DBAPIError
 from datetime import datetime, timedelta
@@ -18,17 +18,11 @@ from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
-    AUTH_EXTERNAL,
-    OID_AZURE,
-    OID_GOOGLE,
-    OID_NONE,
-    OID_COGNITO,
 )
 from cornflow.shared.exceptions import (
     ConfigurationError,
     InvalidCredentials,
     InvalidUsage,
-    EndpointNotImplemented,
 )
 
 
@@ -47,7 +41,7 @@ class LoginBaseEndpoint(BaseMetaResource):
         This method is in charge of performing the log in of the user
 
         :param kwargs: keyword arguments passed for the login, these can be username, password or a token
-        :return: the response of the login or it raises an error. The correct response is a dict
+        :return: the response of the login, or it raises an error. The correct response is a dict
         with the newly issued token and the user id, and a status code of 200
         :rtype: dict
         """
@@ -62,15 +56,17 @@ class LoginBaseEndpoint(BaseMetaResource):
             user = self.auth_ldap_authenticate(**kwargs)
             current_app.logger.info(f"User {user.email} logged in successfully using LDAP authentication")
         elif auth_type == AUTH_OID:
-            user = self.auth_oid_authenticate(**kwargs)
-            current_app.logger.info(f"User {user.email} logged in successfully using OpenID authentication")
-        elif auth_type == AUTH_EXTERNAL:
-            user = self.auth_external_authenticate(**kwargs)
-            current_app.logger.info(f"User {user.email} logged in successfully using external authentication")
-            if user.is_service_user():
+            if (kwargs.get('username') and kwargs.get('password')):
+                if not current_app.config.get("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 0):
+                    raise InvalidUsage("Must provide a token in Authorization header. Cannot log in with username and password", 400)
+                user = self.auth_oid_authenticate(username=kwargs['username'], password=kwargs['password'])
+                current_app.logger.info(f"Service user {user.email} logged in successfully using password")
                 token = self.auth_class.generate_token(user.id)
             else:
-                token = kwargs.get('token') 
+                token = self.auth_class().get_token_from_header(request.headers)
+                user = self.auth_oid_authenticate(token=token)
+                current_app.logger.info(f"User {user.email} logged in successfully using OpenID authentication")
+            
             response.update({"token": token, "id": user.id})
             return response, 200
         else:
@@ -91,7 +87,7 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         :param str username: the username of the user to log in
         :param str password:  the password of the user to log in
-        :return: the user object or it raises an error if it has not been possible to log in
+        :return: the user object, or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
         user = self.data_model.get_one_object(username=username)
@@ -110,7 +106,7 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         :param str username: the username of the user to log in
         :param str password:  the password of the user to log in
-        :return: the user object or it raises an error if it has not been possible to log in
+        :return: the user object, or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
         ldap_obj = self.ldap_class(current_app.config)
@@ -151,53 +147,27 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         return user
 
-    def auth_oid_authenticate(
-        self, token: str = None, username: str = None, password: str = None
-    ):
+    def auth_oid_authenticate(self, token: str = None, username: str = None, password: str = None):
         """
-        Method  in charge of performing the log in with the token issued by an Open ID provider.
-        It has an exception and thus accepts username and password for service users if needed.
+        Method in charge of performing the authentication using OpenID Connect tokens.
+        Supports any OIDC provider configured via provider_url.
 
-        :param str token: the token that the user has obtained from the Open ID provider
-        :param str username: the username of the user to log in
-        :param str password: the password of the user to log in
-        :return: the user object or it raises an error if it has not been possible to log in
+        :param str token: the JWT token from the OIDC provider
+        :param str username: username for service users
+        :param str password: password for service users
+        :return: the user object, or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
-
         if token:
+            decoded_token = self.auth_class().decode_token(token)
 
-            oid_provider = int(current_app.config["OID_PROVIDER"])
-
-            client_id = current_app.config["OID_CLIENT_ID"]
-            tenant_id = current_app.config["OID_TENANT_ID"]
-            issuer = current_app.config["OID_ISSUER"]
-
-            if client_id is None or tenant_id is None or issuer is None:
-                raise ConfigurationError("The OID provider configuration is not valid")
-
-            if oid_provider == OID_AZURE:
-                decoded_token = self.auth_class().validate_oid_token(
-                    token, client_id, tenant_id, issuer, oid_provider
+            username = decoded_token.get('username')
+            if not username:
+                raise InvalidCredentials(
+                    "Invalid token: missing username claim",
+                    log_txt="Token validation failed: missing username claim",
+                    status_code=400
                 )
-
-            elif oid_provider == OID_GOOGLE:
-                raise EndpointNotImplemented(
-                    "The selected OID provider is not implemented"
-                )
-            elif oid_provider == OID_NONE:
-                raise EndpointNotImplemented(
-                    "The OID provider configuration is not valid"
-                )
-            else:
-                raise EndpointNotImplemented(
-                    "The OID provider configuration is not valid"
-                )
-
-            username = decoded_token["preferred_username"]
-            email = decoded_token.get("email", f"{username}@test.org")
-            first_name = decoded_token.get("given_name", "")
-            last_name = decoded_token.get("family_name", "")
 
             user = self.data_model.get_one_object(username=username)
 
@@ -205,6 +175,10 @@ class LoginBaseEndpoint(BaseMetaResource):
                 current_app.logger.info(
                     f"OpenID user {username} does not exist and is created"
                 )
+
+                email = decoded_token.get('email', f"{username}@test.org")
+                first_name = decoded_token.get('given_name', '')
+                last_name = decoded_token.get('family_name', '')
 
                 data = {
                     "username": username,
@@ -222,92 +196,20 @@ class LoginBaseEndpoint(BaseMetaResource):
                         "role_id": int(current_app.config["DEFAULT_ROLE"]),
                     }
                 )
-
                 user_role.save()
 
             return user
-        elif (
-            username
-            and password
-            and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1
-        ):
-
-            user = self.auth_db_authenticate(username, password)
-
-            if user.is_service_user():
-                return user
-            else:
-                raise InvalidUsage("Invalid request")
-        else:
-            raise InvalidUsage("Invalid request")
-
-    def auth_external_authenticate(self, token: str = None, username: str = None, password: str = None):
-        """
-        Method in charge of performing the authentication using external JWT tokens.
-        Currently supports Cognito tokens, but can be extended to support other providers.
-
-        :param str token: the JWT token from the external provider
-        :return: the user object or it raises an error if it has not been possible to log in
-        :rtype: :class:`UserModel`
-        """
-        if token:
-            # Get the provider from config (default to Cognito)
-            provider = int(current_app.config.get("OID_PROVIDER", OID_COGNITO))
-            
-            if provider == OID_COGNITO:
-                # Validate token
-                decoded_token = self.auth_class().validate_external_cognito_token(token)
-
-                # Get user info from token
-                username = decoded_token.get('sub')
-                email = decoded_token.get('email', f"{username}@test.org")
-                first_name = decoded_token.get('given_name', '')
-                last_name = decoded_token.get('family_name', '')
-
-                # Try to get existing user
-                user = self.data_model.get_one_object(username=username)
-
-                if not user:
-                    current_app.logger.info(
-                        f"External auth user {username} does not exist and is created"
-                    )
-
-                    data = {
-                        "username": username,
-                        "email": email,
-                        "first_name": first_name,
-                        "last_name": last_name,
-                    }
-
-                    user = self.data_model(data=data)
-                    user.save()
-
-                    user_role = self.user_role_association(
-                        {
-                            "user_id": user.id,
-                            "role_id": int(current_app.config["DEFAULT_ROLE"]),
-                        }
-                    )
-                    user_role.save()
-
-                return user
-            else:
-                raise EndpointNotImplemented("The selected external provider is not implemented")
 
         elif (
             username
             and password
-            and current_app.config["SERVICE_USER_ALLOW_PASSWORD_LOGIN"] == 1
         ):
-
             user = self.auth_db_authenticate(username, password)
-
             if user.is_service_user():
                 return user
-            else:
-                raise InvalidUsage("Invalid request")
+            raise InvalidUsage("Invalid request", status_code=400)
         else:
-            raise InvalidUsage("Invalid request")
+            raise InvalidUsage("Invalid request", status_code=400)
 
 
 def check_last_password_change(user):

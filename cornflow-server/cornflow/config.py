@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_EXTERNAL, AUTH_OID
+from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -28,7 +28,7 @@ class DefaultConfig(object):
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
-    # If service user is allow to log with username and password
+    # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
     )
@@ -59,11 +59,9 @@ class DefaultConfig(object):
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS", "False")
 
-    # OpenID login -> Default Azure
-    OID_PROVIDER = os.getenv("OID_PROVIDER", 0)
-    OID_CLIENT_ID = os.getenv("OID_CLIENT_ID")
-    OID_TENANT_ID = os.getenv("OID_TENANT_ID")
-    OID_ISSUER = os.getenv("OID_ISSUER")
+    # OpenID Connect configuration
+    PROVIDER_URL = os.getenv("PROVIDER_URL")
+    EXPECTED_AUDIENCE = os.getenv("EXPECTED_AUDIENCE")
 
     # APISPEC:
     APISPEC_SPEC = APISpec(
@@ -135,13 +133,6 @@ class TestingOpenAuth(Testing):
     AUTH_TYPE = AUTH_OID
 
 
-class TestingExternalAuth(Testing):
-    """
-    Configuration class for testing external authentication
-    """
-    AUTH_TYPE = AUTH_EXTERNAL
-
-
 class TestingApplicationRoot(Testing):
     """
     Configuration class for testing with application root
@@ -169,6 +160,5 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
-    "testing-root": TestingApplicationRoot,
-    "testing-external": TestingExternalAuth,
+    "testing-root": TestingApplicationRoot
 }
