@@ -1,8 +1,8 @@
 ==============
-Cornflow-tools
+cornflow-tools
 ==============
 
-Cornflow contains commands to help you create REST APIs in an easier and faster way.
+cornflow contains commands to help you create REST APIs in an easier and faster way.
 It includes a set of modules that can be used to start the creation of your flask REST API and some command line
 interface commands that let you create a full REST API from a JSONSchema file that represent your data or
 create a JSONSchema file representing your REST API.

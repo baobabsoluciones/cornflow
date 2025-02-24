@@ -1,4 +1,4 @@
-Cornflow-client
+cornflow-client
 ==========================
 
 Core classes
@@ -45,7 +45,7 @@ ExperimentCore
    :member-order: bysource
 
 
-Cornflow client
+cornflow client
 ------------------
 
 .. automodule:: cornflow_client.cornflow_client
