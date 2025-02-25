@@ -185,7 +185,7 @@ class VrpTestCase(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(self.config)
 
 
-class Knapsack(BaseDAGTests.SolvingTests):
+class KnapsackTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.knapsack import Knapsack
@@ -205,7 +205,7 @@ class Knapsack(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="MIP.cbc", **self.config))
 
 
-class Roadef(BaseDAGTests.SolvingTests):
+class RoadefTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.roadef import Roadef
@@ -224,7 +224,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         )
 
     def test_read_xml(self):
-        data_dir = os.path.join(os.path.dirname(__file__), "../DAG/roadef/data/")
+        data_dir = os.path.join(os.path.dirname(__file__), "../../DAG/roadef/data/")
         instance = self.app.instance.from_file(
             data_dir + "Instance_V_1.0_ConvertedTo_V2.xml"
         )
