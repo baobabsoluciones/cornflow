@@ -107,7 +107,7 @@ class BaseDAGTests:
                     raise Exception("The solution checks have invalid format")
 
                 validator = Draft7Validator(instance.schema_checks)
-                print(inst_check)
+
                 if not validator.is_valid(inst_check):
                     raise Exception("The instance checks have invalid format")
 
@@ -271,7 +271,7 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
         from DAG.two_dimension_bin_packing import TwoDimensionBinPackingProblem
 
         self.app = TwoDimensionBinPackingProblem()
-        self.config.update(dict(solver="right_corner.cbc"))
+        self.config.update(dict(solver="right_corner.cbc"), timeLimit=10, msg=True)
 
 
 class TimerTestCase(BaseDAGTests.SolvingTests):
