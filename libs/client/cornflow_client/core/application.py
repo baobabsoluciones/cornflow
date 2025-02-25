@@ -188,7 +188,7 @@ class ApplicationCore(ABC):
             .keys()
         )
         instance_errors = instance_checks.kfilter(lambda k: k not in warnings_tables)
-        if any([len(error_table) for error_table in instance_errors.values()]):
+        if len(instance_errors) > 0:
             log = dict(
                 time=0,
                 solver=solver,

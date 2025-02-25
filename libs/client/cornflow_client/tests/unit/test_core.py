@@ -196,7 +196,7 @@ class TestCore(TestCase):
 
         class BadCheckSolver(ExperimentCore):
             schema_checks = get_empty_schema(
-                properties=dict(check_something=dict(type="string"))
+                properties=dict(something=dict(type="string"))
             )
 
             def solve(self, options):
@@ -281,15 +281,15 @@ class TestCore(TestCase):
 
         self.assertEqual(len(instance.get_check_methods()), 3)
         checks = instance.check()
-        self.assertEqual(checks, {"check_b_equal_c": [{"b": 1, "c": 2}]})
+        self.assertEqual(checks, {"b_equal_c": [{"b": 1, "c": 2}]})
 
         instance = InstanceWithChecks({"a": 1, "b": 2, "c": 1})
         checks = instance.check()
         self.assertEqual(
             checks,
             {
-                "check_a_equal_b": [{"a": 1, "b": 2}],
-                "check_a_not_equal_c": [{"a": 1, "c": 1}],
-                "check_b_equal_c": [{"b": 2, "c": 1}],
+                "a_equal_b": [{"a": 1, "b": 2}],
+                "a_not_equal_c": [{"a": 1, "c": 1}],
+                "b_equal_c": [{"b": 2, "c": 1}],
             },
         )

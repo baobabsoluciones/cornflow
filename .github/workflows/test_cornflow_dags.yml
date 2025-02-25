@@ -77,7 +77,7 @@ jobs:
         AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
     - name: Run unit tests
       run: |
-        coverage run --source=. --rcfile=./.coveragerc -m unittest tests/test_dags.py
+        coverage run --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/unit
         coverage report -m
     - name: Run integration tests
       run: |

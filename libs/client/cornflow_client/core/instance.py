@@ -78,6 +78,15 @@ class InstanceCore(InstanceSolutionCore, ABC):
         It will only return those checks that return a non-empty list/dict.
         """
         check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
-        negative_checks = {k: v for k, v in check_methods.items() if len(v)}
+        failed_checks = {}
+        for k, v in check_methods.items():
+            if v is None:
+                continue
 
-        return dict(negative_checks)
+            try:
+                if len(v) > 0:
+                    failed_checks[k.split("check_")[1]] = v
+            except TypeError:
+                failed_checks[k.split("check_")[1]] = v
+
+        return dict(failed_checks)
