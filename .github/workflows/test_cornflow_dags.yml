@@ -81,7 +81,7 @@ jobs:
         coverage report -m
     - name: Run integration tests
       run: |
-        coverage run -a --source=. --rcfile=./.coveragerc -m unittest tests/test_dags_af.py
+        coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
         coverage report -m
         coverage xml
     - name: Upload coverage to codecov
