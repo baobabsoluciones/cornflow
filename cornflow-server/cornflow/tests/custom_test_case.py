@@ -829,7 +829,7 @@ class CheckTokenTestCase:
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
             else:
@@ -995,8 +995,10 @@ class LoginTestCases:
 
             # Generate an expired token
             expired_payload = {
-                "exp": datetime.utcnow() - timedelta(hours=1),  # Token expired 1 hour ago
-                "iat": datetime.utcnow() - timedelta(hours=2),  # Token created 2 hours ago
+                # Token expired 1 hour ago
+                "exp": datetime.utcnow() - timedelta(hours=1),
+                # Token created 2 hours ago
+                "iat": datetime.utcnow() - timedelta(hours=2),
                 "sub": self.idx,
                 "iss": INTERNAL_TOKEN_ISSUER,
             }
@@ -1012,7 +1014,7 @@ class LoginTestCases:
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + expired_token,
+                    "Authorization": f"Bearer {expired_token}",
                 },
             )
 
@@ -1065,7 +1067,7 @@ class LoginTestCases:
                 "exp": datetime.utcnow() + timedelta(hours=1),
                 "iat": datetime.utcnow(),
                 "sub": self.idx,
-                "iss": "invalid_issuer",  # This makes the token invalid
+                "iss": "invalid_issuer",
             }
             invalid_token = jwt.encode(
                 invalid_payload,
@@ -1079,7 +1081,7 @@ class LoginTestCases:
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + invalid_token,
+                    "Authorization": f"Bearer {invalid_token}",
                 },
             )
 

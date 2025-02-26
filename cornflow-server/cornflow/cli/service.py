@@ -90,7 +90,7 @@ def init_cornflow_service():
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
     user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
-    default_role = os.getenv("DEFAULT_ROLE", PLANNER_ROLE)
+    default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     os.environ["DEFAULT_ROLE"] = str(default_role)
 
     # Check LDAP parameters for active directory and show message

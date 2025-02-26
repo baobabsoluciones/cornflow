@@ -47,7 +47,7 @@ class TestRolesListEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
             self.assertEqual(200, response.status_code)
@@ -63,7 +63,7 @@ class TestRolesListEndpoint(CustomTestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -75,7 +75,7 @@ class TestRolesListEndpoint(CustomTestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -91,7 +91,7 @@ class TestRolesListEndpoint(CustomTestCase):
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
                 self.assertEqual(403, response.status_code)
@@ -157,7 +157,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
 
@@ -191,7 +191,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -203,7 +203,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -246,7 +246,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
             self.assertEqual(200, response.status_code)
@@ -261,7 +261,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
                 self.assertEqual(403, response.status_code)

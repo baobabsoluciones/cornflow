@@ -51,21 +51,21 @@ class LoginBaseEndpoint(BaseMetaResource):
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
             response.update({"change_password": check_last_password_change(user)})
-            current_app.logger.info(f"User {user.email} logged in successfully using database authentication")
+            current_app.logger.info(f"User {user.id} logged in successfully using database authentication")
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
-            current_app.logger.info(f"User {user.email} logged in successfully using LDAP authentication")
+            current_app.logger.info(f"User {user.id} logged in successfully using LDAP authentication")
         elif auth_type == AUTH_OID:
             if (kwargs.get('username') and kwargs.get('password')):
                 if not current_app.config.get("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 0):
                     raise InvalidUsage("Must provide a token in Authorization header. Cannot log in with username and password", 400)
                 user = self.auth_oid_authenticate(username=kwargs['username'], password=kwargs['password'])
-                current_app.logger.info(f"Service user {user.email} logged in successfully using password")
+                current_app.logger.info(f"Service user {user.id} logged in successfully using password")
                 token = self.auth_class.generate_token(user.id)
             else:
                 token = self.auth_class().get_token_from_header(request.headers)
                 user = self.auth_oid_authenticate(token=token)
-                current_app.logger.info(f"User {user.email} logged in successfully using OpenID authentication")
+                current_app.logger.info(f"User {user.id} logged in successfully using OpenID authentication")
             
             response.update({"token": token, "id": user.id})
             return response, 200
@@ -158,25 +158,31 @@ class LoginBaseEndpoint(BaseMetaResource):
         :return: the user object, or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
+        print("[auth_oid_authenticate] Starting OpenID authentication")
         if token:
+            print("[auth_oid_authenticate] Authenticating with token")
             decoded_token = self.auth_class().decode_token(token)
+            print(f"[auth_oid_authenticate] Token decoded successfully: {decoded_token}")
 
             username = decoded_token.get('username')
             if not username:
+                print("[auth_oid_authenticate] Missing username in token claims")
                 raise InvalidCredentials(
                     "Invalid token: missing username claim",
                     log_txt="Token validation failed: missing username claim",
                     status_code=400
                 )
 
+            print(f"[auth_oid_authenticate] Looking up user: {username}")
             user = self.data_model.get_one_object(username=username)
 
             if not user:
+                print(f"[auth_oid_authenticate] Creating new user: {username}")
                 current_app.logger.info(
                     f"OpenID user {username} does not exist and is created"
                 )
 
-                email = decoded_token.get('email', f"{username}@test.org")
+                email = decoded_token.get('email', f"{username}@cornflow.org")
                 first_name = decoded_token.get('given_name', '')
                 last_name = decoded_token.get('family_name', '')
 
@@ -207,9 +213,9 @@ class LoginBaseEndpoint(BaseMetaResource):
             user = self.auth_db_authenticate(username, password)
             if user.is_service_user():
                 return user
-            raise InvalidUsage("Invalid request", status_code=400)
+            raise InvalidUsage("Invalid request")
         else:
-            raise InvalidUsage("Invalid request", status_code=400)
+            raise InvalidUsage("Invalid request")
 
 
 def check_last_password_change(user):

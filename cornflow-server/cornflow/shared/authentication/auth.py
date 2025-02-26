@@ -127,7 +127,9 @@ class Auth:
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
+        print("[decode_token] Starting token decode")
         if token is None:
+            print("[decode_token] Token is None")
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
@@ -136,45 +138,52 @@ class Auth:
 
         try:
             # First try to decode header to validate basic token structure
+            print("[decode_token] Decoding unverified header")
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
             issuer = unverified_payload.get("iss")
+            print(f"[decode_token] Token issuer: {issuer}")
             
             # For internal tokens
             if issuer == INTERNAL_TOKEN_ISSUER:
+                print("[decode_token] Processing internal token")
                 payload = jwt.decode(
                     token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
                 )
                 return {"username": payload["sub"]}
+                
+            # For OpenID tokens
+            if current_app.config["AUTH_TYPE"] == AUTH_OID:
+                print("[decode_token] Processing OpenID token")
+                decoded = self.verify_token(
+                    token, 
+                    current_app.config["OID_PROVIDER"], 
+                    current_app.config["OID_EXPECTED_AUDIENCE"]
+                )
+                return {"username": decoded["sub"]}
+            
+            # If we get here, the issuer is not valid
+            print(f"[decode_token] Invalid issuer: {issuer}")
+            raise InvalidCredentials(
+                "Invalid token issuer. Token must be issued by a valid provider",
+                log_txt="Error while trying to decode token. Invalid issuer.",
+                status_code=400
+            )
 
         except jwt.ExpiredSignatureError:
-                raise InvalidCredentials(
-                    "The token has expired, please login again",
-                    log_txt="Error while trying to decode token. The token has expired.",
-                    status_code=400
-                )
-        except jwt.InvalidTokenError as e:
-                raise InvalidCredentials(
-                    "Invalid token format or signature",
-                    log_txt="Error while trying to decode token. The token format is invalid.",
-                    status_code=400
-                )
-
-                
-        # For OpenID tokens
-        if current_app.config["AUTH_TYPE"] == AUTH_OID:
-            decoded = Auth().verify_token(
-                token, 
-                current_app.config["PROVIDER_URL"], 
-                current_app.config["EXPECTED_AUDIENCE"]
+            print("[decode_token] Caught ExpiredSignatureError")
+            raise InvalidCredentials(
+                "The token has expired, please login again",
+                log_txt="Error while trying to decode token. The token has expired.",
+                status_code=400
             )
-            return {"username": decoded["sub"]}
-        
-        # If we get here, the issuer is not valid
-        raise InvalidCredentials(
-            "Invalid token issuer. Token must be issued by a valid provider",
-            log_txt="Error while trying to decode token. Invalid issuer.",
-            status_code=400
-        )
+        except jwt.InvalidTokenError as e:
+            print("[decode_token] Caught InvalidTokenError")
+            raise InvalidCredentials(
+                "Invalid token format or signature",
+                log_txt=f"Error while trying to decode token. The token format is invalid: {str(e)}",
+                status_code=400
+            )
+
 
     def get_token_from_header(self, headers: Headers = None) -> str:
         """
@@ -256,16 +265,12 @@ class Auth:
     @staticmethod
     def get_public_keys(provider_url: str) -> dict:
         """
-        Gets and caches the public keys from the OIDC provider
+        Gets the public keys from the OIDC provider and caches them
         
         :param str provider_url: The base URL of the OIDC provider
         :return: Dictionary of kid to public key mappings
         :rtype: dict
         """
-        # Check cache first
-        if provider_url in public_keys_cache:
-            return public_keys_cache[provider_url]
-            
         # Fetch keys from provider
         jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
         try:
@@ -299,18 +304,15 @@ class Auth:
         :return: The decoded token claims
         :rtype: dict
         """
-        # First validate token header
-        try:
-            unverified_header = jwt.get_unverified_header(token)
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                "Invalid token format or signature",
-                log_txt="Error while verifying token. Invalid token format.",
-                status_code=400
-            )
+        print("[verify_token] Starting token verification")
+        # Get unverified header - this will raise jwt.InvalidTokenError if token format is invalid
+        print("[verify_token] Getting unverified header")
+        unverified_header = jwt.get_unverified_header(token)
+        print(f"[verify_token] Unverified header: {unverified_header}")
 
         # Check for kid in header
         if "kid" not in unverified_header:
+            print("[verify_token] Missing kid in header")
             raise InvalidCredentials(
                 "Invalid token: Missing key identifier (kid) in token header",
                 log_txt="Error while verifying token. Token header is missing 'kid'.",
@@ -318,44 +320,40 @@ class Auth:
             )
             
         kid = unverified_header["kid"]
+        print(f"[verify_token] Found kid: {kid}")
         
-        # Get public keys
-        public_keys = self.get_public_keys(provider_url)
-
+        # Check if we have the keys in cache and if the kid exists
+        print("[verify_token] Checking cache for public keys")
+        public_key = None
+        if provider_url in public_keys_cache:
+            print(f"[verify_token] Found keys in cache for {provider_url}")
+            cached_keys = public_keys_cache[provider_url]
+            if kid in cached_keys:
+                print("[verify_token] Found matching kid in cached keys")
+                public_key = cached_keys[kid]
         
-        # Validate kid exists in public keys
-        if kid not in public_keys:
-            raise InvalidCredentials(
-                "Invalid token: Unknown key identifier (kid)",
-                log_txt=f"Error while verifying token. Key ID {kid} not found in public keys.",
-                status_code=400
-            )
-            
-        public_key = public_keys[kid]
+        # If kid not in cache, fetch fresh keys
+        if public_key is None:
+            print("[verify_token] Public key not found in cache, fetching fresh keys")
+            public_keys = self.get_public_keys(provider_url)
+            if kid not in public_keys:
+                print(f"[verify_token] Kid {kid} not found in fresh public keys")
+                print("[verify_token] About to raise InvalidCredentials")
+                raise InvalidCredentials(
+                    "Invalid token: Unknown key identifier (kid)",
+                    log_txt="Error while verifying token. Key ID not found in public keys."
+                )
+            public_key = public_keys[kid]
+            print("[verify_token] Found public key in fresh keys")
         
-        # Finally verify token
-        try:
-            payload = jwt.decode(
-                token,
-                public_key,
-                algorithms=["RS256"],
-                audience=expected_audience,
-                issuer=provider_url
-            )
-            return payload
-            
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                "The token has expired, please login again",
-                log_txt="Error while verifying token. The token has expired.",
-                status_code=400
-            )
-        except jwt.InvalidTokenError as e:
-            raise InvalidCredentials(
-                "Invalid token format or signature",
-                log_txt=f"Error while verifying token signature: {str(e)}",
-                status_code=400
-            )
+        # Verify token - this will raise appropriate jwt exceptions that will be caught in decode_token
+        return jwt.decode(
+            token,
+            public_key,
+            algorithms=["RS256"],
+            audience=[expected_audience],
+            issuer=provider_url
+        )
 
     @staticmethod
     def _get_permission_for_request(req, user_id):

@@ -87,18 +87,18 @@ class TestUnexpiringToken(CustomTestCase):
     def test_token_unexpiring(self):
         auth = BIAuth()
 
-        # Generar token dinámicamente
+        # Generate token dynamically
         token = auth.generate_token(1)
 
-        # Verificar que el token se decodifica correctamente
+        # Verify that the token decodes correctly
         response = auth.decode_token(token)
         self.assertEqual(response, {"username": "testname"})
 
-        # No usar token hardcodeado, generar otro token dinámico
+        # Don't use hardcoded token, generate another dynamic one
         user = UserModel.get_one_user(1)
         self.assertIsNotNone(user)
         
-        # Verificar que otro token generado también funciona
+        # Verify that another generated token also works
         token2 = auth.generate_token(1)
         response2 = auth.decode_token(token2)
         self.assertEqual(response2, {"username": "testname"})

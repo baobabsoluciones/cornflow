@@ -185,7 +185,6 @@ class TestLogInOpenAuth(CustomTestCase):
         """
         Tests failure when trying to fetch public keys from the OIDC provider
         """
-        self.app.config["PROVIDER_URL"] = "https://test-provider.com"
         
         # Clear the cache
         from cornflow.shared.authentication.auth import public_keys_cache
@@ -193,7 +192,7 @@ class TestLogInOpenAuth(CustomTestCase):
         
         # Mock jwt to pass initial validation
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
-        mock_jwt.decode.side_effect = lambda *args, **kwargs: {"iss": "https://test-provider.com"} if kwargs.get('options', {}).get('verify_signature') is False else {}
+        mock_jwt.decode.side_effect = lambda *args, **kwargs: {"iss": current_app.config["OID_PROVIDER"]} if kwargs.get('options', {}).get('verify_signature') is False else {}
         
         # Mock get to fail
         mock_get.side_effect = requests.exceptions.RequestException("Failed to get keys")
@@ -251,18 +250,21 @@ class TestLogInOpenAuth(CustomTestCase):
     @mock.patch("cornflow.shared.authentication.auth.jwt")
     def test_public_keys_caching(self, mock_jwt, mock_get):
         """
-        Tests that public keys are cached and reused for subsequent requests
+        Tests that public keys are cached and reused for subsequent requests.
+        Also verifies that when a new kid is encountered that's not in the cache,
+        the system fetches fresh keys from the provider.
         """
-        self.app.config["PROVIDER_URL"] = "https://test-provider.com"
-        self.app.config["EXPECTED_AUDIENCE"] = "test-audience"
-
+        # Clear the cache first
+        from cornflow.shared.authentication.auth import public_keys_cache
+        public_keys_cache.clear()
+    
         # Mock jwt functions
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
         
         # Configure decode to always return valid data
         def decode_side_effect(*args, **kwargs):
             if kwargs.get('options', {}).get('verify_signature') is False:
-                return {"iss": "https://test-provider.com"}
+                return {"iss": current_app.config["OID_PROVIDER"]}
             return {"sub": "test_user", "email": "test@test.com"}
             
         mock_jwt.decode.side_effect = decode_side_effect
@@ -305,7 +307,48 @@ class TestLogInOpenAuth(CustomTestCase):
 
         # Verify get was called only once for fetching keys
         mock_get.assert_called_once_with(
-            "https://test-provider.com/.well-known/jwks.json"
+            f"{current_app.config['OID_PROVIDER']}/.well-known/jwks.json"
+        )
+        
+        # Now test with a different kid that's not in cache
+        mock_jwt.get_unverified_header.return_value = {"kid": "new_kid"}
+        
+        # Reset the mock_get to track new calls
+        mock_get.reset_mock()
+        
+        # Update the mock response to include the new kid
+        mock_response.json.return_value = {
+            "keys": [
+                {
+                    "kid": "test_kid",
+                    "kty": "RSA",
+                    "n": "test_n",
+                    "e": "test_e"
+                },
+                {
+                    "kid": "new_kid",
+                    "kty": "RSA",
+                    "n": "new_n",
+                    "e": "new_e"
+                }
+            ]
+        }
+        
+        # Make a request with the new kid
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({}),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer some_token_with_new_kid"
+            },
+        )
+        
+        self.assertEqual(200, response.status_code)
+        
+        # Verify get was called again to fetch the new kid
+        mock_get.assert_called_once_with(
+            f"{current_app.config['OID_PROVIDER']}/.well-known/jwks.json"
         )
 
 

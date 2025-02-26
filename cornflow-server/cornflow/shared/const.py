@@ -1,5 +1,5 @@
 """
-In these files we import the values for different constants on cornflow server
+In this file we import the values for different constants on cornflow server
 """
 
 INTERNAL_TOKEN_ISSUER = "cornflow"

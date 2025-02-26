@@ -60,8 +60,8 @@ class DefaultConfig(object):
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS", "False")
 
     # OpenID Connect configuration
-    PROVIDER_URL = os.getenv("PROVIDER_URL")
-    EXPECTED_AUDIENCE = os.getenv("EXPECTED_AUDIENCE")
+    OID_PROVIDER = os.getenv("OID_PROVIDER")
+    OID_EXPECTED_AUDIENCE = os.getenv("OID_EXPECTED_AUDIENCE")
 
     # APISPEC:
     APISPEC_SPEC = APISpec(
@@ -90,11 +90,6 @@ class DefaultConfig(object):
 
     # Password rotation time in days
     PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
-
-    # Cognito configuration
-    COGNITO_REGION = os.getenv("COGNITO_REGION", None)
-    COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID", None)
-    COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID", None)
 
 
 class Development(DefaultConfig):
@@ -131,6 +126,8 @@ class TestingOpenAuth(Testing):
     Configuration class for testing some edge cases with Open Auth login
     """
     AUTH_TYPE = AUTH_OID
+    OID_PROVIDER = "https://test-provider.example.com"
+    OID_EXPECTED_AUDIENCE = "test-audience-id"
 
 
 class TestingApplicationRoot(Testing):
