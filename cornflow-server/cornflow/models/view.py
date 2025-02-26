@@ -1,6 +1,7 @@
 """
 This file contains the view model
 """
+
 # Imports from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 
@@ -13,6 +14,7 @@ class ViewModel(EmptyBaseModel):
     """
     This model stores the views / endpoints / resources of the API
     This model inherits from :class:`EmptyBaseModel` so it has no traceability
+    This model is used to store the views of cornflow and the external app, if used.
 
     The fields of the model are:
 

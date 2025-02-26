@@ -34,7 +34,6 @@ from cornflow.shared.exceptions import InvalidUsage, InvalidData
 from cornflow.shared.validators import json_schema_validate_as_string
 
 
-
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {"mps", "lp"}
 
@@ -84,7 +83,7 @@ class InstanceEndpoint(BaseMetaResource):
         if data_schema is None:
             # no schema provided, no validation to do
             return self.post_list(data=kwargs)
-
+        # TODO AGA: whay do we need this?
         if data_schema == "pulp":
             # The dag name is solve_model_dag
             data_schema = "solve_model_dag"
@@ -92,14 +91,18 @@ class InstanceEndpoint(BaseMetaResource):
         # We validate the instance data
         config = current_app.config
 
-        instance_schema = DeployedDAG.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
-        instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+        instance_schema = DeployedDAG.get_one_schema(
+            config, data_schema, INSTANCE_SCHEMA
+        )
+        instance_errors = json_schema_validate_as_string(
+            instance_schema, kwargs["data"]
+        )
 
         if instance_errors:
             raise InvalidData(
                 payload=dict(jsonschema_errors=instance_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create an instance. "
-                        f"Instance data do not match the jsonschema.",
+                f"Instance data do not match the jsonschema.",
             )
 
         # if we're here, we validated and the data seems to fit the schema
@@ -163,14 +166,18 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
             config = current_app.config
 
-            instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
-            instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+            instance_schema = DeployedDAG.get_one_schema(
+                config, schema, INSTANCE_SCHEMA
+            )
+            instance_errors = json_schema_validate_as_string(
+                instance_schema, kwargs["data"]
+            )
 
             if instance_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=instance_errors),
                     log_txt=f"Error while user {self.get_user()} tries to create an instance. "
-                            f"Instance data do not match the jsonschema.",
+                    f"Instance data do not match the jsonschema.",
                 )
 
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)

@@ -1,6 +1,7 @@
 """
 
 """
+
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import ViewModel
@@ -15,9 +16,7 @@ from flask import current_app
 
 class ApiViewListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
-    DESCRIPTION = (
-        "Endpoint to get the list of all the endpoints defined in cornflow and its url"
-    )
+    DESCRIPTION = "Endpoint to get the list of all the endpoints defined in cornflow and external app, if used, and its url"
 
     def __init__(self):
         super().__init__()
