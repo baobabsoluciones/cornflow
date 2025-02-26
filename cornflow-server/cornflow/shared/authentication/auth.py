@@ -154,7 +154,7 @@ class Auth:
             # For OpenID tokens
             if current_app.config["AUTH_TYPE"] == AUTH_OID:
                 print("[decode_token] Processing OpenID token")
-                decoded = self.verify_token(
+                decoded = Auth().verify_token(
                     token, 
                     current_app.config["OID_PROVIDER"], 
                     current_app.config["OID_EXPECTED_AUDIENCE"]
