@@ -37,6 +37,7 @@ from cornflow.shared.exceptions import (
 # Cache for storing public keys with 1 hour TTL
 public_keys_cache = TTLCache(maxsize=10, ttl=3600)
 
+
 class Auth:
     def __init__(self, user_model=UserModel):
         self.user_model = user_model
@@ -133,7 +134,7 @@ class Auth:
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
-                status_code=400
+                status_code=400,
             )
 
         try:
@@ -142,7 +143,7 @@ class Auth:
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
             issuer = unverified_payload.get("iss")
             print(f"[decode_token] Token issuer: {issuer}")
-            
+
             # For internal tokens
             if issuer == INTERNAL_TOKEN_ISSUER:
                 print("[decode_token] Processing internal token")
@@ -150,23 +151,23 @@ class Auth:
                     token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
                 )
                 return {"username": payload["sub"]}
-                
+
             # For OpenID tokens
             if current_app.config["AUTH_TYPE"] == AUTH_OID:
                 print("[decode_token] Processing OpenID token")
                 decoded = Auth().verify_token(
-                    token, 
-                    current_app.config["OID_PROVIDER"], 
-                    current_app.config["OID_EXPECTED_AUDIENCE"]
+                    token,
+                    current_app.config["OID_PROVIDER"],
+                    current_app.config["OID_EXPECTED_AUDIENCE"],
                 )
                 return {"username": decoded["sub"]}
-            
+
             # If we get here, the issuer is not valid
             print(f"[decode_token] Invalid issuer: {issuer}")
             raise InvalidCredentials(
                 "Invalid token issuer. Token must be issued by a valid provider",
                 log_txt="Error while trying to decode token. Invalid issuer.",
-                status_code=400
+                status_code=400,
             )
 
         except jwt.ExpiredSignatureError:
@@ -174,16 +175,15 @@ class Auth:
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
-                status_code=400
+                status_code=400,
             )
         except jwt.InvalidTokenError as e:
             print("[decode_token] Caught InvalidTokenError")
             raise InvalidCredentials(
                 "Invalid token format or signature",
                 log_txt=f"Error while trying to decode token. The token format is invalid: {str(e)}",
-                status_code=400
+                status_code=400,
             )
-
 
     def get_token_from_header(self, headers: Headers = None) -> str:
         """
@@ -198,27 +198,27 @@ class Auth:
             raise InvalidUsage(
                 "Request headers are missing",
                 log_txt="Error while trying to get a token from header. The header is invalid.",
-                status_code=400
+                status_code=400,
             )
 
         if "Authorization" not in headers:
             raise InvalidCredentials(
                 "Authorization header is missing",
                 log_txt="Error while trying to get a token from header. The auth token is not available.",
-                status_code=400
+                status_code=400,
             )
-            
+
         auth_header = headers.get("Authorization")
-        
+
         if not auth_header:
             return ""
 
         if not auth_header.startswith("Bearer "):
             err = "Invalid Authorization header format. Must be 'Bearer <token>'"
             raise InvalidCredentials(
-                err, 
+                err,
                 log_txt=f"Error while trying to get a token from header. " + err,
-                status_code=400
+                status_code=400,
             )
 
         try:
@@ -227,9 +227,9 @@ class Auth:
         except Exception as e:
             err = "Invalid Authorization header format. Must be 'Bearer <token>'"
             raise InvalidCredentials(
-                err, 
+                err,
                 log_txt=f"Error while trying to get a token from header. " + err,
-                status_code=400
+                status_code=400,
             )
 
     def get_user_from_header(self, headers: Headers = None) -> UserModel:
@@ -244,21 +244,21 @@ class Auth:
         if headers is None:
             err = "Request headers are missing"
             raise InvalidUsage(
-                err, 
+                err,
                 log_txt="Error while trying to get user from header. " + err,
-                status_code=400
+                status_code=400,
             )
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
-        
+
         user = self.user_model.get_one_object(username=data["username"])
-            
+
         if user is None:
             err = "User not found. Please ensure you are using valid credentials"
             raise InvalidCredentials(
-                err, 
+                err,
                 log_txt="Error while trying to get user from header. User does not exist.",
-                status_code=400
+                status_code=400,
             )
         return user
 
@@ -266,7 +266,7 @@ class Auth:
     def get_public_keys(provider_url: str) -> dict:
         """
         Gets the public keys from the OIDC provider and caches them
-        
+
         :param str provider_url: The base URL of the OIDC provider
         :return: Dictionary of kid to public key mappings
         :rtype: dict
@@ -276,28 +276,30 @@ class Auth:
         try:
             response = requests.get(jwks_url)
             response.raise_for_status()
-            
+
             # Convert JWK to RSA public keys using PyJWT's built-in method
             public_keys = {
-                key["kid"]: RSAAlgorithm.from_jwk(key) 
+                key["kid"]: RSAAlgorithm.from_jwk(key)
                 for key in response.json()["keys"]
             }
-            
+
             # Store in cache
             public_keys_cache[provider_url] = public_keys
             return public_keys
-            
+
         except requests.exceptions.RequestException as e:
             raise CommunicationError(
                 "Failed to fetch public keys from authentication provider",
                 log_txt=f"Error while fetching public keys from {jwks_url}: {str(e)}",
-                status_code=400
+                status_code=400,
             )
 
-    def verify_token(self, token: str, provider_url: str, expected_audience: str) -> dict:
+    def verify_token(
+        self, token: str, provider_url: str, expected_audience: str
+    ) -> dict:
         """
         Verifies an OpenID Connect token
-        
+
         :param str token: The token to verify
         :param str provider_url: The base URL of the OIDC provider
         :param str expected_audience: The expected audience claim
@@ -316,12 +318,12 @@ class Auth:
             raise InvalidCredentials(
                 "Invalid token: Missing key identifier (kid) in token header",
                 log_txt="Error while verifying token. Token header is missing 'kid'.",
-                status_code=400
+                status_code=400,
             )
-            
+
         kid = unverified_header["kid"]
         print(f"[verify_token] Found kid: {kid}")
-        
+
         # Check if we have the keys in cache and if the kid exists
         print("[verify_token] Checking cache for public keys")
         public_key = None
@@ -331,7 +333,7 @@ class Auth:
             if kid in cached_keys:
                 print("[verify_token] Found matching kid in cached keys")
                 public_key = cached_keys[kid]
-        
+
         # If kid not in cache, fetch fresh keys
         if public_key is None:
             print("[verify_token] Public key not found in cache, fetching fresh keys")
@@ -341,18 +343,19 @@ class Auth:
                 print("[verify_token] About to raise InvalidCredentials")
                 raise InvalidCredentials(
                     "Invalid token: Unknown key identifier (kid)",
-                    log_txt="Error while verifying token. Key ID not found in public keys."
+                    log_txt="Error while verifying token. Key ID not found in public keys.",
+                    status_code=400,
                 )
             public_key = public_keys[kid]
             print("[verify_token] Found public key in fresh keys")
-        
+
         # Verify token - this will raise appropriate jwt exceptions that will be caught in decode_token
         return jwt.decode(
             token,
             public_key,
             algorithms=["RS256"],
             audience=[expected_audience],
-            issuer=provider_url
+            issuer=provider_url,
         )
 
     @staticmethod
@@ -436,7 +439,7 @@ class BIAuth(Auth):
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",
                 log_txt="Error while trying to decode token. The token is invalid.",
-                status_code=400
+                status_code=400,
             )
 
     @staticmethod
@@ -463,7 +466,8 @@ class BIAuth(Auth):
             )
 
         payload = {
-            "exp": datetime.utcnow() + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
+            "exp": datetime.utcnow()
+            + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.utcnow(),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,

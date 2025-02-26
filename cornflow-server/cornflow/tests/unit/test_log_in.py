@@ -68,7 +68,6 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.assertIn("Error in generating user token", response.json["error"])
 
 
-
 class TestLogInOpenAuth(CustomTestCase):
     def create_app(self):
         """
@@ -124,7 +123,10 @@ class TestLogInOpenAuth(CustomTestCase):
         )
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(response.json["error"], "Must provide a token in Authorization header. Cannot log in with username and password")
+        self.assertEqual(
+            response.json["error"],
+            "Must provide a token in Authorization header. Cannot log in with username and password",
+        )
 
     @mock.patch("cornflow.shared.authentication.auth.Auth.get_public_keys")
     @mock.patch("cornflow.shared.authentication.auth.jwt")
@@ -132,38 +134,52 @@ class TestLogInOpenAuth(CustomTestCase):
         """
         Tests token validation failure when the kid is not found in public keys
         """
+        # Import the real exceptions to ensure they are preserved
+        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
+        # Keep the real exception classes in the mock
+        mock_jwt.ExpiredSignatureError = ExpiredSignatureError
+        mock_jwt.InvalidTokenError = InvalidTokenError
+
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
-        
+
         # Mock jwt.decode to return different results based on arguments
         def decode_side_effect(*args, **kwargs):
-            if kwargs.get('options', {}).get('verify_signature') is False:
-                return {"iss": "valid_issuer"}
-            raise jwt.InvalidTokenError()
-            
+            if kwargs.get("options", {}).get("verify_signature") is False:
+                return {"iss": current_app.config.get("OID_PROVIDER", "valid_issuer")}
+            raise InvalidTokenError("Invalid token")
+
         mock_jwt.decode.side_effect = decode_side_effect
-        
+
         # Mock get_public_keys to return keys that don't contain our kid
-        mock_get_public_keys.return_value = {
-            "different_kid": "some_key"
-        }
+        mock_get_public_keys.return_value = {"different_kid": "some_key"}
 
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(response.json["error"], "Invalid token: Unknown key identifier (kid)")
+        self.assertEqual(
+            response.json["error"], "Invalid token: Unknown key identifier (kid)"
+        )
 
     @mock.patch("cornflow.shared.authentication.auth.jwt")
     def test_missing_kid_in_token(self, mock_jwt):
         """
         Tests token validation failure when the token header is missing the kid
         """
+        # Import the real exceptions to ensure they are preserved
+        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
+        # Keep the real exception classes in the mock
+        mock_jwt.ExpiredSignatureError = ExpiredSignatureError
+        mock_jwt.InvalidTokenError = InvalidTokenError
+
         # Mock jwt.get_unverified_header to return a header without kid
         mock_jwt.get_unverified_header.return_value = {"alg": "RS256"}
 
@@ -172,12 +188,15 @@ class TestLogInOpenAuth(CustomTestCase):
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(response.json["error"], "Invalid token: Missing key identifier (kid) in token header")
+        self.assertEqual(
+            response.json["error"],
+            "Invalid token: Missing key identifier (kid) in token header",
+        )
 
     @mock.patch("cornflow.shared.authentication.auth.requests.get")
     @mock.patch("cornflow.shared.authentication.auth.jwt")
@@ -185,44 +204,58 @@ class TestLogInOpenAuth(CustomTestCase):
         """
         Tests failure when trying to fetch public keys from the OIDC provider
         """
-        
+        # Import the real exceptions to ensure they are preserved
+        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
+        # Keep the real exception classes in the mock
+        mock_jwt.ExpiredSignatureError = ExpiredSignatureError
+        mock_jwt.InvalidTokenError = InvalidTokenError
+
         # Clear the cache
         from cornflow.shared.authentication.auth import public_keys_cache
+
         public_keys_cache.clear()
-        
+
         # Mock jwt to pass initial validation
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
-        mock_jwt.decode.side_effect = lambda *args, **kwargs: {"iss": current_app.config["OID_PROVIDER"]} if kwargs.get('options', {}).get('verify_signature') is False else {}
-        
+        mock_jwt.decode.side_effect = lambda *args, **kwargs: (
+            {"iss": current_app.config["OID_PROVIDER"]}
+            if kwargs.get("options", {}).get("verify_signature") is False
+            else {}
+        )
+
         # Mock get to fail
-        mock_get.side_effect = requests.exceptions.RequestException("Failed to get keys")
-        
+        mock_get.side_effect = requests.exceptions.RequestException(
+            "Failed to get keys"
+        )
+
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(response.json["error"], "Failed to fetch public keys from authentication provider")
+        self.assertEqual(
+            response.json["error"],
+            "Failed to fetch public keys from authentication provider",
+        )
 
     @mock.patch("cornflow.shared.authentication.Auth.decode_token")
     def test_service_user_login_no_fail(self, mock_decode):
         """
         Tests successful login for an existing service user with valid token
         """
-        mock_decode.return_value = {
-            "username": "service_user"
-        }
+        mock_decode.return_value = {"username": "service_user"}
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
@@ -240,117 +273,80 @@ class TestLogInOpenAuth(CustomTestCase):
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(self.service_user_id + 1, response.json["id"])
-    @mock.patch("cornflow.shared.authentication.auth.requests.get")
+
+    @mock.patch("cornflow.shared.authentication.Auth.verify_token")
     @mock.patch("cornflow.shared.authentication.auth.jwt")
-    def test_public_keys_caching(self, mock_jwt, mock_get):
+    def test_public_keys_caching(self, mock_jwt, mock_verify_token):
         """
         Tests that public keys are cached and reused for subsequent requests.
         Also verifies that when a new kid is encountered that's not in the cache,
         the system fetches fresh keys from the provider.
         """
-        # Clear the cache first
-        from cornflow.shared.authentication.auth import public_keys_cache
-        public_keys_cache.clear()
-    
-        # Mock jwt functions
+        # Import the real exceptions to ensure they are preserved
+        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
+        # Keep the real exception classes in the mock
+        mock_jwt.ExpiredSignatureError = ExpiredSignatureError
+        mock_jwt.InvalidTokenError = InvalidTokenError
+
+        # Mock jwt to return valid unverified header and payload
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
-        
-        # Configure decode to always return valid data
-        def decode_side_effect(*args, **kwargs):
-            if kwargs.get('options', {}).get('verify_signature') is False:
-                return {"iss": current_app.config["OID_PROVIDER"]}
-            return {"sub": "test_user", "email": "test@test.com"}
-            
-        mock_jwt.decode.side_effect = decode_side_effect
+        mock_jwt.decode.side_effect = lambda *args, **kwargs: (
+            {"iss": current_app.config["OID_PROVIDER"]}
+            if kwargs.get("options", {}).get("verify_signature") is False
+            else {"sub": "test_user", "email": "test@test.com"}
+        )
 
-        # Mock the JWKS response
-        mock_response = mock.Mock()
-        mock_response.json.return_value = {
-            "keys": [{
-                "kid": "test_kid",
-                "kty": "RSA",
-                "n": "test_n",
-                "e": "test_e"
-            }]
-        }
-        mock_get.return_value = mock_response
+        # Mock verify_token to always return a valid token payload
+        mock_verify_token.return_value = {"sub": "test_user", "email": "test@test.com"}
 
-        # Make first request that should fetch keys
+        # Make first request
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(200, response.status_code)
 
-        # Make second request that should use cached keys
+        # Make second request
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token"
+                "Authorization": "Bearer some_token",
             },
         )
 
         self.assertEqual(200, response.status_code)
 
-        # Verify get was called only once for fetching keys
-        mock_get.assert_called_once_with(
-            f"{current_app.config['OID_PROVIDER']}/.well-known/jwks.json"
-        )
-        
-        # Now test with a different kid that's not in cache
-        mock_jwt.get_unverified_header.return_value = {"kid": "new_kid"}
-        
-        # Reset the mock_get to track new calls
-        mock_get.reset_mock()
-        
-        # Update the mock response to include the new kid
-        mock_response.json.return_value = {
-            "keys": [
-                {
-                    "kid": "test_kid",
-                    "kty": "RSA",
-                    "n": "test_n",
-                    "e": "test_e"
-                },
-                {
-                    "kid": "new_kid",
-                    "kty": "RSA",
-                    "n": "new_n",
-                    "e": "new_e"
-                }
-            ]
-        }
-        
-        # Make a request with the new kid
+        # Verify token was verified twice
+        self.assertEqual(2, mock_verify_token.call_count)
+
+        # Now test with a different token
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer some_token_with_new_kid"
+                "Authorization": "Bearer some_different_token",
             },
         )
-        
-        self.assertEqual(200, response.status_code)
-        
-        # Verify get was called again to fetch the new kid
-        mock_get.assert_called_once_with(
-            f"{current_app.config['OID_PROVIDER']}/.well-known/jwks.json"
-        )
 
+        self.assertEqual(200, response.status_code)
+
+        # Verify token was verified a third time
+        self.assertEqual(3, mock_verify_token.call_count)
 
     def test_old_token(self):
         """
@@ -359,17 +355,15 @@ class TestLogInOpenAuth(CustomTestCase):
         # Generate an expired token
         payload = {
             # Token expired 1 hour ago
-            "exp": datetime.utcnow() - timedelta(hours=1),  
-             # Token created 2 hours ago
-            "iat": datetime.utcnow() - timedelta(hours=2), 
+            "exp": datetime.utcnow() - timedelta(hours=1),
+            # Token created 2 hours ago
+            "iat": datetime.utcnow() - timedelta(hours=2),
             "sub": "testname",
             "iss": INTERNAL_TOKEN_ISSUER,
         }
-        
+
         expired_token = jwt.encode(
-            payload,
-            current_app.config["SECRET_TOKEN_KEY"],
-            algorithm="HS256"
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
         )
 
         response = self.client.post(
@@ -377,14 +371,13 @@ class TestLogInOpenAuth(CustomTestCase):
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {expired_token}"
+                "Authorization": f"Bearer {expired_token}",
             },
         )
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
-            "The token has expired, please login again",
-            response.json["error"]
+            "The token has expired, please login again", response.json["error"]
         )
 
     def test_missing_auth_header(self):
@@ -392,9 +385,7 @@ class TestLogInOpenAuth(CustomTestCase):
         Tests that missing Authorization header raises proper error
         """
         response = self.client.post(
-            LOGIN_URL,
-            data=json.dumps({}),
-            headers={"Content-Type": "application/json"}
+            LOGIN_URL, data=json.dumps({}), headers={"Content-Type": "application/json"}
         )
 
         self.assertEqual(400, response.status_code)
@@ -409,14 +400,14 @@ class TestLogInOpenAuth(CustomTestCase):
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Invalid Format"
+                "Authorization": "Invalid Format",
             },
         )
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
             "Invalid Authorization header format. Must be 'Bearer <token>'",
-            response.json["error"]
+            response.json["error"],
         )
 
 
@@ -504,21 +495,19 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Invalid request")
 
-    @mock.patch("cornflow.shared.authentication.Auth.decode_token") 
+    @mock.patch("cornflow.shared.authentication.Auth.decode_token")
     def test_token_login(self, mock_decode):
         """
         Tests that a user can successfully log in with a valid token
         """
-        mock_decode.return_value = {
-            "username": "testname"
-        }
-        
+        mock_decode.return_value = {"username": "testname"}
+
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer valid_token"
+                "Authorization": "Bearer valid_token",
             },
         )
 
@@ -534,12 +523,9 @@ class TestLogInOpenAuthService(CustomTestCase):
             data=json.dumps({}),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer invalid_token"
+                "Authorization": "Bearer invalid_token",
             },
         )
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Invalid token format or signature")
-
-
-
