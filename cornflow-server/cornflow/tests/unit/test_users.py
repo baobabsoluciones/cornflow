@@ -363,7 +363,11 @@ class TestUserEndpoint(TestCase):
 
     def test_change_password_rotation(self):
         current_app.config["PWD_ROTATION_TIME"] = 1  # in days
-        payload = {"pwd_last_change": (datetime.utcnow() - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        payload = {
+            "pwd_last_change": (datetime.utcnow() - timedelta(days=2)).strftime(
+                "%Y-%m-%dT%H:%M:%SZ"
+            )
+        }
         self.modify_info(self.planner, self.planner, payload)
         response = self.log_in(self.planner)
         self.assertEqual(True, response.json["change_password"])
@@ -371,7 +375,7 @@ class TestUserEndpoint(TestCase):
         payload = {"password": "Newtestpassword1!"}
         self.modify_info(self.planner, self.planner, payload)
         self.planner.update(payload)
-        print(self.planner)
+
         response = self.log_in(self.planner)
         self.assertEqual(False, response.json["change_password"])
 

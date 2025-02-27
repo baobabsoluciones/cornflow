@@ -141,19 +141,46 @@ class TestApiViewModel(CustomTestCase):
         """
         Test that the get_all_objects method works properly
         """
-        objective = len(resources) + 2
+        expected_count = len(resources) + 2
 
-        instances = ViewModel.get_all_objects().all()
-        self.assertEqual(len(instances), objective)
+        # Test getting all objects
+        all_instances = ViewModel.get_all_objects().all()
+        self.assertEqual(len(all_instances), expected_count)
 
-        instances = ViewModel.get_all_objects(offset=10, limit=10).all()
-        self.assertEqual(len(instances), 10)
+        # Check that all resources are included in the results
+        api_view_names = [view.name for view in all_instances]
+        expected_names = [view["endpoint"] for view in resources]
 
-        instances = ViewModel.get_all_objects(offset=10).all()
-        self.assertEqual(len(instances), objective - 10)
+        # Verify all expected resource names are in the results
+        for name in expected_names:
+            self.assertIn(name, api_view_names)
 
-        instances = ViewModel.get_all_objects(limit=10).all()
-        self.assertEqual(len(instances), 10)
+        # Test with offset and limit
+        limited_instances = ViewModel.get_all_objects(offset=10, limit=10).all()
+        self.assertEqual(len(limited_instances), 10)
+
+        # Verify these are different from the first 10 results
+        first_ten = [view.id for view in all_instances[:10]]
+        offset_ten = [view.id for view in limited_instances]
+        self.assertNotEqual(first_ten, offset_ten)
+
+        # Test with only offset
+        offset_instances = ViewModel.get_all_objects(offset=10).all()
+        self.assertEqual(len(offset_instances), expected_count - 10)
+
+        # Verify these match with the correct slice of all results
+        offset_ids = [view.id for view in offset_instances]
+        expected_offset_ids = [view.id for view in all_instances[10:]]
+        self.assertEqual(offset_ids, expected_offset_ids)
+
+        # Test with only limit
+        limit_instances = ViewModel.get_all_objects(limit=10).all()
+        self.assertEqual(len(limit_instances), 10)
+
+        # Verify these match with the first 10 of all results
+        limit_ids = [view.id for view in limit_instances]
+        expected_limit_ids = [view.id for view in all_instances[:10]]
+        self.assertEqual(limit_ids, expected_limit_ids)
 
     def test_get_one_object_by_name(self):
         """
@@ -171,7 +198,13 @@ class TestApiViewModel(CustomTestCase):
 
     def test_get_one_object_without_idx(self):
         """
-        Test that the get_one_object method works properly
+        Test that the get_one_object method works properly when called without any filters
         """
-        instance = ViewModel.get_one_object(name="instance")
-        self.assertEqual(instance.name, "instance")
+        # Call get_one_object without any filters
+        instance = ViewModel.get_one_object()
+
+        # It should return the first instance by default
+        first_instance = ViewModel.get_all_objects().first()
+        self.assertIsNotNone(instance)
+        self.assertEqual(instance.id, first_instance.id)
+        self.assertEqual(instance.name, first_instance.name)
