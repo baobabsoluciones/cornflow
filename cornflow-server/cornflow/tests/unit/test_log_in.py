@@ -249,7 +249,7 @@ class TestLogInOpenAuth(CustomTestCase):
         """
         Tests successful login for an existing service user with valid token
         """
-        mock_decode.return_value = {"username": "service_user"}
+        mock_decode.return_value = {"sub": "service_user"}
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
@@ -267,7 +267,7 @@ class TestLogInOpenAuth(CustomTestCase):
         """
         Tests successful login and creation of a new user with valid token
         """
-        mock_decode.return_value = {"username": "test_user"}
+        mock_decode.return_value = {"sub": "test_user"}
         response = self.client.post(
             LOGIN_URL,
             data=json.dumps({}),
@@ -300,11 +300,14 @@ class TestLogInOpenAuth(CustomTestCase):
         mock_jwt.decode.side_effect = lambda *args, **kwargs: (
             {"iss": current_app.config["OID_PROVIDER"]}
             if kwargs.get("options", {}).get("verify_signature") is False
-            else {"sub": "test_user", "email": "test@test.com"}
+            else {"sub": "test_user", "email": "test_user@test.com"}
         )
 
         # Mock verify_token to always return a valid token payload
-        mock_verify_token.return_value = {"sub": "test_user", "email": "test@test.com"}
+        mock_verify_token.return_value = {
+            "sub": "test_user",
+            "email": "test_user@test.com",
+        }
 
         # Make first request
         response = self.client.post(
@@ -500,7 +503,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         """
         Tests that a user can successfully log in with a valid token
         """
-        mock_decode.return_value = {"username": "testname"}
+        mock_decode.return_value = {"sub": "testname"}
 
         response = self.client.post(
             LOGIN_URL,

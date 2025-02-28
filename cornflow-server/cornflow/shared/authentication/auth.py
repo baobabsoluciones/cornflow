@@ -147,20 +147,18 @@ class Auth:
             # For internal tokens
             if issuer == INTERNAL_TOKEN_ISSUER:
                 print("[decode_token] Processing internal token")
-                payload = jwt.decode(
+                return jwt.decode(
                     token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
                 )
-                return {"username": payload["sub"]}
 
             # For OpenID tokens
             if current_app.config["AUTH_TYPE"] == AUTH_OID:
                 print("[decode_token] Processing OpenID token")
-                decoded = Auth().verify_token(
+                return Auth().verify_token(
                     token,
                     current_app.config["OID_PROVIDER"],
                     current_app.config["OID_EXPECTED_AUDIENCE"],
                 )
-                return {"username": decoded["sub"]}
 
             # If we get here, the issuer is not valid
             print(f"[decode_token] Invalid issuer: {issuer}")
@@ -425,16 +423,11 @@ class BIAuth(Auth):
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-        if token is None:
-            err = "The provided token is not valid."
-            raise InvalidUsage(
-                err, log_txt="Error while trying to decode token. " + err
-            )
         try:
-            payload = jwt.decode(
+            return jwt.decode(
                 token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
             )
-            return {"username": payload["sub"]}
+
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",

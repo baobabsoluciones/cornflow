@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import UserModel, UserRoleModel
+from cornflow.models import UserModel, UserRoleModel, PermissionsDAG
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth, LDAPBase
@@ -51,22 +51,35 @@ class LoginBaseEndpoint(BaseMetaResource):
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
             response.update({"change_password": check_last_password_change(user)})
-            current_app.logger.info(f"User {user.id} logged in successfully using database authentication")
+            current_app.logger.info(
+                f"User {user.id} logged in successfully using database authentication"
+            )
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
-            current_app.logger.info(f"User {user.id} logged in successfully using LDAP authentication")
+            current_app.logger.info(
+                f"User {user.id} logged in successfully using LDAP authentication"
+            )
         elif auth_type == AUTH_OID:
-            if (kwargs.get('username') and kwargs.get('password')):
+            if kwargs.get("username") and kwargs.get("password"):
                 if not current_app.config.get("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 0):
-                    raise InvalidUsage("Must provide a token in Authorization header. Cannot log in with username and password", 400)
-                user = self.auth_oid_authenticate(username=kwargs['username'], password=kwargs['password'])
-                current_app.logger.info(f"Service user {user.id} logged in successfully using password")
+                    raise InvalidUsage(
+                        "Must provide a token in Authorization header. Cannot log in with username and password",
+                        400,
+                    )
+                user = self.auth_oid_authenticate(
+                    username=kwargs["username"], password=kwargs["password"]
+                )
+                current_app.logger.info(
+                    f"Service user {user.id} logged in successfully using password"
+                )
                 token = self.auth_class.generate_token(user.id)
             else:
                 token = self.auth_class().get_token_from_header(request.headers)
                 user = self.auth_oid_authenticate(token=token)
-                current_app.logger.info(f"User {user.id} logged in successfully using OpenID authentication")
-            
+                current_app.logger.info(
+                    f"User {user.id} logged in successfully using OpenID authentication"
+                )
+
             response.update({"token": token, "id": user.id})
             return response, 200
         else:
@@ -147,7 +160,9 @@ class LoginBaseEndpoint(BaseMetaResource):
 
         return user
 
-    def auth_oid_authenticate(self, token: str = None, username: str = None, password: str = None):
+    def auth_oid_authenticate(
+        self, token: str = None, username: str = None, password: str = None
+    ):
         """
         Method in charge of performing the authentication using OpenID Connect tokens.
         Supports any OIDC provider configured via provider_url.
@@ -162,16 +177,11 @@ class LoginBaseEndpoint(BaseMetaResource):
         if token:
             print("[auth_oid_authenticate] Authenticating with token")
             decoded_token = self.auth_class().decode_token(token)
-            print(f"[auth_oid_authenticate] Token decoded successfully: {decoded_token}")
+            print(
+                f"[auth_oid_authenticate] Token decoded successfully: {decoded_token}"
+            )
 
-            username = decoded_token.get('username')
-            if not username:
-                print("[auth_oid_authenticate] Missing username in token claims")
-                raise InvalidCredentials(
-                    "Invalid token: missing username claim",
-                    log_txt="Token validation failed: missing username claim",
-                    status_code=400
-                )
+            username = decoded_token.get("sub")
 
             print(f"[auth_oid_authenticate] Looking up user: {username}")
             user = self.data_model.get_one_object(username=username)
@@ -182,9 +192,9 @@ class LoginBaseEndpoint(BaseMetaResource):
                     f"OpenID user {username} does not exist and is created"
                 )
 
-                email = decoded_token.get('email', f"{username}@cornflow.org")
-                first_name = decoded_token.get('given_name', '')
-                last_name = decoded_token.get('family_name', '')
+                email = decoded_token.get("email", f"{username}@cornflow.org")
+                first_name = decoded_token.get("given_name", "")
+                last_name = decoded_token.get("family_name", "")
 
                 data = {
                     "username": username,
@@ -203,13 +213,12 @@ class LoginBaseEndpoint(BaseMetaResource):
                     }
                 )
                 user_role.save()
+                if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+                    PermissionsDAG.add_all_permissions_to_user(user.id)
 
             return user
 
-        elif (
-            username
-            and password
-        ):
+        elif username and password:
             user = self.auth_db_authenticate(username, password)
             if user.is_service_user():
                 return user
@@ -221,7 +230,7 @@ class LoginBaseEndpoint(BaseMetaResource):
 def check_last_password_change(user):
     """
     Check if the user needs to change their password based on the password rotation time.
-    
+
     :param user: The user object to check
     :return: True if password needs to be changed, False otherwise
     :rtype: bool
