@@ -1092,7 +1092,7 @@ class LoginTestCases:
             )
 
             self.assertAlmostEqual(
-                datetime.utcnow(),
+                datetime.now(UTC),
                 datetime.utcfromtimestamp(decoded_token["iat"]),
                 delta=timedelta(seconds=2),
             )

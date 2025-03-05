@@ -230,11 +230,9 @@ class LoginBaseEndpoint(BaseMetaResource):
 
 def check_last_password_change(user):
     if user.pwd_last_change:
-        if (
-            user.pwd_last_change
-            + timedelta(days=int(current_app.config["PWD_ROTATION_TIME"]))
-            < datetime.utcnow()
-        ):
+        if user.pwd_last_change + timedelta(
+            days=int(current_app.config["PWD_ROTATION_TIME"])
+        ) < datetime.now(UTC):
             return True
     return False
 
