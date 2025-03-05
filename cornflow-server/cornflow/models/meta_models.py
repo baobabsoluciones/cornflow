@@ -3,7 +3,7 @@ This file contains the base abstract models from which the rest of the models in
 """
 
 # Imports from libraries
-from datetime import datetime, UTC
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List
 
 from flask import current_app
@@ -211,8 +211,8 @@ class TraceAttributesModel(EmptyBaseModel):
     deleted_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self):
-        self.created_at = datetime.now(UTC)
-        self.updated_at = datetime.now(UTC)
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
         self.deleted_at = None
 
     def update(self, data):
@@ -223,11 +223,11 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.updated_at = datetime.now(UTC)
+        self.updated_at = datetime.now(timezone.utc)
         super().update(data)
 
     def pre_update(self, data):
-        self.updated_at = datetime.now(UTC)
+        self.updated_at = datetime.now(timezone.utc)
         super().pre_update(data)
 
     def disable(self):
@@ -237,7 +237,7 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.deleted_at = datetime.now(UTC)
+        self.deleted_at = datetime.now(timezone.utc)
         db.session.add(self)
         self.commit_changes("disabling")
 
@@ -248,7 +248,7 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.updated_at = datetime.now(UTC)
+        self.updated_at = datetime.now(timezone.utc)
         self.deleted_at = None
         db.session.add(self)
         self.commit_changes("activating")

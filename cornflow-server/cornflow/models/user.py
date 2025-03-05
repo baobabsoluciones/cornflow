@@ -5,7 +5,7 @@ This file contains the UserModel
 # Imports from external libraries
 import random
 import string
-from datetime import datetime, UTC
+from datetime import datetime, timezone, timedelta
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -94,7 +94,7 @@ class UserModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
-        self.pwd_last_change = datetime.now(UTC)
+        self.pwd_last_change = datetime.now(timezone.utc)
         # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(data.get("password"))
         if check_pass:
@@ -123,7 +123,7 @@ class UserModel(TraceAttributesModel):
         if new_password:
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
-            data["pwd_last_change"] = datetime.now(UTC)
+            data["pwd_last_change"] = datetime.now(timezone.utc)
         super().update(data)
 
     def comes_from_external_provider(self):

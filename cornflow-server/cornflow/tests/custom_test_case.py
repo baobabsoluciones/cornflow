@@ -18,7 +18,7 @@ import json
 
 # Import from libraries
 import logging as log
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import jwt
@@ -1092,7 +1092,7 @@ class LoginTestCases:
             )
 
             self.assertAlmostEqual(
-                datetime.now(UTC),
-                datetime.fromtimestamp(decoded_token["iat"], UTC),
+                datetime.now(timezone.utc),
+                datetime.fromtimestamp(decoded_token["iat"], timezone.utc),
                 delta=timedelta(seconds=2),
             )
