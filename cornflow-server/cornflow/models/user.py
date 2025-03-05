@@ -5,7 +5,7 @@ This file contains the UserModel
 # Imports from external libraries
 import random
 import string
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel

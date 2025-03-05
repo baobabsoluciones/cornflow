@@ -3,10 +3,11 @@ This file contains the base abstract models from which the rest of the models in
 """
 
 # Imports from libraries
-from datetime import datetime
+from datetime import datetime, UTC
+from typing import Dict, List
+
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from typing import Dict, List
 
 # Imports from internal modules
 from cornflow.shared import db

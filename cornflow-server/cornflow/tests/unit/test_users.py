@@ -1,8 +1,9 @@
 import json
+from datetime import datetime, timedelta, UTC
 
 from flask import current_app
 from flask_testing import TestCase
-from datetime import datetime, timedelta
+
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
@@ -15,9 +16,8 @@ from cornflow.models import (
     UserModel,
     UserRoleModel,
 )
-
-from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.shared import db
+from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,

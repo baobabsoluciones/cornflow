@@ -14,26 +14,26 @@ LoginTestCases
     Test cases for login functionality
 """
 
+import json
+
 # Import from libraries
 import logging as log
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, UTC
 from typing import List
 
+import jwt
 from flask import current_app
 from flask_testing import TestCase
-import json
-import jwt
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
+from cornflow.models import UserRoleModel
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
-from cornflow.shared import db
 from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
@@ -1093,6 +1093,6 @@ class LoginTestCases:
 
             self.assertAlmostEqual(
                 datetime.now(UTC),
-                datetime.utcfromtimestamp(decoded_token["iat"]),
+                datetime.fromtimestamp(decoded_token["iat"], UTC),
                 delta=timedelta(seconds=2),
             )

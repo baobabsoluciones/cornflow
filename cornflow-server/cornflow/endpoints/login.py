@@ -2,11 +2,12 @@
 External endpoint for the user to login to the cornflow webserver
 """
 
+from datetime import datetime, timedelta, UTC
+
 # Partial imports
 from flask import current_app
 from flask_apispec import use_kwargs, doc
 from sqlalchemy.exc import IntegrityError, DBAPIError
-from datetime import datetime, timedelta
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
@@ -230,9 +231,28 @@ class LoginBaseEndpoint(BaseMetaResource):
 
 def check_last_password_change(user):
     if user.pwd_last_change:
-        if user.pwd_last_change + timedelta(
+        # Handle the case where pwd_last_change is already a datetime object
+        if isinstance(user.pwd_last_change, datetime):
+            # If it's a naive datetime (no timezone info), make it timezone-aware
+            if user.pwd_last_change.tzinfo is None:
+                last_change = user.pwd_last_change.replace(tzinfo=UTC)
+            else:
+                # Already timezone-aware
+                last_change = user.pwd_last_change
+        else:
+            # It's a timestamp (integer), convert to datetime
+            last_change = datetime.fromtimestamp(user.pwd_last_change, UTC)
+
+        # Get current time with UTC timezone for proper comparison
+        current_time = datetime.now(UTC)
+
+        # Calculate the expiration time based on the password rotation setting
+        expiration_time = last_change + timedelta(
             days=int(current_app.config["PWD_ROTATION_TIME"])
-        ) < datetime.now(UTC):
+        )
+
+        # Compare the timezone-aware datetimes
+        if expiration_time < current_time:
             return True
     return False
 
