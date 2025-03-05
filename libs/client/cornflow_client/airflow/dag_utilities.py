@@ -171,32 +171,25 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :param kwargs: other kwargs passed to the dag task.
     :return:
     """
-    print("Starting cf_solve function")
     ti = kwargs["ti"]
     base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
     config = dict()
     try:
-        print("Connecting to cornflow...")
         client = connect_to_cornflow(secrets)
         exec_id = kwargs["dag_run"].conf["exec_id"]
-        print(f"Getting data for execution {exec_id}")
         execution_data = client.get_data(exec_id)
         execution_status = client.update_status(exec_id, {"status": 0})
-        print("Successfully got execution data")
         data = execution_data["data"]
         solution_data = execution_data["solution_data"]
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        print("Calling solve function...")
         solution, sol_checks, inst_checks, log, log_json = fun(
             data, config, solution_data
         )
-        print("Solve function completed")
 
         # We connect again to cornflow in case that more than 24 hours
         # have passed from the first time we connect
-        print("Reconnecting to cornflow...")
         client = connect_to_cornflow(secrets)
 
         payload = dict(
@@ -209,7 +202,6 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         )
         if not solution:
             # No solution found: we just send everything to cornflow.
-            print("No solution found - saving partial results")
             if config.get("msg", True):
                 print("No solution found: we save what we have.")
             try_to_write_solution(client, exec_id, payload)
@@ -224,39 +216,32 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             print("A solution was found: we will first validate it")
 
         if sol_checks is not None:
-            print("Adding solution checks to payload")
             payload["checks"] = sol_checks
 
-        print("Writing solution to cornflow...")
         try_to_write_solution(client, exec_id, payload)
-        print("Solution written successfully")
 
         # The validation went correctly: can save the solution without problem
         return "Solution saved"
 
     except NoSolverException as e:
-        print("NoSolverException caught!")
         if config.get("msg", True):
             print("No solver found !")
         # We reconnect in case the solver has been more than 24 hours solving before the error is raised
-        print("Reconnecting to cornflow to handle error...")
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(e)
     except Exception as e:
-        print(f"Unexpected exception caught: {str(e)}")
         if config.get("msg", True):
             print("Some unknown error happened")
-            print(e)
         # We reconnect in case the solver has been more than 24 hours solving before the error is raised
-        print("Reconnecting to cornflow to handle error...")
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(f"There was an error during the solving: {e}")
+
 
 def cf_check(fun, dag_name, secrets, **kwargs):
     """
