@@ -128,9 +128,9 @@ class Auth:
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-        print("[decode_token] Starting token decode")
+
         if token is None:
-            print("[decode_token] Token is None")
+
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
@@ -139,21 +139,20 @@ class Auth:
 
         try:
             # First try to decode header to validate basic token structure
-            print("[decode_token] Decoding unverified header")
+
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
             issuer = unverified_payload.get("iss")
-            print(f"[decode_token] Token issuer: {issuer}")
 
             # For internal tokens
             if issuer == INTERNAL_TOKEN_ISSUER:
-                print("[decode_token] Processing internal token")
+
                 return jwt.decode(
                     token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
                 )
 
             # For OpenID tokens
             if current_app.config["AUTH_TYPE"] == AUTH_OID:
-                print("[decode_token] Processing OpenID token")
+
                 return Auth().verify_token(
                     token,
                     current_app.config["OID_PROVIDER"],
@@ -161,7 +160,7 @@ class Auth:
                 )
 
             # If we get here, the issuer is not valid
-            print(f"[decode_token] Invalid issuer: {issuer}")
+
             raise InvalidCredentials(
                 "Invalid token issuer. Token must be issued by a valid provider",
                 log_txt="Error while trying to decode token. Invalid issuer.",
@@ -169,14 +168,14 @@ class Auth:
             )
 
         except jwt.ExpiredSignatureError:
-            print("[decode_token] Caught ExpiredSignatureError")
+
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
                 status_code=400,
             )
         except jwt.InvalidTokenError as e:
-            print("[decode_token] Caught InvalidTokenError")
+
             raise InvalidCredentials(
                 "Invalid token format or signature",
                 log_txt=f"Error while trying to decode token. The token format is invalid: {str(e)}",
@@ -249,7 +248,7 @@ class Auth:
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
 
-        user = self.user_model.get_one_object(username=data["username"])
+        user = self.user_model.get_one_object(username=data["sub"])
 
         if user is None:
             err = "User not found. Please ensure you are using valid credentials"
@@ -304,15 +303,13 @@ class Auth:
         :return: The decoded token claims
         :rtype: dict
         """
-        print("[verify_token] Starting token verification")
+
         # Get unverified header - this will raise jwt.InvalidTokenError if token format is invalid
-        print("[verify_token] Getting unverified header")
         unverified_header = jwt.get_unverified_header(token)
-        print(f"[verify_token] Unverified header: {unverified_header}")
 
         # Check for kid in header
         if "kid" not in unverified_header:
-            print("[verify_token] Missing kid in header")
+
             raise InvalidCredentials(
                 "Invalid token: Missing key identifier (kid) in token header",
                 log_txt="Error while verifying token. Token header is missing 'kid'.",
@@ -320,32 +317,24 @@ class Auth:
             )
 
         kid = unverified_header["kid"]
-        print(f"[verify_token] Found kid: {kid}")
 
         # Check if we have the keys in cache and if the kid exists
-        print("[verify_token] Checking cache for public keys")
         public_key = None
         if provider_url in public_keys_cache:
-            print(f"[verify_token] Found keys in cache for {provider_url}")
             cached_keys = public_keys_cache[provider_url]
             if kid in cached_keys:
-                print("[verify_token] Found matching kid in cached keys")
                 public_key = cached_keys[kid]
 
         # If kid not in cache, fetch fresh keys
         if public_key is None:
-            print("[verify_token] Public key not found in cache, fetching fresh keys")
             public_keys = self.get_public_keys(provider_url)
             if kid not in public_keys:
-                print(f"[verify_token] Kid {kid} not found in fresh public keys")
-                print("[verify_token] About to raise InvalidCredentials")
                 raise InvalidCredentials(
                     "Invalid token: Unknown key identifier (kid)",
                     log_txt="Error while verifying token. Key ID not found in public keys.",
                     status_code=400,
                 )
             public_key = public_keys[kid]
-            print("[verify_token] Found public key in fresh keys")
 
         # Verify token - this will raise appropriate jwt exceptions that will be caught in decode_token
         return jwt.decode(

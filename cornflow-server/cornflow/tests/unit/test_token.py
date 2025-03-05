@@ -1,6 +1,7 @@
 """
 Unit test for the token endpoint
 """
+
 import json
 
 from flask import current_app
@@ -92,16 +93,25 @@ class TestUnexpiringToken(CustomTestCase):
 
         # Verify that the token decodes correctly
         response = auth.decode_token(token)
-        self.assertEqual(response, {"username": "testname"})
 
+        self.assertIn("exp", response)
+        self.assertIn("iat", response)
+        self.assertIn("iss", response)
+        self.assertIn("sub", response)
+        self.assertEqual("testname", response["sub"])
         # Don't use hardcoded token, generate another dynamic one
         user = UserModel.get_one_user(1)
         self.assertIsNotNone(user)
-        
+
         # Verify that another generated token also works
         token2 = auth.generate_token(1)
         response2 = auth.decode_token(token2)
-        self.assertEqual(response2, {"username": "testname"})
+
+        self.assertIn("exp", response2)
+        self.assertIn("iat", response2)
+        self.assertIn("iss", response2)
+        self.assertIn("sub", response2)
+        self.assertEqual("testname", response2["sub"])
 
     def test_user_not_valid(self):
         auth = BIAuth()

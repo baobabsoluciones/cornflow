@@ -32,7 +32,12 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, INTERNAL_TOKEN_ISSUER
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    PLANNER_ROLE,
+    SERVICE_ROLE,
+    INTERNAL_TOKEN_ISSUER,
+)
 from cornflow.shared import db
 from cornflow.tests.const import (
     LOGIN_URL,
@@ -122,7 +127,7 @@ class CustomTestCase(TestCase):
         ).json["token"]
 
         data = Auth().decode_token(self.token)
-        self.user = UserModel.get_one_object(username=data["username"])
+        self.user = UserModel.get_one_object(username=data["sub"])
         self.url = None
         self.model = None
         self.copied_items = set()
@@ -1005,7 +1010,7 @@ class LoginTestCases:
             expired_token = jwt.encode(
                 expired_payload,
                 current_app.config["SECRET_TOKEN_KEY"],
-                algorithm="HS256"
+                algorithm="HS256",
             )
 
             # Try to use the expired token
@@ -1020,8 +1025,7 @@ class LoginTestCases:
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "The token has expired, please login again",
-                response.json["error"]
+                "The token has expired, please login again", response.json["error"]
             )
 
         def test_bad_format_token(self):
@@ -1072,7 +1076,7 @@ class LoginTestCases:
             invalid_token = jwt.encode(
                 invalid_payload,
                 current_app.config["SECRET_TOKEN_KEY"],
-                algorithm="HS256"
+                algorithm="HS256",
             )
 
             # Try to use the invalid token
