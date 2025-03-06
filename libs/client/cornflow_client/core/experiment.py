@@ -79,7 +79,6 @@ class ExperimentCore(ABC):
             if checks is None:
                 checks = self.check_solution()
         except NotImplementedError:
-            # Add a deprecation warning here
             warnings.warn(
                 "The check_solution() method is deprecated. Please use check() instead. "
                 "Support for check_solution() will be removed on cornflow-client 2.0.0",
@@ -95,7 +94,10 @@ class ExperimentCore(ABC):
 
     def check(self) -> Dict[str, Union[List, Dict]]:
         """
-        Method that runs all the checks on the class.
+        Method that runs all the checks for the solution.
+
+        This method can be overridden by the user to modify the behaviour of the checks
+        if wanted.
 
         :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
           inside represents one error of that particular type.
@@ -104,10 +106,15 @@ class ExperimentCore(ABC):
 
     def check_solution(self) -> Dict[str, Union[List, Dict]]:
         """
-        Mandatory method
+        Method that runs all the checks for the solution.
+        This method will be deprecated on cornflow-client version 2.0.0
 
-        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
-          inside represents one error of that particular type.
+        This method can be overridden by the user to modify the behaviour of the checks
+        if wanted.
+
+        :return: a dictionary of dictionaries. Each dictionary represents one type of
+          error. Each of the elements inside represents one error of that particular
+          type.
         """
         return self.launch_all_checks()
 
