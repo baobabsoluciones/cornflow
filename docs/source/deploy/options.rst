@@ -4,7 +4,7 @@ Deployment options
 Running airflow with reverse proxy
 ***************************************
 
-Cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
+cornflow does not have any reverse proxy configuration like airflow does. Just redirect all http request to cornflow port.
 Eg.::
 
     [Nginx]
@@ -39,9 +39,9 @@ To create a database, you must be a superuser. A user called postgres is made on
     postgres=# create user myuser with encrypted password 'myuserpwd';
     postgres=# grant all privileges on database cornflowdb to myuser;
 
-**Cornflow set connection to database**
+**cornflow set connection to database**
 
-Before deploying Cornflow, set the environment variable with the address of the database::
+Before deploying cornflow, set the environment variable with the address of the database::
 
     docker run -e DATABASE_URL=postgresql://myuser:myuserpwd@myserverip:myserverport/cornflow -d --name=cornflow baobabsoluciones/cornflow
     

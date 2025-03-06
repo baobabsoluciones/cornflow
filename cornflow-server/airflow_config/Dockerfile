@@ -20,7 +20,7 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 # install Airflow and extras: celery,postgres and redis
 RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 # We add these overruns due to security reasons as suggested here: https://airflow.apache.org/docs/apache-airflow/stable/installation/installing-from-pypi.html#upgrading-and-installing-dependencies-including-providers
-RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==42.0.5" "gunicorn==22.0.0" "requests==2.31.0" "Werkzeug==2.3.8"
+RUN pip install "apache-airflow[celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==42.0.5" "requests==2.31.0" "Werkzeug==2.3.8"
 
 # copy init script and config to container
 COPY scripts ${AIRFLOW_HOME}/scripts
