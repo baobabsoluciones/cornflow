@@ -1,2 +1,1 @@
-Facility location 
-====================
+.. include:: ../../../cornflow-dags/DAG/facility_location/README.rst

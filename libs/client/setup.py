@@ -12,7 +12,7 @@ extra_required = {"excel": ["openpyxl", "pandas"]}
 
 setuptools.setup(
     name="cornflow-client",
-    version="1.1.1",
+    version="1.1.5",
     author="baobab soluciones",
     author_email="sistemas@baobabsoluciones.es",
     description="Client to connect to a cornflow server",
@@ -26,7 +26,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Development Status :: 5 - Production/Stable",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     include_package_data=True,
     install_requires=required,
     extra_require=extra_required,

@@ -1,6 +1,7 @@
 """
-
+Base code for the application core.
 """
+
 # Partial imports
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
@@ -179,7 +180,7 @@ class ApplicationCore(ABC):
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
 
-        instance_checks = SuperDict(inst.check())
+        instance_checks = SuperDict(inst.data_checks())
 
         warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
@@ -233,17 +234,22 @@ class ApplicationCore(ABC):
             log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
 
         if log_json["sol_code"] > 0:
+            sol_errors = algo.solution.check_schema()
+            if sol_errors:
+                raise BadSolution(
+                    f"The solution does not match the schema:\n{sol_errors}"
+                )
             sol = algo.solution.to_dict()
 
         if sol != {} and sol is not None:
-            checks = algo.check_solution()
+            checks = algo.data_checks()
         else:
             checks = None
 
         return sol, checks, instance_checks, log_txt, log_json
 
     def check(
-        self, instance_data: dict, solution_data: dict, *args, **kwargs
+        self, instance_data: dict, solution_data: dict = None
     ) -> Tuple[Dict, Dict, Dict]:
         """
         Checks the instance and solution data
@@ -257,13 +263,13 @@ class ApplicationCore(ABC):
             raise NoSolverException(f"No solver is available")
         inst = self.instance.from_dict(instance_data)
 
-        instance_checks = inst.check(*args, **kwargs)
+        instance_checks = inst.data_checks()
 
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
             algo = solver_class(inst, sol)
             start = timer()
-            solution_checks = algo.check_solution(*args, **kwargs)
+            solution_checks = algo.data_checks()
         else:
             start = timer()
             solution_checks = None
