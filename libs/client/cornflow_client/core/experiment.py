@@ -128,7 +128,7 @@ class ExperimentCore(ABC):
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
-           or in a config["solver_config"] using the solver names.
+           or in a config["solver_config"] using the solver names. Nothing is ever removed from solver_config.
         Example:
             config = {
                 "solver":"milp.cbc",
@@ -168,9 +168,8 @@ class ExperimentCore(ABC):
             if config.get("solver_config"):
                 conf.update(
                     {
-                        mapping[k, lib, solver]: v
+                        mapping.get((k, lib, solver), k): v
                         for k, v in config["solver_config"].items()
-                        if (k, lib, solver) in mapping
                     }
                 )
         else:
