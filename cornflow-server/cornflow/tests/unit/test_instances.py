@@ -16,6 +16,7 @@ from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
     INSTANCE_PATH,
+    EMPTY_INSTANCE_PATH
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from flask import current_app
@@ -35,6 +36,7 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
             return temp
 
         self.payload = load_file(INSTANCE_PATH)
+        self.payload2 = load_file(EMPTY_INSTANCE_PATH)
         self.payloads = [load_file(f) for f in INSTANCES_LIST]
         self.keys_to_check = [
             "data_hash",
@@ -48,6 +50,16 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
 
     def test_new_instance(self):
         self.create_new_row(self.url, self.model, self.payload)
+
+    def test_empty_instance(self):
+        """
+        testing what happend when empty dictionary get saved
+        """
+        self.create_new_row(self.url, self.model, self.payload2)
+
+        active_rows = self.model.query.filter(self.model.deleted_at == None).all()
+        has_empty_dict = any(getattr(row, "data", None) == {} for row in active_rows)
+        self.assertTrue(has_empty_dict, "Error: Not an empty dicctionary")
 
     def test_new_instance_missing_info(self):
         del self.payload["data"]["parameters"]
