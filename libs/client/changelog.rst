@@ -1,3 +1,13 @@
+version 1.1.5
+--------------
+
+- released: 2025-01-14 
+- description: added support for python 3.12
+- changelog:
+    - added support for python 3.12.
+    - dropped support for python 3.8.
+    - updated requirements versions.
+
 version 1.1.4
 ------------
 
