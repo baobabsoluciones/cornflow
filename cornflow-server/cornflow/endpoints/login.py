@@ -173,21 +173,15 @@ class LoginBaseEndpoint(BaseMetaResource):
         :return: the user object, or it raises an error if it has not been possible to log in
         :rtype: :class:`UserModel`
         """
-        print("[auth_oid_authenticate] Starting OpenID authentication")
         if token:
-            print("[auth_oid_authenticate] Authenticating with token")
+
             decoded_token = self.auth_class().decode_token(token)
-            print(
-                f"[auth_oid_authenticate] Token decoded successfully: {decoded_token}"
-            )
 
             username = decoded_token.get("sub")
 
-            print(f"[auth_oid_authenticate] Looking up user: {username}")
             user = self.data_model.get_one_object(username=username)
 
             if not user:
-                print(f"[auth_oid_authenticate] Creating new user: {username}")
                 current_app.logger.info(
                     f"OpenID user {username} does not exist and is created"
                 )
