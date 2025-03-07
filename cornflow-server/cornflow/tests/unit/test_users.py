@@ -11,20 +11,12 @@ All tests follow a consistent pattern of setting up test data,
 executing operations, and verifying results against expected outcomes.
 """
 
-# Import from libraries
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
 
-# Import from flask
 from flask import current_app
 from flask_testing import TestCase
 
-# Import from internal modules
-from cornflow.endpoints import UserEndpoint
-from cornflow.models import UserModel
-from cornflow.shared.authentication import Auth
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
@@ -34,10 +26,11 @@ from cornflow.models import (
     ExecutionModel,
     InstanceModel,
     PermissionsDAG,
+    UserModel,
     UserRoleModel,
 )
 from cornflow.shared import db
-from cornflow.shared.const import PLANNER_ROLE, VIEWER_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE, PLANNER_ROLE, VIEWER_ROLE
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,
@@ -383,12 +376,11 @@ class TestUserEndpoint(TestCase):
 
     def test_change_password_rotation(self):
         current_app.config["PWD_ROTATION_TIME"] = 1  # in days
-        payload = {
-            "pwd_last_change": (
-                datetime.now(timezone.utc) - timedelta(days=2)
-            ).strftime("%Y-%m-%dT%H:%M:%SZ")
-        }
-        self.modify_info(self.planner, self.planner, payload)
+        payload = {"pwd_last_change": (datetime.now(timezone.utc) - timedelta(days=2))}
+
+        planner = UserModel.get_one_user(self.planner["id"])
+        planner.update(payload)
+
         response = self.log_in(self.planner)
         self.assertEqual(True, response.json["change_password"])
 
