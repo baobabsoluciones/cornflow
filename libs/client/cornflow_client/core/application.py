@@ -188,7 +188,19 @@ class ApplicationCore(ABC):
             .keys()
         )
         instance_errors = instance_checks.kfilter(lambda k: k not in warnings_tables)
-        if any([len(error_table) for error_table in instance_errors.values()]):
+
+        # Check if any error table has errors, handling scalar values
+        has_errors = False
+        for error_table in instance_errors.values():
+            if isinstance(error_table, (list, dict)) and len(error_table) > 0:
+                has_errors = True
+                break
+            elif error_table and not isinstance(error_table, (list, dict)):
+                # If it's a scalar value and evaluates to True, consider it an error
+                has_errors = True
+                break
+
+        if has_errors:
             log = dict(
                 time=0,
                 solver=solver,
