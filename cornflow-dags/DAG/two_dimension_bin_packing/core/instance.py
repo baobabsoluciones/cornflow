@@ -1,7 +1,7 @@
 import os
 import random
 import pickle
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
@@ -85,7 +85,7 @@ class Instance(InstanceCore):
             print(f"No area valid cuts exist")
             return [], 0
 
-        t = datetime.utcnow()
+        t = datetime.now(timezone.utc)
         cuts = {
             1: self.get_biggest_cut(),
             2: self.get_value_cut(),
@@ -111,7 +111,7 @@ class Instance(InstanceCore):
             cuts[cut] = tuple(selection)
             cut += 1
 
-            if (datetime.utcnow() - t).seconds > 3 or cut > 1000:
+            if (datetime.now(timezone.utc) - t).seconds > 3 or cut > 1000:
                 break
 
         print(f"{cut - 1} cuts generated")
