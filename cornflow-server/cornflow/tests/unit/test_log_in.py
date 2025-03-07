@@ -226,8 +226,6 @@ class TestLogInOpenAuthAzure(CustomTestCase):
             headers={"Content-Type": "application/json"},
         )
 
-        print(response.json)
-
         self.assertEqual(200, response.status_code)
         self.assertEqual(self.service_user_id, response.json["id"])
 
