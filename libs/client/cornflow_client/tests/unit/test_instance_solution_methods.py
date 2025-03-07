@@ -386,6 +386,82 @@ class TestExperimentCore(TestCase):
         res = self.class_to_use.get_solver_config(initial_config)
         self.assertEqual(res, {"limits/time": 10, "lp/iterlim": 10})
 
+    def test_get_solver_config_with_remove_unknow(self):
+        """testing the function get_solver_config when the argument remove_unknown is True"""
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+            solver_config=dict(time_limit=10 * 60, rel_gap=0.001,  additional = True)
+        )
+
+        expected = {"TimeLimit": 600, "MIPGap": 0.001, "MIPGapAbs": 5, "additional": True}
+        result = self.class_to_use.get_solver_config(config, remove_unknown=True)
+        msg = "if remove_unknown is true, unmapped argument should be removed from config but not from solver_config"
+        self.assertEqual(expected, result, msg=msg)
+
+    def test_get_solver_config_without_remove_unknow(self):
+        """testing the function get_solver_config when the argument remove_unknown is False"""
+        config = dict(
+            solver= "milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+            solver_config=dict(time_limit=10 * 60, rel_gap=0.001, additional = True),
+        )
+
+        expected = {"TimeLimit": 600, "MIPGap": 0.001 ,"MIPGapAbs": 5, "additional":True, "msg" : True }
+        result = self.class_to_use.get_solver_config(config, remove_unknown=False)
+        msg = "if remove_unknown is false, unmapped argument should not be removed from config and solver_config"
+        self.assertEqual(expected, result, msg=msg)
+
+    def test_get_solver_config_without_remove_unknow_and_solver_config(self):
+        """testing the function get_solver_config when the argument remove_unknown is False and solver_config does not exist"""
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+        )
+
+        expected = {"MIPGapAbs": 5, "msg": True}
+        result = self.class_to_use.get_solver_config(config, remove_unknown=False)
+        msg = "if remove_unknown is false, unmapped argument should not be removed from config"
+        self.assertEqual(expected, result, msg=msg)
+
+    def test_get_solver_config_with_remove_unknow_without_solver_config(self):
+        """testing the function get_solver_config when the argument remove_unknown is True and solver_config does not exist"""
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+        )
+
+        expected = {"MIPGapAbs": 5}
+        result = self.class_to_use.get_solver_config(config, remove_unknown=True)
+        msg = "if remove_unknown is false, unmapped argument should be removed from config"
+        self.assertEqual(expected, result, msg=msg)
+
+    def test_get_solver_config_empty(self):
+        """testing the function get_solver_config when the argument config is empty"""
+        config = dict(
+        )
+
+        expected = {}
+        result = self.class_to_use.get_solver_config(config)
+        msg = "the dictionary has to be empty"
+        self.assertEqual(expected, result, msg=msg)
+
+    def test_get_solver_config(self):
+        """testing the function get_solver_config when config has only solver and solver_config arguments"""
+        config = dict(
+            solver="milp_solver.gurobi",
+            solver_config=dict(time_limit=10 * 60, rel_gap=0.001)
+        )
+
+        expected = {"TimeLimit": 600, "MIPGap": 0.001}
+        result = self.class_to_use.get_solver_config(config)
+        msg = "only solver_config arguments has to be included"
+        self.assertEqual(expected, result, msg=msg)
+
     def test_get_solver_config_pyomo_2(self):
         initial_config = {
             "solver": "mip.scip",
