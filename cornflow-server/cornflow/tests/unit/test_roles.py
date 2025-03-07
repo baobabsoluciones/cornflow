@@ -1,6 +1,7 @@
 """
 Unit test for the role endpoints
 """
+
 import json
 import logging as log
 from cornflow.models import PermissionViewRoleModel, RoleModel
@@ -472,3 +473,40 @@ class TestRolesModelMethods(CustomTestCase):
         self.token = self.create_user_with_role(ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.str_method(idx, "<Role test_role>")
+
+    def test_get_all_objects(self):
+        """
+        Tests the get_all_objects method
+        """
+        # We expect 4 roles to be present (from ROLES_MAP constant)
+        instances = RoleModel.get_all_objects().all()
+        self.assertEqual(len(instances), 4)
+
+        # Check that all the roles from ROLES_MAP are present
+        role_names = [role.name for role in instances]
+        expected_names = list(ROLES_MAP.values())
+        self.assertCountEqual(role_names, expected_names)
+
+        # Test offset parameter - should get all except the first role
+        instances = RoleModel.get_all_objects(offset=1).all()
+        self.assertEqual(len(instances), 3)
+
+        # Get the names of all roles except the first one
+        remaining_roles = [role.name for role in instances]
+        # The first role is skipped due to offset=1
+        first_role = RoleModel.get_all_objects().first().name
+        self.assertNotIn(first_role, remaining_roles)
+
+        # Test offset and limit parameters
+        instances = RoleModel.get_all_objects(offset=1, limit=1).all()
+        self.assertEqual(len(instances), 1)
+
+        # Verify that we get the second role when using offset=1 and limit=1
+        second_role = RoleModel.get_all_objects().all()[1]
+        self.assertEqual(instances[0].id, second_role.id)
+        self.assertEqual(instances[0].name, second_role.name)
+
+        # Test filtering by name
+        instances = RoleModel.get_all_objects(limit=1, name="admin").all()
+        self.assertEqual(len(instances), 1)
+        self.assertEqual(instances[0].name, "admin")
