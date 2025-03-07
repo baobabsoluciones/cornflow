@@ -39,7 +39,7 @@ class BaseDataModel(TraceAttributesModel):
 
     def __init__(self, data):
         self.user_id = data.get("user_id")
-        self.data = data.get("data") or data.get("execution_results")
+        self.data = data.get("data")
         self.data_hash = hash_json_256(self.data)
         self.name = data.get("name")
         self.description = data.get("description")
