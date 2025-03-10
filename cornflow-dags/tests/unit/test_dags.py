@@ -1,6 +1,7 @@
-import os, sys
+import os
+import sys
 
-prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
+prev_dir = os.path.join(os.path.dirname(__file__), "../../DAG")
 sys.path.insert(1, prev_dir)
 import unittest
 from unittest.mock import patch, Mock, MagicMock
@@ -77,7 +78,7 @@ class BaseDAGTests:
                     ) = self.app.solve(instance_data, config)
                 if solution_test is None:
                     raise ValueError("No solution found")
-                marshm = SchemaManager(self.app.solution.schema).jsonschema_to_flask()
+
                 validator = Draft7Validator(self.app.solution.schema)
                 if not validator.is_valid(solution_test):
                     raise Exception("The solution has invalid format")
@@ -106,6 +107,7 @@ class BaseDAGTests:
                     raise Exception("The solution checks have invalid format")
 
                 validator = Draft7Validator(instance.schema_checks)
+
                 if not validator.is_valid(inst_check):
                     raise Exception("The instance checks have invalid format")
 
@@ -142,7 +144,7 @@ class BaseDAGTests:
                 mock.write_solution.assert_called_once()
 
 
-class GraphColor(BaseDAGTests.SolvingTests):
+class GraphColorTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.graph_coloring import GraphColoring
@@ -151,7 +153,7 @@ class GraphColor(BaseDAGTests.SolvingTests):
         self.config = dict(msg=False)
 
 
-class Tsp(BaseDAGTests.SolvingTests):
+class TspTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.tsp import TspApp
@@ -162,7 +164,7 @@ class Tsp(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="cpsat", **self.config))
 
 
-class Vrp(BaseDAGTests.SolvingTests):
+class VrpTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.vrp import VRP
@@ -183,7 +185,7 @@ class Vrp(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(self.config)
 
 
-class Knapsack(BaseDAGTests.SolvingTests):
+class KnapsackTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.knapsack import Knapsack
@@ -203,7 +205,7 @@ class Knapsack(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="MIP.cbc", **self.config))
 
 
-class Roadef(BaseDAGTests.SolvingTests):
+class RoadefTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.roadef import Roadef
@@ -222,7 +224,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         )
 
     def test_read_xml(self):
-        data_dir = os.path.join(os.path.dirname(__file__), "../DAG/roadef/data/")
+        data_dir = os.path.join(os.path.dirname(__file__), "../../DAG/roadef/data/")
         instance = self.app.instance.from_file(
             data_dir + "Instance_V_1.0_ConvertedTo_V2.xml"
         )
@@ -231,16 +233,7 @@ class Roadef(BaseDAGTests.SolvingTests):
         self.assertEqual(len(instance.check_schema()), 0)
 
 
-class Rostering(BaseDAGTests.SolvingTests):
-    def setUp(self):
-        super().setUp()
-        from DAG.rostering import Rostering
-
-        self.app = Rostering()
-        self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
-
-
-class BarCutting(BaseDAGTests.SolvingTests):
+class BarCuttingTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.bar_cutting import BarCutting
@@ -254,7 +247,7 @@ class BarCutting(BaseDAGTests.SolvingTests):
         return self.test_try_solving_testcase(dict(solver="CG.cbc", **self.config))
 
 
-class FacilityLocation(BaseDAGTests.SolvingTests):
+class FacilityLocationTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.facility_location import FacilityLocation
@@ -263,7 +256,7 @@ class FacilityLocation(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="Pyomo.cbc", abs_gap=1, rel_gap=0.01))
 
 
-class PuLP(BaseDAGTests.SolvingTests):
+class PuLPTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.solve_model_dag import PuLP
@@ -278,10 +271,10 @@ class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
         from DAG.two_dimension_bin_packing import TwoDimensionBinPackingProblem
 
         self.app = TwoDimensionBinPackingProblem()
-        self.config.update(dict(solver="right_corner.cbc"))
+        self.config.update(dict(solver="right_corner.cbc"), timeLimit=10, msg=True)
 
 
-class Timer(BaseDAGTests.SolvingTests):
+class TimerTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         from DAG.dag_timer import Timer

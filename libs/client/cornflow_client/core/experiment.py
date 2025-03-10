@@ -4,7 +4,7 @@ Base code for the experiment template.
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import Union, Dict
+from typing import List, Dict, Union
 
 from jsonschema import Draft7Validator
 
@@ -79,7 +79,6 @@ class ExperimentCore(ABC):
             if checks is None:
                 checks = self.check_solution()
         except NotImplementedError:
-            # Add a deprecation warning here
             warnings.warn(
                 "The check_solution() method is deprecated. Please use check() instead. "
                 "Support for check_solution() will be removed on cornflow-client 2.0.0",
@@ -93,24 +92,68 @@ class ExperimentCore(ABC):
             )
         return checks
 
-    # TODO: make this method abstract on cornflow-client 2.0.0
-    def check(self) -> Dict[str, Dict]:
+    def check(self) -> Dict[str, Union[List, Dict]]:
         """
-        Mandatory method
+        Method that runs all the checks for the solution.
+
+        This method can be overridden by the user to modify the behaviour of the checks
+        if wanted.
 
         :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
           inside represents one error of that particular type.
         """
-        pass
+        return self.launch_all_checks()
 
-    def check_solution(self) -> dict:
+    def check_solution(self) -> Dict[str, Union[List, Dict]]:
         """
-        Mandatory method
+        Method that runs all the checks for the solution.
+        This method will be deprecated on cornflow-client version 2.0.0
 
-        :return: a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
-          inside represents one error of that particular type.
+        This method can be overridden by the user to modify the behaviour of the checks
+        if wanted.
+
+        :return: a dictionary of dictionaries. Each dictionary represents one type of
+          error. Each of the elements inside represents one error of that particular
+          type.
         """
-        pass
+        return self.launch_all_checks()
+
+    def get_check_methods(self) -> list:
+        """
+        Finds all class methods starting with check_ and returns them in a list.
+
+        :return: A list of check methods.
+        """
+        check_methods = [
+            m
+            for m in dir(self)
+            if m.startswith("check_")
+            and callable(getattr(self, m))
+            and m != "check_schema"
+            and m != "check_solution"
+        ]
+        return check_methods
+
+    def launch_all_checks(self) -> Dict[str, Union[List, Dict]]:
+        """
+        Launch every check method and return a dict with the check method name as key
+        and the list/dict of errors / warnings as value.
+
+        It will only return those checks that return a non-empty list/dict.
+        """
+        check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
+        failed_checks = {}
+        for k, v in check_methods.items():
+            if v is None:
+                continue
+
+            try:
+                if len(v) > 0:
+                    failed_checks[k.split("check_")[1]] = v
+            except TypeError:
+                failed_checks[k.split("check_")[1]] = v
+
+        return dict(failed_checks)
 
     @property
     @abstractmethod

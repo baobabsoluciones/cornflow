@@ -1,20 +1,19 @@
 """
-
+Instance class for the rostering problem
 """
-# Imports from libraries
-from datetime import datetime, timedelta
+
 import os
 import pickle
-from pytups import SuperDict, TupList
-from typing import Dict, Tuple
+from datetime import datetime, timedelta
 from math import ceil
+from typing import Dict, Tuple
+from typing import Union
 
-# Imports from cornflow libraries
 from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
-from .const import INSTANCE_KEYS_RELATION
+from pytups import SuperDict, TupList
 
-# Imports from internal modules
+from .const import INSTANCE_KEYS_RELATION
 from .tools import (
     get_hour_string_from_date_time,
     get_hour_string_from_hour_minute,
@@ -123,9 +122,9 @@ class Instance(InstanceCore):
             data_p["employee_preferences"] = SuperDict({})
 
         if data.get("employee_schedule"):
-            data_p["employee_schedule"] = TupList(
-                data["employee_schedule"]
-            ).to_dict(result_col="week_day", indices=["id_employee", "id_contract"])
+            data_p["employee_schedule"] = TupList(data["employee_schedule"]).to_dict(
+                result_col="week_day", indices=["id_employee", "id_contract"]
+            )
         else:
             data_p["employee_schedule"] = SuperDict()
 
@@ -151,7 +150,7 @@ class Instance(InstanceCore):
             "employee_downtime",
             "store_holidays",
             "employee_preferences",
-            "fixed_worktables"
+            "fixed_worktables",
         ]
 
         data_p = {el: self.data[el].values_l() for el in tables}
@@ -194,7 +193,9 @@ class Instance(InstanceCore):
         ]
         data_p["employee_schedule"] = [
             dict(id_employee=id_employee, week_day=week_day, id_contract=id_contract)
-            for (id_employee, id_contract), weekdays in self.data["employee_schedule"].items()
+            for (id_employee, id_contract), weekdays in self.data[
+                "employee_schedule"
+            ].items()
             for week_day in weekdays
         ]
         return pickle.loads(pickle.dumps(data_p, -1))
@@ -209,16 +210,7 @@ class Instance(InstanceCore):
         self.time_slots = self._get_time_slots()
         self.time_slots_properties = self._get_time_slots_properties()
 
-    def check(self) -> dict:
-        return SuperDict(
-            incoherent_foreign_keys=self.check_indexes_coherence(),
-            missing_data=self.check_missing_data(),
-            timeslot_length=self.check_timeslot_length(),
-            penalties=self.check_penalties(),
-            **self.check_timeslot_coherence(),
-        ).vfilter(lambda v: len(v))
-
-    def check_indexes_coherence(self) -> list:
+    def check_incoherent_foreign_keys(self) -> list:
         errors = list()
         for pk, fk_list in INSTANCE_KEYS_RELATION.items():
             for fk_table, fk_column, _ in fk_list:
@@ -244,74 +236,93 @@ class Instance(InstanceCore):
                     continue
                 items = self._get_property(pk[0], pk[1]).values_tl()
                 fk_items = self._get_property(fk_table, fk_column).values_tl()
-                errors += items.vfilter(lambda v: v not in fk_items).vapply(lambda v: {
-                    "primary_table": pk[0],
-                    "foreign_table": fk_table,
-                    "key": pk[1],
-                    "value": v,
-                })
+                errors += items.vfilter(lambda v: v not in fk_items).vapply(
+                    lambda v: {
+                        "primary_table": pk[0],
+                        "foreign_table": fk_table,
+                        "key": pk[1],
+                        "value": v,
+                    }
+                )
 
         return errors
 
-    def check_timeslot_length(self):
+    def check_timeslot_length(self) -> Union[float, Dict]:
+        """
+        Checks if the timeslot length is 15, 30 or 60 minutes
+        Returns a dict with the timeslot length if it is not 15, 30 or 60 minutes
+        """
         slot_length = self._get_slot_length()
         if slot_length not in [15, 30, 60]:
-            return dict(timeslot_length=slot_length)
-        return dict()
+            return slot_length
+        return None
 
-    def check_timeslot_coherence(self) -> dict:
-        checks = SuperDict(
-            weekly_schedule_timeslots=TupList(),
-            schedule_exceptions_timeslots=TupList(),
-            shift_hours_timeslots=TupList(),
-            employee_preferences_timeslots=TupList(),
-            fixed_worktable_timeslots=TupList()
-        )
+    def check_weekly_schedule_timeslots(self) -> TupList:
+        """
+        Checks if the minutes in weekly schedule start/end times are divisible by the slot length
+        Returns a TupList of inconsistencies
+        """
         slot_length = self._get_slot_length()
         weekly_schedule = self._get_weekly_schedule(round_ts=False)
+
+        result = TupList()
+        for key, values in weekly_schedule.items():
+            result += TupList(
+                {
+                    "weekday": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
+                }
+                for v in values
+                if v[1] % slot_length != 0
+            ) + TupList(
+                {
+                    "weekday": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
+                }
+                for v in values
+                if v[3] % slot_length != 0
+            )
+        return result
+
+    def check_schedule_exceptions_timeslots(self) -> TupList:
+        """
+        Checks if the minutes in schedule exceptions start/end times are divisible by the slot length
+        Returns a TupList of inconsistencies
+        """
+        slot_length = self._get_slot_length()
         schedule_exceptions = self._get_schedule_exceptions(round_ts=False)
+
+        result = TupList()
+        for key, values in schedule_exceptions.items():
+            result += TupList(
+                {
+                    "date": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
+                }
+                for v in values
+                if v[1] % slot_length != 0
+            ) + TupList(
+                {
+                    "date": key,
+                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
+                }
+                for v in values
+                if v[3] % slot_length != 0
+            )
+        return result
+
+    def check_shift_hours_timeslots(self) -> TupList:
+        """
+        Checks if the minutes in employee contract start/end hours are divisible by the slot length
+        Returns a TupList of inconsistencies
+        """
+        slot_length = self._get_slot_length()
         contract_start_hours = self._get_employees_contract_starting_hour(
             round_ts=False
         )
         contract_end_hours = self._get_employees_contract_ending_hour(round_ts=False)
-        employee_preferences = self._get_employee_preferences(round_ts=False)
-        fixed_worktable = self.get_fixed_worktable(round_ts=False)
 
-        for key, values in weekly_schedule.items():
-            checks["weekly_schedule_timeslots"] += TupList(
-                {
-                    "weekday": key,
-                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
-                }
-                for v in values
-                if v[1] % slot_length != 0
-            ) + TupList(
-                {
-                    "weekday": key,
-                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
-                }
-                for v in values
-                if v[3] % slot_length != 0
-            )
-
-        for key, values in schedule_exceptions.items():
-            checks["schedule_exceptions_timeslots"] += TupList(
-                {
-                    "date": key,
-                    "hour": get_hour_string_from_hour_minute(hour=v[0], minute=v[1]),
-                }
-                for v in values
-                if v[1] % slot_length != 0
-            ) + TupList(
-                {
-                    "date": key,
-                    "hour": get_hour_string_from_hour_minute(hour=v[2], minute=v[3]),
-                }
-                for v in values
-                if v[3] % slot_length != 0
-            )
-
-        checks["shift_hours_timeslots"] += TupList(
+        return TupList(
             {"week": week, "employee": employee, "hour": hour}
             for (week, employee), hour in contract_start_hours.items()
             if int(hour[3:]) % slot_length != 0
@@ -321,19 +332,33 @@ class Instance(InstanceCore):
             if int(hour[3:]) % slot_length != 0
         )
 
-        checks["employee_preferences_timeslots"] += TupList(
+    def check_employee_preferences_timeslots(self) -> TupList:
+        """
+        Checks if the minutes in employee preferences hours are divisible by the slot length
+        Returns a TupList of inconsistencies
+        """
+        slot_length = self._get_slot_length()
+        employee_preferences = self._get_employee_preferences(round_ts=False)
+
+        return TupList(
             {"date": date, "employee": employee, "hour": hour_string}
             for (employee, date, _, hour_string) in employee_preferences
             if int(hour_string[3:]) % slot_length != 0
         )
 
-        checks["fixed_worktable_timeslots"] = TupList(
+    def check_fixed_worktable_timeslots(self) -> TupList:
+        """
+        Checks if the minutes in fixed worktable hours are divisible by the slot length
+        Returns a TupList of inconsistencies
+        """
+        slot_length = self._get_slot_length()
+        fixed_worktable = self.get_fixed_worktable(round_ts=False)
+
+        return TupList(
             {"date": ts[:10], "employee": employee, "hour": ts[-5:]}
             for (ts, employee) in fixed_worktable
             if int(ts[-2:]) % slot_length != 0
         )
-
-        return checks.vfilter(lambda v: len(v))
 
     def check_penalties(self):
         """Checks that all penalties are defined for soft constraints"""
@@ -595,15 +620,14 @@ class Instance(InstanceCore):
             .to_dict(result_col=2, indices=[0, 1])
         )
         if not set_default:
-            return (
-                employees_contracts
-                .kvapply(lambda k, v: employee_schedule.get((k[1], v), None))
-                .vfilter(lambda v: v)
-            )
-        if self.get_requirement("rq15") == "strict" or (self.get_requirement("rq15") == "soft" and model):
-            return (
-                employees_contracts
-                .kvapply(lambda k, v: employee_schedule.get((k[1], v), list(range(7))))
+            return employees_contracts.kvapply(
+                lambda k, v: employee_schedule.get((k[1], v), None)
+            ).vfilter(lambda v: v)
+        if self.get_requirement("rq15") == "strict" or (
+            self.get_requirement("rq15") == "soft" and model
+        ):
+            return employees_contracts.kvapply(
+                lambda k, v: employee_schedule.get((k[1], v), list(range(7)))
             )
         else:
             return employees_contracts.vapply(lambda v: list(range(7)))
@@ -858,13 +882,11 @@ class Instance(InstanceCore):
         For example: [("2021-09-06T07:00", "2021-09-06", 1),
             ("2021-09-06T08:00", "2021-09-06", 1), ...]
         """
-        start = (
-            self._get_employees_contract_starting_hour()
-            .vapply(lambda v: self._get_hour_from_hour_string(v))
+        start = self._get_employees_contract_starting_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
         )
-        end = (
-            self._get_employees_contract_ending_hour()
-            .vapply(lambda v: self._get_hour_from_hour_string(v))
+        end = self._get_employees_contract_ending_hour().vapply(
+            lambda v: self._get_hour_from_hour_string(v)
         )
 
         return TupList(
@@ -1292,10 +1314,18 @@ class Instance(InstanceCore):
         Returns a TupList with the fixed schedule
         For example:  [("2021-09-06T08:00", 1), ("2021-09-06T09:00", 1) ...]
         """
-        return TupList(self.data["fixed_worktables"].keys_tl()).vapply_col(
-            None,
-            lambda v: v[1] + "T" + self._round_hour_string_down(v[2]) if round_ts else v[2],
-        ).take([3, 0])
+        return (
+            TupList(self.data["fixed_worktables"].keys_tl())
+            .vapply_col(
+                None,
+                lambda v: (
+                    f"{v[1]}T{self._round_hour_string_down(v[2])}"
+                    if round_ts
+                    else f"{v[1]}T{v[2]}"
+                ),
+            )
+            .take([3, 0])
+        )
 
     def get_employee_time_slots_preferences(self) -> SuperDict:
         """

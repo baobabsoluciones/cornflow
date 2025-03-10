@@ -35,6 +35,3 @@ class Experiment(ExperimentCore):
 
         return distance
         pass
-
-    def check_solution(self, *args, **kwargs):
-        return dict()

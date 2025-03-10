@@ -27,17 +27,14 @@ class Experiment(ExperimentCore):
     def solution(self, value):
         self._solution = value
 
-    def check_solution(self):
-        return self.check_total_weight()
-
     def check_total_weight(self):
         id_weight = self.instance.get_objects_weights()
         capacity = self.instance.get_weight_capacity()
         total_weight = sum(id_weight[el] for el in self.solution.get_ids())
         dif = capacity - total_weight
         if dif < 0:
-            return dict(weight={"weight_excess": dif})
-        return dict()
+            return dif
+        return None
 
     def get_objective(self):
         id_value = self.instance.get_objects_values()
