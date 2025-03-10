@@ -46,7 +46,7 @@ def upgrade_migrations(revision="head"):
 
 @migrations.command(name="downgrade", help="Downgrade migrations")
 @click.option(
-    "-r", "--revision", type=str, help="The number of the revision to downgrade to", default="-1"
+    "-r", "--revision", type=str, help="The revision to downgrade to", default="-1"
 )
 def downgrade_migrations(revision="-1"):
     app = get_app()
