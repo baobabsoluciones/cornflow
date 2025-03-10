@@ -6,7 +6,7 @@ This file contains the auth class that can be used for authentication on the req
 import jwt
 import requests
 from jwt.algorithms import RSAAlgorithm
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import request, g, current_app, Request
 from functools import wraps
 from typing import Tuple
@@ -107,9 +107,9 @@ class Auth:
             )
 
         payload = {
-            "exp": datetime.utcnow()
+            "exp": datetime.now(timezone.utc)
             + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
         }
@@ -448,9 +448,7 @@ class BIAuth(Auth):
             )
 
         payload = {
-            "exp": datetime.utcnow()
-            + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
         }
