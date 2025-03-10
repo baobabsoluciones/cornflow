@@ -28,7 +28,10 @@ def migrate_migrations():
 
 
 @migrations.command(name="upgrade", help="Apply migrations")
-def upgrade_migrations():
+@click.option(
+    "-r", "--revision", type=str, help="The revision to upgrade to", default="head"
+)
+def upgrade_migrations(revision="head"):
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
@@ -38,11 +41,14 @@ def upgrade_migrations():
 
     with app.app_context():
         migration_client = Migrate(app=app, db=db, directory=path)
-        upgrade()
+        upgrade(revision=revision)
 
 
 @migrations.command(name="downgrade", help="Downgrade migrations")
-def downgrade_migrations():
+@click.option(
+    "-r", "--revision", type=str, help="The number of the revision to downgrade to", default="-1"
+)
+def downgrade_migrations(revision="-1"):
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
@@ -52,7 +58,7 @@ def downgrade_migrations():
 
     with app.app_context():
         migration_client = Migrate(app=app, db=db, directory=path)
-        downgrade()
+        downgrade(revision=revision)
 
 
 @migrations.command(
