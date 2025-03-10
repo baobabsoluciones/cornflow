@@ -2,7 +2,7 @@
 This file contains the base abstract models from which the rest of the models inherit
 """
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from flask import current_app
@@ -33,9 +33,6 @@ class EmptyBaseModel(db.Model):
 
         try:
             db.session.commit()
-            current_app.logger.debug(
-                f"Transaction type: {action}, performed correctly on {self}"
-            )
             current_app.logger.debug(
                 f"Transaction type: {action}, performed correctly on {self}"
             )
@@ -107,9 +104,7 @@ class EmptyBaseModel(db.Model):
             current_app.logger.debug(
                 f"Transaction type: {action}, performed correctly on {cls}"
             )
-            current_app.logger.debug(
-                f"Transaction type: {action}, performed correctly on {cls}"
-            )
+
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -133,9 +128,7 @@ class EmptyBaseModel(db.Model):
             current_app.logger.debug(
                 f"Transaction type: {action}, performed correctly on {cls}"
             )
-            current_app.logger.debug(
-                f"Transaction type: {action}, performed correctly on {cls}"
-            )
+
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -151,7 +144,6 @@ class EmptyBaseModel(db.Model):
         return instances
 
     @classmethod
-    def get_all_objects(cls, offset=0, limit=None, **kwargs):
     def get_all_objects(cls, offset=0, limit=None, **kwargs):
         """
         Method to get all the objects from the database applying the filters passed as keyword arguments
@@ -274,7 +266,6 @@ class TraceAttributesModel(EmptyBaseModel):
         update_date_lte=None,
         offset=0,
         limit=None,
-        **kwargs,
         **kwargs,
     ):
         """
