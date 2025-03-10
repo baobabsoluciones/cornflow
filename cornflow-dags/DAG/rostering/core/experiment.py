@@ -1,6 +1,7 @@
 """
 
 """
+
 # Imports from libraries
 import os
 from pytups import SuperDict, TupList
@@ -36,23 +37,6 @@ class Experiment(ExperimentCore):
     def solution(self, value):
         self._solution = value
 
-    def check_solution(self, *args, **kwargs) -> dict:
-        return SuperDict(
-            slots_without_workers=self.check_slots_without_workers(),
-            slots_closed_with_workers=self.check_working_without_opening(),
-            difference_hours_worked=self.check_hours_worked(),
-            manager_present=self.check_manager_present(),
-            skills_demand=self.check_skills_demand(),
-            days_worked_per_week=self.check_days_worked_per_week(),
-            min_hours_worked_per_day=self.check_min_hours_worked_day(),
-            employee_holidays=self.check_employee_holidays(),
-            employee_downtime=self.check_employees_downtime(),
-            start_hour_preference=self.check_start_hour_preference(),
-            number_hours_preferences=self.check_number_hours_preference(),
-            employee_work_days=self.check_employee_work_days(),
-            fixed_worktable=self.check_fixed_worktable()
-        ).vfilter(lambda v: len(v))
-
     def get_objective(self) -> float:
         return self.solution.get_working_hours()
 
@@ -74,13 +58,13 @@ class Experiment(ExperimentCore):
         time_slots_assigned = self.solution.get_time_slots().to_set()
         return [{"timeslot": k} for k in time_slots_open - time_slots_assigned]
 
-    def check_working_without_opening(self) -> list:
+    def check_slots_closed_with_workers(self) -> list:
         """Checks if there is any time slot where an employee is working, but it shouldn't"""
         time_slots_open = self.instance.get_opening_time_slots_set()
         time_slots_assigned = self.solution.get_time_slots().to_set()
         return [{"timeslot": k} for k in time_slots_assigned - time_slots_open]
 
-    def check_hours_worked(self) -> list:
+    def check_difference_hours_worked(self) -> list:
         """Checks the difference between the hours in the contract and the worked hours for each employee and week"""
         max_slots = self.instance.get_max_working_slots_week()
         worked_slots = self.solution.get_hours_worked_per_week()
@@ -271,16 +255,14 @@ class Experiment(ExperimentCore):
             .to_tuplist()
             .vapply_col(0, lambda v: v[0][:10])
             .intersect(work_days)
-            .vapply(
-                lambda v: {"date": v[0], "id_employee": v[1]}
-            )
+            .vapply(lambda v: {"date": v[0], "id_employee": v[1]})
         )
 
     def check_fixed_worktable(self) -> TupList:
-        """ Checks if some parts of the fixed worktable are not respected """
+        """Checks if some parts of the fixed worktable are not respected"""
         ts_employee = self.solution.get_ts_employee().to_tuplist()
 
-        return(
+        return (
             self.instance.get_fixed_worktable()
             .vfilter(lambda v: v not in ts_employee)
             .vapply(lambda v: {"time_slot": v[0], "id_employee": v[1]})

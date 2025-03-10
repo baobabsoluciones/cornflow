@@ -19,10 +19,18 @@
             "type": "string"
           },
           "value": {
-            "type": ["integer", "string"]
+            "type": [
+              "integer",
+              "string"
+            ]
           }
         },
-        "required": ["primary_table", "foreign_table", "key", "value"],
+        "required": [
+          "primary_table",
+          "foreign_table",
+          "key",
+          "value"
+        ],
         "additionalProperties": false
       }
     },
@@ -44,26 +52,26 @@
             "type": "string"
           },
           "value": {
-            "type": ["integer", "string"]
+            "type": [
+              "integer",
+              "string"
+            ]
           }
         },
-        "required": ["primary_table", "foreign_table", "key", "value"],
+        "required": [
+          "primary_table",
+          "foreign_table",
+          "key",
+          "value"
+        ],
         "additionalProperties": false
       }
     },
     "timeslot_length": {
-      "type": "object",
+      "type": "number",
       "title": "Timeslot length",
       "is_warning": false,
-      "description": "Timeslot length should be 15, 30 or 60.",
-      "properties": {
-        "timeslot_length": {
-          "type": "number",
-          "title": "Timeslot length",
-          "description": "The timeslot length provided by the user."
-        }
-      },
-      "required": []
+      "description": "Timeslot length should be 15, 30 or 60."
     },
     "weekly_schedule_timeslots": {
       "type": "array",
@@ -84,7 +92,10 @@
             "description": "The hour of the incoherence"
           }
         },
-        "required": ["weekday", "hour"]
+        "required": [
+          "weekday",
+          "hour"
+        ]
       }
     },
     "schedule_exceptions_timeslots": {
@@ -96,7 +107,7 @@
         "type": "object",
         "properties": {
           "date": {
-            "type": "integer",
+            "type": "string",
             "title": "Date",
             "description": "The date of the problem"
           },
@@ -106,7 +117,10 @@
             "description": "The hour of the incoherence"
           }
         },
-        "required": ["date", "hour"]
+        "required": [
+          "date",
+          "hour"
+        ]
       }
     },
     "shift_hours_timeslots": {
@@ -133,7 +147,11 @@
             "description": "The hour of the incoherence"
           }
         },
-        "required": ["week", "employee", "hour"]
+        "required": [
+          "week",
+          "employee",
+          "hour"
+        ]
       }
     },
     "employee_preferences_timeslots": {
@@ -144,10 +162,10 @@
       "items": {
         "type": "object",
         "properties": {
-          "week": {
-            "type": "integer",
-            "title": "Week",
-            "description": "The week of the problem"
+          "date": {
+            "type": "string",
+            "title": "Day",
+            "description": "The day of the preference"
           },
           "employee": {
             "type": "integer",
@@ -160,7 +178,11 @@
             "description": "The hour of the incoherence"
           }
         },
-        "required": ["week", "employee", "hour"]
+        "required": [
+          "date",
+          "employee",
+          "hour"
+        ]
       }
     },
     "fixed_worktable_timeslots": {
@@ -171,10 +193,10 @@
       "items": {
         "type": "object",
         "properties": {
-          "week": {
-            "type": "integer",
-            "title": "Week",
-            "description": "The week of the problem"
+          "date": {
+            "type": "string",
+            "title": "Day",
+            "description": "The day of the problem"
           },
           "employee": {
             "type": "integer",
@@ -187,7 +209,11 @@
             "description": "The hour of the incoherence"
           }
         },
-        "required": ["week", "employee", "hour"]
+        "required": [
+          "date",
+          "employee",
+          "hour"
+        ]
       }
     },
     "penalties": {
@@ -204,7 +230,9 @@
             "description": "The name of the requirement for which the penalty is not defined"
           }
         },
-        "required": ["requirement"]
+        "required": [
+          "requirement"
+        ]
       }
     }
   },
