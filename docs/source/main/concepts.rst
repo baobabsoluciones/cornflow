@@ -13,13 +13,13 @@ In this guide, we do not make a clear difference between Decision problem and Op
 
 We sometimes refer to this Decision Problem as an Abstract Problem or just Problem. Some Problems are quite famous, such as the  `Traveling Salesman Problem <https://en.wikipedia.org/wiki/Travelling_salesman_problem>`_ and the `Knapsack Problem <https://en.wikipedia.org/wiki/Knapsack_problem>`_. Naming a Problem makes it possible to design Solution Methods that are tailored for that particular Problem.
 
-In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.
+In cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.
 
 .. _concepts1:
 
 .. figure:: ./../_static/concepts1.png
 
-   Main concepts in a Cornflow deployment of an Optimization Problem
+   Main concepts in a cornflow deployment of an Optimization Problem
 
 
 Instance
@@ -27,7 +27,7 @@ Instance
 
 An Instance represents all the data needed to completely formulate one case of a decision problem.
 
-In Cornflow, it is represented as a `data` json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it "input data". It needs to follow the input data schema.
+In cornflow, it is represented as a `data` json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it "input data". It needs to follow the input data schema.
 
 
 Feasible Solution Space
@@ -41,7 +41,7 @@ Solution
 
 A Solution represents all data needed to completely represent a feasible solution to an Instance. 
 
-In Cornflow, it is represented as a `data` json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it "Output Data". It needs to follow the output data schema.
+In cornflow, it is represented as a `data` json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it "Output Data". It needs to follow the output data schema.
 
 
 Experiment
@@ -55,7 +55,7 @@ Solution Method
 
 A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).
 
-In Cornflow, A Solution Method is a subclass of Experiment.
+In cornflow, A Solution Method is a subclass of Experiment.
 
 
 Configuration
@@ -72,7 +72,7 @@ Consists of: (1) an Instance with (2) a Solve Configuration and (3) a Solution M
 Implementation
 -------------------
 
-In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.
+In practice, cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.
 
 .. _concepts2:
 

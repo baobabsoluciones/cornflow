@@ -234,7 +234,6 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["data"], instance_data["data"])
         self.assertEqual(data["config"], self.payload["config"])
-        return
 
     def test_get_no_dag(self):
         """

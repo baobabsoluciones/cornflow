@@ -54,7 +54,7 @@ The image entrypoint works as follows:
 Airflow personalized image
 ******************************************
 
-For this project we have created a custom Airflow image that we will maintain for the life cycle of the Cornflow application.
+For this project we have created a custom Airflow image that we will maintain for the life cycle of the cornflow application.
 The airflow personalized image is built from the Dockerfile file hosted in the official cornflow repository. The image is built from the new changes on the main development branch, creating an image with the label "latest"::
 
     docker pull baobabsoluciones/docker-airflow:latest
