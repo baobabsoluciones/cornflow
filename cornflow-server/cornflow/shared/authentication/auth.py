@@ -3,19 +3,14 @@ This file contains the auth class that can be used for authentication on the req
 """
 
 # Imports from external libraries
-import base64
 import jwt
 import requests
-
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+from jwt.algorithms import RSAAlgorithm
 from datetime import datetime, timedelta, timezone
 from flask import request, g, current_app, Request
 from functools import wraps
-from typing import Union, Tuple
-
-from jwt import DecodeError
+from typing import Tuple
+from cachetools import TTLCache
 from werkzeug.datastructures import Headers
 
 # Imports from internal modules
@@ -26,21 +21,21 @@ from cornflow.models import (
     ViewModel,
 )
 from cornflow.shared.const import (
-    OID_AZURE,
-    OID_AZURE_DISCOVERY_TENANT_URL,
-    OID_AZURE_DISCOVERY_COMMON_URL,
-    OID_GOOGLE,
+    AUTH_OID,
     PERMISSION_METHOD_MAP,
+    INTERNAL_TOKEN_ISSUER,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
-    EndpointNotImplemented,
     InvalidCredentials,
     InvalidData,
     InvalidUsage,
     NoPermission,
     ObjectDoesNotExist,
 )
+
+# Cache for storing public keys with 1 hour TTL
+public_keys_cache = TTLCache(maxsize=10, ttl=3600)
 
 
 class Auth:
@@ -92,9 +87,9 @@ class Auth:
     @staticmethod
     def generate_token(user_id: int = None) -> str:
         """
-        Generates a token given a user_id with a duration of one day
+        Generates a token given a user_id. The token will contain the username in the sub claim.
 
-        :param int user_id: user code to be encoded in the token to identify the user afterwards
+        :param int user_id: user id to generate the token for
         :return: the generated token
         :rtype: str
         """
@@ -104,11 +99,19 @@ class Auth:
                 err, log_txt="Error while trying to generate token. " + err
             )
 
+        user = UserModel.get_one_user(user_id)
+        if user is None:
+            err = "User does not exist"
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate token. " + err
+            )
+
         payload = {
             "exp": datetime.now(timezone.utc)
             + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
             "iat": datetime.now(timezone.utc),
-            "sub": user_id,
+            "sub": user.username,
+            "iss": INTERNAL_TOKEN_ISSUER,
         }
 
         return jwt.encode(
@@ -118,73 +121,68 @@ class Auth:
     @staticmethod
     def decode_token(token: str = None) -> dict:
         """
-        Decodes a given JSON Web token and extracts the sub from it to give it back.
+        Decodes a given JSON Web token and extracts the username from the sub claim.
+        Works with both internal tokens and OpenID tokens.
 
         :param str token: the given JSON Web Token
-        :return: the sub field of the token as the user_id
+        :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
+
         if token is None:
-            err = "The provided token is not valid."
-            raise InvalidUsage(
-                err, log_txt="Error while trying to decode token. " + err
+
+            raise InvalidCredentials(
+                "Must provide a token in Authorization header",
+                log_txt="Error while trying to decode token. Token is missing.",
+                status_code=400,
             )
+
         try:
-            payload = jwt.decode(
-                token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
+            # First try to decode header to validate basic token structure
+
+            unverified_payload = jwt.decode(token, options={"verify_signature": False})
+            issuer = unverified_payload.get("iss")
+
+            # For internal tokens
+            if issuer == INTERNAL_TOKEN_ISSUER:
+
+                return jwt.decode(
+                    token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
+                )
+
+            # For OpenID tokens
+            if current_app.config["AUTH_TYPE"] == AUTH_OID:
+
+                return Auth().verify_token(
+                    token,
+                    current_app.config["OID_PROVIDER"],
+                    current_app.config["OID_EXPECTED_AUDIENCE"],
+                )
+
+            # If we get here, the issuer is not valid
+
+            raise InvalidCredentials(
+                "Invalid token issuer. Token must be issued by a valid provider",
+                log_txt="Error while trying to decode token. Invalid issuer.",
+                status_code=400,
             )
-            return {"user_id": payload["sub"]}
+
         except jwt.ExpiredSignatureError:
+
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
+                status_code=400,
             )
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
+
             raise InvalidCredentials(
-                "Invalid token, please try again with a new token",
-                log_txt="Error while trying to decode token. The token is invalid.",
+                "Invalid token format or signature",
+                log_txt=f"Error while trying to decode token. The token format is invalid: {str(e)}",
+                status_code=400,
             )
 
-    def validate_oid_token(
-        self, token: str, client_id: str, tenant_id: str, issuer: str, provider: int
-    ) -> dict:
-        """
-        This method takes a token issued by an OID provider, the relevant information about the OID provider
-        and validates that the token was generated by such source, is valid and extracts the information
-        in the token for its use during the login process
-
-        :param str token: the received token
-        :param str client_id: the identifier from the client
-        :param str tenant_id: the identifier for the tenant
-        :param str issuer: the identifier for the issuer of the token
-        :param int provider: the identifier for the provider of the token
-        :return: the decoded token as a dictionary
-        :rtype: dict
-        """
-        public_key = self._get_public_key(token, tenant_id, provider)
-        try:
-            decoded = jwt.decode(
-                token,
-                public_key,
-                verify=True,
-                algorithms=["RS256"],
-                audience=[client_id],
-                issuer=issuer,
-            )
-            return decoded
-        except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
-                "The token has expired, please login again",
-                log_txt="Error while trying to validate a token. The token has expired.",
-            )
-        except jwt.InvalidTokenError:
-            raise InvalidCredentials(
-                "Invalid token, please try again with a new token",
-                log_txt="Error while trying to validate a token. The token is not valid.",
-            )
-
-    @staticmethod
-    def get_token_from_header(headers: Headers = None) -> str:
+    def get_token_from_header(self, headers: Headers = None) -> str:
         """
         Extracts the token given on the request from the Authorization headers.
 
@@ -195,65 +193,157 @@ class Auth:
         """
         if headers is None:
             raise InvalidUsage(
-                log_txt="Error while trying to get a token from header. The header is invalid."
+                "Request headers are missing",
+                log_txt="Error while trying to get a token from header. The header is invalid.",
+                status_code=400,
             )
 
         if "Authorization" not in headers:
             raise InvalidCredentials(
-                "Auth token is not available",
+                "Authorization header is missing",
                 log_txt="Error while trying to get a token from header. The auth token is not available.",
+                status_code=400,
             )
+
         auth_header = headers.get("Authorization")
+
         if not auth_header:
             return ""
-        try:
-            return auth_header.split(" ")[1]
-        except Exception as e:
-            err = f"The authorization header has a bad syntax: {e}"
+
+        if not auth_header.startswith("Bearer "):
+            err = "Invalid Authorization header format. Must be 'Bearer <token>'"
             raise InvalidCredentials(
-                err, log_txt=f"Error while trying to get a token from header. " + err
+                err,
+                log_txt=f"Error while trying to get a token from header. " + err,
+                status_code=400,
+            )
+
+        try:
+            token = auth_header.split(" ")[1]
+            return token
+        except Exception as e:
+            err = "Invalid Authorization header format. Must be 'Bearer <token>'"
+            raise InvalidCredentials(
+                err,
+                log_txt=f"Error while trying to get a token from header. " + err,
+                status_code=400,
             )
 
     def get_user_from_header(self, headers: Headers = None) -> UserModel:
         """
-        Gets the user represented by the token that has to be in the request headers.
+        Extracts the user from the Authorization headers.
 
         :param headers: the request headers
         :type headers: `Headers`
         :return: the user object
-        :rtype: `UserBaseModel`
+        :rtype: :class:`UserModel`
         """
         if headers is None:
-            err = "Headers are missing from the request. Authentication was not possible to perform."
+            err = "Request headers are missing"
             raise InvalidUsage(
-                err, log_txt="Error while trying to get user from header. " + err
+                err,
+                log_txt="Error while trying to get user from header. " + err,
+                status_code=400,
             )
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
-        user_id = data["user_id"]
-        user = self.user_model.get_one_user(user_id)
+
+        user = self.user_model.get_one_object(username=data["sub"])
+
         if user is None:
-            err = "User does not exist, invalid token."
-            raise ObjectDoesNotExist(
-                err, log_txt="Error while trying to get user from header. " + err
+            err = "User not found. Please ensure you are using valid credentials"
+            raise InvalidCredentials(
+                err,
+                log_txt="Error while trying to get user from header. User does not exist.",
+                status_code=400,
             )
         return user
 
     @staticmethod
-    def return_user_from_token(token):
+    def get_public_keys(provider_url: str) -> dict:
         """
-        Function used for internal testing. Given a token gives back the user_id encoded in it.
+        Gets the public keys from the OIDC provider and caches them
 
-        :param str token: the given token
-        :return: the user id code.
-        :rtype: int
+        :param str provider_url: The base URL of the OIDC provider
+        :return: Dictionary of kid to public key mappings
+        :rtype: dict
         """
-        user_id = Auth.decode_token(token)["user_id"]
-        return user_id
+        # Fetch keys from provider
+        jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
+        try:
+            response = requests.get(jwks_url)
+            response.raise_for_status()
 
-    """
-    START OF INTERNAL PROTECTED METHODS
-    """
+            # Convert JWK to RSA public keys using PyJWT's built-in method
+            public_keys = {
+                key["kid"]: RSAAlgorithm.from_jwk(key)
+                for key in response.json()["keys"]
+            }
+
+            # Store in cache
+            public_keys_cache[provider_url] = public_keys
+            return public_keys
+
+        except requests.exceptions.RequestException as e:
+            raise CommunicationError(
+                "Failed to fetch public keys from authentication provider",
+                log_txt=f"Error while fetching public keys from {jwks_url}: {str(e)}",
+                status_code=400,
+            )
+
+    def verify_token(
+        self, token: str, provider_url: str, expected_audience: str
+    ) -> dict:
+        """
+        Verifies an OpenID Connect token
+
+        :param str token: The token to verify
+        :param str provider_url: The base URL of the OIDC provider
+        :param str expected_audience: The expected audience claim
+        :return: The decoded token claims
+        :rtype: dict
+        """
+
+        # Get unverified header - this will raise jwt.InvalidTokenError if token format is invalid
+        unverified_header = jwt.get_unverified_header(token)
+
+        # Check for kid in header
+        if "kid" not in unverified_header:
+
+            raise InvalidCredentials(
+                "Invalid token: Missing key identifier (kid) in token header",
+                log_txt="Error while verifying token. Token header is missing 'kid'.",
+                status_code=400,
+            )
+
+        kid = unverified_header["kid"]
+
+        # Check if we have the keys in cache and if the kid exists
+        public_key = None
+        if provider_url in public_keys_cache:
+            cached_keys = public_keys_cache[provider_url]
+            if kid in cached_keys:
+                public_key = cached_keys[kid]
+
+        # If kid not in cache, fetch fresh keys
+        if public_key is None:
+            public_keys = self.get_public_keys(provider_url)
+            if kid not in public_keys:
+                raise InvalidCredentials(
+                    "Invalid token: Unknown key identifier (kid)",
+                    log_txt="Error while verifying token. Key ID not found in public keys.",
+                    status_code=400,
+                )
+            public_key = public_keys[kid]
+
+        # Verify token - this will raise appropriate jwt exceptions that will be caught in decode_token
+        return jwt.decode(
+            token,
+            public_key,
+            algorithms=["RS256"],
+            audience=[expected_audience],
+            issuer=provider_url,
+        )
 
     @staticmethod
     def _get_permission_for_request(req, user_id):
@@ -308,164 +398,6 @@ class Auth:
         """
         return getattr(req, "environ")["REQUEST_METHOD"], getattr(req, "url_rule").rule
 
-    @staticmethod
-    def _get_key_id(token: str) -> str:
-        """
-        Function to get the Key ID from the token
-
-        :param str token: the given token
-        :return: the key identifier
-        :rtype: str
-        """
-        try:
-            headers = jwt.get_unverified_header(token)
-        except DecodeError as err:
-            raise InvalidCredentials("Token is not valid")
-        if not headers:
-            raise InvalidCredentials("Token is missing the headers")
-        try:
-            return headers["kid"]
-        except KeyError:
-            raise InvalidCredentials("Token is missing the key identifier")
-
-    @staticmethod
-    def _fetch_discovery_meta(tenant_id: str, provider: int) -> dict:
-        """
-        Function to return a dictionary with the discovery URL of the provider
-
-        :param str tenant_id: the tenant id
-        :param int provider: the provider information
-        :return: the different urls to be discovered on the provider
-        :rtype: dict
-        """
-        if provider == OID_AZURE:
-            oid_tenant_url = OID_AZURE_DISCOVERY_TENANT_URL
-            oid_common_url = OID_AZURE_DISCOVERY_COMMON_URL
-        elif provider == OID_GOOGLE:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-        else:
-            raise EndpointNotImplemented("The OID provider configuration is not valid")
-
-        discovery_url = (
-            oid_tenant_url.format(tenant_id=tenant_id) if tenant_id else oid_common_url
-        )
-        try:
-            response = requests.get(discovery_url)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError:
-            raise CommunicationError(
-                f"Error getting issuer discovery meta from {discovery_url}"
-            )
-        return response.json()
-
-    def _get_json_web_keys_uri(self, tenant_id: str, provider: int) -> str:
-        """
-        Returns the JSON Web Keys URI
-
-        :param str tenant_id: the tenant id
-        :param int provider: the provider information
-        :return: the URI from where to get the JSON Web Keys
-        :rtype: str
-        """
-        meta = self._fetch_discovery_meta(tenant_id, provider)
-        if "jwks_uri" in meta:
-            return meta["jwks_uri"]
-        else:
-            raise CommunicationError("jwks_uri not found in the issuer meta")
-
-    def _get_json_web_keys(self, tenant_id: str, provider: int) -> dict:
-        """
-        Function to get the json web keys from the tenant id and the provider
-
-        :param str tenant_id: the tenant id
-        :param int provider: the provider information
-        :return: the JSON Web Keys dict
-        :rtype: dict
-        """
-        json_web_keys_uri = self._get_json_web_keys_uri(tenant_id, provider)
-        try:
-            response = requests.get(json_web_keys_uri)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as error:
-            raise CommunicationError(
-                f"Error getting issuer jwks from {json_web_keys_uri}", error
-            )
-        return response.json()
-
-    def _get_jwk(self, kid: str, tenant_id: str, provider: int) -> dict:
-        """
-        Function to get the JSON Web Key from the key identifier, the tenant id and the provider information
-
-        :param str kid: the key identifier
-        :param str tenant_id: the tenant information
-        :param int provider: the provider information
-        :return: the JSON Web Key
-        :rtype: dict
-        """
-        for jwk in self._get_json_web_keys(tenant_id, provider).get("keys"):
-            if jwk.get("kid") == kid:
-                return jwk
-        raise InvalidCredentials("Token has an unknown key identifier")
-
-    @staticmethod
-    def _ensure_bytes(key: Union[str, bytes]) -> bytes:
-        """
-        Function that ensures that the key is in bytes format
-
-        :param str | bytes key:
-        :return: the key on bytes format
-        :rtype: bytes
-        """
-        if isinstance(key, str):
-            key = key.encode("utf-8")
-        return key
-
-    def _decode_value(self, val: Union[str, bytes]) -> int:
-        """
-        Function that ensures that the value is decoded as a big int
-
-        :param str | bytes val: the value that has to be decoded
-        :return: the decoded value as a big int
-        :rtype: int
-        """
-        decoded = base64.urlsafe_b64decode(self._ensure_bytes(val) + b"==")
-        return int.from_bytes(decoded, "big")
-
-    def _rsa_pem_from_jwk(self, jwk: dict) -> bytes:
-        """
-        Returns the private key from the JSON Web Key encoded as PEM
-
-        :param dict jwk: the JSON Web Key
-        :return: the RSA PEM key serialized as bytes
-        :rtype: bytes
-        """
-        return (
-            RSAPublicNumbers(
-                n=self._decode_value(jwk["n"]),
-                e=self._decode_value(jwk["e"]),
-            )
-            .public_key(default_backend())
-            .public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo,
-            )
-        )
-
-    def _get_public_key(self, token: str, tenant_id: str, provider: int):
-        """
-        This method returns the public key from the given token, ensuring that
-        the tenant information and provider are correct
-
-        :param str token: the given token
-        :param str tenant_id: the tenant information
-        :param int provider: the token provider information
-        :return: the public key in the token or it raises an error
-        :rtype: str
-        """
-        kid = self._get_key_id(token)
-        jwk = self._get_jwk(kid, tenant_id, provider)
-        return self._rsa_pem_from_jwk(jwk)
-
 
 class BIAuth(Auth):
     def __init__(self, user_model=UserModel):
@@ -474,34 +406,31 @@ class BIAuth(Auth):
     @staticmethod
     def decode_token(token: str = None) -> dict:
         """
-        Decodes a given JSON Web token and extracts the sub from it to give it back.
+        Decodes a given JSON Web token and extracts the username from the sub claim.
 
         :param str token: the given JSON Web Token
-        :return: the sub field of the token as the user_id
+        :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-        if token is None:
-            err = "The provided token is not valid."
-            raise InvalidUsage(
-                err, log_txt="Error while trying to decode token. " + err
-            )
         try:
-            payload = jwt.decode(
+            return jwt.decode(
                 token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
             )
-            return {"user_id": payload["sub"]}
+
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",
                 log_txt="Error while trying to decode token. The token is invalid.",
+                status_code=400,
             )
 
     @staticmethod
     def generate_token(user_id: int = None) -> str:
         """
-        Generates a token given a user_id with a duration of one day
+        Generates a token given a user_id. The token will contain the username in the sub claim.
+        BI tokens do not include expiration time.
 
-        :param int user_id: user code to be encoded in the token to identify the user afterward.
+        :param int user_id: user id to generate the token for
         :return: the generated token
         :rtype: str
         """
@@ -511,9 +440,17 @@ class BIAuth(Auth):
                 err, log_txt="Error while trying to generate token. " + err
             )
 
+        user = UserModel.get_one_user(user_id)
+        if user is None:
+            err = "User does not exist"
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate token. " + err
+            )
+
         payload = {
             "iat": datetime.now(timezone.utc),
-            "sub": user_id,
+            "sub": user.username,
+            "iss": INTERNAL_TOKEN_ISSUER,
         }
 
         return jwt.encode(

@@ -240,7 +240,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
-        raise AirflowDagException("There was an error during the solving")
+        raise AirflowDagException(f"There was an error during the solving: {e}")
 
 
 def cf_check(fun, dag_name, secrets, **kwargs):
