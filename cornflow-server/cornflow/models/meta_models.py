@@ -2,7 +2,7 @@
 This file contains the base abstract models from which the rest of the models inherit
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from flask import current_app
@@ -104,6 +104,7 @@ class EmptyBaseModel(db.Model):
             current_app.logger.debug(
                 f"Transaction type: {action}, performed correctly on {cls}"
             )
+
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -127,6 +128,7 @@ class EmptyBaseModel(db.Model):
             current_app.logger.debug(
                 f"Transaction type: {action}, performed correctly on {cls}"
             )
+
         except IntegrityError as err:
             db.session.rollback()
             current_app.logger.error(f"Integrity error on {action} data: {err}")
@@ -211,8 +213,8 @@ class TraceAttributesModel(EmptyBaseModel):
     deleted_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self):
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
         self.deleted_at = None
 
     def update(self, data):
@@ -223,11 +225,11 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         super().update(data)
 
     def pre_update(self, data):
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         super().pre_update(data)
 
     def disable(self):
@@ -237,7 +239,7 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.deleted_at = datetime.utcnow()
+        self.deleted_at = datetime.now(timezone.utc)
         db.session.add(self)
         self.commit_changes("disabling")
 
@@ -248,7 +250,7 @@ class TraceAttributesModel(EmptyBaseModel):
         :return: None
         :rtype: None
         """
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         self.deleted_at = None
         db.session.add(self)
         self.commit_changes("activating")

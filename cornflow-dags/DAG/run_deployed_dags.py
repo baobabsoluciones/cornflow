@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from airflow import DAG
 from airflow.models import Variable
@@ -76,9 +76,9 @@ def run_examples(**kwargs):
         executions.append((execution_id, schema))
 
     limit = (len(executions) + 1) * 60
-    start = datetime.utcnow()
+    start = datetime.now(timezone.utc)
 
-    while executions and datetime.utcnow() - start < timedelta(seconds=limit):
+    while executions and datetime.now(timezone.utc) - start < timedelta(seconds=limit):
         for index, (execution, schema) in enumerate(executions):
             try:
                 response = cf_client.get_status(execution_id=execution)

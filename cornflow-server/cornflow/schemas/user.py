@@ -27,7 +27,7 @@ class UserEndpointResponse(Schema):
     last_name = fields.Str()
     email = fields.Str()
     created_at = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -36,7 +36,7 @@ class UserDetailsEndpointResponse(Schema):
     last_name = fields.Str()
     username = fields.Str()
     email = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class TokenEndpointResponse(Schema):
@@ -53,7 +53,6 @@ class UserEditRequest(Schema):
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
-    pwd_last_change = fields.DateTime(required=False)
 
 
 class LoginEndpointRequest(Schema):
