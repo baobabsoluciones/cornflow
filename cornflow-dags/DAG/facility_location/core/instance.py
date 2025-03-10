@@ -56,9 +56,6 @@ class Instance(InstanceCore):
         data_p["parameters"] = self.data["parameters"]
         return pickle.loads(pickle.dumps(data_p, -1))
 
-    def check(self):
-        return dict()
-
     def get_suppliers(self):
         return self.data["suppliers"].keys_tl()
 

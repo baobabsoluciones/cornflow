@@ -14,26 +14,26 @@ LoginTestCases
     Test cases for login functionality
 """
 
+import json
+
 # Import from libraries
 import logging as log
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, timezone
 from typing import List
 
+import jwt
 from flask import current_app
 from flask_testing import TestCase
-import json
-import jwt
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.models import UserRoleModel
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
+from cornflow.models import UserRoleModel
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth
 from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE
-from cornflow.shared import db
 from cornflow.tests.const import (
     LOGIN_URL,
     SIGNUP_URL,
@@ -587,6 +587,14 @@ class BaseTestCases:
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(limit=1), [allrows.json[0]])
 
+        def test_opt_filters_limit_none(self):
+            """
+            Tests the limit filter option
+            """
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(limit=None), allrows.json)
+
         def test_opt_filters_offset(self):
             """
             Tests the offset filter option.
@@ -595,6 +603,22 @@ class BaseTestCases:
             data_many = [self.payload for _ in range(4)]
             allrows = self.get_rows(self.url, data_many)
             self.apply_filter(self.url, dict(offset=1, limit=2), allrows.json[1:3])
+
+        def test_opt_filters_offset_zero(self):
+            """
+            Tests the offset filter option with a zero value.
+            """
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(offset=0), allrows.json)
+
+        def test_opt_filters_offset_none(self):
+            """
+            Tests the offset filter option with a None value.
+            """
+            data_many = [self.payload for _ in range(4)]
+            allrows = self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(offset=None), allrows.json)
 
         def test_opt_filters_schema(self):
             """
@@ -1092,7 +1116,7 @@ class LoginTestCases:
             )
 
             self.assertAlmostEqual(
-                datetime.utcnow(),
-                datetime.utcfromtimestamp(decoded_token["iat"]),
+                datetime.now(timezone.utc),
+                datetime.fromtimestamp(decoded_token["iat"], timezone.utc),
                 delta=timedelta(seconds=2),
             )

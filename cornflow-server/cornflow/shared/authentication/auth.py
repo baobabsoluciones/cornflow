@@ -10,7 +10,7 @@ import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import request, g, current_app, Request
 from functools import wraps
 from typing import Union, Tuple
@@ -105,9 +105,9 @@ class Auth:
             )
 
         payload = {
-            "exp": datetime.utcnow()
+            "exp": datetime.now(timezone.utc)
             + timedelta(hours=float(current_app.config["TOKEN_DURATION"])),
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "sub": user_id,
         }
 
@@ -512,7 +512,7 @@ class BIAuth(Auth):
             )
 
         payload = {
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "sub": user_id,
         }
 
