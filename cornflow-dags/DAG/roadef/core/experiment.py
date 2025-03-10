@@ -165,39 +165,14 @@ class Experiment(ExperimentCore):
     # ====================================
     # ====================================
     # Verification of the solution
-    def check_solution(self):
-        return SuperDict(
-            {
-                **self.check_shifts(),
-                **self.check_sites(),
-                **self.check_resources(),
-                **self.check_service_quality(),
-            }
-        ).vfilter(lambda v: len(v))
 
-    # ==================================
-    # Verification of shifts constraints
-    def check_shifts(self):
-        check = SuperDict(
-            c_02_timeline=TupList(),
-            c_03_wrong_index=TupList(),
-            c_03_setup_times=TupList(),
-            c_04_customer_TW=TupList(),
-            c_05_sites_accessible=TupList(),
-            c_0607_inventory_trailer_negative=TupList(),
-            c_0607_inventory_trailer_above_capacity=TupList(),
-            c_0607_inventory_trailer_final_inventory=TupList(),
-            c_0607_inventory_trailer_initial_inventory=TupList(),
-            c_11_quantity_delivered=TupList(),
-            c_16_customer_tank_exceeds=TupList(),
-            c_16_customer_tank_too_low=TupList(),
-            driver_and_trailer=TupList(),
-        )
-
+    def check_driver_and_trailer(self):
+        check = TupList()
         for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
             driver = shift.get("driver", None)
             trailer = shift.get("trailer", None)
-            id_shift = shift.get("id_shift", None)
+
             if driver is None or trailer is None:
                 dr_tr = dict(
                     id_shift=id_shift, missing_trailer=False, missing_driver=False
@@ -206,166 +181,201 @@ class Experiment(ExperimentCore):
                     dr_tr["missing_driver"] = True
                 if trailer is None:
                     dr_tr["missing_trailer"] = True
-                check["driver_and_trailer"].append(dr_tr)
-                continue
-            check["c_02_timeline"] += self.check_shift_02(shift, id_shift, driver)
-            res_check_c03 = self.check_shift_03(shift, id_shift).vfilter(
-                lambda v: len(v) != 0
-            )
-            check["c_03_wrong_index"] += res_check_c03.get("wrong_index", [])
-            check["c_03_setup_times"] += res_check_c03.get("setup_time", [])
-            check["c_04_customer_TW"] += self.check_shift_04(shift, id_shift)
-            check["c_05_sites_accessible"] += self.check_shift_05(
-                shift, id_shift, trailer
-            )
-            check["c_11_quantity_delivered"] += self.check_shift_11(shift, id_shift)
-            res_check_c16 = self.check_shift_16(shift, id_shift).vfilter(
-                lambda v: len(v) != 0
-            )
-            check["c_16_customer_tank_exceeds"] += res_check_c16.get("exceeds", [])
-            check["c_16_customer_tank_too_low"] += res_check_c16.get("too_low", [])
+                check.append(dr_tr)
 
-        checks_0607 = self.check_shift_0607().vfilter(lambda v: len(v) != 0)
-        check["c_0607_inventory_trailer_negative"] = checks_0607.get(
-            "inventory_negative", []
-        )
-        check["c_0607_inventory_trailer_above_capacity"] = checks_0607.get(
-            "above_capacity", []
-        )
-        check["c_0607_inventory_trailer_final_inventory"] = checks_0607.get(
-            "final_inventory", []
-        )
-        check["c_0607_inventory_trailer_initial_inventory"] = checks_0607.get(
-            "initial_inventory", []
-        )
-        return check.vfilter(lambda v: len(v))
+        return check
 
     # Checks that the timeline is coherent for each shift
-    def check_shift_02(self, shift, id_shift, driver) -> TupList:
+    def check_c02_timeline(self) -> TupList:
         """
-        returns [{"id_shift": shift_id, "id_location": location}, ...] for incoherent timeline at given location
+        returns [{"id_shift": shift_id, "id_location": location}, ...] for incoherent
+        timeline at given location
         """
         check = TupList()
-        last_point = self.instance.get_id_base()
-        last_departure = shift["departure_time"]
 
-        for operation in shift["route"]:
-            current_point = operation["location"]
-            travel_time = self.instance.get_time_between(last_point, current_point)
-            layover_time = self.instance.get_driver_property(driver, "LayoverDuration")
-            if (
-                operation["arrival"]
-                < last_departure
-                + travel_time
-                + operation["layover_before"] * layover_time
-            ):
-                check.append({"id_shift": id_shift, "id_location": current_point})
-            last_point = current_point
-            last_departure = operation["departure"]
+        for shift in self.solution.get_all_shifts():
+            driver = shift.get("driver", None)
+            id_shift = shift.get("id_shift", None)
+            if driver is None:
+                continue
+
+            last_point = self.instance.get_id_base()
+            last_departure = shift["departure_time"]
+
+            for operation in shift["route"]:
+                current_point = operation["location"]
+                travel_time = self.instance.get_time_between(last_point, current_point)
+                layover_time = self.instance.get_driver_property(
+                    driver, "LayoverDuration"
+                )
+                if (
+                    operation["arrival"]
+                    < last_departure
+                    + travel_time
+                    + operation["layover_before"] * layover_time
+                ):
+                    check.append({"id_shift": id_shift, "id_location": current_point})
+                last_point = current_point
+                last_departure = operation["departure"]
         return check
 
     # Checks the loading and delivery times
-    def check_shift_03(self, shift, id_shift):
+    def check_c03_wrong_index(self) -> TupList:
         """
-        returns {"wrong_index": [{"id_shift": id_shift, "position": id_operation}, ... ] for non existent locations,
-                 "setup_time":  [{"id_shift": id_shift, "id_location": id_location}, ... ] for operation that does not respect setup time }
+        returns {"wrong_index": [{"id_shift": id_shift, "position": id_operation}, ... ]
+          for non existent locations,
+
         """
-        check = SuperDict(wrong_index=TupList(), setup_time=TupList())
-        id_operation = 1
-        for operation in shift["route"][:-1]:
-            if not self.is_valid_location(operation["location"]):
-                check["wrong_index"].append(
-                    {"id_shift": id_shift, "position": id_operation}
-                )
-                continue
-            location = operation["location"]
-            if location > 0:
-                setup_time = self.instance.get_location_property(location, "setupTime")
-                if operation["departure"] < operation["arrival"] + setup_time:
-                    check["setup_time"].append(
-                        {"id_shift": id_shift, "id_location": location}
+        check = TupList()
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+            id_operation = 1
+
+            for operation in shift["route"][:-1]:
+                if not self.is_valid_location(operation["location"]):
+                    check.append({"id_shift": id_shift, "position": id_operation})
+                    continue
+
+                location = operation["location"]
+                if location > 0:
+                    setup_time = self.instance.get_location_property(
+                        location, "setupTime"
                     )
-                    id_operation += 1
+                    if operation["departure"] < operation["arrival"] + setup_time:
+
+                        id_operation += 1
+
+        return check
+
+    def check_c03_setup_time(self) -> TupList:
+        """
+        returns [{"id_shift": id_shift, "id_location": location}, ...] for operation
+        that does not respect setup time
+        """
+        check = TupList()
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+            id_operation = 1
+
+            for operation in shift["route"][:-1]:
+                if not self.is_valid_location(operation["location"]):
+                    continue
+
+                location = operation["location"]
+                if location > 0:
+                    setup_time = self.instance.get_location_property(
+                        location, "setupTime"
+                    )
+                    if operation["departure"] < operation["arrival"] + setup_time:
+                        check.append({"id_shift": id_shift, "id_location": location})
+                        id_operation += 1
+
         return check
 
     # Checks that the operations are performed during customers'time windows
-    def check_shift_04(self, shift, id_shift):
+    def check_c_04_customer_TW(self):
         """
         returns [{"id_shift": shift_id, "id_location": location}, ... ] for operation out of customer's TW
         """
         check = TupList()
-        for operation in shift["route"][:-1]:
-            location = operation["location"]
-            if not self.is_customer(location):
-                continue
-            tw_found = False
-            ind_tw = 0
-            while (
-                ind_tw
-                < len(self.instance.get_customer_property(location, "timewindows"))
-                and not tw_found
-            ):
-                time_window = self.instance.get_customer_property(
-                    location, "timewindows"
-                )[ind_tw]
-                if (
-                    time_window["start"] <= operation["arrival"]
-                    and time_window["end"] >= operation["departure"]
+
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+
+            for operation in shift["route"][:-1]:
+                location = operation["location"]
+                if not self.is_customer(location):
+                    continue
+                tw_found = False
+                ind_tw = 0
+                while (
+                    ind_tw
+                    < len(self.instance.get_customer_property(location, "timewindows"))
+                    and not tw_found
                 ):
-                    tw_found = True
-                ind_tw += 1
-            if not tw_found:
-                check.append({"id_shift": id_shift, "id_location": location})
+                    time_window = self.instance.get_customer_property(
+                        location, "timewindows"
+                    )[ind_tw]
+                    if (
+                        time_window["start"] <= operation["arrival"]
+                        and time_window["end"] >= operation["departure"]
+                    ):
+                        tw_found = True
+                    ind_tw += 1
+                if not tw_found:
+                    check.append({"id_shift": id_shift, "id_location": location})
         return check
 
     # Checks that the loading and delivery sites are accessible for the vehicle
-    def check_shift_05(self, shift, id_shift, trailer):
+    def check_c_05_sites_accessible(self):
         """
-        returns [{"id_shift": shift_id, "id_location": location, "id_trailer": trailer}, ... ] for incompatible shift-location combination
+        returns [{"id_shift": shift_id, "id_location": location, "id_trailer": trailer},
+          ... ] for incompatible shift-location combination
         """
         check = TupList()
-        for operation in shift["route"][:-1]:
-            location = operation["location"]
-            if self.is_customer_or_source(location):
-                if trailer not in self.instance.get_location_property(
-                    location, "allowedTrailers"
-                ):
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+            trailer = shift.get("trailer", None)
+            if trailer is None:
+                continue
+
+            for operation in shift["route"][:-1]:
+                location = operation["location"]
+                if self.is_customer_or_source(location):
+                    if trailer not in self.instance.get_location_property(
+                        location, "allowedTrailers"
+                    ):
+                        check.append(
+                            {
+                                "id_shift": id_shift,
+                                "id_location": location,
+                                "id_trailer": trailer,
+                            }
+                        )
+        return check
+
+    def check_c_0607_inventory_trailer_negative(self):
+        check = TupList()
+        last_trailer_quantity = [0] * len(self.instance.get_id_trailers())
+
+        for trailer in self.instance.get_id_trailers():
+            last_trailer_quantity[trailer] = self.instance.get_trailer_property(
+                trailer, "InitialQuantity"
+            )
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            trailer = shift.get("trailer", None)
+
+            id_shift = shift.get("id_shift", None)
+            if driver is None or trailer is None:
+                return check
+
+            last_quantity = shift["initial_quantity"]
+
+            for operation in shift["route"]:
+                quantity = last_quantity + operation["quantity"]
+                location = operation["location"]
+                if round(quantity, 2) < 0:
                     check.append(
                         {
                             "id_shift": id_shift,
                             "id_location": location,
-                            "id_trailer": trailer,
+                            "quantity": quantity,
                         }
                     )
+
+                last_quantity = quantity
+
+            last_trailer_quantity[trailer] = last_quantity
+
         return check
 
-    # Checks that the trailer's inventory is not negative and does not exceed capacity (06)
-    # Checks that the initial quantity of a trailer on a shift is the end quantity of its previous shift (07)
-    def check_shift_0607(self):
-        """
-        returns {"negative": [{"id_shift": id_shift, "id_location": id_location, "quantity": quantity} ... ] for operation resulting in negative trailer inventory
-                 "above_capacity": [{"id_shift": id_shift,
-                                     "id_location": id_location,
-                                     "quantity": quantity,
-                                     "id_trailer": trailer,
-                                     "capacity": capacity}, ... ] for operation resulting in excessive trailer inventory
-                 "final_inventory": [{"id_shift": id_shift,
-                                      "final_inventory": final_inventory,
-                                      "calculated_final_inventory":  cfi}, ...] for shifts with inconsistent final inventory
-                 "initial_inventory": [{"id_shift": id_shift,
-                                        "initial_quantity": initial_quantity,
-                                        "last_shift_final_inventory": lsfi,
-                                        "id_trailer": id_trailer}, ...] for shifts with inconsistent initial inventory
-                }
-        """
-        check = SuperDict(
-            negative=TupList(),
-            above_capacity=TupList(),
-            final_inventory=TupList(),
-            initial_inventory=TupList(),
-        )
+    def check_c_0607_inventory_trailer_above_capacity(self):
+        check = TupList()
         last_trailer_quantity = [0] * len(self.instance.get_id_trailers())
-        aux_info_shift = self.get_aux_info_shift()
 
         for trailer in self.instance.get_id_trailers():
             last_trailer_quantity[trailer] = self.instance.get_trailer_property(
@@ -381,22 +391,15 @@ class Experiment(ExperimentCore):
             id_shift = shift.get("id_shift", None)
             if driver is None or trailer is None:
                 return check
-            # Constraints (06)
+
             last_quantity = shift["initial_quantity"]
 
             for operation in shift["route"]:
                 quantity = last_quantity + operation["quantity"]
                 location = operation["location"]
-                if round(quantity, 2) < 0:
-                    check["negative"].append(
-                        {
-                            "id_shift": id_shift,
-                            "id_location": location,
-                            "quantity": quantity,
-                        }
-                    )
-                elif round(quantity, 2) > trailer_capacity:
-                    check["above_capacity"].append(
+
+                if round(quantity, 2) > trailer_capacity:
+                    check.append(
                         {
                             "id_shift": id_shift,
                             "id_location": location,
@@ -407,11 +410,41 @@ class Experiment(ExperimentCore):
                     )
 
                 last_quantity = quantity
-            # Constraints (07)
+
+            last_trailer_quantity[trailer] = last_quantity
+
+        return check
+
+    def check_c_0607_inventory_trailer_final_inventory(self):
+        check = TupList()
+        last_trailer_quantity = [0] * len(self.instance.get_id_trailers())
+        aux_info_shift = self.get_aux_info_shift()
+
+        for trailer in self.instance.get_id_trailers():
+            last_trailer_quantity[trailer] = self.instance.get_trailer_property(
+                trailer, "InitialQuantity"
+            )
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            trailer = shift.get("trailer", None)
+
+            id_shift = shift.get("id_shift", None)
+            if driver is None or trailer is None:
+                return check
+
+            last_quantity = shift["initial_quantity"]
+
+            for operation in shift["route"]:
+                quantity = last_quantity + operation["quantity"]
+                last_quantity = quantity
+
             if round(aux_info_shift[id_shift]["final_inventory"], 2) != round(
                 last_quantity, 2
             ):
-                check["final_inventory"].append(
+                check.append(
                     {
                         "id_shift": id_shift,
                         "final_inventory": round(
@@ -420,10 +453,40 @@ class Experiment(ExperimentCore):
                         "calculated_final_inventory": round(last_quantity, 2),
                     }
                 )
+
+            last_trailer_quantity[trailer] = last_quantity
+
+        return check
+
+    def check_c_0607_inventory_trailer_initial_inventory(self):
+        check = TupList()
+        last_trailer_quantity = [0] * len(self.instance.get_id_trailers())
+
+        for trailer in self.instance.get_id_trailers():
+            last_trailer_quantity[trailer] = self.instance.get_trailer_property(
+                trailer, "InitialQuantity"
+            )
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            trailer = shift.get("trailer", None)
+
+            id_shift = shift.get("id_shift", None)
+            if driver is None or trailer is None:
+                return check
+
+            last_quantity = shift["initial_quantity"]
+
+            for operation in shift["route"]:
+                quantity = last_quantity + operation["quantity"]
+                last_quantity = quantity
+
             if round(last_trailer_quantity[trailer], 2) != round(
                 shift["initial_quantity"], 2
             ):
-                check["initial_inventory"].append(
+                check.append(
                     {
                         "id_shift": id_shift,
                         "initial_quantity": round(shift["initial_quantity"], 2),
@@ -434,99 +497,102 @@ class Experiment(ExperimentCore):
                     }
                 )
             last_trailer_quantity[trailer] = last_quantity
-        check = check.vfilter(lambda v: len(v) != 0)
+
         return check
 
     # Checks that the quantity delivered at a customer is positive and the quantity loaded at a source is also positive
-    def check_shift_11(self, shift, id_shift):
+    def check_c_11_quantity_delivered(self):
         """
         returns [{"id_shift": shift_id, "id_location": location, "quantity": quantity}, ... ] for operation with wrong sign
         """
         check = TupList()
-        for i in range(1, len(shift["route"]) + 1):
-            operation = shift["route"][i - 1]
-            location = operation["location"]
-            if self.is_source(location) and operation["quantity"] < 0:
-                check.append(
-                    {
-                        "id_shift": id_shift,
-                        "id_location": location,
-                        "quantity": operation["quantity"],
-                    }
-                )
-            elif self.is_customer(location) and operation["quantity"] > 0:
-                check.append(
-                    {
-                        "id_shift": id_shift,
-                        "id_location": location,
-                        "quantity": operation["quantity"],
-                    }
-                )
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+
+            for i in range(1, len(shift["route"]) + 1):
+                operation = shift["route"][i - 1]
+                location = operation["location"]
+                if self.is_source(location) and operation["quantity"] < 0:
+                    check.append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": operation["quantity"],
+                        }
+                    )
+                elif self.is_customer(location) and operation["quantity"] > 0:
+                    check.append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "quantity": operation["quantity"],
+                        }
+                    )
         return check
 
     # For each delivery, the delivery must be smaller than the customer's tank's capacity
-    def check_shift_16(self, shift, id_shift):
-        """
-        returns {"exceeds": [{"id_shift": id_shift, "id_location": id_location,
-                              "quantity": quantity, "capacity": capacity}, ... ]
-                        for operation with quantity above trailer's capacity
-                 "too_low": [{"id_shift": id_shift, "id_location": id_location,
-                              "quantity": quantity, "minimum_quantity": min_quantity}, ... ]
-                        for operation with quantity < min_quantity
-                }
-        """
-        check = SuperDict(exceeds=TupList(), too_low=TupList())
-        for i in range(1, len(shift["route"]) + 1):
-            operation = shift["route"][i - 1]
-            location = operation["location"]
+    def check_c_16_customer_tank_exceeds(self):
+        check = TupList()
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
 
-            if not self.is_customer(location):
-                continue
+            for i in range(1, len(shift["route"]) + 1):
+                operation = shift["route"][i - 1]
+                location = operation["location"]
 
-            call_in = self.instance.get_customer_property(location, "callIn")
-            if call_in == 0:
-                capacity = self.instance.get_customer_property(location, "Capacity")
-                min_ope_quantity = self.instance.get_customer(location).get(
-                    "MinOperationQuantity", 0
-                )
-                if -operation["quantity"] > capacity:
-                    check["exceeds"].append(
-                        {
-                            "id_shift": id_shift,
-                            "id_location": location,
-                            "quantity": operation["quantity"],
-                            "capacity": capacity,
-                        }
+                if not self.is_customer(location):
+                    continue
+
+                call_in = self.instance.get_customer_property(location, "callIn")
+                if call_in == 0:
+                    capacity = self.instance.get_customer_property(location, "Capacity")
+
+                    if -operation["quantity"] > capacity:
+                        check.append(
+                            {
+                                "id_shift": id_shift,
+                                "id_location": location,
+                                "quantity": operation["quantity"],
+                                "capacity": capacity,
+                            }
+                        )
+        return check
+
+    def check_c_16_customer_tank_too_low(self):
+        check = TupList()
+        for shift in self.solution.get_all_shifts():
+            id_shift = shift.get("id_shift", None)
+
+            for i in range(1, len(shift["route"]) + 1):
+                operation = shift["route"][i - 1]
+                location = operation["location"]
+
+                if not self.is_customer(location):
+                    continue
+
+                call_in = self.instance.get_customer_property(location, "callIn")
+                if call_in == 0:
+
+                    min_ope_quantity = self.instance.get_customer(location).get(
+                        "MinOperationQuantity", 0
                     )
-                elif -operation["quantity"] < min_ope_quantity:
-                    check["exceeds"].append(
-                        {
-                            "id_shift": id_shift,
-                            "id_location": location,
-                            "quantity": operation["quantity"],
-                            "minimum_quantity": min_ope_quantity,
-                        }
-                    )
-        check = check.vfilter(lambda v: len(v) != 0)
+
+                    if -operation["quantity"] < min_ope_quantity:
+                        check.append(
+                            {
+                                "id_shift": id_shift,
+                                "id_location": location,
+                                "quantity": operation["quantity"],
+                                "minimum_quantity": min_ope_quantity,
+                            }
+                        )
+
         return check
 
     # =================================
     # Verification of sites constraints
-    def check_sites(self):
-        """
-        returns {"site_inventory_negative": [{"id_location": location, "timeslot": time, "inventory": inventory}, ... ]
-                            for inventories > tank_capacity
-                 "site_inventory_exceeds": [{"id_location": location, "timeslot": time, "inventory": inventory,
-                                             "capacity": capacity}, ... ]
-                            for  negative inventories
-                 "site_doesnt_exist": [{"id_location": location}, ...] for nonexistent locations
-                }
-        """
-        check = SuperDict(
-            site_inventory_negative=TupList(),
-            site_inventory_exceeds=TupList(),
-            site_doesnt_exist=TupList(),
-        )
+    def check_site_inventory_negative(self):
+        check = TupList()
         operation_quantities = []
 
         for location in range(1 + self.nb_sources + self.nb_customers):
@@ -536,7 +602,6 @@ class Experiment(ExperimentCore):
         for site_inventory in site_inventories.values():
             location = site_inventory["location"]
             if not self.is_valid_location(location):
-                check["site_doesntexist"].append({"id_location": location})
                 continue
             if location <= 1 + self.nb_sources:
                 continue
@@ -545,17 +610,38 @@ class Experiment(ExperimentCore):
                 continue
             for i in range(self.horizon):
                 if round(site_inventory["tank_quantity"][i], 3) < 0:
-                    check["site_inventory_negative"].append(
+                    check.append(
                         {
                             "id_location": location,
                             "hour": i,
                             "inventory": site_inventory["tank_quantity"][i],
                         }
                     )
+
+        return check
+
+    def check_site_inventory_exceeds(self):
+        check = TupList()
+        operation_quantities = []
+
+        for location in range(1 + self.nb_sources + self.nb_customers):
+            operation_quantities.append([0] * self.horizon)
+
+        site_inventories = self.calculate_inventories()
+        for site_inventory in site_inventories.values():
+            location = site_inventory["location"]
+            if not self.is_valid_location(location):
+                continue
+            if location <= 1 + self.nb_sources:
+                continue
+            call_in = self.instance.get_customer_property(location, "callIn")
+            if call_in == 1:
+                continue
+            for i in range(self.horizon):
                 if round(
                     site_inventory["tank_quantity"][i], 3
                 ) > self.instance.get_customer_property(location, "Capacity"):
-                    check["site_inventory_exceeds"].append(
+                    check.append(
                         {
                             "id_location": location,
                             "hour": i,
@@ -565,60 +651,55 @@ class Experiment(ExperimentCore):
                             ),
                         }
                     )
-        check = check.vfilter(lambda v: len(v) != 0)
+
+        return check
+
+    def check_site_doesnt_exist(self):
+        check = TupList()
+        operation_quantities = []
+
+        for location in range(1 + self.nb_sources + self.nb_customers):
+            operation_quantities.append([0] * self.horizon)
+
+        site_inventories = self.calculate_inventories()
+        for site_inventory in site_inventories.values():
+            location = site_inventory["location"]
+            if not self.is_valid_location(location):
+                check.append({"id_location": location})
+                continue
+
         return check
 
     # =====================================
     # Verification of resources constraints
-    def check_resources(self):
+    def check_res_dr_01_intershift(self):
         """
-        returns:
-        {
-            "res_dr_01_intershift": [{"id_shift": id_shift, "id_driver": id_driver,
-                                      "duration": duration, "minimum_duration": minimum_duration
-                                      "last_shift": id_last_shift}, ...]
-                        for drivers not respecting minInterShiftDuration
-            "res_dr_03_max_duration": [{"id_shift": id_shift, "id_driver": id_driver,
-                                        "duration": duration, "maximum_duration": maximum_duration}, ...]
-                        for drivers not respecting max shift duration
-            "res_dr_08_driver_TW": [{"id_shift": id_shift, "id_driver": id_driver}, ...]
-                        for drivers not respecting driver's time windows
-            "res_tl_01_shift_overlaps": [{"id_shift": id_shift, "last_shift": id_last_shift,
-                                          "id_trailer": id_trailer}, ...]
-                        for trailers having shifts that overlap
-            "res_tl_03_compatibility_dr_tr": [{"id_shift": id_shift, "id_trailer": id_trailer,
-                                                "id_driver": id_driver}, ...]
-                        for shifts having drivers and trailers that are not compatibles
-        }
+        Check if drivers respect minimum inter-shift duration.
+
+        returns: TupList [{"id_shift": id_shift, "id_driver": id_driver,
+                         "duration": duration, "minimum_duration": minimum_duration,
+                         "last_shift": id_last_shift}, ...]
+                for drivers not respecting minInterShiftDuration
         """
-        check = SuperDict(
-            res_dr_01_intershift=TupList(),
-            res_dr_03_max_duration=TupList(),
-            res_dr_08_driver_TW=TupList(),
-            res_tl_01_shift_overlaps=TupList(),
-            res_tl_03_compatibility_dr_tr=TupList(),
-        )
+        check = TupList()
         last_shift_driver = dict()
         end_of_last_shifts_drivers = [0] * self.nb_drivers
-        last_shift_trailer = dict()
-        end_of_last_shifts_trailer = [0] * self.nb_trailers
         aux_info_shift = self.get_aux_info_shift()
 
         for shift in sorted(
             list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
         ):
             driver = shift.get("driver", None)
-            trailer = shift.get("trailer", None)
             id_shift = shift.get("id_shift", None)
-            if driver is None or trailer is None:
+            if driver is None:
                 continue
-            # DRIVERS
-            duration, min_duration = self.check_resources_dr_01(
+
+            duration, min_duration = self.aux_check_resources_dr_01(
                 shift, driver, end_of_last_shifts_drivers[driver]
             )
             if duration is not None:
-                last_shift = last_shift_driver[driver]
-                check["res_dr_01_intershift"].append(
+                last_shift = last_shift_driver.get(driver)
+                check.append(
                     {
                         "id_shift": id_shift,
                         "last_shift": last_shift,
@@ -628,9 +709,34 @@ class Experiment(ExperimentCore):
                     }
                 )
 
-            duration, max_duration = self.check_resources_dr_03(shift, driver)
+            last_shift_driver[driver] = id_shift
+            end_of_last_shifts_drivers[driver] = aux_info_shift[id_shift][
+                "arrival_time"
+            ]
+
+        return check
+
+    def check_res_dr_03_max_duration(self):
+        """
+        Check if drivers respect maximum shift duration.
+
+        returns: TupList [{"id_shift": id_shift, "id_driver": id_driver,
+                         "duration": duration, "maximum_duration": maximum_duration}, ...]
+                for drivers not respecting max shift duration
+        """
+        check = TupList()
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            id_shift = shift.get("id_shift", None)
+            if driver is None:
+                continue
+
+            duration, max_duration = self.aux_check_resources_dr_03(shift, driver)
             if duration is not None:
-                check["res_dr_03_max_duration"].append(
+                check.append(
                     {
                         "id_shift": id_shift,
                         "id_driver": driver,
@@ -639,15 +745,56 @@ class Experiment(ExperimentCore):
                     }
                 )
 
-            if self.check_resources_dr_08(shift, id_shift, driver):
-                check["res_dr_08_driver_TW"].append(
-                    {"id_shift": id_shift, "id_driver": driver}
-                )
+        return check
 
-            # TRAILERS
-            if self.check_resources_tl_01(shift, end_of_last_shifts_trailer[trailer]):
-                last_shift = last_shift_trailer[trailer]
-                check["res_tl_01_shift_overlaps"].append(
+    def check_res_dr_08_driver_TW(self):
+        """
+        Check if drivers respect their time windows.
+
+        returns: TupList [{"id_shift": id_shift, "id_driver": id_driver}, ...]
+                for drivers not respecting driver's time windows
+        """
+        check = TupList()
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            id_shift = shift.get("id_shift", None)
+            if driver is None:
+                continue
+
+            if self.aux_check_resources_dr_08(shift, id_shift, driver):
+                check.append({"id_shift": id_shift, "id_driver": driver})
+
+        return check
+
+    def check_res_tl_01_shift_overlaps(self):
+        """
+        Check if trailers have overlapping shifts.
+
+        returns: TupList [{"id_shift": id_shift, "last_shift": id_last_shift,
+                         "id_trailer": id_trailer}, ...]
+                for trailers having shifts that overlap
+        """
+        check = TupList()
+        last_shift_trailer = dict()
+        end_of_last_shifts_trailer = [0] * self.nb_trailers
+        aux_info_shift = self.get_aux_info_shift()
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            trailer = shift.get("trailer", None)
+            id_shift = shift.get("id_shift", None)
+            if trailer is None:
+                continue
+
+            if self.aux_check_resources_tl_01(
+                shift, end_of_last_shifts_trailer[trailer]
+            ):
+                last_shift = last_shift_trailer.get(trailer)
+                check.append(
                     {
                         "id_shift": id_shift,
                         "last_shift": last_shift,
@@ -655,24 +802,40 @@ class Experiment(ExperimentCore):
                     }
                 )
 
-            if self.check_resources_tl_03(driver, trailer):
-                check["res_tl_03_compatibility_dr_tr"].append(
-                    {"id_shift": id_shift, "id_trailer": trailer, "id_driver": driver}
-                )
-
-            #
             last_shift_trailer[trailer] = id_shift
             end_of_last_shifts_trailer[trailer] = aux_info_shift[id_shift][
                 "arrival_time"
             ]
-            last_shift_driver[driver] = id_shift
-            end_of_last_shifts_drivers[driver] = aux_info_shift[id_shift][
-                "arrival_time"
-            ]
-        return check.vfilter(lambda v: len(v))
 
-    # Checks that the minimum delay between two shifts is respected
-    def check_resources_dr_01(self, shift, driver, end_of_last_shift):
+        return check
+
+    def check_res_tl_03_compatibility_dr_tr(self):
+        """
+        Check if drivers and trailers are compatible.
+
+        returns: TupList [{"id_shift": id_shift, "id_trailer": id_trailer,
+                         "id_driver": id_driver}, ...]
+                for shifts having drivers and trailers that are not compatibles
+        """
+        check = TupList()
+
+        for shift in sorted(
+            list(self.solution.get_all_shifts()), key=lambda x: x["departure_time"]
+        ):
+            driver = shift.get("driver", None)
+            trailer = shift.get("trailer", None)
+            id_shift = shift.get("id_shift", None)
+            if driver is None or trailer is None:
+                continue
+
+            if self.aux_check_resources_tl_03(driver, trailer):
+                check.append(
+                    {"id_shift": id_shift, "id_trailer": trailer, "id_driver": driver}
+                )
+
+        return check
+
+    def aux_check_resources_dr_01(self, shift, driver, end_of_last_shift):
         """
         returns True for shifts not respecting minInterShiftDuration
         """
@@ -683,7 +846,7 @@ class Experiment(ExperimentCore):
         return None, None
 
     # Checks that the shift respects maximum duration
-    def check_resources_dr_03(self, shift, driver):
+    def aux_check_resources_dr_03(self, shift, driver):
         """
         returns driving_time for shifts not respecting mex driving duration
         """
@@ -714,7 +877,7 @@ class Experiment(ExperimentCore):
         return check, max_driving_duration
 
     # Checks that the shift fits into the driver's time windows
-    def check_resources_dr_08(self, shift, id_shift, driver):
+    def aux_check_resources_dr_08(self, shift, id_shift, driver):
         """
         returns True for shifts not respecting drivers' TW
         """
@@ -734,14 +897,14 @@ class Experiment(ExperimentCore):
         return not found
 
     # Checks that two shifts with the same trailer do not overlap
-    def check_resources_tl_01(self, shift, end_of_last_shift):
+    def aux_check_resources_tl_01(self, shift, end_of_last_shift):
         """
         returns True for shifts using the same trailer as other currently running shift
         """
         return end_of_last_shift != 0 and shift["departure_time"] < end_of_last_shift
 
     # Checks that the driver and the trailer and compatible
-    def check_resources_tl_03(self, driver, trailer):
+    def aux_check_resources_tl_03(self, driver, trailer):
         """
         returns True for incompatible driver-trailer combinations
         """
@@ -749,15 +912,8 @@ class Experiment(ExperimentCore):
 
     # ===========================================
     # Verification of service quality constraints
-    def check_service_quality(self):
-        return SuperDict(
-            qs_01_orders_satisfied=self.check_qs_01(),
-            qs_02_runouts=self.check_qs_02(),
-            qs_03_callins=self.check_qs_03(),
-        ).vfilter(lambda v: len(v))
-
     # Checks that all orders having a time window ending before the planning horizon are satisfied
-    def check_qs_01(self):
+    def check_qs_01_orders_satisfied(self):
         """
         returns [{"id_customer": id_customer, "num_order": num_order}, ... ] for not delivered orders
         """
@@ -841,7 +997,7 @@ class Experiment(ExperimentCore):
         return check
 
     # Checks that there are no run outs
-    def check_qs_02(self):
+    def check_qs_02_runouts(self):
         """
         returns [{"id_location": location, "nb_run_outs": nb_run_outs}, ... ] for locations experiencing run-outs
         """
@@ -870,7 +1026,7 @@ class Experiment(ExperimentCore):
         return check
 
     # Checks that callIn customers only receive deliveries linked to an order
-    def check_qs_03(self):
+    def check_qs_03_callins(self):
         check = TupList()
         for shift in self.solution.get_all_shifts():
             id_shift = shift["id_shift"]
@@ -913,6 +1069,7 @@ class Experiment(ExperimentCore):
         # Shifts
         for row in check_dict.get("driver_and_trailer", []):
             check_log += f"Shift : {row['id_shift']} has no driver or no trailer.\n"
+
         for row in check_dict.get("c_02_timeline", []):
             check_log += f"check_shift_02, shift {row['id_shift']}. "
             check_log += (
@@ -921,35 +1078,45 @@ class Experiment(ExperimentCore):
         for row in check_dict.get("c_03_wrong_index", []):
             check_log += f"check_shift_03, shift {row['id_shift']}. "
             check_log += f"Operation nº{row['position']} has a wrong location index.\n"
+
         for row in check_dict.get("c_03_setup_times", []):
             check_log += f"check_shift_03, shift {row['id_shift']}. "
             check_log += f"Departure of operation at location {row['id_location']} is too early.\n"
+
         for row in check_dict.get("c_04_customer_TW", []):
             check_log += f"check_shift_04, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} is out of the time windows.\n"
+
         for row in check_dict.get("c_05_sites_accessible", []):
             check_log += f"check_shift_05, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} can't accept this trailer.\n"
+
         for row in check_dict.get("c_0607_inventory_trailer_negative", []):
             check_log += f"check_shift_06, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} makes the trailer's inventory negative.\n"
+
         for row in check_dict.get("c_0607_inventory_trailer_above_capacity", []):
             check_log += f"check_shift_06, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} makes the trailer's inventory above its capacity.\n"
+
         for row in check_dict.get("c_0607_inventory_trailer_final_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += (
                 f"The trailer's operations do not correspond to its final inventory.\n"
             )
+
         for row in check_dict.get("c_0607_inventory_trailer_initial_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += f"The initial inventory is not coherent with last shift of the trailer.\n"
+
         for row in check_dict.get("c_11_quantity_delivered", []):
             check_log += f"check_shift_11, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} has wrong sign.\n"
+
         for row in check_dict.get("c_16_customer_tank_exceeds", []):
             check_log += f"check_shift_16, shift {row['id_shift']}. "
             check_log += f"Operation at customer {row['id_location']} has quantity higher than tank's capacity.\n"
+
         for row in check_dict.get("c_16_customer_tank_too_low", []):
             check_log += f"check_shift_16, shift {row['id_shift']}. "
             check_log += f"Operation at customer {row['id_location']} has quantity lower than minimum quantity.\n"
@@ -958,34 +1125,40 @@ class Experiment(ExperimentCore):
         for row in check_dict.get("site_inventory_negative", []):
             check_log += f"check_sites, site_inventory {row['id_location']}. "
             check_log += f"Tank quantity strictly negative  at hour {row['hour']}. \n"
+
         for row in check_dict.get("site_inventory_exceeds", []):
             check_log += f"check_sites, site_inventory {row['id_location']}. "
             check_log += (
                 f"Tank quantity superior to tank_capacity at hour {row['hour']}.\n"
             )
+
         for row in check_dict.get("site_doesntexist", []):
             check_log += f"check_sites."
             check_log += f"SiteInventory {row['id_location']} does not correspond to a location.\n"
 
         # Resources
         for row in check_dict.get("res_dr_01_intershift", []):
-            check_log += f"check_resources_dr_01, shift {row['id_shift']}. "
+            check_log += f"aux_check_resources_dr_01, shift {row['id_shift']}. "
             check_log += f"Driver {row['id_driver']} does not respect minInterSHIFTDURATION before this shift.\n"
+
         for row in check_dict.get("res_dr_03_max_duration", []):
-            check_log += f"check_resources_dr_03, shift {row['id_shift']}. "
+            check_log += f"aux_check_resources_dr_03, shift {row['id_shift']}. "
             check_log += (
                 f"Driver {row['id_driver']} does not respect maxDrivingDuration.\n"
             )
+
         for row in check_dict.get("res_dr_08_driver_TW", []):
             check_log += f"check_resources_dr_08, shift {row['id_shift']}. "
             check_log += f"Shift is out of the time windows of the driver.\n"
+
         for row in check_dict.get("res_tl_01_shift_overlaps", []):
-            check_log += f"check_resources_tl_01, shift {row['id_shift']}. "
+            check_log += f"aux_check_resources_tl_01, shift {row['id_shift']}. "
             check_log += (
                 f"Trailer doesn't respect shift separation before this shift.\n"
             )
+
         for row in check_dict.get("res_tl_03_compatibility_dr_tr", []):
-            check_log += f"check_resources_tl_03, shift {row['id_shift']}. "
+            check_log += f"aux_check_resources_tl_03, shift {row['id_shift']}. "
             check_log += (
                 f"Trailer is not in the set of trailers compatible with the driver.\n"
             )
@@ -994,9 +1167,11 @@ class Experiment(ExperimentCore):
         for row in check_dict.get("qs_01_orders_satisfied", []):
             check_log += f"check_qs_01. "
             check_log += f"Missed order nª{row['num_order']} at customer {row['id_customer']}. \n"
+
         for row in check_dict.get("qs_02_runouts", []):
             check_log += f"check_qs_02."
             check_log += f"Customer {row['id_location']} ran out.\n"
+
         for row in check_dict.get("qs_03_callins", []):
             check_log += f"sub_check_qs_03, shift {row['id_shift']}. "
             check_log += f"Operation at location {row['id_location']} is out of the time windows of orders.\n"

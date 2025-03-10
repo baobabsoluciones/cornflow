@@ -8,8 +8,5 @@ class Instance(InstanceCore):
     schema = load_json(os.path.join(os.path.dirname(__file__), "../schemas/input.json"))
     schema_checks = get_empty_schema()
 
-    def check(self):
-        return dict()
-
     def get_pairs(self):
         return pt.TupList((el["n1"], el["n2"]) for el in self.data["pairs"])
