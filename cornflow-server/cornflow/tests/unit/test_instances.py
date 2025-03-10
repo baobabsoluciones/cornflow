@@ -79,7 +79,7 @@ class TestInstancesListEndpoint(BaseTestCases.ListFilters):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(400, response.status_code)
@@ -215,7 +215,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         idx = self.create_new_row(self.url, self.model, self.payload)
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + self.token,
+            "Authorization": f"Bearer {self.token}",
             "Accept-Encoding": "gzip",
         }
         response = self.client.get(INSTANCE_URL + idx + "/data/", headers=headers)

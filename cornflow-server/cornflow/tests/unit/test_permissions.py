@@ -43,7 +43,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
 
@@ -58,7 +58,7 @@ class TestPermissionsViewRoleEndpoint(CustomTestCase):
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
 
@@ -103,7 +103,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             data=json.dumps(self.payload),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         ).json["id"]
         view_id = 2
@@ -127,7 +127,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             data=json.dumps(self.payload),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         ).json["id"]
         for role in ROLES_MAP:
@@ -151,7 +151,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 data=json.dumps(self.payload),
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             ).json["id"]
 
@@ -160,7 +160,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
             self.assertEqual(200, response.status_code)
@@ -174,7 +174,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
             data=json.dumps(self.payload),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         ).json["id"]
 
@@ -186,7 +186,7 @@ class TestPermissionViewRolesDetailEndpoint(CustomTestCase):
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
                 self.assertEqual(403, response.status_code)
