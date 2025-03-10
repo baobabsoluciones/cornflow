@@ -94,7 +94,6 @@ class TestUnexpiringToken(CustomTestCase):
         # Verify that the token decodes correctly
         response = auth.decode_token(token)
 
-        self.assertIn("exp", response)
         self.assertIn("iat", response)
         self.assertIn("iss", response)
         self.assertIn("sub", response)
@@ -107,7 +106,6 @@ class TestUnexpiringToken(CustomTestCase):
         token2 = auth.generate_token(1)
         response2 = auth.decode_token(token2)
 
-        self.assertIn("exp", response2)
         self.assertIn("iat", response2)
         self.assertIn("iss", response2)
         self.assertIn("sub", response2)
