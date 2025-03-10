@@ -29,9 +29,6 @@ class Instance(InstanceCore):
     schema = get_pulp_jsonschema()
     schema_checks = get_empty_schema()
 
-    def check(self):
-        return dict()
-
 
 class Solution(SolutionCore):
     schema = get_pulp_jsonschema()
@@ -69,9 +66,6 @@ class PuLPSolve(ExperimentCore):
     def get_objective(self) -> float:
         _, model = pl.LpProblem.fromDict(self.solution.data)
         return model.objective
-
-    def check_solution(self, *args, **kwargs) -> dict:
-        return dict()
 
 
 class PuLP(ApplicationCore):

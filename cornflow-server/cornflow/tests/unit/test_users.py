@@ -387,7 +387,7 @@ class TestUserEndpoint(TestCase):
         payload = {"password": "Newtestpassword1!"}
         self.modify_info(self.planner, self.planner, payload)
         self.planner.update(payload)
-        print(self.planner)
+
         response = self.log_in(self.planner)
         self.assertEqual(False, response.json["change_password"])
 

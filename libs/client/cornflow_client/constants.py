@@ -207,6 +207,7 @@ SOLVER_CONVERTER = {
     "cbc": "cbc",
     "scip": "scip",
     "highs": "highs",
+    "appsi_highs": "highs",
     # PULP
     "PULP_CBC_CMD": "cbc",
     "GUROBI_CMD": "gurobi",

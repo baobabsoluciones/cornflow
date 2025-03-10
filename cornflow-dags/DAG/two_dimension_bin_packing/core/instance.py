@@ -32,9 +32,6 @@ class Instance(InstanceCore):
         data_p["parameters"] = self.data["parameters"]
         return pickle.loads(pickle.dumps(data_p, -1))
 
-    def check(self):
-        return dict()
-
     def _get_property(self, key, prop) -> SuperDict:
         return self.data[key].get_property(prop)
 
@@ -167,13 +164,7 @@ class Instance(InstanceCore):
             temp.values_tl(), key=lambda v: v["value"] / (v["width"] * v["height"])
         )["id"]
 
-    def check(self) -> dict:
-        return dict(
-            non_valid_objects=self.check_non_valid_items(),
-            non_valid_data=self.non_valid_data(),
-        )
-
-    def check_non_valid_items(self) -> list:
+    def check_non_valid_objects(self) -> list:
         items = list()
         for item in self.get_items():
             if (
@@ -183,9 +174,9 @@ class Instance(InstanceCore):
                 items.append({"id": item})
         return items
 
-    def non_valid_data(self) -> dict:
+    def check_non_valid_data(self) -> dict:
         valid = dict()
-        non_valid = self.check_non_valid_items()
+        non_valid = self.check_non_valid_objects()
         if len(non_valid) == len(self.get_items()):
             valid["valid"] = False
         return valid

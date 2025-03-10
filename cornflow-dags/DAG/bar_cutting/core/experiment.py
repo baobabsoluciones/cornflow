@@ -62,11 +62,6 @@ class Experiment(ExperimentCore):
         # Total loss of material
         return total_length_input_material - total_length_output_material
 
-    def check_solution(self, *args, **kwargs) -> Dict[str, Dict]:
-        return SuperDict(
-            demand_satisfaction=self.check_demand_satisfaction(),
-        )
-
     def check_demand_satisfaction(self) -> TupList:
         """Checks demand satisfaction"""
         demand = self.instance.get_demand()
