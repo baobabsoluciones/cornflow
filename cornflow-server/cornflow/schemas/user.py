@@ -1,12 +1,14 @@
 """
 This file contains the schemas used for the users defined in the application
 """
-from marshmallow import fields, Schema
+
+from marshmallow import fields, Schema, validates_schema, ValidationError
 from .instance import InstanceSchema
 
 
 class UserSchema(Schema):
     """ """
+
     id = fields.Int(dump_only=True)
     first_name = fields.Str()
     last_name = fields.Str()
@@ -25,7 +27,7 @@ class UserEndpointResponse(Schema):
     last_name = fields.Str()
     email = fields.Str()
     created_at = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -34,7 +36,7 @@ class UserDetailsEndpointResponse(Schema):
     last_name = fields.Str()
     username = fields.Str()
     email = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class TokenEndpointResponse(Schema):
@@ -51,7 +53,6 @@ class UserEditRequest(Schema):
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
-    pwd_last_change = fields.DateTime(required=False)
 
 
 class LoginEndpointRequest(Schema):
@@ -65,10 +66,10 @@ class LoginEndpointRequest(Schema):
 
 class LoginOpenAuthRequest(Schema):
     """
-    This is the schema used by the login endpoint with Open ID protocol
+    Schema for the login request with OpenID authentication
     """
-
-    token = fields.Str(required=True)
+    username = fields.String(required=False)
+    password = fields.String(required=False)
 
 
 class SignupRequest(Schema):

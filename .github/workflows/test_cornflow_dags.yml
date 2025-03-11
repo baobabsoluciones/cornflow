@@ -27,13 +27,13 @@ jobs:
     strategy:
       max-parallel: 21
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11']
+        python-version: [3.9, '3.10', '3.11', '3.12']
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install cbc
@@ -48,7 +48,7 @@ jobs:
         python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
     - name: Install airflow
       run: |
-        AIRFLOW_VERSION=2.7.1
+        AIRFLOW_VERSION=2.9.1
         PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
         CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
         CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
@@ -77,11 +77,11 @@ jobs:
         AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
     - name: Run unit tests
       run: |
-        coverage run --source=. --rcfile=./.coveragerc -m unittest tests/test_dags.py
+        coverage run --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/unit
         coverage report -m
     - name: Run integration tests
       run: |
-        coverage run -a --source=. --rcfile=./.coveragerc -m unittest tests/test_dags_af.py
+        coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
         coverage report -m
         coverage xml
     - name: Upload coverage to codecov

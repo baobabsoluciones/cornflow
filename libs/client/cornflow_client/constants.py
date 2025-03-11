@@ -1,6 +1,7 @@
 """
 Constants values used in schemas functions.
 """
+
 import pulp as pl
 from ortools.sat.python import cp_model
 
@@ -119,7 +120,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("timeLimit", "pyomo", "cbc"): "sec",
     ("pump_passes", "pyomo", "cbc"): "pumpC",
     ("heuristics", "pyomo", "cbc"): "heur",
-
     ("is_mip", "pulp", "cbc"): "mip",
     ("abs_gap", "pulp", "cbc"): "gapAbs",
     ("rel_gap", "pulp", "cbc"): "gapRel",
@@ -129,7 +129,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("threads", "pulp", "cbc"): "threads",
     ("presolve", "pulp", "cbc"): "presolve",
     ("msg", "pulp", "cbc"): "msg",
-
     ("abs_gap", "pyomo", "gurobi"): "MIPGapAbs",
     ("rel_gap", "pyomo", "gurobi"): "MIPGap",
     ("time_limit", "pyomo", "gurobi"): "TimeLimit",
@@ -145,7 +144,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("pump_passes", "pyomo", "gurobi"): "PumpPasses",
     ("heuristics", "pyomo", "gurobi"): "Heuristics",
     ("threads", "pyomo", "gurobi"): "threads",
-
     ("is_mip", "pulp", "gurobi"): "mip",
     ("abs_gap", "pulp", "gurobi"): "gapAbs",
     ("rel_gap", "pulp", "gurobi"): "gapRel",
@@ -155,7 +153,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("feasibility_tol", "pulp", "gurobi"): "FeasibilityTol",
     ("iteration_limit", "pulp", "gurobi"): "IterationLimit",
     ("msg", "pulp", "gurobi"): "msg",
-
     ("abs_gap", "pyomo", "scip"): "limits/absgap",
     ("rel_gap", "pyomo", "scip"): "limits/gap",
     ("time_limit", "pyomo", "scip"): "limits/time",
@@ -171,7 +168,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("nlp_tol", "pyomo", "scip"): "heuristics/subnlp/opttol",
     ("cutoff", "pyomo", "scip"): "heuristics/subnlp/setcutoff",
     ("nlp_iteration_limit", "pyomo", "scip"): "heuristics/subnlp/itermin",
-
     ("is_mip", "pulp", "scip"): "mip",
     ("abs_gap", "pulp", "scip"): "gapAbs",
     ("rel_gap", "pulp", "scip"): "gapRel",
@@ -186,7 +182,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("solution_limit", "pulp", "scip"): "limits/maxsol",
     ("nlp_iteration_limit", "pulp", "scip"): "heuristics/subnlp/itermin",
     ("msg", "pulp", "scip"): "msg",
-
     ("rel_gap", "pyomo", "highs"): "mip_rel_gap",
     ("abs_gap", "pyomo", "highs"): "mip_abs_gap",
     ("time_limit", "pyomo", "highs"): "time_limit",
@@ -195,7 +190,6 @@ PARAMETER_SOLVER_TRANSLATING_MAPPING = {
     ("parallel", "pyomo", "highs"): "parallel",
     ("crossover", "pyomo", "highs"): "run_crossover",
     ("heuristics", "pyomo", "highs"): "mip_heuristic_effort",
-
     ("is_mip", "pulp", "highs"): "mip",
     ("abs_gap", "pulp", "highs"): "gapAbs",
     ("rel_gap", "pulp", "highs"): "gapRel",
@@ -213,7 +207,7 @@ SOLVER_CONVERTER = {
     "cbc": "cbc",
     "scip": "scip",
     "highs": "highs",
-
+    "appsi_highs": "highs",
     # PULP
     "PULP_CBC_CMD": "cbc",
     "GUROBI_CMD": "gurobi",
@@ -261,4 +255,12 @@ class BadInstance(Exception):
 
 
 class BadSolution(Exception):
+    pass
+
+
+class BadInstanceChecks(Exception):
+    pass
+
+
+class BadSolutionChecks(Exception):
     pass

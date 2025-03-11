@@ -1,10 +1,16 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE
+from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
 
 class DefaultConfig(object):
+    """
+    Default configuration class
+    """
+
+    APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
+    EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
@@ -21,6 +27,11 @@ class DefaultConfig(object):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
+
+    # If service user is allowed to log with username and password
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
+        os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
+    )
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
@@ -48,15 +59,13 @@ class DefaultConfig(object):
     LDAP_PROTOCOL_VERSION = int(os.getenv("LDAP_PROTOCOL_VERSION", 3))
     LDAP_USE_TLS = os.getenv("LDAP_USE_TLS", "False")
 
-    # OpenID login -> Default Azure
-    OID_PROVIDER = os.getenv("OID_PROVIDER", 0)
-    OID_CLIENT_ID = os.getenv("OID_CLIENT_ID")
-    OID_TENANT_ID = os.getenv("OID_TENANT_ID")
-    OID_ISSUER = os.getenv("OID_ISSUER")
+    # OpenID Connect configuration
+    OID_PROVIDER = os.getenv("OID_PROVIDER")
+    OID_EXPECTED_AUDIENCE = os.getenv("OID_EXPECTED_AUDIENCE")
 
     # APISPEC:
     APISPEC_SPEC = APISpec(
-        title="Cornflow API docs",
+        title="cornflow API docs",
         version="v1",
         plugins=[MarshmallowPlugin()],
         openapi_version="2.0.0",
@@ -84,14 +93,17 @@ class DefaultConfig(object):
 
 
 class Development(DefaultConfig):
-
-    """ """
+    """
+    Configuration class for development
+    """
 
     ENV = "development"
 
 
 class Testing(DefaultConfig):
-    """ """
+    """
+    Configuration class for testing
+    """
 
     ENV = "testing"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -109,8 +121,27 @@ class Testing(DefaultConfig):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
 
+class TestingOpenAuth(Testing):
+    """
+    Configuration class for testing some edge cases with Open Auth login
+    """
+    AUTH_TYPE = AUTH_OID
+    OID_PROVIDER = "https://test-provider.example.com"
+    OID_EXPECTED_AUDIENCE = "test-audience-id"
+
+
+class TestingApplicationRoot(Testing):
+    """
+    Configuration class for testing with application root
+    """
+
+    APPLICATION_ROOT = "/test"
+
+
 class Production(DefaultConfig):
-    """ """
+    """
+    Configuration class for production
+    """
 
     ENV = "production"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -121,4 +152,10 @@ class Production(DefaultConfig):
     PROPAGATE_EXCEPTIONS = True
 
 
-app_config = {"development": Development, "testing": Testing, "production": Production}
+app_config = {
+    "development": Development,
+    "testing": Testing,
+    "production": Production,
+    "testing-oauth": TestingOpenAuth,
+    "testing-root": TestingApplicationRoot
+}

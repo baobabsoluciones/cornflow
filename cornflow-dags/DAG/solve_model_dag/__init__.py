@@ -67,9 +67,6 @@ class PuLPSolve(ExperimentCore):
         _, model = pl.LpProblem.fromDict(self.solution.data)
         return model.objective
 
-    def check_solution(self, *args, **kwargs) -> dict:
-        return dict()
-
 
 class PuLP(ApplicationCore):
     name = "solve_model_dag"
