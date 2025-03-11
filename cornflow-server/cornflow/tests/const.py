@@ -9,6 +9,7 @@ def _get_file(relative_path):
 
 PREFIX = ""
 INSTANCE_PATH = _get_file("./data/new_instance.json")
+EMPTY_INSTANCE_PATH = _get_file("./data/empty_instance.json")
 INSTANCES_LIST = [INSTANCE_PATH, _get_file("./data/new_instance_2.json")]
 INSTANCE_URL = PREFIX + "/instance/"
 INSTANCE_MPS = _get_file("./data/test_mps.mps")

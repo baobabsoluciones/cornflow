@@ -1,6 +1,7 @@
 """
 
 """
+
 # Imports from libraries
 import os
 from datetime import datetime, timedelta
@@ -11,7 +12,7 @@ from cornflow_client import ApplicationCore
 from cornflow_client.core.tools import load_json
 
 # Imports from internal modules
-from .core import Experiment, Instance, Solution
+from .core import Instance, Solution
 from .solvers import MipModel
 
 

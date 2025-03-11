@@ -1,7 +1,7 @@
 requests<=2.32.3
 genson<=1.2.2
-jsonschema<=4.19.1
-marshmallow<=3.19.0
+jsonschema<=4.21.1
+marshmallow<=3.20.2
 pytups<=0.86.2
 ortools<=9.8.3296
 PuLP<=2.9.0

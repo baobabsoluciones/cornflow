@@ -1,5 +1,17 @@
 """
-Unit test for the DAG endpoints
+Unit tests for the DAG endpoints.
+
+This module contains tests for DAG (Directed Acyclic Graph) functionality, including:
+
+- DAG execution and state management
+- Manual and automated DAG operations
+- Service and planner user permissions
+- DAG deployment and registration
+- Permission cascade deletion
+- DAG configuration and data handling
+
+The tests verify both successful operations and proper error handling
+for various DAG-related scenarios.
 """
 
 # Import from libraries
@@ -31,7 +43,28 @@ from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
 
 class TestDagEndpoint(TestExecutionsDetailEndpointMock):
+    """
+    Test suite for DAG endpoint functionality.
+
+    This class tests the DAG endpoints for different user roles and states:
+
+    - Manual DAG operations for service users
+    - Manual DAG operations for planner users
+    - DAG state management
+    - Data validation and processing
+    """
+
     def test_manual_dag_service_user(self):
+        """
+        Test manual DAG operations for service users.
+
+        Verifies:
+
+        - Service user can create manual DAGs
+        - Proper state assignment
+        - Correct data handling
+        - Required fields validation
+        """
         with open(CASE_PATH) as f:
             payload = json.load(f)
         data = dict(
@@ -59,6 +92,16 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
         )
 
     def test_manual_dag_planner_user(self):
+        """
+        Test manual DAG operations for planner users.
+
+        Verifies:
+
+        - Planner user can create manual DAGs
+        - Proper state assignment
+        - Correct data handling
+        - Required fields validation
+        """
         with open(CASE_PATH) as f:
             payload = json.load(f)
         data = dict(
@@ -87,7 +130,29 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
 
 
 class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
+    """
+    Test suite for DAG detail endpoint functionality.
+
+    This class tests detailed DAG operations including:
+
+    - DAG updates and modifications
+    - Log handling and validation
+    - Data retrieval and verification
+    - Error handling for unauthorized access
+    """
+
     def test_put_dag(self):
+        """
+        Test updating a DAG.
+
+        Verifies:
+
+        - Successful DAG update
+        - Log JSON handling
+        - State transition
+        - Field validation
+        - Log field filtering
+        """
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         with open(CASE_PATH) as f:
             payload = json.load(f)
@@ -104,19 +169,12 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         data = dict(
             data=payload["data"],
             state=EXEC_STATE_CORRECT,
-            log_json={
-                "time": 10.3,
-                "solver": "dummy",
-                "status": "feasible",
-                "status_code": 2,
-                "sol_code": 1,
-                "some_other_key": "this should be excluded",
-            },
+            log_json=log_json,
         )
         payload_to_check = {**self.payload, **data}
         token = self.create_service_user()
         self.update_row(
-            url=DAG_URL + idx + "/",
+            url=f"{DAG_URL}{idx}/",
             payload_to_check=payload_to_check,
             change=data,
             token=token,
@@ -124,7 +182,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
         data = self.get_one_row(
-            url=EXECUTION_URL + idx + "/log/",
+            url=f"{EXECUTION_URL}{idx}/log/",
             token=token,
             check_payload=False,
             payload=self.payload,
@@ -137,6 +195,16 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         self.assertNotIn("some_other_key", data["log"].keys())
 
     def test_get_dag(self):
+        """
+        Test retrieving a DAG.
+
+        Verifies:
+
+        - Successful DAG retrieval
+        - Correct data structure
+        - Instance data consistency
+        - Configuration validation
+        """
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         token = self.create_service_user()
         keys_to_check = ["id", "data", "solution_data", "config"]
@@ -166,9 +234,17 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["data"], instance_data["data"])
         self.assertEqual(data["config"], self.payload["config"])
-        return
 
     def test_get_no_dag(self):
+        """
+        Test retrieving a non-existent DAG.
+
+        Verifies:
+
+        - Proper error handling for missing DAGs
+        - Correct error status code
+        - Error message validation
+        """
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         data = self.get_one_row(
             url=DAG_URL + idx + "/",
@@ -181,11 +257,39 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
 
 
 class TestDeployedDAG(TestCase):
+    """
+    Test suite for deployed DAG functionality.
+
+    This class tests deployed DAG operations including:
+
+    - DAG deployment and registration
+    - Permission management
+    - Cascade deletion
+    - User role interactions
+    """
+
     def create_app(self):
+        """
+        Create and configure the Flask application for testing.
+
+        :return: The configured Flask application instance
+        :rtype: Flask
+        """
         app = create_app("testing")
         return app
 
     def setUp(self):
+        """
+        Set up test environment before each test.
+
+        Initializes:
+
+        - Database tables
+        - Access controls
+        - Test DAGs
+        - Admin user with roles
+        - DAG permissions
+        """
         db.create_all()
         access_init_command(verbose=False)
         register_deployed_dags_command_test(verbose=False)
@@ -226,10 +330,24 @@ class TestDeployedDAG(TestCase):
         register_dag_permissions_command(verbose=False)
 
     def tearDown(self):
+        """
+        Clean up test environment after each test.
+
+        Removes database session and drops all tables.
+        """
         db.session.remove()
         db.drop_all()
 
     def test_permission_cascade_deletion(self):
+        """
+        Test cascade deletion of DAG permissions.
+
+        Verifies:
+
+        - Successful permission deletion on DAG removal
+        - Proper cascade effect
+        - Permission count validation
+        """
         before = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertIsNotNone(before)
         dag = DeployedDAG.query.get("solve_model_dag")
@@ -239,12 +357,21 @@ class TestDeployedDAG(TestCase):
         self.assertGreater(len(before), len(after))
 
     def test_get_deployed_dags(self):
+        """
+        Test retrieving deployed DAGs.
+
+        Verifies:
+
+        - Successful DAG listing
+        - Proper authorization
+        - Response structure
+        """
         response = self.client.get(
             DEPLOYED_DAG_URL,
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -275,7 +402,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -300,7 +427,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -312,7 +439,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -327,7 +454,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 400)

@@ -1,10 +1,11 @@
 """
 This file contains the UserModel
 """
+
 # Imports from external libraries
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
@@ -55,9 +56,7 @@ class UserModel(TraceAttributesModel):
     pwd_last_change = db.Column(db.DateTime, nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
 
-    user_roles = db.relationship(
-        "UserRoleModel", cascade="all,delete", backref="users"
-    )
+    user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
 
     instances = db.relationship(
         "InstanceModel",
@@ -95,15 +94,14 @@ class UserModel(TraceAttributesModel):
         self.first_name = data.get("first_name")
         self.last_name = data.get("last_name")
         self.username = data.get("username")
-        self.pwd_last_change = datetime.utcnow()
+        self.pwd_last_change = datetime.now(timezone.utc)
         # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(data.get("password"))
         if check_pass:
             self.password = self.__generate_hash(data.get("password"))
         else:
             raise InvalidCredentials(
-                msg,
-                log_txt="Error while trying to create a new user. " + msg
+                msg, log_txt="Error while trying to create a new user. " + msg
             )
 
         check_email, msg = check_email_pattern(data.get("email"))
@@ -111,8 +109,7 @@ class UserModel(TraceAttributesModel):
             self.email = data.get("email")
         else:
             raise InvalidCredentials(
-                msg,
-                log_txt="Error while trying to create a new user. " + msg
+                msg, log_txt="Error while trying to create a new user. " + msg
             )
 
     def update(self, data):
@@ -126,7 +123,7 @@ class UserModel(TraceAttributesModel):
         if new_password:
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
-            data["pwd_last_change"] = datetime.utcnow()
+            data["pwd_last_change"] = datetime.now(timezone.utc)
         super().update(data)
 
     def comes_from_external_provider(self):

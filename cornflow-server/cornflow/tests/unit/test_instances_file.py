@@ -28,7 +28,7 @@ class TestInstances(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "multipart/form-data",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
 

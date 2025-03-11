@@ -1,3 +1,21 @@
+"""
+Unit tests for the Cornflow CLI commands.
+
+This module contains tests for the command-line interface functionality, including:
+
+- Entry point commands and help messages
+- Actions management commands
+- Configuration management commands
+- Roles management commands
+- Views management commands
+- Permissions management commands
+- Service management commands
+- User management commands
+
+The tests verify both the command structure and the actual functionality
+of each command, ensuring proper database operations and state changes.
+"""
+
 import configparser
 import os
 
@@ -18,18 +36,61 @@ from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
 
 
 class CLITests(TestCase):
+    """
+    Test suite for Cornflow CLI functionality.
+
+    This class tests all CLI commands and their effects on the system, including:
+
+    - Command help messages and documentation
+    - Actions initialization and management
+    - Configuration variable handling
+    - Role management and initialization
+    - View registration and management
+    - Permission system setup and validation
+    - Service initialization
+    - User creation and management
+
+    Each test method focuses on a specific command or group of related commands,
+    verifying both the command interface and its actual effects on the system.
+    """
+
     def setUp(self):
+        """
+        Set up test environment before each test.
+
+        Creates all database tables required for testing.
+        """
         db.create_all()
 
     def tearDown(self):
+        """
+        Clean up test environment after each test.
+
+        Removes database session and drops all tables.
+        """
         db.session.remove()
         db.drop_all()
 
     def create_app(self):
+        """
+        Create and configure the Flask application for testing.
+
+        :return: The configured Flask application instance
+        :rtype: Flask
+        """
         app = create_app("testing")
         return app
 
     def test_entry_point(self):
+        """
+        Test the main CLI entry point and help command.
+
+        Verifies:
+
+        - Command execution success
+        - Presence of all main command groups
+        - Help message content and formatting
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
         self.assertEqual(result.exit_code, 0)
@@ -53,6 +114,15 @@ class CLITests(TestCase):
         self.assertIn("Commands to manage the views", result.output)
 
     def test_actions_entry_point(self):
+        """
+        Test the actions command group entry point.
+
+        Verifies:
+
+        - Actions command help message
+        - Presence of init subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["actions", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -61,6 +131,15 @@ class CLITests(TestCase):
         self.assertIn("Initialize the actions", result.output)
 
     def test_actions(self):
+        """
+        Test the actions initialization command.
+
+        Verifies:
+
+        - Successful action initialization
+        - Correct number of actions created
+        - Database state after initialization
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["actions", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -68,6 +147,15 @@ class CLITests(TestCase):
         self.assertEqual(len(actions), 5)
 
     def test_config_entrypoint(self):
+        """
+        Test the config command group entry point.
+
+        Verifies:
+
+        - Config command help message
+        - Presence of all config subcommands
+        - Command descriptions
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["config", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -80,6 +168,15 @@ class CLITests(TestCase):
         self.assertIn("Save the configuration variables to a file", result.output)
 
     def test_config_list(self):
+        """
+        Test the config list command.
+
+        Verifies:
+
+        - Successful listing of configuration variables
+        - Presence of key configuration items
+        - Correct values in testing environment
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["config", "list"])
         self.assertEqual(result.exit_code, 0)
@@ -87,12 +184,29 @@ class CLITests(TestCase):
         self.assertIn("testing", result.output)
 
     def test_config_get(self):
+        """
+        Test the config get command.
+
+        Verifies:
+
+        - Successful retrieval of specific config value
+        - Correct value returned for ENV variable
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["config", "get", "-k", "ENV"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("testing", result.output)
 
     def test_config_save(self):
+        """
+        Test the config save command.
+
+        Verifies:
+
+        - Successful configuration file creation
+        - Correct content in saved file
+        - Proper file cleanup after test
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["config", "save", "-p", "./"])
         self.assertEqual(result.exit_code, 0)
@@ -104,6 +218,15 @@ class CLITests(TestCase):
         os.remove("config.cfg")
 
     def test_roles_entrypoint(self):
+        """
+        Test the roles command group entry point.
+
+        Verifies:
+
+        - Roles command help message
+        - Presence of init subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["roles", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -112,6 +235,15 @@ class CLITests(TestCase):
         self.assertIn("Initializes the roles with the default roles", result.output)
 
     def test_roles_init_command(self):
+        """
+        Test the roles initialization command.
+
+        Verifies:
+
+        - Successful role initialization
+        - Correct number of default roles created
+        - Database state after initialization
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["roles", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -119,6 +251,15 @@ class CLITests(TestCase):
         self.assertEqual(len(roles), 4)
 
     def test_views_entrypoint(self):
+        """
+        Test the views command group entry point.
+
+        Verifies:
+
+        - Views command help message
+        - Presence of init subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["views", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -127,6 +268,15 @@ class CLITests(TestCase):
         self.assertIn("Initialize the views", result.output)
 
     def test_views_init_command(self):
+        """
+        Test the views initialization command.
+
+        Verifies:
+
+        - Successful view initialization
+        - Correct number of views created
+        - Database state after initialization
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -134,6 +284,15 @@ class CLITests(TestCase):
         self.assertEqual(len(views), 50)
 
     def test_permissions_entrypoint(self):
+        """
+        Test the permissions command group entry point.
+
+        Verifies:
+
+        - Permissions command help message
+        - Presence of all subcommands
+        - Command descriptions
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["permissions", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -146,6 +305,15 @@ class CLITests(TestCase):
         self.assertIn("Initialize the base permissions", result.output)
 
     def test_permissions_init(self):
+        """
+        Test the permissions initialization command.
+
+        Verifies:
+
+        - Successful initialization of all permission components
+        - Correct number of actions, roles, views, and permissions
+        - Database state after initialization
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["permissions", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -159,6 +327,15 @@ class CLITests(TestCase):
         self.assertEqual(len(permissions), 551)
 
     def test_permissions_base_command(self):
+        """
+        Test the base permissions initialization command.
+
+        Verifies:
+
+        - Successful initialization of base permissions
+        - Correct setup of all permission components
+        - Database state consistency
+        """
         runner = CliRunner()
         runner.invoke(cli, ["actions", "init", "-v"])
         runner.invoke(cli, ["roles", "init", "-v"])
@@ -175,6 +352,15 @@ class CLITests(TestCase):
         self.assertEqual(len(permissions), 551)
 
     def test_service_entrypoint(self):
+        """
+        Test the service command group entry point.
+
+        Verifies:
+
+        - Service command help message
+        - Presence of init subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["service", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -183,6 +369,15 @@ class CLITests(TestCase):
         self.assertIn("Initialize the service", result.output)
 
     def test_users_entrypoint(self):
+        """
+        Test the users command group entry point.
+
+        Verifies:
+
+        - Users command help message
+        - Presence of create subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["users", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -191,6 +386,15 @@ class CLITests(TestCase):
         self.assertIn("Create a user", result.output)
 
     def test_users_create_entrypoint(self):
+        """
+        Test the users create command entry point.
+
+        Verifies:
+
+        - Create command help message
+        - Presence of service subcommand
+        - Command description accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["users", "create", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -198,6 +402,15 @@ class CLITests(TestCase):
         self.assertIn("Create a service user", result.output)
 
     def test_service_user_help(self):
+        """
+        Test the service user creation help command.
+
+        Verifies:
+
+        - Help message content
+        - Required parameter descriptions
+        - Parameter documentation accuracy
+        """
         runner = CliRunner()
         result = runner.invoke(cli, ["users", "create", "service", "--help"])
         self.assertEqual(result.exit_code, 0)
@@ -209,6 +422,16 @@ class CLITests(TestCase):
         self.assertIn("email", result.output)
 
     def test_service_user_command(self):
+        """
+        Test service user creation command.
+
+        Verifies:
+
+        - Successful service user creation
+        - Correct user attributes
+        - Service role assignment
+        - Service user status verification
+        """
         runner = CliRunner()
         self.test_roles_init_command()
         result = runner.invoke(
@@ -233,6 +456,16 @@ class CLITests(TestCase):
         self.assertTrue(user.is_service_user())
 
     def test_viewer_user_command(self):
+        """
+        Test viewer user creation command.
+
+        Verifies:
+
+        - Successful viewer user creation
+        - Correct user attributes
+        - Viewer role assignment
+        - Service user status check
+        """
         runner = CliRunner()
         self.test_roles_init_command()
         result = runner.invoke(
