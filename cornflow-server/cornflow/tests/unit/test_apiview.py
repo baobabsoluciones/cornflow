@@ -141,8 +141,8 @@ class TestApiViewModel(CustomTestCase):
         """
         Test that the get_all_objects method works properly
         """
-        expected_count = len(resources) + 2
-
+        expected_count = len(resources) + 3
+        resources
         # Test getting all objects
         all_instances = ViewModel.get_all_objects().all()
         self.assertEqual(len(all_instances), expected_count)
