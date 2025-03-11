@@ -13,6 +13,7 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
+from flask_socketio import SocketIO
 from logging.config import dictConfig
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.exceptions import NotFound
@@ -39,6 +40,12 @@ from cornflow.shared.compress import init_compress
 from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
+from cornflow.shared.socket import initialize_socket
+
+
+socketio = SocketIO(
+    cors_allowed_origins=os.getenv("CORS_ORIGINS", "*"), message_queue="redis://"
+)
 
 
 def create_app(env_name="development", dataconn=None):
@@ -62,6 +69,7 @@ def create_app(env_name="development", dataconn=None):
     CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
+    socketio.init_app(app)
     Migrate(app=app, db=db)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
@@ -103,7 +111,7 @@ def create_app(env_name="development", dataconn=None):
     else:
         raise ConfigurationError(
             error="Invalid authentication type",
-            log_txt="Error while configuring authentication. The authentication type is not valid."
+            log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
 
     initialize_errorhandlers(app)
@@ -120,6 +128,8 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
 
+    initialize_socket(socketio)
+    setattr(app, "__socketio_obj", socketio)
     if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
         app.wsgi_app = DispatcherMiddleware(
             NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
@@ -214,4 +224,4 @@ def register_dag_permissions(open_deployment, verbose):
 if __name__ == "__main__":
     environment_name = os.getenv("FLASK_ENV", "development")
     flask_app = create_app(environment_name)
-    flask_app.run()
+    socketio.run(flask_app)

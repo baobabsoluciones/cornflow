@@ -4,6 +4,7 @@ Initialization file for the models module
 from .action import ActionModel
 from .alarms import AlarmsModel
 from .case import CaseModel
+from .connection import ConnectionModel
 from .dag import DeployedDAG
 from .dag_permissions import PermissionsDAG
 from .execution import ExecutionModel
