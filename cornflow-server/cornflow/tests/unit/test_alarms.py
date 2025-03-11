@@ -13,9 +13,10 @@ TestAlarmsEndpoint
 """
 
 # Imports from internal modules
+import json
 from cornflow.models import AlarmsModel
 from cornflow.tests.const import ALARMS_URL
-from cornflow.tests.custom_test_case import CustomTestCase
+from cornflow.tests.custom_test_case import BaseTestCases, CustomTestCase
 
 
 class TestAlarmsEndpoint(CustomTestCase):
@@ -86,20 +87,17 @@ class TestAlarmsEndpoint(CustomTestCase):
                 if key in data[i]:
                     self.assertEqual(rows_data[i][key], data[i][key])
 
-    def test_get_alarm_detail(self):
-        """
-        The idea would be to read the alarm_id of the query and be able to return the characteristics associated with said alarm_id.
-        To check this, I would use an example data set of different alarms and, after giving a specific id, be able to return the expected result.
 
-        Verifies:
-        - Retrieval of a single alarm using its ID
-        - Correct validation of alarm data fields
-
-        NOT IMPLEMENTED
-
-        """
-
-        raise NotImplemented
+class TestAlarmsDetailEndpoint(TestAlarmsEndpoint, BaseTestCases.DetailEndpoint):
+    def setUp(self):
+        super().setUp()
+        self.url = self.url
+        self.idx = 0
+        self.payload = {
+            "name": "Alarm 1",
+            "description": "Description Alarm 1",
+            "criticality": 1,
+        }
 
     def test_disable_alarm_detail(self):
         """
@@ -111,8 +109,33 @@ class TestAlarmsEndpoint(CustomTestCase):
         - Retrieval of a single alarm using its ID
         - Correct validation of alarm data fields
 
-        NOT IMPLEMENTED
-
         """
 
-        raise NotImplemented
+        data = {
+            "name": "Alarm 1",
+            "description": "Description Alarm 1",
+            "criticality": 1,
+        }
+        id = self.create_new_row(self.url, self.model, data)
+        data = {
+            "name": "Alarm 2",
+            "description": "Description Alarm 2",
+            "criticality": 1,
+        }
+        self.idx = id
+        url = self.url + str(id) + "/"
+        response = self.client.delete(
+            url,
+            data=json.dumps(data),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {"message": "Object marked as disabled"})
+        all_rows = AlarmsModel.query.all()
+        for row in all_rows:
+            if row.id == id:
+                # We check deleted at has a value
+                self.assertIsNotNone(row.deleted_at)
+            else:
+                self.assertIsNone(row.deleted_at)

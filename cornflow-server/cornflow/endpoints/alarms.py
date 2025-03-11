@@ -6,11 +6,13 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import AlarmsModel
 from cornflow.schemas.alarms import (
+    AlarmEditRequest,
     AlarmsResponse,
     AlarmsPostRequest,
-    QueryFiltersAlarms
+    QueryFiltersAlarms,
 )
 from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.exceptions import AirflowError, ObjectDoesNotExist, InvalidData
 
 
 class AlarmsEndpoint(BaseMetaResource):
@@ -60,9 +62,52 @@ class AlarmsEndpoint(BaseMetaResource):
         return self.post_list(data=kwargs)
 
 
-class AlarmDetailEndpoint(BaseMetaResource):
+# class AlarmDetailEndpoint(BaseMetaResource):
+#     """
+#     Endpoint use to get the information of one single alarm
+#     """
+
+#     def __init__(self):
+#         super().__init__()
+#         self.data_model = AlarmsModel
+#         self.unique = ["id"]
+
+#     @doc(
+#         description="Get an alarm",
+#         tags=["None"],
+#     )
+#     @authenticate(auth_class=Auth())
+#     @marshal_with(AlarmsResponse(many=True))
+#     @BaseMetaResource.get_data_or_404
+#     def get(self, idx):
+#         """
+#         API method to get all the data of a specific alarm.
+#         It requires authentication to be passed in the form of a token that has to be linked to
+#         an existing session (login) made by a user.
+#         :return: The data of the alarm, and an integer with the HTTP status code.
+#         :rtype: Tuple(dict, integer)
+#         """
+
+#         current_app.logger.info(f"User {self.get_user()} gets details of alarm {idx}")
+
+#         return self.get_detail(idx=idx)
+
+#     @doc(description="Disable an alarm", tags=["None"])
+#     @authenticate(auth_class=Auth())
+#     def delete(self, idx):
+#         """
+#         :param int alarm_id: Alarm id.
+#         :return:
+#         :rtype: Tuple(dict, integer)
+#         """
+
+#         current_app.logger.info(f"Alarm {idx} was disabled by user {self.get_user()}")
+#         return self.disable_detail(idx=idx)
+
+
+class AlarmDetailEndpointBase(BaseMetaResource):
     """
-    Endpoint use to get the information of one single alarm
+    Endpoint used to get the information of a certain alarm. But not the data!
     """
 
     def __init__(self):
@@ -70,42 +115,51 @@ class AlarmDetailEndpoint(BaseMetaResource):
         self.data_model = AlarmsModel
         self.unique = ["id"]
 
-    @doc(
-        description="Get an alarm",
-        tags=["None"],
-    )
+
+class AlarmDetailEndpoint(AlarmDetailEndpointBase):
+    @doc(description="Get details of an alarm", tags=["None"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(AlarmsResponse(many=True))
+    @marshal_with(AlarmsResponse)
     @BaseMetaResource.get_data_or_404
-    def get(self, alarm_id):
+    def get(self, idx):
         """
-        API method to get all the data of a specific alarm.
+        API method to get an execution created by the user and its related info.
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
-        :return: The data of the alarm, and an integer with the HTTP status code.
+
+        :param str idx: ID of the execution.
+        :return: A dictionary with a message (error if authentication failed, or the execution does not exist or
+          the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-
         current_app.logger.info(
-            f"User {self.get_user()} gets details of alarm {alarm_id}"
+            f"User {self.get_user()} gets details of execution {idx}"
         )
+        return self.get_detail(idx=idx)
 
-        return self.get_detail(idx=alarm_id)
+    @doc(description="Edit an execution", tags=["Executions"], inherit=False)
+    @authenticate(auth_class=Auth())
+    @use_kwargs(AlarmEditRequest, location="json")
+    def put(self, idx, **data):
+        """
+        Edit an existing alarm
+
+        :param string idx: ID of the alarm.
+        :return: A dictionary with a message (error if authentication failed, or the alarm does not exist or
+          a message) and an integer with the HTTP status code.
+        :rtype: Tuple(dict, integer)
+        """
+        current_app.logger.info(f"User {self.get_user()} edits alarm {idx}")
+        return self.put_detail(data, track_user=False, idx=idx)
 
     @doc(description="Disable an alarm", tags=["None"])
     @authenticate(auth_class=Auth())
-    def delete(self, alarm_id):
+    def delete(self, idx):
         """
         :param int alarm_id: Alarm id.
         :return:
         :rtype: Tuple(dict, integer)
         """
-                
-        current_app.logger.info(
-            f"Alarm {alarm_id} was disabled by user {self.get_user()}"
-        )
-        return self.disable_detail(idx=alarm_id)
 
-
-
-
+        current_app.logger.info(f"Alarm {idx} was disabled by user {self.get_user()}")
+        return self.disable_detail(idx=idx)
