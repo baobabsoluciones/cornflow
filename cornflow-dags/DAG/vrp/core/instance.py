@@ -33,9 +33,6 @@ class Instance(InstanceCore):
 
         return data
 
-    def check(self):
-        return dict()
-
     def get_nodes(self):
         return [i["n"] for i in self.data["demand"].values()]
 

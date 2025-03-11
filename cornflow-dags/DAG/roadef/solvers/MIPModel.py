@@ -162,7 +162,7 @@ class MIPModel(Experiment):
         if status == 1:
             self.to_solution(model, used_routes, current_round)
             if current_round > self.limit_artificial_round:
-                self.check_and_save(current_round)
+                self.checkpoint_and_save(current_round)
 
         if status != 1 or current_round == 0:
             used_routes = old_used_routes
@@ -572,7 +572,7 @@ class MIPModel(Experiment):
         self.print_in_console(selected_routes)
         return selected_routes
 
-    def check_and_save(self, current_round):
+    def checkpoint_and_save(self, current_round):
         """Checks the solution and, in some cases, saves the log in a file"""
         self.print_in_console(
             "Checking solution at: ", datetime.now().strftime("%H:%M:%S")

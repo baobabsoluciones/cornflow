@@ -23,10 +23,10 @@ def install():
         install_dir = solver_dir+"/gurobi"
         os.chdir(solver_dir)
         subprocess.check_output(
-            ["wget", "https://packages.gurobi.com/10.0/gurobi10.0.1_linux64.tar.gz"]
+            ["wget", "https://packages.gurobi.com/12.0/gurobi12.0.1_linux64.tar.gz"]
         )
-        subprocess.check_output(["tar", "-xvf", "gurobi10.0.1_linux64.tar.gz"])
-        os.rename("gurobi1001", "gurobi")
+        subprocess.check_output(["tar", "-xvf", "gurobi12.0.1_linux64.tar.gz"])
+        os.rename("gurobi1201", "gurobi")
         uid = pwd.getpwnam("cornflow").pw_uid
         gid = grp.getgrnam("cornflow").gr_gid
         os.chown(install_dir, uid, gid)

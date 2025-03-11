@@ -38,9 +38,6 @@ class Instance(InstanceCore):
 
         return pickle.loads(pickle.dumps(data_p, -1))
 
-    def check(self):
-        return dict()
-
     def get_bars(self) -> TupList:
         """
         Returns a TupList with the ids of the bars.

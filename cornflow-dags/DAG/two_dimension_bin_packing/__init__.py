@@ -25,11 +25,11 @@ class TwoDimensionBinPackingProblem(ApplicationCore):
         )
 
         return [
-            {
-                "name": "example_1",
-                "instance": data1,
-                "description": "Example with 31 objects",
-            },
+            # {
+            #     "name": "example_1",
+            #     "instance": data1,
+            #     "description": "Example with 31 objects",
+            # },
             {
                 "name": "example_2",
                 "instance": data2,

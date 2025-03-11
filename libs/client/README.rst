@@ -1,4 +1,4 @@
-Cornflow client
+cornflow client
 ================
 
 The aim of this repository is to have a client to use to connect to a deployed cornflow webserver
