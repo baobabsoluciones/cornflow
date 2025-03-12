@@ -234,7 +234,6 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["data"], instance_data["data"])
         self.assertEqual(data["config"], self.payload["config"])
-        return
 
     def test_get_no_dag(self):
         """
@@ -372,7 +371,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -403,7 +402,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -428,7 +427,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -440,7 +439,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -455,7 +454,7 @@ class TestDeployedDAG(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 400)

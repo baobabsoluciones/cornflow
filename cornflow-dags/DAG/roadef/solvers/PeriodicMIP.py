@@ -7,10 +7,7 @@ import pulp as pl
 import pickle
 import json
 import itertools
-from cornflow_client.constants import (
-    STATUS_FEASIBLE,
-    SOLUTION_STATUS_FEASIBLE
-)
+from cornflow_client.constants import STATUS_FEASIBLE, SOLUTION_STATUS_FEASIBLE
 
 
 class PeriodicMIP(MIPModel):
@@ -151,10 +148,7 @@ class PeriodicMIP(MIPModel):
             ) as fd:
                 json.dump(self.solution.to_dict(), fd)
 
-        return dict(
-            status=STATUS_FEASIBLE,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=STATUS_FEASIBLE, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def solve_one_iteration(self, solver, used_routes, previous_value, current_round):
         if 0 < current_round <= self.limit_artificial_round + 1:
@@ -182,7 +176,7 @@ class PeriodicMIP(MIPModel):
         if status == 1:
             self.to_solution(model, used_routes, current_round)
             if current_round > self.limit_artificial_round:
-                self.check_and_save(current_round)
+                self.checkpoint_and_save(current_round)
 
         if status != 1 or current_round == 0:
             used_routes = old_used_routes
@@ -354,7 +348,7 @@ class PeriodicMIP(MIPModel):
                 "ArtificialBinary", ind_customers_hours, 0, 1, pl.LpBinary
             )
 
-            for (i, h) in ind_customers_hours:
+            for i, h in ind_customers_hours:
                 if h < self.Hmin - self.resolve_margin:
                     self.artificial_binary_var[i, h].setInitialValue(0)
                     self.artificial_binary_var[i, h].fixValue()
@@ -375,7 +369,7 @@ class PeriodicMIP(MIPModel):
         self.print_in_console("Var 'inventory'")
 
         # Variables : quantity
-        for (r, i, tr, k) in self.get_var_quantity_s_domain(used_routes):
+        for r, i, tr, k in self.get_var_quantity_s_domain(used_routes):
             self.quantity_var[i, r, tr, k] = pl.LpVariable(f"quantity{i, r, tr, k}", 0)
             if initial_quantities.get((i, r, tr, k), None) is None:
                 continue
@@ -385,7 +379,7 @@ class PeriodicMIP(MIPModel):
             """if self.routes[r].start < self.Hmin - self.resolve_margin:
                 self.variables["quantity"][(i, r, tr, k)].fixValue() """
 
-        for (r, i, tr, k) in self.get_var_quantity_p_domain(used_routes):
+        for r, i, tr, k in self.get_var_quantity_p_domain(used_routes):
             self.quantity_var[i, r, tr, k] = pl.LpVariable(
                 f"quantity{i, r, tr, k}", upBound=0
             )
@@ -438,7 +432,7 @@ class PeriodicMIP(MIPModel):
         self.print_in_console("Added (3)")
 
         # Constraints : (7) - Conservation of the inventory
-        for (i, h) in ind_customers_hours:
+        for i, h in ind_customers_hours:
             artificial_var = 0
             if artificial_variables:
                 artificial_var = self.artificial_quantities_var[i, h]
@@ -462,7 +456,7 @@ class PeriodicMIP(MIPModel):
 
         # Constraints: (A2) - The quantity delivered in an artificial delivery respects quantities constraints
         if artificial_variables:
-            for (i, h) in ind_customers_hours:
+            for i, h in ind_customers_hours:
                 model += (
                     self.artificial_quantities_var[i, h]
                     + self.artificial_binary_var[i, h]
@@ -476,7 +470,7 @@ class PeriodicMIP(MIPModel):
 
         # Constraints : (9) - Conservation of the trailers' inventories
         _sum_c9_domain = self.get_sum_c9_domain(used_routes)
-        for (tr, h) in self.get_c4_c9_domain():
+        for tr, h in self.get_c4_c9_domain():
             model += (
                 pl.lpSum(
                     self.quantity_var[i, r, tr, k] * self.k_visit_hour[(i, h, r, k)]
@@ -518,7 +512,7 @@ class PeriodicMIP(MIPModel):
 
         # Constraints: (10) - Quantities delivered don't exceed trailer capacity
         _drivers = self.instance.get_id_drivers()
-        for (r, i, tr, k) in self.get_c10_domain(used_routes):
+        for r, i, tr, k in self.get_c10_domain(used_routes):
             _capacity = self.instance.get_customer_property(i, "Capacity")
             model += (
                 pl.lpSum(self.route_var[r, tr, dr] * _capacity for dr in _drivers)
@@ -528,7 +522,7 @@ class PeriodicMIP(MIPModel):
         self.print_in_console("Added (10)")
 
         # Constraints: (11), (12)
-        for (r, route, i, tr, k) in self.get_c11_c12_domain(used_routes):
+        for r, route, i, tr, k in self.get_c11_c12_domain(used_routes):
             # Constraint: (11) - Quantities delivered don't exceed the quantity in the trailer
             visited = lambda j: route.visited[j][0]
             q_tup = lambda j, kp: (visited(j), r, tr, kp)
@@ -574,7 +568,7 @@ class PeriodicMIP(MIPModel):
 
         # Constraints: (13) - Quantities loaded at a source don't exceed trailer capacity
         _drivers = self.instance.get_id_drivers()
-        for (r, i, tr, k) in self.get_c13_domain(used_routes):
+        for r, i, tr, k in self.get_c13_domain(used_routes):
             _capacity = self.instance.get_trailer_property(tr, "Capacity")
             model += (
                 self.quantity_var[i, r, tr, k]
@@ -583,7 +577,7 @@ class PeriodicMIP(MIPModel):
         self.print_in_console("Added (13)")
 
         # Constraints: (14) - Quantities loaded at a source don't exceed free space in the trailer
-        for (r, route, i, tr, k) in self.get_c14_domain(used_routes):
+        for r, route, i, tr, k in self.get_c14_domain(used_routes):
             visited = lambda j: route.visited[j][0]
             q_tup = lambda j, kp: (visited(j), r, tr, kp)
             hour_tup = lambda j, kp: (
@@ -612,7 +606,7 @@ class PeriodicMIP(MIPModel):
         #   and two shifts realized by the same driver must leave time for the driver to rest between both
         _sum_c4_domain = self.get_sum_c4_domain(used_routes)
         _sum_c5_domain = self.get_sum_c5_domain(used_routes)
-        for (tr, h) in self.get_c4_c9_domain():
+        for tr, h in self.get_c4_c9_domain():
             model += (
                 pl.lpSum(
                     self.route_var[r, tr, dr]
@@ -624,7 +618,7 @@ class PeriodicMIP(MIPModel):
             )
         self.print_in_console("Added (4)")
 
-        for (dr, h) in self.get_c5_domain():
+        for dr, h in self.get_c5_domain():
             model += (
                 pl.lpSum(
                     self.route_var[r, tr, dr]
@@ -656,7 +650,7 @@ class PeriodicMIP(MIPModel):
         return selected_routes
 
     def get_td_routes(self, used_routes):
-        """ Returns a list of every possible truple (index_route, index_trailer, index_driver) """
+        """Returns a list of every possible truple (index_route, index_trailer, index_driver)"""
         return list(
             itertools.product(
                 used_routes,

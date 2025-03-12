@@ -81,7 +81,7 @@ class TestTablesListEndpoint(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -111,7 +111,7 @@ class TestTablesListEndpoint(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
             query_string=dict(limit=3),
         )
@@ -187,7 +187,7 @@ class TestTablesDetailEndpoint(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 
@@ -204,7 +204,7 @@ class TestTablesDetailEndpoint(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 400)
@@ -216,7 +216,7 @@ class TestTablesDetailEndpoint(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 404)
@@ -270,7 +270,7 @@ class TestTablesEndpointAdmin(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
         self.assertEqual(response.status_code, 403)
@@ -284,7 +284,7 @@ class TestTablesEndpointAdmin(TestCase):
             follow_redirects=True,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.token,
+                "Authorization": f"Bearer {self.token}",
             },
         )
 

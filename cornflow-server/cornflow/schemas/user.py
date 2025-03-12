@@ -27,7 +27,7 @@ class UserEndpointResponse(Schema):
     last_name = fields.Str()
     email = fields.Str()
     created_at = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -36,7 +36,7 @@ class UserDetailsEndpointResponse(Schema):
     last_name = fields.Str()
     username = fields.Str()
     email = fields.Str()
-    pwd_last_change = fields.Str()
+    pwd_last_change = fields.DateTime()
 
 
 class TokenEndpointResponse(Schema):
@@ -53,7 +53,6 @@ class UserEditRequest(Schema):
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
-    pwd_last_change = fields.DateTime(required=False)
 
 
 class LoginEndpointRequest(Schema):
@@ -67,24 +66,10 @@ class LoginEndpointRequest(Schema):
 
 class LoginOpenAuthRequest(Schema):
     """
-    This is the schema used by the login endpoint with Open ID protocol
-    Validates that either a token is provided, or both username and password are present
+    Schema for the login request with OpenID authentication
     """
-
-    token = fields.Str(required=False)
-    username = fields.Str(required=False)
-    password = fields.Str(required=False)
-
-    @validates_schema
-    def validate_fields(self, data, **kwargs):
-        if data.get("token") is None:
-            if not data.get("username") or not data.get("password"):
-                raise ValidationError(
-                    "A token needs to be provided when using Open ID authentication"
-                )
-        else:
-            if data.get("username") or data.get("password"):
-                raise ValidationError("The login needs to be done with a token only")
+    username = fields.String(required=False)
+    password = fields.String(required=False)
 
 
 class SignupRequest(Schema):

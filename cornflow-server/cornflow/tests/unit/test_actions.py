@@ -67,7 +67,7 @@ class TestActionsListEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
             self.assertEqual(200, response.status_code)
@@ -89,7 +89,7 @@ class TestActionsListEndpoint(CustomTestCase):
                     follow_redirects=True,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + self.token,
+                        "Authorization": f"Bearer {self.token}",
                     },
                 )
 

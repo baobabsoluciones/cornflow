@@ -5,7 +5,7 @@ We want to schedule delivery routes to cover the demand of a given set of custom
 
 Each route has to start and end in one depot.
 
-**Name of dag**: ``vrp
+**Name of dag**: `vrp`
 
 **Available solution methods**:
 

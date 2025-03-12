@@ -47,9 +47,3 @@ class Experiment(ExperimentCore):
         nodes_in = TupList(v["n1"] for v in self.instance.data["arcs"]).to_set()
         positions = TupList(n["pos"] for n in self.solution.data["route"]).to_set()
         return [{"position": p} for p in set(range(len(nodes_in))) - positions]
-
-    def check_solution(self, *args, **kwargs) -> SuperDict:
-        return SuperDict(
-            missing_nodes=self.check_missing_nodes(),
-            missing_positions=self.check_missing_positions(),
-        )

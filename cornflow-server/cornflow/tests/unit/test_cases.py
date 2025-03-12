@@ -90,11 +90,10 @@ class TestCasesModels(CustomTestCase):
         self.payload = load_file(INSTANCE_PATH)
         self.payloads = [load_file(f) for f in INSTANCES_LIST]
         parents = [None, 1, 1, 3, 3, 3, 1, 7, 7, 9, 7]
-        user = UserModel.get_one_user(self.user)
-        data = {**self.payload, **dict(user_id=user.id)}
+        data = {**self.payload, **dict(user_id=self.user.id)}
         for parent in parents:
             if parent is not None:
-                parent = CaseModel.get_one_object(user=user, idx=parent)
+                parent = CaseModel.get_one_object(user=self.user, idx=parent)
             node = CaseModel(data=data, parent=parent)
             node.save()
 
@@ -106,10 +105,9 @@ class TestCasesModels(CustomTestCase):
         - Correct path generation for cases
         - Proper parent-child relationships
         """
-        user = UserModel.get_one_user(self.user)
-        case = CaseModel.get_one_object(user=user, idx=6)
+        case = CaseModel.get_one_object(user=self.user, idx=6)
         self.assertEqual(case.path, "1/3/")
-        case = CaseModel.get_one_object(user=user, idx=11)
+        case = CaseModel.get_one_object(user=self.user, idx=11)
         self.assertEqual(case.path, "1/7/")
 
     def test_move_case(self):
@@ -120,9 +118,8 @@ class TestCasesModels(CustomTestCase):
         - Cases can be moved to new parents
         - Path updates correctly after move
         """
-        user = UserModel.get_one_user(self.user)
-        case6 = CaseModel.get_one_object(user=user, idx=6)
-        case11 = CaseModel.get_one_object(user=user, idx=11)
+        case6 = CaseModel.get_one_object(user=self.user, idx=6)
+        case11 = CaseModel.get_one_object(user=self.user, idx=11)
         case6.move_to(case11)
         self.assertEqual(case6.path, "1/7/11/")
 
@@ -135,11 +132,10 @@ class TestCasesModels(CustomTestCase):
         - Nested path updates
         - Path integrity after moves
         """
-        user = UserModel.get_one_user(self.user)
-        case3 = CaseModel.get_one_object(user=user, idx=3)
-        case11 = CaseModel.get_one_object(user=user, idx=11)
-        case9 = CaseModel.get_one_object(user=user, idx=9)
-        case10 = CaseModel.get_one_object(user=user, idx=10)
+        case3 = CaseModel.get_one_object(user=self.user, idx=3)
+        case11 = CaseModel.get_one_object(user=self.user, idx=11)
+        case9 = CaseModel.get_one_object(user=self.user, idx=9)
+        case10 = CaseModel.get_one_object(user=self.user, idx=10)
         case3.move_to(case11)
         case9.move_to(case3)
         self.assertEqual(case10.path, "1/7/11/3/9/")
@@ -152,10 +148,9 @@ class TestCasesModels(CustomTestCase):
         - Case deletion removes the case
         - Child cases are properly handled
         """
-        user = UserModel.get_one_user(self.user)
-        case7 = CaseModel.get_one_object(user=user, idx=7)
+        case7 = CaseModel.get_one_object(user=self.user, idx=7)
         case7.delete()
-        case11 = CaseModel.get_one_object(user=user, idx=11)
+        case11 = CaseModel.get_one_object(user=self.user, idx=11)
         self.assertIsNone(case11)
 
     def test_descendants(self):
@@ -166,8 +161,7 @@ class TestCasesModels(CustomTestCase):
         - Correct counting of descendants
         - Proper descendant relationships
         """
-        user = UserModel.get_one_user(self.user)
-        case7 = CaseModel.get_one_object(user=user, idx=7)
+        case7 = CaseModel.get_one_object(user=self.user, idx=7)
         self.assertEqual(len(case7.descendants), 4)
 
     def test_depth(self):
@@ -178,8 +172,7 @@ class TestCasesModels(CustomTestCase):
         - Correct depth calculation in case tree
         - Proper nesting level determination
         """
-        user = UserModel.get_one_user(self.user)
-        case10 = CaseModel.get_one_object(user=user, idx=10)
+        case10 = CaseModel.get_one_object(user=self.user, idx=10)
         self.assertEqual(case10.depth, 4)
 
 
@@ -234,12 +227,11 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "execution_id": execution_id,
             "schema": "solve_model_dag",
         }
-        self.user_object = UserModel.get_one_user(self.user)
         self.instance = InstanceModel.get_one_object(
-            user=self.user_object, idx=instance_id
+            user=self.user, idx=instance_id
         )
         self.execution = ExecutionModel.get_one_object(
-            user=self.user_object, idx=execution_id
+            user=self.user, idx=execution_id
         )
 
     def test_new_case_execution(self):
@@ -266,7 +258,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["schema"] = self.instance.schema
         self.payload["solution"] = self.execution.data
         self.payload["solution_hash"] = self.execution.data_hash
-        self.payload["user_id"] = self.user
+        self.payload["user_id"] = self.user.id
         self.payload["indicators"] = ""
 
         for key in self.response_items:
@@ -293,7 +285,7 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
         self.payload["data"] = self.instance.data
         self.payload["data_hash"] = self.instance.data_hash
         self.payload["schema"] = self.instance.schema
-        self.payload["user_id"] = self.user
+        self.payload["user_id"] = self.user.id
         self.payload["solution"] = None
         self.payload["solution_hash"] = hash_json_256(None)
         self.payload["indicators"] = ""
@@ -488,10 +480,9 @@ class TestCaseCopyEndpoint(CustomTestCase):
         new_case = self.create_new_row(
             self.url + str(self.case_id) + "/copy/", self.model, {}, check_payload=False
         )
-        user = UserModel.get_one_user(self.user)
 
-        original_case = CaseModel.get_one_object(user=user, idx=self.case_id)
-        new_case = CaseModel.get_one_object(user=user, idx=new_case["id"])
+        original_case = CaseModel.get_one_object(user=self.user, idx=self.case_id)
+        new_case = CaseModel.get_one_object(user=self.user, idx=new_case["id"])
 
         for key in self.copied_items:
             self.assertEqual(getattr(original_case, key), getattr(new_case, key))

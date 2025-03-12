@@ -1,0 +1,7 @@
+{
+  "data": {
+  },
+  "name": "instance_1",
+  "description": "This is a test instance to check if empty dictionary get saved succesfully",
+  "schema": "gc"
+}

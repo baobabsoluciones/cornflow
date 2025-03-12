@@ -25,11 +25,11 @@ class Experiment(ExperimentCore):
     def get_objective(self) -> float:
         return self.solution.get_assignments().values_tl().unique().len()
 
-    def check_solution(self, *args, **kwargs) -> dict:
+    def check_pairs(self, *args, **kwargs) -> list:
         # if a pair of nodes have the same colors: that's a problem
         colors = self.solution.get_assignments()
         pairs = self.instance.get_pairs()
         errors = [
             {"n1": n1, "n2": n2} for (n1, n2) in pairs if colors[n1] == colors[n2]
         ]
-        return dict(pairs=errors)
+        return errors
