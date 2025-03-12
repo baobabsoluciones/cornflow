@@ -13,7 +13,7 @@ TestApiViewListEndpoint
 """
 
 # Import from internal modules
-from cornflow.endpoints import ApiViewListEndpoint, resources
+from cornflow.endpoints import ApiViewListEndpoint, resources, alarms_resources
 from cornflow.models import ViewModel
 from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import APIVIEW_URL
@@ -141,8 +141,7 @@ class TestApiViewModel(CustomTestCase):
         """
         Test that the get_all_objects method works properly
         """
-        expected_count = len(resources) + 2
-
+        expected_count = len(resources) + len(alarms_resources)
         # Test getting all objects
         all_instances = ViewModel.get_all_objects().all()
         self.assertEqual(len(all_instances), expected_count)

@@ -13,6 +13,7 @@ from cornflow.shared.const import ALL_DEFAULT_ROLES
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
+
 class BaseMetaResource(Resource, MethodResource):
     """
     The base resource from all methods inherit from.
@@ -175,11 +176,18 @@ class BaseMetaResource(Resource, MethodResource):
     METHODS USED FOR ACTIVATING / DISABLING RECORDS IN CASE WE DO NOT WANT TO DELETE THEM STRAIGHT AWAY
     """
 
-    def disable_detail(self):
+    def disable_detail(self, idx):
         """
-        Method not implemented yet
+        Method to DISABLE an object from the database
+
+        :param idx: the idx which identifies the object
+        :return: the object and a status code.
         """
-        raise NotImplemented
+        row = self.data_model.query.get(idx)
+        if row is None:
+            raise ObjectDoesNotExist(f"Object with id {idx} not found.")
+        row.disable()
+        return {"message": "Object marked as disabled"}, 200
 
     def activate_detail(self, **kwargs):
         """
