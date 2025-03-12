@@ -1,6 +1,7 @@
 """
 This file contains the schemas used for the table alarms defined in the application None
 """
+
 from marshmallow import fields, Schema
 
 
@@ -18,3 +19,10 @@ class AlarmsResponse(AlarmsPostRequest):
 class QueryFiltersAlarms(Schema):
     schema = fields.Str(required=False)
     criticality = fields.Number(required=False)
+
+
+class AlarmEditRequest(Schema):
+    name = fields.Str(required=False)
+    criticality = fields.Number(required=False)
+    description = fields.Str(required=False)
+    schema = fields.Str(required=False)
