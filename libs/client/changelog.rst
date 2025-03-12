@@ -1,3 +1,13 @@
+version 1.2.0
+--------------
+
+- released: 2025-03-12
+- description: new features
+- changelog:
+    - fixed `get_solver_config` method.
+    - added method to run automatically `Instance` and `Experiment` checks.
+    - changed the way the token is sent on cornflow-client library.
+
 version 1.1.5
 --------------
 
