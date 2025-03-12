@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cornflow-client - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="Cornflow-client"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="cornflow-client"/>
 <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Cornflow-client</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -148,6 +149,8 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.get_check_methods"><code class="docutils literal notranslate">get_check_methods()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.launch_all_checks"><code class="docutils literal notranslate">launch_all_checks()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -213,6 +216,8 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate">check_solution()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_check_methods"><code class="docutils literal notranslate">get_check_methods()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.launch_all_checks"><code class="docutils literal notranslate">launch_all_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate">get_solver_config()</span></code></a></li>
 </ul>
@@ -221,7 +226,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-cornflow_client.cornflow_client">Cornflow client</a></li>
+<li><a class="reference internal" href="#module-cornflow_client.cornflow_client">cornflow client</a></li>
 <li><a class="reference internal" href="#constants">Constants</a><ul>
 <li><a class="reference internal" href="#solving-status">Solving status</a><ul>
 <li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.STATUS_NOT_SOLVED"><code class="docutils literal notranslate">constants.STATUS_NOT_SOLVED</span></code></a></li>
@@ -340,7 +345,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -348,7 +353,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Cornflow-client</strong>
+        <strong itemprop="name">cornflow-client</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -362,7 +367,7 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="cornflow-client">
-<h1>Cornflow-client<a class="headerlink" href="#cornflow-client" title="Link to this heading">¶</a></h1>
+<h1>cornflow-client<a class="headerlink" href="#cornflow-client" title="Link to this heading">¶</a></h1>
 <section id="core-classes">
 <h2>Core classes<a class="headerlink" href="#core-classes" title="Link to this heading">¶</a></h2>
 <section id="module-cornflow_client.core.application">
@@ -557,7 +562,8 @@ if each element in the list is:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.data_checks">
 <span class="sig-name descname"><span class="pre">data_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.data_checks" title="Link to this definition">¶</a></dt>
-<dd><p>Method that executes the InstanceCore.check() method and validates the result against the schema_checks</p>
+<dd><p>Method that executes the InstanceCore.check() method and validates the result
+against the schema_checks</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The dictionary returned by the InstanceCore.check() method</p>
@@ -576,19 +582,42 @@ if each element in the list is:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.check">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check" title="Link to this definition">¶</a></dt>
-<dd><p>Method that checks if there are inconsistencies in the data of the instance and if the problem is feasible</p>
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.check" title="Link to this definition">¶</a></dt>
+<dd><p>Method that checks if there are inconsistencies in the data of the instance and
+if the problem is feasible</p>
+<p>This method can be overridden if necessary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>An dictionary containing the inconsistencies found and indicating if the problem is infeasible</p>
+<dd class="field-odd"><p>An dictionary containing the inconsistencies found and indicating if</p>
 </dd>
 </dl>
+<p>the problem is infeasible</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.schema_checks">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.schema_checks" title="Link to this definition">¶</a></dt>
-<dd><p>A dictionary representation of the json-schema for the dictionary returned by the method Instance.check()</p>
+<dd><p>A dictionary representation of the json-schema for the dictionary returned by
+the method Instance.check()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.get_check_methods">
+<span class="sig-name descname"><span class="pre">get_check_methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.get_check_methods" title="Link to this definition">¶</a></dt>
+<dd><p>Finds all class methods starting with <a href="#id2"><span class="problematic" id="id3">check_</span></a> and returns them in a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of check methods.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.launch_all_checks">
+<span class="sig-name descname"><span class="pre">launch_all_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.launch_all_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Launch every check method and return a dict with the check method name as key
+and the list/dict of errors / warnings as value.</p>
+<p>It will only return those checks that return a non-empty list/dict.</p>
 </dd></dl>
 
 </dd></dl>
@@ -986,8 +1015,10 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check" title="Link to this definition">¶</a></dt>
-<dd><p>Mandatory method</p>
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check" title="Link to this definition">¶</a></dt>
+<dd><p>Method that runs all the checks for the solution.</p>
+<p>This method can be overridden by the user to modify the behaviour of the checks
+if wanted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
@@ -998,14 +1029,37 @@ inside represents one error of that particular type.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check_solution">
-<span class="sig-name descname"><span class="pre">check_solution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Link to this definition">¶</a></dt>
-<dd><p>Mandatory method</p>
+<span class="sig-name descname"><span class="pre">check_solution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_solution" title="Link to this definition">¶</a></dt>
+<dd><p>Method that runs all the checks for the solution.
+This method will be deprecated on cornflow-client version 2.0.0</p>
+<p>This method can be overridden by the user to modify the behaviour of the checks
+if wanted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of error. Each of the elements
-inside represents one error of that particular type.</p>
+<dd class="field-odd"><p>a dictionary of dictionaries. Each dictionary represents one type of
+error. Each of the elements inside represents one error of that particular
+type.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_check_methods">
+<span class="sig-name descname"><span class="pre">get_check_methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_check_methods" title="Link to this definition">¶</a></dt>
+<dd><p>Finds all class methods starting with <a href="#id4"><span class="problematic" id="id5">check_</span></a> and returns them in a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of check methods.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.launch_all_checks">
+<span class="sig-name descname"><span class="pre">launch_all_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.launch_all_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Launch every check method and return a dict with the check method name as key
+and the list/dict of errors / warnings as value.</p>
+<p>It will only return those checks that return a non-empty list/dict.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1023,7 +1077,7 @@ inside represents one error of that particular type.</p>
 <dd><p>Format the configuration used to solve the problem.
 Solver configuration can either be directly in config using cornflow mapping name</p>
 <blockquote>
-<div><p>or in a config[“solver_config”] using the solver names.</p>
+<div><p>or in a config[“solver_config”] using the solver names. Nothing is ever removed from solver_config.</p>
 </div></blockquote>
 <dl>
 <dt>Example:</dt><dd><dl class="simple">
@@ -1057,7 +1111,7 @@ but will not be translated.</p></li>
 </section>
 </section>
 <section id="module-cornflow_client.cornflow_client">
-<span id="id1"></span><h2>Cornflow client<a class="headerlink" href="#module-cornflow_client.cornflow_client" title="Link to this heading">¶</a></h2>
+<span id="id1"></span><h2>cornflow client<a class="headerlink" href="#module-cornflow_client.cornflow_client" title="Link to this heading">¶</a></h2>
 </section>
 <section id="constants">
 <h2>Constants<a class="headerlink" href="#constants" title="Link to this heading">¶</a></h2>
@@ -1784,5 +1838,5 @@ table3: {config1: a, config2: b},
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

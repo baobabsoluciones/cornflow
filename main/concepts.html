@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Concepts - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Cornflow-server architecture" href="architecture.html" /><link rel="prev" title="Introduction" href="introduction.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Concepts - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="cornflow-server architecture" href="architecture.html" /><link rel="prev" title="Introduction" href="introduction.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Main topics</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -144,7 +145,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -175,18 +176,18 @@ data-aria-dark="Switch to auto color mode">
 </div></blockquote>
 <p>In this guide, we do not make a clear difference between Decision problem and Optimization problem. In both cases we care on finding a solution (or the best solution) given a feasible solution space.</p>
 <p>We sometimes refer to this Decision Problem as an Abstract Problem or just Problem. Some Problems are quite famous, such as the  <a class="reference external" href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">Traveling Salesman Problem</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Knapsack_problem">Knapsack Problem</a>. Naming a Problem makes it possible to design Solution Methods that are tailored for that particular Problem.</p>
-<p>In Cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.</p>
+<p>In cornflow, a Problem is represented by two schema json files: the first schema file describes the kind of input data format it accepts. This schema describes any Instance of the Problem. The second schema file describes the output data format it returns. This schema describes any Solution of the Problem.</p>
 <figure class="align-default" id="id1">
 <span id="concepts1"></span><img alt="../_images/concepts1.png" src="../_images/concepts1.png" />
 <figcaption>
-<p><span class="caption-text">Main concepts in a Cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Main concepts in a cornflow deployment of an Optimization Problem</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="instance">
 <h2>Instance<a class="headerlink" href="#instance" title="Link to this heading">¶</a></h2>
 <p>An Instance represents all the data needed to completely formulate one case of a decision problem.</p>
-<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “input data”. It needs to follow the input data schema.</p>
+<p>In cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to represent the Feasible Solution Space and provide enough information to determine if one Solution to the problem is better or worse than another. We sometimes call it “input data”. It needs to follow the input data schema.</p>
 </section>
 <section id="feasible-solution-space">
 <h2>Feasible Solution Space<a class="headerlink" href="#feasible-solution-space" title="Link to this heading">¶</a></h2>
@@ -195,7 +196,7 @@ data-aria-dark="Switch to auto color mode">
 <section id="solution">
 <h2>Solution<a class="headerlink" href="#solution" title="Link to this heading">¶</a></h2>
 <p>A Solution represents all data needed to completely represent a feasible solution to an Instance.</p>
-<p>In Cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”. It needs to follow the output data schema.</p>
+<p>In cornflow, it is represented as a <cite>data</cite> json file. This file should be sufficient to, when used together with an Instance, determine if the solution is feasible and the Objective Function Value of the Solution. We sometimes call it “Output Data”. It needs to follow the output data schema.</p>
 </section>
 <section id="experiment">
 <h2>Experiment<a class="headerlink" href="#experiment" title="Link to this heading">¶</a></h2>
@@ -204,7 +205,7 @@ data-aria-dark="Switch to auto color mode">
 <section id="solution-method">
 <h2>Solution Method<a class="headerlink" href="#solution-method" title="Link to this heading">¶</a></h2>
 <p>A solution method (also called Algorithm) is a function that takes as input an Instance and returns a Solution. The Solution Method can be exact (i.e., it proves it can find the best solution) or inexact (i.e., there is no proof).</p>
-<p>In Cornflow, A Solution Method is a subclass of Experiment.</p>
+<p>In cornflow, A Solution Method is a subclass of Experiment.</p>
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
@@ -216,7 +217,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
-<p>In practice, Cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.</p>
+<p>In practice, cornflow uses jsonschema to validate the schemas of Instance, Configuration and Solution. It uses python to define a solve method.</p>
 <figure class="align-default" id="id2">
 <span id="concepts2"></span><img alt="../_images/concepts2.png" src="../_images/concepts2.png" />
 <figcaption>
@@ -260,7 +261,7 @@ data-aria-dark="Switch to auto color mode">
     <a href="architecture.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Cornflow-server architecture</div>
+        <div class="title">cornflow-server architecture</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -289,5 +290,5 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

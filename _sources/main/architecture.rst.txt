@@ -1,4 +1,4 @@
-Cornflow-server architecture
+cornflow-server architecture
 =======================================
 
 Components
@@ -10,7 +10,7 @@ Components
 
    Components with the connections between them
 
-Cornflow-server
+cornflow-server
 **********************
 
 The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.
@@ -21,7 +21,7 @@ Airflow service
 
 Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.
 
-Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.
+Airflow has its own nomenclature, which includes some concepts we refer to in cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.
 
 A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.
 
@@ -36,7 +36,7 @@ A worker is a machine that is capable of executing an airflow task. Some of thes
 Client
 ***********
 
-Any library that uses the REST API to use Cornflow. There are two official clients that are currently maintained: a `SPA web app <https://github.com/baobabsoluciones/cornflow-admin>`_ and a `python package <https://github.com/baobabsoluciones/cornflow-client>`_.
+Any library that uses the REST API to use cornflow. There are two official clients that are currently maintained: a `SPA web app <https://github.com/baobabsoluciones/cornflow-admin>`_ and a `python package <https://github.com/baobabsoluciones/cornflow-client>`_.
 
 The REST API is created with Open API standards (see :ref:`REST API <rest-api-reference>`), so it should be fairly easy to build new apis.
 
@@ -53,25 +53,25 @@ Main data flows
 
 Create instance (data):
 
-#. Client calls Cornflow and sends instance.
-#. Cornflow validates the instance matches the app's jsonschema.
-#. Cornflow saves the instance and returns the instance code to client.
+#. Client calls cornflow and sends instance.
+#. cornflow validates the instance matches the app's jsonschema.
+#. cornflow saves the instance and returns the instance code to client.
 
 Solve instance (instance, config, dag):
 
-#. Client calls Cornflow and gives instance code, execution configuration and eventually an existing solution.
-#. Cornflow validates the instance matches the jsonschema of the dag to execute.
-#. Cornflow calls airflow dag and assigns dagrun code to execution.
-#. Cornflow creates execution and returns the execution code to client.
+#. Client calls cornflow and gives instance code, execution configuration and eventually an existing solution.
+#. cornflow validates the instance matches the jsonschema of the dag to execute.
+#. cornflow calls airflow dag and assigns dagrun code to execution.
+#. cornflow creates execution and returns the execution code to client.
 #. Airflow creates a rundag for the selected dag and sends it to a worker.
-#. The worker asks Cornflow for the instance, the config, and eventually the solution data.
+#. The worker asks cornflow for the instance, the config, and eventually the solution data.
 #. The worker solves the problem.
-#. The worker sends Cornflow the results (solution and log) of the execution.
+#. The worker sends cornflow the results (solution and log) of the execution.
 
 Retrieve results (execution):
 
-#. Client asks Cornflow for the results to an execution.
-#. Cornflow returns the execution solution and / or log.
+#. Client asks cornflow for the results to an execution.
+#. cornflow returns the execution solution and / or log.
 
 Secondary flows
 ----------------
@@ -84,30 +84,30 @@ Secondary flows
 
 Interrupt execution (execution):
 
-#. Client asks Cornflow to stop an execution.
-#. Cornflow checks the current status and asks Airflow to stop the execution.
+#. Client asks cornflow to stop an execution.
+#. cornflow checks the current status and asks Airflow to stop the execution.
 #. Airflow kills the process and worker by deleting the execution.
 
 Retrieve status (execution):
 
-#. Client asks Cornflow for the results to an execution.
-#. If Cornflow does not know it: it asks Airflow for the status.
-#. Cornflow returns the status to the user.
+#. Client asks cornflow for the results to an execution.
+#. If cornflow does not know it: it asks Airflow for the status.
+#. cornflow returns the status to the user.
 
 Retrieve schema:
 
-#. Client asks Cornflow for the schema to a problem.
-#. If Cornflow does not know it: it asks Airflow for the schema of a problem.
+#. Client asks cornflow for the schema to a problem.
+#. If cornflow does not know it: it asks Airflow for the schema of a problem.
 #. Airflow returns the schema if it exists.
 
 Get instance data:
 
-#. Client asks Cornflow for the data of an instance.
-#. Cornflow returns the data of the instance if it exists.
+#. Client asks cornflow for the data of an instance.
+#. cornflow returns the data of the instance if it exists.
 
 Save manual execution:
 
-#. Client sends Cornflow a solved problem.
-#. Cornflow check the problem matches the schema.
-#. Cornflow saves the execution.
+#. Client sends cornflow a solved problem.
+#. cornflow check the problem matches the schema.
+#. cornflow saves the execution.
 
