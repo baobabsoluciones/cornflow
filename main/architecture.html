@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cornflow-server architecture - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Installation instructions" href="install.html" /><link rel="prev" title="Concepts" href="concepts.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-server architecture - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Installation instructions" href="install.html" /><link rel="prev" title="Concepts" href="concepts.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="Cornflow-server architecture"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="cornflow-server architecture"/>
 <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Main topics</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">Concepts</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Cornflow-server architecture</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -123,7 +124,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#components">Components</a><ul>
-<li><a class="reference internal" href="#cornflow-server">Cornflow-server</a></li>
+<li><a class="reference internal" href="#cornflow-server">cornflow-server</a></li>
 <li><a class="reference internal" href="#airflow-service">Airflow service</a></li>
 <li><a class="reference internal" href="#worker">Worker</a></li>
 <li><a class="reference internal" href="#client">Client</a></li>
@@ -143,7 +144,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -151,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Cornflow-server architecture</strong>
+        <strong itemprop="name">cornflow-server architecture</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -165,7 +166,7 @@ data-aria-dark="Switch to auto color mode">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
           <section id="cornflow-server-architecture">
-<h1>Cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Link to this heading">¶</a></h1>
+<h1>cornflow-server architecture<a class="headerlink" href="#cornflow-server-architecture" title="Link to this heading">¶</a></h1>
 <section id="components">
 <h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id2">
@@ -175,13 +176,13 @@ data-aria-dark="Switch to auto color mode">
 </figcaption>
 </figure>
 <section id="cornflow-server">
-<h3>Cornflow-server<a class="headerlink" href="#cornflow-server" title="Link to this heading">¶</a></h3>
+<h3>cornflow-server<a class="headerlink" href="#cornflow-server" title="Link to this heading">¶</a></h3>
 <p>The main component. It stores the user information, their instances, executions, etc. It is built in python+flask and is served via an REST API.</p>
 </section>
 <section id="airflow-service">
 <h3>Airflow service<a class="headerlink" href="#airflow-service" title="Link to this heading">¶</a></h3>
 <p>Apache Foundation project that is used to handle the new executions. It manages the set of workers (machines or processors) that will execute the solution methods on the instances.</p>
-<p>Airflow has its own nomenclature, which includes some concepts we refer to in Cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
+<p>Airflow has its own nomenclature, which includes some concepts we refer to in cornflow, such as: DAGs, DAG-runs (or dagrun), workers, etc.</p>
 <p>A DAG usually represents an Abstract Problem. A Dagrun represents an Execution.</p>
 <p>Airflow is also built on top of flask+python. The project’s site is: <a class="reference external" href="airflow.apache.org/">airflow.apache.org/</a></p>
 </section>
@@ -191,7 +192,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="client">
 <h3>Client<a class="headerlink" href="#client" title="Link to this heading">¶</a></h3>
-<p>Any library that uses the REST API to use Cornflow. There are two official clients that are currently maintained: a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-admin">SPA web app</a> and a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-client">python package</a>.</p>
+<p>Any library that uses the REST API to use cornflow. There are two official clients that are currently maintained: a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-admin">SPA web app</a> and a <a class="reference external" href="https://github.com/baobabsoluciones/cornflow-client">python package</a>.</p>
 <p>The REST API is created with Open API standards (see <a class="reference internal" href="../stable-rest-api-ref.html#rest-api-reference"><span class="std std-ref">REST API</span></a>), so it should be fairly easy to build new apis.</p>
 </section>
 </section>
@@ -205,25 +206,25 @@ data-aria-dark="Switch to auto color mode">
 </figure>
 <p>Create instance (data):</p>
 <ol class="arabic simple">
-<li><p>Client calls Cornflow and sends instance.</p></li>
-<li><p>Cornflow validates the instance matches the app’s jsonschema.</p></li>
-<li><p>Cornflow saves the instance and returns the instance code to client.</p></li>
+<li><p>Client calls cornflow and sends instance.</p></li>
+<li><p>cornflow validates the instance matches the app’s jsonschema.</p></li>
+<li><p>cornflow saves the instance and returns the instance code to client.</p></li>
 </ol>
 <p>Solve instance (instance, config, dag):</p>
 <ol class="arabic simple">
-<li><p>Client calls Cornflow and gives instance code, execution configuration and eventually an existing solution.</p></li>
-<li><p>Cornflow validates the instance matches the jsonschema of the dag to execute.</p></li>
-<li><p>Cornflow calls airflow dag and assigns dagrun code to execution.</p></li>
-<li><p>Cornflow creates execution and returns the execution code to client.</p></li>
+<li><p>Client calls cornflow and gives instance code, execution configuration and eventually an existing solution.</p></li>
+<li><p>cornflow validates the instance matches the jsonschema of the dag to execute.</p></li>
+<li><p>cornflow calls airflow dag and assigns dagrun code to execution.</p></li>
+<li><p>cornflow creates execution and returns the execution code to client.</p></li>
 <li><p>Airflow creates a rundag for the selected dag and sends it to a worker.</p></li>
-<li><p>The worker asks Cornflow for the instance, the config, and eventually the solution data.</p></li>
+<li><p>The worker asks cornflow for the instance, the config, and eventually the solution data.</p></li>
 <li><p>The worker solves the problem.</p></li>
-<li><p>The worker sends Cornflow the results (solution and log) of the execution.</p></li>
+<li><p>The worker sends cornflow the results (solution and log) of the execution.</p></li>
 </ol>
 <p>Retrieve results (execution):</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow for the results to an execution.</p></li>
-<li><p>Cornflow returns the execution solution and / or log.</p></li>
+<li><p>Client asks cornflow for the results to an execution.</p></li>
+<li><p>cornflow returns the execution solution and / or log.</p></li>
 </ol>
 </section>
 <section id="secondary-flows">
@@ -236,32 +237,32 @@ data-aria-dark="Switch to auto color mode">
 </figure>
 <p>Interrupt execution (execution):</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow to stop an execution.</p></li>
-<li><p>Cornflow checks the current status and asks Airflow to stop the execution.</p></li>
+<li><p>Client asks cornflow to stop an execution.</p></li>
+<li><p>cornflow checks the current status and asks Airflow to stop the execution.</p></li>
 <li><p>Airflow kills the process and worker by deleting the execution.</p></li>
 </ol>
 <p>Retrieve status (execution):</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow for the results to an execution.</p></li>
-<li><p>If Cornflow does not know it: it asks Airflow for the status.</p></li>
-<li><p>Cornflow returns the status to the user.</p></li>
+<li><p>Client asks cornflow for the results to an execution.</p></li>
+<li><p>If cornflow does not know it: it asks Airflow for the status.</p></li>
+<li><p>cornflow returns the status to the user.</p></li>
 </ol>
 <p>Retrieve schema:</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow for the schema to a problem.</p></li>
-<li><p>If Cornflow does not know it: it asks Airflow for the schema of a problem.</p></li>
+<li><p>Client asks cornflow for the schema to a problem.</p></li>
+<li><p>If cornflow does not know it: it asks Airflow for the schema of a problem.</p></li>
 <li><p>Airflow returns the schema if it exists.</p></li>
 </ol>
 <p>Get instance data:</p>
 <ol class="arabic simple">
-<li><p>Client asks Cornflow for the data of an instance.</p></li>
-<li><p>Cornflow returns the data of the instance if it exists.</p></li>
+<li><p>Client asks cornflow for the data of an instance.</p></li>
+<li><p>cornflow returns the data of the instance if it exists.</p></li>
 </ol>
 <p>Save manual execution:</p>
 <ol class="arabic simple">
-<li><p>Client sends Cornflow a solved problem.</p></li>
-<li><p>Cornflow check the problem matches the schema.</p></li>
-<li><p>Cornflow saves the execution.</p></li>
+<li><p>Client sends cornflow a solved problem.</p></li>
+<li><p>cornflow check the problem matches the schema.</p></li>
+<li><p>cornflow saves the execution.</p></li>
 </ol>
 </section>
 </section>
@@ -310,5 +311,5 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

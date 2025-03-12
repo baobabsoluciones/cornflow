@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Main endpoints - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Other endpoints" href="other_endpoints.html" /><link rel="prev" title="Meta models" href="meta_models.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Main endpoints - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Other endpoints" href="other_endpoints.html" /><link rel="prev" title="Meta models" href="meta_models.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -262,7 +263,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -336,7 +337,7 @@ and an integer with the HTTP status code</p>
 </section>
 <section id="module-cornflow.endpoints.login">
 <span id="login-endpoint"></span><h2>Login endpoint<a class="headerlink" href="#module-cornflow.endpoints.login" title="Link to this heading">¶</a></h2>
-<p>External endpoint for the user to login to the cornflow webserver</p>
+<p>External endpoint for the user to log in to the cornflow webserver</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.login.LoginBaseEndpoint">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.login.</span></span><span class="sig-name descname"><span class="pre">LoginBaseEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.login.LoginBaseEndpoint" title="Link to this definition">¶</a></dt>
@@ -351,7 +352,7 @@ and an integer with the HTTP status code</p>
 <dd class="field-odd"><p><strong>kwargs</strong> – keyword arguments passed for the login, these can be username, password or a token</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the response of the login or it raises an error. The correct response is a dict</p>
+<dd class="field-even"><p>the response of the login, or it raises an error. The correct response is a dict</p>
 </dd>
 </dl>
 <p>with the newly issued token and the user id, and a status code of 200
@@ -370,7 +371,7 @@ and an integer with the HTTP status code</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the user object or it raises an error if it has not been possible to log in</p>
+<dd class="field-even"><p>the user object, or it raises an error if it has not been possible to log in</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></p>
@@ -390,7 +391,7 @@ and an integer with the HTTP status code</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the user object or it raises an error if it has not been possible to log in</p>
+<dd class="field-even"><p>the user object, or it raises an error if it has not been possible to log in</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></p>
@@ -401,18 +402,18 @@ and an integer with the HTTP status code</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.endpoints.login.LoginBaseEndpoint.auth_oid_authenticate">
 <span class="sig-name descname"><span class="pre">auth_oid_authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_oid_authenticate" title="Link to this definition">¶</a></dt>
-<dd><p>Method  in charge of performing the log in with the token issued by an Open ID provider.
-It has an exception and thus accepts username and password for service users if needed.</p>
+<dd><p>Method in charge of performing the authentication using OpenID Connect tokens.
+Supports any OIDC provider configured via provider_url.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>token</strong> (<em>str</em>) – the token that the user has obtained from the Open ID provider</p></li>
-<li><p><strong>username</strong> (<em>str</em>) – the username of the user to log in</p></li>
-<li><p><strong>password</strong> (<em>str</em>) – the password of the user to log in</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – the JWT token from the OIDC provider</p></li>
+<li><p><strong>username</strong> (<em>str</em>) – username for service users</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – password for service users</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the user object or it raises an error if it has not been possible to log in</p>
+<dd class="field-even"><p>the user object, or it raises an error if it has not been possible to log in</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UserModel</span></code></p>
@@ -425,7 +426,19 @@ It has an exception and thus accepts username and password for service users if 
 <dl class="py function">
 <dt class="sig sig-object py" id="cornflow.endpoints.login.check_last_password_change">
 <span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.login.</span></span><span class="sig-name descname"><span class="pre">check_last_password_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.login.check_last_password_change" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Check if the user needs to change their password based on the password rotation time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user</strong> – The user object to check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if password needs to be changed, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.login.LoginEndpoint">
@@ -1203,5 +1216,5 @@ Sends a temporary password and updates the database.
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

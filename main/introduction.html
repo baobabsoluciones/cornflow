@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Introduction - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Concepts" href="concepts.html" /><link rel="prev" title="Main topics" href="index.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Introduction - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Concepts" href="concepts.html" /><link rel="prev" title="Main topics" href="index.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Main topics</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -136,7 +137,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -173,26 +174,26 @@ data-aria-dark="Switch to auto color mode">
 </a>
 <a class="reference external image-reference" href="https://app.codecov.io/gh/baobabsoluciones/cornflow"><img alt="Codecov" src="https://img.shields.io/codecov/c/gh/baobabsoluciones/cornflow?flag=dags-tests&amp;label=dags&amp;logo=codecov&amp;logoColor=white&amp;style=for-the-badge&amp;token=H14UGPUQVL" />
 </a>
-<p>Cornflow is a collection of projects that allow for the rapid prototyping and deployment of optimization-based applications. Contrary to other existing deployment servers, Cornflow is centered around the applications and the problems, not in the techniques. It offers several other advantages such as being completely free (as in freedom) and very flexible.</p>
-<p>Cornflow uses input and output schemas to define “optimization problems” and then accepts any (for now python) code that reads data in the input schema and returns a solution in the output schema. We use JSONSchema to define these schemas. By working like this, Cornflow becomes technique-agnostic without losing data-validation and re-usability (e.g., we can have more than one “solution method” for the same problem).</p>
+<p>cornflow is a collection of projects that allow for the rapid prototyping and deployment of optimization-based applications. Contrary to other existing deployment servers, cornflow is centered around the applications and the problems, not in the techniques. It offers several other advantages such as being completely free (as in freedom) and very flexible.</p>
+<p>cornflow uses input and output schemas to define “optimization problems” and then accepts any (for now python) code that reads data in the input schema and returns a solution in the output schema. We use JSONSchema to define these schemas. By working like this, cornflow becomes technique-agnostic without losing data-validation and re-usability (e.g., we can have more than one “solution method” for the same problem).</p>
 <p>Being technique-agnostic implies we sometimes use CP models built with ortools, MIP models built with pyomo and some heuristics in pure python. But again, we could also have a localsolver model or any metaheuristic as long as it complies with the interface format for the particular optimization problem. In the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section we describe some of the demo solution methods we have built and deployed.</p>
 <section id="ways-it-can-be-used">
 <h2>Ways it can be used<a class="headerlink" href="#ways-it-can-be-used" title="Link to this heading">¶</a></h2>
-<p>Cornflow main advantage is its flexibility and so it can be used and deployed in many ways. The easiest is to use the test server we already have deployed to test the current offer of solvers. For this, check the <a class="reference internal" href="../guides/use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a> section on how to test the server and then the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section to see what solvers are available.</p>
+<p>cornflow main advantage is its flexibility and so it can be used and deployed in many ways. The easiest is to use the test server we already have deployed to test the current offer of solvers. For this, check the <a class="reference internal" href="../guides/use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a> section on how to test the server and then the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section to see what solvers are available.</p>
 <p>If you want to have your solution available in the server, feel free to propose a new solution method via a Pull Request. This is explained in section <a class="reference internal" href="../guides/deploy_solver_new.html#how-to-deploy-a-new-solution-method-2-0"><span class="std std-ref">How to deploy a new solution method (2.0)</span></a>.</p>
-<p>Finally, if you want to deploy your own Cornflow-server privately and deploy your own private solution methods, you can check the several ways in which you can do that in <a class="reference internal" href="../deploy/index.html#deploy-your-own-cornflow-server"><span class="std std-ref">Deploy your own cornflow-server</span></a>.</p>
+<p>Finally, if you want to deploy your own cornflow-server privately and deploy your own private solution methods, you can check the several ways in which you can do that in <a class="reference internal" href="../deploy/index.html#deploy-your-own-cornflow-server"><span class="std std-ref">Deploy your own cornflow-server</span></a>.</p>
 </section>
 <section id="components">
 <h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
-<p>Cornflow is composed of several components:</p>
+<p>cornflow is composed of several components:</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-p-2 docutils">
 <div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
-Cornflow server</div>
-<p class="sd-card-text">The Cornflow server is the main component of the system. It is a Flask application that exposes a REST API to interact with the system. It is the component that receives the optimization problems and returns the solutions. It is also the component that manages the optimization problems and the solution methods.</p>
+cornflow server</div>
+<p class="sd-card-text">The cornflow server is the main component of the system. It is a Flask application that exposes a REST API to interact with the system. It is the component that receives the optimization problems and returns the solutions. It is also the component that manages the optimization problems and the solution methods.</p>
 </div>
 </div>
 </div>
@@ -200,8 +201,8 @@ Cornflow server</div>
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
-Cornflow client</div>
-<p class="sd-card-text">The Cornflow client is a python library that allows to interact with the Cornflow server. It is the component that allows to create and manage optimization problems and solution methods.</p>
+cornflow client</div>
+<p class="sd-card-text">The cornflow client is a python library that allows to interact with the cornflow server. It is the component that allows to create and manage optimization problems and solution methods.</p>
 </div>
 </div>
 </div>
@@ -209,8 +210,8 @@ Cornflow client</div>
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
-Cornflow dags</div>
-<p class="sd-card-text">The Cornflow dags are a collection of airflow dags that allow to deploy the Cornflow server and the solution methods in a Kubernetes cluster. It is the component that allows to deploy the Cornflow server and the solution methods.</p>
+cornflow dags</div>
+<p class="sd-card-text">The cornflow dags are a collection of airflow DAGs that represent the developed models and their solution methods. These models are deployed on Airflow and can be consumed by demand by cornflow server and therefore by the client.</p>
 </div>
 </div>
 </div>
@@ -219,7 +220,7 @@ Cornflow dags</div>
 <div class="sd-card-body docutils">
 <div class="sd-card-title sd-font-weight-bold docutils">
 airflow</div>
-<p class="sd-card-text">Airflow is a platform to programmatically author, schedule and monitor workflows. It is the component that allows to deploy the Cornflow server and the solution methods.</p>
+<p class="sd-card-text">Airflow is a platform to programmatically author, schedule and monitor workflows. It is the component that allows to deploy the the solution methods and to be able to consume them by demand.</p>
 </div>
 </div>
 </div>
@@ -272,5 +273,5 @@ airflow</div>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

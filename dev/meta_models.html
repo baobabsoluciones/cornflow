@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Meta models - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Main endpoints" href="endpoints.html" /><link rel="prev" title="Auxiliar models" href="auxiliar_models.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Meta models - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Main endpoints" href="endpoints.html" /><link rel="prev" title="Auxiliar models" href="auxiliar_models.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -168,7 +169,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -481,7 +482,7 @@ attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.base_data_model.BaseDataModel.get_all_objects">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creation_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletion_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_gte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_date_lte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get all objects from a user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -492,13 +493,6 @@ for example, any mapped columns or relationships.</p>
 <li><p><strong>creation_date_lte</strong> (<em>string</em>) – created_at needs to be smaller or equal to this</p></li>
 <li><p><strong>deletion_date_gte</strong> (<em>string</em>) – deletion_at needs to be larger or equal to this</p></li>
 <li><p><strong>deletion_date_lte</strong> (<em>string</em>) – deletion_at needs to be smaller or equal to this</p></li>
-<li><p><strong>id</strong> (<em>string</em>) – user id</p></li>
-<li><p><strong>user_name</strong> (<em>string</em>) – user first name</p></li>
-<li><p><strong>last_name</strong> (<em>string</em>) – user last name</p></li>
-<li><p><strong>email</strong> (<em>string</em>) – user email</p></li>
-<li><p><strong>role_id</strong> (<em>int</em>) – user role id</p></li>
-<li><p><strong>url_rule</strong> (<em>string</em>) – url_rule</p></li>
-<li><p><strong>description</strong> (<em>string</em>) – description</p></li>
 <li><p><strong>update_date_gte</strong> (<em>string</em>) – update_at needs to be larger or equal to this</p></li>
 <li><p><strong>update_date_lte</strong> (<em>string</em>) – update_at needs to be smaller or equal to this</p></li>
 <li><p><strong>offset</strong> (<em>int</em>) – query offset for pagination</p></li>
@@ -583,5 +577,5 @@ for example, any mapped columns or relationships.</p>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

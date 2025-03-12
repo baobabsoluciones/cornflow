@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Access control - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging and monitoring" href="logs.html" /><link rel="prev" title="Production deployment and security" href="production.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Access control - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging and monitoring" href="logs.html" /><link rel="prev" title="Production deployment and security" href="production.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../examples/rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/two_dimensional_bin_packing.html">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="production.html">Production deployment and security</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -131,9 +132,9 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#roles-with-auth-ldap">Roles with Auth-LDAP</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#cornflow-interactions-with-airflow-service-user">Cornflow interactions with airflow (service user)</a><ul>
-<li><a class="reference internal" href="#cornflow-airflow">Cornflow &#8658; Airflow</a></li>
-<li><a class="reference internal" href="#airflow-cornflow">Airflow &#8658; Cornflow</a></li>
+<li><a class="reference internal" href="#cornflow-interactions-with-airflow-service-user">cornflow interactions with airflow (service user)</a><ul>
+<li><a class="reference internal" href="#cornflow-airflow">cornflow &#8658; Airflow</a></li>
+<li><a class="reference internal" href="#airflow-cornflow">Airflow &#8658; cornflow</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#manage-cornflow-users">Manage cornflow users</a></li>
@@ -151,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -174,7 +175,7 @@ data-aria-dark="Switch to auto color mode">
         <article class="yue" role="main">
           <section id="access-control">
 <h1>Access control<a class="headerlink" href="#access-control" title="Link to this heading">¶</a></h1>
-<p>Cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
+<p>cornflow supports multi-user access using password encryption authentication. The user needs to authenticate at least once with the cornflow server to obtain a token that allows him to continue operating.
 In this section we will explain the workflow and data process when create users, delete them or change the user´s access password.</p>
 <section id="user-access-data">
 <h2>User access data<a class="headerlink" href="#user-access-data" title="Link to this heading">¶</a></h2>
@@ -182,7 +183,7 @@ In this section we will explain the workflow and data process when create users,
 The second method is AUTH_LDAP. This method allows you to link cornflow with your own security directory and thus the application will delegate the authentication of the users.</p>
 <section id="with-auth-db-default">
 <h3>With Auth-DB (default)<a class="headerlink" href="#with-auth-db-default" title="Link to this heading">¶</a></h3>
-<p>Cornflow has an environment variable to control the type of authentication we want to activate:</p>
+<p>cornflow has an environment variable to control the type of authentication we want to activate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AUTH_TYPE</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">(</span><span class="n">Auth</span><span class="o">-</span><span class="n">DB</span> <span class="n">default</span> <span class="n">method</span><span class="p">)</span>
 </span></pre></div>
 </div>
@@ -263,7 +264,7 @@ In addition, there is a temporary link between the user and his role that will n
 </div>
 <section id="roles-with-auth-ldap">
 <h3>Roles with Auth-LDAP<a class="headerlink" href="#roles-with-auth-ldap" title="Link to this heading">¶</a></h3>
-<p>In the cornflow server deployment, the LDAP server roles will be configured through environment variables. Cornflow roles to bind to ldap server:</p>
+<p>In the cornflow server deployment, the LDAP server roles will be configured through environment variables. cornflow roles to bind to ldap server:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">LDAP_GROUP_TO_ROLE_SERVICE</span>
 </span><span data-line="2"><span class="n">LDAP_GROUP_TO_ROLE_ADMIN</span>
 </span><span data-line="3"><span class="n">LDAP_GROUP_TO_ROLE_VIEWER</span>
@@ -274,9 +275,9 @@ In addition, there is a temporary link between the user and his role that will n
 </section>
 </section>
 <section id="cornflow-interactions-with-airflow-service-user">
-<h2>Cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Link to this heading">¶</a></h2>
+<h2>cornflow interactions with airflow (service user)<a class="headerlink" href="#cornflow-interactions-with-airflow-service-user" title="Link to this heading">¶</a></h2>
 <section id="cornflow-airflow">
-<h3>Cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Link to this heading">¶</a></h3>
+<h3>cornflow ⇒ Airflow<a class="headerlink" href="#cornflow-airflow" title="Link to this heading">¶</a></h3>
 <p>Not all cornflow users can access airflow. A role defined in the application will give access to perform actions that involve communication with airflow through the user defined in the previous point.
 If the user has access to airflow, in each communication, the username and password that provides access to the platform will be provided by this environment variables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">AIRFLOW_USER</span> <span class="o">-</span> <span class="n">airflow</span> <span class="n">user</span> <span class="n">name</span> <span class="k">for</span> <span class="n">login</span> <span class="ow">in</span> <span class="n">airflow</span> <span class="ow">and</span> <span class="n">manage</span> <span class="n">dags</span>
@@ -295,10 +296,10 @@ The cornflow user profile in airflow must have the following permissions:</p>
 <p>If airflow also connects through LDAP to the same active directory, it will be necessary in the deployment configuration to bind the user that communicates cornflow with the role that gives the previously defined permissions.
 The user who operates airflow through cornflow may not be the same user who has the role of system administrator of the platform.</p>
 <p><strong>User access to dags</strong></p>
-<p>The user access to each dag in airflow can be controlled in cornflow. Cornflow store a table with dags and have roles that give access to each dag individually.</p>
+<p>The user access to each dag in airflow can be controlled in cornflow. cornflow store a table with dags and have roles that give access to each dag individually.</p>
 </section>
 <section id="airflow-cornflow">
-<h3>Airflow ⇒ Cornflow<a class="headerlink" href="#airflow-cornflow" title="Link to this heading">¶</a></h3>
+<h3>Airflow ⇒ cornflow<a class="headerlink" href="#airflow-cornflow" title="Link to this heading">¶</a></h3>
 <p>Airflow use a cornflow service rights that allow it to do some operations. It´s used to get and post to any user’s instances and executions. In this way this role restrict for doing admin stuff (e.g., manage users or delete them)
 Service user is a good solution for doing all the data interaction between applications. You have only to pay attention to one account for set permissions and key values on deployment:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">CORNFLOW_SERVICE_USER - service user account name for communications between cornflow and airflow (default value `service_user`)
@@ -400,5 +401,5 @@ Service user is a good solution for doing all the data interaction between appli
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>

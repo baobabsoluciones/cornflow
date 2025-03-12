@@ -70,7 +70,7 @@ In fact, these validations should not be done inside. Experiment is correct to a
 
 The actual validations should be done outside (before) the creation of the Experiment so as to be sure to provide Experiment always with an instance and a solution.
 
-These kinds of validations can be done in javascript (python) with the use of TypeScript (python type-hints). While TypeScript is not yet present in Cornflow-app, python type-hints are very well present in cornflow-server and cornflow-client.
+These kinds of validations can be done in javascript (python) with the use of TypeScript (python type-hints). While TypeScript is not yet present in cornflow-app, python type-hints are very well present in cornflow-server and cornflow-client.
 
 In this case, the correct code would be the same but without ifs:
 

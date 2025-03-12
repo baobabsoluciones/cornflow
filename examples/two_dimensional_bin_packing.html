@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>two_dimensional_bin_packing - Cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Vehicle Routing Problem (VRP)" href="vrp.html" /><link rel="prev" title="Travelling Salesman Problem (TSP)" href="tsp.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Two dimension bin packing - cornflow 1.1.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Vehicle Routing Problem (VRP)" href="vrp.html" /><link rel="prev" title="Travelling Salesman Problem (TSP)" href="tsp.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=3b41e830" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="two_dimensional_bin_packing"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Two dimension bin packing"/>
 <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -27,7 +27,7 @@
     <a class="sy-head-brand" href="../index.html">
       
       
-      <strong>Cornflow</strong>
+      <strong>cornflow</strong>
     </a>
     <div class="sy-head-nav" id="HeadNav">
       <nav class="sy-head-links"></nav>
@@ -59,7 +59,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../main/index.html">Main topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../main/introduction.html">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/concepts.html">Concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">Cornflow-server architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main/architecture.html">cornflow-server architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../main/install.html">Installation instructions</a></li>
 </ul>
 </li>
@@ -80,7 +80,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="rostering.html">Rostering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scheduling.html">Scheduling: hackathon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tsp.html">Travelling Salesman Problem (TSP)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">two_dimensional_bin_packing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Two dimension bin packing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vrp.html">Vehicle Routing Problem (VRP)</a></li>
 </ul>
 </li>
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../deploy/production.html">Production deployment and security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/access.html">Access control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/logs.html">Logging and monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/issues.html">Known issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/index.html">Code documentation</a><ul>
@@ -106,7 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../dev/endpoints.html">Main endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/other_endpoints.html">Other endpoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dev/auxiliar_endpoints.html">Auxiliar endpoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">Cornflow-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev/cornflow_client.html">cornflow-client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../stable-rest-api-ref.html">API reference</a></li>
@@ -121,7 +122,11 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#decision">Decision</a></li>
+<li><a class="reference internal" href="#input-data">Input data</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
@@ -132,7 +137,7 @@ data-aria-dark="Switch to auto color mode">
       </button>
     </div>
     <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../index.html"><span itemprop="name">Cornflow</span></a>
+        <a itemprop="item" href="../index.html"><span itemprop="name">cornflow</span></a>
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -140,7 +145,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">two_dimensional_bin_packing</strong>
+        <strong itemprop="name">Two dimension bin packing</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -153,8 +158,31 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         <article class="yue" role="main">
-          <section id="two-dimensional-bin-packing">
-<h1>two_dimensional_bin_packing<a class="headerlink" href="#two-dimensional-bin-packing" title="Link to this heading">¶</a></h1>
+          <section id="two-dimension-bin-packing">
+<h1>Two dimension bin packing<a class="headerlink" href="#two-dimension-bin-packing" title="Link to this heading">¶</a></h1>
+<p>A set of objects have to be place on a two dimension grid maximizing the value of the objects placed on the grid. This problem is an extension of the bin packing problem. The bin packing problem is a combinatorial NP-hard problem. The two dimension bin packing problem is also NP-hard.</p>
+<p><strong>Name of the DAG</strong>: <cite>two_dimension_bin_packing</cite></p>
+<p><strong>Available solution methods</strong>:</p>
+<ul class="simple">
+<li><p><strong>default</strong>: A mip solver.</p></li>
+<li><p>right_corner: The mip solver based on coordinates of the right corner. It can be solved with CBC, Gurobi or SCIP.</p></li>
+</ul>
+<section id="decision">
+<h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">¶</a></h2>
+<p>For each object we have to decide if it is included on the bin and its position inside of it maximizing the value of the items placed on the bin.</p>
+</section>
+<section id="input-data">
+<h2>Input data<a class="headerlink" href="#input-data" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Items: A set of items with their width, height and value.</p></li>
+<li><p>Parameters:</p>
+<ul>
+<li><p>width: The width of the bin.</p></li>
+<li><p>height: The height of the bin.</p></li>
+</ul>
+</li>
+</ul>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -201,5 +229,5 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+      <script src="../_static/shibuya.js?v=e2230717"></script></body>
 </html>
