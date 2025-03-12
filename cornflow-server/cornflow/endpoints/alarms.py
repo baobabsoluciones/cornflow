@@ -22,8 +22,6 @@ class AlarmsEndpoint(BaseMetaResource):
     Available methods: [get, post]
     """
 
-    ROLES_WITH_ACCESS = [SERVICE_ROLE]
-
     def __init__(self):
         super().__init__()
         self.data_model = AlarmsModel
@@ -69,8 +67,6 @@ class AlarmDetailEndpointBase(BaseMetaResource):
     """
     Endpoint used to get the information of a certain alarm. But not the data!
     """
-
-    ROLES_WITH_ACCESS = [SERVICE_ROLE]
 
     def __init__(self):
         super().__init__()
