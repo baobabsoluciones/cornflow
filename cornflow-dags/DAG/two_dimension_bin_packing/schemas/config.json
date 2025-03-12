@@ -4,7 +4,7 @@
   "properties": {
     "solver": {
       "type": "string",
-      "enum": ["right_corner.cbc", "right_corner.gurobi", "right_corner.scip"],
+      "enum": ["right_corner.cbc", "right_corner.gurobi", "right_corner.scip", "right_corner.appsi_highs"],
       "default": "right_corner.cbc"
     },
     "timeLimit": {

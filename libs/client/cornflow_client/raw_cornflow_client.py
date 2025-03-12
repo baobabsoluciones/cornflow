@@ -109,7 +109,7 @@ class RawCornFlow(object):
             method=method,
             url=url,
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
             **kwargs,
@@ -120,7 +120,7 @@ class RawCornFlow(object):
             method=method,
             url=urljoin(self.url, api) + "/",
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
             **kwargs,
@@ -183,7 +183,7 @@ class RawCornFlow(object):
         return requests.post(
             urljoin(self.url, api),
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
             **kwargs,
@@ -406,7 +406,7 @@ class RawCornFlow(object):
             method="post",
             url=url,
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
         )
@@ -436,7 +436,7 @@ class RawCornFlow(object):
             method="post",
             url=url,
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
         )
@@ -466,7 +466,7 @@ class RawCornFlow(object):
             method="post",
             url=url,
             headers={
-                "Authorization": "access_token " + self.token,
+                "Authorization": f"Bearer {self.token}",
                 "Content-Encoding": encoding,
             },
         )

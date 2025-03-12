@@ -61,9 +61,6 @@ class Instance(InstanceCore):
 
         return data_dict
 
-    def check(self):
-        return dict()
-
     def get_objects_values(self):
         return {
             self.data["ids"][i]: self.data["values"][i]

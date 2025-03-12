@@ -6,6 +6,7 @@ from logging import error
 
 
 import click
+from .utils import get_db_conn
 import cornflow
 from cornflow.app import create_app
 from cornflow.commands import (
@@ -16,7 +17,14 @@ from cornflow.commands import (
     update_schemas_command,
     update_dag_registry_command,
 )
-from cornflow.shared.const import AUTH_DB, ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import (
+    AUTH_DB,
+    AUTH_LDAP,
+    AUTH_OID,
+    ADMIN_ROLE,
+    SERVICE_ROLE,
+    PLANNER_ROLE,
+)
 from cornflow.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
@@ -49,15 +57,8 @@ def init_cornflow_service():
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
     # Cornflow db defaults
-    cornflow_db_host = os.getenv("CORNFLOW_DB_HOST", "cornflow_db")
-    cornflow_db_port = os.getenv("CORNFLOW_DB_PORT", "5432")
-    cornflow_db_user = os.getenv("CORNFLOW_DB_USER", "cornflow")
-    cornflow_db_password = os.getenv("CORNFLOW_DB_PASSWORD", "cornflow")
-    cornflow_db = os.getenv("CORNFLOW_DB", "cornflow")
-    cornflow_db_conn = os.getenv(
-        "cornflow_db_conn",
-        f"postgresql://{cornflow_db_user}:{cornflow_db_password}@{cornflow_db_host}:{cornflow_db_port}/{cornflow_db}",
-    )
+    os.environ["DEFAULT_POSTGRES"] = "1"
+    cornflow_db_conn = get_db_conn()
     os.environ["DATABASE_URL"] = cornflow_db_conn
 
     # Platform auth config and service users
@@ -83,11 +84,11 @@ def init_cornflow_service():
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
     user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
-    default_role = os.getenv("DEFAULT_ROLE", 2)
+    default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     os.environ["DEFAULT_ROLE"] = str(default_role)
 
     # Check LDAP parameters for active directory and show message
-    if os.getenv("AUTH_TYPE") == 2:
+    if os.getenv("AUTH_TYPE") == AUTH_LDAP:
         print(
             "WARNING: Cornflow will be deployed with LDAP Authorization. Please review your ldap auth configuration."
         )
@@ -129,10 +130,11 @@ def init_cornflow_service():
         app = create_app(environment, cornflow_db_conn)
         with app.app_context():
             path = f"{os.path.dirname(cornflow.__file__)}/migrations"
-            migrate = Migrate(app=app, db=db, directory=path)
+            Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(verbose=False)
-            if auth == 1 or auth == 0:
+            if auth == AUTH_DB or auth == AUTH_OID:
+                # create cornflow admin user
                 create_user_with_role(
                     cornflow_admin_user,
                     cornflow_admin_email,
@@ -188,7 +190,7 @@ def init_cornflow_service():
             migrate = Migrate(app=app, db=db, directory=path)
             upgrade()
             access_init_command(verbose=False)
-            if auth == 1 or auth == 0:
+            if auth == AUTH_DB or auth == AUTH_OID:
                 # create cornflow admin user
                 create_user_with_role(
                     cornflow_admin_user,

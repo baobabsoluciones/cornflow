@@ -1,8 +1,22 @@
+"""
+Unit tests for the user endpoints.
+
+This module contains tests for the user-related functionalities, including:
+- User authentication and authorization
+- User role management
+- Password handling and rotation
+- User profile operations
+
+All tests follow a consistent pattern of setting up test data,
+executing operations, and verifying results against expected outcomes.
+"""
+
 import json
+from datetime import datetime, timedelta, timezone
 
 from flask import current_app
 from flask_testing import TestCase
-from datetime import datetime, timedelta
+
 from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
@@ -15,9 +29,8 @@ from cornflow.models import (
     UserModel,
     UserRoleModel,
 )
-
-from cornflow.shared.const import ADMIN_ROLE, PLANNER_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.shared import db
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE, PLANNER_ROLE, VIEWER_ROLE
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,
@@ -363,15 +376,18 @@ class TestUserEndpoint(TestCase):
 
     def test_change_password_rotation(self):
         current_app.config["PWD_ROTATION_TIME"] = 1  # in days
-        payload = {"pwd_last_change": (datetime.utcnow() - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")}
-        self.modify_info(self.planner, self.planner, payload)
+        payload = {"pwd_last_change": (datetime.now(timezone.utc) - timedelta(days=2))}
+
+        planner = UserModel.get_one_user(self.planner["id"])
+        planner.update(payload)
+
         response = self.log_in(self.planner)
         self.assertEqual(True, response.json["change_password"])
 
         payload = {"password": "Newtestpassword1!"}
         self.modify_info(self.planner, self.planner, payload)
         self.planner.update(payload)
-        print(self.planner)
+
         response = self.log_in(self.planner)
         self.assertEqual(False, response.json["change_password"])
 
