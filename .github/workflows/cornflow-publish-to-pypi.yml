@@ -3,7 +3,7 @@ name: Publish cornflow Python 🐍 distributions 📦 to PyPI
 on:
   push:
     tags:
-      - "cornflow*"
+      - 'cornflow*'
 
 jobs:
   build-n-publish:
@@ -13,46 +13,53 @@ jobs:
         working-directory: ./cornflow-server
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.9
-    - name: Install build
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-    - name: Build a binary wheel and a source
-      run: python -m build
-    - name: Publish distribution 📦 to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.CORNFLOW_TEST_PYPI_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
-        packages_dir: cornflow-server/dist/
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.CORNFLOW_PYPI_TOKEN }}
-        packages_dir: cornflow-server/dist/
-    - name: Get version number
-      uses: winterjung/split@v2
-      id: split
-      with:
-        msg : ${{ github.ref_name }}
-        separator: "w"
-    - name: Notify slack channel
-      uses: slackapi/slack-github-action@v1.23.0
-      with:
-        slack-message: "A new version of cornflow (v${{ steps.split.outputs._1 }}) has been deployed"
-        channel-id: ${{ secrets.SLACK_CHANNEL }}
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-    - name: Tag published version for docker hub trigger
-      run: |
-        sleep 30s
-        git config --local user.email "cornflow@baobabsoluciones.es"
-        git config --local user.name "cornflow"
-        git tag -a v${{ steps.split.outputs._1 }} -m "Published cornflow version v${{ steps.split.outputs._1 }}"
-        git push origin v${{ steps.split.outputs._1 }}
-        git push --delete origin ${{ github.ref_name }}
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+      - name: Install build
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build a binary wheel and a source
+        run: python -m build
+      - name: Publish distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.CORNFLOW_TEST_PYPI_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: cornflow-server/dist/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.CORNFLOW_PYPI_TOKEN }}
+          packages_dir: cornflow-server/dist/
+      - name: Get version number
+        uses: winterjung/split@v2
+        id: split
+        with:
+          msg: ${{ github.ref_name }}
+          separator: 'w'
+      - name: Notify slack channel
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          slack-message: 'A new version of cornflow (v${{ steps.split.outputs._1 }}) has been deployed'
+          channel-id: ${{ secrets.SLACK_CHANNEL }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+      - name: Tag published version for docker hub trigger
+        run: |
+          sleep 30s
+
+          # Configure git with the specific user's information
+          git config --local user.email "${{ secrets.GIT_TAG_EMAIL }}"
+          git config --local user.name "${{ secrets.GIT_TAG_USER }}"
+
+          # Create the tag
+          git tag -a v${{ steps.split.outputs._1 }} -m "Published cornflow version v${{ steps.split.outputs._1 }}"
+
+          # Set up authentication with the user's token and push the tag
+          git remote set-url origin https://${{ secrets.GIT_TAG_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin v${{ steps.split.outputs._1 }}
+          git push --delete origin ${{ github.ref_name }}
