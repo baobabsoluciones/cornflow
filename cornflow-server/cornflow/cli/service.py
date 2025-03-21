@@ -249,8 +249,10 @@ def init_cornflow_service():
                 update_dag_registry_command(
                     airflow_url, airflow_user, airflow_pwd, verbose=True
                 )
-            else:
+            elif cornflow_backend == DATABRICKS_BACKEND:
                 register_dag_permissions_command(open_deployment, verbose=True)
+            else:
+                raise Exception("Selected backend not among valid options")
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "
