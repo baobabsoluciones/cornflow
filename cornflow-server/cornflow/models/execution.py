@@ -55,7 +55,7 @@ class ExecutionModel(BaseDataModel):
         db.String(256), db.ForeignKey("instances.id"), nullable=False
     )
     config = db.Column(JSON, nullable=False)
-    dag_run_id = db.Column(db.String(256), nullable=True)
+    run_id = db.Column(db.String(256), nullable=True)
     log_text = db.Column(TEXT, nullable=True)
     log_json = db.Column(JSON, nullable=True)
     state = db.Column(db.SmallInteger, default=DEFAULT_EXECUTION_CODE, nullable=False)
@@ -78,8 +78,7 @@ class ExecutionModel(BaseDataModel):
                 + str(self.instance_id)
             ).encode()
         ).hexdigest()
-        # TODO AGA: modificar a run_id, tanto la columna como el parámetro.
-        self.dag_run_id = data.get("dag_run_id")
+        self.run_id = data.get("run_id")
         self.state = data.get("state", DEFAULT_EXECUTION_CODE)
         self.state_message = EXECUTION_STATE_MESSAGE_DICT[self.state]
         self.config = data.get("config")

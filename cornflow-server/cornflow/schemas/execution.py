@@ -43,7 +43,7 @@ class ExecutionSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     schema = fields.Str(required=False)
-    dag_run_id = fields.Str(required=False, dump_only=True)
+    run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
     checks = fields.Raw(required=False, allow_none=True)

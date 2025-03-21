@@ -105,7 +105,7 @@ class ExecutionEndpoint(BaseMetaResource):
         ]
 
         for execution in running_executions:
-            dag_run_id = execution.dag_run_id
+            dag_run_id = execution.run_id
             if not dag_run_id:
                 # it's safe to say we will never get anything if we did not store the dag_run_id
                 current_app.logger.warning(
@@ -290,7 +290,7 @@ class ExecutionEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         orq_data = response.json()
         # TODO AGA: revisar el nombre del modelo de ejecuciones
-        execution.dag_run_id = orq_data[orq_const["run_id"]]
+        execution.run_id = orq_data[orq_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
             "User {} creates execution {}".format(self.get_user_id(), execution.id)
@@ -428,7 +428,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         # if we succeed, we register the dag_run_id in the execution table:
         orq_data = response.json()
         # TODO AGA: revisar el nombre del modelo de ejecuciones
-        execution.dag_run_id = orq_data[orq_const["run_id"]]
+        execution.run_id = orq_data[orq_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
             "User {} relaunches execution {}".format(self.get_user_id(), execution.id)
@@ -538,7 +538,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
                 + err,
             )
         response = af_client.set_dag_run_to_fail(
-            dag_name=execution.schema, dag_run_id=execution.dag_run_id
+            dag_name=execution.schema, dag_run_id=execution.run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
         current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
@@ -602,9 +602,9 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         print("The execution is ", execution)
         print("The execution user is ", self.get_user())
         print("The execution id is ", idx)
-        print("The parameter is ", execution.dag_run_id)
+        print("The parameter is ", execution.run_id)
 
-        dag_run_id = execution.dag_run_id
+        dag_run_id = execution.run_id
         if not dag_run_id:
             # it's safe to say we will never get anything if we did not store the dag_run_id
             _raise_af_error(
