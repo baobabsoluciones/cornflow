@@ -118,7 +118,7 @@ class ExecutionEndpoint(BaseMetaResource):
             run_id = execution.run_id
 
             if not run_id:
-                # it's safe to say we will never get anything if we did not store the dag_run_id
+                # it's safe to say we will never get anything if we did not store the run_id
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
                     f"Execution {execution.id} has status {execution.state} but has no dag run associated."
@@ -133,7 +133,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 continue
             try:
                 response = self.orch_client.get_run_status(
-                    dag_name=execution.schema, dag_run_id=run_id
+                    dag_name=execution.schema, run_id=run_id
                 )
             except self.orch_error as err:
                 current_app.logger.warning(
@@ -409,7 +409,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 + error,
             )
 
-        # if we succeed, we register the dag_run_id in the execution table:
+        # if we succeed, we register the run_id in the execution table:
         orch_data = response.json()
         execution.run_id = orch_data[self.orch_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
@@ -536,7 +536,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
 
         response = self.orch_client.set_dag_run_to_fail(
-            dag_name=execution.schema, dag_run_id=execution.run_id
+            dag_name=execution.schema, run_id=execution.run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
         current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
@@ -551,6 +551,17 @@ class ExecutionStatusEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = ExecutionModel
+        self.orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self.orch_type == AIRFLOW_BACKEND:
+            self.orch_client = Airflow.from_config(current_app.config)
+            self.orch_error = AirflowError
+            self.orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self.orch_const = config_orchestrator["airflow"]
+        elif self.orch_type == DATABRICKS_BACKEND:
+            self.orch_client = Databricks.from_config(current_app.config)
+            self.orch_error = DatabricksError
+            self.orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self.orch_const = config_orchestrator["databricks"]
 
     @doc(description="Get status of an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -566,14 +577,6 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        orch_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        if orch_TYPE == AIRFLOW_BACKEND:
-            orch_const = config_orchestrator["airflow"]
-            orch_ERROR = AirflowError
-        elif orch_TYPE == DATABRICKS_BACKEND:
-            orch_const = config_orchestrator["databricks"]
-            # TODO AGA: Revisar si esto funcionaría correctamente
-            orch_ERROR = DatabricksError
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -593,18 +596,13 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 log_txt = error
             message = EXECUTION_STATE_MESSAGE_DICT[state]
             execution.update_state(state)
-            raise orch_ERROR(
+            raise self.orch_error(
                 error=error, payload=dict(message=message, state=state), log_txt=log_txt
             )
 
-        print("The execution is ", execution)
-        print("The execution user is ", self.get_user())
-        print("The execution id is ", idx)
-        print("The parameter is ", execution.run_id)
-
-        dag_run_id = execution.run_id
-        if not dag_run_id:
-            # it's safe to say we will never get anything if we did not store the dag_run_id
+        run_id = execution.run_id
+        if not run_id:
+            # it's safe to say we will never get anything if we did not store the run_id
             _raise_af_error(
                 execution,
                 state=EXEC_STATE_ERROR,
@@ -613,34 +611,25 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 f"The execution has no associated dag run id.",
             )
         schema = execution.schema
-        # TODO AGA: Revisar si merece la pena hacer una funcion que solo
+        # We use it only to check if the orchestrator is alive
         orch_client, schema_info, execution = get_orch_client(
-            schema, orch_TYPE, execution
+            schema,
+            self.orch_type,
+            execution,
+            message="tries to get the status of an execution",
         )
-
-        if not orch_client.is_alive():
-            err = orch_const["name"] + " is not accessible"
-            _raise_af_error(
-                execution,
-                err,
-                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                + err,
-            )
-
         try:
-            # TODO: get the dag_name from somewhere!
-            state = orch_client.get_run_status(schema, dag_run_id)
-        except orch_ERROR as err:
-            error = orch_const["name"] + f" responded with an error: {err}"
+            state = self.orch_client.get_run_status(schema, run_id)
+        except self.orch_error as err:
+            error = self.orch_const["name"] + f" responded with an error: {err}"
             _raise_af_error(
                 execution,
                 error,
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
                 + str(err),
             )
-        print("The state before mapping is ", state)
-        state = map_run_state(state, orch_TYPE)
-        print("The state prev to updating is ", state)
+
+        state = map_run_state(state, self.orch_type)
         execution.update_state(state)
         current_app.logger.info(
             f"User {self.get_user()} gets status of execution {idx}"
@@ -730,19 +719,21 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
 # region aux_functions
 
 
-def get_orch_client(schema, orch_type, execution):
+def get_orch_client(
+    schema, orch_type, execution, message="tries to create an execution"
+):
     """
     Get the orchestrator client and the schema info
     """
     if orch_type == AIRFLOW_BACKEND:
-        return get_airflow(schema, execution=execution)
+        return get_airflow(schema, execution=execution, message=message)
     elif orch_type == DATABRICKS_BACKEND:
-        return get_databricks(schema, execution=execution)
+        return get_databricks(schema, execution=execution, message=message)
     else:
         raise EndpointNotImplemented()
 
 
-def get_airflow(schema, execution):
+def get_airflow(schema, execution, message="tries to create an execution"):
     """
     Get the Airflow client and the schema info
     """
@@ -758,15 +749,14 @@ def get_airflow(schema, execution):
                 message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                 state=EXEC_STATE_ERROR_START,
             ),
-            log_txt=f"Error while user {execution.user_id} tries to create an execution "
-            + err,
+            log_txt=f"Error while user {execution.user_id} {message} " + err,
         )
     # TODO AGA: revisar si tiene sentido que se devuelva execution o si
     #  es un puntero
     return af_client, schema_info, execution
 
 
-def get_databricks(schema, execution):
+def get_databricks(schema, execution, message="tries to create an execution"):
     """
     Get the Databricks client and the schema info
     """
@@ -782,8 +772,7 @@ def get_databricks(schema, execution):
                 message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                 state=EXEC_STATE_ERROR_START,
             ),
-            log_txt=f"Error while user {execution.user_id} tries to create an execution "
-            + err,
+            log_txt=f"Error while user {execution.user_id} {message} " + err,
         )
     return db_client, schema_info, execution
     # endregion
@@ -797,10 +786,8 @@ def map_run_state(state, orch_TYPE):
         state = state.json()["state"]
         return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
     elif orch_TYPE == DATABRICKS_BACKEND:
-        print("The state is ", state)
         preliminar_state = DATABRICKS_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
-        # print("The preliminar state is ", preliminar_state)
         # if preliminar_state =="TERMINATED":
-        #     # TODO AGA DUDA: Revisar si es correcto el error predeterminado
+        #     # TODO GG DUDA: Revisar si es correcto el error predeterminado
         #     return DATABRICKS_FINISH_TO_STATE_MAP.get(state,EXEC_STATE_ERROR)
         return preliminar_state
