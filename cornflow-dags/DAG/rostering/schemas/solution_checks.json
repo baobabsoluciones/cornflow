@@ -1,344 +1,382 @@
 {
-    "$schema": "http://json-schema.org/schema#",
-    "type": "object",
-    "properties": {
-        "slots_without_workers": {
-            "type": "array",
-            "title": "Slots without workers",
-            "description": "Table containing the timeslots where no employees are working.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timeslot": {
-                        "type": "string",
-                        "title": "Timeslot",
-                        "description": "Timeslot where no employees are working"
-                    }
-                },
-                "required": ["timeslot"],
-                "additionalProperties": false
-            }
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "slots_without_workers": {
+      "type": "array",
+      "title": "Slots without workers",
+      "description": "Table containing the timeslots where no employees are working.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "timeslot": {
+            "type": "string",
+            "title": "Timeslot",
+            "description": "Timeslot where no employees are working"
+          }
         },
-        "slots_closed_with_workers": {
-            "type": "array",
-            "title": "Slots closed with workers",
-            "description": "Table containing the timeslots where some employees are working while the center is closed",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timeslot": {
-                        "type": "string",
-                        "title": "Timeslot",
-                        "description": "Timeslot where at least an employee is working while the center is closed"
-                    }
-                },
-                "required": ["timeslot"],
-                "additionalProperties": false
-            }
+        "required": [
+          "timeslot"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "slots_closed_with_workers": {
+      "type": "array",
+      "title": "Slots closed with workers",
+      "description": "Table containing the timeslots where some employees are working while the center is closed",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "timeslot": {
+            "type": "string",
+            "title": "Timeslot",
+            "description": "Timeslot where at least an employee is working while the center is closed"
+          }
         },
-        "difference_hours_worked": {
-            "type": "array",
+        "required": [
+          "timeslot"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "difference_hours_worked": {
+      "type": "array",
+      "title": "Extra hours",
+      "description": "Table that contains information about the employees that work more hours than indicated in their contracts",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The number of the week"
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee"
+          },
+          "extra_hours": {
+            "type": "number",
             "title": "Extra hours",
-            "description": "Table that contains information about the employees that work more hours than indicated in their contracts",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "week": {
-                        "type": "integer",
-                        "title": "Week",
-                        "description": "The number of the week"
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee"
-                    },
-                    "extra_hours": {
-                        "type": "number",
-                        "title": "Extra hours",
-                        "description": "The number of extra hours"
-                    }
-                },
-                "required": ["week", "id_employee", "extra_hours"],
-                "additionalProperties": false
-            }
+            "description": "The number of extra hours"
+          }
         },
-        "manager_present": {
-            "type": "array",
-            "title": "Slots without managers",
-            "description": "Table containing the timeslots where no managers are working.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timeslot": {
-                        "type": "string",
-                        "title": "Timeslot",
-                        "description": "Timeslot where no managers are working"
-                    }
-                },
-                "required": ["timeslot"],
-                "additionalProperties": false
-            }
+        "required": [
+          "week",
+          "id_employee",
+          "extra_hours"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "manager_present": {
+      "type": "array",
+      "title": "Slots without managers",
+      "description": "Table containing the timeslots where no managers are working.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "timeslot": {
+            "type": "string",
+            "title": "Timeslot",
+            "description": "Timeslot where no managers are working"
+          }
         },
-        "skills_demand": {
-            "type": "array",
-            "title": "Uncovered skill demand",
-            "description": "Table containing the information about timeslots where the demand for skill is not respected.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timeslot": {
-                        "type": "string",
-                        "title": "Timeslot",
-                        "description": "The timeslot where the skill demand is not covered."
-                    },
-                    "id_skill": {
-                        "type": "integer",
-                        "title": "Id skill",
-                        "description": "The unique identifier of the skill."
-                    },
-                    "number_missing": {
-                        "type": "integer",
-                        "title": "Number missing",
-                        "description": "The number of employees mastering the skill that are missing."
-                    }
-                },
-                "required": ["timeslot", "id_skill", "number_missing"],
-                "additionalProperties": false
-            }
+        "required": [
+          "timeslot"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "skills_demand": {
+      "type": "array",
+      "title": "Uncovered skill demand",
+      "description": "Table containing the information about timeslots where the demand for skill is not respected.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "timeslot": {
+            "type": "string",
+            "title": "Timeslot",
+            "description": "The timeslot where the skill demand is not covered."
+          },
+          "id_skill": {
+            "type": "integer",
+            "title": "Id skill",
+            "description": "The unique identifier of the skill."
+          },
+          "number_missing": {
+            "type": "integer",
+            "title": "Number missing",
+            "description": "The number of employees mastering the skill that are missing."
+          }
         },
-        "days_worked_per_week": {
-            "type": "array",
-            "title": "Max work days",
-            "description": "Table containing the information about weeks when an employee works more days than their work days",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "week": {
-                        "type": "integer",
-                        "title": "Week",
-                        "description": "The week of the issue."
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee."
-                    },
-                    "nb_days_worked": {
-                        "type": "integer",
-                        "title": "Nb days worked",
-                        "description": "The number of days worked by the employee on that week."
-                    },
-                    "max_days_week": {
-                        "type": "integer",
-                        "title": "Max days week",
-                        "description": "The number of work days of the employee."
-                    }
-                },
-                "required": ["week", "id_employee", "nb_days_worked", "max_days_week"],
-                "additionalProperties": false
-            }
+        "required": [
+          "timeslot",
+          "id_skill",
+          "number_missing"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "days_worked_per_week": {
+      "type": "array",
+      "title": "Max work days",
+      "description": "Table containing the information about weeks when an employee works more days than their work days",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week",
+            "description": "The week of the issue."
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee."
+          },
+          "nb_days_worked": {
+            "type": "integer",
+            "title": "Nb days worked",
+            "description": "The number of days worked by the employee on that week."
+          },
+          "max_days_week": {
+            "type": "integer",
+            "title": "Max days week",
+            "description": "The number of work days of the employee."
+          }
         },
-        "min_hours_worked_per_day": {
-            "type": "array",
-            "title": "Min hours worked",
-            "description": "Table containing information about the days when an employee works less than the minimum work day duration.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "date": {
-                        "type": "string",
-                        "title": "Date",
-                        "description": "The date of the issue."
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee."
-                    },
-                    "nb_hours_worked": {
-                        "type": "number",
-                        "title": "Nb hours worked",
-                        "description": "The number of hours worked by the employee on that day."
-                    },
-                    "min_hours_day": {
-                        "type": "integer",
-                        "title": "Min hours day",
-                        "description": "The minimum number of hours worked by the employee of the employee."
-                    }
-                },
-                "required": ["date", "id_employee", "nb_hours_worked", "min_hours_day"],
-                "additionalProperties": false
-            }
+        "required": [
+          "week",
+          "id_employee",
+          "nb_days_worked",
+          "max_days_week"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "min_hours_worked_per_day": {
+      "type": "array",
+      "title": "Min hours worked",
+      "description": "Table containing information about the days when an employee works less than the minimum work day duration.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "The date of the issue."
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee."
+          },
+          "nb_hours_worked": {
+            "type": "number",
+            "title": "Nb hours worked",
+            "description": "The number of hours worked by the employee on that day."
+          },
+          "min_hours_day": {
+            "type": "integer",
+            "title": "Min hours day",
+            "description": "The minimum number of hours worked by the employee of the employee."
+          }
         },
-        "employee_holidays": {
-            "type": "array",
-            "title": "Employee holidays",
-            "description": "Table containing information about the dates when an employee is working while they should be on holidays.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "date": {
-                        "type": "string",
-                        "title": "Date",
-                        "description": "The date of the issue."
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee."
-                    }
-                },
-                "required": ["date", "id_employee"],
-                "additionalProperties": false
-            }
+        "required": [
+          "date",
+          "id_employee",
+          "nb_hours_worked",
+          "min_hours_day"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "employee_holidays": {
+      "type": "array",
+      "title": "Employee holidays",
+      "description": "Table containing information about the dates when an employee is working while they should be on holidays.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "The date of the issue."
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee."
+          }
         },
-        "employee_downtime": {
-            "type": "array",
-            "title": "Employee downtime",
-            "description": "Table containing information about the dates when an employee is working while they are on downtime.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "properties": {
-                        "date": {
-                            "type": "string",
-                            "title": "Date",
-                            "description": "The date of the issue."
-                        },
-                        "id_employee": {
-                            "type": "integer",
-                            "title": "Id employee",
-                            "description": "The unique identifier of the employee."
-                        }
-                    },
-                    "required": ["date", "id_employee"],
-                    "additionalProperties": false
-                }
-            }
-        },
-        "start_hour_preference": {
-            "type": "array",
-            "title": "Preferences - start hour",
-            "description": "Table containing information about the employees preferences about their starting hours that are not respected.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "date": {
-                        "type": "string",
-                        "title": "Date",
-                        "description": "The date of the issue."
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee."
-                    },
-                    "start_hour": {
-                        "type": "string",
-                        "title": "Start hour",
-                        "description": "The start hour of the employee."
-                    }
-                }
+        "required": [
+          "date",
+          "id_employee"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "employee_downtime": {
+      "type": "array",
+      "title": "Employee downtime",
+      "description": "Table containing information about the dates when an employee is working while they are on downtime.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "date": {
+              "type": "string",
+              "title": "Date",
+              "description": "The date of the issue."
             },
-            "required": ["date", "id_employee", "start_hour"],
-            "additionalProperties": false
+            "id_employee": {
+              "type": "integer",
+              "title": "Id employee",
+              "description": "The unique identifier of the employee."
+            }
+          },
+          "required": [
+            "date",
+            "id_employee"
+          ],
+          "additionalProperties": false
         }
+      }
+    },
+    "start_hour_preference": {
+      "type": "array",
+      "title": "Preferences - start hour",
+      "description": "Table containing information about the employees preferences about their starting hours that are not respected.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "The date of the issue."
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee."
+          },
+          "start_hour": {
+            "type": "string",
+            "title": "Start hour",
+            "description": "The start hour of the employee."
+          }
+        }
+      },
+      "required": [
+        "date",
+        "id_employee",
+        "start_hour"
+      ],
+      "additionalProperties": false
     },
     "number_hours_preferences": {
+      "type": "array",
+      "title": "Preferences - number of hours",
+      "description": "Table containing information about the employees preferences about their number of hours that are not respected.",
+      "is_warning": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "The date of the issue."
+          },
+          "id_employee": {
+            "type": "integer",
+            "title": "Id employee",
+            "description": "The unique identifier of the employee."
+          },
+          "number_hours_worked": {
+            "type": "number",
+            "title": "Number hours worked",
+            "description": "The number of hours worked by the employee on that day."
+          }
+        },
+        "required": [
+          "date",
+          "id_employee",
+          "number_hours_worked"
+        ],
+        "additionalProperties": false
+      },
+      "employee_work_days": {
         "type": "array",
-        "title": "Preferences - number of hours",
-        "description": "Table containing information about the employees preferences about their number of hours that are not respected.",
+        "title": "Employee work days",
+        "description": "Table containing the information about dates when the employees work days are not respected.",
         "is_warning": false,
         "items": {
-            "type": "object",
-            "properties": {
-                "date": {
-                    "type": "string",
-                    "title": "Date",
-                    "description": "The date of the issue."
-                },
-                "id_employee": {
-                    "type": "integer",
-                    "title": "Id employee",
-                    "description": "The unique identifier of the employee."
-                },
-                "number_hours_worked": {
-                    "type": "number",
-                    "title": "Number hours worked",
-                    "description": "The number of hours worked by the employee on that day."
-                }
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "title": "Date",
+              "description": "The date of the issue."
             },
-            "required": ["date", "id_employee", "number_hours_worked"],
-            "additionalProperties": false
-        },
-        "employee_work_days": {
-            "type": "array",
-            "title": "Employee work days",
-            "description": "Table containing the information about dates when the employees work days are not respected.",
-            "is_warning": false,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "date": {
-                        "type": "string",
-                        "title": "Date",
-                        "description": "The date of the issue."
-                    },
-                    "id_employee": {
-                        "type": "integer",
-                        "title": "Id employee",
-                        "description": "The unique identifier of the employee."
-                    }
-                },
-                "required": [
-                    "date",
-                    "id_employee"
-                ],
-                "additionalProperties": false
+            "id_employee": {
+              "type": "integer",
+              "title": "Id employee",
+              "description": "The unique identifier of the employee."
             }
-        },
-        "fixed_worktable": {
-            "type": "array",
-            "description": "Table containing information about the parts of the fixed worktable that are not respected.",
-            "show": true,
-            "filterable": true,
-            "sortable": true,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id_employee": {
-                        "type": "integer",
-                        "description": "The unique identifier for each employee.",
-                        "title": "Employee id.",
-                        "sortable": true,
-                        "filterable": true
-                    },
-                    "time_slot": {
-                        "type": "string",
-                        "title": "Time slot",
-                        "description": "The time slot the employee should be working on",
-                        "sortable": true,
-                        "filterable": true
-                    }
-                },
-                "required": [
-                    "id_employee",
-                    "time_slot"
-                ]
-            }
+          },
+          "required": [
+            "date",
+            "id_employee"
+          ],
+          "additionalProperties": false
         }
+      },
+      "fixed_worktable": {
+        "type": "array",
+        "description": "Table containing information about the parts of the fixed worktable that are not respected.",
+        "show": true,
+        "filterable": true,
+        "sortable": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "id_employee": {
+              "type": "integer",
+              "description": "The unique identifier for each employee.",
+              "title": "Employee id.",
+              "sortable": true,
+              "filterable": true
+            },
+            "time_slot": {
+              "type": "string",
+              "title": "Time slot",
+              "description": "The time slot the employee should be working on",
+              "sortable": true,
+              "filterable": true
+            }
+          },
+          "required": [
+            "id_employee",
+            "time_slot"
+          ]
+        }
+      }
     },
     "required": [],
     "additionalProperties": false
+  }
 }

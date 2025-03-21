@@ -37,7 +37,7 @@ from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
 from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
-from cornflow.shared.exceptions import initialize_errorhandlers
+from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
 
 
@@ -62,11 +62,11 @@ def create_app(env_name="development", dataconn=None):
     CORS(app)
     bcrypt.init_app(app)
     db.init_app(app)
-    migrate = Migrate(app=app, db=db)
+    Migrate(app=app, db=db)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 
-        def _fk_pragma_on_connect(dbapi_con, con_record):
+        def _fk_pragma_on_connect(dbapi_con, _con_record):
             dbapi_con.execute("pragma foreign_keys=ON")
 
         with app.app_context():
@@ -100,6 +100,11 @@ def create_app(env_name="development", dataconn=None):
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_OID:
         api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
+    else:
+        raise ConfigurationError(
+            error="Invalid authentication type",
+            log_txt="Error while configuring authentication. The authentication type is not valid."
+        )
 
     initialize_errorhandlers(app)
     init_compress(app)

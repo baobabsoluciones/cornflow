@@ -1,7 +1,7 @@
-# VERSION 1.1.0
+# VERSION 1.1.5
 # AUTHOR: sistemas@baobabsoluciones.es
 
-FROM python:3.10-slim-buster
+FROM python:3.12-slim
 LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
@@ -27,6 +27,7 @@ WORKDIR /usr/src/app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV DEFAULT_POSTGRES=1
 
 # install dependencies
 RUN pip install --upgrade pip

@@ -71,7 +71,7 @@ def connect_to_cornflow(secrets):
     """
     Create a connection to cornflow and log in with airflow admin user.
 
-    :return: A logged and connected Cornflow class instance
+    :return: A logged and connected cornflow client class instance
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
@@ -240,7 +240,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
-        raise AirflowDagException("There was an error during the solving")
+        raise AirflowDagException(f"There was an error during the solving: {e}")
 
 
 def cf_check(fun, dag_name, secrets, **kwargs):
