@@ -517,6 +517,10 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     def post(self, idx):
+        if self.orch_type != AIRFLOW_BACKEND:
+            return {
+                "message": f"This feature is not available for {self.orch_const['name']}"
+            }, 200
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -528,10 +532,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             err = self.orch_const["name"] + " is not accessible"
             raise self.orch_error(
                 error=err,
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
-                + err,
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {err}",
             )
-        # TODO AGA: CREAR UN SET_RUN_TO_FAIL PARA DATABRICKS
+
         response = self.orch_client.set_dag_run_to_fail(
             dag_name=execution.schema, dag_run_id=execution.run_id
         )
