@@ -6,6 +6,7 @@ These endpoints hve different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.databricks.api import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 
 # TODO AGA: Porqué el import no funcina correctamente
@@ -48,8 +49,6 @@ from cornflow.shared.const import (
     EXEC_STATE_QUEUED,
 )
 
-# TODO AGA: Modificar import para sacarlo de cornflow_client
-from cornflow.shared.databricks import Databricks
 from cornflow.shared.exceptions import (
     AirflowError,
     DatabricksError,
@@ -304,6 +303,17 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         self.model = ExecutionModel
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
+        self.orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self.orch_type == AIRFLOW_BACKEND:
+            self.orch_client = Airflow.from_config(current_app.config)
+            self.orch_error = AirflowError
+            self.orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self.orch_const = config_orchestrator["airflow"]
+        elif self.orch_type == DATABRICKS_BACKEND:
+            self.orch_client = Databricks.from_config(current_app.config)
+            self.orch_error = DatabricksError
+            self.orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self.orch_const = config_orchestrator["databricks"]
 
     @doc(description="Re-launch an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -319,18 +329,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        orch_TYPE = current_app.config["CORNFLOW_BACKEND"]
-        if orch_TYPE == AIRFLOW_BACKEND:
-            orch_const = config_orchestrator["airflow"]
-            orch_ERROR = AirflowError
-        elif orch_TYPE == DATABRICKS_BACKEND:
-            orch_const = config_orchestrator["databricks"]
-            # TODO AGA: Revisar si esto funcionaría correctamente
-            orch_ERROR = DatabricksError
-
         config = current_app.config
         if "schema" not in kwargs:
-            kwargs["schema"] = orch_const["def_schema"]
+            kwargs["schema"] = self.orch_const["def_schema"]
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
@@ -372,34 +373,17 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 f"Configuration data does not match the jsonschema.",
             )
         orch_client, schema_info, execution = get_orch_client(
-            kwargs["schema"], orch_TYPE, execution
+            kwargs["schema"], self.orch_type, execution
         )
-
-        if not orch_client.is_alive():
-            err = orch_const["name"] + " is not accessible"
-            current_app.logger.error(err)
-            execution.update_state(EXEC_STATE_ERROR_START)
-            raise orch_ERROR(
-                error=err,
-                payload=dict(
-                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                    state=EXEC_STATE_ERROR_START,
-                ),
-                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
-                + err,
-            )
-
-        # ask airflow if dag_name exists
         schema = execution.schema
-        schema_info = orch_client.get_orch_info(schema)
 
         info = schema_info.json()
-        if orch_TYPE == AIRFLOW_BACKEND:
+        if self.orch_type == AIRFLOW_BACKEND:
             if info["is_paused"]:
                 err = "The dag exists but it is paused in airflow"
                 current_app.logger.error(err)
                 execution.update_state(EXEC_STATE_ERROR_START)
-                raise orch_ERROR(
+                raise self.orch_error(
                     error=err,
                     payload=dict(
                         message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
@@ -408,14 +392,14 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                     + err,
                 )
-        # TODO AGA: revisar si hay que hacer alguna comprobación del estilo a databricks
+        # TODO GG: revisar si hay que hacer alguna comprobación del estilo a databricks
         try:
-            response = orch_client.run_workflow(execution.id, orch_name=schema)
-        except orch_ERROR as err:
-            error = orch_const["name"] + " responded with an error: {}".format(err)
+            response = self.orch_client.run_workflow(execution.id, orch_name=schema)
+        except self.orch_error as err:
+            error = self.orch_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
-            raise orch_ERROR(
+            raise self.orch_error(
                 error=error,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
@@ -427,8 +411,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
 
         # if we succeed, we register the dag_run_id in the execution table:
         orch_data = response.json()
-        # TODO AGA: revisar el nombre del modelo de ejecuciones
-        execution.run_id = orch_data[orch_const["run_id"]]
+        execution.run_id = orch_data[self.orch_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
             "User {} relaunches execution {}".format(self.get_user_id(), execution.id)
@@ -446,6 +429,17 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
         super().__init__()
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
+        self.orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self.orch_type == AIRFLOW_BACKEND:
+            self.orch_client = Airflow.from_config(current_app.config)
+            self.orch_error = AirflowError
+            self.orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self.orch_const = config_orchestrator["airflow"]
+        elif self.orch_type == DATABRICKS_BACKEND:
+            self.orch_client = Databricks.from_config(current_app.config)
+            self.orch_error = DatabricksError
+            self.orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self.orch_const = config_orchestrator["databricks"]
 
 
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
@@ -529,15 +523,16 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
                 log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
                 f"The execution does not exist."
             )
-        af_client = Airflow.from_config(current_app.config)
-        if not af_client.is_alive():
-            err = "Airflow is not accessible"
-            raise AirflowError(
+
+        if not self.orch_client.is_alive():
+            err = self.orch_const["name"] + " is not accessible"
+            raise self.orch_error(
                 error=err,
                 log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
                 + err,
             )
-        response = af_client.set_dag_run_to_fail(
+        # TODO AGA: CREAR UN SET_RUN_TO_FAIL PARA DATABRICKS
+        response = self.orch_client.set_dag_run_to_fail(
             dag_name=execution.schema, dag_run_id=execution.run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
