@@ -1,7 +1,7 @@
 import os
 import random
 import pickle
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cornflow_client import InstanceCore
 from cornflow_client.core.tools import load_json
@@ -31,9 +31,6 @@ class Instance(InstanceCore):
         data_p = {el: self.data[el].values_l() for el in tables}
         data_p["parameters"] = self.data["parameters"]
         return pickle.loads(pickle.dumps(data_p, -1))
-
-    def check(self):
-        return dict()
 
     def _get_property(self, key, prop) -> SuperDict:
         return self.data[key].get_property(prop)
@@ -85,7 +82,7 @@ class Instance(InstanceCore):
             print(f"No area valid cuts exist")
             return [], 0
 
-        t = datetime.utcnow()
+        t = datetime.now(timezone.utc)
         cuts = {
             1: self.get_biggest_cut(),
             2: self.get_value_cut(),
@@ -111,7 +108,7 @@ class Instance(InstanceCore):
             cuts[cut] = tuple(selection)
             cut += 1
 
-            if (datetime.utcnow() - t).seconds > 3 or cut > 1000:
+            if (datetime.now(timezone.utc) - t).seconds > 3 or cut > 1000:
                 break
 
         print(f"{cut - 1} cuts generated")
@@ -167,13 +164,7 @@ class Instance(InstanceCore):
             temp.values_tl(), key=lambda v: v["value"] / (v["width"] * v["height"])
         )["id"]
 
-    def check(self) -> dict:
-        return dict(
-            non_valid_objects=self.check_non_valid_items(),
-            non_valid_data=self.non_valid_data(),
-        )
-
-    def check_non_valid_items(self) -> list:
+    def check_non_valid_objects(self) -> list:
         items = list()
         for item in self.get_items():
             if (
@@ -183,9 +174,9 @@ class Instance(InstanceCore):
                 items.append({"id": item})
         return items
 
-    def non_valid_data(self) -> dict:
+    def check_non_valid_data(self) -> dict:
         valid = dict()
-        non_valid = self.check_non_valid_items()
+        non_valid = self.check_non_valid_objects()
         if len(non_valid) == len(self.get_items()):
             valid["valid"] = False
         return valid

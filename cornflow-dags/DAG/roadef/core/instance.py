@@ -116,9 +116,6 @@ class Instance(InstanceCore):
             ._update(sources_tables)
         )
 
-    def check(self):
-        return dict()
-
     @staticmethod
     def dict_to_int_or_float(data_dict):
         """

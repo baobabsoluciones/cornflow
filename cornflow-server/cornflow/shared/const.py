@@ -7,6 +7,8 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
+INTERNAL_TOKEN_ISSUER = "cornflow"
+
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
 STATUS_UNHEALTHY = "unhealthy"
@@ -71,20 +73,6 @@ AUTH_DB = 1
 AUTH_LDAP = 2
 AUTH_OAUTH = 4
 AUTH_OID = 0
-
-# Providers of open ID:
-OID_NONE = 0
-OID_AZURE = 1
-OID_GOOGLE = 2
-
-
-# AZURE OPEN ID URLS
-OID_AZURE_DISCOVERY_COMMON_URL = (
-    "https://login.microsoftonline.com/common/.well-known/openid-configuration"
-)
-OID_AZURE_DISCOVERY_TENANT_URL = (
-    "https://login.microsoftonline.com/{tenant_id}/.well-known/openid-configuration"
-)
 
 GET_ACTION = 1
 PATCH_ACTION = 2

@@ -54,7 +54,7 @@ class DAGTests(unittest.TestCase):
         self.assertEqual(apps, ALL_VARIABLES)
 
     def test_auto_scripts(self):
-        script_folder = os.path.join(os.path.dirname(__file__), "./data/auto_scripts/")
+        script_folder = os.path.join(os.path.dirname(__file__), "../data/auto_scripts/")
         destination_folder = script_folder
         results = execute_scripts(script_folder, destination_folder)
         self.assertTrue(results)

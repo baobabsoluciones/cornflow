@@ -10,3 +10,4 @@ openpyxl<=3.1.2
 pyomo<=6.7.0
 tsplib95<=0.7.1
 numpy<2.0.0
+highspy==1.9.0

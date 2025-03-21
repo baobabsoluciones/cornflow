@@ -28,17 +28,6 @@ class Experiment(ExperimentCore):
     def solution(self, value):
         self._solution = value
 
-    def check_solution(self, *args, **kwargs) -> dict:
-        return SuperDict(
-            availability=self.check_availability(),
-            restricted_flows=self.check_restricted_flows(),
-            demand=self.check_demand(),
-            second_doses=self.check_second_dose(),
-            warehouse_capacities=self.check_warehouse_capacity(),
-            consistency_warehouses=self.check_consistency_warehouses(),
-            consistency_suppliers=self.check_consistency_suppliers(),
-        )
-
     def check_availability(self):
         """Checks that the supplier don't supply more product than what they theoretically have"""
         availability_dict = self.instance.get_availability()

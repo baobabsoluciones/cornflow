@@ -59,8 +59,5 @@ class Instance(InstanceCore):
         )
         return tsp.models.StandardProblem(**dict_data)
 
-    def check(self):
-        return dict()
-
     def get_arcs(self) -> TupList:
         return self.data["arcs"]

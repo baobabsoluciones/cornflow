@@ -33,7 +33,7 @@ class TestLicensesListEndpoint(CustomTestCase):
                 follow_redirects=True,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + self.token,
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
 

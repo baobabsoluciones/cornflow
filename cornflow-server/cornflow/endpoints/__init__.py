@@ -3,8 +3,9 @@ Initialization file for the endpoints module
 All references to endpoints should be imported from here
 The login resource gets created on app startup as it depends on configuration
 """
+
 from .action import ActionListEndpoint
-from .alarms import AlarmsEndpoint
+from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
 from .case import (
     CaseEndpoint,
@@ -224,6 +225,11 @@ alarms_resources = [
         resource=AlarmsEndpoint,
         urls="/alarms/",
         endpoint="alarms",
+    ),
+    dict(
+        resource=AlarmDetailEndpoint,
+        urls="/alarms/<int:idx>/",
+        endpoint="alarms-detail",
     ),
     dict(
         resource=MainAlarmsEndpoint,
