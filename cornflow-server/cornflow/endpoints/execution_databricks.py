@@ -105,8 +105,17 @@ class ExecutionEndpoint(BaseMetaResource):
         ]
 
         for execution in running_executions:
-            dag_run_id = execution.run_id
-            if not dag_run_id:
+            run_id = execution.run_id
+            # Get the orchestrator type and the error class
+            ORQ_TYPE = current_app.config["CORNFLOW_BACKEND"]
+            if ORQ_TYPE == AIRFLOW_BACKEND:
+                orq_client = Airflow.from_config(current_app.config)
+                ORQ_ERROR = AirflowError
+            elif ORQ_TYPE == DATABRICKS_BACKEND:
+                orq_client = Databricks.from_config(current_app.config)
+                ORQ_ERROR = DatabricksError
+
+            if not run_id:
                 # it's safe to say we will never get anything if we did not store the dag_run_id
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
@@ -114,22 +123,20 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
                 continue
 
-            af_client = Airflow.from_config(current_app.config)
-            if not af_client.is_alive():
+            if not orq_client.is_alive():
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
                     "Airflow is not accessible."
                 )
                 continue
-
             try:
-                response = af_client.get_run_status(
-                    dag_name=execution.schema, dag_run_id=dag_run_id
+                response = orq_client.get_run_status(
+                    dag_name=execution.schema, dag_run_id=run_id
                 )
-            except AirflowError as err:
+            except ORQ_ERROR as err:
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
-                    f"Airflow responded with an error: {err}"
+                    f"Orchestrator responded with an error: {err}"
                 )
                 continue
 
