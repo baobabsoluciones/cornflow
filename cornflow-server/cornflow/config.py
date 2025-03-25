@@ -134,6 +134,9 @@ class Testing(DefaultConfig):
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
+class TestingDatabricks(Testing):
+    CORNFLOW_BACKEND = DATABRICKS_BACKEND
+
 
 class TestingOpenAuth(Testing):
     """
@@ -173,4 +176,5 @@ app_config = {
     "production": Production,
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
+    "testing-databricks" : TestingDatabricks
 }

@@ -6,6 +6,7 @@ Unit test for the executions endpoints
 import json
 from unittest.mock import patch
 
+from cornflow.app import create_app
 # Import from internal modules
 from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.tests.const import (
@@ -20,7 +21,7 @@ from cornflow.tests.const import (
     EXECUTION_SOLUTION_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
-from cornflow.tests.unit.tools import patch_af_client
+from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 
 
 class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
@@ -68,9 +69,28 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
 
         self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_new_execution_run_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
+
+        self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+
     @patch("cornflow.endpoints.execution_databricks.Airflow")
     def test_new_execution_bad_config(self, af_client_class):
         patch_af_client(af_client_class)
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.bad_payload,
+            expected_status=400,
+            check_payload=False,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_new_execution_bad_config_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
         response = self.create_new_row(
             EXECUTION_URL,
             self.model,
@@ -91,9 +111,30 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.assertIn("solver", response["config"])
         self.assertEqual(response["config"]["solver"], "cbc")
 
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_new_execution_partial_config_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
+        self.payload["config"].pop("solver")
+        response = self.create_new_row(
+            EXECUTION_URL, self.model, payload=self.payload, check_payload=False
+        )
+        self.assertIn("solver", response["config"])
+        self.assertEqual(response["config"]["solver"], "cbc")
+
     @patch("cornflow.endpoints.execution_databricks.Airflow")
     def test_new_execution_with_solution(self, af_client_class):
         patch_af_client(af_client_class)
+        self.payload["data"] = self.solution
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+        )
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_new_execution_with_solution_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
         self.payload["data"] = self.solution
         response = self.create_new_row(
             EXECUTION_URL,
@@ -106,6 +147,21 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
     def test_new_execution_with_solution_bad(self, af_client_class):
         patch_af_client(af_client_class)
         patch_af_client(af_client_class)
+        self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload,
+            check_payload=False,
+            expected_status=400,
+        )
+        self.assertIn("error", response)
+        self.assertIn("jsonschema_errors", response)
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_new_execution_with_solution_bad_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
+        patch_db_client(db_client_class)
         self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
         response = self.create_new_row(
             EXECUTION_URL,
@@ -196,6 +252,40 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
     @patch("cornflow.endpoints.execution_databricks.Airflow")
     def test_relaunch_execution_run(self, af_client_class):
         patch_af_client(af_client_class)
+
+        idx = self.create_new_row(self.url, self.model, payload=self.payload)
+
+        # Add solution checks to see if they are deleted correctly
+        token = self.create_service_user()
+        self.update_row(
+            url=DAG_URL + idx + "/",
+            payload_to_check=dict(),
+            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
+            token=token,
+            check_payload=False,
+        )
+
+        url = EXECUTION_URL + idx + "/relaunch/"
+        self.payload["config"]["warmStart"] = False
+        response = self.client.post(
+            url,
+            data=json.dumps({"config": self.payload["config"]}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(201, response.status_code)
+
+        url = EXECUTION_URL + idx + "/data"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        ).json
+
+        self.assertEqual(row["config"], self.payload["config"])
+        self.assertIsNone(row["checks"])
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_relaunch_execution_run_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
 
         idx = self.create_new_row(self.url, self.model, payload=self.payload)
 
@@ -373,7 +463,7 @@ class TestExecutionsDetailEndpoint(
         self.assertEqual(row.json["checks"], None)
 
     @patch("cornflow.endpoints.execution_databricks.Airflow")
-    def test_stop_execution(self, af_client_class):
+    def test_stop_execution_airflow(self, af_client_class):
         patch_af_client(af_client_class)
 
         idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
@@ -387,7 +477,124 @@ class TestExecutionsDetailEndpoint(
         self.assertEqual(200, response.status_code)
         self.assertEqual(response.json["message"], "The execution has been stopped")
 
+class TestExecutionsDetailEndpointDatabricks(TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint):
+    def setUp(self):
+        super().setUp()
+        self.url = self.url
+        self.query_arguments = {"run": 0}
+    def create_app(self):
+        app = create_app("testing-databricks")
+        return app
+    def test_incomplete_payload2(self):
+        payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
+        response = self.create_new_row(
+            self.url + "?run=0",
+            self.model,
+            payload,
+            expected_status=400,
+            check_payload=False,
+        )
 
+    def test_create_delete_instance_load(self):
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        keys_to_check = [
+            "message",
+            "id",
+            "schema",
+            "data_hash",
+            "config",
+            "instance_id",
+            "user_id",
+            "indicators",
+            "description",
+            "name",
+            "created_at",
+            "state",
+        ]
+        execution = self.get_one_row(
+            self.url + idx,
+            payload={**self.payload, **dict(id=idx)},
+            keys_to_check=keys_to_check,
+        )
+        self.delete_row(self.url + idx + "/")
+        keys_to_check = [
+            "id",
+            "schema",
+            "description",
+            "name",
+            "user_id",
+            "executions",
+            "created_at",
+            "data_hash",
+        ]
+        instance = self.get_one_row(
+            INSTANCE_URL + execution["instance_id"] + "/",
+            payload={},
+            expected_status=200,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        executions = [execution["id"] for execution in instance["executions"]]
+        self.assertFalse(idx in executions)
+
+    def test_delete_instance_deletes_execution(self):
+        # we create a new instance
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        payload = {**self.payload, **dict(instance_id=fk_id)}
+        # we create an execution for that instance
+        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
+        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
+        # we delete the new instance
+        self.delete_row(INSTANCE_URL + fk_id + "/")
+        # we check the execution does not exist
+        self.get_one_row(
+            self.url + idx, payload={}, expected_status=404, check_payload=False
+        )
+
+    def test_update_one_row_data(self):
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        payload["data"]["parameters"]["name"] = "NewName"
+
+        url = self.url + str(idx) + "/"
+        payload = {
+            **self.payload,
+            **dict(id=idx, name="new_name", data=payload["data"]),
+        }
+        self.update_row(
+            url,
+            dict(name="new_name", data=payload["data"]),
+            payload,
+        )
+
+        url += "data/"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(row.json["checks"], None)
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_stop_execution_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+
+        response = self.client.post(
+            self.url + str(idx) + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            response.json["message"], "This feature is not available for Databricks"
+        )
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
     def setUp(self):
         super().setUp()
@@ -495,9 +702,42 @@ class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["state"], 1)
 
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_get_one_status_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        keys_to_check = ["state", "message", "id", "data_hash"]
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/",
+            payload,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        self.assertEqual(data["state"], 1)
+
     @patch("cornflow.endpoints.execution_databricks.Airflow")
     def test_put_one_status(self, af_client_class):
         patch_af_client(af_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        response = self.client.put(
+            EXECUTION_URL + idx + "/status/",
+            data=json.dumps({"status": 0}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_put_one_status_databricks(self, db_client_class):
+        patch_db_client(db_client_class)
 
         idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
         payload = dict(self.payload)

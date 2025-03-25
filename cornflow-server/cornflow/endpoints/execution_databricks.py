@@ -321,6 +321,7 @@ class ExecutionEndpoint(BaseMetaResource):
 
         # if we succeed, we register the run_id in the execution table:
         orch_data = response.json()
+        print("orch data is ", orch_data)
         execution.run_id = orch_data[self.orch_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
