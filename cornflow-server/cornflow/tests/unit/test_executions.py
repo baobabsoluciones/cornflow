@@ -182,6 +182,10 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
             "indicators",
         ]
 
+    def create_app(self):
+        app = create_app("testing-databricks")
+        return app
+
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
 
@@ -492,7 +496,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         self.payload["instance_id"] = fk_id
 
 
-class TestExecutionsDetailEndpoint(
+class TestExecutionsDetailEndpointAirflow(
     TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
 ):
     def setUp(self):
@@ -500,103 +504,12 @@ class TestExecutionsDetailEndpoint(
         self.url = self.url
         self.query_arguments = {"run": 0}
 
-    # TODO: this test should be moved as it is not using the detail endpoint
-    def test_incomplete_payload2(self):
-        payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
-        response = self.create_new_row(
-            self.url + "?run=0",
-            self.model,
-            payload,
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_create_delete_instance_load(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        keys_to_check = [
-            "message",
-            "id",
-            "schema",
-            "data_hash",
-            "config",
-            "instance_id",
-            "user_id",
-            "indicators",
-            "description",
-            "name",
-            "created_at",
-            "state",
-        ]
-        execution = self.get_one_row(
-            self.url + idx,
-            payload={**self.payload, **dict(id=idx)},
-            keys_to_check=keys_to_check,
-        )
-        self.delete_row(self.url + idx + "/")
-        keys_to_check = [
-            "id",
-            "schema",
-            "description",
-            "name",
-            "user_id",
-            "executions",
-            "created_at",
-            "data_hash",
-        ]
-        instance = self.get_one_row(
-            INSTANCE_URL + execution["instance_id"] + "/",
-            payload={},
-            expected_status=200,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        executions = [execution["id"] for execution in instance["executions"]]
-        self.assertFalse(idx in executions)
-
-    def test_delete_instance_deletes_execution(self):
-        # we create a new instance
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        payload = {**self.payload, **dict(instance_id=fk_id)}
-        # we create an execution for that instance
-        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
-        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
-        # we delete the new instance
-        self.delete_row(INSTANCE_URL + fk_id + "/")
-        # we check the execution does not exist
-        self.get_one_row(
-            self.url + idx, payload={}, expected_status=404, check_payload=False
-        )
-
-    def test_update_one_row_data(self):
-        idx = self.create_new_row(
-            self.url_with_query_arguments(), self.model, self.payload
-        )
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        payload["data"]["parameters"]["name"] = "NewName"
-
-        url = self.url + str(idx) + "/"
-        payload = {
-            **self.payload,
-            **dict(id=idx, name="new_name", data=payload["data"]),
-        }
-        self.update_row(
-            url,
-            dict(name="new_name", data=payload["data"]),
-            payload,
-        )
-
-        url += "data/"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        )
-
-        self.assertEqual(row.json["checks"], None)
+    def create_app(self):
+        app = create_app("testing")  # configuración para Airflow
+        return app
 
     @patch("cornflow.endpoints.execution_databricks.Airflow")
-    def test_stop_execution_airflow(self, af_client_class):
+    def test_stop_execution(self, af_client_class):
         patch_af_client(af_client_class)
 
         idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
@@ -623,102 +536,8 @@ class TestExecutionsDetailEndpointDatabricks(
         app = create_app("testing-databricks")
         return app
 
-    def test_incomplete_payload2(self):
-        payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
-        response = self.create_new_row(
-            self.url + "?run=0",
-            self.model,
-            payload,
-            expected_status=400,
-            check_payload=False,
-        )
-
-    def test_create_delete_instance_load(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        keys_to_check = [
-            "message",
-            "id",
-            "schema",
-            "data_hash",
-            "config",
-            "instance_id",
-            "user_id",
-            "indicators",
-            "description",
-            "name",
-            "created_at",
-            "state",
-        ]
-        execution = self.get_one_row(
-            self.url + idx,
-            payload={**self.payload, **dict(id=idx)},
-            keys_to_check=keys_to_check,
-        )
-        self.delete_row(self.url + idx + "/")
-        keys_to_check = [
-            "id",
-            "schema",
-            "description",
-            "name",
-            "user_id",
-            "executions",
-            "created_at",
-            "data_hash",
-        ]
-        instance = self.get_one_row(
-            INSTANCE_URL + execution["instance_id"] + "/",
-            payload={},
-            expected_status=200,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        executions = [execution["id"] for execution in instance["executions"]]
-        self.assertFalse(idx in executions)
-
-    def test_delete_instance_deletes_execution(self):
-        # we create a new instance
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        payload = {**self.payload, **dict(instance_id=fk_id)}
-        # we create an execution for that instance
-        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
-        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
-        # we delete the new instance
-        self.delete_row(INSTANCE_URL + fk_id + "/")
-        # we check the execution does not exist
-        self.get_one_row(
-            self.url + idx, payload={}, expected_status=404, check_payload=False
-        )
-
-    def test_update_one_row_data(self):
-        idx = self.create_new_row(
-            self.url_with_query_arguments(), self.model, self.payload
-        )
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        payload["data"]["parameters"]["name"] = "NewName"
-
-        url = self.url + str(idx) + "/"
-        payload = {
-            **self.payload,
-            **dict(id=idx, name="new_name", data=payload["data"]),
-        }
-        self.update_row(
-            url,
-            dict(name="new_name", data=payload["data"]),
-            payload,
-        )
-
-        url += "data/"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        )
-
-        self.assertEqual(row.json["checks"], None)
-
     @patch("cornflow.endpoints.execution_databricks.Databricks")
-    def test_stop_execution_databricks(self, db_client_class):
+    def test_stop_execution(self, db_client_class):
         patch_db_client(db_client_class)
 
         idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
@@ -733,6 +552,93 @@ class TestExecutionsDetailEndpointDatabricks(
         self.assertEqual(
             response.json["message"], "This feature is not available for Databricks"
         )
+
+
+class TestExecutionsStatusEndpointAirflow(TestExecutionsDetailEndpointMock):
+    def setUp(self):
+        super().setUp()
+        self.response_items = {"id", "name", "status"}
+        self.items_to_check = []
+
+    def create_app(self):
+        app = create_app("testing")
+        return app
+
+    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    def test_get_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        keys_to_check = ["state", "message", "id", "data_hash"]
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/",
+            payload,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        self.assertEqual(data["state"], 1)
+
+    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    def test_put_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        response = self.client.put(
+            EXECUTION_URL + idx + "/status/",
+            data=json.dumps({"status": 0}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
+
+
+class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
+    def setUp(self):
+        super().setUp()
+        self.response_items = {"id", "name", "status"}
+        self.items_to_check = []
+
+    def create_app(self):
+        app = create_app("testing-databricks")
+        return app
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_get_one_status(self, db_client_class):
+        patch_db_client(db_client_class)
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        keys_to_check = ["state", "message", "id", "data_hash"]
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/",
+            payload,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        self.assertEqual(data["state"], 1)
+
+    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    def test_put_one_status(self, db_client_class):
+        patch_db_client(db_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        response = self.client.put(
+            EXECUTION_URL + idx + "/status/",
+            data=json.dumps({"status": 0}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
 
 class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
@@ -911,90 +817,6 @@ class TestExecutionsLogEndpointDatabricks(TestExecutionsDetailEndpointMock):
             token=token,
             keys_to_check=self.keys_to_check,
         )
-
-
-class TestExecutionsStatusEndpoint(TestExecutionsDetailEndpointMock):
-    def setUp(self):
-        super().setUp()
-        self.response_items = {"id", "name", "status"}
-        self.items_to_check = []
-
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
-    def test_get_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        keys_to_check = ["state", "message", "id", "data_hash"]
-        data = self.get_one_row(
-            EXECUTION_URL + idx + "/status/",
-            payload,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertEqual(data["state"], 1)
-
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
-    def test_put_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        response = self.client.put(
-            EXECUTION_URL + idx + "/status/",
-            data=json.dumps({"status": 0}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
-
-
-class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
-    def setUp(self):
-        super().setUp()
-        self.response_items = {"id", "name", "status"}
-        self.items_to_check = []
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
-
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
-    def test_get_one_status_databricks(self, db_client_class):
-        patch_db_client(db_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        keys_to_check = ["state", "message", "id", "data_hash"]
-        data = self.get_one_row(
-            EXECUTION_URL + idx + "/status/",
-            payload,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertEqual(data["state"], 1)
-
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
-    def test_put_one_status_databricks(self, db_client_class):
-        patch_db_client(db_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        response = self.client.put(
-            EXECUTION_URL + idx + "/status/",
-            data=json.dumps({"status": 0}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
 
 class TestExecutionsModel(TestExecutionsDetailEndpointMock):

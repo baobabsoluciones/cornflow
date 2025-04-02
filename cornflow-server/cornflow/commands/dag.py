@@ -80,7 +80,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
-        dags = ["solve_model_dag", "gc", "timer"]
+        dags = ["solve_model_dag", "gc", "timer", "979073949072767" ]
 
     deployed_dag = [
         DeployedOrch(
