@@ -92,7 +92,8 @@ class Databricks:
         # TODO AGA: revisar si deben ser notebook parameters o job parameters.
         #   Entender cómo se usa checks_only
         payload = dict(
-            job_id=orch_name, notebook_parameters=dict(checks_only=checks_only)
+            job_id=orch_name,
+            job_parameters=dict(checks_only=checks_only, execution_id=execution_id),
         )
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
