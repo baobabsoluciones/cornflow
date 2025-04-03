@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 # Full imports
 import json
@@ -91,11 +89,11 @@ class Airflow(object):
             dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
         )
 
-    def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
+    def set_dag_run_to_fail(self, dag_name, run_id, new_status="failed"):
         # here, two calls have to be done:
         # first we get information on the dag_run
         dag_run = self.consume_dag_run(
-            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+            dag_name, payload=None, dag_run_id=run_id, method="GET"
         )
         dag_run_data = dag_run.json()
         # then, we use the "executed_date" to build a call to the change state api
