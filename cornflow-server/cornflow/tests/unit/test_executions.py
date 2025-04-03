@@ -64,13 +64,13 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_run(self, af_client_class):
         patch_af_client(af_client_class)
 
         self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_bad_config(self, af_client_class):
         patch_af_client(af_client_class)
         response = self.create_new_row(
@@ -83,7 +83,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.assertIn("error", response)
         self.assertIn("jsonschema_errors", response)
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_partial_config(self, af_client_class):
         patch_af_client(af_client_class)
         self.payload["config"].pop("solver")
@@ -93,7 +93,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.assertIn("solver", response["config"])
         self.assertEqual(response["config"]["solver"], "cbc")
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_with_solution(self, af_client_class):
         patch_af_client(af_client_class)
         self.payload["data"] = self.solution
@@ -104,7 +104,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             check_payload=False,
         )
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_with_solution_bad(self, af_client_class):
         patch_af_client(af_client_class)
         patch_af_client(af_client_class)
@@ -189,13 +189,13 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_run_databricks(self, db_client_class):
         patch_db_client(db_client_class)
 
         self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_bad_config(self, db_client_class):
         patch_db_client(db_client_class)
         response = self.create_new_row(
@@ -208,7 +208,7 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
         self.assertIn("error", response)
         self.assertIn("jsonschema_errors", response)
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_partial_config(self, db_client_class):
         patch_db_client(db_client_class)
         self.payload["config"].pop("solver")
@@ -218,7 +218,7 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
         self.assertIn("solver", response["config"])
         self.assertEqual(response["config"]["solver"], "cbc")
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_with_solution(self, db_client_class):
         patch_db_client(db_client_class)
         self.payload["data"] = self.solution
@@ -229,7 +229,7 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
             check_payload=False,
         )
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_with_solution_bad(self, db_client_class):
         patch_db_client(db_client_class)
         patch_db_client(db_client_class)
@@ -320,7 +320,7 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.assertEqual(row["config"], self.payload["config"])
         self.assertIsNone(row["checks"])
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_relaunch_execution_run(self, af_client_class):
         patch_af_client(af_client_class)
 
@@ -420,7 +420,7 @@ class TestExecutionRelaunchEndpointDatabricks(CustomTestCase):
         self.assertEqual(row["config"], self.payload["config"])
         self.assertIsNone(row["checks"])
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_relaunch_execution_run(self, db_client_class):
         patch_db_client(db_client_class)
 
@@ -508,7 +508,7 @@ class TestExecutionsDetailEndpointAirflow(
         app = create_app("testing")  # configuración para Airflow
         return app
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_stop_execution(self, af_client_class):
         patch_af_client(af_client_class)
 
@@ -536,7 +536,7 @@ class TestExecutionsDetailEndpointDatabricks(
         app = create_app("testing-databricks")
         return app
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_stop_execution(self, db_client_class):
         patch_db_client(db_client_class)
 
@@ -564,7 +564,7 @@ class TestExecutionsStatusEndpointAirflow(TestExecutionsDetailEndpointMock):
         app = create_app("testing")
         return app
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_get_one_status(self, af_client_class):
         patch_af_client(af_client_class)
 
@@ -580,7 +580,7 @@ class TestExecutionsStatusEndpointAirflow(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["state"], 1)
 
-    @patch("cornflow.endpoints.execution_databricks.Airflow")
+    @patch("cornflow.endpoints.execution.Airflow")
     def test_put_one_status(self, af_client_class):
         patch_af_client(af_client_class)
 
@@ -608,7 +608,7 @@ class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
         app = create_app("testing-databricks")
         return app
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_get_one_status(self, db_client_class):
         patch_db_client(db_client_class)
         idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
@@ -623,7 +623,7 @@ class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
         )
         self.assertEqual(data["state"], -1)
 
-    @patch("cornflow.endpoints.execution_databricks.Databricks")
+    @patch("cornflow.endpoints.execution.Databricks")
     def test_put_one_status(self, db_client_class):
         patch_db_client(db_client_class)
 
