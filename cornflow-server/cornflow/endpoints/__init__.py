@@ -30,7 +30,7 @@ from .data_check import (
     DataCheckCaseEndpoint,
 )
 from .example_data import ExampleDataListEndpoint, ExampleDataDetailEndpoint
-from .execution_databricks import (
+from .execution import (
     ExecutionEndpoint,
     ExecutionDetailsEndpoint,
     ExecutionStatusEndpoint,

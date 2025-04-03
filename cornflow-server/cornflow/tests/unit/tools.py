@@ -14,7 +14,7 @@ def create_test_app():
 
 def patch_af_client(af_client_class):
     with patch(
-        "cornflow.endpoints.execution_databricks.current_app.config"
+        "cornflow.endpoints.execution.current_app.config"
     ) as mock_config:
         mock_config.__getitem__.side_effect = lambda key: (
             1 if key == "CORNFLOW_BACKEND" else {}
@@ -38,7 +38,7 @@ def patch_db_client(db_client_class):
     mock_config = {"CORNFLOW_BACKEND": 2}
 
     with patch(
-        "cornflow.endpoints.execution_databricks.current_app.config", mock_config
+        "cornflow.endpoints.execution.current_app.config", mock_config
     ):
         db_client_mock = Mock()
         responses_mock = Mock()
