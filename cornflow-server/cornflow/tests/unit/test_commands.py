@@ -381,8 +381,8 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
 
-        self.assertEqual(3, len(service_permissions))
-        self.assertEqual(3, len(admin_permissions))
+        self.assertEqual(4, len(service_permissions))
+        self.assertEqual(4, len(admin_permissions))
 
     def test_dag_permissions_command_no_open(self):
         """
@@ -405,7 +405,7 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
 
-        self.assertEqual(3, len(service_permissions))
+        self.assertEqual(4, len(service_permissions))
         self.assertEqual(0, len(admin_permissions))
 
     def test_argument_parsing_correct(self):
