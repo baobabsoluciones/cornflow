@@ -68,9 +68,9 @@ def patch_db_client(db_client_class):
                     response_get_run_status.json.return_value["status"]["termination_details"]["code"]
                     in DATABRICKS_FINISH_TO_STATE_MAP.keys()
             ):
-                response_get_run_status.json.return_value = response_get_run_status.json.return_value["status"]["termination_details"]["code"]
+                response_get_run_status = response_get_run_status.json.return_value["status"]["termination_details"]["code"]
             else:
-                response_get_run_status.json.return_value = "OTHER_FINISH_ERROR"
+                response_get_run_status = "OTHER_FINISH_ERROR"
         db_client_mock.is_alive.return_value = True
         db_client_mock.get_orch_info.return_value = response_get_orch_info
         db_client_mock.run_workflow.return_value = response_run_workflow

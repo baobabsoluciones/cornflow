@@ -621,7 +621,7 @@ class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
             check_payload=False,
             keys_to_check=keys_to_check,
         )
-        self.assertEqual(data["state"], 1)
+        self.assertEqual(data["state"], -1)
 
     @patch("cornflow.endpoints.execution_databricks.Databricks")
     def test_put_one_status(self, db_client_class):
