@@ -1,3 +1,22 @@
+version 1.2.0
+--------------
+
+- released: 2025-03-12
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - small fixes to documentation
+    - refactored test so that they do not return anything.
+    - default DAG update_dag_registry skips deleted apps.
+    - fixed error when no data was passed on `Instance` creation.
+    - fixed some filtering errors when using `offset`.
+    - changed `datetime.utcnow()` to `datetime.now(timezone.utc)` to avoid future deprecation.
+    - revamped OpenID authentication.
+    - added `issuer` field for token authentication.
+    - added `downgrade` command for migrations.
+    - allowed commands to be run from inside docker container.
+    - added `disable_detail` method on `BaseMetaResource`.
+
+
 version 1.1.5
 --------------
 
