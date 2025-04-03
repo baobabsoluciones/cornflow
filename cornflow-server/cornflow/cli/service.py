@@ -24,6 +24,8 @@ from cornflow.shared.const import (
     ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
+    DATABRICKS_BACKEND,
+    AIRFLOW_BACKEND,
 )
 from cornflow.shared import db
 from cryptography.fernet import Fernet
@@ -45,14 +47,32 @@ def init_cornflow_service():
     ###################################
     # Global defaults and back-compat #
     ###################################
+    # cornflow backend selection
+    cornflow_backend = os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND)
+    os.environ["CORNFLOW_BACKEND"] = cornflow_backend
+    cornflow_backend = int(cornflow_backend)
     # Airflow global default conn
-    airflow_user = os.getenv("AIRFLOW_USER", "admin")
-    airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
-    airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
-    cornflow_url = os.environ.setdefault("cornflow_url", "http://cornflow:5000")
-    os.environ["AIRFLOW_USER"] = airflow_user
-    os.environ["AIRFLOW_PWD"] = airflow_pwd
-    os.environ["AIRFLOW_URL"] = airflow_url
+    if cornflow_backend == AIRFLOW_BACKEND:
+        airflow_user = os.getenv("AIRFLOW_USER", "admin")
+        airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
+        airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
+        os.environ["AIRFLOW_USER"] = airflow_user
+        os.environ["AIRFLOW_PWD"] = airflow_pwd
+        os.environ["AIRFLOW_URL"] = airflow_url
+    elif cornflow_backend == DATABRICKS_BACKEND:
+        databricks_url = os.getenv("DATABRICKS_HOST")
+        databricks_auth_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+        databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+        databricks_ep_clusters = os.getenv("DATABRICKS_EP_CLUSTERS")
+        databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")
+        os.environ["DATABRICKS_HOST"] = databricks_url
+        os.environ["DATABRICKS_CLIENT_SECRET"] = databricks_auth_secret
+        os.environ["DATABRICKS_TOKEN_ENDPOINT"] = databricks_token_endpoint
+        os.environ["DATABRICKS_EP_CLUSTERS"] = databricks_ep_clusters
+        os.environ["DATABRICKS_CLIENT_ID"] = databricks_client_id
+    else:
+        raise Exception("Selected backend not among valid options")
+
     os.environ["FLASK_APP"] = "cornflow.app"
     os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
 
@@ -112,10 +132,10 @@ def init_cornflow_service():
                 f"cat > /etc/logrotate.d/cornflow <<EOF\n {conf} \nEOF", shell=True
             )
             out_logrotate = logrotate.stdout
-            print(out_logrotate)
+            click.echo(out_logrotate)
 
         except error:
-            print(error)
+            click.echo(error)
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     if external_application == 0:
@@ -152,11 +172,17 @@ def init_cornflow_service():
                     SERVICE_ROLE,
                     verbose=True,
                 )
-            register_deployed_dags_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
-            register_dag_permissions_command(open_deployment, verbose=True)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
+
+            if cornflow_backend == AIRFLOW_BACKEND:
+                register_deployed_dags_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+                register_dag_permissions_command(open_deployment, verbose=True)
+                update_schemas_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+            else:
+                register_dag_permissions_command(open_deployment, verbose=True)
 
         # execute gunicorn application
         os.system(
@@ -209,14 +235,24 @@ def init_cornflow_service():
                     SERVICE_ROLE,
                     verbose=True,
                 )
-            register_deployed_dags_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
-            register_dag_permissions_command(open_deployment, verbose=True)
-            update_schemas_command(airflow_url, airflow_user, airflow_pwd, verbose=True)
-            update_dag_registry_command(
-                airflow_url, airflow_user, airflow_pwd, verbose=True
-            )
+
+            click.echo(f"Selected backend is: {cornflow_backend}")
+            if cornflow_backend == AIRFLOW_BACKEND:
+                register_deployed_dags_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+
+                register_dag_permissions_command(open_deployment, verbose=True)
+                update_schemas_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+                update_dag_registry_command(
+                    airflow_url, airflow_user, airflow_pwd, verbose=True
+                )
+            elif cornflow_backend == DATABRICKS_BACKEND:
+                register_dag_permissions_command(open_deployment, verbose=True)
+            else:
+                raise Exception("Selected backend not among valid options")
 
         os.system(
             f"/usr/local/bin/gunicorn -c python:cornflow.gunicorn "

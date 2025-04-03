@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 # Full imports
 import json
@@ -12,12 +10,14 @@ from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
 from cornflow_client.constants import AirflowError
+from cornflow_client.orchestrator_constants import config_orchestrator
 
 
 class Airflow(object):
     def __init__(self, url, user, pwd):
         self.url = f"{url}/api/v1"
         self.auth = HTTPBasicAuth(user, pwd)
+        self.constants = config_orchestrator["airflow"]
 
     @classmethod
     def from_config(cls, config):
@@ -65,14 +65,18 @@ class Airflow(object):
         url = f"{self.url}/dags/{dag_name}/updateTaskInstancesState"
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
-    def run_dag(
-        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+    def run_workflow(
+        self,
+        execution_id,
+        orch_name=config_orchestrator["airflow"]["def_schema"],
+        checks_only=False,
+        case_id=None,
     ):
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
-        return self.consume_dag_run(dag_name, payload=payload, method="POST")
+        return self.consume_dag_run(orch_name, payload=payload, method="POST")
 
     def update_schemas(self, dag_name="update_all_schemas"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
@@ -80,16 +84,16 @@ class Airflow(object):
     def update_dag_registry(self, dag_name="update_dag_registry"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
-    def get_dag_run_status(self, dag_name, dag_run_id):
+    def get_run_status(self, dag_name, dag_run_id):
         return self.consume_dag_run(
             dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
         )
 
-    def set_dag_run_to_fail(self, dag_name, dag_run_id, new_status="failed"):
+    def set_dag_run_to_fail(self, dag_name, run_id, new_status="failed"):
         # here, two calls have to be done:
         # first we get information on the dag_run
         dag_run = self.consume_dag_run(
-            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+            dag_name, payload=None, dag_run_id=run_id, method="GET"
         )
         dag_run_data = dag_run.json()
         # then, we use the "executed_date" to build a call to the change state api
@@ -109,9 +113,12 @@ class Airflow(object):
     def get_all_dag_runs(self, dag_name):
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
-    def get_dag_info(self, dag_name, method="GET"):
-        url = f"{self.url}/dags/{dag_name}"
-        return self.request_headers_auth(method=method, url=url)
+    def get_orch_info(self, orch_name, method="GET"):
+        url = f"{self.url}/dags/{orch_name}"
+        schema_info = self.request_headers_auth(method=method, url=url)
+        if schema_info.status_code != 200:
+            raise AirflowError("DAG not available")
+        return schema_info
 
     def get_one_variable(self, variable):
         url = f"{self.url}/variables/{variable}"

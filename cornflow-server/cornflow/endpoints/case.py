@@ -16,7 +16,7 @@ import jsonpatch
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import CaseModel, ExecutionModel, DeployedDAG, InstanceModel
+from cornflow.models import CaseModel, ExecutionModel, DeployedOrch, InstanceModel
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
@@ -79,14 +79,14 @@ class CaseEndpoint(BaseMetaResource):
 
         # We validate the instance data if it exists
         if kwargs.get("data") is not None:
-            data_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            data_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
             data_errors = json_schema_validate_as_string(data_schema, kwargs["data"])
             if data_errors:
                 raise InvalidData(payload=dict(jsonschema_errors=data_errors))
 
         # And the solution data if it exists
         if kwargs.get("solution") is not None:
-            solution_schema = DeployedDAG.get_one_schema(config, schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedOrch.get_one_schema(config, schema, SOLUTION_SCHEMA)
             solution_errors = json_schema_validate_as_string(solution_schema, kwargs["solution"])
             if solution_errors:
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
@@ -383,7 +383,7 @@ class CaseToInstance(BaseMetaResource):
         config = current_app.config
 
         # Data validation
-        jsonschema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        jsonschema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
         data_errors = json_schema_validate_as_string(jsonschema, payload["data"])
         if data_errors:
             raise InvalidData(

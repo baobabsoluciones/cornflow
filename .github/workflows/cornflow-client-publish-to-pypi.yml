@@ -48,4 +48,3 @@ jobs:
         channel-id: ${{ secrets.SLACK_CHANNEL }}
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-

@@ -1,0 +1,144 @@
+{
+    "job_id": 168474305719382,
+    "creator_user_name": "david.ampuero@baobabsoluciones.es",
+    "run_as_user_name": "david.ampuero@baobabsoluciones.es",
+    "run_as_owner": false,
+    "settings": {
+        "name": "Villaverde_Production_Scheduling",
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "timeout_seconds": 0,
+        "max_concurrent_runs": 1,
+        "tasks": [
+            {
+                "task_key": "run_optimization",
+                "run_if": "ALL_SUCCESS",
+                "spark_python_task": {
+                    "python_file": "/Workspace/Users/david.ampuero@baobabsoluciones.es/.bundle/production_scheduling_model/default/files/production_scheduling_jobs.py",
+                    "parameters": [
+                        "/FileStore/shared_uploads/solution.json"
+                    ],
+                    "source": "WORKSPACE"
+                },
+                "new_cluster": {
+                    "spark_version": "15.4.x-scala2.12",
+                    "spark_conf": {
+                        "spark.databricks.cluster.profile": "singleNode",
+                        "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true",
+                        "spark.master": "local[*]"
+                    },
+                    "azure_attributes": {
+                        "availability": "ON_DEMAND_AZURE"
+                    },
+                    "node_type_id": "Standard_DS3_v2",
+                    "custom_tags": {
+                        "ResourceClass": "SingleNode"
+                    },
+                    "spark_env_vars": {
+                        "UC_CORNFLOW_SCHEMA": "public",
+                        "DATABRICKS_HOST": "https://adb-3109346743730783.3.azuredatabricks.net",
+                        "UC_DATABRICKS": "true",
+                        "GRB_LICENSE_FILE": "/dbfs/FileStore/tables/gurobi.lic",
+                        "UC_CORNFLOW_CATALOG": "unitycatalog",
+                        "DATABRICKS_TOKEN": "{{secrets/databricks/token}}"
+                    },
+                    "enable_elastic_disk": true,
+                    "docker_image": {
+                        "url": "baobabsoluciones/dbs:latest"
+                    },
+                    "data_security_mode": "SINGLE_USER",
+                    "num_workers": 0
+                },
+                "libraries": [
+                    {
+                        "pypi": {
+                            "package": "databricks-sdk"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "cornflow-client"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "et-xmlfile==1.1.0"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "mango==0.2.1"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "numpy<=1.26.0"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "openpyxl==3.1.2"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "pandas==2.1.1"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "python-dateutil==2.8.2"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "pytups==0.86.2"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "pytz==2023.3.post1"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "six==1.16.0"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "tzdata==2023.3"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "plotly>=5.17"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "pyomo==6.6.2"
+                        }
+                    },
+                    {
+                        "pypi": {
+                            "package": "highspy>=1.7.1"
+                        }
+                    }
+                ],
+                "timeout_seconds": 0,
+                "email_notifications": {}
+            }
+        ],
+        "format": "MULTI_TASK",
+        "queue": {
+            "enabled": true
+        },
+        "edit_mode": "UI_LOCKED",
+        "deployment": {
+            "kind": "BUNDLE",
+            "metadata_file_path": "/Workspace/Users/david.ampuero@baobabsoluciones.es/.bundle/production_scheduling_model/default/state/metadata.json"
+        }
+    },
+    "created_time": 1742484698423
+}
