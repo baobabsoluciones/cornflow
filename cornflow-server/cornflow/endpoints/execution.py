@@ -636,6 +636,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         response = self.orch_client.set_dag_run_to_fail(
             dag_name=execution.schema, run_id=execution.run_id
         )
+        # We should check if the execution has been stopped
         execution.update_state(EXEC_STATE_STOPPED)
         current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
         return {"message": "The execution has been stopped"}, 200
