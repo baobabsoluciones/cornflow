@@ -147,8 +147,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-server.xml
-          path: coverage-server.xml
+          path: cornflow-server/coverage-server.xml
           retention-days: 1
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: server-tests
+          token: ${{secrets.CODECOV_TOKEN}}
 
   dag-tests:
     name: Run all test suites on cornflow-dags
@@ -218,8 +223,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-dags.xml
-          path: coverage-dags.xml
+          path: cornflow-dags/coverage-dags.xml
           retention-days: 1
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: dags-tests
+          token: ${{secrets.CODECOV_TOKEN}}
 
   client-tests:
     name: Run all test suites on cornflow-client
@@ -319,8 +329,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-client.xml
-          path: coverage-client.xml
+          path: libs/client/coverage-client.xml
           retention-days: 1
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: client-tests
+          token: ${{secrets.CODECOV_TOKEN}}
 
   sonarqube:
     needs: [server-tests, client-tests, dag-tests]
