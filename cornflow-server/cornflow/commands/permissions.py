@@ -1,6 +1,6 @@
 import sys
 from importlib import import_module
-
+import click
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
@@ -14,13 +14,22 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     if external_app is None:
         from cornflow.endpoints import resources, alarms_resources
+
         resources_to_register = resources
+        extra_permissions = EXTRA_PERMISSION_ASSIGNATION
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources
     elif external_app is not None:
         sys.path.append("./")
         external_module = import_module(external_app)
         resources_to_register = external_module.endpoints.resources
+        try:
+            extra_permissions = (
+                EXTRA_PERMISSION_ASSIGNATION
+                + external_module.shared.const.EXTRA_PERMISSION_ASSIGNATION
+            )
+        except AttributeError:
+            extra_permissions = EXTRA_PERMISSION_ASSIGNATION
     else:
         resources_to_register = []
         exit()
@@ -52,7 +61,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
                 "api_view_id": views_in_db[endpoint],
             }
         )
-        for role, action, endpoint in EXTRA_PERMISSION_ASSIGNATION
+        for role, action, endpoint in extra_permissions
     ]
 
     permissions_in_app_keys = [
@@ -128,7 +137,7 @@ def register_dag_permissions_command(
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
+    from cornflow.models import DeployedOrch, PermissionsDAG, UserModel
     from cornflow.shared import db
 
     if open_deployment is None:
@@ -146,9 +155,10 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users().all()
-    all_dags = DeployedDAG.get_all_objects().all()
+    all_dags = DeployedOrch.get_all_objects().all()
 
     if open_deployment == 1:
+
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users
@@ -190,9 +200,10 @@ def register_dag_permissions_command(
             )
 
     if verbose:
+        click.echo(f"DAG permissions registered")
         if len(permissions) > 1:
             current_app.logger.info(f"DAG permissions registered: {permissions}")
         else:
             current_app.logger.info("No new DAG permissions")
-
+    
     pass

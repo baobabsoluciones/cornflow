@@ -2,6 +2,7 @@ import os
 from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
+from cornflow.shared.const import AIRFLOW_BACKEND, DATABRICKS_BACKEND
 
 
 class DefaultConfig(object):
@@ -15,9 +16,7 @@ class DefaultConfig(object):
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
-    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
-    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
-    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
@@ -27,6 +26,21 @@ class DefaultConfig(object):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
+
+    # To change the tasks backend used by cornflow to solve the optimization models
+    CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
+
+    # AIRFLOW config
+    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
+    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
+    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
+    # DATABRICKS config
+    DATABRICKS_URL = os.getenv("DATABRICKS_HOST")
+    DATABRICKS_AUTH_SECRET = os.getenv("DATABRICKS_CLIENT_SECRET")
+    DATABRICKS_TOKEN_ENDPOINT = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+    DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
+    DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
 
     # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
@@ -120,11 +134,15 @@ class Testing(DefaultConfig):
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
+class TestingDatabricks(Testing):
+    CORNFLOW_BACKEND = DATABRICKS_BACKEND
+
 
 class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
     """
+
     AUTH_TYPE = AUTH_OID
     OID_PROVIDER = "https://test-provider.example.com"
     OID_EXPECTED_AUDIENCE = "test-audience-id"
@@ -157,5 +175,6 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
-    "testing-root": TestingApplicationRoot
+    "testing-root": TestingApplicationRoot,
+    "testing-databricks" : TestingDatabricks
 }

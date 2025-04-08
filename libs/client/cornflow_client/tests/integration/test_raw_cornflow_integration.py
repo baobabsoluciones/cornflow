@@ -76,7 +76,7 @@ class TestRawCornflowClientUser(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["cornflow_status"], "healthy")
-        self.assertEqual(data["airflow_status"], "healthy")
+        self.assertEqual(data["backend_status"], "healthy")
 
     def test_sign_up(self):
         response = self.client.raw.sign_up(

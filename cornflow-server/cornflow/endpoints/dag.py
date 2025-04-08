@@ -9,7 +9,7 @@ from flask_apispec import use_kwargs, doc, marshal_with
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
+from cornflow.models import DeployedOrch, ExecutionModel, InstanceModel, CaseModel
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from cornflow.schemas.case import CaseCheckRequest
 from cornflow.schemas.instance import InstanceCheckRequest
@@ -111,7 +111,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         if solution_schema is not None:
             config = current_app.config
 
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedOrch.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
@@ -215,7 +215,7 @@ class DAGEndpointManual(BaseMetaResource):
             solution_schema = "solve_model_dag"
         if solution_schema is not None:
             config = current_app.config
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedOrch.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
@@ -244,7 +244,7 @@ class DeployedDAGEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = DeployedDAG
+        self.data_model = DeployedOrch
 
     @doc(
         description="Get list of deployed dags registered on the data base",
@@ -268,7 +268,7 @@ class DeployedDagDetailEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = DeployedDAG
+        self.data_model = DeployedOrch
 
     @doc(
         description="Endpoint to update the schemas of a deployed DAG",

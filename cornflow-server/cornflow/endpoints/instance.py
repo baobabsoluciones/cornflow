@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, DeployedDAG
+from cornflow.models import InstanceModel, DeployedOrch
 from cornflow.schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
@@ -92,7 +92,7 @@ class InstanceEndpoint(BaseMetaResource):
         # We validate the instance data
         config = current_app.config
 
-        instance_schema = DeployedDAG.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
+        instance_schema = DeployedOrch.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
         instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
 
         if instance_errors:
@@ -163,7 +163,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
             config = current_app.config
 
-            instance_schema = DeployedDAG.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            instance_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
             instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
 
             if instance_errors:
