@@ -1,12 +1,12 @@
 """
 This file has several validators
 """
+
 import re
 from typing import Tuple, Union
 
 from jsonschema import Draft7Validator, validators
 from disposable_email_domains import blocklist
-from jsonschema.protocols import Validator
 
 
 def is_special_character(character):

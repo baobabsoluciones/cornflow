@@ -8,6 +8,10 @@ from .utils import get_app
 
 @click.group(name="views", help="Commands to manage the views")
 def views():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

@@ -274,7 +274,6 @@ class TestExecutionsDetailEndpoint(
 ):
     def setUp(self):
         super().setUp()
-        self.url = self.url
         self.query_arguments = {"run": 0}
 
     # TODO: this test should be moved as it is not using the detail endpoint
