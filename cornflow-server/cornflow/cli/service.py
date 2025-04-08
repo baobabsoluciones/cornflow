@@ -48,7 +48,7 @@ def init_cornflow_service():
     # Global defaults and back-compat #
     ###################################
     # cornflow backend selection
-    cornflow_backend = os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND)
+    cornflow_backend = os.getenv("CORNFLOW_BACKEND", str(AIRFLOW_BACKEND))
     os.environ["CORNFLOW_BACKEND"] = cornflow_backend
     cornflow_backend = int(cornflow_backend)
     # Airflow global default conn
