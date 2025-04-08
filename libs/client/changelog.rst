@@ -1,3 +1,13 @@
+version 1.2.1
+--------------
+
+- released: 2025-04-03
+- description: security update
+- changelog:
+    - updated gunicorn version to 23.0.0
+    - updated cryptography version to 44.0.1
+
+
 version 1.2.0
 --------------
 
