@@ -14,6 +14,10 @@ from cornflow.shared.exceptions import (
 
 @click.group(name="users", help="Commands to manage the users")
 def users():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

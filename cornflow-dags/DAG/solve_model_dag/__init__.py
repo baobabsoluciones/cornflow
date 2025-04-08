@@ -128,7 +128,7 @@ class PuLP(ApplicationCore):
                 log_dict = ol.get_info_solver(
                     path=log, solver=solver_name, get_progress=True, content=True
                 )
-            except:
+            except ValueError:
                 # we keep the original log from the solve function
                 log_dict = simple_log
             else:
@@ -138,7 +138,7 @@ class PuLP(ApplicationCore):
 
         try:
             os.remove(log_path)
-        except:
+        except FileNotFoundError:
             pass
 
         return solution, {}, {}, log, log_dict

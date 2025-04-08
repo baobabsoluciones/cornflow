@@ -20,14 +20,14 @@ def install():
     ####################
 
     try:
-
+        mips_path = "/usr/local/bin/mps_mipcl"
         MIPCL = git.Repo.clone_from("https://github.com/onebitbrain/MIPCL", "MIPCL")
         os.chdir(f"{MIPCL.working_dir}/bin")
-        subprocess.check_output(["cp", "mps_mipcl", "/usr/local/bin/mps_mipcl"])
-        subprocess.check_output(["chmod", "+x", "/usr/local/bin/mps_mipcl"])
+        subprocess.check_output(["cp", "mps_mipcl", mips_path])
+        subprocess.check_output(["chmod", "+x", mips_path])
         uid = pwd.getpwnam("cornflow").pw_uid
         gid = grp.getgrnam("root").gr_gid
-        mips_path = "/usr/local/bin/mps_mipcl"
+
         os.chown(mips_path, uid, gid)
 
     except error:

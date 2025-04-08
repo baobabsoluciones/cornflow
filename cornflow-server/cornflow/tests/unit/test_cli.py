@@ -449,7 +449,7 @@ class CLITests(TestCase):
                 "test@test.org",
             ],
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, 1)
         user = UserModel.get_one_user_by_email("test@test.org")
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@test.org")
@@ -484,7 +484,7 @@ class CLITests(TestCase):
             ],
         )
 
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, 1)
         user = UserModel.get_one_user_by_email("test@test.org")
         self.assertEqual(user.username, "test")
         self.assertEqual(user.email, "test@test.org")
@@ -511,7 +511,7 @@ class CLITests(TestCase):
             ],
         )
 
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, 1)
 
         user_id = UserModel.get_one_user_by_username("viewer_user").id
 

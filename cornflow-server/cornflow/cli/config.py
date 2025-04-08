@@ -7,6 +7,10 @@ from .arguments import path
 
 @click.group(name="config", help="Commands to manage the configuration variables")
 def config():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 
