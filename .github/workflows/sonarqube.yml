@@ -136,7 +136,7 @@ jobs:
         run: |
           coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/integration
           coverage report -m
-          coverage xml
+          coverage xml -i
           cp coverage.xml coverage-server.xml
         env:
           FLASK_ENV: testing
@@ -215,7 +215,7 @@ jobs:
         run: |
           coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
           coverage report -m
-          coverage xml
+          coverage xml -i
           ls -ltr
           cp coverage.xml coverage-dags.xml
           ls -ltr
@@ -323,7 +323,7 @@ jobs:
         run: |
           coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
           coverage report -m
-          coverage xml
+          coverage xml -i
           cp coverage.xml coverage-client.xml
       - name: Upload coverage to artifact
         uses: actions/upload-artifact@v4
