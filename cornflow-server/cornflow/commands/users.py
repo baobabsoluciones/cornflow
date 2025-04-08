@@ -16,19 +16,14 @@ def create_user_with_role(
             current_app.logger.info(
                 f"User {username} is created and assigned {role_name} role"
             )
-        return True
 
     user_roles = UserRoleModel.get_all_objects(user_id=user.id)
     user_actual_roles = [ur.role for ur in user_roles]
-    if (
-        user_roles is not None
-        and RoleModel.get_one_object(role) in user_actual_roles
-    ):
+    if user_roles is not None and RoleModel.get_one_object(role) in user_actual_roles:
         if verbose:
             current_app.logger.info(
                 f"User {username} exists and already has {role_name} role assigned"
             )
-        return True
 
     user_role = UserRoleModel({"user_id": user.id, "role_id": role})
     user_role.save()
@@ -36,7 +31,6 @@ def create_user_with_role(
         current_app.logger.info(
             f"User {username} already exists and is assigned a {role_name} role"
         )
-    return True
 
 
 def create_service_user_command(username, email, password, verbose: bool = True):
@@ -45,8 +39,8 @@ def create_service_user_command(username, email, password, verbose: bool = True)
 
     if username is None or email is None or password is None:
         current_app.logger.info("Missing required arguments")
-        return False
-    return create_user_with_role(
+
+    create_user_with_role(
         username, email, password, "serviceuser", SERVICE_ROLE, verbose
     )
 
@@ -57,10 +51,8 @@ def create_admin_user_command(username, email, password, verbose: bool = True):
 
     if username is None or email is None or password is None:
         current_app.logger.info("Missing required arguments")
-        return False
-    return create_user_with_role(
-        username, email, password, "admin", ADMIN_ROLE, verbose
-    )
+
+    create_user_with_role(username, email, password, "admin", ADMIN_ROLE, verbose)
 
 
 def create_planner_user_command(username, email, password, verbose: bool = True):
@@ -69,7 +61,5 @@ def create_planner_user_command(username, email, password, verbose: bool = True)
 
     if username is None or email is None or password is None:
         current_app.logger.info("Missing required arguments")
-        return False
-    return create_user_with_role(
-        username, email, password, "planner", PLANNER_ROLE, verbose
-    )
+
+    create_user_with_role(username, email, password, "planner", PLANNER_ROLE, verbose)
