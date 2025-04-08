@@ -1117,7 +1117,7 @@ class LoginTestCases:
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "Invalid token issuer. Token must be issued by a valid provider",
+                "Invalid token format or signature",
                 response.json["error"],
             )
 

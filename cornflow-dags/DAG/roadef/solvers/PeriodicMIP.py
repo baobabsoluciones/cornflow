@@ -301,14 +301,17 @@ class PeriodicMIP(MIPModel):
             "Generating new model at: ", datetime.now().strftime("%H:%M:%S")
         )
         model = pl.LpProblem("Roadef", pl.LpMinimize)
-        self.create_variables(used_routes, previous_routes_infos, artificial_variables)
+        self.create_variables(
+            used_routes,
+            artificial_variables,
+            previous_routes_infos=previous_routes_infos,
+        )
         model = self.create_constraints(model, used_routes, artificial_variables)
         return model
 
-    def create_variables(
-        self, used_routes, previous_routes_infos, artificial_variables
-    ):
+    def create_variables(self, used_routes, artificial_variables, **kwargs):
         # Indices
+        previous_routes_infos = kwargs.get("previous_routes_infos", None)
         ind_td_routes = self.get_td_routes(used_routes)
         ind_customers_hours = self.get_customers_hours()
 

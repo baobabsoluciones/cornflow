@@ -112,3 +112,6 @@ BASE_PERMISSION_ASSIGNATION = [
 EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
 ]
+
+# migrations cosntants
+MIGRATIONS_DEFAULT_PATH = "./cornflow/migrations"

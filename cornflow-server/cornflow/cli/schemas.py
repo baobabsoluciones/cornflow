@@ -1,6 +1,7 @@
 """
 File that implements the generate from schema cli command
 """
+
 import click
 from .tools.api_generator import APIGenerator
 from .tools.schema_generator import SchemaGenerator
@@ -20,6 +21,10 @@ METHOD_OPTIONS = [
 
 @click.group(name="schemas", help="Commands to manage the schemas")
 def schemas():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

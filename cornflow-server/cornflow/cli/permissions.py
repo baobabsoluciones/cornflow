@@ -11,6 +11,10 @@ from .utils import get_app
 
 @click.group(name="permissions", help="Commands to manage the permissions")
 def permissions():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

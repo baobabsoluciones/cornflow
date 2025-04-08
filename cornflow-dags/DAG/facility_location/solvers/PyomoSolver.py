@@ -1,4 +1,5 @@
 from ..core import Experiment, Solution
+from ..core.const import FIRST_DAY, SECOND_DAY, DAYS
 from pyomo.environ import (
     AbstractModel,
     Set,
@@ -16,8 +17,9 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
+
 
 class PyomoSolver(Experiment):
     def __init__(self, instance, solution=None):
@@ -35,7 +37,7 @@ class PyomoSolver(Experiment):
             "sProducts": {None: self.instance.get_products()},
             "sClients": {None: self.instance.get_clients()},
             "sAllWarehouses": {None: self.instance.get_warehouses()},
-            "sDays": {None: ["Day 1", "Day 2"]},
+            "sDays": {None: DAYS},
             "sLocations": {None: self.instance.get_all_locations()},
             "sNotAllowedFlows": {None: self.instance.get_restricted_flows()},
             "pSupplierLimit": self.instance.get_availability(),
@@ -154,12 +156,14 @@ class PyomoSolver(Experiment):
 
         def c1_2_consistency_Warehouses(model, iW, iDay, iProduct):
             """the amount of doses which enter a warehouse one day
-            is equal to the number of doses that are sent that same day from the warehouse"""
+            is equal to the number of doses that are sent that same day from the warehouse
+            """
             return (
                 sum(
                     model.vFlow[iSupplier, iW, iProduct, iDay]
                     for iSupplier in model.sL1Suppliers
-                ) + sum(
+                )
+                + sum(
                     model.vFlow[iWLp, iW, iProduct, iDay]
                     for iWLp in model.sAllWarehouses
                     if self.instance.is_lower_level(iWLp, iW)
@@ -169,7 +173,8 @@ class PyomoSolver(Experiment):
                     model.vFlow[iW, iWLs, iProduct, iDay]
                     for iWLs in model.sAllWarehouses
                     if self.instance.is_higher_level(iWLs, iW)
-                ) + sum(
+                )
+                + sum(
                     model.vFlow[iW, iClient, iProduct, iDay]
                     for iClient in model.sClients
                 )
@@ -204,7 +209,8 @@ class PyomoSolver(Experiment):
                     model.vFlow[iSupplier, iW, iProduct, iDay]
                     for iSupplier in model.sL1Suppliers
                     for iProduct in model.sProducts
-                ) + sum(
+                )
+                + sum(
                     model.vFlow[iWp, iW, iProduct, iDay]
                     for iWp in model.sAllWarehouses
                     for iProduct in model.sProducts
@@ -226,20 +232,20 @@ class PyomoSolver(Experiment):
                 return Constraint.Skip
             return (
                 sum(
-                    model.vFlow[iSupplier, iClient, iProduct, "Day 1"]
+                    model.vFlow[iSupplier, iClient, iProduct, FIRST_DAY]
                     for iSupplier in model.sL1Suppliers
                 )
                 + sum(
-                    model.vFlow[iW, iClient, iProduct, "Day 1"]
+                    model.vFlow[iW, iClient, iProduct, FIRST_DAY]
                     for iW in model.sAllWarehouses
                 )
             ) <= (
                 sum(
-                    model.vFlow[iSupplier, iClient, iProduct, "Day 2"]
+                    model.vFlow[iSupplier, iClient, iProduct, SECOND_DAY]
                     for iSupplier in model.sL1Suppliers
                 )
                 + sum(
-                    model.vFlow[iW, iClient, iProduct, "Day 2"]
+                    model.vFlow[iW, iClient, iProduct, SECOND_DAY]
                     for iW in model.sAllWarehouses
                 )
             )
@@ -304,7 +310,10 @@ class PyomoSolver(Experiment):
             model.sDays, model.sProducts, rule=c1_1_consistency_Suppliers
         )
         model.c1_2_consistency_Warehouses = Constraint(
-            model.sAllWarehouses, model.sDays, model.sProducts, rule=c1_2_consistency_Warehouses
+            model.sAllWarehouses,
+            model.sDays,
+            model.sProducts,
+            rule=c1_2_consistency_Warehouses,
         )
         model.c2_limit_suppliers = Constraint(
             model.sL1Suppliers, model.sProducts, rule=c2_limit_suppliers
@@ -347,11 +356,15 @@ class PyomoSolver(Experiment):
         # Check status
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
-            return dict(status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE)
+            return dict(
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
-                return dict(status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE)
+                return dict(
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
             else:
                 pass
 
