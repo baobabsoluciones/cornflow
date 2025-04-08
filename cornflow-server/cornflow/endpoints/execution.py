@@ -6,6 +6,7 @@ These endpoints hve different access url, but manage the same data entities
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.databricks.api import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 
 # TODO AGA: Porqué el import no funcina correctamente
@@ -31,7 +32,6 @@ from cornflow.schemas.execution import (
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
-from cornflow.shared.databricks import Databricks
 from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
