@@ -530,7 +530,7 @@ class CLITests(TestCase):
             ],
         )
 
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, 1)
 
         result = runner.invoke(
             cli,

@@ -29,6 +29,8 @@ from cornflow.shared import db
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
+MAIN_WD = "/usr/src/app"
+
 
 @click.group(name="service", help="Commands to run the cornflow service")
 def service():
@@ -42,7 +44,7 @@ def service():
 @service.command(name="init", help="Initialize the service")
 def init_cornflow_service():
     click.echo("Starting the service")
-    os.chdir("/usr/src/app")
+    os.chdir(MAIN_WD)
     environment = os.getenv("FLASK_ENV", "development")
     os.environ["FLASK_ENV"] = environment
 
@@ -110,7 +112,7 @@ def init_cornflow_service():
             compress\n\
             size 20M\n\
             postrotate\n\
-             kill -HUP \$(cat /usr/src/app/gunicorn.pid)\n \
+             kill -HUP \$(cat {MAIN_WD}/gunicorn.pid)\n \
             endscript}"
             logrotate = subprocess.run(
                 f"cat > /etc/logrotate.d/cornflow <<EOF\n {conf} \nEOF", shell=True
@@ -123,9 +125,9 @@ def init_cornflow_service():
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     if external_application == 0:
-        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
+        os.environ["GUNICORN_WORKING_DIR"] = MAIN_WD
     elif external_application == 1:
-        os.environ["GUNICORN_WORKING_DIR"] = "/usr/src/app"
+        os.environ["GUNICORN_WORKING_DIR"] = MAIN_WD
     else:
         raise Exception("No external application found")
 
@@ -169,7 +171,7 @@ def init_cornflow_service():
 
     elif external_application == 1:
         click.echo(f"Starting cornflow + {os.getenv('EXTERNAL_APP_MODULE')}")
-        os.chdir("/usr/src/app")
+        os.chdir(MAIN_WD)
 
         if register_key():
             prefix = "CUSTOM_SSH_"
@@ -183,7 +185,7 @@ def init_cornflow_service():
 
         os.system("$(command -v pip) install --user -r requirements.txt")
         time.sleep(5)
-        sys.path.append("/usr/src/app")
+        sys.path.append(MAIN_WD)
 
         from importlib import import_module
 
@@ -233,19 +235,19 @@ def init_cornflow_service():
 
 def register_ssh_host(host):
     if host is not None:
-        add_host = f"ssh-keyscan {host} >> /usr/src/app/.ssh/known_hosts"
-        config_ssh_host = f"echo Host {host} >> /usr/src/app/.ssh/config"
-        config_ssh_key = 'echo "   IdentityFile /usr/src/app/.ssh/id_rsa" >> /usr/src/app/.ssh/config'
+        add_host = f"ssh-keyscan {host} >> {MAIN_WD}/.ssh/known_hosts"
+        config_ssh_host = f"echo Host {host} >> {MAIN_WD}/.ssh/config"
+        config_ssh_key = (
+            'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
+        )
         os.system(add_host)
         os.system(config_ssh_host)
         os.system(config_ssh_key)
 
 
 def register_key():
-    if os.path.isfile("/usr/src/app/.ssh/id_rsa"):
-        add_key = (
-            "chmod 0600 /usr/src/app/.ssh/id_rsa && ssh-add /usr/src/app/.ssh/id_rsa"
-        )
+    if os.path.isfile(f"{MAIN_WD}/.ssh/id_rsa"):
+        add_key = f"chmod 0600 {MAIN_WD}/.ssh/id_rsa && ssh-add {MAIN_WD}/.ssh/id_rsa"
         os.system(add_key)
         return True
     else:
