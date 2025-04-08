@@ -135,11 +135,20 @@ class TestLogInOpenAuth(CustomTestCase):
         Tests token validation failure when the kid is not found in public keys
         """
         # Import the real exceptions to ensure they are preserved
-        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+        from jwt.exceptions import (
+            InvalidTokenError,
+            ExpiredSignatureError,
+            InvalidIssuerError,
+            InvalidSignatureError,
+            DecodeError,
+        )
 
         # Keep the real exception classes in the mock
         mock_jwt.ExpiredSignatureError = ExpiredSignatureError
         mock_jwt.InvalidTokenError = InvalidTokenError
+        mock_jwt.InvalidIssuerError = InvalidIssuerError
+        mock_jwt.InvalidSignatureError = InvalidSignatureError
+        mock_jwt.DecodeError = DecodeError
 
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
 
@@ -165,7 +174,7 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
-            response.json["error"], "Invalid token: Unknown key identifier (kid)"
+            response.json["error"], "Invalid token format, signature, or configuration"
         )
 
     @mock.patch("cornflow.shared.authentication.auth.jwt")
@@ -174,11 +183,20 @@ class TestLogInOpenAuth(CustomTestCase):
         Tests token validation failure when the token header is missing the kid
         """
         # Import the real exceptions to ensure they are preserved
-        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+        from jwt.exceptions import (
+            InvalidTokenError,
+            ExpiredSignatureError,
+            InvalidIssuerError,
+            InvalidSignatureError,
+            DecodeError,
+        )
 
         # Keep the real exception classes in the mock
         mock_jwt.ExpiredSignatureError = ExpiredSignatureError
         mock_jwt.InvalidTokenError = InvalidTokenError
+        mock_jwt.InvalidIssuerError = InvalidIssuerError
+        mock_jwt.InvalidSignatureError = InvalidSignatureError
+        mock_jwt.DecodeError = DecodeError
 
         # Mock jwt.get_unverified_header to return a header without kid
         mock_jwt.get_unverified_header.return_value = {"alg": "RS256"}
@@ -194,8 +212,7 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
-            response.json["error"],
-            "Invalid token: Missing key identifier (kid) in token header",
+            "Invalid token format, signature, or configuration", response.json["error"]
         )
 
     @mock.patch("cornflow.shared.authentication.auth.requests.get")
@@ -205,11 +222,20 @@ class TestLogInOpenAuth(CustomTestCase):
         Tests failure when trying to fetch public keys from the OIDC provider
         """
         # Import the real exceptions to ensure they are preserved
-        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+        from jwt.exceptions import (
+            InvalidTokenError,
+            ExpiredSignatureError,
+            InvalidIssuerError,
+            InvalidSignatureError,
+            DecodeError,
+        )
 
         # Keep the real exception classes in the mock
         mock_jwt.ExpiredSignatureError = ExpiredSignatureError
         mock_jwt.InvalidTokenError = InvalidTokenError
+        mock_jwt.InvalidIssuerError = InvalidIssuerError
+        mock_jwt.InvalidSignatureError = InvalidSignatureError
+        mock_jwt.DecodeError = DecodeError
 
         # Clear the cache
         from cornflow.shared.authentication.auth import public_keys_cache
@@ -240,8 +266,8 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
+            "Invalid token format, signature, or configuration",
             response.json["error"],
-            "Failed to fetch public keys from authentication provider",
         )
 
     @mock.patch("cornflow.shared.authentication.Auth.decode_token")
@@ -289,11 +315,20 @@ class TestLogInOpenAuth(CustomTestCase):
         the system fetches fresh keys from the provider.
         """
         # Import the real exceptions to ensure they are preserved
-        from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+        from jwt.exceptions import (
+            InvalidTokenError,
+            ExpiredSignatureError,
+            InvalidIssuerError,
+            InvalidSignatureError,
+            DecodeError,
+        )
 
         # Keep the real exception classes in the mock
         mock_jwt.ExpiredSignatureError = ExpiredSignatureError
         mock_jwt.InvalidTokenError = InvalidTokenError
+        mock_jwt.InvalidIssuerError = InvalidIssuerError
+        mock_jwt.InvalidSignatureError = InvalidSignatureError
+        mock_jwt.DecodeError = DecodeError
 
         # Mock jwt to return valid unverified header and payload
         mock_jwt.get_unverified_header.return_value = {"kid": "test_kid"}
@@ -531,4 +566,6 @@ class TestLogInOpenAuthService(CustomTestCase):
         )
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(response.json["error"], "Invalid token format or signature")
+        self.assertEqual(
+            response.json["error"], "Invalid token format, signature, or configuration"
+        )

@@ -84,7 +84,8 @@ class PuLP(ApplicationCore):
         prob += x + 4 * y + 9 * z, "obj"
         prob += x + y <= 5, "c1"
         prob += x + z >= 10, "c2"
-        prob += -y + z == 7.5, "c3"
+        prob += -y + z >= 7.5, "c3"
+        prob += -y + z <= 7.5, "c4"
 
         return [
             {
