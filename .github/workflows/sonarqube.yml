@@ -211,7 +211,9 @@ jobs:
           coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
           coverage report -m
           coverage xml
+          ls -ltr
           cp coverage.xml coverage-dags.xml
+          ls -ltr
       - name: Upload coverage to artifact
         uses: actions/upload-artifact@v4
         with:
