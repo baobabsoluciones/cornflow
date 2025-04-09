@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 import math
 import numbers
@@ -23,13 +21,13 @@ def read_excel(
 
     try:
         import openpyxl
-    except (ModuleNotFoundError, ImportError) as e:
-        raise Exception("You must install openpyxl package to use this method")
+    except ImportError:
+        raise ImportError("You must install openpyxl package to use this method")
 
     try:
         import pandas as pd
-    except (ModuleNotFoundError, ImportError):
-        raise Exception("You must install pandas package to use this method")
+    except ImportError:
+        raise ImportError("You must install pandas package to use this method")
 
     dtype = "object" if preserve_types else None
 
@@ -74,7 +72,7 @@ def read_excel_table(path: str, table: str, **kwargs):
     """
     try:
         import pandas as pd
-    except (ModuleNotFoundError, ImportError):
+    except ImportError:
         raise Exception("You must install pandas package to use this method")
 
     data = pd.read_excel(path, sheet_name=table, **kwargs)
