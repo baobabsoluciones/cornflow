@@ -24,7 +24,7 @@ from cornflow.schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
-    ExecutionDetailsWithIndicatorsAndLogResponse
+    ExecutionDetailsWithIndicatorsAndLogResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
@@ -91,6 +91,7 @@ class ExecutionEndpoint(BaseMetaResource):
             dag_run_id = execution.dag_run_id
             if not dag_run_id:
                 # it's safe to say we will never get anything if we did not store the dag_run_id
+                # This extra check should be redundant
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
                     f"Execution {execution.id} has status {execution.state} but has no dag run associated."
@@ -111,14 +112,29 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
             except AirflowError as err:
                 current_app.logger.warning(
-                    "Error while the app tried to update the status of all running executions."
+                    f"Error while the app tried to update the status of execution {execution.id}"
                     f"Airflow responded with an error: {err}"
+                )
+                execution.update_state(
+                    EXEC_STATE_UNKNOWN, "Job not found on Airflow. Possible zombie job"
                 )
                 continue
 
-            data = response.json()
-            state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
-            execution.update_state(state)
+            try:
+                data = response.json()
+                state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
+                execution.update_state(
+                    state, f"Airflow returned unknown state: {data['state']}"
+                )
+            except Exception as err:
+                current_app.logger.warning(
+                    f"Error while the app tried to update the state of execution {execution.id}. "
+                    f"Response parsing error: {err}"
+                )
+                execution.update_state(
+                    EXEC_STATE_UNKNOWN, "Wrong Airflow response. Job status unknown"
+                )
+                continue
 
         return executions
 
