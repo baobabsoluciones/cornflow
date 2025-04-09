@@ -1,6 +1,7 @@
 """
 This file has the class that creates the new API
 """
+
 import json
 import os
 import re
@@ -9,6 +10,8 @@ from .endpoint_tools import EndpointGenerator
 from .models_tools import ModelGenerator, model_shared_imports
 from .schemas_tools import SchemaGenerator, schemas_imports
 from .tools import generate_class_def
+
+INIT_FILE = "__init__.py"
 
 
 class APIGenerator:
@@ -52,7 +55,7 @@ class APIGenerator:
         self.endpoint_path = os.path.join(self.output_path, "endpoints")
         self.schema_path = os.path.join(self.output_path, "schemas")
         self.init_resources = []
-        self.init_file = os.path.join(self.endpoint_path, "__init__.py")
+        self.init_file = os.path.join(self.endpoint_path, INIT_FILE)
 
     def import_schema(self) -> dict:
         """
@@ -77,23 +80,23 @@ class APIGenerator:
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
 
-        init_path = os.path.join(self.model_path, "__init__.py")
+        init_path = os.path.join(self.model_path, INIT_FILE)
         with open(init_path, "w") as file:
-            file.write(f'"""\nThis file exposes the models\n"""\n')
+            file.write("\nThis file exposes the models\n\n")
 
         if not os.path.isdir(self.endpoint_path):
             os.mkdir(self.endpoint_path)
 
-        init_path = os.path.join(self.endpoint_path, "__init__.py")
+        init_path = os.path.join(self.endpoint_path, INIT_FILE)
         with open(init_path, "w") as file:
-            file.write(f'"""\nThis file exposes the endpoints\n"""\n')
+            file.write("\nThis file exposes the endpoints\n\n")
 
         if not os.path.isdir(self.schema_path):
             os.mkdir(self.schema_path)
 
-        init_path = os.path.join(self.schema_path, "__init__.py")
+        init_path = os.path.join(self.schema_path, INIT_FILE)
         with open(init_path, "w") as file:
-            file.write(f'"""\nThis file exposes the schemas\n"""\n')
+            file.write("\nThis file exposes the schemas\n\n")
 
     def main(self):
         """
@@ -151,7 +154,7 @@ class APIGenerator:
             fd.write(mg.generate_model_repr_str())
             fd.write("\n")
 
-        init_file = os.path.join(self.model_path, "__init__.py")
+        init_file = os.path.join(self.model_path, INIT_FILE)
 
         with open(init_file, "a") as file:
             file.write(f"from .{self.prefix}{table_name} import {class_name}\n")
@@ -207,7 +210,7 @@ class APIGenerator:
             fd.write(generate_class_def(class_name_one, parents_class))
             fd.write(sg.generate_schema())
 
-        init_file = os.path.join(self.schema_path, "__init__.py")
+        init_file = os.path.join(self.schema_path, INIT_FILE)
         with open(init_file, "a") as file:
             file.write(
                 f"from .{self.prefix}{table_name} import {class_name_one}, "
@@ -432,7 +435,7 @@ class APIGenerator:
         :return: str: the type in format "<type:idx>"
         """
         schema_table = self.schema["properties"][table_name]["items"]["properties"]
-        id_type=None
+        id_type = None
         if "id" in schema_table.keys():
             id_type = schema_table["id"]["type"]
         if id_type == "string" or isinstance(id_type, list):
