@@ -73,7 +73,7 @@ def read_excel_table(path: str, table: str, **kwargs):
     try:
         import pandas as pd
     except ImportError:
-        raise Exception("You must install pandas package to use this method")
+        raise ImportError("You must install pandas package to use this method")
 
     data = pd.read_excel(path, sheet_name=table, **kwargs)
 

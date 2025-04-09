@@ -24,11 +24,14 @@ from cornflow.schemas.execution import (
     ExecutionEditRequest,
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
-    ExecutionDetailsWithIndicatorsAndLogResponse
+    ExecutionDetailsWithIndicatorsAndLogResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
+    AIRFLOW_ERROR_MSG,
+    AIRFLOW_NOT_REACHABLE_MSG,
+    DAG_PAUSED_MSG,
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
@@ -100,8 +103,8 @@ class ExecutionEndpoint(BaseMetaResource):
             af_client = Airflow.from_config(current_app.config)
             if not af_client.is_alive():
                 current_app.logger.warning(
-                    "Error while the app tried to update the status of all running executions."
-                    "Airflow is not accessible."
+                    f"Error while the app tried to update the status of all running executions."
+                    f"{AIRFLOW_NOT_REACHABLE_MSG}"
                 )
                 continue
 
@@ -112,7 +115,7 @@ class ExecutionEndpoint(BaseMetaResource):
             except AirflowError as err:
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
-                    f"Airflow responded with an error: {err}"
+                    f"{AIRFLOW_ERROR_MSG} {err}"
                 )
                 continue
 
@@ -137,17 +140,20 @@ class ExecutionEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: should validation should be done even if the execution is not going to be run?
-        # TODO: should the schema field be cross validated with the instance schema field?
+
         config = current_app.config
 
         if "schema" not in kwargs:
             kwargs["schema"] = "solve_model_dag"
 
-        execution, status_code = self.post_list(data=kwargs)
+        execution, _ = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
         )
+
+        if execution.schema != instance.schema:
+            execution.delete()
+            raise InvalidData(error="Instance and execution schema mismatch")
 
         current_app.logger.debug(f"The request is: {request.args.get('run')}")
         # this allows testing without airflow interaction:
@@ -161,17 +167,17 @@ class ExecutionEndpoint(BaseMetaResource):
         # We now try to launch the task in airflow
         af_client = Airflow.from_config(config)
         if not af_client.is_alive():
-            err = "Airflow is not accessible"
-            current_app.logger.error(err)
+
+            current_app.logger.error(AIRFLOW_NOT_REACHABLE_MSG)
             execution.update_state(EXEC_STATE_ERROR_START)
             raise AirflowError(
-                error=err,
+                error=AIRFLOW_NOT_REACHABLE_MSG,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution "
-                + err,
+                + AIRFLOW_NOT_REACHABLE_MSG,
             )
         # ask airflow if dag_name exists
         schema = execution.schema
@@ -231,23 +237,23 @@ class ExecutionEndpoint(BaseMetaResource):
 
         info = schema_info.json()
         if info["is_paused"]:
-            err = "The dag exists but it is paused in airflow"
-            current_app.logger.error(err)
+
+            current_app.logger.error(DAG_PAUSED_MSG)
             execution.update_state(EXEC_STATE_ERROR_START)
             raise AirflowError(
-                error=err,
+                error=DAG_PAUSED_MSG,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
                 log_txt=f"Error while user {self.get_user()} tries to create an execution. "
-                + err,
+                + DAG_PAUSED_MSG,
             )
 
         try:
             response = af_client.run_dag(execution.id, dag_name=schema)
         except AirflowError as err:
-            error = "Airflow responded with an error: {}".format(err)
+            error = f"{AIRFLOW_ERROR_MSG} {err}"
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
             raise AirflowError(
@@ -339,17 +345,17 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         # We now try to launch the task in airflow
         af_client = Airflow.from_config(config)
         if not af_client.is_alive():
-            err = "Airflow is not accessible"
-            current_app.logger.error(err)
+
+            current_app.logger.error(AIRFLOW_NOT_REACHABLE_MSG)
             execution.update_state(EXEC_STATE_ERROR_START)
             raise AirflowError(
-                error=err,
+                error=AIRFLOW_NOT_REACHABLE_MSG,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
-                + err,
+                + AIRFLOW_NOT_REACHABLE_MSG,
             )
         # ask airflow if dag_name exists
         schema = execution.schema
@@ -357,23 +363,23 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
 
         info = schema_info.json()
         if info["is_paused"]:
-            err = "The dag exists but it is paused in airflow"
-            current_app.logger.error(err)
+
+            current_app.logger.error(DAG_PAUSED_MSG)
             execution.update_state(EXEC_STATE_ERROR_START)
             raise AirflowError(
-                error=err,
+                error=DAG_PAUSED_MSG,
                 payload=dict(
                     message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                     state=EXEC_STATE_ERROR_START,
                 ),
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
-                + err,
+                + DAG_PAUSED_MSG,
             )
 
         try:
             response = af_client.run_dag(execution.id, dag_name=schema)
         except AirflowError as err:
-            error = "Airflow responded with an error: {}".format(err)
+            error = f"{AIRFLOW_ERROR_MSG} {err}"
             current_app.logger.error(error)
             execution.update_state(EXEC_STATE_ERROR)
             raise AirflowError(
@@ -490,13 +496,13 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
         af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
-            err = "Airflow is not accessible"
+
             raise AirflowError(
-                error=err,
+                error=AIRFLOW_NOT_REACHABLE_MSG,
                 log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
-                + err,
+                + AIRFLOW_NOT_REACHABLE_MSG,
             )
-        response = af_client.set_dag_run_to_fail(
+        af_client.set_dag_run_to_fail(
             dag_name=execution.schema, dag_run_id=execution.dag_run_id
         )
         execution.update_state(EXEC_STATE_STOPPED)
@@ -563,21 +569,21 @@ class ExecutionStatusEndpoint(BaseMetaResource):
 
         af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
-            err = "Airflow is not accessible"
+
             _raise_af_error(
                 execution,
-                err,
+                AIRFLOW_NOT_REACHABLE_MSG,
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                + err,
+                + AIRFLOW_NOT_REACHABLE_MSG,
             )
 
         try:
-            # TODO: get the dag_name from somewhere!
+
             response = af_client.get_dag_run_status(
                 dag_name=execution.schema, dag_run_id=dag_run_id
             )
         except AirflowError as err:
-            error = f"Airflow responded with an error: {err}"
+            error = f"{AIRFLOW_ERROR_MSG} {err}"
             _raise_af_error(
                 execution,
                 error,
