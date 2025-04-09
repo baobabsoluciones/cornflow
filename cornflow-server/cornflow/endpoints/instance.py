@@ -289,11 +289,7 @@ class InstanceFileEndpoint(BaseMetaResource):
                 log_txt=f"Error for user {self.get_user()}: Permission denied for MPS file '{filename}'. Details: {e}",
                 status_code=403,
             ) from e
-        except (
-            ValueError,
-            pulp.PulpError,
-            OSError,
-        ) as e:
+        except (ValueError, pulp.PulpError, OSError, IndexError) as e:
             # Catch parsing errors, PuLP errors, and other IO errors
             # Handle parsing, PuLP, or other OS errors
             current_app.logger.error(
