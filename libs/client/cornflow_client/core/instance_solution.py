@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 import json
 from abc import ABC, abstractmethod
@@ -12,6 +10,8 @@ from jsonschema import Draft7Validator
 from pytups import SuperDict
 
 from .read_tools import read_excel, is_xl_type
+
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
 class InstanceSolutionCore(ABC):
@@ -141,8 +141,8 @@ class InstanceSolutionCore(ABC):
         """
         try:
             import pandas as pd
-        except (ImportError, ModuleNotFoundError):
-            raise Exception("You must install pandas package to use this method")
+        except ImportError:
+            raise ImportError("You must install pandas package to use this method")
 
         is_xl_type(path)
 
@@ -165,41 +165,50 @@ class InstanceSolutionCore(ABC):
     """
 
     @staticmethod
+    def _try_convert_string(s):
+        """Tries to convert a string to int or float."""
+        if not isinstance(s, str):
+            return s
+        if s.isnumeric():
+            return int(s)
+        try:
+            return float(s)
+        except ValueError:
+            return s
+
+    @staticmethod
+    def _convert_value(value):
+        """Recursively converts values within lists and dicts."""
+        if isinstance(value, str):
+            return InstanceSolutionCore._try_convert_string(value)
+        elif isinstance(value, list):
+            # Recursively convert each item in the list
+            return [InstanceSolutionCore._convert_value(item) for item in value]
+        elif isinstance(value, dict):
+            # Recursively convert each value in the dictionary
+            return {k: InstanceSolutionCore._convert_value(v) for k, v in value.items()}
+        else:
+            # Return other types (int, float, bool, None, etc.) as is
+            return value
+
+    @staticmethod
     def dict_to_int_or_float(data_dict):
         """
-        Tranforms a dictionary to change all strings into integer of floating numbers if the strings
-            represent numbers
+        Recursively transforms a dictionary (and nested structures) by converting
+        string representations of numbers into actual int or float types.
+        Returns a new dictionary with converted values, does not modify the original.
+
         For example: Transforms {a: '4', b: {c: '7', d: ['8.7', '9']}}
             into {a: 4, b: {c: 7, d: [8.7, 9]}}
         """
-        for key in data_dict.keys():
-            if isinstance(data_dict[key], str):
-                if data_dict[key].isnumeric():
-                    data_dict[key] = int(data_dict[key])
-                else:
-                    try:
-                        fl = float(data_dict[key])
-                        data_dict[key] = fl
-                    except ValueError:
-                        pass
-            elif isinstance(data_dict[key], list):
-                if isinstance(data_dict[key][0], str):
-                    try:
-                        data_dict[key] = list(map(int, data_dict[key]))
-                    except ValueError:
-                        try:
-                            data_dict[key] = list(map(float, data_dict[key]))
-                        except ValueError:
-                            pass
-                elif isinstance(data_dict[key][0], dict):
-                    data_dict[key] = list(
-                        map(InstanceSolutionCore.dict_to_int_or_float, data_dict[key])
-                    )
-            elif isinstance(data_dict[key], dict):
-                data_dict[key] = InstanceSolutionCore.dict_to_int_or_float(
-                    data_dict[key]
-                )
-        return dict(data_dict)
+        if not isinstance(data_dict, dict):
+            # Consider raising TypeError if input must be a dict
+            # Or return input if other types should pass through?
+            # For now, mimicking potential pass-through if not dict.
+            return data_dict
+
+        # Start the recursive conversion using the helper
+        return InstanceSolutionCore._convert_value(data_dict)
 
     @staticmethod
     def from_element_or_list_to_dict(element_or_list):
@@ -232,7 +241,7 @@ class InstanceSolutionCore(ABC):
         """
         Returns a datetime object from an hour-string in format 'YYYY-MM-DDTh:m:s'
         """
-        return datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        return datetime.strptime(string, DATETIME_FORMAT)
 
     @staticmethod
     def get_datetime_from_date_hour(date: str, hour: int) -> datetime:
@@ -248,7 +257,7 @@ class InstanceSolutionCore(ABC):
         """
         Returns a tuple (date, hour) from an hour-string
         """
-        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        date_t = datetime.strptime(string, DATETIME_FORMAT)
         hour = date_t.strftime("%H")
         if hour == "00" and zero_to_twenty_four:
             hour = "24"
@@ -269,23 +278,18 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_datetimesec_string_from_ts(ts: datetime) -> str:
         """Returns the string of a given date as 'YYYY-MM-DDTh:m:s'"""
-        return datetime.strftime(ts, "%Y-%m-%dT%H:%M:%S")
+        return datetime.strftime(ts, DATETIME_FORMAT)
 
     @staticmethod
     def get_next_hour_datetime_string(string: str) -> str:
         """
         Returns the hour following the given hour, as a string
         """
-        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        date_t = datetime.strptime(string, DATETIME_FORMAT)
         return (date_t + timedelta(hours=1)).isoformat()
 
-    @staticmethod
-    def get_next_hour_datetimesec_string(string: str) -> str:
-        """
-        Returns the hour following the given hour, as a string
-        """
-        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
-        return (date_t + timedelta(hours=1)).isoformat()
+    # Alias: get_next_hour_datetimesec_string points to the same implementation
+    get_next_hour_datetimesec_string = get_next_hour_datetime_string
 
     @staticmethod
     def get_next_hour(ts: datetime) -> datetime:
@@ -299,7 +303,7 @@ class InstanceSolutionCore(ABC):
         """
         Returns the hour preceding the given hour, as a string
         """
-        date_t = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        date_t = datetime.strptime(string, DATETIME_FORMAT)
         return (date_t - timedelta(hours=1)).isoformat()
 
     @staticmethod
@@ -347,18 +351,18 @@ class InstanceSolutionCore(ABC):
         string: str, weeks=0, days=0, minutes=0, seconds=0
     ) -> str:
         """Adds time to a datetime"""
-        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(string, DATETIME_FORMAT)
         return (
             datetime_object
             + timedelta(days=7 * weeks + days, minutes=minutes, seconds=seconds)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        ).strftime(DATETIME_FORMAT)
 
     @staticmethod
     def add_time_to_datetimesec_string(
         string: str, weeks=0, days=0, hours=0, minutes=0, seconds=0
     ) -> str:
         """Adds time to a datetime"""
-        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(string, DATETIME_FORMAT)
         return (
             datetime_object
             + timedelta(
@@ -368,7 +372,7 @@ class InstanceSolutionCore(ABC):
                 minutes=minutes,
                 seconds=seconds,
             )
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        ).strftime(DATETIME_FORMAT)
 
     @staticmethod
     def get_week_from_ts(ts: datetime) -> int:
@@ -390,7 +394,7 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_week_from_datetimesec_string(string: str) -> int:
         """Returns the integer value of the week for the given string"""
-        datetime_object = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(string, DATETIME_FORMAT)
         return datetime_object.isocalendar()[1]
 
     @staticmethod
@@ -407,23 +411,23 @@ class InstanceSolutionCore(ABC):
     @staticmethod
     def get_weekday_from_datetime_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_obj = datetime.strptime(string, DATETIME_FORMAT)
         return datetime_obj.isocalendar()[2]
 
     @staticmethod
     def get_weekday_from_datetimesec_string(string: str) -> int:
         """Returns the number of the weekday from a date string in format 'YYYY-MM-DDT:h:m:s'"""
-        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_obj = datetime.strptime(string, DATETIME_FORMAT)
         return datetime_obj.isocalendar()[2]
 
     @staticmethod
     def get_hour_from_datetime_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m'"""
-        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_obj = datetime.strptime(string, DATETIME_FORMAT)
         return datetime_obj.hour
 
     @staticmethod
     def get_hour_from_datetimesec_string(string: str) -> float:
         """Returns the integer value of the hour (in number) from ts string in format 'YYYY-MM-DDTh:m:s'"""
-        datetime_obj = datetime.strptime(string, "%Y-%m-%dT%H:%M:%S")
+        datetime_obj = datetime.strptime(string, DATETIME_FORMAT)
         return datetime_obj.hour

@@ -12,6 +12,7 @@ def register_deployed_dags_command(
     from cornflow_client.airflow.api import Airflow
     from cornflow.models import DeployedDAG
     from cornflow.shared import db
+    from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
     max_attempts = 20
@@ -19,12 +20,12 @@ def register_deployed_dags_command(
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose:
-            current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG} (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose:
-            current_app.logger.info("Airflow is not reachable")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
     dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]

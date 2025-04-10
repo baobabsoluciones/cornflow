@@ -33,7 +33,6 @@ def create_user_with_role(
         current_app.logger.info(
             f"User {username} already exists and is assigned a {role_name} role"
         )
-    return
 
 
 def create_service_user_command(username, email, password, verbose: bool = True):

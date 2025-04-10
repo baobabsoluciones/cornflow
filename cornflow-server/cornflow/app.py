@@ -51,6 +51,8 @@ def create_app(env_name="development", dataconn=None):
     """
     dictConfig(log_config(app_config[env_name].LOG_LEVEL))
 
+    # Note: Explicit CSRF protection is not configured as the application uses
+    # JWT for authentication via headers, mitigating standard CSRF vulnerabilities.
     app = Flask(__name__)
     app.json.sort_keys = False
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
@@ -103,7 +105,7 @@ def create_app(env_name="development", dataconn=None):
     else:
         raise ConfigurationError(
             error="Invalid authentication type",
-            log_txt="Error while configuring authentication. The authentication type is not valid."
+            log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
 
     initialize_errorhandlers(app)
