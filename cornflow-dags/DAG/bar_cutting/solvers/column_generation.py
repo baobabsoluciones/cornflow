@@ -114,27 +114,27 @@ class ColumnGeneration(Experiment):
         )
 
         # Create constraints
-        def c01_demand_satisfaction(model, iProduct):
+        def c01_demand_satisfaction(model, product):
             """demand satisfaction for each product"""
             return (
                 sum(
-                    model.pNumberProductsPerBarPattern[iBar, iPattern, iProduct]
+                    model.pNumberProductsPerBarPattern[iBar, iPattern, product]
                     * model.vNumPatternsUsedPerBar[iBar, iPattern]
                     for iBar in model.sBars
                     for iPattern in model.sPatterns
-                    if (iBar, iPattern, iProduct) in model.sBars_sPatterns_sProducts
+                    if (iBar, iPattern, product) in model.sBars_sPatterns_sProducts
                 )
-                >= model.pProductDemand[iProduct]
+                >= model.pProductDemand[product]
             )
 
         # Create objective function
         def obj_expression(model):
             """minimum total loss of material"""
             return sum(
-                model.pBarLength[iBar] * model.vNumPatternsUsedPerBar[iBar, iPattern]
-                for iBar in model.sBars
-                for iPattern in model.sPatterns
-                if (iBar, iPattern) in model.sBars_sPatterns
+                model.pBarLength[bar] * model.vNumPatternsUsedPerBar[bar, pattern]
+                for bar in model.sBars
+                for pattern in model.sPatterns
+                if (bar, pattern) in model.sBars_sPatterns
             ) - sum(
                 model.pProductLength[iProduct] * model.pProductDemand[iProduct]
                 for iProduct in model.sProducts
@@ -150,7 +150,7 @@ class ColumnGeneration(Experiment):
 
         return model
 
-    def get_subproblem(self, pBarXLength, pDuals):
+    def get_subproblem(self, bar_length, duals):
         """This function builds the subproblem (knapsack problem)"""
 
         # Create model
@@ -175,19 +175,18 @@ class ColumnGeneration(Experiment):
             """bar length satisfaction"""
             return (
                 sum(
-                    model.pProductLength[iProduct]
-                    * model.vNumberProductsPerBar[iProduct]
-                    for iProduct in model.sProducts
+                    model.pProductLength[product] * model.vNumberProductsPerBar[product]
+                    for product in model.sProducts
                 )
-                <= pBarXLength
+                <= bar_length
             )
 
         # Create objective function
         def obj_expression(model):
             """maximize the value of the pieces that will be part of a new pattern"""
             return sum(
-                pDuals[iProduct] * model.vNumberProductsPerBar[iProduct]
-                for iProduct in model.sProducts
+                duals[product] * model.vNumberProductsPerBar[product]
+                for product in model.sProducts
             )
 
         # Active constraints
@@ -252,10 +251,10 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
-                    # SonarQube ReDoS FP: Pattern ([a-z]+)([0-9]+) uses disjoint
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)(\d+) uses disjoint
                     # character sets, preventing catastrophic backtracking.
                     # Used on internal solver variable names.
-                    name_format = re.compile("([a-z]+)([0-9]+)")
+                    name_format = re.compile("([a-z]+)(\d+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
                     # Add the new pattern to 'sPatterns'
@@ -267,18 +266,18 @@ class ColumnGeneration(Experiment):
                         (self.instance.get_bar1_id(), new_pattern_name)
                     )
                     # Add the new pattern to 'sBars_sPatterns_sProducts'
-                    for iProduct in data_subproblem1[None]["sProducts"][None]:
+                    for product in data_subproblem1[None]["sProducts"][None]:
                         data_master_problem[None]["sBars_sPatterns_sProducts"][
                             None
                         ].append(
-                            (self.instance.get_bar1_id(), new_pattern_name, iProduct)
+                            (self.instance.get_bar1_id(), new_pattern_name, product)
                         )
                     # Add the new pattern to 'pNumberProductsPerBarPattern'
-                    for iProduct in data_subproblem1[None]["sProducts"][None]:
+                    for product in data_subproblem1[None]["sProducts"][None]:
                         data_master_problem[None]["pNumberProductsPerBarPattern"][
-                            self.instance.get_bar1_id(), new_pattern_name, iProduct
+                            self.instance.get_bar1_id(), new_pattern_name, product
                         ] = value(
-                            model_instance_subproblem1.vNumberProductsPerBar[iProduct]
+                            model_instance_subproblem1.vNumberProductsPerBar[product]
                         )
                 else:
                     # Stop the search
@@ -300,10 +299,10 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
-                    # SonarQube ReDoS FP: Pattern ([a-z]+)([0-9]+) uses disjoint
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)(\d+) uses disjoint
                     # character sets, preventing catastrophic backtracking.
                     # Used on internal solver variable names.
-                    name_format = re.compile("([a-z]+)([0-9]+)")
+                    name_format = re.compile("([a-z]+)(\d+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
                     # Add the new pattern to 'sPatterns'
@@ -315,18 +314,18 @@ class ColumnGeneration(Experiment):
                         (self.instance.get_bar2_id(), new_pattern_name)
                     )
                     # Add the new pattern to 'sBars_sPatterns_sProducts'
-                    for iProduct in data_subproblem2[None]["sProducts"][None]:
+                    for product in data_subproblem2[None]["sProducts"][None]:
                         data_master_problem[None]["sBars_sPatterns_sProducts"][
                             None
                         ].append(
-                            (self.instance.get_bar2_id(), new_pattern_name, iProduct)
+                            (self.instance.get_bar2_id(), new_pattern_name, product)
                         )
                     # Add the new pattern to 'pNumberProductsPerBarPattern'
-                    for iProduct in data_subproblem2[None]["sProducts"][None]:
+                    for product in data_subproblem2[None]["sProducts"][None]:
                         data_master_problem[None]["pNumberProductsPerBarPattern"][
-                            self.instance.get_bar2_id(), new_pattern_name, iProduct
+                            self.instance.get_bar2_id(), new_pattern_name, product
                         ] = value(
-                            model_instance_subproblem2.vNumberProductsPerBar[iProduct]
+                            model_instance_subproblem2.vNumberProductsPerBar[product]
                         )
                 else:
                     # Stop the search

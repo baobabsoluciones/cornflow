@@ -28,7 +28,7 @@ def migrate_migrations():
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         migrate()
 
 
@@ -45,7 +45,7 @@ def upgrade_migrations(revision="head"):
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         upgrade(revision=revision)
 
 
@@ -62,7 +62,7 @@ def downgrade_migrations(revision="-1"):
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         downgrade(revision=revision)
 
 
@@ -79,5 +79,5 @@ def init_migrations():
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         init()

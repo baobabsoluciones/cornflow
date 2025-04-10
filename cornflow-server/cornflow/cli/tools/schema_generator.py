@@ -224,7 +224,7 @@ class SchemaGenerator:
                 self.data[table_name]["items"]["required"].append(key)
 
     def parse(self, files):
-        db = SQLAlchemy()
+        SQLAlchemy()
         try:
             for file_path, file_name in files:
                 mod = self._load_module(file_path, file_name)
