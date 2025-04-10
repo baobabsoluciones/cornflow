@@ -209,64 +209,89 @@ class ApplicationCore(ABC):
 
         return algo, output, solver_name, elapsed_time
 
-    def _format_log_and_solution(self, algo, output, solver_name, elapsed_time):
-        """Formats logs, validates and checks the solution."""
+    def _build_base_log_json(self, output, solver_name, elapsed_time):
+        """Builds the initial log_json dictionary."""
         status = output.get("status")
-        status_sol = output.get("status_sol")
-
-        log_json = {
+        return {
             **output,
             "time": elapsed_time,
             "solver": solver_name,
             "status": STATUS_CONV.get(status, "Unknown"),
             "status_code": status,
-            "sol_code": SOLUTION_STATUS_INFEASIBLE,
+            "sol_code": SOLUTION_STATUS_INFEASIBLE,  # Default to infeasible
         }
 
-        try:
-            log_txt = algo.log
-        except AttributeError:
-            log_txt = ""
-
-        # Determine solution status code
+    def _determine_final_solution_code(self, algo, status_sol):
+        """Determines the final solution status code."""
         if status_sol is not None:
-            log_json["sol_code"] = status_sol
+            return status_sol
         elif algo.solution is not None and algo.solution.data:
-            # Check if solution object exists and has data
-            log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
+            return SOLUTION_STATUS_FEASIBLE
+        else:
+            # Return default infeasible if no explicit status or valid solution found
+            return SOLUTION_STATUS_INFEASIBLE
 
-        final_sol_dict = None
+    def _get_log_text(self, algo):
+        """Safely retrieves the log text from the algorithm object."""
+        try:
+            return algo.log
+        except AttributeError:
+            return ""  # Solver might not have a .log attribute
+
+    def _validate_and_check_solution(self, algo):
+        """
+        Validates the solution schema and performs data checks if available.
+        Returns the solution dict and checks dict, or (None, None).
+        Raises BadSolution if schema validation fails.
+        """
+        if algo.solution is None:
+            # This case should ideally be prevented by checking sol_code before calling,
+            # but added as a safeguard.
+            raise BadSolution(
+                "Attempted to validate solution, but algo.solution is None."
+            )
+
+        # Check solution schema
+        sol_schema_errors = algo.solution.check_schema()
+        if sol_schema_errors:
+            raise BadSolution(
+                f"The final solution does not match the schema:\n{sol_schema_errors}"
+            )
+
+        final_sol_dict = algo.solution.to_dict()
         solution_checks = None
 
-        # Validate and check the solution if it's considered feasible/optimal
-        if log_json["sol_code"] > 0:
-            if algo.solution is None:
-                # Should not happen if sol_code > 0 was derived from algo.solution
-                raise BadSolution(
-                    "Solver reported a solution status > 0 but algo.solution is None."
-                )
-
-            sol_schema_errors = algo.solution.check_schema()
-            if sol_schema_errors:
-                raise BadSolution(
-                    f"The final solution does not match the schema:\n{sol_schema_errors}"
-                )
-
-            final_sol_dict = algo.solution.to_dict()
-
-            # Perform data checks only if a valid solution dict was obtained
-            if final_sol_dict is not None and final_sol_dict != {}:
-                try:
-                    # Some solvers might not implement data_checks
-                    solution_checks = algo.data_checks()
-                except AttributeError:
-                    solution_checks = None
-            else:
+        # Perform data checks only if a valid solution dict was obtained
+        # and the solver implements data_checks
+        if final_sol_dict:  # Checks for non-None and non-empty dict
+            try:
+                solution_checks = algo.data_checks()
+            except AttributeError:
+                # Solver doesn't implement data_checks, which is acceptable.
                 solution_checks = None
-        else:
-            # Ensure solution is None if status indicates no solution
-            final_sol_dict = None
-            solution_checks = None
+
+        return final_sol_dict, solution_checks
+
+    def _format_log_and_solution(self, algo, output, solver_name, elapsed_time):
+        """Formats logs, validates and checks the solution."""
+
+        # 1. Build initial log dictionary
+        log_json = self._build_base_log_json(output, solver_name, elapsed_time)
+
+        # 2. Determine final solution status code and update log
+        status_sol = output.get("status_sol")
+        final_sol_code = self._determine_final_solution_code(algo, status_sol)
+        log_json["sol_code"] = final_sol_code
+
+        # 3. Get text log
+        log_txt = self._get_log_text(algo)
+
+        # 4. Validate and check solution if feasible/optimal
+        final_sol_dict = None
+        solution_checks = None
+        if final_sol_code > 0:
+            # Raises BadSolution if schema validation fails
+            final_sol_dict, solution_checks = self._validate_and_check_solution(algo)
 
         return final_sol_dict, solution_checks, log_txt, log_json
 
