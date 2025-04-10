@@ -22,7 +22,7 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
 
 # Imports from internal modules
@@ -69,7 +69,8 @@ class ColumnGeneration(Experiment):
         return {None: pyomo_instance}
 
     def get_master_problem(self, relax=True):
-        """This function builds the master/original problem (master problem if relax=True, original proble if relax=False)"""
+        """This function builds the master/original problem (master problem
+        if relax=True, original proble if relax=False)"""
 
         # Create model
         model = AbstractModel()
@@ -207,7 +208,7 @@ class ColumnGeneration(Experiment):
             time_limit=config.get("timeLimit", 360),
             abs_gap=config.get("abs_gap", 1),
             rel_gap=config.get("rel_gap", 0.01),
-            solver=solver_name
+            solver=solver_name,
         )
         SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
 
@@ -251,6 +252,9 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)([0-9]+) uses disjoint
+                    # character sets, preventing catastrophic backtracking.
+                    # Used on internal solver variable names.
                     name_format = re.compile("([a-z]+)([0-9]+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
@@ -296,6 +300,9 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)([0-9]+) uses disjoint
+                    # character sets, preventing catastrophic backtracking.
+                    # Used on internal solver variable names.
                     name_format = re.compile("([a-z]+)([0-9]+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
@@ -341,15 +348,13 @@ class ColumnGeneration(Experiment):
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
             return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
 
         solution_dict = dict()
@@ -395,7 +400,4 @@ class ColumnGeneration(Experiment):
 
         self.log += "Solving complete\n"
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=termination_condition, status_sol=SOLUTION_STATUS_FEASIBLE)

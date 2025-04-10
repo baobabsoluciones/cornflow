@@ -1,6 +1,7 @@
 """
 This file has all the logic shared for all the resources
 """
+
 # Import from external libraries
 from flask_restful import Resource
 from flask import g, request
@@ -11,7 +12,6 @@ from pytups import SuperDict
 # Import from internal modules
 from cornflow.shared.const import ALL_DEFAULT_ROLES
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
-
 
 
 class BaseMetaResource(Resource, MethodResource):
@@ -30,7 +30,6 @@ class BaseMetaResource(Resource, MethodResource):
         self.auth_class = None
         self.dependents = None
         self.unique = None
-        pass
 
     """
     METHODS USED FOR THE BASIC CRUD OPERATIONS: GET, POST, PUT, PATCH, DELETE 
@@ -121,7 +120,7 @@ class BaseMetaResource(Resource, MethodResource):
         """
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
-            raise ObjectDoesNotExist("The data entity does not exist on the database")
+            raise ObjectDoesNotExist()
 
         data = dict(data)
 
@@ -144,7 +143,7 @@ class BaseMetaResource(Resource, MethodResource):
         item = self.data_model.get_one_object(**kwargs)
 
         if item is None:
-            raise ObjectDoesNotExist("The data entity does not exist on the database")
+            raise ObjectDoesNotExist()
 
         data = dict(data)
 
@@ -164,7 +163,7 @@ class BaseMetaResource(Resource, MethodResource):
         """
         item = self.data_model.get_one_object(**kwargs)
         if item is None:
-            raise ObjectDoesNotExist("The data entity does not exist on the database")
+            raise ObjectDoesNotExist()
         if self.dependents is not None:
             for element in getattr(item, self.dependents):
                 element.delete()
