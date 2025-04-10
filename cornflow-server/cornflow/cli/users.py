@@ -23,6 +23,10 @@ def users():
 
 @click.group(name="create", help="Create a user")
 def create():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 
