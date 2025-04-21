@@ -1,17 +1,23 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+# Set testing environment before importing app
+os.environ["CORNFLOW_ENV"] = "testing"
+
 from cornflow_f.database import Base, get_db
 from cornflow_f.main import app
+from cornflow_f.config import get_config
 
-# Create test database
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+# Get testing configuration
+config = get_config()
 
+# Create test database using configuration
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    config.DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
