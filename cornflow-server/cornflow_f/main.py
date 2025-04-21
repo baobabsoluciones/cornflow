@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from cornflow_f.database import engine
-from cornflow_f import models
+from cornflow_f.database import engine, Base
 from cornflow_f.views import users, health
 
 # Create database tables
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(

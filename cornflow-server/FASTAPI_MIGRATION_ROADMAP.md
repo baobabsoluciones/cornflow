@@ -14,68 +14,147 @@ This document outlines the strategy for migrating the Cornflow REST API from Fla
 6. CLI functionality
 7. API extensibility
 
+## Current Models and Endpoints
+
+### Models
+
+1. **User Management**
+
+   - `UserModel`: User accounts and authentication
+   - `RoleModel`: User roles and permissions
+   - `UserRoleModel`: User-role assignments
+   - `ActionModel`: API actions (GET, POST, PUT, DELETE)
+   - `ViewModel`: API views/endpoints
+   - `PermissionViewRoleModel`: Role-based permissions
+
+2. **Data Models**
+
+   - `BaseDataModel`: Abstract base model with common fields
+   - `InstanceModel`: Problem instances
+   - `ExecutionModel`: Solution executions
+   - `CaseModel`: Case management
+   - `DeployedDAG`: DAG deployment registry
+
+3. **Monitoring**
+   - `AlarmsModel`: System alarms
+   - `MainAlarmsModel`: Main alarm events
+
+### Endpoints
+
+1. **Authentication & Authorization**
+
+   - `/login`: User authentication
+   - `/signup`: User registration
+   - `/token`: Token management
+   - `/user`: User management
+   - `/user_role`: User role management
+   - `/roles`: Role management
+   - `/permission`: Permission management
+   - `/apiview`: API view management
+   - `/action`: Action management
+
+2. **Data Management**
+
+   - `/instance`: Instance CRUD operations
+   - `/execution`: Execution management
+   - `/case`: Case management
+   - `/dag`: DAG deployment and management
+   - `/data_check`: Data validation
+   - `/example_data`: Example data management
+
+3. **System**
+   - `/health`: System health checks
+   - `/alarms`: Alarm management
+   - `/main_alarms`: Main alarm management
+   - `/licenses`: License management
+   - `/tables`: Table management
+   - `/meta_resource`: Meta resource management
+   - `/schemas`: Schema management
+
 ## Phase 1: Project Structure Setup
 
-- [ ] Create `cornflow_fastapi` directory
-- [ ] Set up basic FastAPI application structure
-- [ ] Configure development environment
-- [ ] Set up testing infrastructure
+- [x] Create `cornflow_fastapi` directory
+- [x] Set up basic FastAPI application structure
+- [x] Configure development environment
+- [x] Set up testing infrastructure
 
 ### Directory Structure
 
 ```
-cornflow_fastapi/
-├── app/
-│   ├── api/
-│   │   └── v1/
-│   ├── core/
-│   │   ├── config.py
-│   │   ├── security.py
-│   │   └── dependencies.py
-│   ├── db/
-│   │   ├── base.py
-│   │   └── session.py
-│   ├── models/
-│   ├── schemas/
-│   └── services/
-├── tests/
+cornflow_f/
 ├── alembic/
-├── cli/
-└── main.py
+│   └── versions/
+├── tests/
+│   ├── data/
+│   ├── unit/
+│   └── conftest.py
+├── views/
+│   ├── health.py
+│   ├── users.py
+│   └── __init__.py
+├── models/
+│   ├── user.py
+│   └── __init__.py
+├── schemas/
+│   ├── user.py
+│   └── __init__.py
+├── alembic.ini
+├── database.py
+├── main.py
+├── models.py
+├── schemas.py
+├── security.py
+└── README.md
 ```
 
 ## Phase 2: Core Infrastructure Migration
 
-- [ ] Database Configuration
+- [x] Database Configuration
 
-  - [ ] Migrate SQLAlchemy setup
-  - [ ] Configure Alembic for migrations
-  - [ ] Set up database session management
+  - [x] Migrate SQLAlchemy setup
+  - [x] Configure Alembic for migrations
+  - [x] Set up database session management
 
 - [ ] Authentication System
 
+  - [x] Basic user model and schemas
   - [ ] Implement JWT authentication
   - [ ] Set up OAuth integration
   - [ ] Migrate user management
 
 - [ ] Data Validation
-  - [ ] Convert Marshmallow schemas to Pydantic
+  - [x] Basic Pydantic schemas
+  - [ ] Convert remaining Marshmallow schemas
   - [ ] Implement request/response models
   - [ ] Set up validation middleware
 
 ## Phase 3: API Endpoints Migration
 
-- [ ] Core Endpoints
+- [ ] Authentication & Authorization Endpoints
 
+  - [x] Basic user signup
   - [ ] User management
   - [ ] Authentication
   - [ ] Permissions
+  - [ ] Roles
+  - [ ] User roles
 
-- [ ] Business Logic Endpoints
-  - [ ] Data models
-  - [ ] Solvers
-  - [ ] Instances
-  - [ ] Solutions
+- [ ] Data Management Endpoints
+
+  - [ ] Instance management
+  - [ ] Execution management
+  - [ ] Case management
+  - [ ] DAG management
+  - [ ] Data validation
+  - [ ] Example data
+
+- [ ] System Endpoints
+  - [x] Basic health checks
+  - [ ] Alarm management
+  - [ ] License management
+  - [ ] Table management
+  - [ ] Meta resources
+  - [ ] Schema management
 
 ## Phase 4: CLI and Package Management
 
@@ -146,20 +225,9 @@ passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.6
 ```
 
-## Timeline Estimation
-
-- Phase 1: 1 week
-- Phase 2: 2 weeks
-- Phase 3: 3 weeks
-- Phase 4: 1 week
-- Phase 5: 2 weeks
-- Phase 6: 1 week
-
-Total estimated time: 10 weeks
-
 ## Next Steps
 
-1. Set up the basic FastAPI project structure
-2. Configure the development environment
-3. Begin with core infrastructure migration
-4. Start with a simple endpoint as proof of concept
+1. Complete the authentication system implementation
+2. Begin migrating the data management endpoints
+3. Implement the remaining user management features
+4. Set up comprehensive testing infrastructure

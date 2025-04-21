@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from cornflow_f.database import get_db
-from cornflow_f import models
+from cornflow_f.models import UserModel
 from cornflow_f.schemas import UserSignup, UserResponse
 from cornflow_f.security import (
     get_password_hash,
@@ -33,15 +33,15 @@ async def signup(user: UserSignup, db: Session = Depends(get_db)):
         )
 
     # Check if username already exists
-    if models.User.exists_by_username(db, user.username):
+    if UserModel.exists_by_username(db, user.username):
         raise HTTPException(status_code=400, detail="Username already registered")
 
     # Check if email already exists
-    if models.User.exists_by_email(db, user.email):
+    if UserModel.exists_by_email(db, user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # Create new user with hashed password
-    db_user = models.User(
+    db_user = UserModel(
         username=user.username,
         email=user.email,
         password=get_password_hash(user.password),

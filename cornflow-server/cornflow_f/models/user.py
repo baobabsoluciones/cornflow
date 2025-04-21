@@ -1,3 +1,7 @@
+"""
+User model definition
+"""
+
 from datetime import datetime, UTC
 from uuid import uuid4
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
@@ -5,7 +9,7 @@ from sqlalchemy.orm import relationship
 from cornflow_f.database import Base
 
 
-class User(Base):
+class UserModel(Base):
     """
     User model with all required fields
     """
@@ -41,7 +45,7 @@ class User(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     # Relationship
-    user = relationship("User", remote_side=[id], backref="subordinates")
+    user = relationship("UserModel", remote_side=[id], backref="subordinates")
 
     @classmethod
     def get_by_username(cls, db, username: str):

@@ -1,3 +1,7 @@
+"""
+User schema definitions
+"""
+
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from typing import Optional
 
