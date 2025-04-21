@@ -4,7 +4,7 @@ Unit tests for authentication functionality
 
 import pytest
 from cornflow_f.models.user import UserModel
-from cornflow_f.security import get_password_hash
+from cornflow_f.tests.data.const import TEST_USER
 
 
 @pytest.fixture
@@ -12,11 +12,7 @@ def test_user(db_session):
     """
     Create a test user for authentication tests
     """
-    user = UserModel(
-        username="testuser",
-        email="test@example.com",
-        password=get_password_hash("TestPass123!"),
-    )
+    user = UserModel(**TEST_USER)
     db_session.add(user)
     db_session.commit()
     return user
@@ -27,7 +23,8 @@ def test_login_success(client, test_user):
     Test successful login with correct credentials
     """
     response = client.post(
-        "/login/", json={"username": test_user.username, "password": "TestPass123!"}
+        "/login/",
+        json={"username": test_user.username, "password": TEST_USER["password"]},
     )
     assert response.status_code == 200
     data = response.json()

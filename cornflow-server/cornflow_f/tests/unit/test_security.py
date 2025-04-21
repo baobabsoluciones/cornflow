@@ -6,8 +6,8 @@ from cornflow_f.security import (
 )
 from cornflow_f.tests.data.const import (
     TEST_USER,
-    INVALID_PASSWORD,
-    DISPOSABLE_EMAIL,
+    TEST_USER_DISPOSABLE_EMAIL,
+    TEST_USER_WEAK_PASSWORD,
 )
 
 
@@ -30,7 +30,7 @@ def test_password_validation():
     assert is_valid
 
     # Test too short
-    is_valid, msg = validate_password(INVALID_PASSWORD["password"])
+    is_valid, msg = validate_password("weak")
     assert not is_valid
     assert "at least 8 characters" in msg
 
@@ -59,6 +59,6 @@ def test_disposable_email():
     """
     Test disposable email detection
     """
-    assert is_disposable_email(DISPOSABLE_EMAIL["email"])
+    assert is_disposable_email(TEST_USER_DISPOSABLE_EMAIL["email"])
     assert not is_disposable_email(TEST_USER["email"])
     assert not is_disposable_email("test@gmail.com")
