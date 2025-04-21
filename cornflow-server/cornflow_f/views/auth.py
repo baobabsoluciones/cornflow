@@ -3,10 +3,9 @@ Authentication views
 """
 
 from datetime import datetime, timedelta, UTC
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
 from sqlalchemy.orm import Session
 from cornflow_f.database import get_db
 from cornflow_f.models.user import UserModel
@@ -23,17 +22,14 @@ router = APIRouter(tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta) -> str:
     """
     Create a new JWT token
     """
     to_encode = data.copy()
     now = datetime.now(UTC)
 
-    if expires_delta:
-        expire = now + expires_delta
-    else:
-        expire = now + timedelta(minutes=15)
+    expire = now + expires_delta
 
     to_encode.update({"exp": expire, "iat": now, "iss": config.JWT_ISSUER})
     encoded_jwt = jwt.encode(
@@ -70,4 +66,4 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 
-    return LoginResponse(access_token=access_token)
+    return LoginResponse(access_token=access_token, id=user.uuid)
