@@ -46,8 +46,11 @@ class UserModel(BaseModel):
     # Self-referential foreign key
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
-    # Relationship
+    # Relationships
     user = relationship("UserModel", remote_side=[id], backref="subordinates")
+    user_roles = relationship(
+        "UserRoleModel", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __init__(self, **data):
         """
@@ -78,6 +81,22 @@ class UserModel(BaseModel):
         Verify if the given password matches the user's password
         """
         return verify_password(plain_password, self.password)
+
+    def get_roles(self, db: Session):
+        """
+        Get all roles for this user
+        """
+        from cornflow_f.models.user_role import UserRoleModel
+
+        return UserRoleModel.get_user_roles(db, self.id)
+
+    def has_role(self, db: Session, role_id: int) -> bool:
+        """
+        Check if user has a specific role
+        """
+        from cornflow_f.models.user_role import UserRoleModel
+
+        return UserRoleModel.has_role(db, self.id, role_id)
 
     @classmethod
     def get_by_username(cls, db: Session, username: str):
