@@ -2,6 +2,6 @@
 Schemas package initialization
 """
 
-from .user import UserBase, UserSignup, UserResponse
+from .user import UserBase, UserSignup, UserResponse, UserUpdateRequest
 
-__all__ = ["UserBase", "UserSignup", "UserResponse"]
+__all__ = ["UserBase", "UserSignup", "UserResponse", "UserUpdateRequest"]

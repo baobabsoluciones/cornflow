@@ -13,6 +13,8 @@ class UserBase(BaseModel):
 
     username: str
     email: EmailStr
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 
 class UserSignup(UserBase):
@@ -21,8 +23,6 @@ class UserSignup(UserBase):
     """
 
     password: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
 
 
 class UserResponse(UserBase):
@@ -32,3 +32,15 @@ class UserResponse(UserBase):
 
     uuid: str = Field(..., serialization_alias="id")
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdateRequest(BaseModel):
+    """
+    Schema for user profile updates
+    """
+
+    username: str | None = None
+    email: EmailStr | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    password: str | None = None

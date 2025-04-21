@@ -27,12 +27,13 @@ def test_login_success(client, test_user):
     Test successful login with correct credentials
     """
     response = client.post(
-        "/login/", json={"username": "testuser", "password": "TestPass123!"}
+        "/login/", json={"username": test_user.username, "password": "TestPass123!"}
     )
     assert response.status_code == 200
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
+    assert "id" in data
 
 
 def test_login_wrong_password(client, test_user):
