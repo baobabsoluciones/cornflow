@@ -80,15 +80,9 @@ def test_user(db_session):
     """
     Create a test user for profile update tests
     """
-    user = UserModel(
-        username="testuser",
-        email="test@example.com",
-        password=get_password_hash("TestPass123!"),
-        first_name="Test",
-        last_name="User",
-    )
-    db_session.add(user)
-    db_session.commit()
+    user = UserModel(**TEST_USER)
+    user.save(db_session)
+    user.refresh(db_session)
     return user
 
 
@@ -98,8 +92,10 @@ def auth_headers(client, test_user):
     Get authentication headers for the test user
     """
     response = client.post(
-        "/login/", json={"username": test_user.username, "password": "TestPass123!"}
+        "/login/",
+        json={"username": test_user.username, "password": TEST_USER["password"]},
     )
+
     assert response.status_code == 200
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
@@ -170,7 +166,7 @@ def test_update_profile_wrong_user(client, test_user, auth_headers, db_session):
     other_user = UserModel(
         username="otheruser",
         email="other@example.com",
-        password=get_password_hash("OtherPass123!"),
+        password="OtherPass123!",
         first_name="Other",
         last_name="User",
     )
@@ -194,7 +190,7 @@ def test_update_profile_duplicate_username(client, test_user, auth_headers, db_s
     other_user = UserModel(
         username="otheruser",
         email="other@example.com",
-        password=get_password_hash("OtherPass123!"),
+        password="OtherPass123!",
         first_name="Other",
         last_name="User",
     )
@@ -217,7 +213,7 @@ def test_update_profile_duplicate_email(client, test_user, auth_headers, db_sess
     other_user = UserModel(
         username="otheruser",
         email="other@example.com",
-        password=get_password_hash("OtherPass123!"),
+        password="OtherPass123!",
         first_name="Other",
         last_name="User",
     )

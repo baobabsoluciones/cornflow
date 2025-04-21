@@ -45,6 +45,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     """
     # Get user from database
     user = UserModel.get_by_username(db, request.username)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
