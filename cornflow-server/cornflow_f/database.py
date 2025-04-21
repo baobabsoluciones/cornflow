@@ -1,17 +1,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import os
+from cornflow_f.config import get_config
 
-# Get the absolute path to the database file
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "cornflow.db")
-
-# Database URL - using SQLite for development
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+# Get configuration
+config = get_config()
 
 # Create engine
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    config.DATABASE_URL,
+    connect_args=(
+        {"check_same_thread": False} if config.DATABASE_URL.startswith("sqlite") else {}
+    ),
 )
 
 # Create SessionLocal class
