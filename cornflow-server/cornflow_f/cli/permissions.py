@@ -8,6 +8,7 @@ from cornflow_f.models import RoleModel, ActionModel, PermissionViewRoleModel, V
 from cornflow_f.shared.const import (
     DEFAULT_ACTIONS,
     DEFAULT_PERMISSIONS,
+    DEFAULT_PERMISSIONS_BLACKLIST,
     DEFAULT_ROLES,
     HTTP_METHOD_TO_ACTION,
     PATH_BLACKLIST,
@@ -112,6 +113,8 @@ def init():
                 (role["id"], action_id, view.id)
                 for role in DEFAULT_ROLES
                 if (role["id"], action_id) in DEFAULT_PERMISSIONS
+                and (role["id"], action_id, view.id)
+                not in DEFAULT_PERMISSIONS_BLACKLIST
             ]
 
         for perm_to_create in permissions_to_create:

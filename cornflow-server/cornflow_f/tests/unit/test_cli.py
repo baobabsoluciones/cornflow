@@ -13,9 +13,17 @@ from cornflow_f.models import (
     RoleModel,
     UserModel,
     UserRoleModel,
+    ViewModel,
 )
 
-from cornflow_f.shared.const import DEFAULT_ROLES, DEFAULT_ACTIONS, DEFAULT_PERMISSIONS
+from cornflow_f.shared.const import (
+    DEFAULT_ROLES,
+    DEFAULT_ACTIONS,
+    DEFAULT_PERMISSIONS,
+    PATH_BLACKLIST,
+    HTTP_METHOD_TO_ACTION,
+    DEFAULT_PERMISSIONS_BLACKLIST,
+)
 
 
 @pytest.fixture
@@ -377,48 +385,124 @@ def test_init_permissions(runner, db_session: Session):
     """
     Test initializing default permissions through CLI
     """
-    # First initialize roles (required for permissions)
-    runner.invoke(cli, ["roles", "init"])
-
     # Test initializing default permissions
     result = runner.invoke(cli, ["permissions", "init"])
     assert result.exit_code == 0
     assert "Permission system initialization completed successfully" in result.output
 
-    # Verify all default actions were created
+    # Step 1: Verify all default roles were created
+    for role_data in DEFAULT_ROLES:
+        role = RoleModel.get_by_name(db_session, role_data["name"])
+        assert role is not None
+        assert role.description == role_data["description"]
+        assert role.id == role_data["id"]
+
+    # Step 2: Verify all default actions were created
     for action_data in DEFAULT_ACTIONS:
         action = ActionModel.get_by_name(db_session, action_data["name"])
         assert action is not None
         assert action.description == action_data["description"]
+        assert action.id == action_data["id"]
 
-    # Verify all default permissions were created
-    for role_id, action_id in DEFAULT_PERMISSIONS:
-        role = db_session.query(RoleModel).filter(RoleModel.id == role_id).first()
-        action = (
-            db_session.query(ActionModel).filter(ActionModel.id == action_id).first()
-        )
+    # Step 3: Verify views were created from app routes
+    from cornflow_f.main import app
 
-        permission = (
-            db_session.query(PermissionViewRoleModel)
-            .filter(
-                PermissionViewRoleModel.role_id == role_id,
-                PermissionViewRoleModel.action_id == action_id,
-                PermissionViewRoleModel.deleted_at.is_(None),
-            )
-            .first()
-        )
+    # Get all routes from the FastAPI app
+    routes = []
+    for route in app.routes:
+        if hasattr(route, "methods") and hasattr(route, "path"):
+            for method in route.methods:
+                routes.append((route.path, method))
 
-        assert permission is not None
-        assert permission.role_id == role_id
-        assert permission.action_id == action_id
+    # Count how many routes should be skipped due to blacklist
+    expected_skipped = sum(
+        1
+        for path, _ in routes
+        if any(doc_path == path.lower() for doc_path in PATH_BLACKLIST)
+    )
+
+    # Verify the output mentions the correct number of skipped paths
+    if expected_skipped > 0:
+        assert f"Skipped {expected_skipped} documentation paths" in result.output
+
+    # Verify views were created for non-blacklisted routes
+    for path, _ in routes:
+        # Skip documentation paths
+        if any(doc_path == path.lower() for doc_path in PATH_BLACKLIST):
+            continue
+
+        # Normalize path (remove path parameters)
+        normalized_path = path.replace("{", "<").replace("}", ">")
+
+        view = ViewModel.get_by_path(db_session, normalized_path)
+        assert view is not None
+        assert view.path == normalized_path
+        assert view.name == normalized_path
+        assert f"API endpoint: {path}" in view.description
+
+    # Step 4: Verify all default permissions were created
+    for path, http_action in routes:
+        if http_action not in HTTP_METHOD_TO_ACTION:
+            continue
+        if any(doc_path == path.lower() for doc_path in PATH_BLACKLIST):
+            continue
+
+        normalized_path = path.replace("{", "<").replace("}", ">")
+        view = ViewModel.get_by_path(db_session, normalized_path)
+        action_id = HTTP_METHOD_TO_ACTION[http_action]
+
+        for role in DEFAULT_ROLES:
+            # Check if this permission should be created based on DEFAULT_PERMISSIONS
+            if (role["id"], action_id) in DEFAULT_PERMISSIONS:
+                # Check if this permission is in the blacklist
+                if (
+                    role["id"],
+                    action_id,
+                    view.id,
+                ) not in DEFAULT_PERMISSIONS_BLACKLIST:
+                    permission = PermissionViewRoleModel.get_by_ids(
+                        db_session, role["id"], action_id, view.id
+                    )
+                    assert permission is not None
+                    assert permission.role_id == role["id"]
+                    assert permission.action_id == action_id
+                    assert permission.api_view_id == view.id
 
     # Test running init again (should not create duplicates)
     result = runner.invoke(cli, ["permissions", "init"])
     assert result.exit_code == 0
-    assert all(
-        f"Action already exists: {action['name']}" in result.output
-        for action in DEFAULT_ACTIONS
-    )
+
+    # Verify that all roles, actions, and views are reported as already existing
+    for role_data in DEFAULT_ROLES:
+        assert f"Role already exists: {role_data['name']}" in result.output
+
+    for action_data in DEFAULT_ACTIONS:
+        assert f"Action already exists: {action_data['name']}" in result.output
+
+    # Verify that permissions are reported as already existing
+    for path, http_action in routes:
+        if http_action not in HTTP_METHOD_TO_ACTION:
+            continue
+        if any(doc_path == path.lower() for doc_path in PATH_BLACKLIST):
+            continue
+
+        normalized_path = path.replace("{", "<").replace("}", ">")
+        view = ViewModel.get_by_path(db_session, normalized_path)
+        action_id = HTTP_METHOD_TO_ACTION[http_action]
+
+        for role in DEFAULT_ROLES:
+            if (role["id"], action_id) in DEFAULT_PERMISSIONS:
+                if (
+                    role["id"],
+                    action_id,
+                    view.id,
+                ) not in DEFAULT_PERMISSIONS_BLACKLIST:
+                    role_obj = RoleModel.get_by_name(db_session, role["name"])
+                    action_obj = ActionModel.get_by_id(db_session, action_id)
+                    assert (
+                        f"Permission already exists: {role_obj.name} can {action_obj.name} on {view.path}"
+                        in result.output
+                    )
 
 
 def test_list_permissions(runner, db_session: Session):
@@ -426,18 +510,75 @@ def test_list_permissions(runner, db_session: Session):
     Test listing permissions through CLI
     """
     # First initialize roles and permissions
-    runner.invoke(cli, ["roles", "init"])
     runner.invoke(cli, ["permissions", "init"])
 
     # Test listing permissions
     result = runner.invoke(cli, ["permissions", "list"])
     assert result.exit_code == 0
+    assert "Available permissions:" in result.output
 
-    # Check that all default permissions are listed
-    for role_data in DEFAULT_ROLES:
-        role_name = role_data["name"]
-        for action_data in DEFAULT_ACTIONS:
-            action_name = action_data["name"]
-            # Only check for permissions that should exist based on DEFAULT_PERMISSIONS
-            if (role_data["id"], action_data["id"]) in DEFAULT_PERMISSIONS:
-                assert f"{role_name} can {action_name}" in result.output
+    # Get all routes from the FastAPI app to check view paths
+    from cornflow_f.main import app
+    from cornflow_f.shared.const import PATH_BLACKLIST, HTTP_METHOD_TO_ACTION
+
+    # Get all routes from the FastAPI app
+    routes = []
+    for route in app.routes:
+        if hasattr(route, "methods") and hasattr(route, "path"):
+            for method in route.methods:
+                routes.append((route.path, method))
+
+    # Check that all valid permissions are listed with the correct format
+    for path, http_action in routes:
+        if http_action not in HTTP_METHOD_TO_ACTION:
+            continue
+        if any(doc_path == path.lower() for doc_path in PATH_BLACKLIST):
+            continue
+
+        normalized_path = path.replace("{", "<").replace("}", ">")
+        view = ViewModel.get_by_path(db_session, normalized_path)
+        action_id = HTTP_METHOD_TO_ACTION[http_action]
+
+        for role in DEFAULT_ROLES:
+            # Check if this permission should be created based on DEFAULT_PERMISSIONS
+            if (role["id"], action_id) in DEFAULT_PERMISSIONS:
+                # Check if this permission is in the blacklist
+                if (
+                    role["id"],
+                    action_id,
+                    view.id,
+                ) not in DEFAULT_PERMISSIONS_BLACKLIST:
+                    role_obj = RoleModel.get_by_name(db_session, role["name"])
+                    action_obj = ActionModel.get_by_id(db_session, action_id)
+                    expected_output = (
+                        f"- {role_obj.name} can {action_obj.name} on {view.path}"
+                    )
+                    assert expected_output in result.output
+
+    # Test with no permissions (after clearing the database)
+    db_session.query(PermissionViewRoleModel).delete()
+    db_session.commit()
+
+    result = runner.invoke(cli, ["permissions", "list"])
+    assert result.exit_code == 0
+    assert "No permissions found" in result.output
+
+    # Test with invalid permissions (permissions with missing role, action, or view)
+    # Create a permission with a non-existent role
+    non_existent_role_id = 9999
+    action = db_session.query(ActionModel).first()
+    view = db_session.query(ViewModel).first()
+
+    if action and view:
+        invalid_permission = PermissionViewRoleModel(
+            role_id=non_existent_role_id, action_id=action.id, api_view_id=view.id
+        )
+        db_session.add(invalid_permission)
+        db_session.commit()
+
+        result = runner.invoke(cli, ["permissions", "list"])
+        assert result.exit_code == 0
+        assert (
+            f"- Invalid permission: role_id={non_existent_role_id}, action_id={action.id}, view_id={view.id}"
+            in result.output
+        )
