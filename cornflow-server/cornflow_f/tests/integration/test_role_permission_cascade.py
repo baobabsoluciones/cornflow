@@ -2,21 +2,12 @@
 Integration tests for role-permission cascade behavior
 """
 
-import pytest
 from sqlalchemy.orm import Session
 from cornflow_f.models import RoleModel, PermissionViewRoleModel
 from cornflow_f.cli import cli
 from click.testing import CliRunner
 from cornflow_f.shared.const import DEFAULT_ROLES
-from cornflow_f.tests.unit.fixtures import auth_headers, test_user
-
-
-@pytest.fixture
-def runner():
-    """
-    Fixture that provides a CLI runner
-    """
-    return CliRunner()
+from cornflow_f.tests.fixtures import auth_headers, test_user, runner
 
 
 def test_role_deletion_cascade_permissions_cli(client, runner, db_session: Session):

@@ -10,7 +10,7 @@ from cornflow_f.tests.data.const import (
     TEST_USER_DUPLICATE_USERNAME,
     TEST_USER_DUPLICATE_EMAIL,
 )
-from cornflow_f.tests.unit.fixtures import test_user, auth_headers
+from cornflow_f.tests.fixtures import test_user, auth_headers
 
 
 def test_signup_success(client: TestClient):

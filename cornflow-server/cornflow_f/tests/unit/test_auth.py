@@ -5,18 +5,7 @@ Unit tests for authentication functionality
 import pytest
 from cornflow_f.models.user import UserModel
 from cornflow_f.tests.data.const import TEST_USER
-from cornflow_f.tests.unit.fixtures import test_user
-
-
-@pytest.fixture
-def test_user(db_session):
-    """
-    Create a test user for authentication tests
-    """
-    user = UserModel(**TEST_USER)
-    db_session.add(user)
-    db_session.commit()
-    return user
+from cornflow_f.tests.fixtures import test_user
 
 
 def test_login_success(client, test_user):

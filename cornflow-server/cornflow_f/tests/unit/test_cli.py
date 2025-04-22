@@ -2,10 +2,9 @@
 Tests for the CLI commands
 """
 
-import pytest
-from click.testing import CliRunner
 from sqlalchemy.orm import Session
 from cornflow_f.cli import cli
+from cornflow_f.tests.fixtures import runner
 
 from cornflow_f.models import (
     ActionModel,
@@ -24,14 +23,6 @@ from cornflow_f.shared.const import (
     HTTP_METHOD_TO_ACTION,
     DEFAULT_PERMISSIONS_BLACKLIST,
 )
-
-
-@pytest.fixture
-def runner():
-    """
-    Fixture that provides a CLI runner
-    """
-    return CliRunner()
 
 
 def test_create_user(runner, db_session: Session):
