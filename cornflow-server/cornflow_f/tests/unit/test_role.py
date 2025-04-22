@@ -8,7 +8,7 @@ from cornflow_f.tests.data.const import (
     INVALID_ROLE_NAME,
 )
 
-from cornflow_f.tests.unit.fixtures import auth_headers, test_role, test_user
+from cornflow_f.tests.fixtures import auth_headers, test_role, test_user
 
 
 def test_get_roles_success(client, test_role, auth_headers):

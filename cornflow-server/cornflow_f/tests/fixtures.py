@@ -1,12 +1,22 @@
 """
-Shared fixtures for unit tests
+Shared fixtures for tests
 """
 
 import pytest
+from click.testing import CliRunner
 
 from cornflow_f.models.role import RoleModel
 from cornflow_f.models.user import UserModel
 from cornflow_f.tests.data.const import TEST_USER, TEST_ROLE
+from cornflow_f.cli import cli
+
+
+@pytest.fixture
+def runner():
+    """
+    Fixture that provides a CLI runner
+    """
+    return CliRunner()
 
 
 @pytest.fixture
