@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Add the project root directory to the Python path
+project_root = str(Path(__file__).parent.parent.parent)
+sys.path.insert(0, project_root)
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -6,8 +13,10 @@ from sqlalchemy import pool
 from alembic import context
 
 # Import your models here
-import models
-from database import SQLALCHEMY_DATABASE_URL
+from cornflow_f.models import UserModel
+from cornflow_f.config import get_config
+
+SQLALCHEMY_DATABASE_URL = get_config().DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +32,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = models.Base.metadata
+target_metadata = UserModel.metadata
 
 
 def run_migrations_offline() -> None:

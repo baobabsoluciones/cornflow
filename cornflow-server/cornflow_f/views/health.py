@@ -18,7 +18,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@router.get("/hello/{name}/")
+@router.get("/hello/{name}")
 async def hello(name: str):
     """
     Hello endpoint
@@ -26,7 +26,7 @@ async def hello(name: str):
     return {"message": f"Hello {name}"}
 
 
-@router.get("/db/")
+@router.get("/db")
 async def db_test(db: Session = Depends(get_db)):
     """
     Test database connection

@@ -31,6 +31,12 @@ class BaseModel(Base):
     )
     deleted_at = Column(DateTime, nullable=True)
 
+    def __init__(self, **data):
+        """
+        Initialize a new object with the given data
+        """
+        super().__init__(**data)
+
     def save(self, db: Session) -> None:
         """
         Save a new object to the database

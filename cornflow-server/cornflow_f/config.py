@@ -78,4 +78,5 @@ def get_config():
     Get the configuration based on the environment
     """
     env = os.getenv("CORNFLOW_ENV", "default")
+    print(f"Using environment: {env}")
     return config[env]()

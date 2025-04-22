@@ -38,7 +38,7 @@ def create_access_token(data: dict, expires_delta: timedelta) -> str:
     return encoded_jwt
 
 
-@router.post("/login/", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     """
     Login endpoint that validates credentials and returns a JWT token
