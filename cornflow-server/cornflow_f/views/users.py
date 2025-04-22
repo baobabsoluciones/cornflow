@@ -13,6 +13,7 @@ from cornflow_f.views.auth import oauth2_scheme
 from jose import JWTError, jwt
 from cornflow_f.config import get_config
 from cornflow_f.utils.query_utils import get_all_records
+from cornflow_f.shared.const import ADMIN_ROLE_ID, SERVICE_ROLE_ID
 
 # Get configuration
 config = get_config()
@@ -102,15 +103,24 @@ async def update_profile(
     """
     Update user profile information
     """
+    # Check if user is admin or service user
+    is_admin = current_user.has_role(db, ADMIN_ROLE_ID)
+    is_service_user = current_user.has_role(db, SERVICE_ROLE_ID)
+
     # Verify user is updating their own profile
-    if current_user.uuid != user_id:
+    if current_user.uuid != user_id and not is_admin and not is_service_user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this profile",
         )
 
-    # If updating password, verify current password
+    # If updating password, verify current password and check permissions
     if user_update.password:
+        if not is_service_user:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only service users can update passwords",
+            )
 
         # Validate new password
         is_valid, error_message = validate_password(user_update.password)
@@ -121,6 +131,12 @@ async def update_profile(
 
     # If updating email, check if it's valid and not already in use
     if user_update.email and user_update.email != current_user.email:
+        if not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can update email addresses",
+            )
+
         if is_disposable_email(user_update.email):
             raise HTTPException(
                 status_code=400, detail="Disposable email addresses are not allowed"
@@ -133,15 +149,31 @@ async def update_profile(
 
     # If updating username, check if it's not already in use
     if user_update.username and user_update.username != current_user.username:
+        if not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can update usernames",
+            )
+
         if UserModel.exists_by_username(db, user_update.username):
             raise HTTPException(status_code=400, detail="Username already registered")
 
         current_user.username = user_update.username
 
-    # Update optional fields
+    # Update optional fields (first_name and last_name)
     if user_update.first_name is not None:
+        if not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can update first name",
+            )
         current_user.first_name = user_update.first_name
     if user_update.last_name is not None:
+        if not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can update last name",
+            )
         current_user.last_name = user_update.last_name
 
     # Save changes
