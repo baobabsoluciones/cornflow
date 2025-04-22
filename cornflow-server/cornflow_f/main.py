@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from cornflow_f.database import engine, Base
-from cornflow_f.views import users, health, auth
+from cornflow_f.views import users, health, auth, role
 from cornflow_f.config import get_config
 
 # Get configuration
@@ -21,3 +21,4 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(role.router)

@@ -6,7 +6,6 @@ from datetime import datetime, UTC
 from uuid import uuid4
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, Session
-from cornflow_f.database import Base
 from cornflow_f.models.base import BaseModel
 from cornflow_f.security import get_password_hash, verify_password
 
@@ -32,16 +31,6 @@ class UserModel(BaseModel):
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)
-
-    # Timestamp fields
-    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
-    updated_at = Column(
-        DateTime,
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False,
-    )
-    deleted_at = Column(DateTime, nullable=True)
 
     # Self-referential foreign key
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)

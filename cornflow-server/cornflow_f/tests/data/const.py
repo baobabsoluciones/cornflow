@@ -35,5 +35,16 @@ INVALID_USERNAME["username"] = "te"
 INVALID_EMAIL = dict(TEST_USER)
 INVALID_EMAIL["email"] = "invalid-email"
 
+# Role test data
+TEST_ROLE = {"name": "test_role", "description": "Test role description"}
+
+# Role with duplicate name
+TEST_ROLE_DUPLICATE_NAME = dict(TEST_ROLE)
+TEST_ROLE_DUPLICATE_NAME["description"] = "Different description"
+
+# Invalid role data
+INVALID_ROLE_NAME = dict(TEST_ROLE)
+INVALID_ROLE_NAME["name"] = 12
+
 # Database test data
 DB_TEST_QUERY = "SELECT 1"

@@ -3,10 +3,10 @@ Shared constants for the application
 """
 
 # Default role IDs
-ADMIN_ROLE_ID = 1
-SERVICE_ROLE_ID = 2
-PLANNER_ROLE_ID = 3
-VIEWER_ROLE_ID = 4
+VIEWER_ROLE_ID = 1
+PLANNER_ROLE_ID = 2
+ADMIN_ROLE_ID = 3
+SERVICE_ROLE_ID = 4
 
 # Default roles with descriptions
 DEFAULT_ROLES = [

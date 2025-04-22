@@ -10,13 +10,14 @@ from cornflow_f.tests.data.const import (
     TEST_USER_DUPLICATE_USERNAME,
     TEST_USER_DUPLICATE_EMAIL,
 )
+from cornflow_f.tests.unit.fixtures import test_user, auth_headers
 
 
 def test_signup_success(client: TestClient):
     """
     Test successful user signup
     """
-    response = client.post("/signup/", json=TEST_USER)
+    response = client.post("/signup", json=TEST_USER)
     assert response.status_code == 201
     data = response.json()
     assert data["username"] == TEST_USER["username"]
@@ -29,7 +30,7 @@ def test_signup_weak_password(client: TestClient):
     """
     Test signup with weak password
     """
-    response = client.post("/signup/", json=TEST_USER_WEAK_PASSWORD)
+    response = client.post("/signup", json=TEST_USER_WEAK_PASSWORD)
     assert response.status_code == 400
     data = response.json()
     assert "detail" in data
@@ -40,7 +41,7 @@ def test_signup_disposable_email(client: TestClient):
     """
     Test signup with disposable email
     """
-    response = client.post("/signup/", json=TEST_USER_DISPOSABLE_EMAIL)
+    response = client.post("/signup", json=TEST_USER_DISPOSABLE_EMAIL)
     assert response.status_code == 400
     data = response.json()
     assert "detail" in data
@@ -52,9 +53,9 @@ def test_signup_duplicate_username(client: TestClient):
     Test signup with duplicate username
     """
     # First signup
-    client.post("/signup/", json=TEST_USER)
+    client.post("/signup", json=TEST_USER)
     # Try to signup with same username
-    response = client.post("/signup/", json=TEST_USER_DUPLICATE_USERNAME)
+    response = client.post("/signup", json=TEST_USER_DUPLICATE_USERNAME)
     assert response.status_code == 400
     data = response.json()
     assert "detail" in data
@@ -66,39 +67,13 @@ def test_signup_duplicate_email(client: TestClient):
     Test signup with duplicate email
     """
     # First signup
-    client.post("/signup/", json=TEST_USER)
+    client.post("/signup", json=TEST_USER)
     # Try to signup with same email
-    response = client.post("/signup/", json=TEST_USER_DUPLICATE_EMAIL)
+    response = client.post("/signup", json=TEST_USER_DUPLICATE_EMAIL)
     assert response.status_code == 400
     data = response.json()
     assert "detail" in data
     assert "email" in data["detail"].lower()
-
-
-@pytest.fixture
-def test_user(db_session):
-    """
-    Create a test user for profile update tests
-    """
-    user = UserModel(**TEST_USER)
-    user.save(db_session)
-    user.refresh(db_session)
-    return user
-
-
-@pytest.fixture
-def auth_headers(client, test_user):
-    """
-    Get authentication headers for the test user
-    """
-    response = client.post(
-        "/login/",
-        json={"username": test_user.username, "password": TEST_USER["password"]},
-    )
-
-    assert response.status_code == 200
-    token = response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
 
 
 def test_update_profile_success(client, test_user, auth_headers):
@@ -106,7 +81,7 @@ def test_update_profile_success(client, test_user, auth_headers):
     Test successful profile update
     """
     response = client.patch(
-        f"/user/{test_user.uuid}/",
+        f"/user/{test_user.uuid}",
         headers=auth_headers,
         json={
             "username": "newusername",
@@ -125,7 +100,7 @@ def test_update_profile_success(client, test_user, auth_headers):
 
     # Verify password change
     response = client.post(
-        "/login/", json={"username": "newusername", "password": "NewPass123!"}
+        "/login", json={"username": "newusername", "password": "NewPass123!"}
     )
     assert response.status_code == 200
     data = response.json()
@@ -136,9 +111,7 @@ def test_update_profile_unauthorized(client, test_user):
     """
     Test profile update without authentication
     """
-    response = client.patch(
-        f"/user/{test_user.uuid}/", json={"username": "newusername"}
-    )
+    response = client.patch(f"/user/{test_user.uuid}", json={"username": "newusername"})
     assert response.status_code == 401
 
 
@@ -150,7 +123,7 @@ def test_update_profile_invalid_token(client, test_user):
     invalid_headers = {"Authorization": "Bearer invalid_token"}
 
     response = client.patch(
-        f"/user/{test_user.uuid}/",
+        f"/user/{test_user.uuid}",
         headers=invalid_headers,
         json={"username": "newusername"},
     )
@@ -175,7 +148,7 @@ def test_update_profile_wrong_user(client, test_user, auth_headers, db_session):
 
     # Try to update other user's profile
     response = client.patch(
-        f"/user/{other_user.uuid}/",
+        f"/user/{other_user.uuid}",
         headers=auth_headers,
         json={"username": "newusername"},
     )
@@ -199,7 +172,7 @@ def test_update_profile_duplicate_username(client, test_user, auth_headers, db_s
 
     # Try to update username to existing one
     response = client.patch(
-        f"/user/{test_user.uuid}/", headers=auth_headers, json={"username": "otheruser"}
+        f"/user/{test_user.uuid}", headers=auth_headers, json={"username": "otheruser"}
     )
     assert response.status_code == 400
     assert "Username already registered" in response.json()["detail"]
@@ -222,7 +195,7 @@ def test_update_profile_duplicate_email(client, test_user, auth_headers, db_sess
 
     # Try to update email to existing one
     response = client.patch(
-        f"/user/{test_user.uuid}/",
+        f"/user/{test_user.uuid}",
         headers=auth_headers,
         json={"email": "other@example.com"},
     )
@@ -235,7 +208,7 @@ def test_update_profile_invalid_password(client, test_user, auth_headers):
     Test profile update with invalid password
     """
     response = client.patch(
-        f"/user/{test_user.uuid}/", headers=auth_headers, json={"password": "weak"}
+        f"/user/{test_user.uuid}", headers=auth_headers, json={"password": "weak"}
     )
     assert response.status_code == 400
     assert "Password must be at least 8 characters long" in response.json()["detail"]
@@ -246,7 +219,7 @@ def test_update_profile_disposable_email(client, test_user, auth_headers):
     Test profile update with disposable email
     """
     response = client.patch(
-        f"/user/{test_user.uuid}/",
+        f"/user/{test_user.uuid}",
         headers=auth_headers,
         json={"email": "test@temp-mail.com"},
     )

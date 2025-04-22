@@ -50,7 +50,7 @@ async def get_current_user(
     return user
 
 
-@router.post("/signup/", response_model=UserResponse, status_code=201)
+@router.post("/signup", response_model=UserResponse, status_code=201)
 async def signup(user: UserSignup, db: Session = Depends(get_db)):
     """
     Create a new user with hashed password
@@ -91,7 +91,7 @@ async def signup(user: UserSignup, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.patch("/user/{user_id}/", response_model=UserResponse)
+@router.patch("/user/{user_id}", response_model=UserResponse)
 async def update_profile(
     user_id: str,
     user_update: UserUpdateRequest,

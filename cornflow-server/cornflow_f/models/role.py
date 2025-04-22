@@ -28,12 +28,6 @@ class RoleModel(BaseModel):
         "UserRoleModel", back_populates="role", cascade="all, delete-orphan"
     )
 
-    def __init__(self, **data):
-        """
-        Initialize a new role with the given data
-        """
-        super().__init__(**data)
-
     @classmethod
     def get_by_name(cls, db: Session, name: str):
         """
