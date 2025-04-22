@@ -41,11 +41,10 @@ class BaseModel(Base):
         """
         Save a new object to the database
 
-        Args:
-            db: Database session
+        :param db: Database session
+        :type db: Session
 
-        Raises:
-            HTTPException: If there is an error saving the object
+        :raises HTTPException: If there is an error saving the object
         """
         try:
             db.add(self)
@@ -60,6 +59,11 @@ class BaseModel(Base):
     def refresh(self, db: Session) -> None:
         """
         Refresh the object from the database
+
+        :param db: Database session
+        :type db: Session
+
+        :raises HTTPException: If there is an error refreshing the object
         """
         db.refresh(self)
 
@@ -67,11 +71,10 @@ class BaseModel(Base):
         """
         Delete an object from the database
 
-        Args:
-            db: Database session
+        :param db: Database session
+        :type db: Session
 
-        Raises:
-            HTTPException: If there is an error deleting the object
+        :raises HTTPException: If there is an error deleting the object
         """
         try:
             db.delete(self)
@@ -88,12 +91,13 @@ class BaseModel(Base):
         Update an object in the database (PUT operation).
         This method will set all fields not present in data to None.
 
-        Args:
-            db: Database session
-            data: Dictionary of fields to update
+        :param db: Database session
+        :type db: Session
 
-        Raises:
-            HTTPException: If there is an error updating the object
+        :param data: Dictionary of fields to update
+        :type data: Dict
+
+        :raises HTTPException: If there is an error updating the object
         """
         try:
             self.updated_at = datetime.now(timezone.utc)
@@ -125,12 +129,13 @@ class BaseModel(Base):
         Partially update an object in the database (PATCH operation).
         Only fields present in data will be modified.
 
-        Args:
-            db: Database session
-            data: Dictionary of fields to update
+        :param db: Database session
+        :type db: Session
 
-        Raises:
-            HTTPException: If there is an error updating the object
+        :param data: Dictionary of fields to update
+        :type data: Dict
+
+        :raises HTTPException: If there is an error updating the object
         """
         try:
             self.updated_at = datetime.now(timezone.utc)
@@ -152,61 +157,19 @@ class BaseModel(Base):
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
 
-    def soft_delete(self, db: Session) -> None:
-        """
-        Soft delete an object by setting deleted_at
-
-        Args:
-            db: Database session
-
-        Raises:
-            HTTPException: If there is an error soft deleting the object
-        """
-        try:
-            self.deleted_at = datetime.now(timezone.utc)
-            self.updated_at = datetime.now(timezone.utc)
-            db.add(self)
-            db.commit()
-        except IntegrityError as e:
-            db.rollback()
-            raise HTTPException(status_code=400, detail=str(e))
-        except DBAPIError as e:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
-
-    def restore(self, db: Session) -> None:
-        """
-        Restore a soft-deleted object by setting deleted_at to None
-
-        Args:
-            db: Database session
-
-        Raises:
-            HTTPException: If there is an error restoring the object
-        """
-        try:
-            self.deleted_at = None
-            self.updated_at = datetime.now(timezone.utc)
-            db.add(self)
-            db.commit()
-        except IntegrityError as e:
-            db.rollback()
-            raise HTTPException(status_code=400, detail=str(e))
-        except DBAPIError as e:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
-
     @classmethod
     def get_by_id(cls: Type[T], db: Session, id: str) -> Optional[T]:
         """
         Get an object by its ID
 
-        Args:
-            db: Database session
-            id: Object ID
+        :param db: Database session
+        :type db: Session
 
-        Returns:
-            Optional[T]: The object if found, None otherwise
+        :param id: Object ID
+        :type id: str
+
+        :return: The object if found, None otherwise
+        :rtype: Optional[T]
         """
         return db.query(cls).filter(cls.id == id, cls.deleted_at.is_(None)).first()
 
@@ -217,14 +180,20 @@ class BaseModel(Base):
         """
         Get all objects with optional filtering and pagination
 
-        Args:
-            db: Database session
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-            **filters: Additional filters to apply
+        :param db: Database session
+        :type db: Session
 
-        Returns:
-            List[T]: List of objects
+        :param skip: Number of records to skip
+        :type skip: int
+
+        :param limit: Maximum number of records to return
+        :type limit: int
+
+        :param filters: Additional filters to apply
+        :type filters: Dict
+
+        :return: List of objects
+        :rtype: List[T]
         """
         query = db.query(cls).filter(cls.deleted_at.is_(None))
         for key, value in filters.items():
@@ -237,15 +206,16 @@ class BaseModel(Base):
         """
         Create a new object
 
-        Args:
-            db: Database session
-            **data: Object data
+        :param db: Database session
+        :type db: Session
 
-        Returns:
-            T: The created object
+        :param data: Object data
+        :type data: Dict
 
-        Raises:
-            HTTPException: If there is an error creating the object
+        :return: The created object
+        :rtype: T
+
+        :raises HTTPException: If there is an error creating the object
         """
         try:
             obj = cls(**data)
