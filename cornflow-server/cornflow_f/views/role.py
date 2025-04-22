@@ -9,6 +9,7 @@ from cornflow_f.database import get_db
 from cornflow_f.models.role import RoleModel
 from cornflow_f.schemas.role import RoleCreate, RoleUpdate, RoleResponse
 from cornflow_f.views.auth import oauth2_scheme
+from cornflow_f.utils.query_utils import get_all_records
 
 router = APIRouter(tags=["roles"])
 
@@ -18,7 +19,8 @@ def get_roles(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
     """
     Get all roles
     """
-    roles = db.query(RoleModel).filter(RoleModel.deleted_at.is_(None)).all()
+    roles = get_all_records(db, RoleModel)
+
     return roles
 
 

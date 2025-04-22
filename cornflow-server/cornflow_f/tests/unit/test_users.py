@@ -225,3 +225,51 @@ def test_update_profile_disposable_email(client, test_user, auth_headers):
     )
     assert response.status_code == 400
     assert "Disposable email addresses are not allowed" in response.json()["detail"]
+
+
+def test_get_all_users(client, test_user, auth_headers, db_session):
+    """
+    Test retrieving all users
+    """
+    # Create additional users for testing
+    user1 = UserModel(
+        username="user1",
+        email="user1@example.com",
+        password="User1Pass123!",
+        first_name="User",
+        last_name="One",
+    )
+    db_session.add(user1)
+
+    user2 = UserModel(
+        username="user2",
+        email="user2@example.com",
+        password="User2Pass123!",
+        first_name="User",
+        last_name="Two",
+    )
+    db_session.add(user2)
+
+    db_session.commit()
+
+    # Test getting all users
+    response = client.get("/users", headers=auth_headers)
+    assert response.status_code == 200
+
+    # Verify response contains all users
+    data = response.json()
+    assert len(data) >= 3  # At least the test_user and the two we just created
+
+    # Check that our test users are in the response
+    usernames = [user["username"] for user in data]
+    assert test_user.username in usernames
+    assert "user1" in usernames
+    assert "user2" in usernames
+
+    # Verify the structure of the response
+    for user in data:
+        assert "id" in user
+        assert "username" in user
+        assert "email" in user
+        assert "first_name" in user
+        assert "last_name" in user
