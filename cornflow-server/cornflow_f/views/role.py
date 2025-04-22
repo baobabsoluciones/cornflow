@@ -136,5 +136,5 @@ def delete_role(
             status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
         )
 
-    db_role.soft_delete(db=db)
+    db_role.delete(db=db)
     return None
