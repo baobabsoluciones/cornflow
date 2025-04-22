@@ -10,23 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-async def root():
-    """
-    Root endpoint
-    """
-    return {"message": "Hello World"}
-
-
-@router.get("/hello/{name}")
-async def hello(name: str):
-    """
-    Hello endpoint
-    """
-    return {"message": f"Hello {name}"}
-
-
-@router.get("/db")
+@router.get("/health")
 async def db_test(db: Session = Depends(get_db)):
     """
     Test database connection
@@ -34,6 +18,6 @@ async def db_test(db: Session = Depends(get_db)):
     try:
         # Try to execute a simple query using text()
         db.execute(text("SELECT 1"))
-        return {"message": "Database connection successful"}
+        return {"cornflow_status": "healthy"}
     except Exception as e:
-        return {"message": f"Database connection failed: {str(e)}"}
+        return {"cornflow_status": "unhealthy"}
