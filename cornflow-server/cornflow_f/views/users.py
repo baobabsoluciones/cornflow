@@ -12,6 +12,7 @@ from cornflow_f.security import (
 from cornflow_f.views.auth import oauth2_scheme
 from jose import JWTError, jwt
 from cornflow_f.config import get_config
+from cornflow_f.utils.query_utils import get_all_records
 
 # Get configuration
 config = get_config()
@@ -148,3 +149,17 @@ async def update_profile(
     db.refresh(current_user)
 
     return current_user
+
+
+@router.get("/users", response_model=list[UserResponse])
+async def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """
+    Get a list of all users
+    """
+    # Use the generic function instead of writing the query directly
+    users = get_all_records(db, UserModel)
+
+    return users
