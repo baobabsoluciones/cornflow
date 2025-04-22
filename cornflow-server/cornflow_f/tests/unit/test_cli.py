@@ -6,10 +6,16 @@ import pytest
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
 from cornflow_f.cli import cli
-from cornflow_f.models.user import UserModel
-from cornflow_f.models.role import RoleModel
-from cornflow_f.models.user_role import UserRoleModel
-from cornflow_f.shared.const import DEFAULT_ROLES
+
+from cornflow_f.models import (
+    ActionModel,
+    PermissionViewRoleModel,
+    RoleModel,
+    UserModel,
+    UserRoleModel,
+)
+
+from cornflow_f.shared.const import DEFAULT_ROLES, DEFAULT_ACTIONS, DEFAULT_PERMISSIONS
 
 
 @pytest.fixture
@@ -365,3 +371,73 @@ def test_list_assignments(runner, db_session: Session):
     result = runner.invoke(cli, ["assignments", "list", "--username", "noroles"])
     assert result.exit_code == 0
     assert "User noroles has no roles assigned" in result.output
+
+
+def test_init_permissions(runner, db_session: Session):
+    """
+    Test initializing default permissions through CLI
+    """
+    # First initialize roles (required for permissions)
+    runner.invoke(cli, ["roles", "init"])
+
+    # Test initializing default permissions
+    result = runner.invoke(cli, ["permissions", "init"])
+    assert result.exit_code == 0
+    assert "Permission system initialization completed successfully" in result.output
+
+    # Verify all default actions were created
+    for action_data in DEFAULT_ACTIONS:
+        action = ActionModel.get_by_name(db_session, action_data["name"])
+        assert action is not None
+        assert action.description == action_data["description"]
+
+    # Verify all default permissions were created
+    for role_id, action_id in DEFAULT_PERMISSIONS:
+        role = db_session.query(RoleModel).filter(RoleModel.id == role_id).first()
+        action = (
+            db_session.query(ActionModel).filter(ActionModel.id == action_id).first()
+        )
+
+        permission = (
+            db_session.query(PermissionViewRoleModel)
+            .filter(
+                PermissionViewRoleModel.role_id == role_id,
+                PermissionViewRoleModel.action_id == action_id,
+                PermissionViewRoleModel.deleted_at.is_(None),
+            )
+            .first()
+        )
+
+        assert permission is not None
+        assert permission.role_id == role_id
+        assert permission.action_id == action_id
+
+    # Test running init again (should not create duplicates)
+    result = runner.invoke(cli, ["permissions", "init"])
+    assert result.exit_code == 0
+    assert all(
+        f"Action already exists: {action['name']}" in result.output
+        for action in DEFAULT_ACTIONS
+    )
+
+
+def test_list_permissions(runner, db_session: Session):
+    """
+    Test listing permissions through CLI
+    """
+    # First initialize roles and permissions
+    runner.invoke(cli, ["roles", "init"])
+    runner.invoke(cli, ["permissions", "init"])
+
+    # Test listing permissions
+    result = runner.invoke(cli, ["permissions", "list"])
+    assert result.exit_code == 0
+
+    # Check that all default permissions are listed
+    for role_data in DEFAULT_ROLES:
+        role_name = role_data["name"]
+        for action_data in DEFAULT_ACTIONS:
+            action_name = action_data["name"]
+            # Only check for permissions that should exist based on DEFAULT_PERMISSIONS
+            if (role_data["id"], action_data["id"]) in DEFAULT_PERMISSIONS:
+                assert f"{role_name} can {action_name}" in result.output

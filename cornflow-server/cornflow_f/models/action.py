@@ -1,5 +1,5 @@
 """
-Role model definition
+Action model definition
 """
 
 from sqlalchemy import Column, Integer, String, Text
@@ -7,48 +7,43 @@ from sqlalchemy.orm import relationship, Session
 from cornflow_f.models.base import BaseModel
 
 
-class RoleModel(BaseModel):
+class ActionModel(BaseModel):
     """
-    Role model that defines the available roles in the system
+    Model to store the actions that can be performed over the REST API: get, patch, post, put, delete.
     """
 
-    __tablename__ = "roles"
+    __tablename__ = "actions"
 
     # Primary key
     id = Column(Integer, primary_key=True, index=True)
 
-    # Role name
-    name = Column(String(50), unique=True, index=True, nullable=False)
+    # Action name (e.g., 'can_get', 'can_post', etc.)
+    name = Column(String(128), unique=True, nullable=False)
 
-    # Role description
+    # Description of the action
     description = Column(Text, nullable=True)
 
-    # Relationship with UserRoleModel
-    user_roles = relationship(
-        "UserRoleModel", back_populates="role", cascade="all, delete-orphan"
-    )
-
-    # Relationship with PermissionViewRoleModel
+    # Relationship with permissions
     permissions = relationship(
-        "PermissionViewRoleModel", back_populates="role", cascade="all, delete-orphan"
+        "PermissionViewRoleModel", back_populates="action", cascade="all, delete-orphan"
     )
 
     @classmethod
     def get_by_name(cls, db: Session, name: str):
         """
-        Get a role by name
+        Get an action by name
         """
         return db.query(cls).filter(cls.name == name, cls.deleted_at.is_(None)).first()
 
     @classmethod
     def exists_by_name(cls, db: Session, name: str) -> bool:
         """
-        Check if a role name already exists
+        Check if an action name already exists
         """
         return cls.get_by_name(db, name) is not None
 
     def __repr__(self):
         """
-        String representation of the role
+        String representation of the action
         """
-        return f"<Role {self.name}>"
+        return f"<Action {self.id}: {self.name}>"
