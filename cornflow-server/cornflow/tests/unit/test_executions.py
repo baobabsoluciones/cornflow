@@ -19,7 +19,7 @@ from cornflow.tests.const import (
     INSTANCE_URL,
     DAG_URL,
     BAD_EXECUTION_PATH,
-    EXECUTION_SOLUTION_PATH,
+    EXECUTION_SOLUTION_PATH, EDIT_EXECUTION_SOLUTION,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
@@ -473,6 +473,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
         fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.instance_payload = payload
         self.model = ExecutionModel
         self.response_items = {
             "id",
@@ -523,6 +524,38 @@ class TestExecutionsDetailEndpointAirflow(
         self.assertEqual(200, response.status_code)
         self.assertEqual(response.json["message"], "The execution has been stopped")
 
+    def test_edit_execution(self):
+
+        id_new_instance = self.create_new_row(
+            INSTANCE_URL, InstanceModel, self.instance_payload
+        )
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+
+        # Extract the data from data/edit_execution_solution.json
+        with open(EDIT_EXECUTION_SOLUTION) as f:
+            data = json.load(f)
+
+        data = {
+            "name": "new_name",
+            "description": "Updated description",
+            "data": data,
+            "instance_id": id_new_instance,
+        }
+        payload_to_check = {
+            "id": idx,
+            "name":"new_name",
+            "description":"Updated description",
+            "data_hash":"74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "instance_id":"805bad3280c95e45384dc6bd91a41317f9a7858c",
+            }
+        self.update_row(
+            self.url + str(idx) + "/",
+            data,
+            payload_to_check,
+        )
+
 
 class TestExecutionsDetailEndpointDatabricks(
     TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
@@ -552,17 +585,37 @@ class TestExecutionsDetailEndpointDatabricks(
         self.assertEqual(
             response.json["message"], "This feature is not available for Databricks"
         )
+    def test_edit_execution(self):
 
+        id_new_instance = self.create_new_row(
+            INSTANCE_URL, InstanceModel, self.instance_payload
+        )
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
 
-class TestExecutionsStatusEndpointAirflow(TestExecutionsDetailEndpointMock):
-    def setUp(self):
-        super().setUp()
-        self.response_items = {"id", "name", "status"}
-        self.items_to_check = []
+        # Extract the data from data/edit_execution_solution.json
+        with open(EDIT_EXECUTION_SOLUTION) as f:
+            data = json.load(f)
 
-    def create_app(self):
-        app = create_app("testing")
-        return app
+        data = {
+            "name": "new_name",
+            "description": "Updated description",
+            "data": data,
+            "instance_id": id_new_instance,
+        }
+        payload_to_check = {
+            "id": idx,
+            "name":"new_name",
+            "description":"Updated description",
+            "data_hash":"74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "instance_id":"805bad3280c95e45384dc6bd91a41317f9a7858c",
+            }
+        self.update_row(
+            self.url + str(idx) + "/",
+            data,
+            payload_to_check,
+        )
 
     @patch("cornflow.endpoints.execution.Airflow")
     def test_get_one_status(self, af_client_class):
