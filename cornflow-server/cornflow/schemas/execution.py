@@ -78,6 +78,7 @@ class ExecutionEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
     data = fields.Raw()
+    instance_id = fields.Str(required=False)
 
 
 class ExecutionDagRequest(Schema):
