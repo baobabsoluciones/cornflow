@@ -556,6 +556,37 @@ class TestExecutionsDetailEndpointAirflow(
             payload_to_check,
         )
 
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_get_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        keys_to_check = ["state", "message", "id", "data_hash"]
+        data = self.get_one_row(
+            EXECUTION_URL + idx + "/status/",
+            payload,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        self.assertEqual(data["state"], 1)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_put_one_status(self, af_client_class):
+        patch_af_client(af_client_class)
+
+        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+        payload = dict(self.payload)
+        payload["id"] = idx
+        response = self.client.put(
+            EXECUTION_URL + idx + "/status/",
+            data=json.dumps({"status": 0}),
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
 class TestExecutionsDetailEndpointDatabricks(
     TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
@@ -617,38 +648,7 @@ class TestExecutionsDetailEndpointDatabricks(
             payload_to_check,
         )
 
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_get_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
 
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        keys_to_check = ["state", "message", "id", "data_hash"]
-        data = self.get_one_row(
-            EXECUTION_URL + idx + "/status/",
-            payload,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertEqual(data["state"], 1)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_put_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        response = self.client.put(
-            EXECUTION_URL + idx + "/status/",
-            data=json.dumps({"status": 0}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
 
 class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
