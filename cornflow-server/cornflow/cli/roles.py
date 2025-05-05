@@ -6,6 +6,10 @@ from .utils import get_app
 
 @click.group(name="roles", help="Commands to manage the roles")
 def roles():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

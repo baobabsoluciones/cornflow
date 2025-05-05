@@ -7,9 +7,7 @@ from pyomo.environ import (
     Constraint,
     Objective,
     SolverFactory,
-    Binary,
     NonNegativeIntegers,
-    NonNegativeReals,
     minimize,
     value,
 )
@@ -19,7 +17,7 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
 
 # Imports from internal modules
@@ -94,30 +92,30 @@ class MipModel(Experiment):
         )
 
         # Create constraints
-        def c01_demand_satisfaction(model, iProduct):
+        def c01_demand_satisfaction(model, product):
             """demand satisfaction for each product"""
             return (
                 sum(
-                    model.pNumberProductsPerBarPattern[iBar, iPattern, iProduct]
-                    * model.vNumPatternsUsedPerBar[iBar, iPattern]
-                    for iBar in model.sBars
-                    for iPattern in model.sPatterns
-                    if (iBar, iPattern, iProduct) in model.sBars_sPatterns_sProducts
+                    model.pNumberProductsPerBarPattern[bar, pattern, product]
+                    * model.vNumPatternsUsedPerBar[bar, pattern]
+                    for bar in model.sBars
+                    for pattern in model.sPatterns
+                    if (bar, pattern, product) in model.sBars_sPatterns_sProducts
                 )
-                >= model.pProductDemand[iProduct]
+                >= model.pProductDemand[product]
             )
 
         # Create objective function
         def obj_expression(model):
             """minimum total loss of material"""
             return sum(
-                model.pBarLength[iBar] * model.vNumPatternsUsedPerBar[iBar, iPattern]
-                for iBar in model.sBars
-                for iPattern in model.sPatterns
-                if (iBar, iPattern) in model.sBars_sPatterns
+                model.pBarLength[bar] * model.vNumPatternsUsedPerBar[bar, pattern]
+                for bar in model.sBars
+                for pattern in model.sPatterns
+                if (bar, pattern) in model.sBars_sPatterns
             ) - sum(
-                model.pProductLength[iProduct] * model.pProductDemand[iProduct]
-                for iProduct in model.sProducts
+                model.pProductLength[product] * model.pProductDemand[product]
+                for product in model.sProducts
             )
 
         # Active constraints
@@ -143,7 +141,7 @@ class MipModel(Experiment):
             time_limit=config.get("timeLimit", 360),
             abs_gap=config.get("abs_gap", 1),
             rel_gap=config.get("rel_gap", 0.01),
-            solver=solver_name
+            solver=solver_name,
         )
         SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
 
@@ -158,15 +156,13 @@ class MipModel(Experiment):
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
             return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
 
         solution_dict = dict()

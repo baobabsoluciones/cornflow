@@ -34,7 +34,6 @@ from cornflow.shared.exceptions import InvalidUsage, InvalidData
 from cornflow.shared.validators import json_schema_validate_as_string
 
 
-
 # Initialize the schema that all endpoints are going to use
 ALLOWED_EXTENSIONS = {"mps", "lp"}
 
@@ -92,14 +91,18 @@ class InstanceEndpoint(BaseMetaResource):
         # We validate the instance data
         config = current_app.config
 
-        instance_schema = DeployedOrch.get_one_schema(config, data_schema, INSTANCE_SCHEMA)
-        instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+        instance_schema = DeployedOrch.get_one_schema(
+            config, data_schema, INSTANCE_SCHEMA
+        )
+        instance_errors = json_schema_validate_as_string(
+            instance_schema, kwargs["data"]
+        )
 
         if instance_errors:
             raise InvalidData(
                 payload=dict(jsonschema_errors=instance_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create an instance. "
-                        f"Instance data do not match the jsonschema.",
+                f"Instance data do not match the jsonschema.",
             )
 
         # if we're here, we validated and the data seems to fit the schema
@@ -163,14 +166,18 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
             config = current_app.config
 
-            instance_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
-            instance_errors = json_schema_validate_as_string(instance_schema, kwargs["data"])
+            instance_schema = DeployedOrch.get_one_schema(
+                config, schema, INSTANCE_SCHEMA
+            )
+            instance_errors = json_schema_validate_as_string(
+                instance_schema, kwargs["data"]
+            )
 
             if instance_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=instance_errors),
                     log_txt=f"Error while user {self.get_user()} tries to create an instance. "
-                            f"Instance data do not match the jsonschema.",
+                    f"Instance data do not match the jsonschema.",
                 )
 
         response = self.put_detail(data=kwargs, user=self.get_user(), idx=idx)
@@ -268,15 +275,35 @@ class InstanceFileEndpoint(BaseMetaResource):
         sense = 1 if minimize else -1
         try:
             _vars, problem = pulp.LpProblem.fromMPS(filename, sense=sense)
-        except:
+        except FileNotFoundError as e:
+            # Handle file not found specifically
             raise InvalidUsage(
-                error="There was an error reading the file",
-                log_txt=f"Error while user {self.get_user()} tries to create instance from mps file. "
-                f"There was an error reading the file.",
+                error=f"MPS file not found: {filename}",
+                log_txt=f"Error for user {self.get_user()}: MPS file '{filename}' not found. Details: {e}",
+                status_code=404,
+            ) from e
+        except PermissionError as e:
+            # Handle permission issues
+            raise InvalidUsage(
+                error=f"Permission denied reading MPS file: {filename}",
+                log_txt=f"Error for user {self.get_user()}: Permission denied for MPS file '{filename}'. Details: {e}",
+                status_code=403,
+            ) from e
+        except (ValueError, pulp.PulpError, OSError, IndexError) as e:
+            # Catch parsing errors, PuLP errors, and other IO errors
+            # Handle parsing, PuLP, or other OS errors
+            current_app.logger.error(
+                f"Error parsing MPS file {filename} for user {self.get_user()}: {e}",
+                exc_info=True,
             )
+            raise InvalidUsage(
+                error="Error reading or parsing the MPS file.",
+                log_txt=f"Error while user {self.get_user()} tries to create instance from MPS file {filename}. Details: {e}",
+            ) from e
+
         try:
             os.remove(filename)
-        except:
+        except FileNotFoundError:
             pass
 
         pb_data = dict(

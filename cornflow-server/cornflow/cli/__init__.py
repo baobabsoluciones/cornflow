@@ -17,6 +17,10 @@ from cornflow.cli.views import views
 
 @click.group(name="cornflow", help="Commands in the cornflow cli")
 def cli():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 

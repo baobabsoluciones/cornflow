@@ -3,6 +3,7 @@ import os.path
 
 import click
 from cornflow.shared import db
+from cornflow.shared.const import MIGRATIONS_DEFAULT_PATH
 from flask_migrate import Migrate, migrate, upgrade, downgrade, init
 
 from .utils import get_app
@@ -10,6 +11,10 @@ from .utils import get_app
 
 @click.group(name="migrations", help="Commands to manage the migrations")
 def migrations():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 
@@ -18,12 +23,12 @@ def migrate_migrations():
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
-        path = "./cornflow/migrations"
+        path = MIGRATIONS_DEFAULT_PATH
     else:
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         migrate()
 
 
@@ -35,12 +40,12 @@ def upgrade_migrations(revision="head"):
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
-        path = "./cornflow/migrations"
+        path = MIGRATIONS_DEFAULT_PATH
     else:
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         upgrade(revision=revision)
 
 
@@ -52,12 +57,12 @@ def downgrade_migrations(revision="-1"):
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
-        path = "./cornflow/migrations"
+        path = MIGRATIONS_DEFAULT_PATH
     else:
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         downgrade(revision=revision)
 
 
@@ -69,10 +74,10 @@ def init_migrations():
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
     if external == 0:
-        path = "./cornflow/migrations"
+        path = MIGRATIONS_DEFAULT_PATH
     else:
         path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
 
     with app.app_context():
-        migration_client = Migrate(app=app, db=db, directory=path)
+        Migrate(app=app, db=db, directory=path)
         init()

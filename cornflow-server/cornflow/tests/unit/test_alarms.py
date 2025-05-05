@@ -91,7 +91,6 @@ class TestAlarmsEndpoint(CustomTestCase):
 class TestAlarmsDetailEndpoint(TestAlarmsEndpoint, BaseTestCases.DetailEndpoint):
     def setUp(self):
         super().setUp()
-        self.url = self.url
         self.idx = 0
         self.payload = {
             "name": "Alarm 1",

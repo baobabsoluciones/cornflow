@@ -53,7 +53,7 @@ class Experiment(ExperimentCore):
         result = SuperDict()
         for id_shift, shift in shifts.items():
             cumulated_driving_time = 0
-            for s, (stop, next_stop) in enumerate(
+            for _, (stop, next_stop) in enumerate(
                 zip(shift["route"], shift["route"][1:])
             ):
                 stop["cumulated_driving_time"] = cumulated_driving_time
@@ -255,7 +255,6 @@ class Experiment(ExperimentCore):
         check = TupList()
         for shift in self.solution.get_all_shifts():
             id_shift = shift.get("id_shift", None)
-            id_operation = 1
 
             for operation in shift["route"][:-1]:
                 if not self.is_valid_location(operation["location"]):
@@ -268,43 +267,46 @@ class Experiment(ExperimentCore):
                     )
                     if operation["departure"] < operation["arrival"] + setup_time:
                         check.append({"id_shift": id_shift, "id_location": location})
-                        id_operation += 1
 
         return check
 
     # Checks that the operations are performed during customers'time windows
     def check_c_04_customer_TW(self):
         """
-        returns [{"id_shift": shift_id, "id_location": location}, ... ] for operation out of customer's TW
+        Returns a list of operations that occur outside of any customer time window.
+        Each item in the list is a dictionary: {'id_shift': shift_id, 'id_location': location}
         """
-        check = TupList()
+        violations = TupList()
 
         for shift in self.solution.get_all_shifts():
-            id_shift = shift.get("id_shift", None)
+            id_shift = shift.get("id_shift")
 
+            # Iterate through operations, excluding the last one (often a depot return)
             for operation in shift["route"][:-1]:
                 location = operation["location"]
+
+                # Skip if the location is not a customer
                 if not self.is_customer(location):
                     continue
-                tw_found = False
-                ind_tw = 0
-                while (
-                    ind_tw
-                    < len(self.instance.get_customer_property(location, "timewindows"))
-                    and not tw_found
-                ):
-                    time_window = self.instance.get_customer_property(
-                        location, "timewindows"
-                    )[ind_tw]
-                    if (
-                        time_window["start"] <= operation["arrival"]
-                        and time_window["end"] >= operation["departure"]
-                    ):
-                        tw_found = True
-                    ind_tw += 1
-                if not tw_found:
-                    check.append({"id_shift": id_shift, "id_location": location})
-        return check
+
+                customer_time_windows = self.instance.get_customer_property(
+                    location, "timewindows"
+                )
+                operation_arrival = operation["arrival"]
+                operation_departure = operation["departure"]
+
+                # Check if the operation fits within *any* of the customer's time windows
+                is_within_any_tw = any(
+                    tw["start"] <= operation_arrival
+                    and tw["end"] >= operation_departure
+                    for tw in customer_time_windows
+                )
+
+                # If the operation doesn't fit in any time window, record a violation
+                if not is_within_any_tw:
+                    violations.append({"id_shift": id_shift, "id_location": location})
+
+        return violations
 
     # Checks that the loading and delivery sites are accessible for the vehicle
     def check_c_05_sites_accessible(self):
@@ -321,17 +323,18 @@ class Experiment(ExperimentCore):
 
             for operation in shift["route"][:-1]:
                 location = operation["location"]
-                if self.is_customer_or_source(location):
-                    if trailer not in self.instance.get_location_property(
-                        location, "allowedTrailers"
-                    ):
-                        check.append(
-                            {
-                                "id_shift": id_shift,
-                                "id_location": location,
-                                "id_trailer": trailer,
-                            }
-                        )
+                if self.is_customer_or_source(
+                    location
+                ) and trailer not in self.instance.get_location_property(
+                    location, "allowedTrailers"
+                ):
+                    check.append(
+                        {
+                            "id_shift": id_shift,
+                            "id_location": location,
+                            "id_trailer": trailer,
+                        }
+                    )
         return check
 
     def check_c_0607_inventory_trailer_negative(self):
@@ -512,15 +515,11 @@ class Experiment(ExperimentCore):
             for i in range(1, len(shift["route"]) + 1):
                 operation = shift["route"][i - 1]
                 location = operation["location"]
-                if self.is_source(location) and operation["quantity"] < 0:
-                    check.append(
-                        {
-                            "id_shift": id_shift,
-                            "id_location": location,
-                            "quantity": operation["quantity"],
-                        }
-                    )
-                elif self.is_customer(location) and operation["quantity"] > 0:
+                # Check for loading at source (quantity should be > 0) or delivery at customer (quantity should be < 0)
+                # Violation if loading at source with negative quantity OR delivering to customer with positive quantity.
+                if (self.is_source(location) and operation["quantity"] < 0) or (
+                    self.is_customer(location) and operation["quantity"] > 0
+                ):
                     check.append(
                         {
                             "id_shift": id_shift,
@@ -666,7 +665,6 @@ class Experiment(ExperimentCore):
             location = site_inventory["location"]
             if not self.is_valid_location(location):
                 check.append({"id_location": location})
-                continue
 
         return check
 
@@ -912,97 +910,91 @@ class Experiment(ExperimentCore):
 
     # ===========================================
     # Verification of service quality constraints
-    # Checks that all orders having a time window ending before the planning horizon are satisfied
+    # Checks that all orders having a time window ending before the planning horizon
+    # are satisfied
     def check_qs_01_orders_satisfied(self):
         """
-        returns [{"id_customer": id_customer, "num_order": num_order}, ... ] for not delivered orders
-        """
-        check = TupList()
-        nb_missed_orders = 0
-        orders_customers = []
-        delivered_orders_customers = []
+        Checks if all required customer orders ending within the horizon are satisfied
+        within their quantity flexibility constraints.
 
-        for i in range(self.nb_customers):
-            orders_customers.append([])
-            delivered_orders_customers.append([])
+        Returns:
+            TupList: A list of dictionaries, each representing an unsatisfied order:
+                     {'id_customer': customer_id, 'num_order': order_index}
+        """
+        violations = TupList()
+        order_deliveries = SuperDict()
+        relevant_orders = SuperDict()
         offset_customer = 1 + self.nb_sources
 
-        for c in range(self.nb_customers):
-            customer = self.instance.get_customer(c + offset_customer)
-            if customer["callIn"] == 0 or customer["orders"] == []:
-                continue
-            orders_customers[c] = [0] * len(customer["orders"])
-            delivered_orders_customers[c] = [0] * len(customer["orders"])
+        # 1. Identify relevant orders and their requirements
+        for c_idx in range(self.nb_customers):
+            customer_id = c_idx + offset_customer
+            customer = self.instance.get_customer(customer_id)
 
-            for o in range(len(customer["orders"])):
-                order = customer["orders"][o]
-                if order["latestTime"] > self.horizon * self.unit:
-                    orders_customers[c][o] = 0
-                    delivered_orders_customers[c][o] = 0
-                else:
-                    orders_customers[c][o] = -1
-                    delivered_orders_customers[c][o] = 0
+            if customer["callIn"] == 1 and customer.get("orders"):
+                for o_idx, order in enumerate(customer["orders"]):
+                    # Only consider orders that must finish within the horizon
+                    if order["latestTime"] <= self.horizon * self.unit:
+                        order_key = (customer_id, o_idx)
+                        quantity = order["Quantity"]
+                        flexibility = order["orderQuantityFlexibility"]
+                        min_qty = quantity * (1 - flexibility / 100.0)
+                        max_qty = quantity
+                        relevant_orders[order_key] = {
+                            "min_qty": round(min_qty, 3),
+                            "max_qty": round(max_qty, 3),
+                            "earliestTime": order["earliestTime"],
+                            "latestTime": order["latestTime"],
+                        }
+                        order_deliveries[order_key] = 0.0
 
+        # 2. Accumulate delivered quantities for relevant orders
         for shift in self.solution.get_all_shifts():
             for operation in shift["route"]:
                 location = operation["location"]
-                if location < 1 + self.nb_sources:
-                    continue
-                call_in = self.instance.get_customer_property(location, "callIn")
-                orders = self.instance.get_customer_property(location, "orders")
-                if call_in != 1 or not len(orders):
-                    continue
-                good_orders = (
-                    TupList(orders)
-                    .kvapply(lambda ord, order: (ord, order))
-                    .vfilter(
-                        lambda o: o[1]["earliestTime"]
-                        <= operation[1]["arrival"]
-                        <= o[1]["latestTime"]
-                    )
+                # Check if it's a delivery to a customer with orders
+                if self.is_customer(location) and operation["quantity"] < 0:
+                    customer_id = location
+                    arrival_time = operation["arrival"]
+                    delivered_amount = -round(operation["quantity"], 3)
+
+                    # Find orders for this customer where the delivery falls within the
+                    # time window
+                    for order_key, requirements in relevant_orders.items():
+                        if (
+                            order_key[0] == customer_id
+                            and requirements["earliestTime"]
+                            <= arrival_time
+                            <= requirements["latestTime"]
+                        ):
+                            # Add delivered amount to all matching orders
+                            # Note: This assumes a delivery potentially contributes to
+                            # multiple open orders within its time window, matching the
+                            # original logic's apparent intent.
+                            order_deliveries[order_key] += delivered_amount
+
+        # 3. Check if accumulated deliveries satisfy order requirements
+        for order_key, requirements in relevant_orders.items():
+            delivered_qty = round(order_deliveries.get(order_key, 0.0), 3)
+            min_qty = requirements["min_qty"]
+            max_qty = requirements["max_qty"]
+
+            # Check if the delivered quantity is outside the allowed flexibility range
+            if not (min_qty <= delivered_qty <= max_qty):
+                violations.append(
+                    {"id_customer": order_key[0], "num_order": order_key[1]}
                 )
 
-                for ord, order in good_orders:
-                    delivered_orders_customers[location - offset_customer][ord] = (
-                        delivered_orders_customers[location - offset_customer][ord]
-                        + operation["quantity"]
-                    )
-
-        for c in range(self.nb_customers):
-            customer = self.instance.get_customer(c + offset_customer)
-            if not customer["orders"]:
-                continue
-
-            for o in range(len(customer["orders"])):
-                quantity = customer["orders"][o]["Quantity"]
-                flexibility = customer["orders"][o]["orderQuantityFlexibility"]
-                if (
-                    quantity * flexibility / 100
-                    <= delivered_orders_customers[c][o]
-                    <= quantity
-                ):
-                    orders_customers[c][o] = 1
-                else:
-                    check.append({"id_customer": c + offset_customer, "num_order": o})
-
-        for c in range(self.nb_customers):
-            customer = self.instance.get_customer(c + offset_customer)
-            nb_missed_orders += sum(
-                1
-                for o in range(len(customer["orders"]))
-                if orders_customers[c][o] == -1
-                if customer["orders"]
-            )
-
-        return check
+        return violations
 
     # Checks that there are no run outs
     def check_qs_02_runouts(self):
         """
-        returns [{"id_location": location, "nb_run_outs": nb_run_outs}, ... ] for locations experiencing run-outs
+        returns [{"id_location": location, "nb_run_outs": nb_run_outs}, ... ] for
+        locations experiencing run-outs
         """
         check = TupList()
-        nb_run_outs = 0
+
         site_inventories = self.calculate_inventories()
 
         for site in site_inventories.keys():
@@ -1020,7 +1012,6 @@ class Experiment(ExperimentCore):
                     if round(site_inventory["tank_quantity"][i], 2) < 0
                     if customer["callIn"] == 0
                 )
-            nb_run_outs += nb_inventory_run_out
             if nb_inventory_run_out != 0:
                 check.append({"id_location": site, "nb_run_outs": nb_inventory_run_out})
         return check
@@ -1036,7 +1027,8 @@ class Experiment(ExperimentCore):
     # Checks that the shift's operations on callIn customers are related to an order
     def sub_check_qs_03(self, shift, id_shift):
         """
-        returns [{"id_shift": shift_id, "id_location": location}, ... ] for deliveries not related to an order to callIn customer
+        returns [{"id_shift": shift_id, "id_location": location}, ... ] for deliveries
+        not related to an order to callIn customer
         """
         check = TupList()
 
@@ -1102,12 +1094,12 @@ class Experiment(ExperimentCore):
         for row in check_dict.get("c_0607_inventory_trailer_final_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
             check_log += (
-                f"The trailer's operations do not correspond to its final inventory.\n"
+                "The trailer's operations do not correspond to its final inventory.\n"
             )
 
         for row in check_dict.get("c_0607_inventory_trailer_initial_inventory", []):
             check_log += f"check_shift_07, shift {row['id_shift']}. "
-            check_log += f"The initial inventory is not coherent with last shift of the trailer.\n"
+            check_log += "The initial inventory is not coherent with last shift of the trailer.\n"
 
         for row in check_dict.get("c_11_quantity_delivered", []):
             check_log += f"check_shift_11, shift {row['id_shift']}. "
@@ -1133,7 +1125,7 @@ class Experiment(ExperimentCore):
             )
 
         for row in check_dict.get("site_doesntexist", []):
-            check_log += f"check_sites."
+            check_log += "check_sites."
             check_log += f"SiteInventory {row['id_location']} does not correspond to a location.\n"
 
         # Resources
@@ -1149,7 +1141,7 @@ class Experiment(ExperimentCore):
 
         for row in check_dict.get("res_dr_08_driver_TW", []):
             check_log += f"check_resources_dr_08, shift {row['id_shift']}. "
-            check_log += f"Shift is out of the time windows of the driver.\n"
+            check_log += "Shift is out of the time windows of the driver.\n"
 
         for row in check_dict.get("res_tl_01_shift_overlaps", []):
             check_log += f"aux_check_resources_tl_01, shift {row['id_shift']}. "
@@ -1160,16 +1152,16 @@ class Experiment(ExperimentCore):
         for row in check_dict.get("res_tl_03_compatibility_dr_tr", []):
             check_log += f"aux_check_resources_tl_03, shift {row['id_shift']}. "
             check_log += (
-                f"Trailer is not in the set of trailers compatible with the driver.\n"
+                "Trailer is not in the set of trailers compatible with the driver.\n"
             )
 
         # Quality of service
         for row in check_dict.get("qs_01_orders_satisfied", []):
-            check_log += f"check_qs_01. "
+            check_log += "check_qs_01. "
             check_log += f"Missed order nª{row['num_order']} at customer {row['id_customer']}. \n"
 
         for row in check_dict.get("qs_02_runouts", []):
-            check_log += f"check_qs_02."
+            check_log += "check_qs_02."
             check_log += f"Customer {row['id_location']} ran out.\n"
 
         for row in check_dict.get("qs_03_callins", []):

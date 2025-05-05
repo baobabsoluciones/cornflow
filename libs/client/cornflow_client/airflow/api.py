@@ -48,8 +48,6 @@ class Airflow(object):
         def_headers = {"Content-type": "application/json", "Accept": "application/json"}
         headers = kwargs.get("headers", def_headers)
         response = requests.request(headers=headers, auth=self.auth, **kwargs)
-        if status is None:
-            return response
         if response.status_code != status:
             raise AirflowError(error=response.text, status_code=response.status_code)
         return response

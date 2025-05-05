@@ -1,6 +1,7 @@
 """
 Endpoints to get the example data from a DAG
 """
+
 import json
 
 from cornflow_client.airflow.api import Airflow
@@ -11,7 +12,12 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG
 from cornflow.schemas.example_data import ExampleListData, ExampleDetailData
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
+from cornflow.shared.const import (
+    AIRFLOW_NOT_REACHABLE_MSG,
+    VIEWER_ROLE,
+    PLANNER_ROLE,
+    ADMIN_ROLE,
+)
 from cornflow.shared.exceptions import AirflowError, NoPermission, ObjectDoesNotExist
 
 
@@ -44,7 +50,7 @@ class ExampleDataListEndpoint(BaseMetaResource):
                 current_app.logger.error(
                     "Airflow not accessible when getting data {}".format(dag_name)
                 )
-                raise AirflowError(error="Airflow is not accessible")
+                raise AirflowError(error=f"{AIRFLOW_NOT_REACHABLE_MSG}")
 
             # try airflow and see if dag_name exists
             af_client.get_orch_info(dag_name)
@@ -87,7 +93,7 @@ class ExampleDataDetailEndpoint(BaseMetaResource):
                 current_app.logger.error(
                     "Airflow not accessible when getting data {}".format(dag_name)
                 )
-                raise AirflowError(error="Airflow is not accessible")
+                raise AirflowError(error=f"{AIRFLOW_NOT_REACHABLE_MSG}")
 
             # try airflow and see if dag_name exists
             af_client.get_orch_info(dag_name)

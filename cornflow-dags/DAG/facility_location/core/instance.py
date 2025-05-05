@@ -109,10 +109,10 @@ class Instance(InstanceCore):
             lambda v: v * self.data["parameters"]["cost_per_km_per_dose"]
         )
 
-    def is_lower_level(self, iW1, iW2):
+    def is_lower_level(self, warehouse_1, warehouse_2):
         levels = self._get_property("warehouses", "level")
-        return levels[iW1] < levels[iW2]
+        return levels[warehouse_1] < levels[warehouse_2]
 
-    def is_higher_level(self, iW1, iW2):
+    def is_higher_level(self, warehouse_1, warehouse_2):
         levels = self._get_property("warehouses", "level")
-        return levels[iW1] > levels[iW2]
+        return levels[warehouse_1] > levels[warehouse_2]

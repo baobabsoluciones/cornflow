@@ -22,7 +22,7 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
 
 # Imports from internal modules
@@ -69,7 +69,8 @@ class ColumnGeneration(Experiment):
         return {None: pyomo_instance}
 
     def get_master_problem(self, relax=True):
-        """This function builds the master/original problem (master problem if relax=True, original proble if relax=False)"""
+        """This function builds the master/original problem (master problem
+        if relax=True, original proble if relax=False)"""
 
         # Create model
         model = AbstractModel()
@@ -113,27 +114,27 @@ class ColumnGeneration(Experiment):
         )
 
         # Create constraints
-        def c01_demand_satisfaction(model, iProduct):
+        def c01_demand_satisfaction(model, product):
             """demand satisfaction for each product"""
             return (
                 sum(
-                    model.pNumberProductsPerBarPattern[iBar, iPattern, iProduct]
+                    model.pNumberProductsPerBarPattern[iBar, iPattern, product]
                     * model.vNumPatternsUsedPerBar[iBar, iPattern]
                     for iBar in model.sBars
                     for iPattern in model.sPatterns
-                    if (iBar, iPattern, iProduct) in model.sBars_sPatterns_sProducts
+                    if (iBar, iPattern, product) in model.sBars_sPatterns_sProducts
                 )
-                >= model.pProductDemand[iProduct]
+                >= model.pProductDemand[product]
             )
 
         # Create objective function
         def obj_expression(model):
             """minimum total loss of material"""
             return sum(
-                model.pBarLength[iBar] * model.vNumPatternsUsedPerBar[iBar, iPattern]
-                for iBar in model.sBars
-                for iPattern in model.sPatterns
-                if (iBar, iPattern) in model.sBars_sPatterns
+                model.pBarLength[bar] * model.vNumPatternsUsedPerBar[bar, pattern]
+                for bar in model.sBars
+                for pattern in model.sPatterns
+                if (bar, pattern) in model.sBars_sPatterns
             ) - sum(
                 model.pProductLength[iProduct] * model.pProductDemand[iProduct]
                 for iProduct in model.sProducts
@@ -149,7 +150,7 @@ class ColumnGeneration(Experiment):
 
         return model
 
-    def get_subproblem(self, pBarXLength, pDuals):
+    def get_subproblem(self, bar_length, duals):
         """This function builds the subproblem (knapsack problem)"""
 
         # Create model
@@ -174,19 +175,18 @@ class ColumnGeneration(Experiment):
             """bar length satisfaction"""
             return (
                 sum(
-                    model.pProductLength[iProduct]
-                    * model.vNumberProductsPerBar[iProduct]
-                    for iProduct in model.sProducts
+                    model.pProductLength[product] * model.vNumberProductsPerBar[product]
+                    for product in model.sProducts
                 )
-                <= pBarXLength
+                <= bar_length
             )
 
         # Create objective function
         def obj_expression(model):
             """maximize the value of the pieces that will be part of a new pattern"""
             return sum(
-                pDuals[iProduct] * model.vNumberProductsPerBar[iProduct]
-                for iProduct in model.sProducts
+                duals[product] * model.vNumberProductsPerBar[product]
+                for product in model.sProducts
             )
 
         # Active constraints
@@ -207,7 +207,7 @@ class ColumnGeneration(Experiment):
             time_limit=config.get("timeLimit", 360),
             abs_gap=config.get("abs_gap", 1),
             rel_gap=config.get("rel_gap", 0.01),
-            solver=solver_name
+            solver=solver_name,
         )
         SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
 
@@ -251,7 +251,10 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
-                    name_format = re.compile("([a-z]+)([0-9]+)")
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)(\d+) uses disjoint
+                    # character sets, preventing catastrophic backtracking.
+                    # Used on internal solver variable names.
+                    name_format = re.compile("([a-z]+)(\d+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
                     # Add the new pattern to 'sPatterns'
@@ -263,18 +266,18 @@ class ColumnGeneration(Experiment):
                         (self.instance.get_bar1_id(), new_pattern_name)
                     )
                     # Add the new pattern to 'sBars_sPatterns_sProducts'
-                    for iProduct in data_subproblem1[None]["sProducts"][None]:
+                    for product in data_subproblem1[None]["sProducts"][None]:
                         data_master_problem[None]["sBars_sPatterns_sProducts"][
                             None
                         ].append(
-                            (self.instance.get_bar1_id(), new_pattern_name, iProduct)
+                            (self.instance.get_bar1_id(), new_pattern_name, product)
                         )
                     # Add the new pattern to 'pNumberProductsPerBarPattern'
-                    for iProduct in data_subproblem1[None]["sProducts"][None]:
+                    for product in data_subproblem1[None]["sProducts"][None]:
                         data_master_problem[None]["pNumberProductsPerBarPattern"][
-                            self.instance.get_bar1_id(), new_pattern_name, iProduct
+                            self.instance.get_bar1_id(), new_pattern_name, product
                         ] = value(
-                            model_instance_subproblem1.vNumberProductsPerBar[iProduct]
+                            model_instance_subproblem1.vNumberProductsPerBar[product]
                         )
                 else:
                     # Stop the search
@@ -296,7 +299,10 @@ class ColumnGeneration(Experiment):
                     last_pattern_name = data_master_problem[None]["sPatterns"][
                         None
                     ].sorted()[-1]
-                    name_format = re.compile("([a-z]+)([0-9]+)")
+                    # SonarQube ReDoS FP: Pattern ([a-z]+)(\d+) uses disjoint
+                    # character sets, preventing catastrophic backtracking.
+                    # Used on internal solver variable names.
+                    name_format = re.compile("([a-z]+)(\d+)")
                     matcher = name_format.search(last_pattern_name)
                     new_pattern_name = matcher.group(1) + str(int(matcher.group(2)) + 1)
                     # Add the new pattern to 'sPatterns'
@@ -308,18 +314,18 @@ class ColumnGeneration(Experiment):
                         (self.instance.get_bar2_id(), new_pattern_name)
                     )
                     # Add the new pattern to 'sBars_sPatterns_sProducts'
-                    for iProduct in data_subproblem2[None]["sProducts"][None]:
+                    for product in data_subproblem2[None]["sProducts"][None]:
                         data_master_problem[None]["sBars_sPatterns_sProducts"][
                             None
                         ].append(
-                            (self.instance.get_bar2_id(), new_pattern_name, iProduct)
+                            (self.instance.get_bar2_id(), new_pattern_name, product)
                         )
                     # Add the new pattern to 'pNumberProductsPerBarPattern'
-                    for iProduct in data_subproblem2[None]["sProducts"][None]:
+                    for product in data_subproblem2[None]["sProducts"][None]:
                         data_master_problem[None]["pNumberProductsPerBarPattern"][
-                            self.instance.get_bar2_id(), new_pattern_name, iProduct
+                            self.instance.get_bar2_id(), new_pattern_name, product
                         ] = value(
-                            model_instance_subproblem2.vNumberProductsPerBar[iProduct]
+                            model_instance_subproblem2.vNumberProductsPerBar[product]
                         )
                 else:
                     # Stop the search
@@ -341,15 +347,13 @@ class ColumnGeneration(Experiment):
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
             return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
 
         solution_dict = dict()
@@ -395,7 +399,4 @@ class ColumnGeneration(Experiment):
 
         self.log += "Solving complete\n"
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=termination_condition, status_sol=SOLUTION_STATUS_FEASIBLE)

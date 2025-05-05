@@ -301,18 +301,33 @@ class PeriodicMIP(MIPModel):
             "Generating new model at: ", datetime.now().strftime("%H:%M:%S")
         )
         model = pl.LpProblem("Roadef", pl.LpMinimize)
-        self.create_variables(used_routes, previous_routes_infos, artificial_variables)
+        self.create_variables(
+            used_routes,
+            artificial_variables,
+            previous_routes_infos=previous_routes_infos,
+        )
         model = self.create_constraints(model, used_routes, artificial_variables)
         return model
 
-    def create_variables(
-        self, used_routes, previous_routes_infos, artificial_variables
-    ):
+    def create_variables(self, used_routes, artificial_variables, **kwargs):
+        """Creates all necessary variables for the MIP model."""
         # Indices
+        previous_routes_infos = kwargs.get("previous_routes_infos", None)
         ind_td_routes = self.get_td_routes(used_routes)
         ind_customers_hours = self.get_customers_hours()
 
         # Initial quantities from previous solutions
+        initial_quantities = self._calculate_initial_quantities()
+
+        # Initialize variable groups
+        self._initialize_route_vars(ind_td_routes, previous_routes_infos)
+        self._initialize_artificial_vars(artificial_variables, ind_customers_hours)
+        self._initialize_inventory_vars()
+        self._initialize_quantity_vars(used_routes, initial_quantities)
+        self._initialize_trailer_vars()
+
+    def _calculate_initial_quantities(self):
+        """Calculates initial quantities based on the current solution."""
         initial_quantities = dict()
         for r, route in self.solution.get_id_and_shifts():
             k = defaultdict(int)
@@ -328,18 +343,22 @@ class PeriodicMIP(MIPModel):
                         k[step["location"]],
                     )
                 ] = step["quantity"]
+        return initial_quantities
 
-        # Variables : route
+    def _initialize_route_vars(self, ind_td_routes, previous_routes_infos):
+        """Initializes the route variables."""
         self.route_var = pl.LpVariable.dicts("route", ind_td_routes, 0, 1, pl.LpBinary)
         previous_routes_infos_s = set(previous_routes_infos)
         for k, v in self.route_var.items():
             v.setInitialValue(k in previous_routes_infos_s)
+            # Fix variables for routes starting before the allowed margin
             if self.routes[k[0]].start < self.Hmin - self.resolve_margin:
                 v.fixValue()
         self.route_var = SuperDict(self.route_var)
         self.print_in_console("Var 'route'")
 
-        # Variables : Artificial Quantity
+    def _initialize_artificial_vars(self, artificial_variables, ind_customers_hours):
+        """Initializes artificial quantity and binary variables if needed."""
         if artificial_variables:
             self.artificial_quantities_var = pl.LpVariable.dicts(
                 "ArtificialQuantity", ind_customers_hours, None, 0
@@ -349,17 +368,20 @@ class PeriodicMIP(MIPModel):
             )
 
             for i, h in ind_customers_hours:
+                # Fix variables for hours before the allowed margin
                 if h < self.Hmin - self.resolve_margin:
                     self.artificial_binary_var[i, h].setInitialValue(0)
                     self.artificial_binary_var[i, h].fixValue()
             self.artificial_quantities_var = SuperDict(self.artificial_quantities_var)
             self.artificial_binary_var = SuperDict(self.artificial_binary_var)
         else:
+            # Initialize as empty SuperDicts if not used
             self.artificial_quantities_var = SuperDict()
             self.artificial_binary_var = SuperDict()
         self.print_in_console("Var 'ArtificialQuantity'")
 
-        # Variables : Inventory
+    def _initialize_inventory_vars(self):
+        """Initializes the inventory variables."""
         _capacity = lambda i: self.instance.get_customer_property(i, "Capacity")
         self.inventory_var = {
             (i, h): pl.LpVariable(f"Inventory{i, h}", 0, _capacity(i))
@@ -368,31 +390,32 @@ class PeriodicMIP(MIPModel):
         self.inventory_var = SuperDict(self.inventory_var)
         self.print_in_console("Var 'inventory'")
 
-        # Variables : quantity
+    def _initialize_quantity_vars(self, used_routes, initial_quantities):
+        """Initializes the quantity variables for sources and customers."""
+        # Source quantity variables (loading)
         for r, i, tr, k in self.get_var_quantity_s_domain(used_routes):
             self.quantity_var[i, r, tr, k] = pl.LpVariable(f"quantity{i, r, tr, k}", 0)
-            if initial_quantities.get((i, r, tr, k), None) is None:
-                continue
-            self.quantity_var[i, r, tr, k].setInitialValue(
-                initial_quantities[(i, r, tr, k)]
-            )
-            """if self.routes[r].start < self.Hmin - self.resolve_margin:
-                self.variables["quantity"][(i, r, tr, k)].fixValue() """
+            # Set initial value if available from previous solution
+            initial_val = initial_quantities.get((i, r, tr, k))
+            if initial_val is not None:
+                self.quantity_var[i, r, tr, k].setInitialValue(initial_val)
+                # Note: Fixing logic based on Hmin was commented out, removed for clarity
 
+        # Customer quantity variables (delivery)
         for r, i, tr, k in self.get_var_quantity_p_domain(used_routes):
+            # upBound=0 implies delivery (negative quantity)
             self.quantity_var[i, r, tr, k] = pl.LpVariable(
                 f"quantity{i, r, tr, k}", upBound=0
             )
-            if initial_quantities.get((i, r, tr, k), None) is None:
-                continue
-            self.quantity_var[i, r, tr, k].setInitialValue(
-                initial_quantities[(i, r, tr, k)]
-            )
-            """if self.routes[r].start < self.Hmin - self.resolve_margin:
-                self.variables["quantity"][(i, r, tr, k)].fixValue() """
+            # Set initial value if available from previous solution
+            initial_val = initial_quantities.get((i, r, tr, k))
+            if initial_val is not None:
+                self.quantity_var[i, r, tr, k].setInitialValue(initial_val)
+                # Note: Fixing logic based on Hmin was commented out, removed for clarity
         self.print_in_console("Var 'quantity'")
 
-        # Variables : TrailerQuantity
+    def _initialize_trailer_vars(self):
+        """Initializes the trailer quantity variables."""
         _capacity = lambda tr: self.instance.get_trailer_property(tr, "Capacity")
         self.trailer_quantity_var = {
             (tr, h): pl.LpVariable(
