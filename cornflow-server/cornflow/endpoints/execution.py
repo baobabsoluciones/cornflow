@@ -5,11 +5,9 @@ These endpoints hve different access url, but manage the same data entities
 """
 
 # Import from libraries
-# from cornflow_client.airflow.api import Airflow
-from cornflow.shared.airflow import Airflow
+from cornflow_client.airflow.api import Airflow
 
-# from cornflow_client.databricks.api import Databricks
-from cornflow.shared.databricks import Databricks
+from cornflow_client.databricks.api import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc

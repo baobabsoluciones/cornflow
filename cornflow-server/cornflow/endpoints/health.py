@@ -20,7 +20,7 @@ from cornflow.shared.const import (
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
 )
-from cornflow.shared.databricks import Databricks
+from cornflow_client.databricks.api import Databricks
 from cornflow.shared.exceptions import EndpointNotImplemented
 
 
@@ -35,11 +35,10 @@ class HealthEndpoint(BaseMetaResource):
         :rtype: dict
         :doc-author: baobab soluciones
         """
-        
+
         backend_status = self.check_backend_status()
 
         cornflow_status = STATUS_UNHEALTHY
-        
 
         if (
             UserModel.get_one_user_by_username(os.getenv("CORNFLOW_SERVICE_USER"))
@@ -75,5 +74,5 @@ class HealthEndpoint(BaseMetaResource):
         databricks_status = STATUS_UNHEALTHY
         if db_client.is_alive():
             databricks_status = STATUS_HEALTHY
-        
+
         return databricks_status

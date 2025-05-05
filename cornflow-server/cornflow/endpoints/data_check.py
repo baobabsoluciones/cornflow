@@ -4,8 +4,7 @@ External endpoints to launch the solution check on an execution
 
 # Import from libraries
 # TODO: CHANGE BEFORE MERGING
-# from cornflow_client.airflow.api import Airflow
-from cornflow.shared.airflow import Airflow
+from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
@@ -256,7 +255,9 @@ class DataCheckCaseEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
