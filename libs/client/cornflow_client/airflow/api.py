@@ -28,7 +28,7 @@ class Airflow(object):
         )
         return cls(**data)
 
-    def is_alive(self):
+    def is_alive(self, config=None):
         try:
             response = requests.get(f"{self.url}/health")
         except (ConnectionError, HTTPError):
@@ -84,9 +84,9 @@ class Airflow(object):
     def update_dag_registry(self, dag_name="update_dag_registry"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
-    def get_run_status(self, dag_name, dag_run_id):
+    def get_run_status(self, schema, run_id):
         return self.consume_dag_run(
-            dag_name, payload=None, dag_run_id=dag_run_id, method="GET"
+            schema, payload=None, dag_run_id=run_id, method="GET"
         )
 
     def set_dag_run_to_fail(self, dag_name, run_id, new_status="failed"):
