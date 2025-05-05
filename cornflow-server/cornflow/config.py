@@ -41,7 +41,7 @@ class DefaultConfig(object):
     DATABRICKS_TOKEN_ENDPOINT = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
     DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
     DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
-
+    DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
     # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
@@ -134,6 +134,7 @@ class Testing(DefaultConfig):
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
 
+
 class TestingDatabricks(Testing):
     CORNFLOW_BACKEND = DATABRICKS_BACKEND
 
@@ -176,5 +177,5 @@ app_config = {
     "production": Production,
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
-    "testing-databricks" : TestingDatabricks
+    "testing-databricks": TestingDatabricks,
 }

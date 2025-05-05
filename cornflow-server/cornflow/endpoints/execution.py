@@ -157,7 +157,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
                 continue
 
-            if not self.orch_client.is_alive():
+            if not self.orch_client.is_alive(config=current_app.config):
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
                     "Airflow is not accessible."
@@ -626,7 +626,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
                 f"The execution does not exist."
             )
 
-        if not self.orch_client.is_alive():
+        if not self.orch_client.is_alive(config=current_app.config):
             err = self.orch_const["name"] + " is not accessible"
             raise self.orch_error(
                 error=err,
@@ -897,7 +897,7 @@ def get_databricks(schema, execution, message="tries to create an execution"):
     """
     db_client = Databricks.from_config(current_app.config)
     schema_info = db_client.get_orch_info(schema)
-    if not db_client.is_alive():
+    if not db_client.is_alive(config=current_app.config):
         err = "Databricks is not accessible"
         current_app.logger.error(err)
         execution.update_state(EXEC_STATE_ERROR_START)

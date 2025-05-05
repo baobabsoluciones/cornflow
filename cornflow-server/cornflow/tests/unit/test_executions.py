@@ -19,7 +19,8 @@ from cornflow.tests.const import (
     INSTANCE_URL,
     DAG_URL,
     BAD_EXECUTION_PATH,
-    EXECUTION_SOLUTION_PATH, EDIT_EXECUTION_SOLUTION,
+    EXECUTION_SOLUTION_PATH,
+    EDIT_EXECUTION_SOLUTION,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
@@ -186,7 +187,9 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
         app = create_app("testing-databricks")
         return app
 
-    def test_new_execution(self):
+    @patch("cornflow.endpoints.execution.Databricks")
+    def test_new_execution(self, db_client_class):
+        patch_db_client(db_client_class)
         self.create_new_row(self.url, self.model, payload=self.payload)
 
     @patch("cornflow.endpoints.execution.Databricks")
@@ -232,7 +235,6 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
     @patch("cornflow.endpoints.execution.Databricks")
     def test_new_execution_with_solution_bad(self, db_client_class):
         patch_db_client(db_client_class)
-        patch_db_client(db_client_class)
         self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
         response = self.create_new_row(
             EXECUTION_URL,
@@ -244,7 +246,9 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
         self.assertIn("error", response)
         self.assertIn("jsonschema_errors", response)
 
-    def test_new_execution_no_instance(self):
+    @patch("cornflow.endpoints.execution.Databricks")
+    def test_new_execution_no_instance(self, db_client_class):
+        patch_db_client(db_client_class)
         payload = dict(self.payload)
         payload["instance_id"] = "bad_id"
         response = self.client.post(
@@ -256,13 +260,19 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
         self.assertEqual(404, response.status_code)
         self.assertTrue("error" in response.json)
 
-    def test_get_executions(self):
+    @patch("cornflow.endpoints.execution.Databricks")
+    def test_get_executions(self, db_client_class):
+        patch_db_client(db_client_class)
         self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
 
-    def test_get_no_executions(self):
+    @patch("cornflow.endpoints.execution.Databricks")
+    def test_get_no_executions(self, db_client_class):
+        patch_db_client(db_client_class)
         self.get_no_rows(self.url)
 
-    def test_get_executions_superadmin(self):
+    @patch("cornflow.endpoints.execution.Databricks")
+    def test_get_executions_superadmin(self, db_client_class):
+        patch_db_client(db_client_class)
         self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
         token = self.create_service_user()
         rows = self.client.get(
@@ -545,11 +555,11 @@ class TestExecutionsDetailEndpointAirflow(
         }
         payload_to_check = {
             "id": idx,
-            "name":"new_name",
-            "description":"Updated description",
-            "data_hash":"74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-            "instance_id":"805bad3280c95e45384dc6bd91a41317f9a7858c",
-            }
+            "name": "new_name",
+            "description": "Updated description",
+            "data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "instance_id": "805bad3280c95e45384dc6bd91a41317f9a7858c",
+        }
         self.update_row(
             self.url + str(idx) + "/",
             data,
@@ -588,6 +598,7 @@ class TestExecutionsDetailEndpointAirflow(
         self.assertEqual(200, response.status_code)
         self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
 
+
 class TestExecutionsDetailEndpointDatabricks(
     TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
 ):
@@ -616,6 +627,7 @@ class TestExecutionsDetailEndpointDatabricks(
         self.assertEqual(
             response.json["message"], "This feature is not available for Databricks"
         )
+
     def test_edit_execution(self):
 
         id_new_instance = self.create_new_row(
@@ -637,18 +649,16 @@ class TestExecutionsDetailEndpointDatabricks(
         }
         payload_to_check = {
             "id": idx,
-            "name":"new_name",
-            "description":"Updated description",
-            "data_hash":"74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-            "instance_id":"805bad3280c95e45384dc6bd91a41317f9a7858c",
-            }
+            "name": "new_name",
+            "description": "Updated description",
+            "data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "instance_id": "805bad3280c95e45384dc6bd91a41317f9a7858c",
+        }
         self.update_row(
             self.url + str(idx) + "/",
             data,
             payload_to_check,
         )
-
-
 
 
 class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):

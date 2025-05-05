@@ -8,8 +8,6 @@ from databricks.sdk import WorkspaceClient
 from flask import current_app
 from cornflow_client.orchestrator_constants import config_orchestrator
 
-# TODO AGA: CODIGO REPETIDO
-# TODO AGA: revisar si el import está bien
 from cornflow_client.constants import DatabricksError
 from cornflow_client.constants import (
     DATABRICKS_TO_STATE_MAP,
@@ -49,12 +47,16 @@ class Databricks:
         oauth_token = oauth_response.json()["access_token"]
         return oauth_token
 
-    def is_alive(self):
+    def is_alive(self, config=None):
         try:
-            # TODO: this url is project specific. Either it has to be a config option or some other way has to be found
-            path = (
-                "/Workspace/Repos/nippon/nippon_production_scheduling/requirements.txt"
-            )
+            if config is None or config["DATABRICKS_HEALTH_PATH"] == "default path":
+                # We raise an error because the default path is not valid
+                raise DatabricksError(
+                    "Invalid default path. Please set DATABRICKS_HEALTH_PATH as an environment variable"
+                )
+            else:
+                path = config["DATABRICKS_HEALTH_PATH"]
+
             url = f"{self.url}/api/2.0/workspace/get-status?path={path}"
             response = self.request_headers_auth(method="GET", url=url)
             if "error_code" in response.json().keys():
@@ -76,8 +78,6 @@ class Databricks:
             raise DatabricksError("JOB not available")
         return schema_info
 
-    # TODO AGA: incluir un id de job por defecto o hacer obligatorio el uso el parámetro.
-    #   Revisar los efectos secundarios de eliminar execution_id y usar el predeterminado
     def run_workflow(
         self,
         execution_id,
@@ -88,9 +88,7 @@ class Databricks:
         """
         Run a job in Databricks
         """
-        # TODO AGA: revisar si la url esta bien/si acepta asi los parámetros
         url = f"{self.url}/api/2.1/jobs/run-now/"
-        # TODO AGA: revisar si deben ser notebook parameters o job parameters.
         #   Entender cómo se usa checks_only
         payload = dict(
             job_id=orch_name,
