@@ -3,7 +3,9 @@ External endpoints to launch the solution check on an execution
 """
 
 # Import from libraries
-from cornflow_client.airflow.api import Airflow
+# TODO: CHANGE BEFORE MERGING
+# from cornflow_client.airflow.api import Airflow
+from cornflow.shared.airflow import Airflow
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
@@ -86,8 +88,8 @@ def _run_airflow_data_check(
 
     # Run the DAG
     try:
-        response = af_client.run_dag(
-            execution.id, dag_name=schema, checks_only=True, **run_dag_kwargs
+        response = af_client.run_workflow(
+            execution.id, orch_name=schema, checks_only=True, **run_dag_kwargs
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"
