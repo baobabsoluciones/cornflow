@@ -8,8 +8,6 @@ These endpoints hve different access url, but manage the same data entities
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.databricks.api import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
-
-# TODO AGA: Porqué el import no funcina correctamente
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 
@@ -37,6 +35,9 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
 )
 from cornflow.shared.const import (
+    AIRFLOW_ERROR_MSG,
+    AIRFLOW_NOT_REACHABLE_MSG,
+    DAG_PAUSED_MSG,
     EXEC_STATE_RUNNING,
     EXEC_STATE_ERROR,
     EXEC_STATE_ERROR_START,
@@ -64,7 +65,7 @@ from cornflow.shared.validators import (
 
 class ExecutionEndpoint(BaseMetaResource):
     """
-    Endpoint used to create and get executions
+    Endpoint used to create a new execution or get all the executions and their information back
     """
 
     def __init__(self):
@@ -159,8 +160,8 @@ class ExecutionEndpoint(BaseMetaResource):
 
             if not self.orch_client.is_alive(config=current_app.config):
                 current_app.logger.warning(
-                    "Error while the app tried to update the status of all running executions."
-                    "Airflow is not accessible."
+                    f"Error while the app tried to update the status of all running executions."
+                    f"{AIRFLOW_NOT_REACHABLE_MSG}"
                 )
                 continue
             try:
@@ -170,7 +171,7 @@ class ExecutionEndpoint(BaseMetaResource):
             except self.orch_error as err:
                 current_app.logger.warning(
                     "Error while the app tried to update the status of all running executions."
-                    f"Orchestrator responded with an error: {err}"
+                    f"{AIRFLOW_ERROR_MSG} {err}"
                 )
                 continue
 
@@ -206,6 +207,10 @@ class ExecutionEndpoint(BaseMetaResource):
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
         )
+
+        if execution.schema != instance.schema:
+            execution.delete()
+            raise InvalidData(error="Instance and execution schema mismatch")
 
         current_app.logger.debug(f"The request is: {request.args.get('run')}")
         # this allows testing without  orchestrator interaction:
@@ -286,22 +291,21 @@ class ExecutionEndpoint(BaseMetaResource):
         if self.orch_type == AIRFLOW_BACKEND:
             info = schema_info.json()
             if info["is_paused"]:
-                err = "The dag exists but it is paused in airflow"
-                current_app.logger.error(err)
+                current_app.logger.error(DAG_PAUSED_MSG)
                 execution.update_state(EXEC_STATE_ERROR_START)
                 raise self.orch_error(
-                    error=err,
+                    error=DAG_PAUSED_MSG,
                     payload=dict(
                         message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                         state=EXEC_STATE_ERROR_START,
                     ),
                     log_txt=f"Error while user {self.get_user()} tries to create an execution. "
-                    + err,
+                    + DAG_PAUSED_MSG,
                 )
         # TODO AGA: revisar si hay que hacer alguna verificación a los JOBS
 
         try:
-            # TODO AGA: Hay que genestionar la posible eliminación de execution.id como
+            # TODO AGA: Hay que gestionar la posible eliminación de execution.id como
             #   parámetro, ya que no se puede seleccionar el id en databricks
             #   revisar las consecuencias que puede tener
             response = self.orch_client.run_workflow(execution.id, orch_name=schema)
@@ -321,7 +325,8 @@ class ExecutionEndpoint(BaseMetaResource):
 
         # if we succeed, we register the run_id in the execution table:
         orch_data = response.json()
-        print("orch data is ", orch_data)
+        info = "orch data is " + orch_data
+        current_app.logger.info(info)
         execution.run_id = orch_data[self.orch_const["run_id"]]
         execution.update_state(EXEC_STATE_QUEUED)
         current_app.logger.info(
@@ -446,17 +451,16 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         info = schema_info.json()
         if self.orch_type == AIRFLOW_BACKEND:
             if info["is_paused"]:
-                err = "The dag exists but it is paused in airflow"
-                current_app.logger.error(err)
+                current_app.logger.error(AIRFLOW_NOT_REACHABLE_MSG)
                 execution.update_state(EXEC_STATE_ERROR_START)
                 raise self.orch_error(
-                    error=err,
+                    error=AIRFLOW_NOT_REACHABLE_MSG,
                     payload=dict(
                         message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
                         state=EXEC_STATE_ERROR_START,
                     ),
                     log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
-                    + err,
+                    + AIRFLOW_NOT_REACHABLE_MSG,
                 )
         # TODO GG: revisar si hay que hacer alguna comprobación del estilo a databricks
         try:
@@ -627,13 +631,12 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
 
         if not self.orch_client.is_alive(config=current_app.config):
-            err = self.orch_const["name"] + " is not accessible"
             raise self.orch_error(
-                error=err,
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {err}",
+                error=AIRFLOW_NOT_REACHABLE_MSG,
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {AIRFLOW_NOT_REACHABLE_MSG}",
             )
 
-        response = self.orch_client.set_dag_run_to_fail(
+        self.orch_client.set_dag_run_to_fail(
             dag_name=execution.schema, run_id=execution.run_id
         )
         # We should check if the execution has been stopped

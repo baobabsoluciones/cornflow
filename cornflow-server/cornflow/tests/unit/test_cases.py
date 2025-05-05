@@ -42,6 +42,7 @@ import zlib
 
 # Import from internal modules
 from cornflow.models import CaseModel, ExecutionModel, InstanceModel, UserModel
+from cornflow.shared.const import DATA_DOES_NOT_EXIST_MSG
 from cornflow.shared.utils import hash_json_256
 from cornflow.tests.const import (
     INSTANCE_URL,
@@ -227,12 +228,8 @@ class TestCasesFromInstanceExecutionEndpoint(CustomTestCase):
             "execution_id": execution_id,
             "schema": "solve_model_dag",
         }
-        self.instance = InstanceModel.get_one_object(
-            user=self.user, idx=instance_id
-        )
-        self.execution = ExecutionModel.get_one_object(
-            user=self.user, idx=execution_id
-        )
+        self.instance = InstanceModel.get_one_object(user=self.user, idx=instance_id)
+        self.execution = ExecutionModel.get_one_object(user=self.user, idx=execution_id)
 
     def test_new_case_execution(self):
         """
@@ -729,7 +726,7 @@ class TestCaseToInstanceEndpoint(CustomTestCase):
             headers=self.get_header_with_auth(self.token),
         )
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json["error"], "The object does not exist")
+        self.assertEqual(response.json["error"], DATA_DOES_NOT_EXIST_MSG)
 
 
 class TestCaseJsonPatch(CustomTestCase):

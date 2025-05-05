@@ -1,4 +1,5 @@
 from ..core import Experiment, Solution
+from ..core.const import FIRST_DAY, SECOND_DAY, DAYS
 from pyomo.environ import (
     AbstractModel,
     Set,
@@ -16,8 +17,9 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
+
 
 class PyomoSolver(Experiment):
     def __init__(self, instance, solution=None):
@@ -35,7 +37,7 @@ class PyomoSolver(Experiment):
             "sProducts": {None: self.instance.get_products()},
             "sClients": {None: self.instance.get_clients()},
             "sAllWarehouses": {None: self.instance.get_warehouses()},
-            "sDays": {None: ["Day 1", "Day 2"]},
+            "sDays": {None: DAYS},
             "sLocations": {None: self.instance.get_all_locations()},
             "sNotAllowedFlows": {None: self.instance.get_restricted_flows()},
             "pSupplierLimit": self.instance.get_availability(),
@@ -123,175 +125,182 @@ class PyomoSolver(Experiment):
 
         # Create constraints
 
-        def c0_not_allowed_flows(model, iOrigin, iDestination):
+        def c0_not_allowed_flows(model, origin, destination):
             """ensure that the flows not allowed in the network are equal to 0"""
-            if (iOrigin, iDestination) not in model.sNotAllowedFlows:
+            if (origin, destination) not in model.sNotAllowedFlows:
                 return Constraint.Skip
             return (
                 sum(
-                    model.vFlow[iOrigin, iDestination, iProduct, iDay]
-                    for iProduct in model.sProducts
-                    for iDay in model.sDays
+                    model.vFlow[origin, destination, product, day]
+                    for product in model.sProducts
+                    for day in model.sDays
                 )
                 == 0
             )
 
-        def c1_1_consistency_Suppliers(model, iDay, iProduct):
+        def c1_1_consistency_suppliers(model, day, product):
             """the amount of doses delivered by suppliers must reach customers"""
             return (
                 sum(
-                    model.vFlow[iSupplier, iW, iProduct, iDay]
-                    for iSupplier in model.sL1Suppliers
-                    for iW in model.sAllWarehouses
+                    model.vFlow[supplier, warehouse, product, day]
+                    for supplier in model.sL1Suppliers
+                    for warehouse in model.sAllWarehouses
                 )
             ) == (
                 sum(
-                    model.vFlow[iW, iClient, iProduct, iDay]
-                    for iW in model.sAllWarehouses
-                    for iClient in model.sClients
+                    model.vFlow[warehouse, client, product, day]
+                    for warehouse in model.sAllWarehouses
+                    for client in model.sClients
                 )
             )
 
-        def c1_2_consistency_Warehouses(model, iW, iDay, iProduct):
+        def c1_2_consistency_warehouses(model, warehouse, day, product):
             """the amount of doses which enter a warehouse one day
-            is equal to the number of doses that are sent that same day from the warehouse"""
+            is equal to the number of doses that are sent that same day from the warehouse
+            """
             return (
                 sum(
-                    model.vFlow[iSupplier, iW, iProduct, iDay]
-                    for iSupplier in model.sL1Suppliers
-                ) + sum(
-                    model.vFlow[iWLp, iW, iProduct, iDay]
-                    for iWLp in model.sAllWarehouses
-                    if self.instance.is_lower_level(iWLp, iW)
+                    model.vFlow[supplier, warehouse, product, day]
+                    for supplier in model.sL1Suppliers
+                )
+                + sum(
+                    model.vFlow[warehouse_p, warehouse, product, day]
+                    for warehouse_p in model.sAllWarehouses
+                    if self.instance.is_lower_level(warehouse_p, warehouse)
                 )
             ) == (
                 sum(
-                    model.vFlow[iW, iWLs, iProduct, iDay]
-                    for iWLs in model.sAllWarehouses
-                    if self.instance.is_higher_level(iWLs, iW)
-                ) + sum(
-                    model.vFlow[iW, iClient, iProduct, iDay]
-                    for iClient in model.sClients
+                    model.vFlow[warehouse, warehouse_s, product, day]
+                    for warehouse_s in model.sAllWarehouses
+                    if self.instance.is_higher_level(warehouse_s, warehouse)
+                )
+                + sum(
+                    model.vFlow[warehouse, client, product, day]
+                    for client in model.sClients
                 )
             )
 
-        def c2_limit_suppliers(model, iSupplier, iProduct):
+        def c2_limit_suppliers(model, supplier, product):
             """the amount of doses delivered by a supplier cannot exceed its initial availability"""
             return (
-                model.vPurchaseFromSupplier[iSupplier, iProduct]
-                <= model.pSupplierLimit[iSupplier, iProduct]
+                model.vPurchaseFromSupplier[supplier, product]
+                <= model.pSupplierLimit[supplier, product]
             )
 
-        def c3_purchases(model, iSupplier, iProduct):
+        def c3_purchases(model, supplier, product):
             """determine the amount of doses of each vaccine purchased from each supplier"""
             return (
                 sum(
-                    model.vFlow[iSupplier, iW, iProduct, iDay]
-                    for iDay in model.sDays
-                    for iW in model.sAllWarehouses
+                    model.vFlow[supplier, warehouse, product, day]
+                    for day in model.sDays
+                    for warehouse in model.sAllWarehouses
                 )
                 + sum(
-                    model.vFlow[iSupplier, iClient, iProduct, iDay]
-                    for iDay in model.sDays
-                    for iClient in model.sClients
+                    model.vFlow[supplier, client, product, day]
+                    for day in model.sDays
+                    for client in model.sClients
                 )
-            ) == model.vPurchaseFromSupplier[iSupplier, iProduct]
+            ) == model.vPurchaseFromSupplier[supplier, product]
 
-        def c4_usage_W(model, iW, iDay):
+        def c4_usage_warehouse(model, warehouse, day):
             """determine the usage (number of doses stored) of a warehouse per day"""
             return (
                 sum(
-                    model.vFlow[iSupplier, iW, iProduct, iDay]
-                    for iSupplier in model.sL1Suppliers
-                    for iProduct in model.sProducts
-                ) + sum(
-                    model.vFlow[iWp, iW, iProduct, iDay]
-                    for iWp in model.sAllWarehouses
-                    for iProduct in model.sProducts
-                    if self.instance.is_lower_level(iWp, iW)
+                    model.vFlow[supplier, warehouse, product, day]
+                    for supplier in model.sL1Suppliers
+                    for product in model.sProducts
                 )
-                == model.vUsage[iW, iDay]
+                + sum(
+                    model.vFlow[warehouse_p, warehouse, product, day]
+                    for warehouse_p in model.sAllWarehouses
+                    for product in model.sProducts
+                    if self.instance.is_lower_level(warehouse_p, warehouse)
+                )
+                == model.vUsage[warehouse, day]
             )
 
-        def c5_capacity_limit_warehouse(model, iW, iDay):
+        def c5_capacity_limit_warehouse(model, warehouse, day):
             """the amount of doses stored in a warehouse each day cannot exceed its maximum capacity"""
-            return model.vUsage[iW, iDay] <= model.pCapacity[iW] * model.v01IsOpen[iW]
+            return (
+                model.vUsage[warehouse, day]
+                <= model.pCapacity[warehouse] * model.v01IsOpen[warehouse]
+            )
 
         # Pfizer, Moderna and AstraZeneca vaccines require two doses. If one day a locality receives
         # a certain number doses of this vaccines, the next day at least the same amount must be received
 
-        def c6_second_doses(model, iClient, iProduct):
+        def c6_second_doses(model, client, product):
             """guarantee the reception of the second doses"""
-            if model.pNumberDoses[iProduct] == 1:
+            if model.pNumberDoses[product] == 1:
                 return Constraint.Skip
             return (
                 sum(
-                    model.vFlow[iSupplier, iClient, iProduct, "Day 1"]
-                    for iSupplier in model.sL1Suppliers
+                    model.vFlow[supplier, client, product, FIRST_DAY]
+                    for supplier in model.sL1Suppliers
                 )
                 + sum(
-                    model.vFlow[iW, iClient, iProduct, "Day 1"]
-                    for iW in model.sAllWarehouses
+                    model.vFlow[warehouse, client, product, FIRST_DAY]
+                    for warehouse in model.sAllWarehouses
                 )
             ) <= (
                 sum(
-                    model.vFlow[iSupplier, iClient, iProduct, "Day 2"]
-                    for iSupplier in model.sL1Suppliers
+                    model.vFlow[supplier, client, product, SECOND_DAY]
+                    for supplier in model.sL1Suppliers
                 )
                 + sum(
-                    model.vFlow[iW, iClient, iProduct, "Day 2"]
-                    for iW in model.sAllWarehouses
+                    model.vFlow[warehouse, client, product, SECOND_DAY]
+                    for warehouse in model.sAllWarehouses
                 )
             )
 
         # The demand of every client must be satisfied
-        def c7_satisfy_demand(model, iClient):
+        def c7_satisfy_demand(model, client):
             """two doses of Pfizer, Moderna and AstraZeneca and one dose of Janssen
             per person are required to meet demand"""
-            return model.pClientDemand[iClient] <= (
+            return model.pClientDemand[client] <= (
                 sum(
-                    model.vFlow[iSupplier, iClient, iProduct, iDay]
-                    / model.pNumberDoses[iProduct]
-                    for iSupplier in model.sL1Suppliers
-                    for iDay in model.sDays
-                    for iProduct in model.sProducts
+                    model.vFlow[supplier, client, product, day]
+                    / model.pNumberDoses[product]
+                    for supplier in model.sL1Suppliers
+                    for day in model.sDays
+                    for product in model.sProducts
                 )
                 + sum(
-                    model.vFlow[iW, iClient, iProduct, iDay]
-                    / model.pNumberDoses[iProduct]
-                    for iW in model.sAllWarehouses
-                    for iDay in model.sDays
-                    for iProduct in model.sProducts
+                    model.vFlow[warehouse, client, product, day]
+                    / model.pNumberDoses[product]
+                    for warehouse in model.sAllWarehouses
+                    for day in model.sDays
+                    for product in model.sProducts
                 )
             )
 
         def obj_expression(model):
             """minimize the total cost"""
             fixed_costs = sum(
-                model.pFixedCost[iW] * model.v01IsOpen[iW]
-                for iW in model.sAllWarehouses
+                model.pFixedCost[warehouse] * model.v01IsOpen[warehouse]
+                for warehouse in model.sAllWarehouses
             )
 
             variable_costs = sum(
-                model.pVariableCost[iW] * model.vUsage[iW, iDay]
-                for iW in model.sAllWarehouses
-                for iDay in model.sDays
+                model.pVariableCost[warehouse] * model.vUsage[warehouse, day]
+                for warehouse in model.sAllWarehouses
+                for day in model.sDays
             )
 
             purchase_costs = sum(
-                model.pUnitProductCost[iProduct]
-                * model.vPurchaseFromSupplier[iSupplier, iProduct]
-                for iSupplier in model.sL1Suppliers
-                for iProduct in model.sProducts
+                model.pUnitProductCost[product]
+                * model.vPurchaseFromSupplier[supplier, product]
+                for supplier in model.sL1Suppliers
+                for product in model.sProducts
             )
 
             transport_costs = sum(
-                model.pUnitFlowCost[iOrigin, iDestination]
-                * model.vFlow[iOrigin, iDestination, iProduct, iDay]
-                for iDestination in model.sLocations
-                for iOrigin in model.sLocations
-                for iDay in model.sDays
-                for iProduct in model.sProducts
+                model.pUnitFlowCost[origin, destination]
+                * model.vFlow[origin, destination, product, day]
+                for destination in model.sLocations
+                for origin in model.sLocations
+                for day in model.sDays
+                for product in model.sProducts
             )
 
             return fixed_costs + variable_costs + purchase_costs + transport_costs
@@ -300,11 +309,14 @@ class PyomoSolver(Experiment):
         model.c0_not_allowed_flows = Constraint(
             model.sLocations, model.sLocations, rule=c0_not_allowed_flows
         )
-        model.c1_1_consistency_Suppliers = Constraint(
-            model.sDays, model.sProducts, rule=c1_1_consistency_Suppliers
+        model.c1_1_consistency_suppliers = Constraint(
+            model.sDays, model.sProducts, rule=c1_1_consistency_suppliers
         )
-        model.c1_2_consistency_Warehouses = Constraint(
-            model.sAllWarehouses, model.sDays, model.sProducts, rule=c1_2_consistency_Warehouses
+        model.c1_2_consistency_warehouses = Constraint(
+            model.sAllWarehouses,
+            model.sDays,
+            model.sProducts,
+            rule=c1_2_consistency_warehouses,
         )
         model.c2_limit_suppliers = Constraint(
             model.sL1Suppliers, model.sProducts, rule=c2_limit_suppliers
@@ -312,8 +324,8 @@ class PyomoSolver(Experiment):
         model.c3_purchases = Constraint(
             model.sL1Suppliers, model.sProducts, rule=c3_purchases
         )
-        model.c4_usage_W = Constraint(
-            model.sAllWarehouses, model.sDays, rule=c4_usage_W
+        model.c4_usage_warehouse = Constraint(
+            model.sAllWarehouses, model.sDays, rule=c4_usage_warehouse
         )
         model.c5_capacity_limit_warehouse = Constraint(
             model.sAllWarehouses, model.sDays, rule=c5_capacity_limit_warehouse
@@ -347,28 +359,30 @@ class PyomoSolver(Experiment):
         # Check status
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
-            return dict(status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE)
+            return dict(
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
+            )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
-                return dict(status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE)
-            else:
-                pass
+                return dict(
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
+                )
 
         solution_dict = dict()
         solution_dict["flows"] = [
             dict(
-                origin=o,
-                destination=d,
-                product=p,
+                origin=origin,
+                destination=destination,
+                product=product,
                 day=day,
-                flow=value(model_instance.vFlow[o, d, p, day]),
+                flow=value(model_instance.vFlow[origin, destination, product, day]),
             )
-            for o in model_instance.sLocations
-            for d in model_instance.sLocations
-            for p in model_instance.sProducts
+            for origin in model_instance.sLocations
+            for destination in model_instance.sLocations
+            for product in model_instance.sProducts
             for day in model_instance.sDays
-            if value(model_instance.vFlow[o, d, p, day]) > 0
+            if value(model_instance.vFlow[origin, destination, product, day]) > 0
         ]
 
         self.solution = Solution.from_dict(solution_dict)

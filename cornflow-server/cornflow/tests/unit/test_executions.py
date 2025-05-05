@@ -512,7 +512,6 @@ class TestExecutionsDetailEndpointAirflow(
 ):
     def setUp(self):
         super().setUp()
-        self.url = self.url
         self.query_arguments = {"run": 0}
 
     def create_app(self):

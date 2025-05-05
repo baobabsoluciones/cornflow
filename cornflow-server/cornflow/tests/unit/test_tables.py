@@ -11,7 +11,7 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.models import UserRoleModel
 from cornflow.shared import db
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE, DATA_DOES_NOT_EXIST_MSG
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, TABLES_URL
 
 
@@ -220,7 +220,7 @@ class TestTablesDetailEndpoint(TestCase):
             },
         )
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json["error"], "The object does not exist")
+        self.assertEqual(response.json["error"], DATA_DOES_NOT_EXIST_MSG)
 
 
 class TestTablesEndpointAdmin(TestCase):

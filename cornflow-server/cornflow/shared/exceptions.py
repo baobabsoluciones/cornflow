@@ -9,6 +9,8 @@ from cornflow_client.constants import AirflowError, DatabricksError
 from werkzeug.exceptions import HTTPException
 import traceback
 
+from cornflow.shared.const import DATA_DOES_NOT_EXIST_MSG
+
 
 class InvalidUsage(Exception):
     """
@@ -48,7 +50,7 @@ class ObjectDoesNotExist(InvalidUsage):
     """
 
     status_code = 404
-    error = "The object does not exist"
+    error = DATA_DOES_NOT_EXIST_MSG
 
 
 class ObjectAlreadyExists(InvalidUsage):
