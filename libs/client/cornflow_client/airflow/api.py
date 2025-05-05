@@ -44,6 +44,10 @@ class Airflow(object):
 
         return database and scheduler
 
+    def get_dag_info(self, dag_name, method="GET"):
+        url = f"{self.url}/dags/{dag_name}"
+        return self.request_headers_auth(method=method, url=url)
+
     def request_headers_auth(self, status=200, **kwargs):
         def_headers = {"Content-type": "application/json", "Accept": "application/json"}
         headers = kwargs.get("headers", def_headers)
