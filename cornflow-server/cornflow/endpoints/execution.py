@@ -175,9 +175,11 @@ class ExecutionEndpoint(BaseMetaResource):
                     f"{AIRFLOW_ERROR_MSG} {err}"
                 )
                 continue
-
-            data = response.json()
-            state = self.orch_to_state_map.get(data["state"], EXEC_STATE_UNKNOWN)
+            if self.orch_type == DATABRICKS_BACKEND:
+                state = self.orch_to_state_map.get(response, EXEC_STATE_UNKNOWN)
+            else:
+                data = response.json()
+                state = self.orch_to_state_map.get(data["state"], EXEC_STATE_UNKNOWN)
             execution.update_state(state)
 
         return executions
