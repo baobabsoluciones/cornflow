@@ -145,8 +145,8 @@ def _setup_environment_variables():
         databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
         databricks_ep_clusters = os.getenv("DATABRICKS_EP_CLUSTERS")
         databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")
-        databricks_health_url = os.getenv("DATABRICKS_HEALTH_URL")
-        os.environ["DATABRICKS_HEALTH_URL"] = databricks_health_url
+        databricks_health_path = os.getenv("DATABRICKS_HEALTH_PATH")
+        os.environ["DATABRICKS_HEALTH_PATH"] = databricks_health_path
         os.environ["DATABRICKS_HOST"] = databricks_url
         os.environ["DATABRICKS_CLIENT_SECRET"] = databricks_auth_secret
         os.environ["DATABRICKS_TOKEN_ENDPOINT"] = databricks_token_endpoint
@@ -231,7 +231,7 @@ def _setup_environment_variables():
             "databricks_token_endpoint": databricks_token_endpoint,
             "databricks_ep_clusters": databricks_ep_clusters,
             "databricks_client_id": databricks_client_id,
-            "databricks_health_url": databricks_health_url,
+            "databricks_health_path": databricks_health_path,
             "cornflow_db_conn": cornflow_db_conn,
             "cornflow_admin_user": cornflow_admin_user,
             "cornflow_admin_email": cornflow_admin_email,
