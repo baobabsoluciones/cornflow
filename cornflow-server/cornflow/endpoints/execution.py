@@ -167,7 +167,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 continue
             try:
                 response = self.orch_client.get_run_status(
-                    dag_name=execution.schema, run_id=run_id
+                    schema=execution.schema, run_id=run_id
                 )
             except self.orch_error as err:
                 current_app.logger.warning(
