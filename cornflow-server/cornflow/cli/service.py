@@ -218,6 +218,7 @@ def _setup_environment_variables():
             "open_deployment": open_deployment,
             "external_application": external_application,
             "external_app_module": external_app_module,
+            "cornflow_backend": cornflow_backend,
         }
     elif cornflow_backend == DATABRICKS_BACKEND:
         return {
@@ -239,6 +240,7 @@ def _setup_environment_variables():
             "open_deployment": open_deployment,
             "external_application": external_application,
             "external_app_module": external_app_module,
+            "cornflow_backend": cornflow_backend,
         }
     else:
         raise Exception("Selected backend not among valid options")
