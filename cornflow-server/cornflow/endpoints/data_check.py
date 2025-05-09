@@ -3,6 +3,7 @@ External endpoints to launch the solution check on an execution
 """
 
 # Import from libraries
+# TODO: CHANGE BEFORE MERGING
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
@@ -10,7 +11,7 @@ from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
+from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedOrch
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -22,6 +23,7 @@ from cornflow.shared.const import (
     EXEC_STATE_ERROR_START,
     EXEC_STATE_NOT_RUN,
     EXECUTION_STATE_MESSAGE_DICT,
+    VIEWER_ROLE,
     PLANNER_ROLE,
     ADMIN_ROLE,
 )
@@ -85,8 +87,8 @@ def _run_airflow_data_check(
 
     # Run the DAG
     try:
-        response = af_client.run_dag(
-            execution.id, dag_name=schema, checks_only=True, **run_dag_kwargs
+        response = af_client.run_workflow(
+            execution.id, orch_name=schema, checks_only=True, **run_dag_kwargs
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"
@@ -309,7 +311,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             if schema == "pulp":
                 validation_schema = "solve_model_dag"
 
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedOrch.get_one_schema(
                 config, validation_schema, INSTANCE_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(
@@ -338,7 +340,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
 
             payload["data"] = case.solution
 
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedOrch.get_one_schema(
                 config, validation_schema, SOLUTION_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(

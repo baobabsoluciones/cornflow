@@ -2,6 +2,11 @@
 In this file we import the values for different constants on cornflow server
 """
 
+# CORNFLOW BACKEND
+AIRFLOW_BACKEND = 1
+DATABRICKS_BACKEND = 2
+
+
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -44,7 +49,25 @@ AIRFLOW_TO_STATE_MAP = dict(
     failed=EXEC_STATE_ERROR,
     queued=EXEC_STATE_QUEUED,
 )
+# TODO AGA : revisar si la correspondencia de estados es correcta
+DATABRICKS_TO_STATE_MAP = dict(
+    BLOCKED=EXEC_STATE_QUEUED,
+    PENDING=EXEC_STATE_QUEUED,
+    QUEUED=EXEC_STATE_QUEUED,
+    RUNNING=EXEC_STATE_RUNNING,
+    TERMINATING=EXEC_STATE_RUNNING,
+    SUCCESS=EXEC_STATE_CORRECT,
+    USER_CANCELED=EXEC_STATE_STOPPED,
+    OTHER_FINISH_ERROR=EXEC_STATE_ERROR,
+    RUN_EXECUTION_ERROR=EXEC_STATE_ERROR
+)
 
+DATABRICKS_FINISH_TO_STATE_MAP = dict(
+    SUCCESS=EXEC_STATE_CORRECT,
+    USER_CANCELED=EXEC_STATE_STOPPED,
+)
+
+DATABRICKS_TERMINATE_STATE = "TERMINATED"
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
 AUTH_DB = 1
