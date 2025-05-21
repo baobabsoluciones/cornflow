@@ -59,6 +59,8 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             "instance_id",
             "name",
             "indicators",
+            "username",
+            "updated_at"
         ]
 
     def test_new_execution(self):
@@ -274,6 +276,8 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "schema",
             "user_id",
             "indicators",
+            "username",
+            "updated_at"
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -316,6 +320,8 @@ class TestExecutionsDetailEndpoint(
             "name",
             "created_at",
             "state",
+            "username",
+            "updated_at"
         ]
         execution = self.get_one_row(
             self.url + idx,
@@ -463,6 +469,8 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
             "user_id",
             "config",
             "indicators",
+            "username",
+            "updated_at"
         ]
 
     def test_get_one_execution(self):
