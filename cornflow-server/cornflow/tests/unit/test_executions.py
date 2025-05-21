@@ -18,6 +18,7 @@ from cornflow.tests.const import (
     DAG_URL,
     BAD_EXECUTION_PATH,
     EXECUTION_SOLUTION_PATH,
+    CUSTOM_CONFIG_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client
@@ -43,6 +44,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.bad_payload = load_file_fk(BAD_EXECUTION_PATH)
         self.payloads = [load_file_fk(f) for f in EXECUTIONS_LIST]
         self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
+        self.custom_config_payload = load_file_fk(CUSTOM_CONFIG_PATH)
         self.keys_to_check = [
             "data_hash",
             "created_at",
@@ -61,6 +63,18 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
 
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
+
+    def test_get_custom_config(self):
+        id = self.create_new_row(
+            self.url, self.model, payload=self.custom_config_payload
+        )
+        url = EXECUTION_URL + "/" + str(id) + "/" + "?run=0"
+
+        response = self.get_one_row(
+            url,
+            payload={**self.custom_config_payload, **dict(id=id)},
+        )
+        self.assertEqual(response["config"]["block_model"]["solver"], "mip.gurobi")
 
     @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_run(self, af_client_class):

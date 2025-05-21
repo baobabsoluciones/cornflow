@@ -95,7 +95,7 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
 
 
 class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
-    config = fields.Nested(ConfigSchemaResponse)
+    config = fields.Raw()
     instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
