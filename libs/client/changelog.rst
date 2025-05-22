@@ -1,3 +1,14 @@
+version 1.2.2
+--------------
+
+- released: 2025-05-21
+- description: Small changes on execution endpoint and sonarqube related changes
+- changelog:
+    - Added fields of username and updated at to GET /execution/ response
+    - Added flexibility to /execution/ get-detail schema (for config read)
+    - Added new action (sonarqube related)
+
+
 version 1.2.1
 --------------
 
