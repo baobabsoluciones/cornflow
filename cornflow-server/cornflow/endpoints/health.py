@@ -4,16 +4,15 @@ It performs a health check to airflow and a health check to cornflow database
 """
 import os
 
-# Import from libraries
-from cornflow_client.airflow.api import Airflow
-from flask import current_app
-from flask_apispec import marshal_with, doc
-
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel
 from cornflow.schemas.health import HealthResponse
-from cornflow.shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY
+from cornflow.shared.const import STATUS_HEALTHY, STATUS_UNHEALTHY, CORNFLOW_VERSION
+# Import from libraries
+from cornflow_client.airflow.api import Airflow
+from flask import current_app
+from flask_apispec import marshal_with, doc
 
 
 class HealthEndpoint(BaseMetaResource):
@@ -30,7 +29,7 @@ class HealthEndpoint(BaseMetaResource):
         af_client = Airflow.from_config(current_app.config)
         airflow_status = STATUS_UNHEALTHY
         cornflow_status = STATUS_UNHEALTHY
-        cornflow_version = "1.2.1"
+        cornflow_version = CORNFLOW_VERSION
         if af_client.is_alive():
             airflow_status = STATUS_HEALTHY
 
