@@ -29,6 +29,9 @@ class TestHealth(CustomTestCase):
         self.assertEqual(200, response.status_code)
         cf_status = response.json["cornflow_status"]
         af_status = response.json["airflow_status"]
+        cf_version = response.json["cornflow_version"]
+        expected_version = "1.2.1"
         self.assertEqual(str, type(cf_status))
         self.assertEqual(str, type(af_status))
         self.assertEqual(cf_status, STATUS_HEALTHY)
+        self.assertEqual(cf_version, expected_version)
