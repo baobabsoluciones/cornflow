@@ -30,6 +30,7 @@ class HealthEndpoint(BaseMetaResource):
         af_client = Airflow.from_config(current_app.config)
         airflow_status = STATUS_UNHEALTHY
         cornflow_status = STATUS_UNHEALTHY
+        cornflow_version = "1.2.1"
         if af_client.is_alive():
             airflow_status = STATUS_HEALTHY
 
@@ -42,4 +43,4 @@ class HealthEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"Health check: cornflow {cornflow_status}, airflow {airflow_status}"
         )
-        return {"cornflow_status": cornflow_status, "airflow_status": airflow_status}
+        return {"cornflow_status": cornflow_status, "airflow_status": airflow_status, "cornflow_version":cornflow_version}
