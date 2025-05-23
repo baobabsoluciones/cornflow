@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.2.1 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.2.2 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
@@ -413,7 +413,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.extra_args">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extra_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.extra_args" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extra_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.extra_args" title="Link to this definition">¶</a></dt>
 <dd><p>Optional property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -457,7 +457,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.test_cases">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_cases</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_cases</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -493,16 +493,17 @@ if each element in the list is:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solve">
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Solves the problem instance using the specified configuration.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – json for the problem</p></li>
-<li><p><strong>config</strong> – execution configuration, including solver</p></li>
-<li><p><strong>solution_data</strong> – optional json with an initial solution</p></li>
+<li><p><strong>data</strong> – Dictionary representing the problem instance.</p></li>
+<li><p><strong>config</strong> – Dictionary containing execution configuration.</p></li>
+<li><p><strong>solution_data</strong> – Optional dictionary with an initial solution.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>solution, solution checks, instance checks and logs</p>
+<dd class="field-even"><p>Tuple containing (solution, solution_checks, instance_checks, log_txt, log_json).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -751,9 +752,10 @@ and the list/dict of errors / warnings as value.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict_to_int_or_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float" title="Link to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Tranforms a dictionary to change all strings into integer of floating numbers if the strings</dt><dd><p>represent numbers</p>
-</dd>
+<dd><p>Recursively transforms a dictionary (and nested structures) by converting
+string representations of numbers into actual int or float types.
+Returns a new dictionary with converted values, does not modify the original.</p>
+<dl class="simple">
 <dt>For example: Transforms {a: ‘4’, b: {c: ‘7’, d: [‘8.7’, ‘9’]}}</dt><dd><p>into {a: 4, b: {c: 7, d: [8.7, 9]}}</p>
 </dd>
 </dl>
@@ -1834,7 +1836,7 @@ table3: {config1: a, config2: b},
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=ca842793"></script>
+      <script src="../_static/documentation_options.js?v=fd7cadf9"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
