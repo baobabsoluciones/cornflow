@@ -2,6 +2,7 @@
 import inspect
 import os
 import sys
+import collections
 
 from importlib import import_module
 from sqlalchemy.dialects.postgresql import TEXT
@@ -31,14 +32,42 @@ def import_models():
 
 
 def all_subclasses(cls, models=None):
-    subclasses = set()
+    """Finds all direct and indirect subclasses of a given class.
+
+    Optionally filters a provided list of models first.
+
+    Args:
+        cls: The base class to find subclasses for.
+        models: An optional iterable of classes to pre-filter.
+
+    Returns:
+        A set containing all subclasses found.
+    """
+    filtered_subclasses = set()
     if models is not None:
         for val in models:
-            if issubclass(val, cls):
-                subclasses.add(val)
+            # Ensure val is a class before checking issubclass
+            if isinstance(val, type) and issubclass(val, cls):
+                filtered_subclasses.add(val)
 
-    return subclasses.union(set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in all_subclasses(c)]))
+    all_descendants = set()
+    # Use a deque for efficient pop(0)
+    queue = collections.deque(cls.__subclasses__())
+    # Keep track of visited classes during the traversal to handle potential complex hierarchies
+    # (though direct subclass relationships shouldn't form cycles)
+    # Initialize with direct subclasses as they are the starting point.
+    visited_for_queue = set(cls.__subclasses__())
+
+    while queue:
+        current_sub = queue.popleft()
+        all_descendants.add(current_sub)
+
+        for grandchild in current_sub.__subclasses__():
+            if grandchild not in visited_for_queue:
+                visited_for_queue.add(grandchild)
+                queue.append(grandchild)
+
+    return filtered_subclasses.union(all_descendants)
 
 
 type_converter = {
@@ -76,6 +105,5 @@ def item_as_dict(item):
 
 def items_as_dict_list(ls):
     return [
-        {c.name: getattr(item, c.name) for c in item.__table__.columns}
-        for item in ls
+        {c.name: getattr(item, c.name) for c in item.__table__.columns} for item in ls
     ]

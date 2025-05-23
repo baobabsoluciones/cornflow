@@ -1,0 +1,23 @@
+{
+    "config": {
+        "block_model": {
+            "solver": "mip.gurobi",
+            "MIPGap": 0.05,
+            "msg": true,
+            "MIPFocus": 2,
+            "presolve": 0,
+            "NoRelHeurTime": 150,
+            "timeLimit": 150,
+            "Heuristics": 0.9
+        },
+        "pos_model": {
+            "solver": "mip.gurobi",
+            "MIPGap": 0.05,
+            "msg": true,
+            "timeLimit": 20
+        }
+    },
+    "name": "execution_1",
+    "description": "This is a test for the executions",
+    "schema": "solve_model_dag"
+}

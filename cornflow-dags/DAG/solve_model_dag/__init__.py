@@ -84,7 +84,8 @@ class PuLP(ApplicationCore):
         prob += x + 4 * y + 9 * z, "obj"
         prob += x + y <= 5, "c1"
         prob += x + z >= 10, "c2"
-        prob += -y + z == 7.5, "c3"
+        prob += -y + z >= 7.5, "c3"
+        prob += -y + z <= 7.5, "c4"
 
         return [
             {
@@ -127,7 +128,7 @@ class PuLP(ApplicationCore):
                 log_dict = ol.get_info_solver(
                     path=log, solver=solver_name, get_progress=True, content=True
                 )
-            except:
+            except ValueError:
                 # we keep the original log from the solve function
                 log_dict = simple_log
             else:
@@ -137,7 +138,7 @@ class PuLP(ApplicationCore):
 
         try:
             os.remove(log_path)
-        except:
+        except FileNotFoundError:
             pass
 
         return solution, {}, {}, log, log_dict

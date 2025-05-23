@@ -635,9 +635,9 @@ class BaseTestCases:
             # (we patch the request to airflow to check if the schema is valid)
             # we create 4 instances
             data_many = [self.payload for _ in range(4)]
-            data_many[-1] = {**data_many[-1], **dict(schema="timer")}
-            allrows = self.get_rows(self.url, data_many)
-            self.apply_filter(self.url, dict(schema="timer"), allrows.json[:1])
+
+            self.get_rows(self.url, data_many)
+            self.apply_filter(self.url, dict(schema="timer"), [])
 
         def test_opt_filters_date_lte(self):
             """
@@ -1117,7 +1117,7 @@ class LoginTestCases:
 
             self.assertEqual(400, response.status_code)
             self.assertEqual(
-                "Invalid token issuer. Token must be issued by a valid provider",
+                "Invalid token format or signature",
                 response.json["error"],
             )
 

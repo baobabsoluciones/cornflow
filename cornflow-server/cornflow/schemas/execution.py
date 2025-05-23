@@ -95,7 +95,7 @@ class ExecutionDagPostRequest(ExecutionRequest, ExecutionDagRequest):
 
 
 class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
-    config = fields.Nested(ConfigSchemaResponse)
+    config = fields.Raw()
     instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
@@ -112,6 +112,14 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
         return indicators_string[1:-1]
 
     indicators = fields.Method("get_indicators")
+    updated_at = fields.DateTime(dump_only=True)
+
+    def get_username(self, obj):
+        if hasattr(obj, "user") and obj.user is not None:
+            return obj.user.username
+        return None
+
+    username = fields.Method("get_username")
 
 
 class ExecutionDetailsWithIndicatorsAndLogResponse(

@@ -30,9 +30,9 @@ def create_dag(app):
     with dag:
         notify = getattr(app, "notify", True)
         if not notify:
-            t1 = PythonOperator(task_id=app.name, python_callable=solve)
+            PythonOperator(task_id=app.name, python_callable=solve)
         else:
-            t1 = PythonOperator(
+            PythonOperator(
                 task_id=app.name,
                 python_callable=solve,
                 on_failure_callback=utils.callback_email,

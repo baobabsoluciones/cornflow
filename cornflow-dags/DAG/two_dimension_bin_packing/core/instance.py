@@ -90,7 +90,7 @@ class Instance(InstanceCore):
         }
         cut = 4
 
-        while True or cut < 1000:
+        while cut < 1000:
             items = self.get_items()
             selection = set()
             while True:

@@ -3,6 +3,7 @@ def update_schemas_command(url, user, pwd, verbose: bool = False):
     from flask import current_app
 
     from cornflow_client.airflow.api import Airflow
+    from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
     max_attempts = 20
@@ -10,12 +11,12 @@ def update_schemas_command(url, user, pwd, verbose: bool = False):
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
-            current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG} (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
-            current_app.logger.info("Airflow is not reachable")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
     response = af_client.update_schemas()
@@ -34,6 +35,7 @@ def update_dag_registry_command(url, user, pwd, verbose: bool = False):
     from flask import current_app
 
     from cornflow_client.airflow.api import Airflow
+    from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
     max_attempts = 20
@@ -41,12 +43,12 @@ def update_dag_registry_command(url, user, pwd, verbose: bool = False):
     while not af_client.is_alive() and attempts < max_attempts:
         attempts += 1
         if verbose == 1:
-            current_app.logger.info(f"Airflow is not reachable (attempt {attempts})")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG} (attempt {attempts})")
         time.sleep(15)
 
     if not af_client.is_alive():
         if verbose == 1:
-            current_app.logger.info("Airflow is not reachable")
+            current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
     response = af_client.update_dag_registry()

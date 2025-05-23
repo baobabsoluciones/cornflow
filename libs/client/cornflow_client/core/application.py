@@ -70,7 +70,7 @@ class ApplicationCore(ABC):
         return None
 
     @property
-    def extra_args(self) -> Dict:
+    def extra_args(self) -> Union[Dict, None]:
         """
         Optional property
 
@@ -112,7 +112,7 @@ class ApplicationCore(ABC):
     @abstractmethod
     def test_cases(
         self,
-    ) -> Union[List[Dict[str, Union[str, Dict]]], List[Union[Dict, Tuple[Dict, Dict]]]]:
+    ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Mandatory property
 
@@ -129,7 +129,6 @@ class ApplicationCore(ABC):
           * **instance**: the instance data.
           * **solution**: the solution data (optional)
         """
-        # TODO: Phase out older list implementation
         raise NotImplementedError()
 
     @property
@@ -142,35 +141,22 @@ class ApplicationCore(ABC):
         """
         raise NotImplementedError()
 
-    def solve(
-        self, data: dict, config: dict, solution_data: dict = None
-    ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
-        """
-        :param data: json for the problem
-        :param config: execution configuration, including solver
-        :param solution_data: optional json with an initial solution
-        :return: solution, solution checks, instance checks and logs
-        """
-        if config.get("msg", True):
-            print("Solving the model")
+    def _validate_config(self, config):
+        """Validates the configuration dictionary against the schema."""
         validator = Draft7Validator(self.schema)
         if not validator.is_valid(config):
-            error_list = [e for e in validator.iter_errors(config)]
+            error_list = [str(e) for e in validator.iter_errors(config)]
             raise BadConfiguration(
                 f"The configuration does not match the schema:\n{error_list}"
             )
 
-        solver = config.get("solver")
-        if solver is None:
-            solver = self.get_default_solver_name()
-        solver_class = self.get_solver(name=solver)
-        # TODO: I think this exception is unreachable
-        if solver_class is None:
-            raise NoSolverException(f"Solver {solver} is not available")
+    def _prepare_instance_and_solution(self, data, solution_data=None):
+        """Creates and validates instance and optional solution objects."""
         inst = self.instance.from_dict(data)
         inst_errors = inst.check_schema()
         if inst_errors:
             raise BadInstance(f"The instance does not match the schema:\n{inst_errors}")
+
         sol = None
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
@@ -179,9 +165,11 @@ class ApplicationCore(ABC):
                 raise BadSolution(
                     f"The solution does not match the schema:\n{sol_errors}"
                 )
+        return inst, sol
 
+    def _check_instance_errors(self, inst):
+        """Performs instance data checks and identifies critical errors."""
         instance_checks = SuperDict(inst.data_checks())
-
         warnings_tables = (
             SuperDict.from_dict(inst.schema_checks)["properties"]
             .vfilter(lambda v: v.get("is_warning", False))
@@ -189,76 +177,175 @@ class ApplicationCore(ABC):
         )
         instance_errors = instance_checks.kfilter(lambda k: k not in warnings_tables)
 
-        # Check if any error table has errors, handling scalar values
         has_errors = False
         for error_table in instance_errors.values():
+            # Check if the error table/value indicates an error
             if isinstance(error_table, (list, dict)) and len(error_table) > 0:
                 has_errors = True
                 break
+            # Check for non-empty scalar values considered errors
             elif error_table and not isinstance(error_table, (list, dict)):
-                # If it's a scalar value and evaluates to True, consider it an error
                 has_errors = True
                 break
 
-        if has_errors:
-            log = dict(
-                time=0,
-                solver=solver,
-                status="Infeasible",
-                status_code=STATUS_INFEASIBLE,
-                sol_code=SOLUTION_STATUS_INFEASIBLE,
-            )
-            return dict(), None, instance_checks, "", log
+        return instance_checks, has_errors
+
+    def _execute_solver(self, inst, sol, config):
+        """Instantiates and runs the solver, returning output and timing."""
+        solver_name = config.get("solver", self.get_default_solver_name())
+        solver_class = self.get_solver(name=solver_name)
+        if solver_class is None:
+            # This check might be redundant if config validation includes solver names
+            raise NoSolverException(f"Solver {solver_name} is not available")
 
         algo = solver_class(inst, sol)
         start = timer()
         output = algo.solve(config)
-        sol = None
-        # compatibility with previous format:
+        elapsed_time = timer() - start
+
+        # Ensure output is a dict for consistency
         if isinstance(output, int):
             output = dict(status=output)
-        status = output.get("status")
-        status_sol = output.get("status_sol")
 
-        log_json = {
+        return algo, output, solver_name, elapsed_time
+
+    def _build_base_log_json(self, output, solver_name, elapsed_time):
+        """Builds the initial log_json dictionary."""
+        status = output.get("status")
+        return {
             **output,
-            **{
-                "time": timer() - start,
-                "solver": solver,
-                "status": STATUS_CONV.get(status, "Unknown"),
-                "status_code": status,
-                "sol_code": SOLUTION_STATUS_INFEASIBLE,
-            },
+            "time": elapsed_time,
+            "solver": solver_name,
+            "status": STATUS_CONV.get(status, "Unknown"),
+            "status_code": status,
+            "sol_code": SOLUTION_STATUS_INFEASIBLE,  # Default to infeasible
         }
 
-        try:
-            log_txt = algo.log
-        except:
-            log_txt = ""
-
-        # check if there is a solution
-        # TODO: we need to extract the solution status too
-        #  because there may be already an initial solution in the solver
-        # TODO: review whole status types and meaning
+    def _determine_final_solution_code(self, algo, status_sol):
+        """Determines the final solution status code."""
         if status_sol is not None:
-            log_json["sol_code"] = status_sol
-        elif algo.solution is not None and len(algo.solution.data):
-            log_json["sol_code"] = SOLUTION_STATUS_FEASIBLE
-
-        if log_json["sol_code"] > 0:
-            sol_errors = algo.solution.check_schema()
-            if sol_errors:
-                raise BadSolution(
-                    f"The solution does not match the schema:\n{sol_errors}"
-                )
-            sol = algo.solution.to_dict()
-
-        if sol != {} and sol is not None:
-            checks = algo.data_checks()
+            return status_sol
+        elif algo.solution is not None and algo.solution.data:
+            return SOLUTION_STATUS_FEASIBLE
         else:
-            checks = None
+            # Return default infeasible if no explicit status or valid solution found
+            return SOLUTION_STATUS_INFEASIBLE
 
-        return sol, checks, instance_checks, log_txt, log_json
+    def _get_log_text(self, algo):
+        """Safely retrieves the log text from the algorithm object."""
+        try:
+            return algo.log
+        except AttributeError:
+            return ""  # Solver might not have a .log attribute
+
+    def _validate_and_check_solution(self, algo):
+        """
+        Validates the solution schema and performs data checks if available.
+        Returns the solution dict and checks dict, or (None, None).
+        Raises BadSolution if schema validation fails.
+        """
+        if algo.solution is None:
+            # This case should ideally be prevented by checking sol_code before calling,
+            # but added as a safeguard.
+            raise BadSolution(
+                "Attempted to validate solution, but algo.solution is None."
+            )
+
+        # Check solution schema
+        sol_schema_errors = algo.solution.check_schema()
+        if sol_schema_errors:
+            raise BadSolution(
+                f"The final solution does not match the schema:\n{sol_schema_errors}"
+            )
+
+        final_sol_dict = algo.solution.to_dict()
+        solution_checks = None
+
+        # Perform data checks only if a valid solution dict was obtained
+        # and the solver implements data_checks
+        if final_sol_dict:  # Checks for non-None and non-empty dict
+            try:
+                solution_checks = algo.data_checks()
+            except AttributeError:
+                # Solver doesn't implement data_checks, which is acceptable.
+                solution_checks = None
+
+        return final_sol_dict, solution_checks
+
+    def _format_log_and_solution(self, algo, output, solver_name, elapsed_time):
+        """Formats logs, validates and checks the solution."""
+
+        # 1. Build initial log dictionary
+        log_json = self._build_base_log_json(output, solver_name, elapsed_time)
+
+        # 2. Determine final solution status code and update log
+        status_sol = output.get("status_sol")
+        final_sol_code = self._determine_final_solution_code(algo, status_sol)
+        log_json["sol_code"] = final_sol_code
+
+        # 3. Get text log
+        log_txt = self._get_log_text(algo)
+
+        # 4. Validate and check solution if feasible/optimal
+        final_sol_dict = None
+        solution_checks = None
+        if final_sol_code > 0:
+            # Raises BadSolution if schema validation fails
+            final_sol_dict, solution_checks = self._validate_and_check_solution(algo)
+
+        return final_sol_dict, solution_checks, log_txt, log_json
+
+    def solve(
+        self, data: dict, config: dict, solution_data: dict = None
+    ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
+        """
+        Solves the problem instance using the specified configuration.
+
+        :param data: Dictionary representing the problem instance.
+        :param config: Dictionary containing execution configuration.
+        :param solution_data: Optional dictionary with an initial solution.
+        :return: Tuple containing (solution, solution_checks, instance_checks, log_txt, log_json).
+        """
+        if config.get("msg", True):
+            print("Solving the model")
+
+        # 1. Validate configuration
+        self._validate_config(config)
+
+        # 2. Prepare instance and potential initial solution
+        inst, sol_initial = self._prepare_instance_and_solution(data, solution_data)
+
+        # 3. Check instance for critical errors
+        instance_checks, has_errors = self._check_instance_errors(inst)
+
+        if has_errors:
+            # Return early if instance has critical errors
+            solver_name = config.get("solver", self.get_default_solver_name())
+            log_json = dict(
+                time=0,
+                solver=solver_name,
+                status="Infeasible",
+                status_code=STATUS_INFEASIBLE,
+                sol_code=SOLUTION_STATUS_INFEASIBLE,
+            )
+            # Ensure solution dict is empty, not None, consistent with successful returns
+            return dict(), None, instance_checks, "", log_json
+
+        # 4. Execute solver
+        algo, output, solver_name, elapsed_time = self._execute_solver(
+            inst, sol_initial, config
+        )
+
+        # 5. Format log and process solution
+        sol_final, solution_checks, log_txt, log_json = self._format_log_and_solution(
+            algo, output, solver_name, elapsed_time
+        )
+
+        # Ensure solution is an empty dict if None for type consistency
+        if sol_final is None:
+            sol_final = dict()
+
+        return sol_final, solution_checks, instance_checks, log_txt, log_json
 
     def check(
         self, instance_data: dict, solution_data: dict = None
@@ -272,7 +359,7 @@ class ApplicationCore(ABC):
         solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
         if solver_class is None:
-            raise NoSolverException(f"No solver is available")
+            raise NoSolverException("No solver is available")
         inst = self.instance.from_dict(instance_data)
 
         instance_checks = inst.data_checks()
