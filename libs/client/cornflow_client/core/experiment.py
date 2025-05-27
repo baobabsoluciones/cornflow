@@ -4,7 +4,7 @@ Base code for the experiment template.
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import Dict, List, Tuple, Union
 
 from jsonschema import Draft7Validator
 
@@ -13,6 +13,7 @@ from cornflow_client.constants import (
     SOLVER_CONVERTER,
     BadSolutionChecks,
 )
+
 from .instance import InstanceCore
 from .solution import SolutionCore
 
@@ -167,7 +168,7 @@ class ExperimentCore(ABC):
     @staticmethod
     def get_solver_config(
         config, lib="pyomo", default_solver="cbc", remove_unknown=False
-    ):
+    ) -> Tuple[str, dict]:
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
@@ -227,4 +228,4 @@ class ExperimentCore(ABC):
                     }
                 )
 
-        return conf
+        return solver, conf
