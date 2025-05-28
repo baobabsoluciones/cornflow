@@ -971,6 +971,8 @@ class TestExecutionsLogEndpointDatabricks(TestExecutionsDetailEndpointMock):
             "user_id",
             "config",
             "indicators",
+            "username",
+            "updated_at"
         ]
 
     def create_app(self):
