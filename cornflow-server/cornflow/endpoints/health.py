@@ -19,6 +19,7 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
+    CORNFLOW_VERSION
 )
 from cornflow_client.databricks.api import Databricks
 from cornflow.shared.exceptions import EndpointNotImplemented
@@ -35,10 +36,9 @@ class HealthEndpoint(BaseMetaResource):
         :rtype: dict
         :doc-author: baobab soluciones
         """
-
         backend_status = self.check_backend_status()
-
         cornflow_status = STATUS_UNHEALTHY
+        cornflow_version = CORNFLOW_VERSION
 
         if (
             UserModel.get_one_user_by_username(os.getenv("CORNFLOW_SERVICE_USER"))
@@ -49,7 +49,8 @@ class HealthEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"Health check: cornflow {cornflow_status}, backend {backend_status}"
         )
-        return {"cornflow_status": cornflow_status, "backend_status": backend_status}
+        return {"cornflow_status": cornflow_status, "backend_status": backend_status,
+                "cornflow_version": cornflow_version}
 
     def check_backend_status(self):
         if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:

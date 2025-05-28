@@ -21,6 +21,7 @@ from cornflow.tests.const import (
     BAD_EXECUTION_PATH,
     EXECUTION_SOLUTION_PATH,
     EDIT_EXECUTION_SOLUTION,
+    CUSTOM_CONFIG_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
@@ -46,6 +47,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         self.bad_payload = load_file_fk(BAD_EXECUTION_PATH)
         self.payloads = [load_file_fk(f) for f in EXECUTIONS_LIST]
         self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
+        self.custom_config_payload = load_file_fk(CUSTOM_CONFIG_PATH)
         self.keys_to_check = [
             "data_hash",
             "created_at",
@@ -60,10 +62,24 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             "instance_id",
             "name",
             "indicators",
+            "username",
+            "updated_at"
         ]
 
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
+
+    def test_get_custom_config(self):
+        id = self.create_new_row(
+            self.url, self.model, payload=self.custom_config_payload
+        )
+        url = EXECUTION_URL + "/" + str(id) + "/" + "?run=0"
+
+        response = self.get_one_row(
+            url,
+            payload={**self.custom_config_payload, **dict(id=id)},
+        )
+        self.assertEqual(response["config"]["block_model"]["solver"], "mip.gurobi")
 
     @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_run(self, af_client_class):
@@ -498,6 +514,8 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "schema",
             "user_id",
             "indicators",
+            "username",
+            "updated_at"
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -517,6 +535,103 @@ class TestExecutionsDetailEndpointAirflow(
     def create_app(self):
         app = create_app("testing")  # configuración para Airflow
         return app
+
+    # TODO: this test should be moved as it is not using the detail endpoint
+    def test_incomplete_payload2(self):
+        payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
+        response = self.create_new_row(
+            self.url + "?run=0",
+            self.model,
+            payload,
+            expected_status=400,
+            check_payload=False,
+        )
+
+    def test_create_delete_instance_load(self):
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        keys_to_check = [
+            "message",
+            "id",
+            "schema",
+            "data_hash",
+            "config",
+            "instance_id",
+            "user_id",
+            "indicators",
+            "description",
+            "name",
+            "created_at",
+            "state",
+            "username",
+            "updated_at"
+        ]
+        execution = self.get_one_row(
+            self.url + idx,
+            payload={**self.payload, **dict(id=idx)},
+            keys_to_check=keys_to_check,
+        )
+        self.delete_row(self.url + idx + "/")
+        keys_to_check = [
+            "id",
+            "schema",
+            "description",
+            "name",
+            "user_id",
+            "executions",
+            "created_at",
+            "data_hash",
+        ]
+        instance = self.get_one_row(
+            INSTANCE_URL + execution["instance_id"] + "/",
+            payload={},
+            expected_status=200,
+            check_payload=False,
+            keys_to_check=keys_to_check,
+        )
+        executions = [execution["id"] for execution in instance["executions"]]
+        self.assertFalse(idx in executions)
+
+    def test_delete_instance_deletes_execution(self):
+        # we create a new instance
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        payload = {**self.payload, **dict(instance_id=fk_id)}
+        # we create an execution for that instance
+        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
+        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
+        # we delete the new instance
+        self.delete_row(INSTANCE_URL + fk_id + "/")
+        # we check the execution does not exist
+        self.get_one_row(
+            self.url + idx, payload={}, expected_status=404, check_payload=False
+        )
+
+    def test_update_one_row_data(self):
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        payload["data"]["parameters"]["name"] = "NewName"
+
+        url = self.url + str(idx) + "/"
+        payload = {
+            **self.payload,
+            **dict(id=idx, name="new_name", data=payload["data"]),
+        }
+        self.update_row(
+            url,
+            dict(name="new_name", data=payload["data"]),
+            payload,
+        )
+
+        url += "data/"
+        row = self.client.get(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+        self.assertEqual(row.json["checks"], None)
 
     @patch("cornflow.endpoints.execution.Airflow")
     def test_stop_execution(self, af_client_class):
@@ -811,6 +926,8 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
             "user_id",
             "config",
             "indicators",
+            "username",
+            "updated_at"
         ]
 
     def test_get_one_execution(self):

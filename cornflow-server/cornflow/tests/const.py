@@ -18,6 +18,7 @@ INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
 EDIT_EXECUTION_SOLUTION = _get_file("./data/edit_execution_solution.json")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
+CUSTOM_CONFIG_PATH = _get_file("./data/new_execution_custom_config.json")
 BAD_EXECUTION_PATH = _get_file("./data/bad_execution.json")
 EXECUTION_SOLUTION_PATH = _get_file("./data/new_execution_solution.json")
 EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
