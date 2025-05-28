@@ -747,9 +747,9 @@ class ExecutionStatusEndpoint(BaseMetaResource):
             _raise_af_error(
                 execution,
                 state=EXEC_STATE_ERROR,
-                error="The execution has no dag_run associated",
+                error="The execution has no run_id associated",
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
-                f"The execution has no associated dag run id.",
+                f"The execution has no associated run id.",
             )
         schema = execution.schema
         # We use it only to check if the orchestrator is alive

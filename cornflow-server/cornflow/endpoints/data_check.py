@@ -106,7 +106,7 @@ def _run_airflow_data_check(
 
     # Update execution on success
     af_data = response.json()
-    execution.dag_run_id = af_data.get("dag_run_id")
+    execution.run_id = af_data.get("dag_run_id")
     execution.update_state(EXEC_STATE_QUEUED)
 
 
