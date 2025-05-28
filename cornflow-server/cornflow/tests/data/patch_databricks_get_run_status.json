@@ -1,0 +1,118 @@
+{
+    "job_id": 123456789012345,
+    "run_id": 9876543210123,
+    "creator_user_name": "user@example.com",
+    "number_in_job": 9876543210123,
+    "original_attempt_run_id": 9876543210123,
+    "state": {
+        "life_cycle_state": "INTERNAL_ERROR",
+        "result_state": "FAILED",
+        "state_message": "Task run_optimization failed with message: Workload failed, see run output for details. This caused all downstream tasks to get skipped.",
+        "user_cancelled_or_timedout": false
+    },
+    "start_time": 1700000000000,
+    "setup_duration": 383000,
+    "execution_duration": 120000,
+    "cleanup_duration": 0,
+    "end_time": 1700000500000,
+    "run_duration": 500000,
+    "trigger": "ONE_TIME",
+    "run_name": "Example_Job_Name",
+    "run_page_url": "https://example.databricks.net/?o=1234567890#job/123456789012345/run/9876543210123",
+    "run_type": "JOB_RUN",
+    "tasks": [
+        {
+            "run_id": 1234567890123456,
+            "task_key": "run_optimization",
+            "run_if": "ALL_SUCCESS",
+            "spark_python_task": {
+                "python_file": "/Workspace/Users/user@example.com/.bundle/example_model/default/files/example_jobs.py",
+                "parameters": [
+                    "/FileStore/shared_uploads/solution.json"
+                ],
+                "source": "WORKSPACE"
+            },
+            "new_cluster": {
+                "spark_version": "15.4.x-scala2.12",
+                "spark_conf": {
+                    "spark.databricks.cluster.profile": "singleNode",
+                    "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true",
+                    "spark.master": "local[*]"
+                },
+                "azure_attributes": {
+                    "availability": "ON_DEMAND_AZURE"
+                },
+                "node_type_id": "Standard_DS3_v2",
+                "custom_tags": {
+                    "ResourceClass": "SingleNode"
+                },
+                "spark_env_vars": {
+                    "UC_CORNFLOW_SCHEMA": "public",
+                    "DATABRICKS_HOST": "https://example.databricks.net",
+                    "UC_DATABRICKS": "true",
+                    "GRB_LICENSE_FILE": "/dbfs/FileStore/tables/gurobi.lic",
+                    "UC_CORNFLOW_CATALOG": "unitycatalog",
+                    "DATABRICKS_TOKEN": "{{secrets/databricks/token}}"
+                },
+                "enable_elastic_disk": true,
+                "docker_image": {
+                    "url": "example/dbs:latest"
+                },
+                "data_security_mode": "SINGLE_USER",
+                "num_workers": 0
+            },
+            "libraries": [
+                {
+                    "pypi": {
+                        "package": "library1"
+                    }
+                },
+                {
+                    "pypi": {
+                        "package": "library2==1.0.0"
+                    }
+                },
+                {
+                    "pypi": {
+                        "package": "library3>=2.0.0"
+                    }
+                }
+            ],
+            "state": {
+                "life_cycle_state": "TERMINATED",
+                "result_state": "FAILED",
+                "state_message": "Workload failed, see run output for details",
+                "user_cancelled_or_timedout": false
+            },
+            "run_page_url": "https://example.databricks.net/?o=1234567890#job/123456789012345/run/1234567890123456",
+            "start_time": 1700000000000,
+            "setup_duration": 383000,
+            "execution_duration": 120000,
+            "cleanup_duration": 0,
+            "end_time": 1700000500000,
+            "cluster_instance": {
+                "cluster_id": "0000-000000-abcdefgh",
+                "spark_context_id": "1234567890123456789"
+            },
+            "attempt_number": 0,
+            "status": {
+                "state": "TERMINATED",
+                "termination_details": {
+                    "code": "RUN_EXECUTION_ERROR",
+                    "type": "CLIENT_ERROR",
+                    "message": "Workload failed, see run output for details"
+                }
+            }
+        }
+    ],
+    "format": "MULTI_TASK",
+    "status": {
+        "state": "TERMINATED",
+        "termination_details": {
+            "code": "RUN_EXECUTION_ERROR",
+            "type": "CLIENT_ERROR",
+            "message": "Task run_optimization failed with message: Workload failed, see run output for details. This caused all downstream tasks to get skipped."
+        }
+    },
+    "job_run_id": 9876543210123
+}
