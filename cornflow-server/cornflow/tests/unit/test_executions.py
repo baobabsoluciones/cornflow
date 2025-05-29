@@ -197,6 +197,9 @@ class TestExecutionsListEndpointDatabricks(BaseTestCases.ListFilters):
             "instance_id",
             "name",
             "indicators",
+            "username",
+            "updated_at"
+
         ]
 
     def create_app(self):
