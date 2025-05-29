@@ -18,12 +18,12 @@ from cornflow_client.constants import (
 class ParameterSchema(Schema):
     name = fields.String(required=True)
     description = fields.String(required=False)
-    required = fields.Bool(default=False)
-    many = fields.Bool(default=False)
-    allow_none = fields.Bool(default=False)
+    required = fields.Bool(load_default=False)
+    many = fields.Bool(load_default=False)
+    allow_none = fields.Bool(load_default=False)
     type = fields.String(required=True)
     valid_values = fields.List(fields.String, required=False)
-    strict = fields.Bool(default=True)
+    strict = fields.Bool(load_default=True)
 
 
 def validator(valid_values, input):
