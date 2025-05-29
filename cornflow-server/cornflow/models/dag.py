@@ -1,13 +1,12 @@
-"""
+""" """
 
-"""
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
-    SOLUTION_CHECKS_SCHEMA
+    SOLUTION_CHECKS_SCHEMA,
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 
@@ -16,8 +15,7 @@ from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
-# TODO AGA: cambiar nombre a la clase para que sea general
-# Aí como a los permisos etc
+
 class DeployedOrch(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
@@ -61,7 +59,7 @@ class DeployedOrch(TraceAttributesModel):
             raise ObjectDoesNotExist(
                 err,
                 log_txt=f"Error while user tries to register data for DAG {dag_name} "
-                            f"from instance and execution. " + err
+                f"from instance and execution. " + err,
             )
 
         if schema == INSTANCE_SCHEMA:

@@ -7,8 +7,7 @@ from databricks.sdk import WorkspaceClient
 from flask import current_app
 from cornflow.orchestrator_constants import config_orchestrator
 
-# TODO AGA: CODIGO REPETIDO
-# TODO AGA: revisar si el import está bien
+
 from cornflow_client.constants import DatabricksError
 from cornflow.shared.const import (
     DATABRICKS_TO_STATE_MAP,

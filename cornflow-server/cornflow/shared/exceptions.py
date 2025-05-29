@@ -148,7 +148,6 @@ def initialize_errorhandlers(app):
     @app.errorhandler(InvalidCredentials)
     @app.errorhandler(EndpointNotImplemented)
     @app.errorhandler(AirflowError)
-    # TODO AGA: revisar si está bien implementado el nuevo error
     @app.errorhandler(DatabricksError)
     @app.errorhandler(InvalidData)
     @app.errorhandler(InvalidPatch)

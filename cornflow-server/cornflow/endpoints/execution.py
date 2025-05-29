@@ -199,8 +199,6 @@ class ExecutionEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and a integer wit the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        # TODO: should validation should be done even if the execution is not going to be run?
-        # TODO: should the schema field be cross validated with the instance schema field?
 
         if "schema" not in kwargs:
             kwargs["schema"] = self.orch_const["def_schema"]
@@ -290,7 +288,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 execution.update_log_txt(f"{solution_errors}")
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
         # endregion
-        # TODO GG: Duda, de los estados definidos en const.py, hay alguno de databricks que cuadre aquí?
+        # TODO: Consider adding similar checks for databricks
         if self.orch_type == AIRFLOW_BACKEND:
             info = schema_info.json()
             if info["is_paused"]:
@@ -305,12 +303,8 @@ class ExecutionEndpoint(BaseMetaResource):
                     log_txt=f"Error while user {self.get_user()} tries to create an execution. "
                     + DAG_PAUSED_MSG,
                 )
-        # TODO AGA: revisar si hay que hacer alguna verificación a los JOBS
 
         try:
-            # TODO AGA: Hay que gestionar la posible eliminación de execution.id como
-            #   parámetro, ya que no se puede seleccionar el id en databricks
-            #   revisar las consecuencias que puede tener
             response = self.orch_client.run_workflow(execution.id, orch_name=schema)
         except self.orch_error as err:
             error = self.orch_const["name"] + " responded with an error: {}".format(err)
@@ -465,7 +459,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                     log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                     + AIRFLOW_NOT_REACHABLE_MSG,
                 )
-        # TODO GG: revisar si hay que hacer alguna comprobación del estilo a databricks
+        # TODO: Consider adding similar checks for databricks
         try:
             response = self.orch_client.run_workflow(execution.id, orch_name=schema)
         except self.orch_error as err:
@@ -892,8 +886,6 @@ def get_airflow(schema, execution, message="tries to create an execution"):
             ),
             log_txt=f"Error while user {execution.user_id} {message} " + err,
         )
-    # TODO AGA: revisar si tiene sentido que se devuelva execution o si
-    #  es un puntero
     return af_client, schema_info, execution
 
 
@@ -928,7 +920,4 @@ def map_run_state(state, orch_TYPE):
         return AIRFLOW_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
     elif orch_TYPE == DATABRICKS_BACKEND:
         preliminar_state = DATABRICKS_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
-        # if preliminar_state =="TERMINATED":
-        #     # TODO GG DUDA: Revisar si es correcto el error predeterminado
-        #     return DATABRICKS_FINISH_TO_STATE_MAP.get(state,EXEC_STATE_ERROR)
         return preliminar_state
