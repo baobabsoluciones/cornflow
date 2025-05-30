@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Import from libraries
 from flask_apispec import doc, marshal_with, use_kwargs
 from flask import current_app
