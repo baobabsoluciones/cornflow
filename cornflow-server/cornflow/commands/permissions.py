@@ -4,8 +4,14 @@ from importlib import import_module
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
+    ROLES_MAP,
+    GET_ACTION,
+    PATCH_ACTION,
+    POST_ACTION,
+    PUT_ACTION,
+    DELETE_ACTION,
 )
-from cornflow.models import ViewModel, PermissionViewRoleModel
+from cornflow.models import ViewModel, PermissionViewRoleModel, RoleModel
 from cornflow.shared import db
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -14,6 +20,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     if external_app is None:
         from cornflow.endpoints import resources, alarms_resources
+
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources
@@ -31,6 +38,21 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_db
     ]
     resources_names = [resource["endpoint"] for resource in resources_to_register]
+    roles_in_db = [role.name for role in RoleModel.get_all_objects()]
+    # Check which roles are not in ROLES_MAP
+    roles_not_in_map = [role for role in roles_in_db if role not in ROLES_MAP.keys()]
+    complete_base_assignation = BASE_PERMISSION_ASSIGNATION.copy()
+    if len(roles_not_in_map) > 0:
+        # We add to the complete_base_assignation the roles that are not in ROLES_MAP
+        for role in roles_not_in_map:
+            for action in [
+                GET_ACTION,
+                PATCH_ACTION,
+                POST_ACTION,
+                PUT_ACTION,
+                DELETE_ACTION,
+            ]:
+                complete_base_assignation.append((role, action))
 
     # Create base permissions
     permissions_in_app = [
@@ -41,7 +63,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
                 "api_view_id": views_in_db[view["endpoint"]],
             }
         )
-        for role, action in BASE_PERMISSION_ASSIGNATION
+        for role, action in complete_base_assignation
         for view in resources_to_register
         if role in view["resource"].ROLES_WITH_ACCESS
     ] + [
