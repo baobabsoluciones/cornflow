@@ -29,6 +29,7 @@ from cornflow.app import (
     register_dag_permissions,
     register_roles,
     register_views,
+    register_base_assignations,
 )
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.endpoints import resources, alarms_resources
@@ -494,3 +495,91 @@ class TestCommands(TestCase):
             },
         )
         self.assertEqual(403, response.status_code)
+
+    def test_permissions_not_deleted_when_roles_removed_from_code(self):
+        """
+        Test that permissions are NOT deleted when roles are removed from ROLES_WITH_ACCESS.
+
+        This test demonstrates the current bug: when a role is removed from
+        ROLES_WITH_ACCESS in an endpoint's code, the corresponding permissions
+        in the database are not automatically deleted. This happens because
+        the deletion logic in register_base_permissions_command is commented out.
+
+        The test should currently FAIL to demonstrate the bug exists.
+        """
+        # First, initialize the access system normally
+        self.runner.invoke(access_init)
+
+        # Get the original ROLES_WITH_ACCESS for ExampleDataListEndpoint
+        from cornflow.endpoints.example_data import ExampleDataListEndpoint
+
+        original_roles = ExampleDataListEndpoint.ROLES_WITH_ACCESS.copy()
+
+        # Verify initial permissions are created for all three roles
+        # Get the view ID for the endpoint
+        from cornflow.models import ViewModel
+
+        view = ViewModel.query.filter_by(name="example-data").first()
+        self.assertIsNotNone(view, "example-data view should exist")
+
+        # Check permissions exist for all original roles
+        from cornflow.shared.const import ACTIONS_MAP
+        from cornflow.models import PermissionViewRoleModel
+
+        # Check GET action permissions (action_id=1 is typically GET)
+        get_action_id = 1
+        initial_permissions = PermissionViewRoleModel.query.filter_by(
+            api_view_id=view.id, action_id=get_action_id
+        ).all()
+
+        initial_role_ids = [perm.role_id for perm in initial_permissions]
+        self.assertEqual(
+            len(original_roles),
+            len(initial_permissions),
+            f"Should have permissions for all {len(original_roles)} original roles",
+        )
+
+        # Now simulate removing PLANNER_ROLE from ROLES_WITH_ACCESS
+        from cornflow.shared.const import PLANNER_ROLE, VIEWER_ROLE, ADMIN_ROLE
+
+        modified_roles = [VIEWER_ROLE, ADMIN_ROLE]  # Remove PLANNER_ROLE
+
+        # Temporarily modify the ROLES_WITH_ACCESS
+        ExampleDataListEndpoint.ROLES_WITH_ACCESS = modified_roles
+
+        try:
+            # Run the permission registration again
+            # (this simulates redeploying the app with modified roles)
+            self.runner.invoke(register_base_assignations, ["-v"])
+
+            # Check permissions after the "code change"
+            updated_permissions = PermissionViewRoleModel.query.filter_by(
+                api_view_id=view.id, action_id=get_action_id
+            ).all()
+
+            updated_role_ids = [perm.role_id for perm in updated_permissions]
+
+            # THIS IS THE BUG: The permission for PLANNER_ROLE should be deleted
+            # but it's not because the deletion logic is commented out
+            # So we expect this assertion to FAIL, demonstrating the bug
+            self.assertEqual(
+                len(modified_roles),
+                len(updated_permissions),
+                f"After removing PLANNER_ROLE from code, should only have {len(modified_roles)} permissions, "
+                f"but still has {len(updated_permissions)} permissions. "
+                f"This demonstrates the bug: permissions are not deleted when roles are removed from ROLES_WITH_ACCESS.",
+            )
+
+            # Also check that PLANNER_ROLE permission was actually removed
+            planner_permissions = [
+                perm for perm in updated_permissions if perm.role_id == PLANNER_ROLE
+            ]
+            self.assertEqual(
+                0,
+                len(planner_permissions),
+                "PLANNER_ROLE permission should have been deleted but still exists",
+            )
+
+        finally:
+            # Restore original ROLES_WITH_ACCESS to avoid affecting other tests
+            ExampleDataListEndpoint.ROLES_WITH_ACCESS = original_roles
