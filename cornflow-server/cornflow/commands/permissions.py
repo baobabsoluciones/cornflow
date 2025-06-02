@@ -79,9 +79,9 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
 
     # TODO: for now the permission are not going to get deleted just in case.
     #  We are just going to register new permissions
-    # if len(permissions_to_delete) > 0:
-    #     for permission in permissions_to_delete:
-    #         db.session.delete(permission)
+    if len(permissions_to_delete) > 0:
+        for permission in permissions_to_delete:
+            db.session.delete(permission)
 
     try:
         db.session.commit()

@@ -548,6 +548,7 @@ class TestCommands(TestCase):
         ExampleDataListEndpoint.ROLES_WITH_ACCESS = modified_roles
 
         try:
+
             # Run the permission registration again
             # (this simulates redeploying the app with modified roles)
             self.runner.invoke(register_base_assignations, ["-v"])
