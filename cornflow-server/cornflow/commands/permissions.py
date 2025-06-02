@@ -38,13 +38,15 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_db
     ]
     resources_names = [resource["endpoint"] for resource in resources_to_register]
-    roles_in_db = [role.name for role in RoleModel.get_all_objects()]
+    roles_in_db = [role.id for role in RoleModel.get_all_objects()]
     # Check which roles are not in ROLES_MAP
-    roles_not_in_map = [role for role in roles_in_db if role not in ROLES_MAP.keys()]
+    roles_not_in_map = [
+        role_id for role_id in roles_in_db if role_id not in ROLES_MAP.keys()
+    ]
     complete_base_assignation = BASE_PERMISSION_ASSIGNATION.copy()
     if len(roles_not_in_map) > 0:
         # We add to the complete_base_assignation the roles that are not in ROLES_MAP
-        for role in roles_not_in_map:
+        for role_id in roles_not_in_map:
             for action in [
                 GET_ACTION,
                 PATCH_ACTION,
@@ -52,7 +54,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
                 PUT_ACTION,
                 DELETE_ACTION,
             ]:
-                complete_base_assignation.append((role, action))
+                complete_base_assignation.append((role_id, action))
 
     # Create base permissions
     permissions_in_app = [

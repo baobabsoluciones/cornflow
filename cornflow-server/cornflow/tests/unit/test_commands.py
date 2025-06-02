@@ -587,12 +587,13 @@ class TestCommands(TestCase):
 
     def test_custom_role_permissions_are_preserved(self):
         """
-        Test that permissions for custom roles (not in ROLES_MAP) are preserved
-        during permission synchronization.
+        Test that custom roles (not in ROLES_MAP) are automatically detected
+        and assigned complete permissions during synchronization.
 
-        This test verifies that when permissions are synchronized, only permissions
-        for roles defined in ROLES_MAP are subject to deletion, while custom roles
-        added manually to the database are preserved.
+        This test verifies that when permissions are synchronized:
+        1. Custom roles in the database are automatically detected
+        2. They are assigned all actions (GET, PATCH, POST, PUT, DELETE)
+        3. These permissions are created for all endpoints where the role has access
         """
         # First, initialize the access system normally
         self.runner.invoke(access_init)
@@ -608,36 +609,81 @@ class TestCommands(TestCase):
         custom_role = RoleModel({"id": custom_role_id, "name": "custom_role"})
         custom_role.save()
 
-        # Create a permission for this custom role
-        from cornflow.shared.const import GET_ACTION
+        # Temporarily add the custom role to ExampleDataListEndpoint ROLES_WITH_ACCESS
+        from cornflow.endpoints.example_data import ExampleDataListEndpoint
 
-        custom_permission = PermissionViewRoleModel(
-            {"role_id": custom_role_id, "action_id": GET_ACTION, "api_view_id": view.id}
-        )
-        custom_permission.save()
+        original_roles = ExampleDataListEndpoint.ROLES_WITH_ACCESS.copy()
+        ExampleDataListEndpoint.ROLES_WITH_ACCESS = original_roles + [custom_role_id]
 
-        # Verify the custom permission exists
-        custom_perms_before = PermissionViewRoleModel.query.filter_by(
-            role_id=custom_role_id, action_id=GET_ACTION, api_view_id=view.id
-        ).all()
-        self.assertEqual(
-            1, len(custom_perms_before), "Custom permission should exist before sync"
-        )
+        try:
+            # Count permissions before synchronization
+            perms_before = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id, api_view_id=view.id
+            ).count()
+            self.assertEqual(
+                0, perms_before, "No custom permissions should exist initially"
+            )
 
-        # Run permission synchronization (this would previously delete custom role permissions)
-        self.runner.invoke(register_base_assignations, ["-v"])
+            # Run permission synchronization - this should auto-detect the custom role
+            self.runner.invoke(register_base_assignations, ["-v"])
 
-        # Verify the custom permission still exists after synchronization
-        custom_perms_after = PermissionViewRoleModel.query.filter_by(
-            role_id=custom_role_id, action_id=GET_ACTION, api_view_id=view.id
-        ).all()
-        self.assertEqual(
-            1,
-            len(custom_perms_after),
-            "Custom role permission should be preserved after synchronization. "
-            "Permissions should only be deleted for roles defined in ROLES_MAP.",
-        )
+            # Verify that ALL actions have been assigned to the custom role
+            from cornflow.shared.const import (
+                GET_ACTION,
+                PATCH_ACTION,
+                POST_ACTION,
+                PUT_ACTION,
+                DELETE_ACTION,
+            )
 
-        # Clean up
-        custom_permission.delete()
-        custom_role.delete()
+            expected_actions = [
+                GET_ACTION,
+                PATCH_ACTION,
+                POST_ACTION,
+                PUT_ACTION,
+                DELETE_ACTION,
+            ]
+
+            for action in expected_actions:
+                permission = PermissionViewRoleModel.query.filter_by(
+                    role_id=custom_role_id, action_id=action, api_view_id=view.id
+                ).first()
+                self.assertIsNotNone(
+                    permission,
+                    f"Custom role should have permission for action {action}. "
+                    f"The system should auto-detect custom roles and assign complete permissions.",
+                )
+
+            # Verify total count of permissions for custom role
+            total_perms = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id, api_view_id=view.id
+            ).count()
+            self.assertEqual(
+                len(expected_actions),
+                total_perms,
+                f"Custom role should have {len(expected_actions)} permissions (all actions)",
+            )
+
+            # Test that running sync again doesn't duplicate permissions
+            self.runner.invoke(register_base_assignations, ["-v"])
+
+            total_perms_after_second_sync = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id, api_view_id=view.id
+            ).count()
+            self.assertEqual(
+                len(expected_actions),
+                total_perms_after_second_sync,
+                "Permissions should not be duplicated on subsequent syncs",
+            )
+
+        finally:
+            # Clean up
+            # Delete permissions first (due to foreign key constraints)
+            permissions_to_delete = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id
+            ).all()
+            for perm in permissions_to_delete:
+                perm.delete()
+            custom_role.delete()
+            # Restore original ROLES_WITH_ACCESS
+            ExampleDataListEndpoint.ROLES_WITH_ACCESS = original_roles
