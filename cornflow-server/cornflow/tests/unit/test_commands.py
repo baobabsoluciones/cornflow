@@ -584,3 +584,60 @@ class TestCommands(TestCase):
         finally:
             # Restore original ROLES_WITH_ACCESS to avoid affecting other tests
             ExampleDataListEndpoint.ROLES_WITH_ACCESS = original_roles
+
+    def test_custom_role_permissions_are_preserved(self):
+        """
+        Test that permissions for custom roles (not in ROLES_MAP) are preserved
+        during permission synchronization.
+
+        This test verifies that when permissions are synchronized, only permissions
+        for roles defined in ROLES_MAP are subject to deletion, while custom roles
+        added manually to the database are preserved.
+        """
+        # First, initialize the access system normally
+        self.runner.invoke(access_init)
+
+        # Get a view to work with
+        from cornflow.models import ViewModel, PermissionViewRoleModel, RoleModel
+
+        view = ViewModel.query.filter_by(name="example-data").first()
+        self.assertIsNotNone(view, "example-data view should exist")
+
+        # Create a custom role that is NOT in ROLES_MAP
+        custom_role_id = 999  # Use an ID that's not in ROLES_MAP
+        custom_role = RoleModel({"id": custom_role_id, "name": "custom_role"})
+        custom_role.save()
+
+        # Create a permission for this custom role
+        from cornflow.shared.const import GET_ACTION
+
+        custom_permission = PermissionViewRoleModel(
+            {"role_id": custom_role_id, "action_id": GET_ACTION, "api_view_id": view.id}
+        )
+        custom_permission.save()
+
+        # Verify the custom permission exists
+        custom_perms_before = PermissionViewRoleModel.query.filter_by(
+            role_id=custom_role_id, action_id=GET_ACTION, api_view_id=view.id
+        ).all()
+        self.assertEqual(
+            1, len(custom_perms_before), "Custom permission should exist before sync"
+        )
+
+        # Run permission synchronization (this would previously delete custom role permissions)
+        self.runner.invoke(register_base_assignations, ["-v"])
+
+        # Verify the custom permission still exists after synchronization
+        custom_perms_after = PermissionViewRoleModel.query.filter_by(
+            role_id=custom_role_id, action_id=GET_ACTION, api_view_id=view.id
+        ).all()
+        self.assertEqual(
+            1,
+            len(custom_perms_after),
+            "Custom role permission should be preserved after synchronization. "
+            "Permissions should only be deleted for roles defined in ROLES_MAP.",
+        )
+
+        # Clean up
+        custom_permission.delete()
+        custom_role.delete()
