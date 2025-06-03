@@ -68,15 +68,6 @@ def register_views_command(external_app: str = None, verbose: bool = False):
                 view_attrs["url_rule"] != new_endpoint["url_rule"]
                 or view_attrs["description"] != new_endpoint["description"]
             ):
-                # Update the object with new attributes
-                ViewModel.update(
-                    {
-                        "id": view_attrs["id"],
-                        "name": view_name,
-                        "url_rule": new_endpoint["url_rule"],
-                        "description": new_endpoint["description"],
-                    },
-                )
                 views_to_update.append(
                     {
                         "id": view_attrs["id"],
