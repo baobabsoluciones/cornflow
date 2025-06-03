@@ -58,6 +58,8 @@ def register_views_command(external_app: str = None, verbose: bool = False):
         for view in resources_to_register
     }
 
+    views_to_delete = []
+    views_to_update = []
     # Check if views have the same name but different url_rule or description
     for view_name, view_attrs in views_registered_urls_all_attributes.items():
         if view_name in all_resources_to_register_views_endpoints.keys():
@@ -75,12 +77,24 @@ def register_views_command(external_app: str = None, verbose: bool = False):
                         "description": new_endpoint["description"],
                     },
                 )
+                views_to_update.append(
+                    {
+                        "id": view_attrs["id"],
+                        "name": view_name,
+                        "url_rule": new_endpoint["url_rule"],
+                        "description": new_endpoint["description"],
+                    }
+                )
         else:
-            ViewModel.delete(view_attrs["id"])
+            views_to_delete.append(view_attrs["id"])
 
     if len(views_to_register) > 0:
         db.session.bulk_save_objects(views_to_register)
-
+    if len(views_to_update) > 0:
+        db.session.bulk_update_mappings(ViewModel, views_to_update)
+    if len(views_to_delete) > 0:
+        for view_id in views_to_delete:
+            ViewModel.delete(view_id)
     try:
         db.session.commit()
     except IntegrityError as e:
