@@ -31,7 +31,9 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     else:
         resources_to_register = []
         exit()
-
+    print("-----------------------------------------------------------------------")
+    print("DEBUG PERMISSIONS")
+    print("-----------------------------------------------------------------------")
     views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
     permissions_in_db = [perm for perm in PermissionViewRoleModel.get_all_objects()]
     permissions_in_db_keys = [
@@ -39,6 +41,10 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     ]
     resources_names = [resource["endpoint"] for resource in resources_to_register]
     roles_in_db = [role.id for role in RoleModel.get_all_objects()]
+    print("-----------------------------------------------------------------------")
+    print("ROLES IN DB")
+    print("-----------------------------------------------------------------------")
+    print(roles_in_db)
     # Check which roles are not in ROLES_MAP
     roles_not_in_map = [
         role_id for role_id in roles_in_db if role_id not in ROLES_MAP.keys()
@@ -55,6 +61,8 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
                 DELETE_ACTION,
             ]:
                 complete_base_assignation.append((role_id, action))
+        if verbose:
+            current_app.logger.info(f"Custom roles detected: {roles_not_in_map}")
 
     # Create base permissions
     permissions_in_app = [
@@ -141,6 +149,14 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
             current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
         else:
             current_app.logger.info("No permissions to delete")
+
+        current_app.logger.info(
+            f"Resources to register: {[r['endpoint'] for r in resources_to_register]}"
+        )
+        for view in resources_to_register:
+            current_app.logger.info(
+                f"View {view['endpoint']} ROLES_WITH_ACCESS: {view['resource'].ROLES_WITH_ACCESS}"
+            )
 
     return True
 

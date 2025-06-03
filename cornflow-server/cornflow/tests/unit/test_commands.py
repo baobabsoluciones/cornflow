@@ -16,6 +16,7 @@ for various command scenarios and configurations.
 """
 
 import json
+import sys
 
 from flask_testing import TestCase
 
@@ -687,3 +688,117 @@ class TestCommands(TestCase):
             custom_role.delete()
             # Restore original ROLES_WITH_ACCESS
             ExampleDataListEndpoint.ROLES_WITH_ACCESS = original_roles
+
+    def test_access_init_automatically_processes_external_app(self):
+        """
+        Test that access_init automatically detects and processes external apps
+        when EXTERNAL_APP environment variables are set.
+
+        This verifies the automatic deployment behavior.
+        """
+        import os
+        import types
+        import sys
+
+        # Create mock external app with custom roles
+        mock_external_app = types.ModuleType("test_external_app")
+        mock_endpoints = types.ModuleType("test_external_app.endpoints")
+        mock_roles = types.ModuleType("test_external_app.roles")
+
+        # Define custom roles in external app
+        custom_role_id = 888
+        # Insertamos en la bbdd el custom_role_id
+
+        # Define external endpoint that uses the custom role
+        class TestExternalEndpoint:
+            ROLES_WITH_ACCESS = [custom_role_id]
+            DESCRIPTION = "Test external endpoint"
+
+        mock_endpoints.resources = [
+            {
+                "resource": TestExternalEndpoint,
+                "urls": "/test-external/",
+                "endpoint": "test-external",
+            }
+        ]
+
+        mock_external_app.endpoints = mock_endpoints
+        mock_external_app.roles = mock_roles
+
+        # Register mock modules
+        sys.modules["test_external_app"] = mock_external_app
+        sys.modules["test_external_app.endpoints"] = mock_endpoints
+        sys.modules["test_external_app.roles"] = mock_roles
+
+        # Set environment variables for external app
+        original_external_app = os.environ.get("EXTERNAL_APP", "0")
+        original_external_app_module = os.environ.get(
+            "EXTERNAL_APP_MODULE", "external_app"
+        )
+
+        os.environ["EXTERNAL_APP"] = "1"
+        os.environ["EXTERNAL_APP_MODULE"] = "test_external_app"
+
+        try:
+            # Create the view manually (since we're not testing view registration here)
+            from cornflow.models import ViewModel, RoleModel, PermissionViewRoleModel
+
+            test_view = ViewModel(
+                {
+                    "name": "test-external",
+                    "url_rule": "/test-external/",
+                    "description": "Test external endpoint",
+                }
+            )
+            test_view.save()
+
+            # Run access_init - this should automatically detect and process external app
+            self.runner.invoke(access_init, ["-v"])
+
+            # Verify custom role was registered
+            custom_role = RoleModel.query.filter_by(id=custom_role_id).first()
+            self.assertIsNotNone(
+                custom_role,
+                "Custom role from external app should be automatically registered",
+            )
+            self.assertEqual("test_external_role", custom_role.name)
+
+            # Verify permissions were created for custom role
+            from cornflow.shared.const import GET_ACTION
+
+            permission = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id, action_id=GET_ACTION, api_view_id=test_view.id
+            ).first()
+            self.assertIsNotNone(
+                permission,
+                "access_init should automatically create permissions for external app custom roles",
+            )
+
+        finally:
+            # Cleanup
+            # Delete permissions first
+            permissions_to_delete = PermissionViewRoleModel.query.filter_by(
+                role_id=custom_role_id
+            ).all()
+            for perm in permissions_to_delete:
+                perm.delete()
+
+            # Delete role and view
+            custom_role = RoleModel.query.filter_by(id=custom_role_id).first()
+            if custom_role:
+                custom_role.delete()
+            test_view.delete()
+
+            # Restore environment variables
+            os.environ["EXTERNAL_APP"] = original_external_app
+            os.environ["EXTERNAL_APP_MODULE"] = original_external_app_module
+
+            # Remove mock modules
+            modules_to_remove = [
+                "test_external_app",
+                "test_external_app.endpoints",
+                "test_external_app.roles",
+            ]
+            for module_name in modules_to_remove:
+                if module_name in sys.modules:
+                    del sys.modules[module_name]

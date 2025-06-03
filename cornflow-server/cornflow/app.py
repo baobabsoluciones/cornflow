@@ -161,10 +161,11 @@ def create_base_user(username, email, password, verbose):
 
 
 @click.command("register_roles")
+@click.option("-e", "--external_app", type=str, default=None)
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
-def register_roles(verbose):
-    register_roles_command(verbose)
+def register_roles(external_app, verbose):
+    register_roles_command(external_app=external_app, verbose=verbose)
 
 
 @click.command("register_actions")
@@ -182,10 +183,11 @@ def register_views(verbose):
 
 
 @click.command("register_base_assignations")
+@click.option("-e", "--external_app", type=str, default=None)
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
-def register_base_assignations(verbose):
-    register_base_permissions_command(verbose=verbose)
+def register_base_assignations(external_app, verbose):
+    register_base_permissions_command(external_app=external_app, verbose=verbose)
 
 
 @click.command("access_init")

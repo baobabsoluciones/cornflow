@@ -1,6 +1,7 @@
 """
 This file contains the RoleModel
 """
+
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
@@ -50,6 +51,10 @@ class RoleModel(TraceAttributesModel):
         super().__init__()
         self.id = data.get("id")
         self.name = data.get("name")
+
+        # Si no se proporciona nombre, generar uno por defecto
+        if self.name is None and self.id is not None:
+            self.name = f"custom_role_{self.id}"
 
     def __repr__(self):
         return f"<Role {self.name}>"
