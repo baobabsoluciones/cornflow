@@ -89,8 +89,19 @@ def init_cornflow_service():
 
         external_app_lib = import_module(external_app_module)
         app = external_app_lib.create_wsgi_app(environment, cornflow_db_conn)
-
+        click.echo("------------------------Initializing database----------------")
+        click.echo(app)
+        print("------------------------Initializing database----------------")
+        app.logger.info(
+            "------------------------APP Initializing database----------------"
+        )
         with app.app_context():
+            click.echo("------------------------Initializing database----------------")
+            print("------------------------Initializing database----------------")
+            app.logger.info(
+                "------------------------APP Initializing database----------------"
+            )
+
             _initialize_database(app, external_app_module)
             _create_initial_users(
                 config["auth"],
