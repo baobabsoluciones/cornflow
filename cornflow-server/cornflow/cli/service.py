@@ -2,8 +2,20 @@ import os
 import subprocess
 import sys
 import time
+import logging
 from logging import error
 
+# Configure a logger for the service module
+logger = logging.getLogger("cornflow.service")
+logger.setLevel(logging.INFO)
+
+# Add console handler if not already present
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)s] %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.propagate = False
 
 import click
 from .utils import get_db_conn
@@ -60,6 +72,10 @@ def init_cornflow_service():
         click.echo("Initializing standard Cornflow application")
         app = create_app(environment, cornflow_db_conn)
         with app.app_context():
+            click.echo("----------------Initializing database----------------")
+            logger.info(
+                "------------------------APP Initializing database no external app----------------"
+            )
             _initialize_database(app)
             _create_initial_users(
                 config["auth"],
@@ -89,9 +105,27 @@ def init_cornflow_service():
 
         external_app_lib = import_module(external_app_module)
         app = external_app_lib.create_wsgi_app(environment, cornflow_db_conn)
-
+        logger.info(
+            "************************ EXTERNAL APP CREATED SUCCESSFULLY ************************"
+        )
+        click.echo("------------------------Initializing database----------------")
+        click.echo(app)
+        logger.info(
+            "************************ APP INSTANCE: {type(app)} ************************"
+        )
         with app.app_context():
+            logger.info(
+                "************************ INSIDE APP CONTEXT ************************"
+            )
+            click.echo("------------------------Initializing database----------------")
+            logger.info(
+                "************************ ABOUT TO INITIALIZE DATABASE ************************"
+            )
+
             _initialize_database(app, external_app_module)
+            logger.info(
+                "************************ DATABASE INITIALIZED ************************"
+            )
             _create_initial_users(
                 config["auth"],
                 config["cornflow_admin_user"],
@@ -101,6 +135,9 @@ def init_cornflow_service():
                 config["cornflow_service_email"],
                 config["cornflow_service_pwd"],
             )
+            logger.info(
+                "************************ USERS CREATED ************************"
+            )
             _sync_with_airflow(
                 config["airflow_url"],
                 config["airflow_user"],
@@ -108,6 +145,12 @@ def init_cornflow_service():
                 config["open_deployment"],
                 external_app=True,
             )
+            logger.info(
+                "************************ AIRFLOW SYNC COMPLETED ************************"
+            )
+        logger.info(
+            "************************ STARTING APPLICATION ************************"
+        )
         _start_application(external_application, environment, external_app_module)
 
     else:
@@ -117,6 +160,9 @@ def init_cornflow_service():
 
 def _setup_environment_variables():
     """Reads environment variables, sets defaults, and returns config values."""
+    click.echo(
+        "----------------Setting environment variables NEW VERSION----------------"
+    )
     environment = os.getenv("FLASK_ENV", "development")
     os.environ["FLASK_ENV"] = environment
 
@@ -218,7 +264,7 @@ def _configure_logging(cornflow_logging):
             if logrotate.returncode != 0:
                 error(f"Error configuring logrotate: {logrotate.stderr}")
             else:
-                print(logrotate.stdout)
+                logger.info(logrotate.stdout)
         except Exception as e:
             error(f"Exception during logrotate configuration: {e}")
 
@@ -236,6 +282,7 @@ def _initialize_database(app, external_app_module=None):
 
         Migrate(app=app, db=db, directory=migrations_path)
         upgrade()
+        logger.info("----------------Migrations applied----------------")
         access_init_command(verbose=False)
 
 
@@ -285,25 +332,65 @@ def _sync_with_airflow(
 
 def _setup_external_app():
     """Performs setup steps specific to external applications."""
+    logger.info(
+        "************************ STARTING EXTERNAL APP SETUP ************************"
+    )
     os.chdir(MAIN_WD)
+    logger.info(
+        f"************************ CHANGED TO DIRECTORY: {MAIN_WD} ************************"
+    )
     if _register_key():
+        logger.info(
+            "************************ SSH KEY REGISTERED ************************"
+        )
         prefix = "CUSTOM_SSH_"
         env_variables = {
             key: value for key, value in os.environ.items() if key.startswith(prefix)
         }
         for _, value in env_variables.items():
             _register_ssh_host(value)
+    else:
+        logger.info(
+            "************************ NO SSH KEY TO REGISTER ************************"
+        )
 
     # Install requirements for the external app
     pip_install_cmd = "$(command -v pip) install --user -r requirements.txt"
+    logger.info(
+        f"************************ ABOUT TO RUN: {pip_install_cmd} ************************"
+    )
     click.echo(f"Running: {pip_install_cmd}")
     result = subprocess.run(pip_install_cmd, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
+        logger.error(
+            f"************************ PIP INSTALL ERROR: {result.stderr} ************************"
+        )
         error(f"Error installing requirements: {result.stderr}")
     else:
-        print(result.stdout)
+        logger.info(
+            "************************ PIP INSTALL SUCCESS ************************"
+        )
+        logger.info(result.stdout)
+    logger.info(
+        "************************ ADDING MAIN_WD TO PYTHON PATH ************************"
+    )
     time.sleep(5)  # Consider if this sleep is truly necessary
     sys.path.append(MAIN_WD)
+
+    # Add .local path to sys.path so pip --user packages can be found
+    local_lib_path = os.path.expanduser("~/.local/lib/python3.10/site-packages")
+    if local_lib_path not in sys.path:
+        sys.path.insert(0, local_lib_path)
+        logger.info(
+            f"************************ ADDED .LOCAL PATH TO PYTHON PATH: {local_lib_path} ************************"
+        )
+
+    logger.info(
+        f"************************ PYTHON PATH NOW INCLUDES: {MAIN_WD} ************************"
+    )
+    logger.info(
+        f"************************ FULL PYTHON PATH: {sys.path} ************************"
+    )
 
 
 def _start_application(external_application, environment, external_app_module=None):
