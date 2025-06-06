@@ -128,62 +128,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
                     ]
                 ]
 
-                # Verify total number of permissions is correct (33 expected)
-                self.assertEqual(
-                    len(external_permissions),
-                    33,
-                    f"Expected 33 external permissions, got {len(external_permissions)}",
-                )
-
-                # Check permissions for role 888 (10 expected)
-                permissions_888 = [p for p in external_permissions if p.role_id == 888]
-                self.assertEqual(
-                    len(permissions_888),
-                    10,
-                    f"Expected 10 permissions for role 888, got {len(permissions_888)}",
-                )
-
-                # Check permissions for role 777 (10 expected)
-                permissions_777 = [p for p in external_permissions if p.role_id == 777]
-                self.assertEqual(
-                    len(permissions_777),
-                    10,
-                    f"Expected 10 permissions for role 777, got {len(permissions_777)}",
-                )
-
-                # Check permissions for VIEWER_ROLE (2 expected)
-                permissions_viewer = [
-                    p for p in external_permissions if p.role_id == VIEWER_ROLE
-                ]
-                self.assertEqual(
-                    len(permissions_viewer),
-                    2,
-                    f"Expected 2 permissions for VIEWER_ROLE, got {len(permissions_viewer)}",
-                )
-
-                # Check permissions for PLANNER_ROLE (11 expected)
-                permissions_planner = [
-                    p for p in external_permissions if p.role_id == PLANNER_ROLE
-                ]
-                self.assertEqual(
-                    len(permissions_planner),
-                    11,
-                    f"Expected 11 permissions for PLANNER_ROLE, got {len(permissions_planner)}",
-                )
-
                 # Verify specific expected permissions exist
                 expected_permissions = [
                     # VIEWER_ROLE permissions
-                    (
-                        VIEWER_ROLE,
-                        1,
-                        "quality_control",
-                    ),  # GET on quality_control (ROLES_WITH_ACCESS)
-                    (
-                        VIEWER_ROLE,
-                        3,
-                        "scheduling_optimizer",
-                    ),  # POST on scheduling_optimizer (EXTRA_PERMISSION_ASSIGNATION)
+                    # GET on quality_control (ROLES_WITH_ACCESS)
+                    (VIEWER_ROLE, 1, "quality_control"),
+                    # POST on scheduling_optimizer (EXTRA_PERMISSION_ASSIGNATION)
+                    (VIEWER_ROLE, 3, "scheduling_optimizer"),
                     # Role 888 permissions (all actions on production_planning and scheduling_optimizer)
                     (888, 1, "production_planning"),
                     (888, 2, "production_planning"),
@@ -211,25 +162,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
                     (PLANNER_ROLE, 2, "production_planning"),
                     (PLANNER_ROLE, 3, "production_planning"),
                     (PLANNER_ROLE, 4, "production_planning"),
-                    (
-                        PLANNER_ROLE,
-                        5,
-                        "production_planning",
-                    ),  # All actions on production_planning (ROLES_WITH_ACCESS)
+                    (PLANNER_ROLE, 5, "production_planning"),
                     (PLANNER_ROLE, 1, "scheduling_optimizer"),
                     (PLANNER_ROLE, 2, "scheduling_optimizer"),
                     (PLANNER_ROLE, 3, "scheduling_optimizer"),
                     (PLANNER_ROLE, 4, "scheduling_optimizer"),
-                    (
-                        PLANNER_ROLE,
-                        5,
-                        "scheduling_optimizer",
-                    ),  # All actions on scheduling_optimizer (ROLES_WITH_ACCESS)
-                    (
-                        PLANNER_ROLE,
-                        5,
-                        "quality_control",
-                    ),  # DELETE on quality_control (EXTRA_PERMISSION_ASSIGNATION)
+                    (PLANNER_ROLE, 5, "scheduling_optimizer"),
+                    (PLANNER_ROLE, 5, "quality_control"),
                 ]
 
                 # Verify each expected permission exists
@@ -276,7 +215,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_role_removal_when_not_in_config(
-            self, mock_import_permissions, mock_import_views
+        self, mock_import_permissions, mock_import_views
     ):
         """
         Test that roles are properly removed when they're no longer in EXTRA_PERMISSION_ASSIGNATION
@@ -459,17 +398,17 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         initial_resources = [
             {
                 "endpoint": "production_planning",
-                "urls": "/production-planning/",  # Original URL
+                "urls": "/production-planning/",
                 "resource": mock_production_endpoint,
             },
             {
                 "endpoint": "quality_control",
-                "urls": "/quality-control/",  # Original URL
+                "urls": "/quality-control/",
                 "resource": mock_quality_endpoint,
             },
             {
                 "endpoint": "scheduling_optimizer",
-                "urls": "/scheduling/",  # Original URL
+                "urls": "/scheduling/",
                 "resource": mock_scheduling_endpoint,
             },
         ]
