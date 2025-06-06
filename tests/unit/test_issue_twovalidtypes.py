@@ -1,6 +1,9 @@
-
+import os, sys
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore
-from .test_dags import BaseDAGTests
+HERE = os.path.abspath(os.path.dirname(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "cornflow-dags"))
+from tests.unit.test_dags import BaseDAGTests
 
 
 class MyInstance(InstanceCore):
