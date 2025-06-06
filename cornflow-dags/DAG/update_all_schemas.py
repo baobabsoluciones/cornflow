@@ -8,7 +8,6 @@ from warnings import warn
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
-from airflow.utils.db import create_session
 from cornflow_client import ApplicationCore
 from cornflow_client.airflow.dag_utilities import callback_email
 
@@ -153,6 +152,8 @@ def get_all_example_data(apps):
 
 def update_all_schemas(**kwargs):
     sys.setrecursionlimit(250)
+
+    from airflow.utils.db import create_session
 
     # first we delete all variables (this helps to keep it clean)
     with create_session() as session:

@@ -282,6 +282,7 @@ class TimerTestCase(BaseDAGTests.SolvingTests):
         self.app = Timer()
         self.config.update(dict(solver="default", seconds=10))
 
+
 class DagIgnoreTests(unittest.TestCase):
     def setUp(self):
         import importlib.util
@@ -315,5 +316,3 @@ class DagIgnoreTests(unittest.TestCase):
         finally:
             os.remove(dagignore_path)
             os.remove(ignored_path)
-
-
