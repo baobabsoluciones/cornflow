@@ -57,8 +57,6 @@ class BaseDAGTests:
                 case_name = test_case.get("name")
                 case_description = test_case.get("description", "No description")
 
-                marshm = SchemaManager(self.app.instance.schema).jsonschema_to_flask()
-                marshm().load(instance_data)
                 if solution_data is not None:
                     (
                         solution_test,
