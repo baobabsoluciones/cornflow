@@ -281,3 +281,38 @@ class TimerTestCase(BaseDAGTests.SolvingTests):
 
         self.app = Timer()
         self.config.update(dict(solver="default", seconds=10))
+
+
+class DagIgnoreTests(unittest.TestCase):
+    def setUp(self):
+        import importlib.util
+
+        # Import the import_dags module dynamically
+        path = os.path.join(os.path.dirname(__file__), "../../DAG/update_all_schemas.py")
+        spec = importlib.util.spec_from_file_location("import_dags", path)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def test_ignore_patterns_applied(self):
+
+        # Create a .dagignore file and an ignore file in the DAG directory
+        dagignore_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../DAG/.dagignore")
+        )
+        ignored_file = "ignore_me.py"
+        with open(dagignore_path, "w") as f:
+            f.write("ignore_me\n")
+
+        ignored_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), f"../../DAG/{ignored_file}")
+        )
+        with open(ignored_path, "w") as f:
+            f.write("# dummy file to be ignored")
+
+        try:
+            ignore_patterns = self.module._load_ignore_patterns()
+            should_ignore = self.module._should_ignore_file("ignore_me", ignore_patterns)
+            self.assertTrue(should_ignore)
+        finally:
+            os.remove(dagignore_path)
+            os.remove(ignored_path)
