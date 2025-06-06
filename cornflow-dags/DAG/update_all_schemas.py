@@ -38,14 +38,7 @@ def _load_ignore_patterns():
     """
     Load ignore patterns from .dagignore if it exists, else use defaults. Always include default patterns.
     """
-    default_patterns = [
-        ".",
-        "__",
-        "scripts",
-        "documentation",
-        "tests",
-        "activate_dags",
-    ]
+    default_patterns = []
 
     _dir = os.path.dirname(__file__)
     dagignore_path = os.path.join(_dir, ".dagignore")
@@ -94,6 +87,7 @@ def import_dags():
             continue
 
         if _should_ignore_file(filename, ignore_patterns):
+            print(f"Ignored file due to pattern match: {filename}")
             continue
 
         try:
