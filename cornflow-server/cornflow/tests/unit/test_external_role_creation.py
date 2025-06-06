@@ -1,5 +1,6 @@
 import unittest
 import os
+import json
 from unittest.mock import patch, MagicMock
 from cornflow.shared import db
 from cornflow.tests.custom_test_case import CustomTestCase
@@ -17,6 +18,18 @@ class ExternalRoleCreationTestCase(CustomTestCase):
     """
     Test cases for external app custom role creation and removal functionality
     """
+
+    def _load_expected_permissions(self, test_name):
+        """Helper method to load expected permissions from JSON file"""
+        test_data_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "expected_permissions.json"
+        )
+        with open(test_data_path, "r") as f:
+            data = json.load(f)
+        return [
+            (role_id, action_id, endpoint_name)
+            for role_id, action_id, endpoint_name in data[test_name]
+        ]
 
     def _create_mock_external_app_resources(self):
         """Helper method to create mock external app resources"""
@@ -128,48 +141,10 @@ class ExternalRoleCreationTestCase(CustomTestCase):
                     ]
                 ]
 
-                # Verify specific expected permissions exist
-                expected_permissions = [
-                    # VIEWER_ROLE permissions
-                    # GET on quality_control (ROLES_WITH_ACCESS)
-                    (VIEWER_ROLE, 1, "quality_control"),
-                    # POST on scheduling_optimizer (EXTRA_PERMISSION_ASSIGNATION)
-                    (VIEWER_ROLE, 3, "scheduling_optimizer"),
-                    # Role 888 permissions (all actions on production_planning and scheduling_optimizer)
-                    (888, 1, "production_planning"),
-                    (888, 2, "production_planning"),
-                    (888, 3, "production_planning"),
-                    (888, 4, "production_planning"),
-                    (888, 5, "production_planning"),
-                    (888, 1, "scheduling_optimizer"),
-                    (888, 2, "scheduling_optimizer"),
-                    (888, 3, "scheduling_optimizer"),
-                    (888, 4, "scheduling_optimizer"),
-                    (888, 5, "scheduling_optimizer"),
-                    # Role 777 permissions (all actions on quality_control and scheduling_optimizer)
-                    (777, 1, "quality_control"),
-                    (777, 2, "quality_control"),
-                    (777, 3, "quality_control"),
-                    (777, 4, "quality_control"),
-                    (777, 5, "quality_control"),
-                    (777, 1, "scheduling_optimizer"),
-                    (777, 2, "scheduling_optimizer"),
-                    (777, 3, "scheduling_optimizer"),
-                    (777, 4, "scheduling_optimizer"),
-                    (777, 5, "scheduling_optimizer"),
-                    # PLANNER_ROLE permissions
-                    (PLANNER_ROLE, 1, "production_planning"),
-                    (PLANNER_ROLE, 2, "production_planning"),
-                    (PLANNER_ROLE, 3, "production_planning"),
-                    (PLANNER_ROLE, 4, "production_planning"),
-                    (PLANNER_ROLE, 5, "production_planning"),
-                    (PLANNER_ROLE, 1, "scheduling_optimizer"),
-                    (PLANNER_ROLE, 2, "scheduling_optimizer"),
-                    (PLANNER_ROLE, 3, "scheduling_optimizer"),
-                    (PLANNER_ROLE, 4, "scheduling_optimizer"),
-                    (PLANNER_ROLE, 5, "scheduling_optimizer"),
-                    (PLANNER_ROLE, 5, "quality_control"),
-                ]
+                # Load expected permissions from JSON file
+                expected_permissions = self._load_expected_permissions(
+                    "test_custom_role_creation_removal"
+                )
 
                 # Verify each expected permission exists
                 for role_id, action_id, endpoint_name in expected_permissions:

@@ -74,6 +74,49 @@ def load_changes_to_db(views_to_delete, views_to_register, views_to_update):
         current_app.logger.error(f"Unknow error on views register: {e}")
 
 
+def get_views_to_delete(
+    all_resources_to_register_views_endpoints, views_registered_urls_all_attributes
+):
+    """
+    Get the views to delete.
+    Views to delete: exist in registered views but not in resources to register.
+    """
+    return [
+        view_attrs["id"]
+        for view_name, view_attrs in views_registered_urls_all_attributes.items()
+        if view_name not in all_resources_to_register_views_endpoints
+    ]
+
+
+def get_views_to_update(
+    all_resources_to_register_views_endpoints, views_registered_urls_all_attributes
+):
+    """
+    Get the views to update.
+    Views to update: exist in both but with different url_rule or description.
+    """
+    return [
+        {
+            "id": view_attrs["id"],
+            "name": view_name,
+            "url_rule": all_resources_to_register_views_endpoints[view_name][
+                "url_rule"
+            ],
+            "description": all_resources_to_register_views_endpoints[view_name][
+                "description"
+            ],
+        }
+        for view_name, view_attrs in views_registered_urls_all_attributes.items()
+        if view_name in all_resources_to_register_views_endpoints
+        and (
+            view_attrs["url_rule"]
+            != all_resources_to_register_views_endpoints[view_name]["url_rule"]
+            or view_attrs["description"]
+            != all_resources_to_register_views_endpoints[view_name]["description"]
+        )
+    ]
+
+
 def get_views_to_update_and_delete(
     resources_to_register, views_registered_urls_all_attributes
 ):
@@ -89,26 +132,15 @@ def get_views_to_update_and_delete(
         }
         for view in resources_to_register
     }
-    views_to_delete = []
-    views_to_update = []
-    # Check if views have the same name but different url_rule or description
-    for view_name, view_attrs in views_registered_urls_all_attributes.items():
-        if view_name in all_resources_to_register_views_endpoints.keys():
-            new_endpoint = all_resources_to_register_views_endpoints[view_name]
-            if (
-                view_attrs["url_rule"] != new_endpoint["url_rule"]
-                or view_attrs["description"] != new_endpoint["description"]
-            ):
-                views_to_update.append(
-                    {
-                        "id": view_attrs["id"],
-                        "name": view_name,
-                        "url_rule": new_endpoint["url_rule"],
-                        "description": new_endpoint["description"],
-                    }
-                )
-        else:
-            views_to_delete.append(view_attrs["id"])
+
+    views_to_delete = get_views_to_delete(
+        all_resources_to_register_views_endpoints, views_registered_urls_all_attributes
+    )
+
+    views_to_update = get_views_to_update(
+        all_resources_to_register_views_endpoints, views_registered_urls_all_attributes
+    )
+
     return views_to_delete, views_to_update
 
 
