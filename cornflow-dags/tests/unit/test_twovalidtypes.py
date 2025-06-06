@@ -2,13 +2,14 @@
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore
 from .test_dags import BaseDAGTests
 
+
 class MyInstance(InstanceCore):
     schema = {
         "type": "object",
         "properties": {
-            "campo": {"type": ["string", "null", "number"]}
+            "field": {"type": ["string", "null", "number"]}
         },
-        "required": ["campo"],
+        "required": ["field"],
     }
     schema_checks = {
         "type": "object",
@@ -21,9 +22,9 @@ class MySolution(SolutionCore):
     schema = {
         "type": "object",
         "properties": {
-            "resultado": {"type": "string"}
+            "result": {"type": "string"}
         },
-        "required": ["resultado"],
+        "required": ["result"],
     }
     schema_checks = {
         "type": "object",
@@ -50,48 +51,40 @@ class AppTest(ApplicationCore):
 
     @property
     def solvers(self):
-        # devolvemos un diccionario con una única clave "default".
-        # El valor no importa realmente—solo para que ApplicationCore.get_solver
-        # tenga algo en Self.solvers—, porque lo sobreescribimos en get_solver.
         return {"default": None}
 
     @property
     def test_cases(self):
         return [
             {
-                "name": "Campo puede ser string o null",
-                "instance": {"campo": "texto"},
-                "solution": {"resultado": "ok"},
-                "description": "Caso tipo múltiple",
+                "name": "Field string valid",
+                "instance": {"field": "texto"},
+                "solution": {"result": "ok"},
+                "description": "Field string valid",
             },
             {
-                "name": "Campo null válido",
-                "instance": {"campo": None},
-                "solution": {"resultado": "ok"},
-                "description": "Caso null permitido",
+                "name": "Field null valid",
+                "instance": {"field": None},
+                "solution": {"result": "ok"},
+                "description": "Field null valid",
             },
             {
-                "name": "Campo null válido",
-                "instance": {"campo": 2},
-                "solution": {"resultado": "ok"},
-                "description": "Caso null permitido",
+                "name": "Field number valid",
+                "instance": {"field": 2},
+                "solution": {"result": "ok"},
+                "description": "Field number valid",
             },
         ]
 
     def solve(self, instance_data, config, solution_data=None):
-        return (solution_data or {"resultado": "ok"}, {}, {}, [], {})
+        return (solution_data or {"result": "ok"}, {}, {}, [], {})
 
     def get_default_solver_name(self):
         return "default"
 
     def get_solver(self, name):
-        """
-        Debe devolver algo callable. Definimos aquí una clase mínima
-        que tenga schema_checks, check_solution() y get_objective().
-        """
         class DummyExperiment:
             def __init__(self, inst, sol):
-                # inst es MyInstance(inst_data), sol es MySolution(sol_data)
                 self.schema_checks = {}
             def check_solution(self):
                 return {}
@@ -108,5 +101,4 @@ class TestVariousTypes(BaseDAGTests.SolvingTests):
     def setUp(self):
         super().setUp()
         self.app = AppTest()
-        # Añadimos "solver" para que _validate_config pase:
         self.config["solver"] = self.app.get_default_solver_name()
