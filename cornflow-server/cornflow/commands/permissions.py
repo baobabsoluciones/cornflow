@@ -27,24 +27,24 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
     permissions_in_db, permissions_in_db_keys = get_db_permissions()
     # Get all resources and roles with access
-    resources_names, resources_roles_with_access = get_all_resources(
-        resources_to_register
-    )
-    # Get the new roles and base permissions assignation
-    new_roles_to_add, base_permissions_assignation = get_new_roles_base_permissions(
+    resources_roles_with_access = get_all_resources(resources_to_register)
+    new_roles_to_add = get_new_roles_to_add(
         extra_permissions, resources_roles_with_access
     )
+    # Get the new roles and base permissions assignation
+    base_permissions_assignation = get_base_permissions(new_roles_to_add)
     # Get the permissions to register and delete
-    permissions_to_register, permissions_to_delete = (
-        get_permissions_to_register_and_delete(
-            resources_to_register,
-            views_in_db,
-            permissions_in_db,
-            permissions_in_db_keys,
-            resources_names,
-            base_permissions_assignation,
-            extra_permissions,
-        )
+    permissions_tuples = get_permissions_in_code_as_tuples(
+        resources_to_register,
+        views_in_db,
+        base_permissions_assignation,
+        extra_permissions,
+    )
+    permissions_to_register = get_permissions_to_register(
+        permissions_tuples, permissions_in_db_keys
+    )
+    permissions_to_delete = get_permissions_to_delete(
+        permissions_tuples, resources_roles_with_access.keys(), permissions_in_db
     )
 
     # Save the new roles in the database
@@ -119,23 +119,43 @@ def save_and_delete_permissions(permissions_to_register, permissions_to_delete):
             )
 
 
-def get_permissions_to_register_and_delete(
-    resources_to_register,
-    views_in_db,
-    permissions_in_db,
-    permissions_in_db_keys,
-    resources_names,
-    base_permissions_assignation,
-    extra_permissions,
+def get_permissions_to_delete(permissions_tuples, resources_names, permissions_in_db):
+    """
+    Get the permissions to delete.
+    """
+    permissions_to_delete = [
+        permission
+        for permission in permissions_in_db
+        if (permission.role_id, permission.action_id, permission.api_view_id)
+        not in permissions_tuples
+    ]
+
+    return permissions_to_delete
+
+
+def get_permissions_to_register(permissions_tuples, permissions_in_db_keys):
+    """
+    Get the permissions to register.
+    """
+    # Convert set of tuples to list of PermissionViewRoleModel objects
+    return [
+        PermissionViewRoleModel(
+            {
+                "role_id": role_id,
+                "action_id": action_id,
+                "api_view_id": api_view_id,
+            }
+        )
+        for role_id, action_id, api_view_id in permissions_tuples
+        if (role_id, action_id, api_view_id) not in permissions_in_db_keys
+    ]
+
+
+def get_permissions_in_code_as_tuples(
+    resources_to_register, views_in_db, base_permissions_assignation, extra_permissions
 ):
     """
-    Get the permissions to register and delete.
-    resources_to_register: List of resources to register.
-    views_in_db: Dictionary of views in the database.
-    permissions_in_db: List of permissions in the database.
-    permissions_in_db_keys: List of keys of the permissions in the database.
-    resources_names: List of names of the resources.
-    base_permissions_assignation: List of base permissions assignation.
+    Get the permissions in code as tuples.
     """
     # Create base permissions using a set to avoid duplicates
     permissions_tuples = set()
@@ -151,43 +171,31 @@ def get_permissions_to_register_and_delete(
         if endpoint in views_in_db:
             permissions_tuples.add((role, action, views_in_db[endpoint]))
 
-    # Convert set of tuples to list of PermissionViewRoleModel objects
-    permissions_in_app = [
-        PermissionViewRoleModel(
-            {
-                "role_id": role_id,
-                "action_id": action_id,
-                "api_view_id": api_view_id,
-            }
-        )
-        for role_id, action_id, api_view_id in permissions_tuples
-    ]
-
-    permissions_in_app_keys = [
-        (perm.role_id, perm.action_id, perm.api_view_id) for perm in permissions_in_app
-    ]
-
-    permissions_to_register = [
-        permission
-        for permission in permissions_in_app
-        if (permission.role_id, permission.action_id, permission.api_view_id)
-        not in permissions_in_db_keys
-    ]
-
-    permissions_to_delete = [
-        permission
-        for permission in permissions_in_db
-        if (permission.role_id, permission.action_id, permission.api_view_id)
-        not in permissions_in_app_keys
-        and permission.api_view.name in resources_names
-    ]
-
-    return permissions_to_register, permissions_to_delete
+    return permissions_tuples
 
 
-def get_new_roles_base_permissions(extra_permissions, resources_roles_with_access):
+def get_base_permissions(new_roles_to_add):
     """
     Get the new roles and base permissions assignation.
+    extra_permissions: List of extra permissions.
+    resources_roles_with_access: Dictionary of resources and roles with access.
+    """
+    all_new_roles_id = [role.id for role in new_roles_to_add]
+    if len(new_roles_to_add) > 0:
+        # Create extended permission assignation including additional roles
+        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
+            (custom_role, action)
+            for custom_role in all_new_roles_id
+            for action in ALL_DEFAULT_ACTIONS
+        ]
+    else:
+        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION
+    return base_permissions_assignation
+
+
+def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
+    """
+    Get the new roles to add.
     extra_permissions: List of extra permissions.
     resources_roles_with_access: Dictionary of resources and roles with access.
     """
@@ -216,16 +224,7 @@ def get_new_roles_base_permissions(extra_permissions, resources_roles_with_acces
                     }
                 )
                 new_roles_to_add.append(new_role)
-
-        # Create extended permission assignation including additional roles
-        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
-            (custom_role, action)
-            for custom_role in additional_roles_with_access
-            for action in ALL_DEFAULT_ACTIONS
-        ]
-    else:
-        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION
-    return new_roles_to_add, base_permissions_assignation
+    return new_roles_to_add
 
 
 def get_all_external(external_app):
@@ -263,13 +262,13 @@ def get_all_resources(resources_to_register):
     Get all resources and roles with access.
     resources_to_register: List of resources to register.
     """
-    resources_names = [resource["endpoint"] for resource in resources_to_register]
+
     resources_roles_with_access = {
         resource["endpoint"]: resource["resource"].ROLES_WITH_ACCESS
         for resource in resources_to_register
     }
 
-    return resources_names, resources_roles_with_access
+    return resources_roles_with_access
 
 
 def get_db_permissions():
