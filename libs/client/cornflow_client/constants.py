@@ -2,9 +2,6 @@
 Constants values used in schemas functions.
 """
 
-import pulp as pl
-from ortools.sat.python import cp_model
-
 
 STRING_TYPE = "String"
 BOOLEAN_TYPE = "Boolean"
@@ -90,22 +87,6 @@ PYOMO_STATUS_MAPPING = {
     "error": SOLUTION_STATUS_INFEASIBLE,
     "aborted": SOLUTION_STATUS_INFEASIBLE,
     "unknown": SOLUTION_STATUS_INFEASIBLE,
-}
-
-ORTOOLS_STATUS_MAPPING = {
-    cp_model.OPTIMAL: STATUS_OPTIMAL,
-    cp_model.FEASIBLE: STATUS_FEASIBLE,
-    cp_model.INFEASIBLE: STATUS_INFEASIBLE,
-    cp_model.UNKNOWN: STATUS_UNDEFINED,
-    cp_model.MODEL_INVALID: STATUS_UNDEFINED,
-}
-
-PULP_STATUS_MAPPING = {
-    pl.LpStatusInfeasible: STATUS_INFEASIBLE,
-    pl.LpStatusNotSolved: STATUS_NOT_SOLVED,
-    pl.LpStatusOptimal: STATUS_OPTIMAL,
-    pl.LpStatusUnbounded: STATUS_UNBOUNDED,
-    pl.LpStatusUndefined: STATUS_UNDEFINED,
 }
 
 PARAMETER_SOLVER_TRANSLATING_MAPPING = {

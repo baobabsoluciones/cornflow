@@ -17,8 +17,8 @@ class VarsGroup(unittest.TestCase):
         prob += x + z >= 10, "c2"
         prob += -y + z == 7, "c3"
         prob += w >= 0, "c4"
-        data = prob.to_dict()
-        var1, prob1 = pulp.LpProblem.from_dict(data)
+        data = prob.toDict()
+        var1, prob1 = pulp.LpProblem.fromDict(data)
         group_variables_by_name(var1, ["x", "y", "z", "w"])
         x, y, z, w = [var1[name] for name in ["x", "y", "z", "w"]]
 
@@ -34,8 +34,8 @@ class VarsGroup(unittest.TestCase):
         prob += x + z >= 10, "c2"
         prob += -y + z == 7, "c3"
         prob += w >= 0, "c4"
-        data = prob.to_dict()
-        var1, prob1 = pulp.LpProblem.from_dict(data)
+        data = prob.toDict()
+        var1, prob1 = pulp.LpProblem.fromDict(data)
         grouped_dict = group_variables_by_name(var1, ["decision_special", "decision"])
         x, y, z = [grouped_dict["decision"][name] for name in ["x", "y", "z"]]
         w = grouped_dict["decision_special"]["w"]

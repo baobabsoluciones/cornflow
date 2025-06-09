@@ -136,7 +136,7 @@ Retrieve a solution::
     results = client.get_solution(execution['id'])
     print(results['data'])
     # returns a json with the solved pulp object
-    _vars, prob = pulp.LpProblem.from_dict(results['data'])
+    _vars, prob = pulp.LpProblem.fromDict(results['data'])
 
 Retrieve the log of the solver::
 

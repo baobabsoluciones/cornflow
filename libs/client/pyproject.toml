@@ -1,0 +1,41 @@
+[project]
+name = "cornflow-client-pchtsp"
+version = "1.3.1"
+description = "Client to connect to a cornflow server [forked from baobabsoluciones]"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+"genson",
+"jsonschema",
+"marshmallow",
+"pytups",
+]
+authors= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
+maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
+readme='README.rst'
+classifiers= [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Development Status :: 5 - Production/Stable",
+]
+
+[project.optional-dependencies]
+excel = ["openpyxl", "pandas"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "cornflow_client", "cornflow_client.data",
+    "cornflow_client.tests.data"
+]
+
+[tool.setuptools.package-data]
+"cornflow_client.data"= ["*.json"]
+"cornflow_client.tests.data"= ["*.json", "*.xlsx", "*.mps"]
+
+[dependency-groups]
+dev = ["black", "coverage", "openpyxl", 'pulp', "ortools"]
