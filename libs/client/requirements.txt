@@ -1,7 +1,0 @@
-requests
-genson
-jsonschema
-marshmallow
-pytups
-ortools
-PuLP
