@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from cornflow.shared import db
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.models import ViewModel
+from cornflow.commands.access import access_init_command
 from cornflow.shared.const import (
     VIEWER_ROLE,
     PLANNER_ROLE,
@@ -100,10 +101,10 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             # Try adding an existing permission and it works
             (888, GET_ACTION, "production_planning"),
             # Try adding additional permission
-            (888, POST_ACTION, "production_planning"),  # Custom endpoint from external app
-            (777, PATCH_ACTION, "quality_control"),  # Custom endpoint from external app
-            (VIEWER_ROLE, POST_ACTION, "scheduling_optimizer"),  # Extend standard role
-            (PLANNER_ROLE, DELETE_ACTION, "quality_control"),  # Extend standard role
+            (888, POST_ACTION, "production_planning"),
+            (777, PATCH_ACTION, "quality_control"),
+            (VIEWER_ROLE, POST_ACTION, "scheduling_optimizer"),
+            (PLANNER_ROLE, DELETE_ACTION, "quality_control"),
         ]
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
@@ -217,8 +218,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_import_auxiliar.return_value = mock_external_app
 
         # Create initial roles
-        from cornflow.commands.access import access_init_command
-
         access_init_command(verbose=True)
 
         # Now update config to remove role 777
@@ -242,8 +241,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         """
         Test that the system falls back gracefully when EXTRA_PERMISSION_ASSIGNATION is not available
         """
-        from cornflow.commands.access import access_init_command
-
         # Should not raise any exceptions
         try:
             access_init_command(verbose=True)
@@ -279,8 +276,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
-
-        from cornflow.commands.access import access_init_command
 
         # Should not raise any exceptions, should fall back gracefully
         try:
@@ -319,8 +314,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
-
-        from cornflow.commands.access import access_init_command
 
         # Mock the database session for testing
         with patch.object(db.session, "commit"):
@@ -404,8 +397,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_import_auxiliar.return_value = mock_external_app_initial
 
         # === INITIAL ACCESS INIT ===
-        from cornflow.commands.access import access_init_command
-        from cornflow.models import ViewModel
 
         # Mock the database session for testing - INITIAL SETUP ONLY
         with patch.object(db.session, "commit"):
