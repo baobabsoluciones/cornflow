@@ -1,24 +1,17 @@
-import sys
-from importlib import import_module
-
-from cornflow.shared.const import (
-    BASE_PERMISSION_ASSIGNATION,
-    EXTRA_PERMISSION_ASSIGNATION,
-    ALL_DEFAULT_ACTIONS,
-    ALL_DEFAULT_ROLES,
-)
-from cornflow.models import ViewModel, PermissionViewRoleModel, RoleModel
-from cornflow.shared import db
-
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from cornflow.endpoints import resources, alarms_resources
+
 from cornflow.commands.auxiliar import (
     get_all_external,
     get_all_resources,
-    get_new_roles_to_add,
 )
+from cornflow.models import ViewModel, PermissionViewRoleModel
+from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
+from cornflow.shared.const import (
+    BASE_PERMISSION_ASSIGNATION,
+)
+
 
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     """

@@ -1,13 +1,14 @@
 # Imports from external libraries
-from flask import current_app
-from importlib import import_module
-from sqlalchemy.exc import DBAPIError, IntegrityError
 import sys
+from importlib import import_module
 
+from flask import current_app
+from sqlalchemy.exc import DBAPIError, IntegrityError
+
+from cornflow.endpoints import resources, alarms_resources
 # Imports from internal libraries
 from cornflow.models import ViewModel
 from cornflow.shared import db
-from cornflow.endpoints import resources, alarms_resources
 
 
 def register_views_command(external_app: str = None, verbose: bool = False):
@@ -17,11 +18,10 @@ def register_views_command(external_app: str = None, verbose: bool = False):
     verbose: If True, it will print the views that are being registered.
     """
     resources_to_register = get_resources_to_register(external_app)
-
+    views_registered_urls_all_attributes = get_database_view()
     views_to_register, views_registered_urls_all_attributes = get_views_to_register(
-        resources_to_register
+        resources_to_register, views_registered_urls_all_attributes
     )
-
     views_to_delete, views_to_update = get_views_to_update_and_delete(
         resources_to_register, views_registered_urls_all_attributes
     )
@@ -144,12 +144,12 @@ def get_views_to_update_and_delete(
     return views_to_delete, views_to_update
 
 
-def get_views_to_register(resources_to_register):
+def get_views_to_register(resources_to_register,views_registered_urls_all_attributes):
     """
     Get the views to register.
     resources_to_register: List of resources to register.
     """
-    views_registered_urls_all_attributes = get_database_view()
+
     views_to_register = [
         ViewModel(
             {

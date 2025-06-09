@@ -10,7 +10,8 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
     POST_ACTION,
     PATCH_ACTION,
-    DELETE_ACTION, GET_ACTION,
+    DELETE_ACTION,
+    GET_ACTION,
 )
 
 
@@ -79,12 +80,11 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
     @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
-    @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_custom_role_creation_removal(
-        self, mock_import_views, mock_import_permissions, mock_import_auxiliar
+        self, mock_import_views, mock_import_auxiliar
     ):
         """
         Test that custom roles (like role 888) are properly created and removed
@@ -113,7 +113,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_endpoints.resources = self._create_mock_external_app_resources()
         mock_external_app.endpoints = mock_endpoints
 
-        mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
 
@@ -187,12 +186,11 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
     @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
-    @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_role_removal_when_not_in_config(
-        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
+        self, mock_import_views, mock_import_auxiliar
     ):
         """
         Test that roles are properly removed when they're no longer in EXTRA_PERMISSION_ASSIGNATION
@@ -215,7 +213,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_endpoints.resources = self._create_mock_external_app_resources()
         mock_external_app.endpoints = mock_endpoints
 
-        mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
 
@@ -255,12 +252,11 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
     @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
-    @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_external_app_missing_extra_permissions(
-        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
+        self, mock_import_views, mock_import_auxiliar
     ):
         """
         Test graceful handling when external app doesn't have EXTRA_PERMISSION_ASSIGNATION
@@ -281,7 +277,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_endpoints.resources = self._create_mock_external_app_resources()
         mock_external_app.endpoints = mock_endpoints
 
-        mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
 
@@ -295,12 +290,11 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
     @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
-    @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_standard_role_extended_permissions(
-        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
+        self, mock_import_views, mock_import_auxiliar
     ):
         """
         Test that standard roles (like VIEWER_ROLE) can get extended permissions from external app
@@ -323,7 +317,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_endpoints.resources = self._create_mock_external_app_resources()
         mock_external_app.endpoints = mock_endpoints
 
-        mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
         mock_import_auxiliar.return_value = mock_external_app
 
@@ -352,13 +345,10 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
     @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
-    @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
-    def test_view_update_and_deletion(
-        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
-    ):
+    def test_view_update_and_deletion(self, mock_import_views, mock_import_auxiliar):
         """
         Test that views are updated when URLs change and deleted when resources are removed
         """
@@ -410,7 +400,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_endpoints_initial.resources = initial_resources
         mock_external_app_initial.endpoints = mock_endpoints_initial
 
-        mock_import_permissions.return_value = mock_external_app_initial
         mock_import_views.return_value = mock_external_app_initial
         mock_import_auxiliar.return_value = mock_external_app_initial
 
@@ -488,7 +477,6 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_external_app_updated.endpoints = mock_endpoints_updated
 
         # Update mocks to return updated configuration
-        mock_import_permissions.return_value = mock_external_app_updated
         mock_import_views.return_value = mock_external_app_updated
         mock_import_auxiliar.return_value = mock_external_app_updated
 

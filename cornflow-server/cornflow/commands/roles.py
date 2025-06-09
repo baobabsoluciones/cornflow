@@ -3,8 +3,6 @@ def register_roles_command(external_app: str = None, verbose: bool = True):
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app
 
-    from cornflow.models import RoleModel
-    from cornflow.shared.const import ROLES_MAP
     from cornflow.shared import db
     from cornflow.commands.auxiliar import (
         get_all_external,

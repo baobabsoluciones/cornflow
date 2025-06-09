@@ -1,18 +1,15 @@
 import sys
 from importlib import import_module
 
+from flask import current_app
+
+from cornflow.endpoints import resources, alarms_resources
+from cornflow.models import RoleModel
 from cornflow.shared.const import (
-    BASE_PERMISSION_ASSIGNATION,
     EXTRA_PERMISSION_ASSIGNATION,
-    ALL_DEFAULT_ACTIONS,
     ALL_DEFAULT_ROLES,
 )
-from cornflow.models import ViewModel, PermissionViewRoleModel, RoleModel
-from cornflow.shared import db
-
-from flask import current_app
-from sqlalchemy.exc import DBAPIError, IntegrityError
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.shared.const import ROLES_MAP
 
 
 def get_all_external(external_app):
@@ -65,7 +62,7 @@ def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
     extra_permissions: List of extra permissions.
     resources_roles_with_access: Dictionary of resources and roles with access.
     """
-    from cornflow.shared.const import ROLES_MAP
+
 
     roles_with_access = list(
         set([role for roles in resources_roles_with_access.values() for role in roles])
