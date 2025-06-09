@@ -10,7 +10,7 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
     POST_ACTION,
     PATCH_ACTION,
-    DELETE_ACTION,
+    DELETE_ACTION, GET_ACTION,
 )
 
 
@@ -97,11 +97,10 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_shared = MagicMock()
         mock_const = MagicMock()
         mock_const.EXTRA_PERMISSION_ASSIGNATION = [
-            (
-                888,
-                POST_ACTION,
-                "production_planning",
-            ),  # Custom endpoint from external app
+            # Try adding an existing permission and it works
+            (888, GET_ACTION, "production_planning"),
+            # Try adding additional permission
+            (888, POST_ACTION, "production_planning"),  # Custom endpoint from external app
             (777, PATCH_ACTION, "quality_control"),  # Custom endpoint from external app
             (VIEWER_ROLE, POST_ACTION, "scheduling_optimizer"),  # Extend standard role
             (PLANNER_ROLE, DELETE_ACTION, "quality_control"),  # Extend standard role

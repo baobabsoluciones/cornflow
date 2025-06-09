@@ -17,47 +17,12 @@
         ],
         [
             888,
-            2,
-            "production_planning"
-        ],
-        [
-            888,
             3,
-            "production_planning"
-        ],
-        [
-            888,
-            4,
-            "production_planning"
-        ],
-        [
-            888,
-            5,
             "production_planning"
         ],
         [
             888,
             1,
-            "scheduling_optimizer"
-        ],
-        [
-            888,
-            2,
-            "scheduling_optimizer"
-        ],
-        [
-            888,
-            3,
-            "scheduling_optimizer"
-        ],
-        [
-            888,
-            4,
-            "scheduling_optimizer"
-        ],
-        [
-            888,
-            5,
             "scheduling_optimizer"
         ],
         [
@@ -72,42 +37,7 @@
         ],
         [
             777,
-            3,
-            "quality_control"
-        ],
-        [
-            777,
-            4,
-            "quality_control"
-        ],
-        [
-            777,
-            5,
-            "quality_control"
-        ],
-        [
-            777,
             1,
-            "scheduling_optimizer"
-        ],
-        [
-            777,
-            2,
-            "scheduling_optimizer"
-        ],
-        [
-            777,
-            3,
-            "scheduling_optimizer"
-        ],
-        [
-            777,
-            4,
-            "scheduling_optimizer"
-        ],
-        [
-            777,
-            5,
             "scheduling_optimizer"
         ],
         [

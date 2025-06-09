@@ -33,11 +33,6 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     permissions_in_db, permissions_in_db_keys = get_db_permissions()
     # Get all resources and roles with access
     resources_roles_with_access = get_all_resources(resources_to_register)
-    new_roles_to_add = get_new_roles_to_add(
-        extra_permissions, resources_roles_with_access
-    )
-    # Save the new roles in the database first
-    save_new_roles(new_roles_to_add)
     # Get the new roles and base permissions assignation
     base_permissions_assignation = get_base_permissions(resources_roles_with_access)
     # Get the permissions to register and delete
@@ -163,6 +158,8 @@ def get_permissions_in_code_as_tuples(
     """
     Get the permissions in code as tuples.
     """
+    from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
+
     # Create base permissions using a set to avoid duplicates
     permissions_tuples = set()
 
@@ -170,6 +167,9 @@ def get_permissions_in_code_as_tuples(
     for role, action in base_permissions_assignation:
         for view in resources_to_register:
             if role in view["resource"].ROLES_WITH_ACCESS:
+                # For custom roles (not in ALL_DEFAULT_ROLES), only grant GET access
+                if role not in ALL_DEFAULT_ROLES and action != GET_ACTION:
+                    continue
                 permissions_tuples.add((role, action, views_in_db[view["endpoint"]]))
 
     # Add permissions from extra_permissions
