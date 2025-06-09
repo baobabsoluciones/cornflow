@@ -10,7 +10,7 @@ def register_roles_command(external_app: str = None, verbose: bool = True):
         get_new_roles_to_add,
     )
 
-    resources_to_register, extra_permissions = get_all_external(external_app)
+    resources_to_register, extra_permissions, _ = get_all_external(external_app)
     resources_roles_with_access = get_all_resources(resources_to_register)
     new_roles_to_add = get_new_roles_to_add(
         extra_permissions, resources_roles_with_access

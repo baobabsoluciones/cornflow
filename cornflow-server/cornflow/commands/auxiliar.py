@@ -14,12 +14,13 @@ from cornflow.shared.const import ROLES_MAP
 
 def get_all_external(external_app):
     """
-    Get all resources and extra permissions.
+    Get all resources, extra permissions, and custom roles actions.
     external_app: If provided, it will get the resources and extra permissions for the external app.
     """
     if external_app is None:
         resources_to_register = resources
         extra_permissions = EXTRA_PERMISSION_ASSIGNATION
+        custom_roles_actions = {}
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources
     else:
@@ -33,13 +34,18 @@ def get_all_external(external_app):
         except AttributeError:
             extra_permissions = EXTRA_PERMISSION_ASSIGNATION
 
+        try:
+            custom_roles_actions = external_module.shared.const.CUSTOM_ROLES_ACTIONS
+        except AttributeError:
+            custom_roles_actions = {}
+
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = (
                 external_module.endpoints.resources + resources + alarms_resources
             )
         else:
             resources_to_register = external_module.endpoints.resources + resources
-    return resources_to_register, extra_permissions
+    return resources_to_register, extra_permissions, custom_roles_actions
 
 
 def get_all_resources(resources_to_register):

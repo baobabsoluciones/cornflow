@@ -13,6 +13,7 @@ from cornflow.shared.const import (
     PATCH_ACTION,
     DELETE_ACTION,
     GET_ACTION,
+    PUT_ACTION,
 )
 
 
@@ -106,6 +107,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             (VIEWER_ROLE, POST_ACTION, "scheduling_optimizer"),
             (PLANNER_ROLE, DELETE_ACTION, "quality_control"),
         ]
+        # Define permissions for custom roles used in endpoints
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Default permission for role 888
+            888: [GET_ACTION],
+            # Default permission for role 777
+            777: [GET_ACTION],
+        }
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
 
@@ -206,6 +214,17 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             (10000, POST_ACTION, "production_planning"),
             (999, PATCH_ACTION, "quality_control"),
         ]
+        # Define permissions for custom roles used in endpoints (888, 777) and test roles (10000, 999)
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Used in endpoints
+            888: [GET_ACTION],
+            # Used in endpoints
+            777: [GET_ACTION],
+            # Used in test
+            10000: [GET_ACTION],
+            # Used in test
+            999: [GET_ACTION],
+        }
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
 
@@ -224,6 +243,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_const.EXTRA_PERMISSION_ASSIGNATION = [
             (10000, POST_ACTION, "production_planning"),
         ]
+        # Keep the same CUSTOM_ROLES_ACTIONS (role definitions don't change)
 
         # Re-run permissions registration
         access_init_command(verbose=True)
@@ -266,6 +286,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_const = MagicMock()
         # Don't set EXTRA_PERMISSION_ASSIGNATION to trigger AttributeError
         del mock_const.EXTRA_PERMISSION_ASSIGNATION
+        # Define permissions for custom roles used in endpoints
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Used in endpoints
+            888: [GET_ACTION],
+            # Used in endpoints
+            777: [GET_ACTION],
+        }
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
 
@@ -304,6 +331,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             (VIEWER_ROLE, POST_ACTION, "production_planning"),  # Extend standard role
             (PLANNER_ROLE, DELETE_ACTION, "quality_control"),  # Extend standard role
         ]
+        # Define permissions for custom roles used in endpoints
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Used in endpoints
+            888: [GET_ACTION],
+            # Used in endpoints
+            777: [GET_ACTION],
+        }
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
 
@@ -385,6 +419,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_shared_initial = MagicMock()
         mock_const_initial = MagicMock()
         mock_const_initial.EXTRA_PERMISSION_ASSIGNATION = []
+        # Define permissions for custom roles used in test endpoints
+        mock_const_initial.CUSTOM_ROLES_ACTIONS = {
+            # Used in test endpoints
+            888: [GET_ACTION],
+            # Used in test endpoints
+            777: [GET_ACTION],
+        }
         mock_shared_initial.const = mock_const_initial
         mock_external_app_initial.shared = mock_shared_initial
 
@@ -459,6 +500,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_shared_updated = MagicMock()
         mock_const_updated = MagicMock()
         mock_const_updated.EXTRA_PERMISSION_ASSIGNATION = []  # Empty list
+        # Define permissions for custom roles used in test endpoints
+        mock_const_updated.CUSTOM_ROLES_ACTIONS = {
+            # Used in test endpoints
+            888: [GET_ACTION],
+            # Used in test endpoints
+            777: [GET_ACTION],
+        }
         mock_shared_updated.const = mock_const_updated
         mock_external_app_updated.shared = mock_shared_updated
 
@@ -533,6 +581,204 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             len(remaining_external_permissions) > 0,
             f"Permissions for remaining views should still exist. Found views: {set(all_view_names)}",
         )
+
+    @patch("cornflow.commands.auxiliar.import_module")
+    @patch("cornflow.commands.views.import_module")
+    @patch.dict(
+        os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
+    )
+    def test_custom_roles_actions_success(
+        self, mock_import_views, mock_import_auxiliar
+    ):
+        """
+        Test that custom roles get their defined actions from CUSTOM_ROLES_ACTIONS
+        """
+        # Mock external app configuration
+        mock_external_app = MagicMock()
+
+        # Mock the shared.const module with CUSTOM_ROLES_ACTIONS
+        mock_shared = MagicMock()
+        mock_const = MagicMock()
+        mock_const.EXTRA_PERMISSION_ASSIGNATION = []
+        # Define custom roles actions
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Custom role with multiple actions
+            888: [
+                GET_ACTION,
+                POST_ACTION,
+                PUT_ACTION,
+            ],
+            # Another custom role with different actions
+            777: [
+                GET_ACTION,
+                PATCH_ACTION,
+            ],
+        }
+        mock_shared.const = mock_const
+        mock_external_app.shared = mock_shared
+
+        # Mock the endpoints.resources with fake external app endpoints
+        mock_endpoints = MagicMock()
+        mock_endpoints.resources = self._create_mock_external_app_resources()
+        mock_external_app.endpoints = mock_endpoints
+
+        mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
+
+        # Mock the database session for testing
+        with patch.object(db.session, "commit"):
+            with patch.object(db.session, "rollback"):
+                # Run the complete access initialization
+                access_init_command(verbose=True)
+
+                # Verify that custom permissions were created with the correct actions
+                from cornflow.models import PermissionViewRoleModel
+
+                # Get all permissions for role 888
+                permissions_888 = PermissionViewRoleModel.query.filter_by(
+                    role_id=888
+                ).all()
+                actions_888 = {perm.action_id for perm in permissions_888}
+
+                # Get all permissions for role 777
+                permissions_777 = PermissionViewRoleModel.query.filter_by(
+                    role_id=777
+                ).all()
+                actions_777 = {perm.action_id for perm in permissions_777}
+
+                # Verify role 888 has GET, POST, PUT actions
+                expected_actions_888 = {GET_ACTION, POST_ACTION, PUT_ACTION}
+                self.assertTrue(
+                    expected_actions_888.issubset(actions_888),
+                    f"Role 888 should have actions {expected_actions_888}, but got {actions_888}",
+                )
+
+                # Verify role 777 has GET, PATCH actions
+                expected_actions_777 = {GET_ACTION, PATCH_ACTION}
+                self.assertTrue(
+                    expected_actions_777.issubset(actions_777),
+                    f"Role 777 should have actions {expected_actions_777}, but got {actions_777}",
+                )
+
+                # Verify that role 888 does NOT have actions that were not defined
+                # We check that no DELETE or PATCH actions exist for role 888
+                forbidden_actions_888 = {DELETE_ACTION, PATCH_ACTION}
+                actual_forbidden_888 = actions_888.intersection(forbidden_actions_888)
+                self.assertEqual(
+                    len(actual_forbidden_888),
+                    0,
+                    f"Role 888 should not have actions {forbidden_actions_888}, but found {actual_forbidden_888}",
+                )
+
+                # Verify that role 777 does NOT have actions that were not defined
+                # We check that no POST, PUT, DELETE actions exist for role 777
+                forbidden_actions_777 = {POST_ACTION, PUT_ACTION, DELETE_ACTION}
+                actual_forbidden_777 = actions_777.intersection(forbidden_actions_777)
+                self.assertEqual(
+                    len(actual_forbidden_777),
+                    0,
+                    f"Role 777 should not have actions {forbidden_actions_777}, but found {actual_forbidden_777}",
+                )
+
+    @patch("cornflow.commands.auxiliar.import_module")
+    @patch("cornflow.commands.views.import_module")
+    @patch.dict(
+        os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
+    )
+    def test_custom_roles_actions_error_on_undefined_role(
+        self, mock_import_views, mock_import_auxiliar
+    ):
+        """
+        Test that an error is raised when a custom role is used but not defined in CUSTOM_ROLES_ACTIONS
+        """
+        # Mock external app configuration
+        mock_external_app = MagicMock()
+
+        # Mock the shared.const module with CUSTOM_ROLES_ACTIONS that doesn't include role 888
+        mock_shared = MagicMock()
+        mock_const = MagicMock()
+        mock_const.EXTRA_PERMISSION_ASSIGNATION = []
+        # Define custom roles permissions but MISSING role 888 which is used in endpoints
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            # Only define role 777, but role 888 is used in endpoints
+            777: [
+                GET_ACTION,
+                PATCH_ACTION,
+            ],
+        }
+        mock_shared.const = mock_const
+        mock_external_app.shared = mock_shared
+
+        # Mock the endpoints.resources with fake external app endpoints that use role 888
+        mock_endpoints = MagicMock()
+        mock_endpoints.resources = (
+            self._create_mock_external_app_resources()
+        )  # This includes role 888
+        mock_external_app.endpoints = mock_endpoints
+
+        mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
+
+        # Verify that a ValueError is raised for undefined role 888
+        with self.assertRaises(ValueError) as context:
+            access_init_command(verbose=True)
+
+        # Verify the error message contains the undefined role
+        error_message = str(context.exception)
+        self.assertIn("888", error_message)
+        self.assertIn("CUSTOM_ROLES_ACTIONS", error_message)
+        self.assertIn("not defined", error_message)
+
+    @patch("cornflow.commands.auxiliar.import_module")
+    @patch("cornflow.commands.views.import_module")
+    @patch.dict(
+        os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
+    )
+    def test_custom_roles_actions_fallback_when_not_defined(
+        self, mock_import_views, mock_import_auxiliar
+    ):
+        """
+        Test that the system falls back gracefully when CUSTOM_ROLES_ACTIONS is not defined
+        but no custom roles are used
+        """
+        # Mock external app configuration
+        mock_external_app = MagicMock()
+
+        # Mock the shared.const module WITHOUT CUSTOM_ROLES_ACTIONS
+        mock_shared = MagicMock()
+        mock_const = MagicMock()
+        mock_const.EXTRA_PERMISSION_ASSIGNATION = []
+        # Don't set CUSTOM_ROLES_ACTIONS to trigger AttributeError
+        # This simulates an external app that doesn't define the new constant
+        mock_shared.const = mock_const
+        mock_external_app.shared = mock_shared
+
+        # Mock endpoints that only use standard roles (no custom roles)
+        mock_production_endpoint = MagicMock()
+        # Only standard role
+        mock_production_endpoint.ROLES_WITH_ACCESS = [PLANNER_ROLE]
+        mock_production_endpoint.DESCRIPTION = "Production planning endpoint"
+
+        mock_resources = [
+            {
+                "endpoint": "production_planning",
+                "urls": "/production-planning/",
+                "resource": mock_production_endpoint,
+            }
+        ]
+
+        mock_endpoints = MagicMock()
+        mock_endpoints.resources = mock_resources
+        mock_external_app.endpoints = mock_endpoints
+
+        mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
+
+        # Should not raise any exceptions since no custom roles are used
+        try:
+            access_init_command(verbose=True)
+        except Exception as e:
+            self.fail(f"access_init_command raised an exception when it shouldn't: {e}")
 
 
 if __name__ == "__main__":
