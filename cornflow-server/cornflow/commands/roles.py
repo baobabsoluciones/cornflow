@@ -12,25 +12,17 @@ def register_roles_command(external_app: str = None, verbose: bool = True):
         get_new_roles_to_add,
     )
 
-    print(f"DEBUG - register_roles_command called with external_app: {external_app}")
     resources_to_register, extra_permissions = get_all_external(external_app)
-    print(f"DEBUG - resources_to_register count: {len(resources_to_register)}")
-    print(f"DEBUG - extra_permissions: {extra_permissions}")
-
     resources_roles_with_access = get_all_resources(resources_to_register)
-    print(f"DEBUG - resources_roles_with_access: {resources_roles_with_access}")
-
     new_roles_to_add = get_new_roles_to_add(
         extra_permissions, resources_roles_with_access
     )
 
-    print(f"DEBUG - About to save {len(new_roles_to_add)} new roles")
     if len(new_roles_to_add) > 0:
         db.session.bulk_save_objects(new_roles_to_add)
 
     try:
         db.session.commit()
-        print("DEBUG - Roles commit successful")
     except IntegrityError as e:
         db.session.rollback()
         current_app.logger.error(f"Integrity error on roles register: {e}")
