@@ -63,7 +63,6 @@ def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
     resources_roles_with_access: Dictionary of resources and roles with access.
     """
 
-
     roles_with_access = list(
         set([role for roles in resources_roles_with_access.values() for role in roles])
     )

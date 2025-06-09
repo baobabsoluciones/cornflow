@@ -6,6 +6,7 @@ from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow.endpoints import resources, alarms_resources
+
 # Imports from internal libraries
 from cornflow.models import ViewModel
 from cornflow.shared import db
@@ -144,7 +145,7 @@ def get_views_to_update_and_delete(
     return views_to_delete, views_to_update
 
 
-def get_views_to_register(resources_to_register,views_registered_urls_all_attributes):
+def get_views_to_register(resources_to_register, views_registered_urls_all_attributes):
     """
     Get the views to register.
     resources_to_register: List of resources to register.

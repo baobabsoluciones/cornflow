@@ -46,9 +46,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)
 
     if len(permissions_to_register) > 0:
-        current_app.logger.info(
-            f"Permissions registered: {permissions_to_register}"
-        )
+        current_app.logger.info(f"Permissions registered: {permissions_to_register}")
     else:
         current_app.logger.info("No new permissions to register")
 
@@ -185,16 +183,15 @@ def get_base_permissions(resources_roles_with_access):
 
     # Create extended permission assignation including all custom roles
     # For custom roles (not in ALL_DEFAULT_ROLES), only grant GET access
-    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [  
-        (custom_role, GET_ACTION)  
-        for custom_role in all_custom_roles_in_access  
-]  
+    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
+        (custom_role, GET_ACTION) for custom_role in all_custom_roles_in_access
+    ]
 
     return base_permissions_assignation
 
 
 def get_db_permissions():
-    """ 
+    """
     Get all permissions in the database.
     """
     permissions_in_db = [perm for perm in PermissionViewRoleModel.get_all_objects()]
