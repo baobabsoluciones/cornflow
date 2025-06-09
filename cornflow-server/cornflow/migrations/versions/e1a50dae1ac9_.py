@@ -2,10 +2,11 @@
 Initial migrations
 
 Revision ID: e1a50dae1ac9
-Revises: 
+Revises:
 Create Date: 2021-01-13 17:04:32.644405
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql

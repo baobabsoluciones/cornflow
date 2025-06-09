@@ -1,6 +1,7 @@
 """
 File with the common schemas used in cornflow
 """
+
 from marshmallow import fields, Schema
 from .query import BaseQueryFilters
 
@@ -17,4 +18,3 @@ class BaseDataEndpointResponse(Schema):
     user_id = fields.Int()
     data_hash = fields.Str()
     schema = fields.Str(required=False)
-

@@ -35,7 +35,7 @@ SEPARATOR = "/"
 
 class CaseModel(BaseDataModel):
     """
-    Model class for the Cases. 
+    Model class for the Cases.
     It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field.
 
     - **id**: int, the primary key for the cases, is an autoincrement.
@@ -58,7 +58,6 @@ class CaseModel(BaseDataModel):
 
     """
 
-
     __tablename__ = "cases"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -66,7 +65,6 @@ class CaseModel(BaseDataModel):
     solution = db.Column(JSON, nullable=True)
     solution_hash = db.Column(db.String(256), nullable=False)
     solution_checks = db.Column(JSON, nullable=True)
-
 
     # To find the descendants of this node, we look for nodes whose path
     # starts with this node's path.
@@ -79,7 +77,6 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
-    
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
@@ -138,7 +135,7 @@ class CaseModel(BaseDataModel):
         :return: the new case
         :rtype: :class:`CaseModel<cornflow.models.CaseModel>`
         """
-        
+
         if data.get("parent_id") is None:
             # we assume at root
             return cls(data, parent=None)

@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 # Imports from libraries
 import os

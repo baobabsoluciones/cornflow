@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 import logging as log
 import re

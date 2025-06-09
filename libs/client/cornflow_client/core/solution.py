@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from abc import ABC
 

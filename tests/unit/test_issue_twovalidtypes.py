@@ -1,5 +1,6 @@
 import os, sys
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(REPO_ROOT, "cornflow-dags"))
@@ -9,9 +10,7 @@ from tests.unit.test_dags import BaseDAGTests
 class MyInstance(InstanceCore):
     schema = {
         "type": "object",
-        "properties": {
-            "field": {"type": ["string", "null", "number"]}
-        },
+        "properties": {"field": {"type": ["string", "null", "number"]}},
         "required": ["field"],
     }
     schema_checks = {
@@ -24,9 +23,7 @@ class MyInstance(InstanceCore):
 class MySolution(SolutionCore):
     schema = {
         "type": "object",
-        "properties": {
-            "result": {"type": "string"}
-        },
+        "properties": {"result": {"type": "string"}},
         "required": ["result"],
     }
     schema_checks = {
@@ -46,7 +43,7 @@ class AppTest(ApplicationCore):
         return {
             "type": "object",
             "properties": {
-                "solver":    {"enum": ["default"]},
+                "solver": {"enum": ["default"]},
                 "timeLimit": {"type": "number"},
             },
             "required": ["solver", "timeLimit"],
@@ -89,8 +86,10 @@ class AppTest(ApplicationCore):
         class DummyExperiment:
             def __init__(self, inst, sol):
                 self.schema_checks = {}
+
             def check_solution(self):
                 return {}
+
             def get_objective(self):
                 return 0
 

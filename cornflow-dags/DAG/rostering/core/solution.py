@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Imports from libraries
 import os
 import pickle

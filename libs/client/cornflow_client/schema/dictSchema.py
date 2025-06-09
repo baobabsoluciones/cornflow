@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 import re
 
 from cornflow_client.constants import JSON_TYPES, DATASCHEMA

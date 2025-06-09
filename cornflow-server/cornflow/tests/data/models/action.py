@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 from cornflow.models import ActionModel
 
 from cornflow.shared import db

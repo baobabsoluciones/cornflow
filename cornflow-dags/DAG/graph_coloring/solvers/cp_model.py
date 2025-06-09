@@ -38,7 +38,7 @@ class OrToolsCP(Experiment):
         if termination_condition not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
             return dict(
                 status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status_sol=SOLUTION_STATUS_INFEASIBLE,
             )
         color_sol = color.vapply(solver.Value)
 
@@ -47,5 +47,5 @@ class OrToolsCP(Experiment):
 
         return dict(
             status=ORTOOLS_STATUS_MAPPING.get(termination_condition),
-            status_sol=SOLUTION_STATUS_FEASIBLE
+            status_sol=SOLUTION_STATUS_FEASIBLE,
         )

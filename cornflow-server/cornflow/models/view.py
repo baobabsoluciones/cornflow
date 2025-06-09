@@ -1,6 +1,7 @@
 """
 This file contains the view model
 """
+
 # Imports from libraries
 from sqlalchemy.dialects.postgresql import TEXT
 

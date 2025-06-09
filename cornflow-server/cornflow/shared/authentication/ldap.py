@@ -51,16 +51,17 @@ class LDAPBase:
         conn = self.get_bound_connection()
         base_search = base
         search_filter = "(&({}={}))".format(
-            self.config['LDAP_USERNAME_ATTRIBUTE'],
-            user
+            self.config["LDAP_USERNAME_ATTRIBUTE"], user
         )
-        conn.search(base_search, search_filter=search_filter,attributes=['*'])
+        conn.search(base_search, search_filter=search_filter, attributes=["*"])
         try:
-            user_dn = conn.response[0]['dn']
+            user_dn = conn.response[0]["dn"]
         except (KeyError, IndexError):
-            raise InvalidCredentials(log_txt="Error while trying to authenticate a user. Invalid credentials.")
+            raise InvalidCredentials(
+                log_txt="Error while trying to authenticate a user. Invalid credentials."
+            )
         return user_dn
-        
+
     def get_user_attribute(self, user, attribute):
         """
         Method to get one attribute from a user in ldap

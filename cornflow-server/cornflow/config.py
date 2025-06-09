@@ -125,6 +125,7 @@ class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
     """
+
     AUTH_TYPE = AUTH_OID
     OID_PROVIDER = "https://test-provider.example.com"
     OID_EXPECTED_AUDIENCE = "test-audience-id"
@@ -157,5 +158,5 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
-    "testing-root": TestingApplicationRoot
+    "testing-root": TestingApplicationRoot,
 }
