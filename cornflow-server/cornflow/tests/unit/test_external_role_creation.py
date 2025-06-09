@@ -77,13 +77,14 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         return mock_resources
 
+    @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
     @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_custom_role_creation_removal(
-        self, mock_import_views, mock_import_permissions
+        self, mock_import_views, mock_import_permissions, mock_import_auxiliar
     ):
         """
         Test that custom roles (like role 888) are properly created and removed
@@ -115,6 +116,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
 
         # Run the permissions registration
         from cornflow.commands.access import access_init_command
@@ -184,13 +186,14 @@ class ExternalRoleCreationTestCase(CustomTestCase):
                     f"Missing expected permissions: {missing_permissions}",
                 )
 
+    @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
     @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_role_removal_when_not_in_config(
-        self, mock_import_permissions, mock_import_views
+        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
     ):
         """
         Test that roles are properly removed when they're no longer in EXTRA_PERMISSION_ASSIGNATION
@@ -215,6 +218,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
 
         # Create initial roles
         from cornflow.commands.access import access_init_command
@@ -250,13 +254,14 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         except Exception as e:
             self.fail(f"access_init_command raised an exception: {e}")
 
+    @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
     @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_external_app_missing_extra_permissions(
-        self, mock_import_permissions, mock_import_views
+        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
     ):
         """
         Test graceful handling when external app doesn't have EXTRA_PERMISSION_ASSIGNATION
@@ -279,6 +284,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
 
         from cornflow.commands.access import access_init_command
 
@@ -288,13 +294,14 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         except Exception as e:
             self.fail(f"access_init_command raised an exception: {e}")
 
+    @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
     @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
     def test_standard_role_extended_permissions(
-        self, mock_import_permissions, mock_import_views
+        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
     ):
         """
         Test that standard roles (like VIEWER_ROLE) can get extended permissions from external app
@@ -319,6 +326,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_permissions.return_value = mock_external_app
         mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
 
         from cornflow.commands.access import access_init_command
 
@@ -343,12 +351,15 @@ class ExternalRoleCreationTestCase(CustomTestCase):
                 ).all()
                 self.assertTrue(len(planner_permissions) > 0)
 
+    @patch("cornflow.commands.auxiliar.import_module")
     @patch("cornflow.commands.views.import_module")
     @patch("cornflow.commands.permissions.import_module")
     @patch.dict(
         os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
     )
-    def test_view_update_and_deletion(self, mock_import_permissions, mock_import_views):
+    def test_view_update_and_deletion(
+        self, mock_import_permissions, mock_import_views, mock_import_auxiliar
+    ):
         """
         Test that views are updated when URLs change and deleted when resources are removed
         """
@@ -391,7 +402,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         # Mock the shared.const module (no extra permissions)
         mock_shared_initial = MagicMock()
         mock_const_initial = MagicMock()
-        mock_const_initial.EXTRA_PERMISSION_ASSIGNATION = [] 
+        mock_const_initial.EXTRA_PERMISSION_ASSIGNATION = []
         mock_shared_initial.const = mock_const_initial
         mock_external_app_initial.shared = mock_shared_initial
 
@@ -402,6 +413,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
 
         mock_import_permissions.return_value = mock_external_app_initial
         mock_import_views.return_value = mock_external_app_initial
+        mock_import_auxiliar.return_value = mock_external_app_initial
 
         # === INITIAL ACCESS INIT ===
         from cornflow.commands.access import access_init_command
@@ -479,6 +491,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         # Update mocks to return updated configuration
         mock_import_permissions.return_value = mock_external_app_updated
         mock_import_views.return_value = mock_external_app_updated
+        mock_import_auxiliar.return_value = mock_external_app_updated
 
         # === SECOND ACCESS INIT (with updated config) ===
         # Allow real commits for the update to be persisted

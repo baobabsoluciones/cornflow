@@ -100,7 +100,18 @@ class TestCommands(TestCase):
         }
         self.resources = resources + alarms_resources
         self.runner = self.create_app().test_cli_runner()
-        self.runner.invoke(register_roles, ["-v"])
+
+        # DEBUG: Check register_roles result
+        result = self.runner.invoke(register_roles, ["-v"])
+        print(f"DEBUG - register_roles exit_code: {result.exit_code}")
+        print(f"DEBUG - register_roles output: {result.output}")
+        if result.exception:
+            print(f"DEBUG - register_roles exception: {result.exception}")
+            import traceback
+
+            traceback.print_exception(
+                type(result.exception), result.exception, result.exception.__traceback__
+            )
 
     def tearDown(self):
         """
@@ -199,7 +210,26 @@ class TestCommands(TestCase):
         - Correct user attributes
         - Service role assignment
         """
-        return self.user_command(create_service_user, "cornflow", self.payload["email"])
+        # DEBUG: Check if roles exist before creating user
+        print("DEBUG - Checking roles before user creation:")
+        all_roles = RoleModel.query.all()
+        print(
+            f"DEBUG - Roles in DB before user creation: {[(r.id, r.name) for r in all_roles]}"
+        )
+
+        result = self.user_command(
+            create_service_user, "cornflow", self.payload["email"]
+        )
+
+        # DEBUG: Check roles assigned to user after creation
+        from cornflow.models import UserRoleModel
+
+        user_roles = UserRoleModel.query.filter_by(user_id=result.id).all()
+        print(
+            f"DEBUG - User roles after creation: {[(ur.user_id, ur.role_id) for ur in user_roles]}"
+        )
+
+        return result
 
     def test_service_user_existing_admin(self):
         """
@@ -402,8 +432,30 @@ class TestCommands(TestCase):
         service = UserModel.get_one_user_by_email("testemail@test.org")
         admin = UserModel.get_one_user_by_email("admin@test.org")
 
+        # DEBUG: Check service user details
+        print(f"DEBUG - Service user: {service}")
+        print(f"DEBUG - Service user ID: {service.id}")
+        print(f"DEBUG - Service user is_service_user(): {service.is_service_user()}")
+
+        # DEBUG: Check user roles
+        from cornflow.models import UserRoleModel
+
+        service_roles = UserRoleModel.query.filter_by(user_id=service.id).all()
+        print(
+            f"DEBUG - Service user roles: {[(sr.user_id, sr.role_id) for sr in service_roles]}"
+        )
+
+        # DEBUG: Check all users and their service status
+        all_users = UserModel.get_all_users().all()
+        print(
+            f"DEBUG - All users and service status: {[(u.id, u.email, u.is_service_user()) for u in all_users]}"
+        )
+
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
+
+        print(f"DEBUG - Service permissions count: {len(service_permissions)}")
+        print(f"DEBUG - Admin permissions count: {len(admin_permissions)}")
 
         self.assertEqual(3, len(service_permissions))
         self.assertEqual(0, len(admin_permissions))

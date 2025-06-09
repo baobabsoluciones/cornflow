@@ -13,6 +13,11 @@ from cornflow.shared import db
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from cornflow.endpoints import resources, alarms_resources
+from cornflow.commands.auxiliar import (
+    get_all_external,
+    get_all_resources,
+    get_new_roles_to_add,
+)
 
 
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
@@ -31,10 +36,10 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     new_roles_to_add = get_new_roles_to_add(
         extra_permissions, resources_roles_with_access
     )
+    # Save the new roles in the database first
+    save_new_roles(new_roles_to_add)
     # Get the new roles and base permissions assignation
-    base_permissions_assignation = get_base_permissions(
-        new_roles_to_add, resources_roles_with_access
-    )
+    base_permissions_assignation = get_base_permissions(resources_roles_with_access)
     # Get the permissions to register and delete
     permissions_tuples = get_permissions_in_code_as_tuples(
         resources_to_register,
@@ -49,8 +54,7 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         permissions_tuples, resources_roles_with_access.keys(), permissions_in_db
     )
 
-    # Save the new roles in the database
-    save_new_roles(new_roles_to_add)
+    # Save the new permissions in the data
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)
 
     if verbose:
@@ -176,7 +180,7 @@ def get_permissions_in_code_as_tuples(
     return permissions_tuples
 
 
-def get_base_permissions(new_roles_to_add, resources_roles_with_access):
+def get_base_permissions(resources_roles_with_access):
     """
     Get the new roles and base permissions assignation.
     new_roles_to_add: List of new roles to add.
@@ -200,84 +204,6 @@ def get_base_permissions(new_roles_to_add, resources_roles_with_access):
     ]
 
     return base_permissions_assignation
-
-
-def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
-    """
-    Get the new roles to add.
-    extra_permissions: List of extra permissions.
-    resources_roles_with_access: Dictionary of resources and roles with access.
-    """
-    roles_with_access = list(
-        set([role for roles in resources_roles_with_access.values() for role in roles])
-    )
-    roles_in_extra_permissions = [role for role, _, _ in extra_permissions]
-    roles_with_access = list(set(roles_with_access + roles_in_extra_permissions))
-    # We check if there is any role additional to the ones defined in the base permissions
-    additional_roles_with_access = [
-        role for role in roles_with_access if role not in ALL_DEFAULT_ROLES
-    ]
-
-    # We extract the existing roles in the database
-    existing_roles = [role.id for role in RoleModel.get_all_objects()]
-    new_roles_to_add = []
-    if len(additional_roles_with_access) > 0:
-        # If our id is not in the existing roles, we add it, applying a
-        # pre-defined name custom_role_<id>
-        for custom_role in additional_roles_with_access:
-            if custom_role not in existing_roles:
-                new_role = RoleModel(
-                    {
-                        "id": custom_role,
-                        "name": f"custom_role_{custom_role}",
-                    }
-                )
-                new_roles_to_add.append(new_role)
-    return new_roles_to_add
-
-
-def get_all_external(external_app):
-    """
-    Get all resources and extra permissions.
-    external_app: If provided, it will get the resources and extra permissions for the external app.
-    """
-    if external_app is None:
-        resources_to_register = resources
-        extra_permissions = EXTRA_PERMISSION_ASSIGNATION
-        if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = resources + alarms_resources
-    else:
-        sys.path.append("./")
-        external_module = import_module(external_app)
-        try:
-            extra_permissions = (
-                EXTRA_PERMISSION_ASSIGNATION
-                + external_module.shared.const.EXTRA_PERMISSION_ASSIGNATION
-            )
-        except AttributeError:
-            extra_permissions = EXTRA_PERMISSION_ASSIGNATION
-
-        if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = (
-                external_module.endpoints.resources + resources + alarms_resources
-            )
-        else:
-            resources_to_register = external_module.endpoints.resources + resources
-    return resources_to_register, extra_permissions
-
-
-def get_all_resources(resources_to_register):
-    """
-    Get all resources and roles with access.
-    resources_to_register: List of resources to register.
-    """
-
-    resources_roles_with_access = {
-        resource["endpoint"]: resource["resource"].ROLES_WITH_ACCESS
-        for resource in resources_to_register
-    }
-
-    return resources_roles_with_access
 
 
 def get_db_permissions():
