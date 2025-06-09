@@ -32,7 +32,9 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         extra_permissions, resources_roles_with_access
     )
     # Get the new roles and base permissions assignation
-    base_permissions_assignation = get_base_permissions(new_roles_to_add)
+    base_permissions_assignation = get_base_permissions(
+        new_roles_to_add, resources_roles_with_access
+    )
     # Get the permissions to register and delete
     permissions_tuples = get_permissions_in_code_as_tuples(
         resources_to_register,
@@ -174,22 +176,29 @@ def get_permissions_in_code_as_tuples(
     return permissions_tuples
 
 
-def get_base_permissions(new_roles_to_add):
+def get_base_permissions(new_roles_to_add, resources_roles_with_access):
     """
     Get the new roles and base permissions assignation.
-    extra_permissions: List of extra permissions.
+    new_roles_to_add: List of new roles to add.
     resources_roles_with_access: Dictionary of resources and roles with access.
     """
-    all_new_roles_id = [role.id for role in new_roles_to_add]
-    if len(new_roles_to_add) > 0:
-        # Create extended permission assignation including additional roles
-        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
-            (custom_role, action)
-            for custom_role in all_new_roles_id
-            for action in ALL_DEFAULT_ACTIONS
+    # Get all custom roles (both new and existing) that appear in ROLES_WITH_ACCESS
+    all_custom_roles_in_access = set(
+        [
+            role
+            for roles in resources_roles_with_access.values()
+            for role in roles
+            if role not in ALL_DEFAULT_ROLES
         ]
-    else:
-        base_permissions_assignation = BASE_PERMISSION_ASSIGNATION
+    )
+
+    # Create extended permission assignation including all custom roles
+    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
+        (custom_role, action)
+        for custom_role in all_custom_roles_in_access
+        for action in ALL_DEFAULT_ACTIONS
+    ]
+
     return base_permissions_assignation
 
 

@@ -391,7 +391,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         # Mock the shared.const module (no extra permissions)
         mock_shared_initial = MagicMock()
         mock_const_initial = MagicMock()
-        mock_const_initial.EXTRA_PERMISSION_ASSIGNATION = []  # Empty list
+        mock_const_initial.EXTRA_PERMISSION_ASSIGNATION = [] 
         mock_shared_initial.const = mock_const_initial
         mock_external_app_initial.shared = mock_shared_initial
 
@@ -534,9 +534,13 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             if perm.api_view
             and perm.api_view.name in ["production_planning", "quality_control"]
         ]
+
+        all_view_names = [
+            perm.api_view.name for perm in remaining_permissions if perm.api_view
+        ]
         self.assertTrue(
             len(remaining_external_permissions) > 0,
-            "Permissions for remaining views should still exist",
+            f"Permissions for remaining views should still exist. Found views: {set(all_view_names)}",
         )
 
 
