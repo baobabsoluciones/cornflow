@@ -18,7 +18,7 @@ from cornflow.commands.auxiliar import (
     get_all_resources,
     get_new_roles_to_add,
 )
-
+from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
 
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     """
@@ -52,18 +52,17 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     # Save the new permissions in the data
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)
 
-    if verbose:
-        if len(permissions_to_register) > 0:
-            current_app.logger.info(
-                f"Permissions registered: {permissions_to_register}"
-            )
-        else:
-            current_app.logger.info("No new permissions to register")
+    if len(permissions_to_register) > 0:
+        current_app.logger.info(
+            f"Permissions registered: {permissions_to_register}"
+        )
+    else:
+        current_app.logger.info("No new permissions to register")
 
-        if len(permissions_to_delete) > 0:
-            current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
-        else:
-            current_app.logger.info("No permissions to delete")
+    if len(permissions_to_delete) > 0:
+        current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
+    else:
+        current_app.logger.info("No permissions to delete")
 
 
 def save_new_roles(new_roles_to_add):
@@ -158,8 +157,6 @@ def get_permissions_in_code_as_tuples(
     """
     Get the permissions in code as tuples.
     """
-    from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
-
     # Create base permissions using a set to avoid duplicates
     permissions_tuples = set()
 
@@ -167,9 +164,6 @@ def get_permissions_in_code_as_tuples(
     for role, action in base_permissions_assignation:
         for view in resources_to_register:
             if role in view["resource"].ROLES_WITH_ACCESS:
-                # For custom roles (not in ALL_DEFAULT_ROLES), only grant GET access
-                if role not in ALL_DEFAULT_ROLES and action != GET_ACTION:
-                    continue
                 permissions_tuples.add((role, action, views_in_db[view["endpoint"]]))
 
     # Add permissions from extra_permissions
@@ -197,17 +191,17 @@ def get_base_permissions(resources_roles_with_access):
     )
 
     # Create extended permission assignation including all custom roles
-    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
-        (custom_role, action)
-        for custom_role in all_custom_roles_in_access
-        for action in ALL_DEFAULT_ACTIONS
-    ]
+    # For custom roles (not in ALL_DEFAULT_ROLES), only grant GET access
+    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [  
+        (custom_role, GET_ACTION)  
+        for custom_role in all_custom_roles_in_access  
+]  
 
     return base_permissions_assignation
 
 
 def get_db_permissions():
-    """
+    """ 
     Get all permissions in the database.
     """
     permissions_in_db = [perm for perm in PermissionViewRoleModel.get_all_objects()]
