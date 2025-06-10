@@ -19,6 +19,8 @@ from cornflow.tests.const import (
     BAD_EXECUTION_PATH,
     EXECUTION_SOLUTION_PATH,
     CUSTOM_CONFIG_PATH,
+    NO_SCHEMA_EXECUTION_PATH,
+    GOOD_SCHEMA_EXECUTION_PATH
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client
@@ -42,6 +44,8 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
 
         self.payload = load_file_fk(EXECUTION_PATH)
         self.bad_payload = load_file_fk(BAD_EXECUTION_PATH)
+        self.payload_no_schema = load_file_fk(NO_SCHEMA_EXECUTION_PATH)
+        self.payload_good_schema = load_file_fk(GOOD_SCHEMA_EXECUTION_PATH)
         self.payloads = [load_file_fk(f) for f in EXECUTIONS_LIST]
         self.solution = load_file_fk(EXECUTION_SOLUTION_PATH)
         self.custom_config_payload = load_file_fk(CUSTOM_CONFIG_PATH)
@@ -96,6 +100,30 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
         )
         self.assertIn("error", response)
         self.assertIn("jsonschema_errors", response)
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_bad_schema(self, af_client_class):
+        patch_af_client(af_client_class)
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload_no_schema,
+            expected_status=400,
+            check_payload=False,
+        )
+        self.assertIn("schema", response["error"])
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_new_execution_good_schema(self, af_client_class):
+        patch_af_client(af_client_class)
+        response = self.create_new_row(
+            EXECUTION_URL,
+            self.model,
+            payload=self.payload_good_schema,
+            expected_status=201,
+            check_payload=False,
+        )
+        self.assertNotIn("error", response)
 
     @patch("cornflow.endpoints.execution.Airflow")
     def test_new_execution_partial_config(self, af_client_class):

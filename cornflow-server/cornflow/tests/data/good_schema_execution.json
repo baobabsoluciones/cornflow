@@ -15,6 +15,6 @@
 },
 "name": "execution_1",
 "description": "This is a test for the executions",
-    "schema": "solve_model_dag"
+  "schema": "solve_model_dag"
 
 }

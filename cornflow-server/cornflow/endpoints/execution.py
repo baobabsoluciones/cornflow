@@ -296,6 +296,9 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         """
         config = current_app.config
 
+        if "schema" not in kwargs:
+            kwargs["schema"] = "solve_model_dag"
+
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
         )
