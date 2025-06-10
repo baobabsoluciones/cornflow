@@ -19,15 +19,22 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     external_app: If provided, it will register the permissions for the external app.
     verbose: If True, it will print the permissions that are being registered.
     """
-    # Get all resources and extra permissions
-    resources_to_register, extra_permissions = get_all_external(external_app)
+    # Get all resources, extra permissions, and custom roles actions
+    resources_to_register, extra_permissions, custom_roles_actions = get_all_external(
+        external_app
+    )
+
     # Get all views in the database
     views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
     permissions_in_db, permissions_in_db_keys = get_db_permissions()
+
     # Get all resources and roles with access
     resources_roles_with_access = get_all_resources(resources_to_register)
+
     # Get the new roles and base permissions assignation
-    base_permissions_assignation = get_base_permissions(resources_roles_with_access)
+    base_permissions_assignation = get_base_permissions(
+        resources_roles_with_access, custom_roles_actions
+    )
     # Get the permissions to register and delete
     permissions_tuples = get_permissions_in_code_as_tuples(
         resources_to_register,
@@ -165,11 +172,11 @@ def get_permissions_in_code_as_tuples(
     return permissions_tuples
 
 
-def get_base_permissions(resources_roles_with_access):
+def get_base_permissions(resources_roles_with_access, custom_roles_actions):
     """
     Get the new roles and base permissions assignation.
-    new_roles_to_add: List of new roles to add.
     resources_roles_with_access: Dictionary of resources and roles with access.
+    custom_roles_actions: Dictionary mapping custom roles to their allowed actions.
     """
     # Get all custom roles (both new and existing) that appear in ROLES_WITH_ACCESS
     all_custom_roles_in_access = set(
@@ -181,11 +188,23 @@ def get_base_permissions(resources_roles_with_access):
         ]
     )
 
+    # Validate that all custom roles are defined in custom_roles_actions
+    undefined_roles = all_custom_roles_in_access - set(custom_roles_actions.keys())
+    if undefined_roles:
+        raise ValueError(
+            f"The following custom roles are used in code but not defined in CUSTOM_ROLES_ACTIONS: {undefined_roles}. "
+            f"Please define their allowed actions in the CUSTOM_ROLES_ACTIONS dictionary in shared/const.py."
+        )
+
     # Create extended permission assignation including all custom roles
-    # For custom roles (not in ALL_DEFAULT_ROLES), only grant GET access
-    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + [
-        (custom_role, GET_ACTION) for custom_role in all_custom_roles_in_access
+    # For custom roles, use the actions defined in custom_roles_actions
+    custom_permissions = [
+        (custom_role, action)
+        for custom_role in all_custom_roles_in_access
+        for action in custom_roles_actions[custom_role]
     ]
+
+    base_permissions_assignation = BASE_PERMISSION_ASSIGNATION + custom_permissions
 
     return base_permissions_assignation
 
