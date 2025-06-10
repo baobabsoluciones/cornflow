@@ -1,6 +1,7 @@
 import os, sys
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore
 
+
 class MyInstance(InstanceCore):
     schema = {
         "type": "object",
@@ -12,6 +13,8 @@ class MyInstance(InstanceCore):
         "properties": {},
         "required": [],
     }
+
+
 class MySolution(SolutionCore):
     schema = {
         "type": "object",
@@ -23,6 +26,7 @@ class MySolution(SolutionCore):
         "properties": {},
         "required": [],
     }
+
 
 class TwoValidTypes(ApplicationCore):
     name = "app_test_various_types"
