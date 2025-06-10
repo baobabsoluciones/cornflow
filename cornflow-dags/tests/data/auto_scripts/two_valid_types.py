@@ -1,12 +1,6 @@
 import os, sys
 from cornflow_client import ApplicationCore, InstanceCore, SolutionCore
 
-HERE = os.path.abspath(os.path.dirname(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-sys.path.insert(0, os.path.join(REPO_ROOT, "cornflow-dags"))
-from tests.unit.test_dags import BaseDAGTests
-
-
 class MyInstance(InstanceCore):
     schema = {
         "type": "object",
@@ -18,8 +12,6 @@ class MyInstance(InstanceCore):
         "properties": {},
         "required": [],
     }
-
-
 class MySolution(SolutionCore):
     schema = {
         "type": "object",
@@ -32,8 +24,7 @@ class MySolution(SolutionCore):
         "required": [],
     }
 
-
-class AppTest(ApplicationCore):
+class TwoValidTypes(ApplicationCore):
     name = "app_test_various_types"
     instance = MyInstance
     solution = MySolution
@@ -97,10 +88,3 @@ class AppTest(ApplicationCore):
 
     def check_solution(self):
         return {}
-
-
-class TestVariousTypes(BaseDAGTests.SolvingTests):
-    def setUp(self):
-        super().setUp()
-        self.app = AppTest()
-        self.config["solver"] = self.app.get_default_solver_name()

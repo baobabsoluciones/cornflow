@@ -279,3 +279,11 @@ class TimerTestCase(BaseDAGTests.SolvingTests):
 
         self.app = Timer()
         self.config.update(dict(solver="default", seconds=10))
+
+class TestVariousTypesTestCase(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from tests.data.auto_scripts.two_valid_types import TwoValidTypes
+        self.app = TwoValidTypes()
+        self.config["solver"] = self.app.get_default_solver_name()
+
