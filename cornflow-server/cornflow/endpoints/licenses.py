@@ -15,6 +15,7 @@ class LicensesEndpoint(BaseMetaResource):
     Available methods: [get]
     Endpoint used by: the user interface.
     """
+
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):

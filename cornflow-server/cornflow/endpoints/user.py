@@ -1,6 +1,7 @@
 """
 Endpoints for the user profiles
 """
+
 # Imports from external libraries
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc

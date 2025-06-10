@@ -1,6 +1,7 @@
 """
 Model for the relationship between users and roles
 """
+
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
@@ -137,4 +138,3 @@ class UserRoleModel(TraceAttributesModel):
         :rtype: str
         """
         return self.__repr__()
-

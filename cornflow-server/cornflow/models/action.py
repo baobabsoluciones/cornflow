@@ -1,6 +1,7 @@
 """
 This file contains the model that has the actions that can be performed on an REST API endpoint
 """
+
 from cornflow.models.meta_models import EmptyBaseModel
 from cornflow.shared import db
 

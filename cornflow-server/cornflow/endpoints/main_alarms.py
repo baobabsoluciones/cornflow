@@ -7,7 +7,7 @@ from cornflow.models import MainAlarmsModel
 from cornflow.schemas.main_alarms import (
     MainAlarmsResponse,
     MainAlarmsPostRequest,
-    QueryFiltersMainAlarms
+    QueryFiltersMainAlarms,
 )
 from cornflow.shared.authentication import Auth, authenticate
 

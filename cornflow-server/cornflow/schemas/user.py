@@ -68,6 +68,7 @@ class LoginOpenAuthRequest(Schema):
     """
     Schema for the login request with OpenID authentication
     """
+
     username = fields.String(required=False)
     password = fields.String(required=False)
 

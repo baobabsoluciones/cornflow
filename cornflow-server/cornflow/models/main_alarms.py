@@ -1,4 +1,4 @@
-""" Model for the alarms """
+"""Model for the alarms"""
 
 # Import from internal modules
 from cornflow.shared import db
