@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Imports from external libraries
 import pulp as pl
 from pytups import SuperDict, TupList
@@ -132,7 +131,9 @@ class MipModel(Experiment):
         self.preference_hours_employee = self.instance.get_employee_preference_hours()
         self.preference_slots = self.instance.get_employee_time_slots_preferences()
         self.ts_employees_rest_days = self.instance.get_employee_time_slots_rest_days()
-        self.employees_rest_days = self.instance.get_employees_rest_days(self.ts_employees_rest_days)
+        self.employees_rest_days = self.instance.get_employees_rest_days(
+            self.ts_employees_rest_days
+        )
         self.fixed_schedule = self.instance.get_employee_fixed_worktable()
 
     def create_variables(self):
@@ -263,7 +264,7 @@ class MipModel(Experiment):
             self.employees_rest_days,
             lowBound=0,
             upBound=1,
-            cat=pl.LpContinuous
+            cat=pl.LpContinuous,
         )
         self.unmet_employee_schedule = SuperDict(self.unmet_employee_schedule)
 
@@ -273,9 +274,11 @@ class MipModel(Experiment):
             self.fixed_schedule,
             lowBound=0,
             upBound=1,
-            cat=pl.LpContinuous
+            cat=pl.LpContinuous,
         )
-        self.unmet_fixed_schedule_constraint = SuperDict(self.unmet_fixed_schedule_constraint)
+        self.unmet_fixed_schedule_constraint = SuperDict(
+            self.unmet_fixed_schedule_constraint
+        )
 
     def create_constraints(self, model):
         # RQ00: objective function - minimize working hours
@@ -438,12 +441,12 @@ class MipModel(Experiment):
 
         # RQ15: Employee schedule
         if self.instance.get_requirement("rq15") == "soft":
-            for (ts, d, e) in self.ts_employees_rest_days:
+            for ts, d, e in self.ts_employees_rest_days:
                 model += self.works[ts, e] <= self.unmet_employee_schedule[d, e]
 
         # RQ16: Fixed schedule
         if self.instance.get_requirement("rq16") != "deactivated":
-            for (ts, e) in self.fixed_schedule:
+            for ts, e in self.fixed_schedule:
                 model += (
                     self.works[ts, e]
                     + (self.instance.get_requirement("rq16") == "soft")

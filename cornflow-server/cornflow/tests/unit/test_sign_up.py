@@ -1,6 +1,7 @@
 """
 Unit test for the sign-up endpoint
 """
+
 from cornflow.commands import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 

@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Full imports
 import json
 import pulp

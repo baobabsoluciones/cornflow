@@ -19,5 +19,7 @@ STATE_COLORS = {
 from airflow.www.utils import UIAlert
 
 DASHBOARD_UIALERTS = [
-    UIAlert("Welcome! This is the backend of your cornflow environment. Airflow™ is a platform created by the community to programmatically author, schedule and monitor workflows."),
+    UIAlert(
+        "Welcome! This is the backend of your cornflow environment. Airflow™ is a platform created by the community to programmatically author, schedule and monitor workflows."
+    ),
 ]

@@ -56,7 +56,7 @@ class Solution(SolutionCore):
         number_patterns = self.get_number_bars_patterns()
         number_products_per_pattern = self.get_number_products_per_pattern()
         total_number_cut_products = SuperDict()
-        for (bar, pattern, product) in number_products_per_pattern.keys_tl():
+        for bar, pattern, product in number_products_per_pattern.keys_tl():
             if product not in total_number_cut_products.keys():
                 total_number_cut_products[product] = (
                     number_products_per_pattern[(bar, pattern, product)]

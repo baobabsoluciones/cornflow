@@ -16,7 +16,7 @@ from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
     INSTANCE_PATH,
-    EMPTY_INSTANCE_PATH
+    EMPTY_INSTANCE_PATH,
 )
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from flask import current_app

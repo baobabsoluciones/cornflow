@@ -1,6 +1,7 @@
 """
 Initialization file for the models module
 """
+
 from .action import ActionModel
 from .apiview import ApiViewModel
 from .case import CaseModel

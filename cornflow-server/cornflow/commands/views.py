@@ -1,4 +1,3 @@
-
 # Imports from external libraries
 from flask import current_app
 from importlib import import_module
@@ -14,6 +13,7 @@ def register_views_command(external_app: str = None, verbose: bool = False):
 
     if external_app is None:
         from cornflow.endpoints import resources, alarms_resources
+
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources

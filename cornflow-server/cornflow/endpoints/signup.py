@@ -1,6 +1,7 @@
 """
 External endpoint for the user to signup
 """
+
 # Import from libraries
 from flask import current_app
 from flask_apispec import use_kwargs, doc
@@ -57,14 +58,12 @@ class SignUpEndpoint(BaseMetaResource):
         if auth_type == AUTH_LDAP:
             err = "The user has to sign up on the active directory"
             raise EndpointNotImplemented(
-                err,
-                log_txt="Error while user tries to sign up. " + err
+                err, log_txt="Error while user tries to sign up. " + err
             )
         elif auth_type == AUTH_OID:
             err = "The user has to sign up with the OpenID protocol"
             raise EndpointNotImplemented(
-                err,
-                log_txt="Error while user tries to sign up. " + err
+                err, log_txt="Error while user tries to sign up. " + err
             )
 
         user = self.data_model(kwargs)
@@ -72,14 +71,13 @@ class SignUpEndpoint(BaseMetaResource):
         if user.check_username_in_use():
             raise InvalidCredentials(
                 error="Username already in use, please supply another username",
-                log_txt="Error while user tries to sign up. Username already in use."
-
+                log_txt="Error while user tries to sign up. Username already in use.",
             )
 
         if user.check_email_in_use():
             raise InvalidCredentials(
                 error="Email already in use, please supply another email address",
-                log_txt="Error while user tries to sign up. Email already in use."
+                log_txt="Error while user tries to sign up. Email already in use.",
             )
 
         user.save()
@@ -94,8 +92,9 @@ class SignUpEndpoint(BaseMetaResource):
             token = self.auth_class.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
-                error="Error in generating user token: " + str(e), status_code=400,
-                log_txt="Error while user tries to sign up. Unable to generate token."
+                error="Error in generating user token: " + str(e),
+                status_code=400,
+                log_txt="Error while user tries to sign up. Unable to generate token.",
             )
         current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201

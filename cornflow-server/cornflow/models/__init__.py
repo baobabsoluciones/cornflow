@@ -1,6 +1,7 @@
 """
 Initialization file for the models module
 """
+
 from .action import ActionModel
 from .alarms import AlarmsModel
 from .case import CaseModel

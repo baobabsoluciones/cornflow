@@ -1,8 +1,5 @@
 from ..core import Experiment, Solution
-from cornflow_client.constants import (
-    STATUS_FEASIBLE,
-    SOLUTION_STATUS_FEASIBLE
-)
+from cornflow_client.constants import STATUS_FEASIBLE, SOLUTION_STATUS_FEASIBLE
 
 
 class Algorithm(Experiment):
@@ -56,7 +53,4 @@ class Algorithm(Experiment):
         # we close the last route:
         solution[route].append(depot)
         self.solution = Solution(dict(routes=solution))
-        return dict(
-            status=STATUS_FEASIBLE,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=STATUS_FEASIBLE, status_sol=SOLUTION_STATUS_FEASIBLE)

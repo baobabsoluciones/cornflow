@@ -1,6 +1,7 @@
 """
 This file contains the decorator used for the authentication
 """
+
 from functools import wraps
 from .auth import Auth
 from cornflow.shared.exceptions import InvalidCredentials

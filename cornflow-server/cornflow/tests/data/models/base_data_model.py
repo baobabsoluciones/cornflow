@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 # Import from internal modules
 from cornflow.shared import db
 from cornflow.models.meta_models import TraceAttributesModel

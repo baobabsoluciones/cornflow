@@ -14,6 +14,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 def register_base_permissions_command(external_app: str = None, verbose: bool = False):
     if external_app is None:
         from cornflow.endpoints import resources, alarms_resources
+
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources

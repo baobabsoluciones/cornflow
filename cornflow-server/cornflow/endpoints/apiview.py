@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import ViewModel

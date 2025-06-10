@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from flask import current_app
 from sqlalchemy import desc

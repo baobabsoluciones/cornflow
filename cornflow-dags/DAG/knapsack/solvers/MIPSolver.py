@@ -16,7 +16,7 @@ from cornflow_client.constants import (
     STATUS_TIME_LIMIT,
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
-    PYOMO_STOP_MAPPING
+    PYOMO_STOP_MAPPING,
 )
 
 
@@ -74,7 +74,7 @@ class MIPSolver(Experiment):
         model = self.get_knapsack_model()
         model_instance = model.create_instance(data)
 
-        solver_name = config.get("solver","cbc")
+        solver_name = config.get("solver", "cbc")
         if "." in solver_name:
             _, solver_name = solver_name.split(".")
 
@@ -89,15 +89,13 @@ class MIPSolver(Experiment):
         if status in ["error", "unknown", "warning"]:
             self.log += "Infeasible, check data \n"
             return dict(
-                status=termination_condition,
-                status_sol=SOLUTION_STATUS_INFEASIBLE
+                status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
             )
         elif status == "aborted":
             self.log += "Aborted \n"
             if termination_condition != STATUS_TIME_LIMIT:
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
 
         self.solution.data["include"] = [
@@ -107,7 +105,4 @@ class MIPSolver(Experiment):
         ]
         self.log += "Solving complete\n"
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=termination_condition, status_sol=SOLUTION_STATUS_FEASIBLE)

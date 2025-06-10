@@ -2,6 +2,7 @@
 Endpoints to manage the roles of the application and the assignation fo roles to users.
 Some of this endpoints are disable in case that the authentication is not performed over AUTH DB
 """
+
 # Import from libraries
 from flask import current_app
 from flask_apispec import doc, marshal_with, use_kwargs
@@ -64,7 +65,7 @@ class RolesListEndpoint(BaseMetaResource):
             raise EndpointNotImplemented(
                 err,
                 log_txt=f"Error while user {self.get_user()} tries to create "
-                        f"a new role through the endpoint. " + err
+                f"a new role through the endpoint. " + err,
             )
         current_app.logger.info(f"User {self.get_user()} creates a new role")
         return self.post_list(kwargs)
@@ -118,7 +119,7 @@ class RoleDetailEndpoint(BaseMetaResource):
             raise EndpointNotImplemented(
                 err,
                 log_txt=f"Error while user {self.get_user()} tries to edit "
-                        f"a role through the endpoint. " + err
+                f"a role through the endpoint. " + err,
             )
         current_app.logger.info(f"User {self.get_user()} edits role {idx}")
         return self.put_detail(kwargs, idx=idx, track_user=False)
@@ -142,5 +143,6 @@ class RoleDetailEndpoint(BaseMetaResource):
         err = "Roles can not be deleted"
         raise EndpointNotImplemented(
             err,
-            log_txt=f"Error while user {self.get_user()} tries to delete a role. " + err
+            log_txt=f"Error while user {self.get_user()} tries to delete a role. "
+            + err,
         )

@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from functools import partial
 

@@ -1,6 +1,5 @@
-"""
+""" """
 
-"""
 # Imports from external libraries
 from flask_apispec import marshal_with, doc
 from flask import current_app

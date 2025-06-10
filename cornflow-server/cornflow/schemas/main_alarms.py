@@ -1,6 +1,7 @@
 """
 This file contains the schemas used for the table main_alarms defined in the application None
 """
+
 from marshmallow import fields, Schema
 
 

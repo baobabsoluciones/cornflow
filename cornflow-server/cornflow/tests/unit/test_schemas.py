@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 # General imports
 import unittest

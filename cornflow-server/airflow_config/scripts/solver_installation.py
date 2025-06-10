@@ -14,6 +14,7 @@ default_solvers = "HiGHS,CBC,gurobi"
 # list of solvers that will be installed
 solver_list = os.getenv("SOLVER_LIST", default_solvers).split(",")
 
+
 def install(s):
     if s in "CBC":
         get_cbc.install()

@@ -20,7 +20,7 @@ def install():
     try:
 
         solver_dir = os.getenv("SOLVER_DIR")
-        install_dir = solver_dir+"/gurobi"
+        install_dir = solver_dir + "/gurobi"
         os.chdir(solver_dir)
         subprocess.check_output(
             ["wget", "https://packages.gurobi.com/12.0/gurobi12.0.1_linux64.tar.gz"]
@@ -39,7 +39,7 @@ def install():
         output_gurobi_install = gurobi_install.stdout
         print(output_gurobi_install)
 
-    except (error):
+    except error:
 
         print(error)
 

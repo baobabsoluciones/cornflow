@@ -57,8 +57,6 @@ class BaseDAGTests:
                 case_name = test_case.get("name")
                 case_description = test_case.get("description", "No description")
 
-                marshm = SchemaManager(self.app.instance.schema).jsonschema_to_flask()
-                marshm().load(instance_data)
                 if solution_data is not None:
                     (
                         solution_test,
@@ -281,3 +279,12 @@ class TimerTestCase(BaseDAGTests.SolvingTests):
 
         self.app = Timer()
         self.config.update(dict(solver="default", seconds=10))
+
+
+class TestVariousTypesTestCase(BaseDAGTests.SolvingTests):
+    def setUp(self):
+        super().setUp()
+        from tests.data.auto_scripts.two_valid_types import TwoValidTypes
+
+        self.app = TwoValidTypes()
+        self.config["solver"] = self.app.get_default_solver_name()
