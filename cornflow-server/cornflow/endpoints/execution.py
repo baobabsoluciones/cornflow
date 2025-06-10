@@ -143,9 +143,6 @@ class ExecutionEndpoint(BaseMetaResource):
 
         config = current_app.config
 
-        if "schema" not in kwargs:
-            kwargs["schema"] = "solve_model_dag"
-
         execution, _ = self.post_list(data=kwargs)
         instance = InstanceModel.get_one_object(
             user=self.get_user(), idx=execution.instance_id
@@ -298,9 +295,6 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
-
-        if "schema" not in kwargs:
-            kwargs["schema"] = "solve_model_dag"
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx

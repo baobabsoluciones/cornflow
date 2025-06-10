@@ -42,7 +42,7 @@ class ExecutionSchema(Schema):
     instance_id = fields.Str(required=True)
     name = fields.Str()
     description = fields.Str()
-    schema = fields.Str(required=False)
+    schema = fields.Str(required=True)
     dag_run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
@@ -66,7 +66,7 @@ class ExecutionRequest(Schema):
     name = fields.Str(required=True)
     description = fields.Str(required=False)
     instance_id = fields.Str(required=True)
-    schema = fields.Str(required=False)
+    schema = fields.Str(required=True)
     data = fields.Raw(required=False)
 
 
