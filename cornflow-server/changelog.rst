@@ -1,3 +1,13 @@
+version 1.2.3
+--------------
+
+- released: 2025-06-10
+- description: Bug fixes for permissions management and view handling
+- changelog:
+    - Fixed view modification functionality that was not properly updating URL rules and endpoint configurations.
+    - Resolved permission deletion issues where orphaned permissions were not being correctly removed from the database.
+    - Enhanced custom roles functionality to work properly with external applications. For detailed configuration information, please refer to the Cornflow documentation.
+
 version 1.2.2
 --------------
 
