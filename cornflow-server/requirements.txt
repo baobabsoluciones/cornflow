@@ -2,7 +2,7 @@ alembic==1.9.2
 apispec<=6.3.0
 cachetools==5.3.3
 click<=8.1.7
-cornflow-client>=1.2.2
+cornflow-client>=1.2.3
 cryptography<=44.0.1
 disposable-email-domains>=0.0.86
 Flask==2.3.2
