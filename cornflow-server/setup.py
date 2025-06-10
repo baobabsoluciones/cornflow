@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow",
-    version="1.2.3.a4",
+    version="1.2.3.a5",
     author="baobab soluciones",
     author_email="cornflow@baobabsoluciones.es",
     description="cornflow is an open source multi-solver optimization server with a REST API built using flask.",

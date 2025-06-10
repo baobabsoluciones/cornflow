@@ -30,7 +30,7 @@ x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/airflow:release-v1.2.3.a4
+    image: baobabsoluciones/airflow:release-v1.2.3.a5
     platform: linux/amd64
     #build: 
       #context: ./cornflow-server/airflow_config
@@ -64,7 +64,7 @@ x-cornflow-common:
   &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/cornflow:release-v1.2.3.a4
+    image: baobabsoluciones/cornflow:release-v1.2.3.a5
     platform: linux/amd64
     #build: 
       #context: ./cornflow-server

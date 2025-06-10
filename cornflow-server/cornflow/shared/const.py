@@ -1,7 +1,7 @@
 """
 In this file we import the values for different constants on cornflow server
 """
-CORNFLOW_VERSION = "1.2.3.a4"
+CORNFLOW_VERSION = "1.2.3.a5"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
