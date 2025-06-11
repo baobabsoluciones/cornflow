@@ -264,7 +264,7 @@ def detect_memory_error_from_logs(log_file_path):
     Reads possible memory error messages from the log file.
 
     :param log_file_path: the path to the log file
-    :return:
+    :return: True if a memory error is detected, False otherwise
     """
     if not os.path.exists(log_file_path):
         return False
@@ -272,6 +272,7 @@ def detect_memory_error_from_logs(log_file_path):
     with open(log_file_path, 'r') as f:
         log_content = f.read()
 
+    # Possible patterns that indicate a memory error
     memory_error_patterns = [
         "MemoryError",
         "Out of memory",
@@ -288,6 +289,13 @@ def detect_memory_error_from_logs(log_file_path):
     return any(pattern in log_content for pattern in memory_error_patterns)
 
 def construct_log_path(ti, base_log_folder):
+    """
+    Constructs the path to the log file for a given task instance.
+
+    :param ti: Task instance object
+    :param base_log_folder: Base log folder path from Airflow configuration
+    :return: Full path to the log file
+    """
     return os.path.join(
         base_log_folder,
         f"{ti.dag_id}",
