@@ -19,6 +19,7 @@ EXEC_STATE_NOT_RUN = -4
 EXEC_STATE_UNKNOWN = -5
 EXEC_STATE_SAVING = -6
 EXEC_STATE_QUEUED = -7
+EXEC_STATE_MEMORY_ERROR = -8
 
 EXECUTION_STATE_MESSAGE_DICT = {
     EXEC_STATE_CORRECT: "The execution has been solved correctly.",
@@ -31,6 +32,7 @@ EXECUTION_STATE_MESSAGE_DICT = {
     EXEC_STATE_SAVING: "The execution executed ok but failed while saving it.",
     EXEC_STATE_MANUAL: "The execution was loaded manually.",
     EXEC_STATE_QUEUED: "The execution is currently queued.",
+    EXEC_STATE_MEMORY_ERROR: "The execution has run out of memory.",
 }
 
 # derived constants
