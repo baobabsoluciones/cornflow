@@ -232,16 +232,69 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client.update_status(exec_id, {"status": -1})
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(e)
-    except Exception as e:
+    except MemoryError as e:
+        # Python MemoryError is raised when the process runs out of memory.
         if config.get("msg", True):
-            print("Some unknown error happened")
+            print("Memory error detected")
         # We reconnect in case the solver has been more than 24 hours solving before the error is raised
         client = connect_to_cornflow(secrets)
-        try_to_save_error(client, exec_id, -1)
-        client.update_status(exec_id, {"status": -1})
+        try_to_save_error(client, exec_id, -8)
+        client.update_status(exec_id, {"status": -8})
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        raise AirflowDagException(f"The execution ran out of memory: {e}")
+    except Exception as e:
+        if config.get("msg", True):
+            print("Some error happened")
+        # We reconnect in case the solver has been more than 24 hours solving before the error is raised
+        client = connect_to_cornflow(secrets)
+        log_file = construct_log_path(ti, base_log_folder)
+        if detect_memory_error_from_logs(log_file):
+            try_to_save_error(client, exec_id, -8)
+            client.update_status(exec_id, {"status": -8})
+        else:
+            try_to_save_error(client, exec_id, -1)
+            client.update_status(exec_id, {"status": -1})
+
         try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
         raise AirflowDagException(f"There was an error during the solving: {e}")
 
+
+def detect_memory_error_from_logs(log_file_path):
+    """
+    Reads possible memory error messages from the log file.
+
+    :param log_file_path: the path to the log file
+    :return:
+    """
+    if not os.path.exists(log_file_path):
+        return False
+
+    with open(log_file_path, 'r') as f:
+        log_content = f.read()
+
+    memory_error_patterns = [
+        "MemoryError",
+        "Out of memory",
+        "Cannot allocate memory",
+        "Memory limit exceeded",
+        "OOM killed",
+        "Killed",
+        "OOMKilled",
+        "out of memory",
+        "The node was low on resource: memory",
+        "Container was terminated due to OOM"
+    ]
+
+    return any(pattern in log_content for pattern in memory_error_patterns)
+
+def construct_log_path(ti, base_log_folder):
+    return os.path.join(
+        base_log_folder,
+        f"{ti.dag_id}",
+        f"{ti.task_id}",
+        f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
+        f"{ti.try_number}.log",
+    )
 
 def cf_check(fun, dag_name, secrets, **kwargs):
     """
