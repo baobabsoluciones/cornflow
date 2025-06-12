@@ -54,11 +54,13 @@ class TestDagUtilities(unittest.TestCase):
         self.ti = TI()
         self.ti.dag_id = "test_dag"
         self.ti.task_id = "test_task"
-        self.ti.run_id = "manual__2025-06-12T00:00:00"
+        self.ti.run_id = "manual__2025-06-12T00-00-00"
         self.ti.try_number = 1
 
         # Construct expected log path
         self.log_path = du.construct_log_path(self.ti, self.base_log)
+        self.ti.log_filepath = self.log_path
+
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
 
@@ -86,12 +88,11 @@ class TestDagUtilities(unittest.TestCase):
             self.base_log,
             "test_dag",
             "test_task",
-            "2025-06-12T00:00:00",
+            "2025-06-12T00-00-00",
             "1.log"
         )
         self.assertEqual(expected, du.construct_log_path(self.ti, self.base_log))
 
-    @patch('airflow.configuration.conf.get')
     @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('airflow.secrets.environment_variables.EnvironmentVariablesBackend')
     @patch('cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs')
@@ -124,7 +125,6 @@ class TestDagUtilities(unittest.TestCase):
         self.assertEqual(kwargs['id'], 'exec123')
         self.assertIn('log_text', kwargs['payload'])
 
-    @patch('airflow.configuration.conf.get')
     @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('airflow.secrets.environment_variables.EnvironmentVariablesBackend')
     @patch('cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs')

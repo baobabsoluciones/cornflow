@@ -410,7 +410,6 @@ def callback_email(context):
 
 def callback_on_task_failure(context):
     from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-    from airflow.configuration import conf as airflow_conf
 
     """
     Airflow Scheduler callbacks always TaskInstance fails,
@@ -425,8 +424,7 @@ def callback_on_task_failure(context):
     if not exec_id:
         return
 
-    base_log_folder = airflow_conf.get("logging", "base_log_folder")
-    log_file_path = construct_log_path(ti, base_log_folder)
+    log_file_path = ti.log_filepath
 
     try:
         oom = detect_memory_error_from_logs(log_file_path)
