@@ -166,9 +166,32 @@ class ExperimentCore(ABC):
         raise NotImplementedError()
 
     @staticmethod
+    def get_solver_name(config: dict, default_solver: str = "cbc") -> str:
+        """
+        Get the name of the solver used to solve the problem.
+
+        :param config: dict config argument of the solver method
+        :param default_solver: str default solver to use if none is present in config.
+        :return: the solver name.
+        """
+        solver = config.get("solver", "unknown")
+
+        if "." in solver:
+            solver = solver.split(".")[1]
+
+        solver = SOLVER_CONVERTER.get(solver)
+
+        if solver is None:
+            print(
+                "The solver doesn't correspond to any solver in the parameters mapping. "
+                f"Default solver {default_solver} will be used."
+            )
+            solver = default_solver
+
+    @staticmethod
     def get_solver_config(
         config, lib="pyomo", default_solver="cbc", remove_unknown=False
-    ) -> Tuple[str, dict]:
+    ) -> dict:
         """
         Format the configuration used to solve the problem.
         Solver configuration can either be directly in config using cornflow mapping name
@@ -186,22 +209,11 @@ class ExperimentCore(ABC):
         :param default_solver: str default solver to use if none is present inf config.
         :param remove_unknown: bool. if True, the unknown parameters will be deleted. Otherwise, they will remain
             but will not be translated.
-        :return: the solver name and the config dict.
+        :return: the config dict.
         """
         mapping = PARAMETER_SOLVER_TRANSLATING_MAPPING
-        solver = config.get("solver", "unknown")
 
-        if "." in solver:
-            solver = solver.split(".")[1]
-
-        solver = SOLVER_CONVERTER.get(solver)
-
-        if solver is None:
-            print(
-                "The solver doesn't correspond to any solver in the parameters mapping. "
-                f"Default solver {default_solver} will be used."
-            )
-            solver = default_solver
+        solver = ExperimentCore.get_solver_name(config, default_solver)
 
         if remove_unknown:
             conf = {
@@ -228,4 +240,4 @@ class ExperimentCore(ABC):
                     }
                 )
 
-        return solver, conf
+        return conf
