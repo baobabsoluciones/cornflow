@@ -188,6 +188,8 @@ class ExperimentCore(ABC):
             )
             solver = default_solver
 
+        return solver
+
     @staticmethod
     def get_solver_config(
         config, lib="pyomo", default_solver="cbc", remove_unknown=False
