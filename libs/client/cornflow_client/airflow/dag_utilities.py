@@ -408,6 +408,49 @@ def callback_email(context):
     )
 
 
+def callback_on_task_failure(context):
+    from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+    from airflow.configuration import conf as airflow_conf
+
+    """
+    Airflow Scheduler callbacks always TaskInstance fails,
+    even by OOM (SIGKILL) worker's death.
+    """
+    ti = context.get("ti")
+    dag_run = context.get("dag_run")
+    if not ti or not dag_run or not dag_run.conf:
+        return
+
+    exec_id = dag_run.conf.get("exec_id")
+    if not exec_id:
+        return
+
+    base_log_folder = airflow_conf.get("logging", "base_log_folder")
+    log_file_path = construct_log_path(ti, base_log_folder)
+
+    try:
+        oom = detect_memory_error_from_logs(log_file_path)
+    except Exception:
+        oom = False
+
+    code = -8 if oom else -1
+
+    try:
+        secrets = EnvironmentVariablesBackend()
+        client = connect_to_cornflow(secrets)
+        client.update_status(exec_id, {"status": code})
+
+        with open(log_file_path, "r") as f:
+            snippet = f.read(10_000)
+        client.raw.put_api_for_id(
+            "dag/",
+            id=exec_id,
+            payload={"log_text": snippet},
+        )
+    except CornFlowApiError as err:
+        ti.log.error(f"[callback_on_task_failure] fail to notify state {code}: {err}")
+
+
 class NoSolverException(Exception):
     pass
 
