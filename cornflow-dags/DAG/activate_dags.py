@@ -30,12 +30,22 @@ def create_dag(app):
     with dag:
         notify = getattr(app, "notify", True)
         if not notify:
-            PythonOperator(task_id=app.name, python_callable=solve)
+            PythonOperator(task_id=app.name,
+                           python_callable=solve,
+                           provide_context=True,
+                           on_failure_callback=utils.callback_on_task_failure,
+            )
         else:
+
+            # Define a failure callback that handles both task failure and email notification
+            def failure_and_email(context):
+                utils.callback_on_task_failure(context)
+                utils.callback_email(context)
+
             PythonOperator(
                 task_id=app.name,
                 python_callable=solve,
-                on_failure_callback=utils.callback_email,
+                on_failure_callback=failure_and_email,
             )
 
     return dag
