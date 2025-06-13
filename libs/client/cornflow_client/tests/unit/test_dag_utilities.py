@@ -93,15 +93,17 @@ class TestDagUtilities(unittest.TestCase):
         )
         self.assertEqual(expected, du.construct_log_path(self.ti, self.base_log))
 
-    @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('airflow.secrets.environment_variables.EnvironmentVariablesBackend')
+    @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs')
-    def test_callback_on_task_failure_oom(self, mock_detect, mock_env, mock_connect):
+    def test_callback_on_task_failure_oom(self, mock_detect, mock_connect, mock_env_backend):
         # Simulate OOM detection
         mock_detect.return_value = True
         # Prepare client mock
         client = Mock()
         mock_connect.return_value = client
+
+        mock_env_backend.return_value.get_conn_value.return_value =  "cornflow://some_test_user:very_classified_password@devsm.cornflow.baobabsoluciones.app"
 
         # Write a dummy log
         with open(self.log_path, 'w') as f:
@@ -125,15 +127,17 @@ class TestDagUtilities(unittest.TestCase):
         self.assertEqual(kwargs['id'], 'exec123')
         self.assertIn('log_text', kwargs['payload'])
 
-    @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('airflow.secrets.environment_variables.EnvironmentVariablesBackend')
+    @patch('cornflow_client.airflow.dag_utilities.connect_to_cornflow')
     @patch('cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs')
-    def test_callback_on_task_failure_generic(self, mock_detect, mock_env, mock_connect):
+    def test_callback_on_task_failure_generic(self, mock_detect, mock_connect, mock_env_backend):
         # Simulate no OOM detection
         mock_detect.return_value = False
         # Prepare client mock
         client = Mock()
         mock_connect.return_value = client
+
+        mock_env_backend.return_value.get_conn_value.return_value =  "cornflow://some_test_user:very_classified_password@devsm.cornflow.baobabsoluciones.app"
 
         # Write a dummy log
         with open(self.log_path, 'w') as f:
