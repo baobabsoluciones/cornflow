@@ -162,5 +162,26 @@ class TestDagUtilities(unittest.TestCase):
         # Should not raise
         du.callback_on_task_failure(context)
 
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    @patch("cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs")
+    def test_cf_solve_memory_error(self, mock_detect_memory_error, mock_connect_to_cornflow):
+        # Mock configuration
+        mock_detect_memory_error.return_value = True
+        mock_client = Mock()
+        mock_connect_to_cornflow.return_value = mock_client
+
+        secrets = Mock()
+        ti = Mock()
+        ti.log_filepath = self.log_path
+        dag_run = Mock()
+        dag_run.conf = {"exec_id": "test_exec_id"}
+        kwargs = {"ti": ti, "dag_run": dag_run, "conf": {"logging": self.base_log}}
+
+        with self.assertRaises(du.AirflowDagException) as context:
+            du.cf_solve(lambda x, y, z: None, "test_dag", secrets, **kwargs)
+
+        self.assertIn("The execution ran out of memory", str(context.exception))
+        mock_client.update_status.assert_called_with("test_exec_id", {"status": -8})
+
 if __name__ == '__main__':
     unittest.main()

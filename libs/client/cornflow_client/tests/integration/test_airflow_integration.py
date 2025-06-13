@@ -82,3 +82,4 @@ class TestAirflowClient(TestCase):
         time.sleep(10)
         status = cf_client.get_status(execution_id=execution["id"])
         self.assertEqual(1, status["state"])
+
