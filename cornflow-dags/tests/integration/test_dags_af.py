@@ -5,6 +5,7 @@ import time
 import unittest
 
 from cornflow_client.airflow.api import Airflow
+from unittest.mock import patch
 
 prev_dir = os.path.join(os.path.dirname(__file__), "../DAG")
 sys.path.insert(1, prev_dir)
@@ -58,3 +59,31 @@ class DAGTests(unittest.TestCase):
         destination_folder = script_folder
         results = execute_scripts(script_folder, destination_folder)
         self.assertTrue(results)
+
+    @patch("cornflow_client.airflow.dag_utilities.detect_memory_error_from_logs")
+    def test_dag_memory_error_callback(self, mock_detect_memory_error):
+        # Simular detección de error de memoria
+        mock_detect_memory_error.return_value = True
+
+        # Configurar cliente de Airflow
+        client = Airflow(url="http://localhost:8080", user="admin", pwd="admin")
+
+        # Ejecutar el DAG
+        response = client.consume_dag_run(dag_name="test_memory_error_dag", payload={})
+        self.assertEqual(response.status_code, 200)
+        dag_run_id = response.json()["dag_run_id"]
+
+        # Esperar a que el DAG termine
+        finished = False
+        while not finished:
+            time.sleep(2)
+            status = client.get_dag_run_status("test_memory_error_dag", dag_run_id)
+            state = status.json()["state"]
+            finished = state != "running"
+
+        # Verificar que el callback se ejecutó correctamente
+        self.assertEqual(state, "failed")
+        exec_id = response.json().get("exec_id", None)
+        self.assertIsNotNone(exec_id)
+        variable = client.get_one_variable(exec_id)
+        self.assertEqual(variable["status"], -8)
