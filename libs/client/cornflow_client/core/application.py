@@ -264,9 +264,9 @@ class ApplicationCore(ABC):
         # Perform data checks only if a valid solution dict was obtained
         # and the solver implements data_checks
         if final_sol_dict:  # Checks for non-None and non-empty dict
-            try:
+            if hasattr(algo, "data_checks"):
                 solution_checks = algo.data_checks()
-            except AttributeError:
+            else:
                 # Solver doesn't implement data_checks, which is acceptable.
                 solution_checks = None
 
