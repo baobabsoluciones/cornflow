@@ -390,7 +390,7 @@ class TestExperimentCore(TestCase):
         """testing the function get_solver_config when the argument remove_unknown is True"""
         config = dict(
             solver="milp_solver.gurobi",
-            msg=True,
+            OutputFlag=True,
             abs_gap=5,
             solver_config=dict(time_limit=10 * 60, rel_gap=0.001,  additional = True)
         )
@@ -404,12 +404,12 @@ class TestExperimentCore(TestCase):
         """testing the function get_solver_config when the argument remove_unknown is False"""
         config = dict(
             solver= "milp_solver.gurobi",
-            msg=True,
+            OutputFlag=True,
             abs_gap=5,
             solver_config=dict(time_limit=10 * 60, rel_gap=0.001, additional = True),
         )
 
-        expected = {"TimeLimit": 600, "MIPGap": 0.001 ,"MIPGapAbs": 5, "additional":True, "msg" : True }
+        expected = {"TimeLimit": 600, "MIPGap": 0.001 ,"MIPGapAbs": 5, "additional":True, "OutputFlag" : True }
         result = self.class_to_use.get_solver_config(config, remove_unknown=False)
         msg = "if remove_unknown is false, unmapped argument should not be removed from config and solver_config"
         self.assertEqual(expected, result, msg=msg)
@@ -418,11 +418,11 @@ class TestExperimentCore(TestCase):
         """testing the function get_solver_config when the argument remove_unknown is False and solver_config does not exist"""
         config = dict(
             solver="milp_solver.gurobi",
-            msg=True,
+            OutputFlag=True,
             abs_gap=5,
         )
 
-        expected = {"MIPGapAbs": 5, "msg": True}
+        expected = {"MIPGapAbs": 5, "OutputFlag": True}
         result = self.class_to_use.get_solver_config(config, remove_unknown=False)
         msg = "if remove_unknown is false, unmapped argument should not be removed from config"
         self.assertEqual(expected, result, msg=msg)
@@ -431,7 +431,7 @@ class TestExperimentCore(TestCase):
         """testing the function get_solver_config when the argument remove_unknown is True and solver_config does not exist"""
         config = dict(
             solver="milp_solver.gurobi",
-            msg=True,
+            OutputFlag=True,
             abs_gap=5,
         )
 
