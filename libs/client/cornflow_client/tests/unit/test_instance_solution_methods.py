@@ -437,7 +437,7 @@ class TestExperimentCore(TestCase):
 
         expected = {"MIPGapAbs": 5}
         result = self.class_to_use.get_solver_config(config, remove_unknown=True)
-        msg = "if remove_unknown is false, unmapped argument should be removed from config"
+        msg = "if remove_unknown is true, unmapped argument should be removed from config"
         self.assertEqual(expected, result, msg=msg)
 
     def test_get_solver_config_empty(self):
@@ -461,6 +461,20 @@ class TestExperimentCore(TestCase):
         result = self.class_to_use.get_solver_config(config)
         msg = "only solver_config arguments has to be included"
         self.assertEqual(expected, result, msg=msg)
+
+    def test_cornflow_mapping(self):
+        """testing the function get_solver_config mapping msg to OutputFlag and abs_gap to MIPGapAbs"""
+        config = dict(
+            solver="milp_solver.gurobi",
+            msg=True,
+            abs_gap=5,
+        )
+
+        expected = {"MIPGapAbs": 5, "OutputFlag": True}
+        result = self.class_to_use.get_solver_config(config)
+        msg = "msg has to be mapped to OutputFlag and abs_gap to MIPGapAbs"
+        self.assertEqual(expected, result, msg=msg)
+
 
     def test_get_solver_config_pyomo_2(self):
         initial_config = {
