@@ -395,7 +395,7 @@ class TestExperimentCore(TestCase):
             solver_config=dict(time_limit=10 * 60, rel_gap=0.001,  additional = True)
         )
 
-        expected = {"TimeLimit": 600, "MIPGap": 0.001, "MIPGapAbs": 5, "additional": True}
+        expected = {"TimeLimit": 600, "MIPGap": 0.001, "MIPGapAbs": 5, "OutputFlag":True,  "additional": True}
         result = self.class_to_use.get_solver_config(config, remove_unknown=True)
         msg = "if remove_unknown is true, unmapped argument should be removed from config but not from solver_config"
         self.assertEqual(expected, result, msg=msg)
@@ -435,7 +435,7 @@ class TestExperimentCore(TestCase):
             abs_gap=5,
         )
 
-        expected = {"MIPGapAbs": 5}
+        expected = {"MIPGapAbs": 5, "OutputFlag":True}
         result = self.class_to_use.get_solver_config(config, remove_unknown=True)
         msg = "if remove_unknown is true, unmapped argument should be removed from config"
         self.assertEqual(expected, result, msg=msg)
