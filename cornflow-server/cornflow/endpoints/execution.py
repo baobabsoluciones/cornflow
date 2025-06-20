@@ -120,6 +120,12 @@ class ExecutionEndpoint(BaseMetaResource):
                 continue
 
             data = response.json()
+
+            """
+            log_file = construct_log_path(ti, base_log_folder)
+            if detect_memory_error_from_logs(log_file):    
+            """
+
             state = AIRFLOW_TO_STATE_MAP.get(data["state"], EXEC_STATE_UNKNOWN)
             execution.update_state(state)
 
