@@ -33,7 +33,7 @@ from cornflow.commands import (
 from cornflow.config import app_config
 from cornflow.endpoints import resources, alarms_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
-from cornflow.endpoints.signup import SignUpEndpoint
+from cornflow.endpoints.signup import SignUpEndpoint, SignUpAuthenticatedEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
 from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
@@ -94,9 +94,12 @@ def create_app(env_name="development", dataconn=None):
     auth_type = app.config["AUTH_TYPE"]
 
     if auth_type == AUTH_DB:
+        print(int(app.config["SIGNUP_ACTIVATED"]))
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
         if signup_activated == 1:
             api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
+        elif signup_activated == 2:
+            api.add_resource(SignUpAuthenticatedEndpoint, "/signup/", endpoint="signup")
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")
     elif auth_type == AUTH_LDAP:
         api.add_resource(LoginEndpoint, "/login/", endpoint="login")

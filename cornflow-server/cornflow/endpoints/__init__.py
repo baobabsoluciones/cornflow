@@ -4,6 +4,7 @@ All references to endpoints should be imported from here
 The login resource gets created on app startup as it depends on configuration
 """
 
+from flask import current_app
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
@@ -54,6 +55,7 @@ from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+from .signup import SignUpEndpoint, SignUpAuthenticatedEndpoint
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -237,3 +239,28 @@ alarms_resources = [
         endpoint="main-alarms",
     ),
 ]
+
+
+def get_resources():
+    """
+    Get the resources based on the configuration
+
+    :return: The resources based on the configuration
+    :rtype: list
+    """
+
+    signup_activated = int(current_app.config.get("SIGNUP_ACTIVATED", 0))
+    if signup_activated == 1:
+        resources.append(
+            dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup")
+        )
+    elif signup_activated == 2:
+        resources.append(
+            dict(
+                resource=SignUpAuthenticatedEndpoint,
+                urls="/signup/",
+                endpoint="signup",
+            )
+        )
+
+    return resources

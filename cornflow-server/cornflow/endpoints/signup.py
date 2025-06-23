@@ -9,8 +9,8 @@ from flask_apispec import use_kwargs, doc
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow.schemas.user import SignupRequest
-from cornflow.shared.authentication import Auth
-from cornflow.shared.const import AUTH_LDAP, AUTH_OID
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -99,3 +99,31 @@ class SignUpEndpoint(BaseMetaResource):
             )
         current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201
+
+class SignUpAuthenticatedEndpoint(SignUpEndpoint):
+    """
+    Endpoint used to sign up to the cornflow web server (authenticated).
+    """
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    def __init__(self):
+        super().__init__()
+        self.auth_class = Auth
+        self.user_role_association = UserRoleModel
+
+    @doc(description="Sign up (authenticated)", tags=["Users"])
+    @authenticate(auth_class=Auth())
+    @use_kwargs(SignupRequest, location="json")
+    def post(self, **kwargs):
+        """
+        API (POST) method to sign up to the cornflow webserver
+
+        :return: A dictionary with a message (either an error during signup or the generated token for the user session)
+          and an integer with the HTTP status code
+        :rtype: Tuple(dict, integer)
+        """
+        content, status = self.sign_up(**kwargs)
+
+        if int(current_app.config["OPEN_DEPLOYMENT"]) == 1:
+            PermissionsDAG.add_all_permissions_to_user(content["id"])
+
+        return content, status
