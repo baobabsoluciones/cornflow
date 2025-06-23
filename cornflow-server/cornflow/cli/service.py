@@ -361,9 +361,11 @@ def _start_application(external_application, environment, external_app_module=No
 
 def _register_ssh_host(host):
     if host is not None:
-        add_host = f"ssh-keyscan {host} >> /usr/src/app/.ssh/known_hosts"
-        config_ssh_host = f"echo Host {host} >> /usr/src/app/.ssh/config"
-        config_ssh_key = 'echo "   IdentityFile /usr/src/app/.ssh/id_rsa" >> /usr/src/app/.ssh/config'
+        add_host = f"ssh-keyscan {host} >> {MAIN_WD}/.ssh/known_hosts"
+        config_ssh_host = f"echo Host {host} >> {MAIN_WD}/.ssh/config"
+        config_ssh_key = (
+            'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
+        )
         os.system(add_host)
         os.system(config_ssh_host)
         os.system(config_ssh_key)
