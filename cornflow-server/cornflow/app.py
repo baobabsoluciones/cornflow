@@ -167,7 +167,7 @@ def create_base_user(username, email, password, verbose):
 @click.option("-v", "--verbose", is_flag=True, default=False)
 @with_appcontext
 def register_roles(verbose):
-    register_roles_command(verbose)
+    register_roles_command(verbose=verbose)
 
 
 @click.command("register_actions")
