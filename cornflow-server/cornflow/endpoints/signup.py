@@ -100,6 +100,7 @@ class SignUpEndpoint(BaseMetaResource):
         current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201
 
+
 class SignUpAuthenticatedEndpoint(SignUpEndpoint):
     """
     Endpoint used to sign up to the cornflow web server (authenticated).

@@ -4,6 +4,8 @@ Main file with the creation of the app logic
 
 # Full imports
 import os
+from logging.config import dictConfig
+
 import click
 
 # Partial imports
@@ -13,9 +15,8 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
-from logging.config import dictConfig
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.exceptions import NotFound
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 # Module imports
 from cornflow.commands import (
@@ -36,7 +37,7 @@ from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint, SignUpAuthenticatedEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
-from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID
+from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID, CONDITIONAL_ENDPOINTS
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
 
@@ -97,14 +98,22 @@ def create_app(env_name="development", dataconn=None):
         print(int(app.config["SIGNUP_ACTIVATED"]))
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
         if signup_activated == 1:
-            api.add_resource(SignUpEndpoint, "/signup/", endpoint="signup")
+            api.add_resource(
+                SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
+            )
         elif signup_activated == 2:
-            api.add_resource(SignUpAuthenticatedEndpoint, "/signup/", endpoint="signup")
-        api.add_resource(LoginEndpoint, "/login/", endpoint="login")
+            api.add_resource(
+                SignUpAuthenticatedEndpoint,
+                CONDITIONAL_ENDPOINTS["signup"],
+                endpoint="signup",
+            )
+        api.add_resource(
+            LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+        )
     elif auth_type == AUTH_LDAP:
-        api.add_resource(LoginEndpoint, "/login/", endpoint="login")
+        api.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login")
     elif auth_type == AUTH_OID:
-        api.add_resource(LoginOpenAuthEndpoint, "/login/", endpoint="login")
+        api.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login")
     else:
         raise ConfigurationError(
             error="Invalid authentication type",

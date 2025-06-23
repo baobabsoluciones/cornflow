@@ -5,6 +5,7 @@ The login resource gets created on app startup as it depends on configuration
 """
 
 from flask import current_app
+from cornflow.shared.const import CONDITIONAL_ENDPOINTS
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
@@ -249,18 +250,14 @@ def get_resources():
     :rtype: list
     """
 
-    signup_activated = int(current_app.config.get("SIGNUP_ACTIVATED", 0))
-    if signup_activated == 1:
-        resources.append(
-            dict(resource=SignUpEndpoint, urls="/signup/", endpoint="signup")
-        )
-    elif signup_activated == 2:
-        resources.append(
-            dict(
-                resource=SignUpAuthenticatedEndpoint,
-                urls="/signup/",
-                endpoint="signup",
+    registered_resources = current_app.view_functions.keys()
+    for resource in registered_resources:
+        if resource in CONDITIONAL_ENDPOINTS.keys():
+            resources.append(
+                dict(
+                    resource=current_app.view_functions[resource].view_class,
+                    urls=CONDITIONAL_ENDPOINTS[resource],
+                    endpoint=resource,
+                )
             )
-        )
-
     return resources

@@ -1,6 +1,7 @@
 """
 In this file we import the values for different constants on cornflow server
 """
+
 CORNFLOW_VERSION = "1.2.3"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
@@ -121,3 +122,9 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
+
+# Conditional endpoints
+CONDITIONAL_ENDPOINTS = {
+    "signup": "/signup/",
+    "login": "/login/",
+}
