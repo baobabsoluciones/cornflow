@@ -56,7 +56,6 @@ from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
-from .signup import SignUpEndpoint, SignUpAuthenticatedEndpoint
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),

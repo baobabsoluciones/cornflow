@@ -30,6 +30,7 @@ class SignUpEndpoint(BaseMetaResource):
         self.user_role_association = UserRoleModel
 
     @doc(description="Sign up", tags=["Users"])
+    @authenticate(auth_class=Auth(), optional_auth="SIGNUP_ACTIVATED", auth_list=[1])
     @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
         """
@@ -112,7 +113,7 @@ class SignUpAuthenticatedEndpoint(SignUpEndpoint):
         self.user_role_association = UserRoleModel
 
     @doc(description="Sign up (authenticated)", tags=["Users"])
-    @authenticate(auth_class=Auth())
+
     @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
         """

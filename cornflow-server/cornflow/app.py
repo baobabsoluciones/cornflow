@@ -97,23 +97,21 @@ def create_app(env_name="development", dataconn=None):
     if auth_type == AUTH_DB:
         print(int(app.config["SIGNUP_ACTIVATED"]))
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if signup_activated == 1:
+        if signup_activated in [1, 2]:
             api.add_resource(
                 SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
-            )
-        elif signup_activated == 2:
-            api.add_resource(
-                SignUpAuthenticatedEndpoint,
-                CONDITIONAL_ENDPOINTS["signup"],
-                endpoint="signup",
             )
         api.add_resource(
             LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
         )
     elif auth_type == AUTH_LDAP:
-        api.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login")
+        api.add_resource(
+            LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+        )
     elif auth_type == AUTH_OID:
-        api.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login")
+        api.add_resource(
+            LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+        )
     else:
         raise ConfigurationError(
             error="Invalid authentication type",
