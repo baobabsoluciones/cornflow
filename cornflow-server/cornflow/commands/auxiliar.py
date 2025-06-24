@@ -107,4 +107,3 @@ def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
             new_roles_to_add.append(new_role)
 
     return new_roles_to_add
-

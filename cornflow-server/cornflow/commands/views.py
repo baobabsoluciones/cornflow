@@ -5,6 +5,8 @@ from importlib import import_module
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
+from cornflow.endpoints import resources, alarms_resources
+
 from cornflow.endpoints import alarms_resources, get_resources
 
 # Imports from internal libraries
