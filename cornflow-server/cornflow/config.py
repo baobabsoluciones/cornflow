@@ -25,7 +25,7 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
-    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
+    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 2))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
     # If service user is allowed to log with username and password
