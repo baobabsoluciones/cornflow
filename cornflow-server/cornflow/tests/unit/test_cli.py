@@ -33,7 +33,7 @@ from cornflow.models import (
 from cornflow.models import UserModel
 from cornflow.shared import db
 from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.endpoints import alarms_resources, get_resources
 
 
 class CLITests(TestCase):
@@ -278,6 +278,7 @@ class CLITests(TestCase):
         - Correct number of views created
         - Database state after initialization
         """
+        resources = get_resources()
         runner = CliRunner()
         result = runner.invoke(cli, ["views", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -315,6 +316,7 @@ class CLITests(TestCase):
         - Correct number of actions, roles, views, and permissions
         - Database state after initialization
         """
+        resources = get_resources()
         runner = CliRunner()
         result = runner.invoke(cli, ["permissions", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
@@ -337,6 +339,7 @@ class CLITests(TestCase):
         - Correct setup of all permission components
         - Database state consistency
         """
+        resources = get_resources()
         runner = CliRunner()
         runner.invoke(cli, ["actions", "init", "-v"])
         runner.invoke(cli, ["roles", "init", "-v"])

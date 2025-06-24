@@ -119,6 +119,7 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    SIGNUP_ACTIVATED = 1  # Enable public signup for tests
 
 
 class TestingOpenAuth(Testing):
@@ -157,5 +158,5 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
-    "testing-root": TestingApplicationRoot
+    "testing-root": TestingApplicationRoot,
 }

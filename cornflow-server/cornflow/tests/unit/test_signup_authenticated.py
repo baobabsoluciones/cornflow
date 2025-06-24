@@ -23,7 +23,7 @@ class TestSignUpPublic(TestCase):
     """Test the public signup endpoint (SIGNUP_ACTIVATED=1)"""
 
     def create_app(self):
-        with patch("cornflow.config.DefaultConfig.SIGNUP_ACTIVATED", 1):
+        with patch("cornflow.config.Testing.SIGNUP_ACTIVATED", 1):
             app = create_app("testing")
         return app
 
