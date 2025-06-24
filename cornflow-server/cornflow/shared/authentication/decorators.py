@@ -25,7 +25,6 @@ def authenticate(auth_class: Auth, optional_auth: str = None, auth_list: list = 
         The decorator definition
 
         :param callable func: the function that gets decorated
-        :param optional_auth: the env variable that indicates if autentication should be activated
         """
 
         @wraps(func)
