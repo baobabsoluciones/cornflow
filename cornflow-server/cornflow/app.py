@@ -95,7 +95,6 @@ def create_app(env_name="development", dataconn=None):
     auth_type = app.config["AUTH_TYPE"]
 
     if auth_type == AUTH_DB:
-        print(int(app.config["SIGNUP_ACTIVATED"]))
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
         if signup_activated in [1, 2]:
             api.add_resource(
