@@ -12,8 +12,8 @@ import json
 
 # Import from internal modules
 from cornflow.app import create_app
-from cornflow.models import UserModel, UserRoleModel
-from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE
+from cornflow.models import UserModel, UserRoleModel, ViewModel, PermissionViewRoleModel
+from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE, POST_ACTION
 from cornflow.shared import db
 from cornflow.tests.const import SIGNUP_URL
 from cornflow.shared.authentication import Auth
@@ -214,3 +214,33 @@ class TestSignUpAuthenticated(TestCase):
         # Should return 400 Bad Request due to invalid token
         self.assertEqual(400, response.status_code)
         self.assertIn("error", response.json)
+
+    def test_signup_permissions_are_registered_in_database(self):
+        """Test that signup permissions are properly registered in the database"""
+        # Check that the signup endpoint exists in the views table
+        signup_view = ViewModel.query.filter_by(name="signup").first()
+        self.assertIsNotNone(
+            signup_view, "Signup endpoint should be registered in views table"
+        )
+        self.assertEqual("/signup/", signup_view.url_rule)
+
+        # Check that admin role has permissions for signup endpoint
+        admin_permissions = PermissionViewRoleModel.query.filter_by(
+            role_id=ADMIN_ROLE, api_view_id=signup_view.id
+        ).all()
+
+        # Admin should have POST permission for signup endpoint
+        self.assertGreater(
+            len(admin_permissions),
+            0,
+            "Admin should have permissions for signup endpoint",
+        )
+
+        # Verify that the permission is for POST action
+        post_permission = PermissionViewRoleModel.query.filter_by(
+            role_id=ADMIN_ROLE, api_view_id=signup_view.id, action_id=POST_ACTION
+        ).first()
+
+        self.assertIsNotNone(
+            post_permission, "Admin should have POST permission for signup endpoint"
+        )

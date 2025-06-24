@@ -34,7 +34,7 @@ from cornflow.commands import (
 from cornflow.config import app_config
 from cornflow.endpoints import resources, alarms_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
-from cornflow.endpoints.signup import SignUpEndpoint, SignUpAuthenticatedEndpoint
+from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
 from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID, CONDITIONAL_ENDPOINTS

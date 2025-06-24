@@ -248,15 +248,19 @@ def get_resources():
     :return: The resources based on the configuration
     :rtype: list
     """
-
+    base_resources = resources.copy()
     registered_resources = current_app.view_functions.keys()
     for resource in registered_resources:
         if resource in CONDITIONAL_ENDPOINTS.keys():
-            resources.append(
-                dict(
-                    resource=current_app.view_functions[resource].view_class,
-                    urls=CONDITIONAL_ENDPOINTS[resource],
-                    endpoint=resource,
+            # Check if the resource already exists
+            if resource not in [
+                present_resource["endpoint"] for present_resource in base_resources
+            ]:
+                base_resources.append(
+                    dict(
+                        resource=current_app.view_functions[resource].view_class,
+                        urls=CONDITIONAL_ENDPOINTS[resource],
+                        endpoint=resource,
+                    )
                 )
-            )
-    return resources
+    return base_resources
