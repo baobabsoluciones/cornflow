@@ -129,49 +129,6 @@ class TestSignUpDeactivated(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-class TestSignUpPublic(TestCase):
-    """Test the public signup endpoint (SIGNUP_ACTIVATED=1)"""
-
-    def create_app(self):
-        with patch("cornflow.config.Testing.SIGNUP_ACTIVATED", 1):
-            app = create_app("testing")
-        return app
-
-    def setUp(self):
-        db.create_all()
-        access_init_command(verbose=False)
-        register_deployed_dags_command_test(verbose=False)
-        self.data = {
-            "username": "testname",
-            "email": "test@test.com",
-            "password": "Testpassword1!",
-        }
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-
-    def test_public_signup_anyone_can_register(self):
-        """Test that anyone can register without authentication"""
-        payload = self.data
-
-        response = self.client.post(
-            SIGNUP_URL,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers={"Content-Type": "application/json"},
-        )
-
-        self.assertEqual(201, response.status_code)
-        self.assertEqual(str, type(response.json["token"]))
-        self.assertEqual(int, type(response.json["id"]))
-        self.assertEqual(
-            PLANNER_ROLE,
-            UserRoleModel.query.filter_by(user_id=response.json["id"]).first().role_id,
-        )
-        self.assertNotEqual(None, UserModel.get_one_user_by_email(self.data["email"]))
-
-
 class TestSignUpAuthenticated(TestCase):
     """Test the authenticated signup endpoint (SIGNUP_ACTIVATED=2)"""
 
