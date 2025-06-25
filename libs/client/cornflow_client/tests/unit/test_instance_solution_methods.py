@@ -429,9 +429,10 @@ class TestExperimentCore(TestCase):
             solver="milp_solver.gurobi",
             msg=True,
             abs_gap=5,
+            additional=True,
         )
 
-        expected = {"MIPGapAbs": 5, "OutputFlag": True}
+        expected = {"MIPGapAbs": 5, "OutputFlag": True, "additional": True}
         result = self.class_to_use.get_solver_config(config, remove_unknown=False)
         msg = "if remove_unknown is false, unmapped argument should not be removed from config"
         self.assertEqual(expected, result, msg=msg)
@@ -442,9 +443,10 @@ class TestExperimentCore(TestCase):
             solver="milp_solver.gurobi",
             msg=True,
             abs_gap=5,
+            additional=True,
         )
 
-        expected = {"MIPGapAbs": 5}
+        expected = {"MIPGapAbs": 5, "OutputFlag": True}
         result = self.class_to_use.get_solver_config(config, remove_unknown=True)
         msg = (
             "if remove_unknown is true, unmapped argument should be removed from config"
