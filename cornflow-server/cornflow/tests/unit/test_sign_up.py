@@ -19,7 +19,7 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel, UserRoleModel, ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE, POST_ACTION
+from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE, POST_ACTION, NO_SIGNUP, SIGNUP_WITH_AUTH
 from cornflow.tests.const import SIGNUP_URL
 
 
@@ -102,7 +102,7 @@ class TestSignUp(TestCase):
 class TestSignUpDeactivated(TestCase):
     def create_app(self):
         app = create_app("testing")
-        app.config["SIGNUP_ACTIVATED"] = 0
+        app.config["SIGNUP_ACTIVATED"] = NO_SIGNUP
         return app
 
     def setUp(self):
@@ -130,10 +130,10 @@ class TestSignUpDeactivated(TestCase):
 
 
 class TestSignUpAuthenticated(TestCase):
-    """Test the authenticated signup endpoint (SIGNUP_ACTIVATED=2)"""
+    """Test the authenticated signup endpoint (SIGNUP_ACTIVATED=SIGNUP_WITH_AUTH)"""
 
     def create_app(self):
-        with patch("cornflow.config.Testing.SIGNUP_ACTIVATED", 2):
+        with patch("cornflow.config.Testing.SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH):
             app = create_app("testing")
         return app
 

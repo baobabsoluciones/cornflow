@@ -44,6 +44,13 @@ AIRFLOW_TO_STATE_MAP = dict(
     failed=EXEC_STATE_ERROR,
     queued=EXEC_STATE_QUEUED,
 )
+# SIGNUP OPTIONS
+# NO_SIGNUP: no signup endpoint
+# SIGNUP_WITH_NO_AUTH: signup endpoint with no auth
+# SIGNUP_WITH_AUTH: signup endpoint with auth
+NO_SIGNUP = 0
+SIGNUP_WITH_NO_AUTH = 1
+SIGNUP_WITH_AUTH = 2
 
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
@@ -127,3 +134,4 @@ CONDITIONAL_ENDPOINTS = {
     "signup": "/signup/",
     "login": "/login/",
 }
+

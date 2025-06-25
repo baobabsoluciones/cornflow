@@ -37,7 +37,14 @@ from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
-from cornflow.shared.const import AUTH_DB, AUTH_LDAP, AUTH_OID, CONDITIONAL_ENDPOINTS
+from cornflow.shared.const import (
+    AUTH_DB,
+    AUTH_LDAP,
+    AUTH_OID,
+    CONDITIONAL_ENDPOINTS,
+    SIGNUP_WITH_AUTH,
+    SIGNUP_WITH_NO_AUTH,
+)
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
 
@@ -96,7 +103,7 @@ def create_app(env_name="development", dataconn=None):
 
     if auth_type == AUTH_DB:
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if signup_activated in [1, 2]:
+        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
             api.add_resource(
                 SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
             )
