@@ -398,6 +398,7 @@ class TestExperimentCore(TestCase):
             "MIPGap": 0.001,
             "MIPGapAbs": 5,
             "additional": True,
+            "OutputFlag": True,
         }
         result = self.class_to_use.get_solver_config(config, remove_unknown=True)
         msg = "if remove_unknown is true, unmapped argument should be removed from config but not from solver_config"
