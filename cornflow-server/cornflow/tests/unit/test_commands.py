@@ -31,7 +31,7 @@ from cornflow.app import (
     register_views,
 )
 from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.endpoints import alarms_resources, get_resources
 from cornflow.models import (
     ActionModel,
     PermissionViewRoleModel,
@@ -98,6 +98,7 @@ class TestCommands(TestCase):
             "email": "testemail@test.org",
             "password": "Testpassword1!",
         }
+        resources = get_resources()
         self.resources = resources + alarms_resources
         self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v"])

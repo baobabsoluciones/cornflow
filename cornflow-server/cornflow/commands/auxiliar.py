@@ -3,7 +3,7 @@ from importlib import import_module
 
 from flask import current_app
 
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.endpoints import alarms_resources, get_resources
 from cornflow.models import RoleModel
 from cornflow.shared.const import (
     EXTRA_PERMISSION_ASSIGNATION,
@@ -17,6 +17,9 @@ def get_all_external(external_app):
     Get all resources, extra permissions, and custom roles actions.
     external_app: If provided, it will get the resources and extra permissions for the external app.
     """
+    # We get base and conditional resources
+    resources = get_resources()
+
     if external_app is None:
         resources_to_register = resources
         extra_permissions = EXTRA_PERMISSION_ASSIGNATION

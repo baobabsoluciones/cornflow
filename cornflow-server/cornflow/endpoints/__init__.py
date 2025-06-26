@@ -4,6 +4,8 @@ All references to endpoints should be imported from here
 The login resource gets created on app startup as it depends on configuration
 """
 
+from flask import current_app
+from cornflow.shared.const import CONDITIONAL_ENDPOINTS
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
@@ -237,3 +239,28 @@ alarms_resources = [
         endpoint="main-alarms",
     ),
 ]
+
+
+def get_resources():
+    """
+    Get the resources based on the configuration
+
+    :return: The resources based on the configuration
+    :rtype: list
+    """
+    base_resources = resources.copy()
+    registered_resources = current_app.view_functions.keys()
+    for resource in registered_resources:
+        if resource in CONDITIONAL_ENDPOINTS.keys():
+            # Check if the resource already exists
+            if resource not in [
+                present_resource["endpoint"] for present_resource in base_resources
+            ]:
+                base_resources.append(
+                    dict(
+                        resource=current_app.view_functions[resource].view_class,
+                        urls=CONDITIONAL_ENDPOINTS[resource],
+                        endpoint=resource,
+                    )
+                )
+    return base_resources
