@@ -11,7 +11,7 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow.schemas.user import SignupRequest
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE, SIGNUP_WITH_AUTH
+from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE, SIGNUP_WITH_NO_AUTH
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -36,7 +36,7 @@ class SignUpEndpoint(BaseMetaResource):
     @authenticate(
         auth_class=Auth(),
         optional_auth="SIGNUP_ACTIVATED",
-        auth_list=[SIGNUP_WITH_AUTH],
+        no_auth_list=[SIGNUP_WITH_NO_AUTH],
     )
     @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
