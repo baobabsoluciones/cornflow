@@ -53,12 +53,14 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)
 
     if len(permissions_to_register) > 0:
-        current_app.logger.info(f"Permissions registered: {permissions_to_register}")
+        current_app.logger.info(
+            f"Permissions registered: {len(permissions_to_register)}"
+        )
     else:
         current_app.logger.info("No new permissions to register")
 
     if len(permissions_to_delete) > 0:
-        current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
+        current_app.logger.info(f"Permissions deleted: {len(permissions_to_delete)}")
     else:
         current_app.logger.info("No permissions to delete")
 
@@ -296,7 +298,7 @@ def register_dag_permissions_command(
 
     if verbose:
         if len(permissions) > 1:
-            current_app.logger.info(f"DAG permissions registered: {permissions}")
+            current_app.logger.info(f"DAG permissions registered: {len(permissions)}")
         else:
             current_app.logger.info("No new DAG permissions")
 

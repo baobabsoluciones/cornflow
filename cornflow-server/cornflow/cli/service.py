@@ -36,6 +36,7 @@ from cornflow.shared.const import (
     ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
+    SIGNUP_WITH_AUTH,
 )
 from cornflow.shared import db
 from cryptography.fernet import Fernet
@@ -171,7 +172,7 @@ def _setup_environment_variables():
     os.environ["CORNFLOW_LOGGING"] = cornflow_logging
     open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
-    signup_activated = os.getenv("SIGNUP_ACTIVATED", 1)
+    signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
     user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
