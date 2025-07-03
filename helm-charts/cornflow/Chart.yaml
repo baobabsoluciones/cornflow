@@ -1,0 +1,17 @@
+apiVersion: v2
+name: cornflow
+description: A Helm chart for Cornflow - Open source optimization platform
+type: application
+version: 0.1.0
+appVersion: "1.2.3"
+keywords:
+  - optimization
+  - operations-research
+  - decision-ops
+home: https://github.com/baobabsoluciones/cornflow
+sources:
+  - https://github.com/baobabsoluciones/cornflow
+maintainers:
+  - name: Baobab Soluciones
+    email: cornflow@baobabsoluciones.es
+icon: https://raw.githubusercontent.com/baobabsoluciones/cornflow/main/docs/source/_static/logo.png 

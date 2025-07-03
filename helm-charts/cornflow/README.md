@@ -1,0 +1,346 @@
+# Cornflow Helm Chart
+
+This Helm chart deploys [Cornflow](https://github.com/baobabsoluciones/cornflow), an open-source optimization platform, to a Kubernetes cluster.
+
+## Description
+
+Cornflow is a platform that allows you to create, execute, and manage optimization problems easily and scalably. This chart includes:
+
+- **Cornflow API**: Main application service
+- **PostgreSQL**: Database for Cornflow
+- **Ingress**: Optional configuration for external access
+
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.0+
+- A configured Kubernetes cluster
+- An Ingress controller (optional, for external access)
+
+## Installation
+
+### Basic Installation
+
+```bash
+# Add the repository (if available)
+helm repo add cornflow https://baobabsoluciones.github.io/cornflow-helm
+
+# Install the chart
+helm install my-cornflow cornflow/cornflow
+```
+
+### Installation from Local Directory
+
+```bash
+# From the chart directory
+helm install my-cornflow ./helm-charts/cornflow
+```
+
+### Installation with Custom Values
+
+```bash
+# Install with the default values file
+helm install my-cornflow ./helm-charts/cornflow -f values-cornflow.yaml
+
+# Or create a custom values file with your overrides
+cat > my-overrides.yaml << EOF
+cornflow:
+  env:
+    SECRET_KEY: "my-very-secure-secret-key"
+    CORNFLOW_ADMIN_PWD: "my-admin-password"
+    CORNFLOW_SERVICE_PWD: "my-service-password"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: cornflow.mydomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+EOF
+
+# Install with custom overrides
+helm install my-cornflow ./helm-charts/cornflow -f values-cornflow.yaml -f my-overrides.yaml
+```
+
+## Configuration
+
+### Main Parameters
+
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `image.repository` | Cornflow image repository | `baobabsoluciones/cornflow` |
+| `image.tag` | Cornflow image tag | `release-v1.2.3` |
+| `cornflow.replicaCount` | Number of Cornflow replicas | `1` |
+| `postgresql.enabled` | Enable PostgreSQL for Cornflow | `true` |
+| `ingress.enabled` | Enable Ingress for Cornflow | `false` |
+
+### Database Configuration
+
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    username: "cornflow"
+    password: "cornflow"
+    database: "cornflow"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+```
+
+### Ingress Configuration
+
+```yaml
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: cornflow.mydomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cornflow-tls
+      hosts:
+        - cornflow.mydomain.com
+```
+
+### Resource Configuration
+
+```yaml
+cornflow:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+airflow:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+```
+
+### Persistence Configuration
+
+```yaml
+persistence:
+  enabled: true
+  storageClass: "fast-ssd"
+  size: 10Gi
+  accessMode: ReadWriteOnce
+```
+
+## Environment Variables
+
+### Core Application Variables
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `DATABASE_URL` | Database connection string | `postgresql://cornflow:cornflow@cornflow-postgresql:5432/cornflow` |
+| `SERVICE_NAME` | Application service name | `Cornflow` |
+| `SECRET_KEY` | Application secret key | `your-secret-key-here` |
+| `SECRET_BI_KEY` | BI secret key | `your-bi-secret-key-here` |
+| `AUTH_TYPE` | Authentication type (1=DB, 2=OID) | `1` |
+| `DEFAULT_ROLE` | Default user role | `2` (Planner) |
+| `CORS_ORIGINS` | CORS allowed origins | `*` |
+| `LOG_LEVEL` | Log level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR) | `20` |
+| `SIGNUP_ACTIVATED` | Enable user signup | `1` |
+| `CORNFLOW_SERVICE_USER` | Service user name | `service_user` |
+| `SERVICE_USER_ALLOW_PASSWORD_LOGIN` | Allow service user password login | `1` |
+| `OPEN_DEPLOYMENT` | Open deployment mode | `1` |
+| `USER_ACCESS_ALL_OBJECTS` | Planner access to other users' objects | `0` |
+| `TOKEN_DURATION` | Token duration in hours | `24` |
+| `PWD_ROTATION_TIME` | Password rotation time in days | `120` |
+
+### Authentication Variables
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `CORNFLOW_ADMIN_USER` | Admin user | `cornflow_admin` |
+| `CORNFLOW_ADMIN_PWD` | Admin password | `Cornflow_admin1234` |
+| `CORNFLOW_SERVICE_PWD` | Service user password | `Service_user1234` |
+
+### LDAP Configuration (for LDAP authentication)
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `LDAP_HOST` | LDAP server URL | `ldap://openldap:389` |
+| `LDAP_BIND_DN` | LDAP bind DN | `cn=admin,dc=example,dc=org` |
+| `LDAP_BIND_PASSWORD` | LDAP bind password | `admin` |
+| `LDAP_USERNAME_ATTRIBUTE` | Username attribute | `cn` |
+| `LDAP_USER_BASE` | User base DN | `ou=users,dc=example,dc=org` |
+| `LDAP_EMAIL_ATTRIBUTE` | Email attribute | `mail` |
+| `LDAP_GROUP_ATTRIBUTE` | Group attribute | `cn` |
+| `LDAP_GROUP_BASE` | Group base DN | `dc=example,dc=org` |
+
+### OpenID Connect Configuration (for OID authentication)
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `OID_PROVIDER` | OpenID provider URL | `` |
+| `OID_EXPECTED_AUDIENCE` | Expected audience | `` |
+
+### Email Configuration
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `SERVICE_EMAIL_ADDRESS` | Email address | `` |
+| `SERVICE_EMAIL_PASSWORD` | Email password | `` |
+| `SERVICE_EMAIL_SERVER` | SMTP server | `` |
+| `SERVICE_EMAIL_PORT` | SMTP port | `` |
+
+### Other Configuration
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `APPLICATION_ROOT` | Application root path | `/` |
+| `EXTERNAL_APP` | External app flag | `0` |
+| `CF_ALARMS_ENDPOINT` | Enable alarms endpoints | `0` |
+
+## Application Access
+
+### Without Ingress
+
+```bash
+# Port-forward for Cornflow
+kubectl port-forward svc/my-cornflow-cornflow 5000:5000
+```
+
+### With Ingress
+
+If you have enabled Ingress, you can access directly through the configured URLs.
+
+
+
+## Monitoring
+
+### Health Checks
+
+- **Cornflow**: `/healthcheck`
+
+### Logs
+
+```bash
+# Cornflow logs
+kubectl logs -f deployment/my-cornflow-cornflow
+
+# PostgreSQL logs
+kubectl logs -f deployment/my-cornflow-postgresql
+```
+
+## Scaling
+
+### Horizontal Scaling
+
+```bash
+# Scale Cornflow
+kubectl scale deployment my-cornflow-cornflow --replicas=3
+```
+
+### Autoscaling
+
+Enable HPA (Horizontal Pod Autoscaler):
+
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+```
+
+## Backup and Restoration
+
+### Database Backup
+
+```bash
+# Cornflow backup
+kubectl exec deployment/my-cornflow-postgresql -- pg_dump -U cornflow cornflow > cornflow_backup.sql
+```
+
+### Restoration
+
+```bash
+# Restore Cornflow
+kubectl exec -i deployment/my-cornflow-postgresql -- psql -U cornflow cornflow < cornflow_backup.sql
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Pods not starting**
+   - Verify that images are available
+   - Check pod logs
+   - Verify resource configuration
+
+2. **Database connectivity issues**
+   - Verify that PostgreSQL services are running
+   - Check database credentials
+   - Verify network configuration
+
+3. **Ingress issues**
+   - Verify that Ingress controller is installed
+   - Check Ingress annotations
+   - Verify DNS configuration
+
+### Useful Commands
+
+```bash
+# Check status of all resources
+kubectl get all -l app.kubernetes.io/instance=my-cornflow
+
+# Describe a pod for more details
+kubectl describe pod <pod-name>
+
+# Execute a shell in a pod
+kubectl exec -it <pod-name> -- /bin/bash
+
+# View namespace events
+kubectl get events --sort-by='.lastTimestamp'
+```
+
+## Uninstallation
+
+```bash
+# Uninstall the release
+helm uninstall my-cornflow
+
+# Delete PVCs (optional)
+kubectl delete pvc -l app.kubernetes.io/instance=my-cornflow
+```
+
+## Contributing
+
+To contribute to this chart:
+
+1. Fork the repository
+2. Create a branch for your feature
+3. Make your changes
+4. Run tests
+5. Submit a pull request
+
+## License
+
+This chart is under the same license as Cornflow.
+
+## Support
+
+For support and questions:
+
+- [GitHub Issues](https://github.com/baobabsoluciones/cornflow/issues)
+- [Cornflow Documentation](https://cornflow.readthedocs.io/)
+- Email: cornflow@baobabsoluciones.es 

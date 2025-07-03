@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cornflow.fullname" . }}-cornflow
+  labels:
+    {{- include "cornflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cornflow
+spec:
+  {{- if not .Values.cornflow.autoscaling.enabled }}
+  replicas: {{ .Values.cornflow.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cornflow.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: cornflow
+  template:
+    metadata:
+      labels:
+        {{- include "cornflow.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cornflow
+      {{- with .Values.cornflow.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cornflow.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.security | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-cornflow
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: {{ .Values.security.runAsUser }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.cornflow.resources | nindent 12 }}
+          env:
+            {{- range $key, $value := .Values.cornflow.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+
+          volumeMounts:
+            - name: logs
+              mountPath: /usr/src/app/log
+            - name: ssh-keys
+              mountPath: /usr/src/app/.ssh
+              readOnly: true
+      {{- with .Values.cornflow.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cornflow.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cornflow.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: logs
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "cornflow.fullname" . }}-logs
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: ssh-keys
+          secret:
+            secretName: {{ include "cornflow.fullname" . }}-ssh-keys
+            optional: true 

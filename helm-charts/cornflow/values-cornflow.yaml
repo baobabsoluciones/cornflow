@@ -1,0 +1,312 @@
+# Cornflow Helm Chart Values
+# This file contains all configuration options for deploying Cornflow to Kubernetes
+
+# =============================================================================
+# GLOBAL CONFIGURATION
+# =============================================================================
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# =============================================================================
+# IMAGE CONFIGURATION
+# =============================================================================
+
+# Cornflow image configuration
+image:
+  repository: baobabsoluciones/cornflow
+  tag: "release-v1.2.3"
+  pullPolicy: IfNotPresent  # Use Always for production
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+
+# Service configuration
+service:
+  type: ClusterIP  # Use LoadBalancer or NodePort for external access
+  port: 5000
+  annotations: {}
+
+# =============================================================================
+# INGRESS CONFIGURATION
+# =============================================================================
+
+# Ingress configuration for external access
+ingress:
+  enabled: false  # Set to true for production with external access
+  className: "nginx"  # Specify your ingress controller
+  annotations:
+    # Example annotations for production:
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: cornflow.local  # Change to your domain
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # Example TLS configuration for production:
+    # - secretName: cornflow-tls
+    #   hosts:
+    #     - cornflow.yourdomain.com
+
+# =============================================================================
+# CORNFLOW APPLICATION CONFIGURATION
+# =============================================================================
+
+# Cornflow application configuration
+cornflow:
+  replicaCount: 1  # Increase for production (2-3 recommended)
+  
+  # Resource configuration
+  resources:
+    # Development settings
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    # Production settings (uncomment and adjust):
+    # limits:
+    #   cpu: 2000m
+    #   memory: 2Gi
+    # requests:
+    #   cpu: 1000m
+    #   memory: 1Gi
+  
+  # Node placement
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  # Environment variables
+  env:
+    # =============================================================================
+    # DATABASE CONFIGURATION
+    # =============================================================================
+    DATABASE_URL: "postgresql://cornflow:cornflow@cornflow-postgresql:5432/cornflow"
+    
+    # =============================================================================
+    # APPLICATION CONFIGURATION
+    # =============================================================================
+    APPLICATION_ROOT: "/"  # Application root path
+    EXTERNAL_APP: "0"  # Set to "1" if running as external app
+    SERVICE_NAME: "Cornflow"
+    SECRET_KEY: "your-secret-key-here"  # CHANGE THIS FOR PRODUCTION
+    SECRET_BI_KEY: "your-bi-secret-key-here"  # CHANGE THIS FOR PRODUCTION
+    AUTH_TYPE: "1"  # Database authentication (1=DB, 2=OID)
+    DEFAULT_ROLE: "2"  # Planner role
+    CORS_ORIGINS: "*"  # Restrict for production
+    LOG_LEVEL: "20"  # INFO level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR)
+    SIGNUP_ACTIVATED: "1"  # Set to "0" for production
+    CORNFLOW_SERVICE_USER: "service_user"
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1"  # Set to "0" for production
+    OPEN_DEPLOYMENT: "1"  # Set to "0" for production
+    USER_ACCESS_ALL_OBJECTS: "0"  # Planner users can access other users' objects
+    TOKEN_DURATION: "24"  # Token duration in hours
+    PWD_ROTATION_TIME: "120"  # Password rotation time in days
+    
+    # =============================================================================
+    # LDAP CONFIGURATION (for LDAP authentication)
+    # =============================================================================
+    LDAP_HOST: "ldap://openldap:389"
+    LDAP_BIND_DN: "cn=admin,dc=example,dc=org"
+    LDAP_BIND_PASSWORD: "admin"
+    LDAP_USERNAME_ATTRIBUTE: "cn"
+    LDAP_USER_BASE: "ou=users,dc=example,dc=org"
+    LDAP_SERVICE_BASE: "ou=users,dc=example,dc=org"
+    LDAP_EMAIL_ATTRIBUTE: "mail"
+    LDAP_USER_OBJECT_CLASS: "inetOrgPerson"
+    LDAP_GROUP_OBJECT_CLASS: "groupOfNames"
+    LDAP_GROUP_ATTRIBUTE: "cn"
+    LDAP_GROUP_BASE: "dc=example,dc=org"
+    LDAP_GROUP_TO_ROLE_SERVICE: "service"
+    LDAP_GROUP_TO_ROLE_ADMIN: "administrators"
+    LDAP_GROUP_TO_ROLE_VIEWER: "viewers"
+    LDAP_GROUP_TO_ROLE_PLANNER: "planners"
+    LDAP_PROTOCOL_VERSION: "3"
+    LDAP_USE_TLS: "False"
+    
+    # =============================================================================
+    # OPENID CONNECT CONFIGURATION (for OID authentication)
+    # =============================================================================
+    OID_PROVIDER: ""  # OpenID provider URL
+    OID_EXPECTED_AUDIENCE: ""  # Expected audience for OID tokens
+    
+    # =============================================================================
+    # EMAIL SERVER CONFIGURATION
+    # =============================================================================
+    SERVICE_EMAIL_ADDRESS: ""  # Email address for notifications
+    SERVICE_EMAIL_PASSWORD: ""  # Email password
+    SERVICE_EMAIL_SERVER: ""  # SMTP server
+    SERVICE_EMAIL_PORT: ""  # SMTP port
+    
+    # =============================================================================
+    # ALARMS CONFIGURATION
+    # =============================================================================
+    CF_ALARMS_ENDPOINT: "0"  # Enable alarms endpoints
+    
+    # =============================================================================
+    # ADMIN USER CONFIGURATION
+    # =============================================================================
+    CORNFLOW_ADMIN_USER: "cornflow_admin"
+    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"  # CHANGE THIS FOR PRODUCTION
+    CORNFLOW_SERVICE_PWD: "Service_user1234"  # CHANGE THIS FOR PRODUCTION
+
+# =============================================================================
+# POSTGRESQL CONFIGURATION
+# =============================================================================
+
+# PostgreSQL configuration for Cornflow
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15.4"
+  auth:
+    postgresPassword: "postgres"  # Change for production
+    database: "cornflow"
+    username: "cornflow"
+    password: "cornflow"  # Change for production
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi  # Increase for production (20Gi recommended)
+      storageClass: ""  # Specify storage class for production
+  service:
+    type: ClusterIP
+    port: 5432
+
+# =============================================================================
+# PERSISTENCE CONFIGURATION
+# =============================================================================
+
+# Persistence configuration for logs
+persistence:
+  enabled: true
+  storageClass: ""  # Specify storage class for production
+  size: 10Gi  # Increase for production (20Gi recommended)
+  accessMode: ReadWriteOnce
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# ServiceAccount configuration
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Security context
+security:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# =============================================================================
+# MONITORING CONFIGURATION
+# =============================================================================
+
+# Monitoring configuration
+monitoring:
+  enabled: false  # Enable for production
+  serviceMonitor:
+    enabled: false  # Enable for production
+    interval: 30s
+    scrapeTimeout: 10s
+
+# =============================================================================
+# SCALING CONFIGURATION
+# =============================================================================
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false  # Enable for production
+  minAvailable: 1
+
+# Horizontal pod autoscaler
+autoscaling:
+  enabled: false  # Enable for production
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# =============================================================================
+# PRODUCTION RECOMMENDATIONS
+# =============================================================================
+# 
+# For production deployment, consider the following changes:
+#
+# 1. SECURITY:
+#    - Change all passwords and secret keys
+#    - Set SIGNUP_ACTIVATED: "0"
+#    - Set SERVICE_USER_ALLOW_PASSWORD_LOGIN: "0"
+#    - Set OPEN_DEPLOYMENT: "0"
+#    - Restrict CORS_ORIGINS to your domain
+#    - Enable ingress with TLS
+#    - Configure LDAP or OID authentication
+#
+# 2. RESOURCES:
+#    - Increase replicaCount to 2-3
+#    - Increase resource limits and requests
+#    - Increase database storage size
+#
+# 3. MONITORING:
+#    - Enable monitoring and ServiceMonitor
+#    - Enable PodDisruptionBudget
+#    - Enable HorizontalPodAutoscaler
+#
+# 4. STORAGE:
+#    - Specify appropriate StorageClass
+#    - Increase persistence size
+#
+# 5. IMAGE:
+#    - Set pullPolicy: Always
+#    - Use specific image tags
+#
+# Example production overrides:
+# ---
+# image:
+#   pullPolicy: Always
+# 
+# ingress:
+#   enabled: true
+#   annotations:
+#     kubernetes.io/ingress.class: nginx
+#     cert-manager.io/cluster-issuer: letsencrypt-prod
+#   hosts:
+#     - host: cornflow.yourdomain.com
+# 
+# cornflow:
+#   replicaCount: 2
+#   env:
+#     SECRET_KEY: "your-super-secure-secret"
+#     SECRET_BI_KEY: "your-super-secure-bi-secret"
+#     SIGNUP_ACTIVATED: "0"
+#     CORS_ORIGINS: "https://cornflow.yourdomain.com"
+#     AUTH_TYPE: "2"  # Use OID authentication
+#     OID_PROVIDER: "https://your-oid-provider.com"
+#     OID_EXPECTED_AUDIENCE: "your-audience"
+# 
+# postgresql:
+#   auth:
+#     password: "your-secure-db-password"
+#   primary:
+#     persistence:
+#       size: 20Gi
+#       storageClass: "fast-ssd"
+# 
+# monitoring:
+#   enabled: true
+# 
+# autoscaling:
+#   enabled: true 
