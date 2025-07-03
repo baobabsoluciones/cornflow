@@ -2,15 +2,16 @@
 This file contains the auth class that can be used for authentication on the request to the REST API
 """
 
+from datetime import datetime, timedelta, timezone
+from functools import wraps
+from typing import Tuple
+
 # Imports from external libraries
 import jwt
 import requests
-from jwt.algorithms import RSAAlgorithm
-from datetime import datetime, timedelta, timezone
-from flask import request, g, current_app, Request
-from functools import wraps
-from typing import Tuple
 from cachetools import TTLCache
+from flask import request, g, current_app, Request
+from jwt.algorithms import RSAAlgorithm
 from werkzeug.datastructures import Headers
 
 # Imports from internal modules
@@ -31,7 +32,6 @@ from cornflow.shared.exceptions import (
     InvalidData,
     InvalidUsage,
     NoPermission,
-    ObjectDoesNotExist,
 )
 
 # Cache for storing public keys with 1 hour TTL
@@ -122,15 +122,13 @@ class Auth:
     def decode_token(token: str = None) -> dict:
         """
         Decodes a given JSON Web token and extracts the username from the sub claim.
-        Works with both internal tokens and OpenID tokens.
+        Works with both internal tokens and OpenID tokens by attempting verification methods sequentially.
 
         :param str token: the given JSON Web Token
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-
         if token is None:
-
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
@@ -138,48 +136,81 @@ class Auth:
             )
 
         try:
-            # First try to decode header to validate basic token structure
-
-            unverified_payload = jwt.decode(token, options={"verify_signature": False})
-            issuer = unverified_payload.get("iss")
-
-            # For internal tokens
-            if issuer == INTERNAL_TOKEN_ISSUER:
-
-                return jwt.decode(
-                    token, current_app.config["SECRET_TOKEN_KEY"], algorithms="HS256"
-                )
-
-            # For OpenID tokens
-            if current_app.config["AUTH_TYPE"] == AUTH_OID:
-
-                return Auth().verify_token(
-                    token,
-                    current_app.config["OID_PROVIDER"],
-                    current_app.config["OID_EXPECTED_AUDIENCE"],
-                )
-
-            # If we get here, the issuer is not valid
-
-            raise InvalidCredentials(
-                "Invalid token issuer. Token must be issued by a valid provider",
-                log_txt="Error while trying to decode token. Invalid issuer.",
-                status_code=400,
+            # Attempt 1: Verify as an internal token (HS256)
+            payload = jwt.decode(
+                token, current_app.config["SECRET_TOKEN_KEY"], algorithms=["HS256"]
             )
+            if payload.get("iss") != INTERNAL_TOKEN_ISSUER:
+                raise jwt.InvalidIssuerError(
+                    "Internal token issuer mismatch after verification"
+                )
+            return payload
 
         except jwt.ExpiredSignatureError:
-
+            # Handle expiration specifically, could apply to either token type if caught here first
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
                 status_code=400,
             )
-        except jwt.InvalidTokenError as e:
-
+        except (
+            jwt.InvalidSignatureError,
+            jwt.DecodeError,
+            jwt.InvalidTokenError,
+        ) as e_internal:
+            # Internal verification failed (signature, format, etc.). Try OIDC if configured.
+            if current_app.config["AUTH_TYPE"] == AUTH_OID:
+                try:
+                    # Attempt 2: Verify as an OIDC token (RS256) using the dedicated method
+                    return Auth().verify_token(
+                        token,
+                        current_app.config["OID_PROVIDER"],
+                        current_app.config["OID_EXPECTED_AUDIENCE"],
+                    )
+                except jwt.ExpiredSignatureError:
+                    # OIDC token expired
+                    raise InvalidCredentials(
+                        "The token has expired, please login again",
+                        log_txt="Error while trying to decode OIDC token. The token has expired.",
+                        status_code=400,
+                    )
+                except (
+                    jwt.InvalidTokenError,
+                    InvalidCredentials,
+                    CommunicationError,
+                ) as e_oidc:
+                    # OIDC verification failed (JWT format, signature, kid, audience, issuer, comms error)
+                    # Log details for debugging but return a generic error to the client.
+                    log_message = (
+                        f"Error decoding token. Internal verification failed ({type(e_internal).__name__}). "
+                        f"OIDC verification failed ({type(e_oidc).__name__}: {str(e_oidc)})."
+                    )
+                    current_app.logger.warning(log_message)
+                    raise InvalidCredentials(
+                        "Invalid token format, signature, or configuration",
+                        log_txt=log_message,
+                        status_code=400,
+                    )
+            else:
+                # Internal verification failed, and OIDC is not configured
+                log_message = (
+                    f"Error decoding token. Internal verification failed ({type(e_internal).__name__}). "
+                    f"OIDC is not configured."
+                )
+                current_app.logger.warning(log_message)
+                raise InvalidCredentials(
+                    "Invalid token format or signature",
+                    log_txt=log_message,
+                    status_code=400,
+                )
+        except Exception as e:
+            # Catch any other unexpected errors during the process
+            log_message = f"Unexpected error during token decoding: {str(e)}"
+            current_app.logger.error(log_message)
             raise InvalidCredentials(
-                "Invalid token format or signature",
-                log_txt=f"Error while trying to decode token. The token format is invalid: {str(e)}",
-                status_code=400,
+                "Could not decode or verify token due to an unexpected server error",
+                log_txt=log_message,
+                status_code=500,
             )
 
     def get_token_from_header(self, headers: Headers = None) -> str:
@@ -365,10 +396,10 @@ class Auth:
                 "The permission for this endpoint is not in the database."
             )
             raise NoPermission(
-                error="You do not have permission to access this endpoint",
+                error="The permission for this endpoint is not in the database.",
                 status_code=403,
                 log_txt=f"Error while user {user_id} tries to access endpoint. "
-                f"The user does not permission to access. ",
+                f"The permission for this endpoint is not in the database.",
             )
 
         for role in user_roles:
@@ -383,7 +414,7 @@ class Auth:
             error="You do not have permission to access this endpoint",
             status_code=403,
             log_txt=f"Error while user {user_id} tries to access endpoint {view_id} with action {action_id}. "
-            f"The user does not permission to access. ",
+            f"The user does not have permission to access. ",
         )
 
     @staticmethod

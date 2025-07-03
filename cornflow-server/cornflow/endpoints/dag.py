@@ -2,6 +2,7 @@
 Internal endpoint for getting and posting execution data
 These are the endpoints used by airflow in its communication with cornflow
 """
+
 # Import from libraries
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
@@ -17,7 +18,6 @@ from cornflow.schemas.execution import (
     ExecutionDagPostRequest,
     ExecutionDagRequest,
     ExecutionDetailsEndpointResponse,
-    ExecutionSchema,
 )
 
 from cornflow.shared.authentication import Auth, authenticate
@@ -85,7 +85,7 @@ class DAGDetailEndpoint(BaseMetaResource):
     @doc(description="Edit an execution", tags=["DAGs"])
     @authenticate(auth_class=Auth())
     @use_kwargs(ExecutionDagRequest, location="json")
-    def put(self, idx, **req_data):
+    def put(self, idx, **kwargs):
         """
         API method to write the results of the execution
         It requires authentication to be passed in the form of a token that has to be linked to
@@ -95,13 +95,20 @@ class DAGDetailEndpoint(BaseMetaResource):
         :return: A dictionary with a message (body) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        solution_schema = req_data.pop("solution_schema", "pulp")
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}."
+                + err,
+            )
 
-        # TODO: the solution_schema maybe we should get it from the created execution_id?
-        #  at least, check they have the same schema-name
+        solution_schema = execution.schema
+
         # Check data format
-        data = req_data.get("data")
-        checks = req_data.get("checks")
+        data = kwargs.get("data")
+        checks = kwargs.get("checks")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -111,24 +118,19 @@ class DAGDetailEndpoint(BaseMetaResource):
         if solution_schema is not None:
             config = current_app.config
 
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedDAG.get_one_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=solution_errors),
                     log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}. "
-                            f"Solution data do not match the jsonschema.",
+                    f"Solution data do not match the jsonschema.",
                 )
-        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
-        if execution is None:
-            err = "The execution does not exist."
-            raise ObjectDoesNotExist(
-                error=err,
-                log_txt=f"Error while user {self.get_user()} tries to edit execution {idx}."
-                + err,
-            )
-        state = req_data.get("state", EXEC_STATE_CORRECT)
+
+        state = kwargs.get("state", EXEC_STATE_CORRECT)
         new_data = dict(
             state=state,
             state_message=EXECUTION_STATE_MESSAGE_DICT[state],
@@ -141,10 +143,9 @@ class DAGDetailEndpoint(BaseMetaResource):
             new_data["data"] = data
         if checks is not None:
             new_data["checks"] = checks
-        req_data.update(new_data)
-        execution.update(req_data)
-        # TODO: is this save necessary?
-        execution.save()
+        kwargs.update(new_data)
+        execution.update(kwargs)
+
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
 
@@ -207,7 +208,6 @@ class DAGEndpointManual(BaseMetaResource):
 
         # Check data format
         data = kwargs.get("data")
-        # TODO: create a function to validate and replace data/ execution_results
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -215,14 +215,16 @@ class DAGEndpointManual(BaseMetaResource):
             solution_schema = "solve_model_dag"
         if solution_schema is not None:
             config = current_app.config
-            solution_schema = DeployedDAG.get_one_schema(config, solution_schema, SOLUTION_SCHEMA)
+            solution_schema = DeployedDAG.get_one_schema(
+                config, solution_schema, SOLUTION_SCHEMA
+            )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
 
             if solution_errors:
                 raise InvalidData(
                     payload=dict(jsonschema_errors=solution_errors),
                     log_txt=f"Error while user {self.get_user()} tries to manually create an execution. "
-                            f"Solution data do not match the jsonschema.",
+                    f"Solution data do not match the jsonschema.",
                 )
 
         kwargs_copy = dict(kwargs)

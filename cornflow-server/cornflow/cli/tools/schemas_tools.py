@@ -35,7 +35,7 @@ class SchemaGenerator:
         for key, val in self.schema["properties"].items():
             if key == "id":
                 continue
-            ty, nullable = get_type(val)
+            ty, _ = get_type(val)
             res += f"    {key} = {JSON_TYPES_TO_FIELDS[ty]}("
             res += "required=False"
             res += ")\n"
@@ -44,7 +44,7 @@ class SchemaGenerator:
     def generate_post_schema(self):
         res = ""
         for key, val in self.schema["properties"].items():
-            ty, nullable = get_type(val)
+            ty, _ = get_type(val)
             res += f"    {key} = {JSON_TYPES_TO_FIELDS[ty]}("
             if key in self.schema["required"]:
                 res += "required=True"
@@ -62,9 +62,8 @@ class SchemaGenerator:
         if not self.schema["properties"].get("id"):
             return "    id = fields.Int(required=True)\n"
         else:
-            id_type=self.schema["properties"].get("id")["type"]
-            return f'    id = {JSON_TYPES_TO_FIELDS[id_type]}(required=True)\n'
-
+            id_type = self.schema["properties"].get("id")["type"]
+            return f"    id = {JSON_TYPES_TO_FIELDS[id_type]}(required=True)\n"
 
     def generate_schema(self):
         if not self.schema["properties"].get("id"):

@@ -7,6 +7,10 @@ from .arguments import verbose
 
 @click.group(name="actions", help="Commands to manage the actions")
 def actions():
+    """
+    This method is empty but it serves as the building block
+    for the rest of the commands
+    """
     pass
 
 
