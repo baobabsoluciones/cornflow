@@ -385,26 +385,6 @@ class TestExperimentCore(TestCase):
         self.assertEqual(res, {"limits/time": 10, "lp/iterlim": 10})
 
     def test_get_solver_config_with_remove_unknow(self):
-        """testing the function get_solver_config when the argument remove_unknown is True"""
-        config = dict(
-            solver="milp_solver.gurobi",
-            msg=True,
-            abs_gap=5,
-            solver_config=dict(time_limit=10 * 60, rel_gap=0.001, additional=True),
-        )
-
-        expected = {
-            "TimeLimit": 600,
-            "MIPGap": 0.001,
-            "MIPGapAbs": 5,
-            "additional": True,
-            "OutputFlag": True,
-        }
-        result = self.class_to_use.get_solver_config(config, remove_unknown=True)
-        msg = "if remove_unknown is true, unmapped argument should be removed from config but not from solver_config"
-        self.assertEqual(expected, result, msg=msg)
-
-    def test_get_solver_config_with_remove_unknow_2(self):
         """testing the function get_solver_config when config has solver and solver_config arguments"""
         config = dict(
             solver="milp_solver.gurobi",
@@ -433,14 +413,18 @@ class TestExperimentCore(TestCase):
             solver="milp_solver.gurobi",
             msg=True,
             abs_gap=5,
-            solver_config=dict(time_limit=10 * 60, rel_gap=0.001, additional=True),
+            aditional_in_config=True,
+            solver_config=dict(
+                time_limit=10 * 60, rel_gap=0.001, additional_in_solver_config=True
+            ),
         )
 
         expected = {
             "TimeLimit": 600,
             "MIPGap": 0.001,
             "MIPGapAbs": 5,
-            "additional": True,
+            "additional_in_solver_config": True,
+            "aditional_in_config": True,
             "OutputFlag": True,
         }
         result = self.class_to_use.get_solver_config(config, remove_unknown=False)
