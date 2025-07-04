@@ -384,6 +384,9 @@ airflow:
       value: "airflow.api.auth.backend.basic_auth"
     - name: PYTHONPATH
       value: "/opt/airflow/dags/deps"
+    # Cornflow configuration for Airflow
+    - name: AIRFLOW_CONN_CF_URI
+      value: "http://service_user:Service_user1234@my-cornflow-cornflow:5000/"
 
 # =============================================================================
 # PRODUCTION RECOMMENDATIONS
