@@ -86,12 +86,25 @@ cornflow:
   tolerations: []
   affinity: {}
   
+  # Horizontal pod autoscaler
+  autoscaling:
+    enabled: false  # Enable for production
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  
   # Environment variables
   env:
     # =============================================================================
     # DATABASE CONFIGURATION
     # =============================================================================
-    DATABASE_URL: "postgresql://cornflow:cornflow@cornflow-postgresql:5432/cornflow"
+    DEFAULT_POSTGRES: "1"  # Use Cornflow's specific DB variables
+    CORNFLOW_DB_HOST: "my-cornflow-cornflow-postgresql"
+    CORNFLOW_DB_PORT: "5432"
+    CORNFLOW_DB_USER: "cornflow"
+    CORNFLOW_DB_PASSWORD: "cornflow"
+    CORNFLOW_DB: "cornflow"
     
     # =============================================================================
     # APPLICATION CONFIGURATION
@@ -159,6 +172,13 @@ cornflow:
     CORNFLOW_ADMIN_USER: "cornflow_admin"
     CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"  # CHANGE THIS FOR PRODUCTION
     CORNFLOW_SERVICE_PWD: "Service_user1234"  # CHANGE THIS FOR PRODUCTION
+    
+    # =============================================================================
+    # AIRFLOW CONFIGURATION
+    # =============================================================================
+    AIRFLOW_URL: "http://my-cornflow-webserver:8080"  # Auto-configured when Airflow is enabled
+    AIRFLOW_USER: "admin"  # Must match airflow.users[0].username
+    AIRFLOW_PWD: "admin"  # Must match airflow.users[0].password
 
 # =============================================================================
 # POSTGRESQL CONFIGURATION
@@ -171,18 +191,20 @@ postgresql:
     repository: postgres
     tag: "15.4"
   auth:
-    postgresPassword: "postgres"  # Change for production
-    database: "cornflow"
+    postgresPassword: "postgres"
     username: "cornflow"
-    password: "cornflow"  # Change for production
+    password: "cornflow"
+    database: "cornflow"
   primary:
     persistence:
       enabled: true
-      size: 8Gi  # Increase for production (20Gi recommended)
-      storageClass: ""  # Specify storage class for production
+      size: 8Gi
+      storageClass: ""
   service:
     type: ClusterIP
     port: 5432
+
+
 
 # =============================================================================
 # PERSISTENCE CONFIGURATION
@@ -232,13 +254,77 @@ podDisruptionBudget:
   enabled: false  # Enable for production
   minAvailable: 1
 
-# Horizontal pod autoscaler
-autoscaling:
-  enabled: false  # Enable for production
-  minReplicas: 1
-  maxReplicas: 5
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+# =============================================================================
+# AIRFLOW CONFIGURATION
+# =============================================================================
+
+# =============================================================================
+# AIRFLOW CONFIGURATION (OPTIONAL)
+# =============================================================================
+
+# Airflow configuration - Set enabled: true to deploy Airflow with Cornflow
+airflow:
+  enabled: true  # Set to false to deploy without Airflow
+  executor: KubernetesExecutor
+  images:
+    airflow:
+      repository: apache/airflow
+      tag: "2.10.5"
+      pullPolicy: IfNotPresent
+  
+  # Airflow webserver configuration
+  webserver:
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    # Service configuration
+    service:
+      type: ClusterIP
+  # Airflow scheduler configuration
+  scheduler:
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    serviceAccount:
+      create: true
+      name: "airflow-scheduler"
+      annotations: {}
+  # Airflow triggerer configuration
+  triggerer:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  # Airflow Redis configuration (for Celery)
+  redis:
+    enabled: false  # Disable Airflow's Redis, we'll use a simpler setup
+  
+  # PgBouncer configuration for Airflow (only parameters allowed by the official chart)
+  pgbouncer:
+    enabled: true  # Can only be enabled/disabled and adjust parameters allowed by the official chart
+
+  # Airflow logs config
+  logs:
+    persistence:
+      enabled: false
+      
+  # Airflow configuration
+  env:
+    - name: AIRFLOW__CORE__LOAD_EXAMPLES
+      value: "True"
+    - name: AIRFLOW__API__AUTH_BACKEND
+      value: "airflow.api.auth.backend.basic_auth"
 
 # =============================================================================
 # PRODUCTION RECOMMENDATIONS

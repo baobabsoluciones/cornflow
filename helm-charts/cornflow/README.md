@@ -8,6 +8,7 @@ Cornflow is a platform that allows you to create, execute, and manage optimizati
 
 - **Cornflow API**: Main application service
 - **PostgreSQL**: Database for Cornflow
+- **Airflow** (optional): Apache Airflow for workflow orchestration
 - **Ingress**: Optional configuration for external access
 
 ## Prerequisites
@@ -40,7 +41,7 @@ helm install my-cornflow ./helm-charts/cornflow
 
 ```bash
 # Install with the default values file
-helm install my-cornflow ./helm-charts/cornflow -f values-cornflow.yaml
+helm install my-cornflow ./helm-charts/cornflow
 
 # Or create a custom values file with your overrides
 cat > my-overrides.yaml << EOF
@@ -57,11 +58,43 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+
+# Enable Airflow
+airflow:
+  enabled: true
+  users:
+    - username: admin
+      password: "my-airflow-password"
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
+      role: Admin
 EOF
 
 # Install with custom overrides
-helm install my-cornflow ./helm-charts/cornflow -f values-cornflow.yaml -f my-overrides.yaml
+helm install my-cornflow ./helm-charts/cornflow -f my-overrides.yaml
 ```
+
+### Installation with Airflow
+
+```bash
+# Enable Airflow in the values.yaml file and install
+# Edit values.yaml and set airflow.enabled: true
+helm install my-cornflow ./helm-charts/cornflow
+
+# Or enable Airflow manually during installation
+helm install my-cornflow ./helm-charts/cornflow --set airflow.enabled=true
+
+# Install with custom Airflow configuration
+helm install my-cornflow ./helm-charts/cornflow \
+  --set airflow.enabled=true \
+  --set airflow.users[0].password=my-secure-password \
+  --set airflow.postgresql.auth.password=my-db-password
+```
+
+**Note:** Airflow uses its own PostgreSQL database, separate from Cornflow's database. This simplifies the configuration and avoids potential conflicts. Each service has unique names:
+- Cornflow PostgreSQL: `my-cornflow-cornflow-postgresql`
+- Airflow PostgreSQL: `my-cornflow-airflow-postgresql`
 
 ## Configuration
 
@@ -73,9 +106,14 @@ helm install my-cornflow ./helm-charts/cornflow -f values-cornflow.yaml -f my-ov
 | `image.tag` | Cornflow image tag | `release-v1.2.3` |
 | `cornflow.replicaCount` | Number of Cornflow replicas | `1` |
 | `postgresql.enabled` | Enable PostgreSQL for Cornflow | `true` |
+| `airflow.enabled` | Enable Airflow deployment | `false` |
 | `ingress.enabled` | Enable Ingress for Cornflow | `false` |
 
 ### Database Configuration
+
+The chart deploys separate PostgreSQL databases for Cornflow and Airflow to avoid conflicts:
+
+#### Cornflow Database
 
 ```yaml
 postgresql:
@@ -89,6 +127,71 @@ postgresql:
       enabled: true
       size: 8Gi
 ```
+
+#### Airflow Database
+
+```yaml
+airflowPostgresql:
+  enabled: true
+  auth:
+    username: "airflow"
+    password: "airflow"
+    database: "airflow"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+```
+
+**Important:** The chart automatically disables Airflow's built-in PostgreSQL to prevent conflicts. Each database has unique service names:
+- Cornflow: `my-cornflow-cornflow-postgresql`
+- Airflow: `my-cornflow-airflow-postgresql`
+
+### Airflow Configuration
+
+To enable Airflow, simply set `airflow.enabled: true` in your values file:
+
+```yaml
+# Enable Airflow deployment
+airflow:
+  enabled: true
+  
+  # Airflow image (Baobab Soluciones)
+  image:
+    repository: baobabsoluciones/airflow
+    tag: "release-v1.2.3"
+    pullPolicy: IfNotPresent
+  
+  # Airflow users
+  users:
+    - username: admin
+      password: admin123  # CHANGE THIS FOR PRODUCTION
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
+      role: Admin
+  
+  # Airflow webserver configuration
+  webserver:
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 8080
+  
+  # Airflow scheduler configuration
+  scheduler:
+    replicaCount: 1
+  
+  # Airflow database configuration (separate from Cornflow's database)
+  # This is configured in the airflowPostgresql section
+  # The chart automatically disables Airflow's built-in PostgreSQL to avoid conflicts
+  
+  # Airflow uses KubernetesExecutor (no Redis needed)
+  # Each task runs in its own Kubernetes pod for better isolation and scalability
+  # RBAC permissions are automatically configured for pod creation
+```
+
+**Important:** When Airflow is enabled, Cornflow will automatically be configured to connect to it. Make sure the `AIRFLOW_USER` and `AIRFLOW_PWD` in the Cornflow configuration match the Airflow `users[0].username` and `users[0].password`.
 
 ### Ingress Configuration
 
@@ -236,8 +339,11 @@ If you have enabled Ingress, you can access directly through the configured URLs
 # Cornflow logs
 kubectl logs -f deployment/my-cornflow-cornflow
 
-# PostgreSQL logs
-kubectl logs -f deployment/my-cornflow-postgresql
+# Cornflow PostgreSQL logs
+kubectl logs -f deployment/my-cornflow-cornflow-postgresql
+
+# Airflow PostgreSQL logs (if Airflow is enabled)
+kubectl logs -f deployment/my-cornflow-airflow-postgresql
 ```
 
 ## Scaling
@@ -268,14 +374,20 @@ autoscaling:
 
 ```bash
 # Cornflow backup
-kubectl exec deployment/my-cornflow-postgresql -- pg_dump -U cornflow cornflow > cornflow_backup.sql
+kubectl exec deployment/my-cornflow-cornflow-postgresql -- pg_dump -U cornflow cornflow > cornflow_backup.sql
+
+# Airflow backup (if Airflow is enabled)
+kubectl exec deployment/my-cornflow-airflow-postgresql -- pg_dump -U airflow airflow > airflow_backup.sql
 ```
 
 ### Restoration
 
 ```bash
 # Restore Cornflow
-kubectl exec -i deployment/my-cornflow-postgresql -- psql -U cornflow cornflow < cornflow_backup.sql
+kubectl exec -i deployment/my-cornflow-cornflow-postgresql -- psql -U cornflow cornflow < cornflow_backup.sql
+
+# Restore Airflow (if Airflow is enabled)
+kubectl exec -i deployment/my-cornflow-airflow-postgresql -- psql -U airflow airflow < airflow_backup.sql
 ```
 
 ## Troubleshooting
@@ -291,6 +403,9 @@ kubectl exec -i deployment/my-cornflow-postgresql -- psql -U cornflow cornflow <
    - Verify that PostgreSQL services are running
    - Check database credentials
    - Verify network configuration
+   - Ensure each service connects to its correct database:
+     - Cornflow → `my-cornflow-cornflow-postgresql`
+     - Airflow → `my-cornflow-airflow-postgresql`
 
 3. **Ingress issues**
    - Verify that Ingress controller is installed

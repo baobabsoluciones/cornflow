@@ -60,7 +60,7 @@ spec:
         - name: data
           {{- if .Values.postgresql.primary.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "cornflow.fullname" . }}-postgresql
+            claimName: {{ include "cornflow.fullname" . }}-cornflow-postgresql
           {{- else }}
           emptyDir: {}
           {{- end }}
@@ -68,7 +68,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cornflow.fullname" . }}-postgresql
+  name: {{ include "cornflow.fullname" . }}-cornflow-postgresql
   labels:
     {{- include "cornflow.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
@@ -87,7 +87,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "cornflow.fullname" . }}-postgresql
+  name: {{ include "cornflow.fullname" . }}-cornflow-postgresql
   labels:
     {{- include "cornflow.labels" . | nindent 4 }}
 spec:

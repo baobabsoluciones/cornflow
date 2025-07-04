@@ -1,0 +1,39 @@
+{{- if .Values.airflow.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cornflow.fullname" . }}-airflow-worker
+  labels:
+    {{- include "cornflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: airflow-rbac
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/exec"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "cornflow.fullname" . }}-airflow-worker
+  labels:
+    {{- include "cornflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: airflow-rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "cornflow.fullname" . }}-airflow-worker
+subjects:
+- kind: ServiceAccount
+  name: {{ include "cornflow.fullname" . }}-airflow-scheduler
+  namespace: {{ .Release.Namespace }}
+{{- end }} 

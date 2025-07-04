@@ -14,4 +14,10 @@ sources:
 maintainers:
   - name: Baobab Soluciones
     email: cornflow@baobabsoluciones.es
-icon: https://raw.githubusercontent.com/baobabsoluciones/cornflow/main/docs/source/_static/logo.png 
+icon: https://raw.githubusercontent.com/baobabsoluciones/cornflow/main/docs/source/_static/logo.png
+
+dependencies:
+  - name: airflow
+    version: "~1.12.0"
+    repository: "https://airflow.apache.org"
+    condition: airflow.enabled 

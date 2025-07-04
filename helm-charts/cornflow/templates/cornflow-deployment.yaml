@@ -30,6 +30,7 @@ spec:
       serviceAccountName: {{ include "cornflow.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.security | nindent 8 }}
+
       containers:
         - name: {{ .Chart.Name }}-cornflow
           securityContext:
