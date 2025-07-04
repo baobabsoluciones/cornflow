@@ -297,6 +297,44 @@ airflow:
       create: true
       name: "airflow-scheduler"
       annotations: {}
+    # Extra init containers to copy Cornflow DAGs
+    extraInitContainers:
+      - name: cornflow-dags-init
+        image: alpine/git
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            echo "Cloning Cornflow repository..."
+            git clone --depth 1 --branch master https://github.com/baobabsoluciones/cornflow.git /tmp/cornflow
+            echo "Copying DAGs to Airflow..."
+            cp -r /tmp/cornflow/cornflow-dags/DAG/* /opt/airflow/dags/ || true
+            echo "Copying requirements.txt to Airflow..."
+            cp /tmp/cornflow/cornflow-dags/requirements.txt /opt/airflow/dags/ || true
+            echo "DAGs and requirements copied successfully!"
+        volumeMounts:
+          - name: dags
+            mountPath: /opt/airflow/dags
+      - name: install-requirements
+        image: apache/airflow:2.10.5
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            echo "Installing Python dependencies from requirements.txt..."
+            if [ -f /opt/airflow/dags/requirements.txt ]; then
+              pip install --target /opt/airflow/dags/deps -r /opt/airflow/dags/requirements.txt
+              echo "Dependencies installed successfully!"
+            else
+              echo "Warning: requirements.txt not found, skipping installation"
+            fi
+        volumeMounts:
+          - name: dags
+            mountPath: /opt/airflow/dags
   # Airflow triggerer configuration
   triggerer:
     resources:
@@ -309,6 +347,10 @@ airflow:
   # Airflow Redis configuration (for Celery)
   redis:
     enabled: false  # Disable Airflow's Redis, we'll use a simpler setup
+    
+  # Airflow Workers configuration
+  workers:
+    replicas: 1
   
   # PgBouncer configuration for Airflow (only parameters allowed by the official chart)
   pgbouncer:
@@ -319,80 +361,31 @@ airflow:
     persistence:
       enabled: false
       
+  # Airflow DAGs volume configuration
+  dags:
+    persistence:
+      enabled: true
+      size: 1Gi
+      
+  # Extra volumes for init containers
+  extraVolumes:
+    - name: dags
+      persistentVolumeClaim:
+        claimName: my-cornflow-airflow-dags
+      
+  # Extra volume mounts for init containers
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /opt/airflow/dags
+
   # Airflow configuration
   env:
-    - name: AIRFLOW__CORE__LOAD_EXAMPLES
-      value: "True"
     - name: AIRFLOW__API__AUTH_BACKEND
       value: "airflow.api.auth.backend.basic_auth"
+    - name: PYTHONPATH
+      value: "/opt/airflow/dags/deps"
 
 # =============================================================================
 # PRODUCTION RECOMMENDATIONS
 # =============================================================================
-# 
-# For production deployment, consider the following changes:
-#
-# 1. SECURITY:
-#    - Change all passwords and secret keys
-#    - Set SIGNUP_ACTIVATED: "0"
-#    - Set SERVICE_USER_ALLOW_PASSWORD_LOGIN: "0"
-#    - Set OPEN_DEPLOYMENT: "0"
-#    - Restrict CORS_ORIGINS to your domain
-#    - Enable ingress with TLS
-#    - Configure LDAP or OID authentication
-#
-# 2. RESOURCES:
-#    - Increase replicaCount to 2-3
-#    - Increase resource limits and requests
-#    - Increase database storage size
-#
-# 3. MONITORING:
-#    - Enable monitoring and ServiceMonitor
-#    - Enable PodDisruptionBudget
-#    - Enable HorizontalPodAutoscaler
-#
-# 4. STORAGE:
-#    - Specify appropriate StorageClass
-#    - Increase persistence size
-#
-# 5. IMAGE:
-#    - Set pullPolicy: Always
-#    - Use specific image tags
-#
-# Example production overrides:
-# ---
-# image:
-#   pullPolicy: Always
-# 
-# ingress:
-#   enabled: true
-#   annotations:
-#     kubernetes.io/ingress.class: nginx
-#     cert-manager.io/cluster-issuer: letsencrypt-prod
-#   hosts:
-#     - host: cornflow.yourdomain.com
-# 
-# cornflow:
-#   replicaCount: 2
-#   env:
-#     SECRET_KEY: "your-super-secure-secret"
-#     SECRET_BI_KEY: "your-super-secure-bi-secret"
-#     SIGNUP_ACTIVATED: "0"
-#     CORS_ORIGINS: "https://cornflow.yourdomain.com"
-#     AUTH_TYPE: "2"  # Use OID authentication
-#     OID_PROVIDER: "https://your-oid-provider.com"
-#     OID_EXPECTED_AUDIENCE: "your-audience"
-# 
-# postgresql:
-#   auth:
-#     password: "your-secure-db-password"
-#   primary:
-#     persistence:
-#       size: 20Gi
-#       storageClass: "fast-ssd"
-# 
-# monitoring:
-#   enabled: true
-# 
-# autoscaling:
-#   enabled: true 
+# TODO: add production recommendations
