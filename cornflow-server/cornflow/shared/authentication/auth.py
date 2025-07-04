@@ -303,19 +303,25 @@ class Auth:
         jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
         try:
             response = requests.get(jwks_url)
+            current_app.logger.info("Checkpoint 1")
             response.raise_for_status()
-
+            current_app.logger.info("Checkpoint 2")
             # Convert JWK to RSA public keys using PyJWT's built-in method
             public_keys = {
                 key["kid"]: RSAAlgorithm.from_jwk(key)
                 for key in response.json()["keys"]
             }
+            current_app.logger.info("Checkpoint 3")
 
             # Store in cache
             public_keys_cache[provider_url] = public_keys
+            current_app.logger.info("Checkpoint 4")
             return public_keys
 
         except requests.exceptions.RequestException as e:
+            import traceback
+
+            print(traceback.format_exc())
             raise CommunicationError(
                 "Failed to fetch public keys from authentication provider",
                 log_txt=f"Error while fetching public keys from {jwks_url}: {str(e)}",
