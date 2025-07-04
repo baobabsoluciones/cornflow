@@ -210,12 +210,7 @@ postgresql:
 # PERSISTENCE CONFIGURATION
 # =============================================================================
 
-# Persistence configuration for logs
-persistence:
-  enabled: true
-  storageClass: ""  # Specify storage class for production
-  size: 10Gi  # Increase for production (20Gi recommended)
-  accessMode: ReadWriteOnce
+# Note: Airflow logs persistence is configured in airflow.logs.persistence section
 
 # =============================================================================
 # SECURITY CONFIGURATION
@@ -359,7 +354,7 @@ airflow:
   # Airflow logs config
   logs:
     persistence:
-      enabled: false
+      enabled: true
       
   # Airflow DAGs volume configuration
   dags:
