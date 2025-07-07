@@ -1,3 +1,12 @@
+version 1.2.4
+--------------
+
+- released: 2025-07-08
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - fixed error on parameter parsing for gurobi.
+    - changed requests version to 2.32.4 due to security issues.
+
 version 1.2.3
 --------------
 

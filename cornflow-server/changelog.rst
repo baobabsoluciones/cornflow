@@ -1,3 +1,13 @@
+version 1.2.4
+--------------
+
+- released: 2025-07-08
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - fixed possible error on signup endpoint being activated even though it was not supposed to be.
+    - signup endpoint may require authentication of service user to create ne users.
+    - changed requests version to 2.32.4 due to security issues.
+
 version 1.2.3
 --------------
 

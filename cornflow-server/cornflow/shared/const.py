@@ -1,7 +1,8 @@
 """
 In this file we import the values for different constants on cornflow server
 """
-CORNFLOW_VERSION = "1.2.3"
+
+CORNFLOW_VERSION = "1.2.4"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -134,4 +135,3 @@ CONDITIONAL_ENDPOINTS = {
     "signup": "/signup/",
     "login": "/login/",
 }
-
