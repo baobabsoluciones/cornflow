@@ -68,9 +68,11 @@ helm install my-cornflow ./helm-charts/cornflow
 
 3. **In the `airflow.env` section:**
    ```yaml
-   AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
+   AIRFLOW_CONN_CF_URI: This must be configured manually
    ```
-   Change `RELEASE_NAME` to your release name
+   The URL must be configured based on the `EXTERNAL_APP` setting in `cornflow.env`:
+   - If `EXTERNAL_APP=0`: `http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/`
+   - If `EXTERNAL_APP=1`: `http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/cornflow/`
 
 **Examples:**
 
@@ -207,6 +209,24 @@ airflowPostgresql:
 **Important:** The chart automatically disables Airflow's built-in PostgreSQL to prevent conflicts. Each database has unique service names:
 - Cornflow: `my-project-cornflow-postgresql`
 - Airflow: `my-project-postgresql`
+
+### External App Configuration
+
+The chart supports running Cornflow as an external application with a specific URL path. This is controlled by the `EXTERNAL_APP` environment variable:
+
+```yaml
+cornflow:
+  env:
+    EXTERNAL_APP: "0"  # Set to "1" if running as external app
+```
+
+**When `EXTERNAL_APP=0` (default):**
+- Cornflow runs at the root URL: `http://my-project-cornflow-server:5000/`
+- Airflow connects to: `http://service_user:Service_user1234@my-project-cornflow-server:5000/`
+
+**When `EXTERNAL_APP=1`:**
+- Cornflow runs at a specific path: `http://my-project-cornflow-server:5000/cornflow/`
+- Airflow connects to: `http://service_user:Service_user1234@my-project-cornflow-server:5000/cornflow/`
 
 ### Airflow Configuration
 
