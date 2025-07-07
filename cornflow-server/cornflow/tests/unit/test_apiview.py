@@ -13,7 +13,7 @@ TestApiViewListEndpoint
 """
 
 # Import from internal modules
-from cornflow.endpoints import ApiViewListEndpoint, resources, alarms_resources
+from cornflow.endpoints import ApiViewListEndpoint, alarms_resources, get_resources
 from cornflow.models import ViewModel
 from cornflow.shared.const import ROLES_MAP
 from cornflow.tests.const import APIVIEW_URL
@@ -42,6 +42,8 @@ class TestApiViewListEndpoint(CustomTestCase):
         """
         super().setUp()
         self.roles_with_access = ApiViewListEndpoint.ROLES_WITH_ACCESS
+        # Get resources within application context
+        resources = get_resources()
         self.payload = [
             {
                 "name": view["endpoint"],
@@ -127,6 +129,8 @@ class TestApiViewModel(CustomTestCase):
         """
         super().setUp()
         self.roles_with_access = ApiViewListEndpoint.ROLES_WITH_ACCESS
+        # Get resources within application context
+        resources = get_resources()
         self.payload = [
             {
                 "name": view["endpoint"],
@@ -141,6 +145,8 @@ class TestApiViewModel(CustomTestCase):
         """
         Test that the get_all_objects method works properly
         """
+        # Get resources within application context
+        resources = get_resources()
         expected_count = len(resources) + len(alarms_resources)
         # Test getting all objects
         all_instances = ViewModel.get_all_objects().all()
