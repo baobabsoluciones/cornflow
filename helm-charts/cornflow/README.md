@@ -27,21 +27,82 @@ Cornflow is a platform that allows you to create, execute, and manage optimizati
 helm repo add cornflow https://baobabsoluciones.github.io/cornflow-helm
 
 # Install the chart
-helm install my-cornflow cornflow/cornflow
+helm install my-project cornflow/cornflow
 ```
 
 ### Installation from Local Directory
 
 ```bash
 # From the chart directory
+helm install my-project ./helm-charts/cornflow
+```
+
+### Installation with Different Release Names
+
+The chart is parameterized to work with different release names. You can install it as:
+
+```bash
+# Installation with release name "cornflow"
+helm install cornflow ./helm-charts/cornflow
+
+# Installation with release name "cornflow-staging"
+helm install cornflow-staging ./helm-charts/cornflow
+
+# Installation with release name "my-cornflow"
 helm install my-cornflow ./helm-charts/cornflow
+```
+
+**IMPORTANT:** If you use a release name different from "my-cornflow", you need to manually modify the following variables in `values.yaml`:
+
+1. **In the `cornflow.env` section:**
+   ```yaml
+   CORNFLOW_DB_HOST: Automatically configured (no manual change needed)
+   AIRFLOW_URL: Automatically configured (no manual change needed)
+   ```
+
+2. **In the `airflow.extraVolumes` section:**
+   ```yaml
+   claimName: RELEASE_NAME-airflow-dags
+   ```
+   Change `RELEASE_NAME` to your release name
+
+3. **In the `airflow.env` section:**
+   ```yaml
+   AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
+   ```
+   Change `RELEASE_NAME` to your release name
+
+**Examples:**
+
+For release "cornflow":
+```yaml
+# CORNFLOW_DB_HOST: Automatically configured as "cornflow-cornflow-postgresql"
+# AIRFLOW_URL: Automatically configured as "http://cornflow-webserver:8080"
+claimName: cornflow-airflow-dags
+AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@cornflow-cornflow-server:5000/"
+```
+
+For release "cornflow-staging":
+```yaml
+# CORNFLOW_DB_HOST: Automatically configured as "cornflow-staging-cornflow-postgresql"
+# AIRFLOW_URL: Automatically configured as "http://cornflow-staging-webserver:8080"
+claimName: cornflow-staging-airflow-dags
+AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@cornflow-staging-cornflow-server:5000/"
+```
+
+For release "my-project":
+```yaml
+# CORNFLOW_DB_HOST: Automatically configured as "my-project-cornflow-postgresql"
+# AIRFLOW_URL: Automatically configured as "http://my-project-webserver:8080"
+claimName: my-project-airflow-dags
+AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@my-project-cornflow-server:5000/"
 ```
 
 ### Installation with Custom Values
 
 ```bash
 # Install with the default values file
-helm install my-cornflow ./helm-charts/cornflow
+helm install my-project ./helm-charts/cornflow
 
 # Or create a custom values file with your overrides
 cat > my-overrides.yaml << EOF
@@ -72,7 +133,7 @@ airflow:
 EOF
 
 # Install with custom overrides
-helm install my-cornflow ./helm-charts/cornflow -f my-overrides.yaml
+helm install my-project ./helm-charts/cornflow -f my-overrides.yaml
 ```
 
 ### Installation with Airflow
@@ -80,21 +141,21 @@ helm install my-cornflow ./helm-charts/cornflow -f my-overrides.yaml
 ```bash
 # Enable Airflow in the values.yaml file and install
 # Edit values.yaml and set airflow.enabled: true
-helm install my-cornflow ./helm-charts/cornflow
+helm install my-project ./helm-charts/cornflow
 
 # Or enable Airflow manually during installation
-helm install my-cornflow ./helm-charts/cornflow --set airflow.enabled=true
+helm install my-project ./helm-charts/cornflow --set airflow.enabled=true
 
 # Install with custom Airflow configuration
-helm install my-cornflow ./helm-charts/cornflow \
+helm install my-project ./helm-charts/cornflow \
   --set airflow.enabled=true \
   --set airflow.users[0].password=my-secure-password \
   --set airflow.postgresql.auth.password=my-db-password
 ```
 
 **Note:** Airflow uses its own PostgreSQL database, separate from Cornflow's database. This simplifies the configuration and avoids potential conflicts. Each service has unique names:
-- Cornflow PostgreSQL: `my-cornflow-cornflow-postgresql`
-- Airflow PostgreSQL: `my-cornflow-airflow-postgresql`
+- Cornflow PostgreSQL: `my-project-cornflow-postgresql`
+- Airflow PostgreSQL: `my-project-postgresql`
 
 ## Configuration
 
@@ -144,8 +205,8 @@ airflowPostgresql:
 ```
 
 **Important:** The chart automatically disables Airflow's built-in PostgreSQL to prevent conflicts. Each database has unique service names:
-- Cornflow: `my-cornflow-cornflow-postgresql`
-- Airflow: `my-cornflow-airflow-postgresql`
+- Cornflow: `my-project-cornflow-postgresql`
+- Airflow: `my-project-postgresql`
 
 ### Airflow Configuration
 
@@ -340,7 +401,7 @@ If you have enabled Ingress, you can access directly through the configured URLs
 kubectl logs -f deployment/my-cornflow-cornflow
 
 # Cornflow PostgreSQL logs
-kubectl logs -f deployment/my-cornflow-cornflow-postgresql
+kubectl logs -f deployment/my-project-cornflow-postgresql
 
 # Airflow PostgreSQL logs (if Airflow is enabled)
 kubectl logs -f deployment/my-cornflow-airflow-postgresql
@@ -374,7 +435,7 @@ autoscaling:
 
 ```bash
 # Cornflow backup
-kubectl exec deployment/my-cornflow-cornflow-postgresql -- pg_dump -U cornflow cornflow > cornflow_backup.sql
+kubectl exec deployment/my-project-cornflow-postgresql -- pg_dump -U cornflow cornflow > cornflow_backup.sql
 
 # Airflow backup (if Airflow is enabled)
 kubectl exec deployment/my-cornflow-airflow-postgresql -- pg_dump -U airflow airflow > airflow_backup.sql
@@ -384,7 +445,7 @@ kubectl exec deployment/my-cornflow-airflow-postgresql -- pg_dump -U airflow air
 
 ```bash
 # Restore Cornflow
-kubectl exec -i deployment/my-cornflow-cornflow-postgresql -- psql -U cornflow cornflow < cornflow_backup.sql
+kubectl exec -i deployment/my-project-cornflow-postgresql -- psql -U cornflow cornflow < cornflow_backup.sql
 
 # Restore Airflow (if Airflow is enabled)
 kubectl exec -i deployment/my-cornflow-airflow-postgresql -- psql -U airflow airflow < airflow_backup.sql
@@ -404,8 +465,8 @@ kubectl exec -i deployment/my-cornflow-airflow-postgresql -- psql -U airflow air
    - Check database credentials
    - Verify network configuration
    - Ensure each service connects to its correct database:
-     - Cornflow → `my-cornflow-cornflow-postgresql`
-     - Airflow → `my-cornflow-airflow-postgresql`
+     - Cornflow → `my-project-cornflow-postgresql`
+           - Airflow → `my-project-postgresql`
 
 3. **Ingress issues**
    - Verify that Ingress controller is installed

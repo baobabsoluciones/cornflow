@@ -26,7 +26,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "cornflow.fullname" . }}-airflow-worker
+  name: {{ .Release.Name }}-airflow-worker
   labels:
     {{- include "cornflow.labels" . | nindent 4 }}
     app.kubernetes.io/component: airflow-rbac
@@ -47,16 +47,16 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "cornflow.fullname" . }}-airflow-worker
+  name: {{ .Release.Name }}-airflow-worker
   labels:
     {{- include "cornflow.labels" . | nindent 4 }}
     app.kubernetes.io/component: airflow-rbac
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "cornflow.fullname" . }}-airflow-worker
+  name: {{ .Release.Name }}-airflow-worker
 subjects:
 - kind: ServiceAccount
-  name: {{ include "cornflow.fullname" . }}-airflow-scheduler
+  name: {{ .Release.Name }}-airflow-scheduler
   namespace: {{ .Release.Namespace }}
 {{- end }} 

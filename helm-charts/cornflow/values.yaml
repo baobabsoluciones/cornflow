@@ -18,6 +18,30 @@
 # Default values for Cornflow with Airflow.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#
+# =============================================================================
+# IMPORTANT: CONFIGURATION FOR DIFFERENT RELEASE NAMES
+# =============================================================================
+#
+# This chart is parameterized to work with different release names.
+# If you install with: helm install my-project ./helm-charts/cornflow
+# Or with: helm install cornflow-staging ./helm-charts/cornflow
+#
+# The following variables need to be changed MANUALLY according to your release name:
+#
+# 1. In the cornflow.env section:
+#    - CORNFLOW_DB_HOST: Automatically configured (no manual change needed)
+#    - AIRFLOW_URL: Automatically configured (no manual change needed)
+#
+# 2. In the airflow.extraVolumes section:
+#    - claimName: RELEASE_NAME-airflow-dags
+#      Change RELEASE_NAME to your release name
+#
+# 3. In the airflow.env section:
+#    - AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
+#      Change RELEASE_NAME to your release name
+#
+# =============================================================================
 
 # =============================================================================
 # GLOBAL CONFIGURATION
@@ -118,7 +142,7 @@ cornflow:
     # DATABASE CONFIGURATION
     # =============================================================================
     DEFAULT_POSTGRES: "1"  # Use Cornflow's specific DB variables
-    CORNFLOW_DB_HOST: "my-cornflow-cornflow-postgresql"
+    # IMPORTANT: DB_HOST is fixes by default to your release name (e.g., my-project, cornflow, etc.)
     CORNFLOW_DB_PORT: "5432"
     CORNFLOW_DB_USER: "cornflow"
     CORNFLOW_DB_PASSWORD: "cornflow"
@@ -137,7 +161,6 @@ cornflow:
     CORS_ORIGINS: "*"  # Restrict for production
     LOG_LEVEL: "20"  # INFO level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR)
     SIGNUP_ACTIVATED: "1"  # Set to "0" for production
-    CORNFLOW_SERVICE_USER: "service_user"
     SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1"  # Set to "0" for production
     OPEN_DEPLOYMENT: "1"  # Set to "0" for production
     USER_ACCESS_ALL_OBJECTS: "0"  # Planner users can access other users' objects
@@ -204,7 +227,7 @@ cornflow:
     # =============================================================================
     # AIRFLOW CONFIGURATION
     # =============================================================================
-    AIRFLOW_URL: "http://my-cornflow-webserver:8080"  # Auto-configured when Airflow is enabled
+    # AIRFLOW_URL: Automatically configured in the template
     AIRFLOW_USER: "admin"  # Must match airflow.users[0].username
     AIRFLOW_PWD: "admin"  # Must match airflow.users[0].password
 
@@ -213,6 +236,7 @@ cornflow:
 # =============================================================================
 
 # PostgreSQL configuration for Cornflow
+# change to false if you are using an external database
 postgresql:
   enabled: true
   image:
@@ -278,11 +302,7 @@ podDisruptionBudget:
   minAvailable: 1
 
 # =============================================================================
-# AIRFLOW CONFIGURATION
-# =============================================================================
-
-# =============================================================================
-# AIRFLOW CONFIGURATION (OPTIONAL)
+# AIRFLOW CONFIGURATION (OPTIONAL - Set enabled: true to deploy Airflow with Cornflow)
 # =============================================================================
 
 # Airflow configuration - Set enabled: true to deploy Airflow with Cornflow
@@ -395,7 +415,8 @@ airflow:
   extraVolumes:
     - name: dags
       persistentVolumeClaim:
-        claimName: my-cornflow-airflow-dags
+        # IMPORTANT: Change RELEASE_NAME to your release name (e.g., cornflow, cornflow-staging, etc.)
+        claimName: RELEASE_NAME-airflow-dags  # Change RELEASE_NAME to your release name
       
   # Extra volume mounts for init containers
   extraVolumeMounts:
@@ -410,7 +431,9 @@ airflow:
       value: "/opt/airflow/dags/deps"
     # Cornflow configuration for Airflow
     - name: AIRFLOW_CONN_CF_URI
-      value: "http://service_user:Service_user1234@my-cornflow-cornflow:5000/"
+      # IMPORTANT: Change RELEASE_NAME to your release name (e.g., decision-ops-cornflow, my-project-cornflow, local-cornflow-cornflow, production-porject--cornflow, etc.)
+      # Example: value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
+      value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
 
 # =============================================================================
 # PRODUCTION RECOMMENDATIONS
