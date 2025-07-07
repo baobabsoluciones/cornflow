@@ -143,6 +143,11 @@ cornflow:
     USER_ACCESS_ALL_OBJECTS: "0"  # Planner users can access other users' objects
     TOKEN_DURATION: "24"  # Token duration in hours
     PWD_ROTATION_TIME: "120"  # Password rotation time in days
+
+    # =============================================================================
+    # FLASK CONFIGURATION
+    # =============================================================================
+    FLASK_ENV: "development"
     
     # =============================================================================
     # LDAP CONFIGURATION (for LDAP authentication)
@@ -185,11 +190,16 @@ cornflow:
     CF_ALARMS_ENDPOINT: "0"  # Enable alarms endpoints
     
     # =============================================================================
+    # SERVICE USER CONFIGURATION
+    # =============================================================================
+    CORNFLOW_SERVICE_USER: "service_user"
+    CORNFLOW_SERVICE_PWD: "Service_user1234"  # CHANGE THIS FOR PRODUCTION
+
+    # =============================================================================
     # ADMIN USER CONFIGURATION
     # =============================================================================
     CORNFLOW_ADMIN_USER: "cornflow_admin"
     CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"  # CHANGE THIS FOR PRODUCTION
-    CORNFLOW_SERVICE_PWD: "Service_user1234"  # CHANGE THIS FOR PRODUCTION
     
     # =============================================================================
     # AIRFLOW CONFIGURATION
