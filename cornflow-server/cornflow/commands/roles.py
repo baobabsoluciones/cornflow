@@ -1,22 +1,23 @@
-def register_roles_command(verbose: bool = True):
+def register_roles_command(external_app: str = None, verbose: bool = True):
 
     from sqlalchemy.exc import DBAPIError, IntegrityError
     from flask import current_app
 
-    from cornflow.models import RoleModel
-    from cornflow.shared.const import ROLES_MAP
     from cornflow.shared import db
+    from cornflow.commands.auxiliar import (
+        get_all_external,
+        get_all_resources,
+        get_new_roles_to_add,
+    )
 
-    roles_registered = [role.name for role in RoleModel.get_all_objects()]
+    resources_to_register, extra_permissions, _ = get_all_external(external_app)
+    resources_roles_with_access = get_all_resources(resources_to_register)
+    new_roles_to_add = get_new_roles_to_add(
+        extra_permissions, resources_roles_with_access
+    )
 
-    roles_to_register = [
-        RoleModel({"id": key, "name": value})
-        for key, value in ROLES_MAP.items()
-        if value not in roles_registered
-    ]
-
-    if len(roles_to_register) > 0:
-        db.session.bulk_save_objects(roles_to_register)
+    if len(new_roles_to_add) > 0:
+        db.session.bulk_save_objects(new_roles_to_add)
 
     try:
         db.session.commit()
@@ -38,8 +39,8 @@ def register_roles_command(verbose: bool = True):
             current_app.logger.error(f"Unknown error on roles sequence updating: {e}")
 
     if verbose:
-        if len(roles_to_register) > 0:
-            current_app.logger.info(f"Roles registered: {roles_to_register}")
+        if len(new_roles_to_add) > 0:
+            current_app.logger.info(f"Roles registered: {new_roles_to_add}")
         else:
             current_app.logger.info("No new roles to be registered")
 

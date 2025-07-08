@@ -407,10 +407,10 @@ class Auth:
                 "The permission for this endpoint is not in the database."
             )
             raise NoPermission(
-                error="You do not have permission to access this endpoint",
+                error="The permission for this endpoint is not in the database.",
                 status_code=403,
                 log_txt=f"Error while user {user_id} tries to access endpoint. "
-                f"The user does not permission to access. ",
+                f"The permission for this endpoint is not in the database.",
             )
 
         for role in user_roles:
@@ -425,7 +425,7 @@ class Auth:
             error="You do not have permission to access this endpoint",
             status_code=403,
             log_txt=f"Error while user {user_id} tries to access endpoint {view_id} with action {action_id}. "
-            f"The user does not permission to access. ",
+            f"The user does not have permission to access. ",
         )
 
     @staticmethod
