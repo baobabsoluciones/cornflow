@@ -158,4 +158,3 @@ CONDITIONAL_ENDPOINTS = {
     "signup": "/signup/",
     "login": "/login/",
 }
-
