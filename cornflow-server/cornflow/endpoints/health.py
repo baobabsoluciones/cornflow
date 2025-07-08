@@ -52,28 +52,13 @@ class HealthEndpoint(BaseMetaResource):
         return {"cornflow_status": cornflow_status, "backend_status": backend_status,
                 "cornflow_version": cornflow_version}
 
-    def check_backend_status(self):
-        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:
-            return self._check_airflow_status()
-        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:
-            return self._check_databricks_status()
-        else:
-            raise EndpointNotImplemented()
-
-    @staticmethod
-    def _check_airflow_status():
-        af_client = Airflow.from_config(current_app.config)
-        airflow_status = STATUS_UNHEALTHY
-        if af_client.is_alive():
-            airflow_status = STATUS_HEALTHY
-
-        return airflow_status
-
-    @staticmethod
-    def _check_databricks_status():
-        db_client = Databricks.from_config(current_app.config)
-        databricks_status = STATUS_UNHEALTHY
-        if db_client.is_alive():
-            databricks_status = STATUS_HEALTHY
-
-        return databricks_status
+    def check_backend_status(self):  
+        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:  
+            client = Airflow.from_config(current_app.config)  
+        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:  
+            client = Databricks.from_config(current_app.config)  
+        else:  
+            raise EndpointNotImplemented()  
+        if client.is_alive():  
+            return STATUS_HEALTHY  
+        return STATUS_UNHEALTHY  
