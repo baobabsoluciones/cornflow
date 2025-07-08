@@ -7,7 +7,7 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.2.3"
+CORNFLOW_VERSION = "2.0.0a21"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
