@@ -3,7 +3,6 @@ External endpoints to launch the solution check on an execution
 """
 
 # Import from libraries
-# TODO: CHANGE BEFORE MERGING
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app

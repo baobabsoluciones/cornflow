@@ -85,14 +85,14 @@ def init_cornflow_service():
                 config["cornflow_service_email"],
                 config["cornflow_service_pwd"],
             )
-        if config["cornflow_backend"] == AIRFLOW_BACKEND:
-            _sync_with_airflow(
-                config["airflow_url"],
-                config["airflow_user"],
-                config["airflow_pwd"],
-                config["open_deployment"],
-                external_app=False,
-            )
+            if config["cornflow_backend"] == AIRFLOW_BACKEND:
+                _sync_with_airflow(
+                    config["airflow_url"],
+                    config["airflow_user"],
+                    config["airflow_pwd"],
+                    config["open_deployment"],
+                    external_app=False,
+                )
         _start_application(external_application, environment)
 
     elif external_application == 1:

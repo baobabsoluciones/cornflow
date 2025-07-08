@@ -73,49 +73,40 @@ class ExecutionEndpoint(BaseMetaResource):
         super().__init__()
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
+        self._init_orch()
 
     def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
+        """Initialize orchestrator configuration once during object creation"""
+        self._orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self._orch_type == AIRFLOW_BACKEND:
+            self._orch_client = Airflow.from_config(current_app.config)
+            self._orch_error = AirflowError
+            self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self._orch_const = config_orchestrator["airflow"]
+        elif self._orch_type == DATABRICKS_BACKEND:
+            self._orch_client = Databricks.from_config(current_app.config)
+            self._orch_error = DatabricksError
+            self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self._orch_const = config_orchestrator["databricks"]
 
     @property
     def orch_type(self):
-        self._init_orch()
         return self._orch_type
 
     @property
     def orch_client(self):
-        self._init_orch()
         return self._orch_client
 
     @property
     def orch_error(self):
-        self._init_orch()
         return self._orch_error
 
     @property
     def orch_to_state_map(self):
-        self._init_orch()
         return self._orch_to_state_map
 
     @property
     def orch_const(self):
-        self._init_orch()
         return self._orch_const
 
     @doc(description="Get all executions", tags=["Executions"])
@@ -338,49 +329,40 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         self.model = ExecutionModel
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
+        self._init_orch()
 
     def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
+        """Initialize orchestrator configuration once during object creation"""
+        self._orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self._orch_type == AIRFLOW_BACKEND:
+            self._orch_client = Airflow.from_config(current_app.config)
+            self._orch_error = AirflowError
+            self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self._orch_const = config_orchestrator["airflow"]
+        elif self._orch_type == DATABRICKS_BACKEND:
+            self._orch_client = Databricks.from_config(current_app.config)
+            self._orch_error = DatabricksError
+            self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self._orch_const = config_orchestrator["databricks"]
 
     @property
     def orch_type(self):
-        self._init_orch()
         return self._orch_type
 
     @property
     def orch_client(self):
-        self._init_orch()
         return self._orch_client
 
     @property
     def orch_error(self):
-        self._init_orch()
         return self._orch_error
 
     @property
     def orch_to_state_map(self):
-        self._init_orch()
         return self._orch_to_state_map
 
     @property
     def orch_const(self):
-        self._init_orch()
         return self._orch_const
 
     @doc(description="Re-launch an execution", tags=["Executions"])
@@ -495,49 +477,40 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
         super().__init__()
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
+        self._init_orch()
 
     def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
+        """Initialize orchestrator configuration once during object creation"""
+        self._orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self._orch_type == AIRFLOW_BACKEND:
+            self._orch_client = Airflow.from_config(current_app.config)
+            self._orch_error = AirflowError
+            self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self._orch_const = config_orchestrator["airflow"]
+        elif self._orch_type == DATABRICKS_BACKEND:
+            self._orch_client = Databricks.from_config(current_app.config)
+            self._orch_error = DatabricksError
+            self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self._orch_const = config_orchestrator["databricks"]
 
     @property
     def orch_type(self):
-        self._init_orch()
         return self._orch_type
 
     @property
     def orch_client(self):
-        self._init_orch()
         return self._orch_client
 
     @property
     def orch_error(self):
-        self._init_orch()
         return self._orch_error
 
     @property
     def orch_to_state_map(self):
-        self._init_orch()
         return self._orch_to_state_map
 
     @property
     def orch_const(self):
-        self._init_orch()
         return self._orch_const
 
 
@@ -650,52 +623,40 @@ class ExecutionStatusEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = ExecutionModel
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
+        self._init_orch()
+
+    def _init_orch(self):
+        """Initialize orchestrator configuration once during object creation"""
+        self._orch_type = current_app.config["CORNFLOW_BACKEND"]
+        if self._orch_type == AIRFLOW_BACKEND:
+            self._orch_client = Airflow.from_config(current_app.config)
+            self._orch_error = AirflowError
+            self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
+            self._orch_const = config_orchestrator["airflow"]
+        elif self._orch_type == DATABRICKS_BACKEND:
+            self._orch_client = Databricks.from_config(current_app.config)
+            self._orch_error = DatabricksError
+            self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+            self._orch_const = config_orchestrator["databricks"]
 
     @property
     def orch_type(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
         return self._orch_type
 
     @property
     def orch_client(self):
-        if self._orch_client is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
         return self._orch_client
 
     @property
     def orch_error(self):
-        if self._orch_error is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_error = AirflowError
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_error = DatabricksError
         return self._orch_error
 
     @property
     def orch_to_state_map(self):
-        if self._orch_to_state_map is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
         return self._orch_to_state_map
 
     @property
     def orch_const(self):
-        if self._orch_const is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_const = config_orchestrator["airflow"]
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_const = config_orchestrator["databricks"]
         return self._orch_const
 
     @doc(description="Get status of an execution", tags=["Executions"])
