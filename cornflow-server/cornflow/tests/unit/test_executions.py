@@ -27,7 +27,12 @@ from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 
 
-class TestExecutionsListEndpointBase(BaseTestCases.ListFilters):
+class BaseExecutionListTest(BaseTestCases.ListFilters):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
+
     def setUp(self):
         super().setUp()
 
@@ -66,6 +71,10 @@ class TestExecutionsListEndpointBase(BaseTestCases.ListFilters):
             "updated_at",
         ]
 
+    def patch_orchestrator(self, client_class):
+        if self.orchestrator_patch_fn:
+            self.orchestrator_patch_fn(client_class)
+
     def test_new_execution(self):
         self.create_new_row(self.url, self.model, payload=self.payload)
 
@@ -81,175 +90,116 @@ class TestExecutionsListEndpointBase(BaseTestCases.ListFilters):
         )
         self.assertEqual(response["config"]["block_model"]["solver"], "mip.gurobi")
 
-    def test_new_execution_run(self, orch_client_class):
-        self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+    def test_new_execution_run(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
-    def test_new_execution_bad_config(self, orch_client_class):
-        response = self.create_new_row(
-            EXECUTION_URL,
-            self.model,
-            payload=self.bad_payload,
-            expected_status=400,
-            check_payload=False,
-        )
-        self.assertIn("error", response)
-        self.assertIn("jsonschema_errors", response)
+    def test_new_execution_bad_config(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            response = self.create_new_row(
+                EXECUTION_URL,
+                self.model,
+                payload=self.bad_payload,
+                expected_status=400,
+                check_payload=False,
+            )
+            self.assertIn("error", response)
+            self.assertIn("jsonschema_errors", response)
 
-    def test_new_execution_partial_config(self, orch_client_class):
-        self.payload["config"].pop("solver")
-        response = self.create_new_row(
-            EXECUTION_URL, self.model, payload=self.payload, check_payload=False
-        )
-        self.assertIn("solver", response["config"])
-        self.assertEqual(response["config"]["solver"], "cbc")
+    def test_new_execution_partial_config(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.payload["config"].pop("solver")
+            response = self.create_new_row(
+                EXECUTION_URL, self.model, payload=self.payload, check_payload=False
+            )
+            self.assertIn("solver", response["config"])
+            self.assertEqual(response["config"]["solver"], "cbc")
 
-    def test_new_execution_with_solution(self, orch_client_class):
-        self.payload["data"] = self.solution
-        response = self.create_new_row(
-            EXECUTION_URL,
-            self.model,
-            payload=self.payload,
-            check_payload=False,
-        )
+    def test_new_execution_with_solution(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.payload["data"] = self.solution
+            response = self.create_new_row(
+                EXECUTION_URL,
+                self.model,
+                payload=self.payload,
+                check_payload=False,
+            )
 
-    def test_new_execution_with_solution_bad(self, orch_client_class):
-        self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
-        response = self.create_new_row(
-            EXECUTION_URL,
-            self.model,
-            payload=self.payload,
-            check_payload=False,
-            expected_status=400,
-        )
-        self.assertIn("error", response)
-        self.assertIn("jsonschema_errors", response)
+    def test_new_execution_with_solution_bad(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.payload["data"] = {"message": "THIS IS NOT A VALID SOLUTION"}
+            response = self.create_new_row(
+                EXECUTION_URL,
+                self.model,
+                payload=self.payload,
+                check_payload=False,
+                expected_status=400,
+            )
+            self.assertIn("error", response)
+            self.assertIn("jsonschema_errors", response)
 
-    def test_new_execution_no_instance(self, orch_client_class):
-        payload = dict(self.payload)
-        payload["instance_id"] = "bad_id"
-        response = self.client.post(
-            self.url,
-            data=json.dumps(payload),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(404, response.status_code)
-        self.assertTrue("error" in response.json)
+    def test_new_execution_no_instance(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            payload = dict(self.payload)
+            payload["instance_id"] = "bad_id"
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+            self.assertEqual(404, response.status_code)
+            self.assertTrue("error" in response.json)
 
-    def test_get_executions(self, orch_client_class):
-        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
+    def test_get_executions(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
 
-    def test_get_no_executions(self, orch_client_class):
-        self.get_no_rows(self.url)
+    def test_get_no_executions(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.get_no_rows(self.url)
 
-    def test_get_executions_superadmin(self, orch_client_class):
-        self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
-        token = self.create_service_user()
-        rows = self.client.get(
-            self.url, follow_redirects=True, headers=self.get_header_with_auth(token)
-        )
-        self.assertEqual(len(rows.json), len(self.payloads))
-
-
-class TestExecutionsListEndpointAirflow(TestExecutionsListEndpointBase):
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_run(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_run(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_bad_config(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_bad_config(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_partial_config(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_partial_config(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_with_solution(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_with_solution(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_with_solution_bad(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_with_solution_bad(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_new_execution_no_instance(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_new_execution_no_instance(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_get_executions(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_get_executions(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_get_no_executions(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_get_no_executions(af_client_class)
-
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_get_executions_superadmin(self, af_client_class):
-        patch_af_client(af_client_class)
-        super().test_get_executions_superadmin(af_client_class)
+    def test_get_executions_superadmin(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.get_rows(self.url, self.payloads, keys_to_check=self.keys_to_check)
+            token = self.create_service_user()
+            rows = self.client.get(
+                self.url,
+                follow_redirects=True,
+                headers=self.get_header_with_auth(token),
+            )
+            self.assertEqual(len(rows.json), len(self.payloads))
 
 
-class TestExecutionsListEndpointDatabricks(TestExecutionsListEndpointBase):
+class TestExecutionsListEndpointAirflow(BaseExecutionListTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsListEndpointDatabricks(BaseExecutionListTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
+
     def create_app(self):
         app = create_app("testing-databricks")
         return app
 
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_run(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_run(db_client_class)
 
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_bad_config(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_bad_config(db_client_class)
+class BaseExecutionRelaunchTest(CustomTestCase):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
 
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_partial_config(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_partial_config(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_with_solution(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_with_solution(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_with_solution_bad(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_with_solution_bad(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_new_execution_no_instance(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_new_execution_no_instance(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_get_executions(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_get_executions(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_get_no_executions(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_get_no_executions(db_client_class)
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_get_executions_superadmin(self, db_client_class):
-        patch_db_client(db_client_class)
-        super().test_get_executions_superadmin(db_client_class)
-
-
-class TestExecutionRelaunchEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
 
@@ -266,6 +216,10 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
             return temp
 
         self.payload = load_file_fk(EXECUTION_PATH)
+
+    def patch_orchestrator(self, client_class):
+        if self.orchestrator_patch_fn:
+            self.orchestrator_patch_fn(client_class)
 
     def test_relaunch_execution(self):
         idx = self.create_new_row(self.url, self.model, payload=self.payload)
@@ -298,39 +252,40 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.assertEqual(row["config"], self.payload["config"])
         self.assertIsNone(row["checks"])
 
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_relaunch_execution_run(self, af_client_class):
-        patch_af_client(af_client_class)
+    def test_relaunch_execution_run(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(self.url, self.model, payload=self.payload)
 
-        idx = self.create_new_row(self.url, self.model, payload=self.payload)
+            # Add solution checks to see if they are deleted correctly
+            token = self.create_service_user()
+            self.update_row(
+                url=DAG_URL + idx + "/",
+                payload_to_check=dict(),
+                change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
+                token=token,
+                check_payload=False,
+            )
 
-        # Add solution checks to see if they are deleted correctly
-        token = self.create_service_user()
-        self.update_row(
-            url=DAG_URL + idx + "/",
-            payload_to_check=dict(),
-            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
-            token=token,
-            check_payload=False,
-        )
+            url = EXECUTION_URL + idx + "/relaunch/"
+            self.payload["config"]["warmStart"] = False
+            response = self.client.post(
+                url,
+                data=json.dumps({"config": self.payload["config"]}),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+            self.assertEqual(201, response.status_code)
 
-        url = EXECUTION_URL + idx + "/relaunch/"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(201, response.status_code)
+            url = EXECUTION_URL + idx + "/data"
+            row = self.client.get(
+                url,
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            ).json
 
-        url = EXECUTION_URL + idx + "/data"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        ).json
-
-        self.assertEqual(row["config"], self.payload["config"])
-        self.assertIsNone(row["checks"])
+            self.assertEqual(row["config"], self.payload["config"])
+            self.assertIsNone(row["checks"])
 
     def test_relaunch_invalid_execution(self):
         idx = "thisIsAnInvalidExecutionId"
@@ -345,107 +300,26 @@ class TestExecutionRelaunchEndpoint(CustomTestCase):
         self.assertEqual(404, response.status_code)
 
 
-class TestExecutionRelaunchEndpointDatabricks(CustomTestCase):
-    def setUp(self):
-        super().setUp()
+class TestExecutionRelaunchEndpointAirflow(BaseExecutionRelaunchTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
 
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        self.url = EXECUTION_URL_NORUN
-        self.model = ExecutionModel
 
-        def load_file_fk(_file):
-            with open(_file) as f:
-                temp = json.load(f)
-            temp["instance_id"] = fk_id
-            return temp
-
-        self.payload = load_file_fk(EXECUTION_PATH)
+class TestExecutionRelaunchEndpointDatabricks(BaseExecutionRelaunchTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
 
     def create_app(self):
         app = create_app("testing-databricks")
         return app
 
-    def test_relaunch_execution(self):
-        idx = self.create_new_row(self.url, self.model, payload=self.payload)
 
-        # Add solution checks to see if they are deleted correctly
-        token = self.create_service_user()
-        self.update_row(
-            url=DAG_URL + idx + "/",
-            payload_to_check=dict(),
-            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
-            token=token,
-            check_payload=False,
-        )
+class BaseExecutionDetailTest(CustomTestCase, BaseTestCases.DetailEndpoint):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
 
-        url = EXECUTION_URL + idx + "/relaunch/?run=0"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(201, response.status_code)
-
-        url = EXECUTION_URL + idx + "/data"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        ).json
-
-        self.assertEqual(row["config"], self.payload["config"])
-        self.assertIsNone(row["checks"])
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_relaunch_execution_run(self, db_client_class):
-        patch_db_client(db_client_class)
-
-        idx = self.create_new_row(self.url, self.model, payload=self.payload)
-
-        # Add solution checks to see if they are deleted correctly
-        token = self.create_service_user()
-        self.update_row(
-            url=DAG_URL + idx + "/",
-            payload_to_check=dict(),
-            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
-            token=token,
-            check_payload=False,
-        )
-
-        url = EXECUTION_URL + idx + "/relaunch/"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(201, response.status_code)
-
-        url = EXECUTION_URL + idx + "/data"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        ).json
-
-        self.assertEqual(row["config"], self.payload["config"])
-        self.assertIsNone(row["checks"])
-
-    def test_relaunch_invalid_execution(self):
-        idx = "thisIsAnInvalidExecutionId"
-        url = EXECUTION_URL + idx + "/relaunch/?run=0"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(404, response.status_code)
-
-
-class TestExecutionsDetailEndpointMock(CustomTestCase):
     def setUp(self):
         super().setUp()
         with open(INSTANCE_PATH) as f:
@@ -475,20 +349,12 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         with open(EXECUTION_PATH) as f:
             self.payload = json.load(f)
         self.payload["instance_id"] = fk_id
-
-
-class TestExecutionsDetailEndpointAirflow(
-    TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
-):
-    def setUp(self):
-        super().setUp()
         self.query_arguments = {"run": 0}
 
-    def create_app(self):
-        app = create_app("testing")  # configuración para Airflow
-        return app
+    def patch_orchestrator(self, client_class):
+        if self.orchestrator_patch_fn:
+            self.orchestrator_patch_fn(client_class)
 
-    # TODO: this test should be moved as it is not using the detail endpoint
     def test_incomplete_payload2(self):
         payload = {"description": "arg", "instance_id": self.payload["instance_id"]}
         response = self.create_new_row(
@@ -585,23 +451,21 @@ class TestExecutionsDetailEndpointAirflow(
 
         self.assertEqual(row.json["checks"], None)
 
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_stop_execution(self, af_client_class):
-        patch_af_client(af_client_class)
+    def test_stop_execution(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+            response = self.client.post(
+                self.url + str(idx) + "/",
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
 
-        response = self.client.post(
-            self.url + str(idx) + "/",
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(response.json["message"], "The execution has been stopped")
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(response.json["message"], "The execution has been stopped")
 
     def test_edit_execution(self):
-
         id_new_instance = self.create_new_row(
             INSTANCE_URL, InstanceModel, self.instance_payload
         )
@@ -632,145 +496,76 @@ class TestExecutionsDetailEndpointAirflow(
             payload_to_check,
         )
 
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_get_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        keys_to_check = ["state", "message", "id", "data_hash"]
-        data = self.get_one_row(
-            EXECUTION_URL + idx + "/status/",
-            payload,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertEqual(data["state"], 1)
+    def test_get_one_status(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            keys_to_check = ["state", "message", "id", "data_hash"]
+            data = self.get_one_row(
+                EXECUTION_URL + idx + "/status/",
+                payload,
+                check_payload=False,
+                keys_to_check=keys_to_check,
+            )
+            self.assertEqual(data["state"], -1)
 
-    @patch("cornflow.endpoints.execution.Airflow")
-    def test_put_one_status(self, af_client_class):
-        patch_af_client(af_client_class)
+    def test_put_one_status(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            response = self.client.put(
+                EXECUTION_URL + idx + "/status/",
+                data=json.dumps({"status": 0}),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
 
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        response = self.client.put(
-            EXECUTION_URL + idx + "/status/",
-            data=json.dumps({"status": 0}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
-
-
-class TestExecutionsDetailEndpointDatabricks(
-    TestExecutionsDetailEndpointMock, BaseTestCases.DetailEndpoint
-):
-    def setUp(self):
-        super().setUp()
-        self.url = self.url
-        self.query_arguments = {"run": 0}
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
-
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_stop_execution(self, db_client_class):
-        patch_db_client(db_client_class)
-
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-
-        response = self.client.post(
-            self.url + str(idx) + "/",
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            response.json["message"], "This feature is not available for Databricks"
-        )
-
-    def test_edit_execution(self):
-
-        id_new_instance = self.create_new_row(
-            INSTANCE_URL, InstanceModel, self.instance_payload
-        )
-        idx = self.create_new_row(
-            self.url_with_query_arguments(), self.model, self.payload
-        )
-
-        # Extract the data from data/edit_execution_solution.json
-        with open(EDIT_EXECUTION_SOLUTION) as f:
-            data = json.load(f)
-
-        data = {
-            "name": "new_name",
-            "description": "Updated description",
-            "data": data,
-            "instance_id": id_new_instance,
-        }
-        payload_to_check = {
-            "id": idx,
-            "name": "new_name",
-            "description": "Updated description",
-            "data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-            "instance_id": "805bad3280c95e45384dc6bd91a41317f9a7858c",
-        }
-        self.update_row(
-            self.url + str(idx) + "/",
-            data,
-            payload_to_check,
-        )
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(
+                f"execution {idx} updated correctly", response.json["message"]
+            )
 
 
-class TestExecutionsStatusEndpointDatabricks(TestExecutionsDetailEndpointMock):
-    def setUp(self):
-        super().setUp()
-        self.response_items = {"id", "name", "status"}
-        self.items_to_check = []
+class TestExecutionsDetailEndpointAirflow(BaseExecutionDetailTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsDetailEndpointDatabricks(BaseExecutionDetailTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
 
     def create_app(self):
         app = create_app("testing-databricks")
         return app
 
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_get_one_status(self, db_client_class):
-        patch_db_client(db_client_class)
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        keys_to_check = ["state", "message", "id", "data_hash"]
-        data = self.get_one_row(
-            EXECUTION_URL + idx + "/status/",
-            payload,
-            check_payload=False,
-            keys_to_check=keys_to_check,
-        )
-        self.assertEqual(data["state"], -1)
+    def test_stop_execution(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
-    @patch("cornflow.endpoints.execution.Databricks")
-    def test_put_one_status(self, db_client_class):
-        patch_db_client(db_client_class)
+            response = self.client.post(
+                self.url + str(idx) + "/",
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
 
-        idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        response = self.client.put(
-            EXECUTION_URL + idx + "/status/",
-            data=json.dumps({"status": 0}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(f"execution {idx} updated correctly", response.json["message"])
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(
+                response.json["message"], "This feature is not available for Databricks"
+            )
 
 
-class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
+class BaseExecutionDataTest(BaseExecutionDetailTest):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
+
     def setUp(self):
         super().setUp()
         self.response_items = {"id", "name", "data"}
@@ -812,53 +607,26 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
         )
 
 
-class TestExecutionsDataEndpointDatabricks(TestExecutionsDetailEndpointMock):
-    def setUp(self):
-        super().setUp()
-        self.response_items = {"id", "name", "data"}
-        self.items_to_check = ["name"]
-        self.keys_to_check = [
-            "created_at",
-            "checks",
-            "instance_id",
-            "schema",
-            "data",
-            "user_id",
-            "message",
-            "data_hash",
-            "log",
-            "config",
-            "description",
-            "state",
-            "name",
-            "id",
-        ]
+class TestExecutionsDataEndpointAirflow(BaseExecutionDataTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsDataEndpointDatabricks(BaseExecutionDataTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
 
     def create_app(self):
         app = create_app("testing-databricks")
         return app
 
-    def test_get_one_execution(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        self.url = EXECUTION_URL + idx + "/data/"
-        payload = dict(self.payload)
-        payload["id"] = idx
-        self.get_one_row(self.url, payload, keys_to_check=self.keys_to_check)
 
-    def test_get_one_execution_superadmin(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        token = self.create_service_user()
-        self.get_one_row(
-            EXECUTION_URL + idx + "/data/",
-            payload,
-            token=token,
-            keys_to_check=self.keys_to_check,
-        )
+class BaseExecutionLogTest(BaseExecutionDetailTest):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
 
-
-class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
     def setUp(self):
         super().setUp()
         self.response_items = {"id", "name", "log", "indicators"}
@@ -903,74 +671,104 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
         )
 
 
-class TestExecutionsLogEndpointDatabricks(TestExecutionsDetailEndpointMock):
+class TestExecutionsLogEndpointAirflow(BaseExecutionLogTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsLogEndpointDatabricks(BaseExecutionLogTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
+
+    def create_app(self):
+        app = create_app("testing-databricks")
+        return app
+
+
+class BaseExecutionModelTest(BaseExecutionDetailTest):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
+
+    def test_repr_method(self):
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        self.repr_method(idx, f"<Execution {idx}>")
+
+    def test_str_method(self):
+        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+        self.str_method(idx, f"<Execution {idx}>")
+
+
+class TestExecutionsModelAirflow(BaseExecutionModelTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsModelDatabricks(BaseExecutionModelTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
+
+    def create_app(self):
+        app = create_app("testing-databricks")
+        return app
+
+
+class BaseExecutionStatusTest(BaseExecutionDetailTest):
+    # e.g. "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_target = None
+    # e.g. patch_af_client
+    orchestrator_patch_fn = None
+
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "log", "indicators"}
-        self.items_to_check = ["name"]
-        self.keys_to_check = [
-            "created_at",
-            "id",
-            "log_text",
-            "instance_id",
-            "state",
-            "message",
-            "description",
-            "data_hash",
-            "name",
-            "log",
-            "schema",
-            "user_id",
-            "config",
-            "indicators",
-            "username",
-            "updated_at",
-        ]
+        self.response_items = {"id", "state", "message", "data_hash"}
+        self.items_to_check = ["state", "message"]
+        self.keys_to_check = ["state", "message", "id", "data_hash"]
+
+    def test_get_one_status(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            keys_to_check = ["state", "message", "id", "data_hash"]
+            data = self.get_one_row(
+                EXECUTION_URL + idx + "/status/",
+                payload,
+                check_payload=False,
+                keys_to_check=keys_to_check,
+            )
+            self.assertEqual(data["state"], -1)
+
+    def test_put_one_status(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            response = self.client.put(
+                EXECUTION_URL + idx + "/status/",
+                data=json.dumps({"status": 0}),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(
+                f"execution {idx} updated correctly", response.json["message"]
+            )
+
+
+class TestExecutionsStatusEndpointAirflow(BaseExecutionStatusTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Airflow"
+    orchestrator_patch_fn = staticmethod(patch_af_client)
+
+
+class TestExecutionsStatusEndpointDatabricks(BaseExecutionStatusTest):
+    orchestrator_patch_target = "cornflow.endpoints.execution.Databricks"
+    orchestrator_patch_fn = staticmethod(patch_db_client)
 
     def create_app(self):
         app = create_app("testing-databricks")
         return app
-
-    def test_get_one_execution(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        self.get_one_row(
-            EXECUTION_URL + idx + "/log/", payload, keys_to_check=self.keys_to_check
-        )
-
-    def test_get_one_execution_superadmin(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        token = self.create_service_user()
-        self.get_one_row(
-            EXECUTION_URL + idx + "/log/",
-            payload,
-            token=token,
-            keys_to_check=self.keys_to_check,
-        )
-
-
-class TestExecutionsModel(TestExecutionsDetailEndpointMock):
-    def test_repr_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.repr_method(idx, f"<Execution {idx}>")
-
-    def test_str_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.str_method(idx, f"<Execution {idx}>")
-
-
-class TestExecutionsModelDatabricks(TestExecutionsDetailEndpointMock):
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
-
-    def test_repr_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.repr_method(idx, f"<Execution {idx}>")
-
-    def test_str_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.str_method(idx, f"<Execution {idx}>")
