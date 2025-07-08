@@ -15,7 +15,7 @@ from flask_apispec import marshal_with, use_kwargs, doc
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, DeployedOrch, ExecutionModel
-from cornflow.orchestrator_constants import config_orchestrator
+from cornflow.shared.const import config_orchestrator
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
