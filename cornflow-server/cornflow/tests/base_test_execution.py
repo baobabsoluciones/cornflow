@@ -716,24 +716,6 @@ class BaseExecutionStatus(BaseExecutionDetail, ABC):
 
     def setUp(self):
         super().setUp()
-        self.response_items = {
-            "id",
-            "name",
-            "description",
-            "created_at",
-            "user_id",
-            "data_hash",
-            "schema",
-            "config",
-            "instance_id",
-            "state",
-            "message",
-            "indicators",
-            "updated_at",
-            "username",
-        }
-        self.items_to_check = ["state", "message"]
-        self.keys_to_check = ["state", "message", "id", "data_hash"]
 
     def test_get_one_status(self):
         with patch(self.orchestrator_patch_target) as client:
