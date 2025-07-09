@@ -189,7 +189,7 @@ class TestNewSchemaEndpointOpen(CustomTestCase):
 
     def test_get_all_schemas(self):
         schemas = self.get_one_row(self.url, {}, 200, False, keys_to_check=["name"])
-        dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer"]]
+        dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer", "979073949072767"]]
 
         self.assertEqual(dags, schemas)
 

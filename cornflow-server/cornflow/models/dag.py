@@ -1,13 +1,12 @@
-"""
+""" """
 
-"""
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
-    SOLUTION_CHECKS_SCHEMA
+    SOLUTION_CHECKS_SCHEMA,
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 
@@ -17,7 +16,7 @@ from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
 
-class DeployedDAG(TraceAttributesModel):
+class DeployedOrch(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """
@@ -35,7 +34,7 @@ class DeployedDAG(TraceAttributesModel):
         "PermissionsDAG",
         cascade="all,delete",
         backref="deployed_dags",
-        primaryjoin="and_(DeployedDAG.id==PermissionsDAG.dag_id)",
+        primaryjoin="and_(DeployedOrch.id==PermissionsDAG.dag_id)",
     )
 
     def __init__(self, data):
@@ -53,14 +52,14 @@ class DeployedDAG(TraceAttributesModel):
 
     @staticmethod
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
-        item = DeployedDAG.get_one_object(dag_name)
+        item = DeployedOrch.get_one_object(dag_name)
 
         if item is None:
             err = f"The DAG {dag_name} does not exist in the database."
             raise ObjectDoesNotExist(
                 err,
                 log_txt=f"Error while user tries to register data for DAG {dag_name} "
-                            f"from instance and execution. " + err
+                f"from instance and execution. " + err,
             )
 
         if schema == INSTANCE_SCHEMA:

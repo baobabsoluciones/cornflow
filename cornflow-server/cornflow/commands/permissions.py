@@ -8,6 +8,9 @@ from cornflow.commands.auxiliar import (
 from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
+import sys
+from importlib import import_module
+import click
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
 )
@@ -235,7 +238,7 @@ def register_dag_permissions_command(
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
+    from cornflow.models import DeployedOrch, PermissionsDAG, UserModel
     from cornflow.shared import db
 
     if open_deployment is None:
@@ -253,9 +256,10 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users().all()
-    all_dags = DeployedDAG.get_all_objects().all()
+    all_dags = DeployedOrch.get_all_objects().all()
 
     if open_deployment == 1:
+
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users
@@ -297,6 +301,7 @@ def register_dag_permissions_command(
             )
 
     if verbose:
+        click.echo(f"DAG permissions registered")
         if len(permissions) > 1:
             current_app.logger.info(f"DAG permissions registered: {len(permissions)}")
         else:
