@@ -76,19 +76,23 @@ class BaseExecutionListTest(BaseTestCases.ListFilters):
             self.orchestrator_patch_fn(client_class)
 
     def test_new_execution(self):
-        self.create_new_row(self.url, self.model, payload=self.payload)
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            self.create_new_row(self.url, self.model, payload=self.payload)
 
     def test_get_custom_config(self):
-        id = self.create_new_row(
-            self.url, self.model, payload=self.custom_config_payload
-        )
-        url = EXECUTION_URL + "/" + str(id) + "/" + "?run=0"
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            id = self.create_new_row(
+                self.url, self.model, payload=self.custom_config_payload
+            )
+            url = EXECUTION_URL + "/" + str(id) + "/" + "?run=0"
 
-        response = self.get_one_row(
-            url,
-            payload={**self.custom_config_payload, **dict(id=id)},
-        )
-        self.assertEqual(response["config"]["block_model"]["solver"], "mip.gurobi")
+            response = self.get_one_row(
+                url,
+                payload={**self.custom_config_payload, **dict(id=id)},
+            )
+            self.assertEqual(response["config"]["block_model"]["solver"], "mip.gurobi")
 
     def test_new_execution_run(self):
         with patch(self.orchestrator_patch_target) as client:
@@ -222,35 +226,39 @@ class BaseExecutionRelaunchTest(CustomTestCase):
             self.orchestrator_patch_fn(client_class)
 
     def test_relaunch_execution(self):
-        idx = self.create_new_row(self.url, self.model, payload=self.payload)
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(self.url, self.model, payload=self.payload)
 
-        # Add solution checks to see if they are deleted correctly
-        token = self.create_service_user()
-        self.update_row(
-            url=DAG_URL + idx + "/",
-            payload_to_check=dict(),
-            change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
-            token=token,
-            check_payload=False,
-        )
+            # Add solution checks to see if they are deleted correctly
+            token = self.create_service_user()
+            self.update_row(
+                url=DAG_URL + idx + "/",
+                payload_to_check=dict(),
+                change=dict(solution_schema="_data_checks", checks=dict(check_1=[])),
+                token=token,
+                check_payload=False,
+            )
 
-        url = EXECUTION_URL + idx + "/relaunch/?run=0"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(201, response.status_code)
+            url = EXECUTION_URL + idx + "/relaunch/?run=0"
+            self.payload["config"]["warmStart"] = False
+            response = self.client.post(
+                url,
+                data=json.dumps({"config": self.payload["config"]}),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+            self.assertEqual(201, response.status_code)
 
-        url = EXECUTION_URL + idx + "/data"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        ).json
+            url = EXECUTION_URL + idx + "/data"
+            row = self.client.get(
+                url,
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            ).json
 
-        self.assertEqual(row["config"], self.payload["config"])
-        self.assertIsNone(row["checks"])
+            self.assertEqual(row["config"], self.payload["config"])
+            self.assertIsNone(row["checks"])
 
     def test_relaunch_execution_run(self):
         with patch(self.orchestrator_patch_target) as client:
@@ -288,16 +296,18 @@ class BaseExecutionRelaunchTest(CustomTestCase):
             self.assertIsNone(row["checks"])
 
     def test_relaunch_invalid_execution(self):
-        idx = "thisIsAnInvalidExecutionId"
-        url = EXECUTION_URL + idx + "/relaunch/?run=0"
-        self.payload["config"]["warmStart"] = False
-        response = self.client.post(
-            url,
-            data=json.dumps({"config": self.payload["config"]}),
-            follow_redirects=True,
-            headers=self.get_header_with_auth(self.token),
-        )
-        self.assertEqual(404, response.status_code)
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = "thisIsAnInvalidExecutionId"
+            url = EXECUTION_URL + idx + "/relaunch/?run=0"
+            self.payload["config"]["warmStart"] = False
+            response = self.client.post(
+                url,
+                data=json.dumps({"config": self.payload["config"]}),
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+            self.assertEqual(404, response.status_code)
 
 
 class TestExecutionRelaunchEndpointAirflow(BaseExecutionRelaunchTest):
@@ -410,50 +420,65 @@ class BaseExecutionDetailTest(CustomTestCase, BaseTestCases.DetailEndpoint):
         self.assertFalse(idx in executions)
 
     def test_delete_instance_deletes_execution(self):
-        # we create a new instance
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        payload = {**self.payload, **dict(instance_id=fk_id)}
-        # we create an execution for that instance
-        idx = self.create_new_row(self.url + "?run=0", self.model, payload)
-        self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
-        # we delete the new instance
-        self.delete_row(INSTANCE_URL + fk_id + "/")
-        # we check the execution does not exist
-        self.get_one_row(
-            self.url + idx, payload={}, expected_status=404, check_payload=False
-        )
-
-    def test_update_one_row_data(self):
-        idx = self.create_new_row(
-            self.url_with_query_arguments(), self.model, self.payload
-        )
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        payload["data"]["parameters"]["name"] = "NewName"
-
-        url = self.url + str(idx) + "/"
-        payload = {
-            **self.payload,
-            **dict(id=idx, name="new_name", data=payload["data"]),
-        }
-        self.update_row(
-            url,
-            dict(name="new_name", data=payload["data"]),
-            payload,
-        )
-
-        url += "data/"
-        row = self.client.get(
-            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
-        )
-
-        self.assertEqual(row.json["checks"], None)
-
-    def test_stop_execution(self):
+        # this test should be agnostic of the orchestrator
         with patch(self.orchestrator_patch_target) as client:
             self.patch_orchestrator(client)
+            # we create a new instance
+            with open(INSTANCE_PATH) as f:
+                payload = json.load(f)
+            fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+            payload = {**self.payload, **dict(instance_id=fk_id)}
+            # we create an execution for that instance
+            idx = self.create_new_row(self.url + "?run=0", self.model, payload)
+            self.get_one_row(self.url + idx, payload={**self.payload, **dict(id=idx)})
+            # we delete the new instance
+            self.delete_row(INSTANCE_URL + fk_id + "/")
+            # we check the execution does not exist
+            self.get_one_row(
+                self.url + idx, payload={}, expected_status=404, check_payload=False
+            )
+
+    def test_update_one_row_data(self):
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
+            with open(INSTANCE_PATH) as f:
+                payload = json.load(f)
+            payload["data"]["parameters"]["name"] = "NewName"
+
+            url = self.url + str(idx) + "/"
+            payload = {
+                **self.payload,
+                **dict(id=idx, name="new_name", data=payload["data"]),
+            }
+            self.update_row(
+                url,
+                dict(name="new_name", data=payload["data"]),
+                payload,
+            )
+
+            url += "data/"
+            row = self.client.get(
+                url,
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+
+            self.assertEqual(row.json["checks"], None)
+
+    def test_stop_execution(self):
+        #! Feature to be implemented for databricks
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            # We only execute this test for airflow
+            if (
+                self.orchestrator_patch_target
+                == "cornflow.endpoints.execution.Databricks"
+            ):
+                self.skipTest("This feature is not implemented for databricks")
+
             idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
 
             response = self.client.post(
@@ -466,35 +491,37 @@ class BaseExecutionDetailTest(CustomTestCase, BaseTestCases.DetailEndpoint):
             self.assertEqual(response.json["message"], "The execution has been stopped")
 
     def test_edit_execution(self):
-        id_new_instance = self.create_new_row(
-            INSTANCE_URL, InstanceModel, self.instance_payload
-        )
-        idx = self.create_new_row(
-            self.url_with_query_arguments(), self.model, self.payload
-        )
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            id_new_instance = self.create_new_row(
+                INSTANCE_URL, InstanceModel, self.instance_payload
+            )
+            idx = self.create_new_row(
+                self.url_with_query_arguments(), self.model, self.payload
+            )
 
-        # Extract the data from data/edit_execution_solution.json
-        with open(EDIT_EXECUTION_SOLUTION) as f:
-            data = json.load(f)
+            # Extract the data from data/edit_execution_solution.json
+            with open(EDIT_EXECUTION_SOLUTION) as f:
+                data = json.load(f)
 
-        data = {
-            "name": "new_name",
-            "description": "Updated description",
-            "data": data,
-            "instance_id": id_new_instance,
-        }
-        payload_to_check = {
-            "id": idx,
-            "name": "new_name",
-            "description": "Updated description",
-            "data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-            "instance_id": "805bad3280c95e45384dc6bd91a41317f9a7858c",
-        }
-        self.update_row(
-            self.url + str(idx) + "/",
-            data,
-            payload_to_check,
-        )
+            data = {
+                "name": "new_name",
+                "description": "Updated description",
+                "data": data,
+                "instance_id": id_new_instance,
+            }
+            payload_to_check = {
+                "id": idx,
+                "name": "new_name",
+                "description": "Updated description",
+                "data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+                "instance_id": "805bad3280c95e45384dc6bd91a41317f9a7858c",
+            }
+            self.update_row(
+                self.url + str(idx) + "/",
+                data,
+                payload_to_check,
+            )
 
     def test_get_one_status(self):
         with patch(self.orchestrator_patch_target) as client:
@@ -588,23 +615,27 @@ class BaseExecutionDataTest(BaseExecutionDetailTest):
         ]
 
     def test_get_one_execution(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        self.url = EXECUTION_URL + idx + "/data/"
-        payload = dict(self.payload)
-        payload["id"] = idx
-        self.get_one_row(self.url, payload, keys_to_check=self.keys_to_check)
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+            self.url = EXECUTION_URL + idx + "/data/"
+            payload = dict(self.payload)
+            payload["id"] = idx
+            self.get_one_row(self.url, payload, keys_to_check=self.keys_to_check)
 
     def test_get_one_execution_superadmin(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        token = self.create_service_user()
-        self.get_one_row(
-            EXECUTION_URL + idx + "/data/",
-            payload,
-            token=token,
-            keys_to_check=self.keys_to_check,
-        )
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            token = self.create_service_user()
+            self.get_one_row(
+                EXECUTION_URL + idx + "/data/",
+                payload,
+                token=token,
+                keys_to_check=self.keys_to_check,
+            )
 
 
 class TestExecutionsDataEndpointAirflow(BaseExecutionDataTest):
@@ -651,24 +682,28 @@ class BaseExecutionLogTest(BaseExecutionDetailTest):
         ]
 
     def test_get_one_execution(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        self.get_one_row(
-            EXECUTION_URL + idx + "/log/", payload, keys_to_check=self.keys_to_check
-        )
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            self.get_one_row(
+                EXECUTION_URL + idx + "/log/", payload, keys_to_check=self.keys_to_check
+            )
 
     def test_get_one_execution_superadmin(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        payload = dict(self.payload)
-        payload["id"] = idx
-        token = self.create_service_user()
-        self.get_one_row(
-            EXECUTION_URL + idx + "/log/",
-            payload,
-            token=token,
-            keys_to_check=self.keys_to_check,
-        )
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+            payload = dict(self.payload)
+            payload["id"] = idx
+            token = self.create_service_user()
+            self.get_one_row(
+                EXECUTION_URL + idx + "/log/",
+                payload,
+                token=token,
+                keys_to_check=self.keys_to_check,
+            )
 
 
 class TestExecutionsLogEndpointAirflow(BaseExecutionLogTest):
@@ -692,12 +727,16 @@ class BaseExecutionModelTest(BaseExecutionDetailTest):
     orchestrator_patch_fn = None
 
     def test_repr_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.repr_method(idx, f"<Execution {idx}>")
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+            self.repr_method(idx, f"<Execution {idx}>")
 
     def test_str_method(self):
-        idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
-        self.str_method(idx, f"<Execution {idx}>")
+        with patch(self.orchestrator_patch_target) as client:
+            self.patch_orchestrator(client)
+            idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
+            self.str_method(idx, f"<Execution {idx}>")
 
 
 class TestExecutionsModelAirflow(BaseExecutionModelTest):
