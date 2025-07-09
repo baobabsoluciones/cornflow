@@ -23,15 +23,6 @@ class TestExecutionsListEndpointAirflow(base_test_execution.BaseExecutionList):
         return patch_af_client
 
     def create_app(self):
-        print(
-            f"[DEBUG TestExecutionsListEndpointAirflow] Creating app with default config"
-        )
-        print(
-            f"[DEBUG TestExecutionsListEndpointAirflow] Orchestrator target: {self.orchestrator_patch_target}"
-        )
-        print(
-            f"[DEBUG TestExecutionsListEndpointAirflow] Patch function: {self.orchestrator_patch_fn}"
-        )
         return super().create_app()
 
 
@@ -45,15 +36,6 @@ class TestExecutionsListEndpointDatabricks(base_test_execution.BaseExecutionList
         return patch_db_client
 
     def create_app(self):
-        print(
-            f"[DEBUG TestExecutionsListEndpointDatabricks] Creating app with config: testing-databricks"
-        )
-        print(
-            f"[DEBUG TestExecutionsListEndpointDatabricks] Orchestrator target: {self.orchestrator_patch_target}"
-        )
-        print(
-            f"[DEBUG TestExecutionsListEndpointDatabricks] Patch function: {self.orchestrator_patch_fn}"
-        )
         app = create_app("testing-databricks")
         return app
 

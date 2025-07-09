@@ -40,10 +40,6 @@ class BaseExecutionList(BaseTestCases.ListFilters, ABC):
 
     def setUp(self):
         super().setUp()
-        print(
-            f"[DEBUG BaseExecutionList] Setting up test with orchestrator: {self.orchestrator_patch_target}"
-        )
-        print(f"[DEBUG BaseExecutionList] Patch function: {self.orchestrator_patch_fn}")
 
         with open(INSTANCE_PATH) as f:
             payload = json.load(f)
@@ -81,22 +77,10 @@ class BaseExecutionList(BaseTestCases.ListFilters, ABC):
         ]
 
     def patch_orchestrator(self, client_class):
-        print(
-            f"[DEBUG BaseExecutionList] Patching orchestrator: {self.orchestrator_patch_target}"
-        )
-        print(
-            f"[DEBUG BaseExecutionList] Using patch function: {self.orchestrator_patch_fn}"
-        )
         if self.orchestrator_patch_fn:
             self.orchestrator_patch_fn(client_class)
-            print(
-                f"[DEBUG BaseExecutionList] Mock configured successfully for {self.orchestrator_patch_target}"
-            )
 
     def test_new_execution(self):
-        print(
-            f"[DEBUG test_new_execution] Running test with orchestrator: {self.orchestrator_patch_target}"
-        )
         with patch(self.orchestrator_patch_target) as client:
             self.patch_orchestrator(client)
             self.create_new_row(self.url, self.model, payload=self.payload)
@@ -641,7 +625,25 @@ class BaseExecutionLog(BaseExecutionDetail, ABC):
 
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "log", "indicators"}
+        # response_items for the log endpoint specifically
+        self.log_response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema",
+            "config",
+            "instance_id",
+            "state",
+            "message",
+            "indicators",
+            "updated_at",
+            "username",
+            "log",
+            "log_text",
+        }
         self.items_to_check = ["name"]
         self.keys_to_check = [
             "created_at",
@@ -714,7 +716,22 @@ class BaseExecutionStatus(BaseExecutionDetail, ABC):
 
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "state", "message", "data_hash"}
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema",
+            "config",
+            "instance_id",
+            "state",
+            "message",
+            "indicators",
+            "updated_at",
+            "username",
+        }
         self.items_to_check = ["state", "message"]
         self.keys_to_check = ["state", "message", "id", "data_hash"]
 
