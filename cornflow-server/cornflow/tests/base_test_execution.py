@@ -749,3 +749,34 @@ class BaseExecutionStatus(BaseExecutionDetail, ABC):
             self.assertEqual(
                 f"execution {idx} updated correctly", response.json["message"]
             )
+
+class TestExecutionsDetailEndpointMock(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.instance_payload = payload
+        self.model = ExecutionModel
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "instance_id",
+            "data_hash",
+            "message",
+            "state",
+            "config",
+            "schema",
+            "user_id",
+            "indicators",
+            "username",
+            "updated_at"
+        }
+        # we only check the following because this endpoint does not return data
+        self.items_to_check = ["name", "description"]
+        self.url = EXECUTION_URL
+        with open(EXECUTION_PATH) as f:
+            self.payload = json.load(f)
+        self.payload["instance_id"] = fk_id

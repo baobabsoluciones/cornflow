@@ -38,7 +38,7 @@ from cornflow.tests.const import (
     USER_URL,
     EXECUTION_URL,
 )
-from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
+from cornflow.tests.base_test_execution import TestExecutionsDetailEndpointMock
 from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
 
@@ -129,7 +129,7 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
         )
 
 
-class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
+class TestDagDetailEndpoint(TestExecutionsDetailEndpointAirflow):
     """
     Test suite for DAG detail endpoint functionality.
 
