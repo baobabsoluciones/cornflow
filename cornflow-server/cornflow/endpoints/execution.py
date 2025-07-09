@@ -223,19 +223,27 @@ class ExecutionEndpoint(BaseMetaResource):
             return execution, 201
 
         # We now try to launch the task in the orchestrator
-        # We try to create an orch client
         # Note schema is a string with the name of the job/dag
         schema = execution.schema
-        # If we are dealing with DataBricks, the schema will
-        #   be the job id
-        orch_client, schema_info, execution = get_orch_client(
-            schema, self.orch_type, execution
-        )
         # endregion
 
         # region VALIDACIONES
-        # We check if the job/dag exists
-        orch_client.get_orch_info(schema)
+        # We check if the job/dag exists and orchestrator is alive
+        if not self.orch_client.is_alive(config=current_app.config):
+            error = f"{self.orch_const['name']} is not accessible"
+            current_app.logger.error(error)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise self.orch_error(
+                error=error,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+                log_txt=f"Error while user {self.get_user()} tries to create an execution. "
+                + error,
+            )
+
+        schema_info = self.orch_client.get_orch_info(schema)
         # Validate config before running the run
         config_schema = DeployedOrch.get_one_schema(config, schema, CONFIG_SCHEMA)
         new_config, config_errors = json_schema_extend_and_validate_as_string(
@@ -440,11 +448,24 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-        orch_client, schema_info, execution = get_orch_client(
-            kwargs["schema"], self.orch_type, execution
-        )
         schema = execution.schema
 
+        # Check if orchestrator is alive
+        if not self.orch_client.is_alive(config=current_app.config):
+            error = f"{self.orch_const['name']} is not accessible"
+            current_app.logger.error(error)
+            execution.update_state(EXEC_STATE_ERROR_START)
+            raise self.orch_error(
+                error=error,
+                payload=dict(
+                    message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                    state=EXEC_STATE_ERROR_START,
+                ),
+                log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
+                + error,
+            )
+
+        schema_info = self.orch_client.get_orch_info(schema)
         info = schema_info.json()
         if self.orch_type == AIRFLOW_BACKEND:
             if info["is_paused"]:
@@ -656,46 +677,43 @@ class ExecutionStatusEndpoint(BaseMetaResource):
         self._orch_to_state_map = None
         self._orch_const = None
 
-    @property
-    def orch_type(self):
+    def _init_orch(self):
         if self._orch_type is None:
             self._orch_type = current_app.config["CORNFLOW_BACKEND"]
+            if self._orch_type == AIRFLOW_BACKEND:
+                self._orch_client = Airflow.from_config(current_app.config)
+                self._orch_error = AirflowError
+                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
+                self._orch_const = config_orchestrator["airflow"]
+            elif self._orch_type == DATABRICKS_BACKEND:
+                self._orch_client = Databricks.from_config(current_app.config)
+                self._orch_error = DatabricksError
+                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+                self._orch_const = config_orchestrator["databricks"]
+
+    @property
+    def orch_type(self):
+        self._init_orch()
         return self._orch_type
 
     @property
     def orch_client(self):
-        if self._orch_client is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
+        self._init_orch()
         return self._orch_client
 
     @property
     def orch_error(self):
-        if self._orch_error is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_error = AirflowError
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_error = DatabricksError
+        self._init_orch()
         return self._orch_error
 
     @property
     def orch_to_state_map(self):
-        if self._orch_to_state_map is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
+        self._init_orch()
         return self._orch_to_state_map
 
     @property
     def orch_const(self):
-        if self._orch_const is None:
-            if self.orch_type == AIRFLOW_BACKEND:
-                self._orch_const = config_orchestrator["airflow"]
-            elif self.orch_type == DATABRICKS_BACKEND:
-                self._orch_const = config_orchestrator["databricks"]
+        self._init_orch()
         return self._orch_const
 
     @doc(description="Get status of an execution", tags=["Executions"])
@@ -746,13 +764,16 @@ class ExecutionStatusEndpoint(BaseMetaResource):
                 f"The execution has no associated run id.",
             )
         schema = execution.schema
-        # We use it only to check if the orchestrator is alive
-        orch_client, schema_info, execution = get_orch_client(
-            schema,
-            self.orch_type,
-            execution,
-            message="tries to get the status of an execution",
-        )
+        # We check if the orchestrator is alive
+        if not self.orch_client.is_alive(config=current_app.config):
+            error = f"{self.orch_const['name']} is not accessible"
+            _raise_af_error(
+                execution,
+                error,
+                state=EXEC_STATE_ERROR_START,
+                log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
+                + error,
+            )
         try:
             state = self.orch_client.get_run_status(schema, run_id)
         except self.orch_error as err:
@@ -852,63 +873,6 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
 
 
 # region aux_functions
-
-
-def get_orch_client(
-    schema, orch_type, execution, message="tries to create an execution"
-):
-    """
-    Get the orchestrator client and the schema info
-    """
-    if orch_type == AIRFLOW_BACKEND:
-        return get_airflow(schema, execution=execution, message=message)
-    elif orch_type == DATABRICKS_BACKEND:
-        return get_databricks(schema, execution=execution, message=message)
-    else:
-        raise EndpointNotImplemented()
-
-
-def get_airflow(schema, execution, message="tries to create an execution"):
-    """
-    Get the Airflow client and the schema info
-    """
-    af_client = Airflow.from_config(current_app.config)
-    schema_info = af_client.get_orch_info(schema)
-    if not af_client.is_alive():
-        err = "Airflow is not accessible"
-        current_app.logger.error(err)
-        execution.update_state(EXEC_STATE_ERROR_START)
-        raise AirflowError(
-            error=err,
-            payload=dict(
-                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                state=EXEC_STATE_ERROR_START,
-            ),
-            log_txt=f"Error while user {execution.user_id} {message} " + err,
-        )
-    return af_client, schema_info, execution
-
-
-def get_databricks(schema, execution, message="tries to create an execution"):
-    """
-    Get the Databricks client and the schema info
-    """
-    db_client = Databricks.from_config(current_app.config)
-    schema_info = db_client.get_orch_info(schema)
-    if not db_client.is_alive(config=current_app.config):
-        err = "Databricks is not accessible"
-        current_app.logger.error(err)
-        execution.update_state(EXEC_STATE_ERROR_START)
-        raise DatabricksError(
-            error=err,
-            payload=dict(
-                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
-                state=EXEC_STATE_ERROR_START,
-            ),
-            log_txt=f"Error while user {execution.user_id} {message} " + err,
-        )
-    return db_client, schema_info, execution
-    # endregion
 
 
 def map_run_state(state, orch_TYPE):
