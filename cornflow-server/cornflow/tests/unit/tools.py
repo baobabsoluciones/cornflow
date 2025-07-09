@@ -16,6 +16,9 @@ def create_test_app():
 
 
 def patch_af_client(af_client_class):
+    print(
+        f"[DEBUG patch_af_client] Configuring AIRFLOW mock for class: {af_client_class}"
+    )
     with patch("cornflow.endpoints.execution.current_app.config") as mock_config:
         mock_config.__getitem__.side_effect = lambda key: (
             1 if key == "CORNFLOW_BACKEND" else {}
@@ -48,9 +51,13 @@ def patch_af_client(af_client_class):
         af_client_mock.run_dag.return_value = responses_mock
         af_client_mock.set_dag_run_to_fail.return_value = None
         af_client_class.from_config.return_value = af_client_mock
+        print(f"[DEBUG patch_af_client] AIRFLOW mock configured successfully")
 
 
 def patch_db_client(db_client_class):
+    print(
+        f"[DEBUG patch_db_client] Configuring DATABRICKS mock for class: {db_client_class}"
+    )
     mock_config = {"CORNFLOW_BACKEND": 2}
 
     with patch("cornflow.endpoints.execution.current_app.config", mock_config):
@@ -94,3 +101,4 @@ def patch_db_client(db_client_class):
         db_client_mock.run_workflow.return_value = response_run_workflow
         db_client_mock.get_run_status.return_value = response_get_run_status
         db_client_class.from_config.return_value = db_client_mock
+        print(f"[DEBUG patch_db_client] DATABRICKS mock configured successfully")
