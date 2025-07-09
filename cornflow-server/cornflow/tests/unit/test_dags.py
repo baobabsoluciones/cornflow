@@ -129,7 +129,7 @@ class TestDagEndpoint(TestExecutionsDetailEndpointMock):
         )
 
 
-class TestDagDetailEndpoint(TestExecutionsDetailEndpointAirflow):
+class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
     """
     Test suite for DAG detail endpoint functionality.
 

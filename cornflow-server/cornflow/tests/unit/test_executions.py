@@ -13,7 +13,7 @@ from cornflow.tests.const import EXECUTION_URL
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 
 
-class TestExecutionsListEndpointAirflow(base_test_execution.BaseExecutionList):
+class AirflowPatcher:
     @property
     def orchestrator_patch_target(self):
         return "cornflow.endpoints.execution.Airflow"
@@ -26,7 +26,7 @@ class TestExecutionsListEndpointAirflow(base_test_execution.BaseExecutionList):
         return super().create_app()
 
 
-class TestExecutionsListEndpointDatabricks(base_test_execution.BaseExecutionList):
+class DatabricksPatcher:
     @property
     def orchestrator_patch_target(self):
         return "cornflow.endpoints.execution.Databricks"
@@ -40,163 +40,85 @@ class TestExecutionsListEndpointDatabricks(base_test_execution.BaseExecutionList
         return app
 
 
-class TestExecutionRelaunchEndpointAirflow(base_test_execution.BaseExecutionRelaunch):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
+class TestExecutionsListEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionList
+):
+    pass
 
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+
+class TestExecutionsListEndpointDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionList
+):
+    pass
+
+
+class TestExecutionRelaunchEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionRelaunch
+):
+    pass
 
 
 class TestExecutionRelaunchEndpointDatabricks(
-    base_test_execution.BaseExecutionRelaunch
+    DatabricksPatcher, base_test_execution.BaseExecutionRelaunch
 ):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
+    pass
 
 
-class TestExecutionsDetailEndpointAirflow(base_test_execution.BaseExecutionDetail):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+class TestExecutionsDetailEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionDetail
+):
+    pass
 
 
-class TestExecutionsDetailEndpointDatabricks(base_test_execution.BaseExecutionDetail):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
-
-    def test_stop_execution(self):
-        with patch(self.orchestrator_patch_target) as client:
-            self.patch_orchestrator(client)
-            idx = self.create_new_row(EXECUTION_URL, self.model, payload=self.payload)
-
-            response = self.client.post(
-                self.url + str(idx) + "/",
-                follow_redirects=True,
-                headers=self.get_header_with_auth(self.token),
-            )
-
-            self.assertEqual(200, response.status_code)
-            self.assertEqual(
-                response.json["message"], "This feature is not available for Databricks"
-            )
+class TestExecutionsDetailEndpointDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionDetail
+):
+    pass
 
 
-class TestExecutionsDataEndpointAirflow(base_test_execution.BaseExecutionData):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+class TestExecutionsDataEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionData
+):
+    pass
 
 
-class TestExecutionsDataEndpointDatabricks(base_test_execution.BaseExecutionData):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
+class TestExecutionsDataEndpointDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionData
+):
+    pass
 
 
-class TestExecutionsLogEndpointAirflow(base_test_execution.BaseExecutionLog):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+class TestExecutionsLogEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionLog
+):
+    pass
 
 
-class TestExecutionsLogEndpointDatabricks(base_test_execution.BaseExecutionLog):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
+class TestExecutionsLogEndpointDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionLog
+):
+    pass
 
 
-class TestExecutionsModelAirflow(base_test_execution.BaseExecutionModel):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+class TestExecutionsModelAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionModel
+):
+    pass
 
 
-class TestExecutionsModelDatabricks(base_test_execution.BaseExecutionModel):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
+class TestExecutionsModelDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionModel
+):
+    pass
 
 
-class TestExecutionsStatusEndpointAirflow(base_test_execution.BaseExecutionStatus):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
+class TestExecutionsStatusEndpointAirflow(
+    AirflowPatcher, base_test_execution.BaseExecutionStatus
+):
+    pass
 
 
-class TestExecutionsStatusEndpointDatabricks(base_test_execution.BaseExecutionStatus):
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
+class TestExecutionsStatusEndpointDatabricks(
+    DatabricksPatcher, base_test_execution.BaseExecutionStatus
+):
+    pass
