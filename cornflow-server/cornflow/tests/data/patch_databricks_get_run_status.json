@@ -5,9 +5,9 @@
     "number_in_job": 9876543210123,
     "original_attempt_run_id": 9876543210123,
     "state": {
-        "life_cycle_state": "INTERNAL_ERROR",
-        "result_state": "FAILED",
-        "state_message": "Task run_optimization failed with message: Workload failed, see run output for details. This caused all downstream tasks to get skipped.",
+        "life_cycle_state": "TERMINATED",
+        "result_state": "SUCCESS",
+        "state_message": "Task completed successfully",
         "user_cancelled_or_timedout": false
     },
     "start_time": 1700000000000,
@@ -80,8 +80,8 @@
             ],
             "state": {
                 "life_cycle_state": "TERMINATED",
-                "result_state": "FAILED",
-                "state_message": "Workload failed, see run output for details",
+                "result_state": "SUCCESS",
+                "state_message": "Task completed successfully",
                 "user_cancelled_or_timedout": false
             },
             "run_page_url": "https://example.databricks.net/?o=1234567890#job/123456789012345/run/1234567890123456",
@@ -98,9 +98,9 @@
             "status": {
                 "state": "TERMINATED",
                 "termination_details": {
-                    "code": "RUN_EXECUTION_ERROR",
-                    "type": "CLIENT_ERROR",
-                    "message": "Workload failed, see run output for details"
+                    "code": "SUCCESS",
+                    "type": "SUCCESS",
+                    "message": "Task completed successfully"
                 }
             }
         }
@@ -109,9 +109,9 @@
     "status": {
         "state": "TERMINATED",
         "termination_details": {
-            "code": "RUN_EXECUTION_ERROR",
-            "type": "CLIENT_ERROR",
-            "message": "Task run_optimization failed with message: Workload failed, see run output for details. This caused all downstream tasks to get skipped."
+            "code": "SUCCESS",
+            "type": "SUCCESS",
+            "message": "Task completed successfully"
         }
     },
     "job_run_id": 9876543210123

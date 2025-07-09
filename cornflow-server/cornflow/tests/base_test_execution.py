@@ -545,7 +545,8 @@ class BaseExecutionDetail(BaseTestCases.DetailEndpoint, ABC):
                 check_payload=False,
                 keys_to_check=keys_to_check,
             )
-            self.assertEqual(data["state"], -1)
+            # In the patch we assign success as the state
+            self.assertEqual(data["state"], 1)
 
     def test_put_one_status(self):
         with patch(self.orchestrator_patch_target) as client:
@@ -574,7 +575,22 @@ class BaseExecutionData(BaseExecutionDetail, ABC):
 
     def setUp(self):
         super().setUp()
-        self.response_items = {"id", "name", "data"}
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "user_id",
+            "data_hash",
+            "schema",
+            "config",
+            "instance_id",
+            "state",
+            "message",
+            "indicators",
+            "updated_at",
+            "username",
+        }
         self.items_to_check = ["name"]
         self.keys_to_check = [
             "created_at",
@@ -715,7 +731,7 @@ class BaseExecutionStatus(BaseExecutionDetail, ABC):
                 check_payload=False,
                 keys_to_check=keys_to_check,
             )
-            self.assertEqual(data["state"], -1)
+            self.assertEqual(data["state"], 1)
 
     def test_put_one_status(self):
         with patch(self.orchestrator_patch_target) as client:
