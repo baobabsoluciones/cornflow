@@ -6,7 +6,7 @@ import requests
 import json
 from databricks.sdk import WorkspaceClient
 from flask import current_app
-from cornflow_client.orchestrator_constants import config_orchestrator
+from cornflow_client.constants import config_orchestrator
 
 from cornflow_client.constants import DatabricksError
 from cornflow_client.constants import (
