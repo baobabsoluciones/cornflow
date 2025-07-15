@@ -7,8 +7,8 @@ FROM baobabsoluciones/pysolver:1.1
 LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM linux
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=linux
 
 # Airflow vars
 ARG AIRFLOW_VERSION=2.9.1
