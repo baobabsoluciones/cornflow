@@ -301,10 +301,10 @@ def register_dag_permissions_command(
             )
 
     if verbose:
-        click.echo(f"DAG permissions registered")
+        click.echo(f"Workflow permissions registered")
         if len(permissions) > 1:
-            current_app.logger.info(f"DAG permissions registered: {len(permissions)}")
+            current_app.logger.info(f"Workflow permissions registered: {len(permissions)}")
         else:
-            current_app.logger.info("No new DAG permissions")
+            current_app.logger.info("No new Workflow permissions")
 
     pass
