@@ -9,7 +9,9 @@ def register_deployed_dags_command(
     from flask import current_app
 
     # Internal modules imports
-    from cornflow_client.airflow.api import Airflow
+    # TODO: change when update client
+    from cornflow.shared.airflow import Airflow
+    # from cornflow_client.airflow.api import Airflow
     from cornflow.models import DeployedOrch
     from cornflow.shared import db
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
