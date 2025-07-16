@@ -6,10 +6,10 @@ import requests
 import json
 from databricks.sdk import WorkspaceClient
 from flask import current_app
-from cornflow_client.constants import config_orchestrator
+from cornflow.shared.constants_cli import config_orchestrator
 
-from cornflow_client.constants import DatabricksError
-from cornflow_client.constants import (
+from cornflow.shared.constants_cli import DatabricksError
+from cornflow.shared.constants_cli import (
     DATABRICKS_TO_STATE_MAP,
     DATABRICKS_TERMINATE_STATE,
     DATABRICKS_FINISH_TO_STATE_MAP,

@@ -9,8 +9,8 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
-from cornflow_client.constants import AirflowError
-from cornflow_client.constants import config_orchestrator
+from cornflow.shared.constants_cli import AirflowError
+from cornflow.shared.constants_cli import config_orchestrator
 
 
 class Airflow(object):
