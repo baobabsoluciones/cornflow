@@ -28,7 +28,7 @@ def patch_af_client(af_client_class):
             "state": "success",
         }
         af_client_mock.is_alive.return_value = True
-        af_client_mock.get_dag_info.return_value = responses_mock
+        af_client_mock.get_orch_info.return_value = responses_mock
 
         # Configurar get_orch_info
         schema_info_mock = Mock()
