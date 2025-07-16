@@ -10,7 +10,8 @@ def register_deployed_dags_command(
 
     # Internal modules imports
     # TODO: change when update client
-    from cornflow.shared.airflow import Airflow
+    from cornflow.shared.airflow.api import Airflow
+
     # from cornflow_client.airflow.api import Airflow
     from cornflow.models import DeployedOrch
     from cornflow.shared import db
@@ -83,7 +84,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
-        dags = ["solve_model_dag", "gc", "timer", "979073949072767" ]
+        dags = ["solve_model_dag", "gc", "timer", "979073949072767"]
 
     deployed_dag = [
         DeployedOrch(
