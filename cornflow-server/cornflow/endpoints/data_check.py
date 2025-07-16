@@ -87,7 +87,7 @@ def _run_airflow_data_check(
     # Run the DAG
     try:
         response = af_client.run_workflow(
-            execution.id, orch_name=schema, checks_only=True, **run_dag_kwargs
+            execution.id, workflow_name=schema, checks_only=True, **run_dag_kwargs
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"

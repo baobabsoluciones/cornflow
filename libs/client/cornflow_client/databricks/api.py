@@ -81,7 +81,7 @@ class Databricks:
     def run_workflow(
         self,
         execution_id,
-        orch_name=config_orchestrator["databricks"]["def_schema"],
+        workflow_name=config_orchestrator["databricks"]["def_schema"],
         checks_only=False,
         case_id=None,
     ):
@@ -91,7 +91,7 @@ class Databricks:
         url = f"{self.url}/api/2.1/jobs/run-now/"
         #   Entender cómo se usa checks_only
         payload = dict(
-            job_id=orch_name,
+            job_id=workflow_name,
             job_parameters=dict(
                 checks_only=checks_only,
                 execution_id=execution_id,

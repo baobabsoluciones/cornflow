@@ -66,7 +66,7 @@ class Airflow(object):
     def run_workflow(
         self,
         execution_id,
-        orch_name=config_orchestrator["airflow"]["def_schema"],
+        workflow_name=config_orchestrator["airflow"]["def_schema"],
         checks_only=False,
         case_id=None,
     ):
@@ -74,7 +74,7 @@ class Airflow(object):
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
-        return self.consume_dag_run(orch_name, payload=payload, method="POST")
+        return self.consume_dag_run(workflow_name, payload=payload, method="POST")
 
     def update_schemas(self, dag_name="update_all_schemas"):
         return self.consume_dag_run(dag_name, payload={}, method="POST")
