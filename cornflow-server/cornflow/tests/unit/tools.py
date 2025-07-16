@@ -68,7 +68,7 @@ def patch_db_client(db_client_class):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_data_dir = os.path.join(os.path.dirname(current_dir), "data")
         with open(
-            os.path.join(test_data_dir, "patch_databricks_get_workflow_info.json")
+            os.path.join(test_data_dir, "patch_databricks_get_orch_info.json")
         ) as f:
             response_get_workflow_info.json.return_value = json.load(f)
         response_get_run_status = Mock()
