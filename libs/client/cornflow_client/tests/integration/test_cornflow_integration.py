@@ -56,7 +56,7 @@ class TestCornflowClientUser(TestCase):
     def test_health_endpoint(self):
         response = self.client.is_alive()
         self.assertEqual(response["cornflow_status"], "healthy")
-        self.assertEqual(response["airflow_status"], "healthy")
+        self.assertEqual(response["backend_status"], "healthy")
 
     def test_sign_up(self):
         response = self.client.sign_up(
