@@ -313,7 +313,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 )
 
         try:
-            response = self.orch_client.run_workflow(execution.id, orch_name=schema)
+            response = self.orch_client.run_workflow(execution.id, workflow_name=schema)
         except self.orch_error as err:
             error = self.orch_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
@@ -482,7 +482,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 )
         # TODO: Consider adding similar checks for databricks
         try:
-            response = self.orch_client.run_workflow(execution.id, orch_name=schema)
+            response = self.orch_client.run_workflow(execution.id, workflow_name=schema)
         except self.orch_error as err:
             error = self.orch_const["name"] + " responded with an error: {}".format(err)
             current_app.logger.error(error)
