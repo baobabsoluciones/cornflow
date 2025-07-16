@@ -67,12 +67,12 @@ class Databricks:
             current_app.logger.error(f"Error: {err}")
             return False
 
-    def get_orch_info(self, orch_name, method="GET"):
+    def get_workflow_info(self, workflow_name, method="GET"):
         """
         Get information about a job in Databricks
         https://docs.databricks.com/api/workspace/jobs/get
         """
-        url = f"{self.url}/api/2.1/jobs/get/?job_id={orch_name}"
+        url = f"{self.url}/api/2.1/jobs/get/?job_id={workflow_name}"
         schema_info = self.request_headers_auth(method=method, url=url)
         if "error_code" in schema_info.json().keys():
             raise DatabricksError("JOB not available")

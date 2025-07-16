@@ -69,7 +69,7 @@ def _run_airflow_data_check(
         )
 
     # Check if DAG is paused
-    schema_info = af_client.get_orch_info(schema)
+    schema_info = af_client.get_workflow_info(workflow_name=schema)
     info = schema_info.json()
     if info.get("is_paused", False):
         current_app.logger.error(DAG_PAUSED_MSG)

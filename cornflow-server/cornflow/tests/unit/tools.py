@@ -28,12 +28,12 @@ def patch_af_client(af_client_class):
             "state": "success",
         }
         af_client_mock.is_alive.return_value = True
-        af_client_mock.get_orch_info.return_value = responses_mock
+        af_client_mock.get_workflow_info.return_value = responses_mock
 
-        # Configurar get_orch_info
+        # Configurar get_workflow_info
         schema_info_mock = Mock()
         schema_info_mock.json.return_value = {"is_paused": False}
-        af_client_mock.get_orch_info.return_value = schema_info_mock
+        af_client_mock.get_workflow_info.return_value = schema_info_mock
 
         # Configurar run_workflow
         run_response_mock = Mock()
@@ -64,13 +64,13 @@ def patch_db_client(db_client_class):
             "run_id": 350148078719367,
             "number_in_job": 350148078719367,
         }
-        response_get_orch_info = Mock()
+        response_get_workflow_info = Mock()
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_data_dir = os.path.join(os.path.dirname(current_dir), "data")
         with open(
-            os.path.join(test_data_dir, "patch_databricks_get_orch_info.json")
+            os.path.join(test_data_dir, "patch_databricks_get_workflow_info.json")
         ) as f:
-            response_get_orch_info.json.return_value = json.load(f)
+            response_get_workflow_info.json.return_value = json.load(f)
         response_get_run_status = Mock()
         with open(
             os.path.join(test_data_dir, "patch_databricks_get_run_status.json")
@@ -90,7 +90,7 @@ def patch_db_client(db_client_class):
             else:
                 response_get_run_status = "OTHER_FINISH_ERROR"
         db_client_mock.is_alive.return_value = True
-        db_client_mock.get_orch_info.return_value = response_get_orch_info
+        db_client_mock.get_workflow_info.return_value = response_get_workflow_info
         db_client_mock.run_workflow.return_value = response_run_workflow
         db_client_mock.get_run_status.return_value = response_get_run_status
         db_client_class.from_config.return_value = db_client_mock

@@ -243,7 +243,7 @@ class ExecutionEndpoint(BaseMetaResource):
                 + error,
             )
 
-        schema_info = self.orch_client.get_orch_info(schema)
+        schema_info = self.orch_client.get_workflow_info(workflow_name=schema)
         # Validate config before running the run
         config_schema = DeployedOrch.get_one_schema(config, schema, CONFIG_SCHEMA)
         new_config, config_errors = json_schema_extend_and_validate_as_string(
@@ -465,7 +465,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
                 + error,
             )
 
-        schema_info = self.orch_client.get_orch_info(schema)
+        schema_info = self.orch_client.get_workflow_info(workflow_name=schema)
         info = schema_info.json()
         if self.orch_type == AIRFLOW_BACKEND:
             if info["is_paused"]:

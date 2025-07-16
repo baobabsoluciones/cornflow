@@ -35,7 +35,7 @@ class TestExampleDataEndpoint(CustomTestCase):
     def patch_af_client(self, Airflow_mock):
         af_client = Airflow_mock.return_value
         af_client.is_alive.return_value = True
-        af_client.get_orch_info.return_value = {}
+        af_client.get_workflow_info.return_value = {}
         af_client.get_one_variable.return_value = {
             "value": json.dumps(self.example),
             "key": self.schema_name,

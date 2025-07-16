@@ -25,6 +25,7 @@ class ExampleDataListEndpoint(BaseMetaResource):
     """
     Endpoint used to obtain schemas for one app
     """
+    # TODO: DATABRICKS NOT IMPLEMENTED YET
 
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
@@ -53,7 +54,7 @@ class ExampleDataListEndpoint(BaseMetaResource):
                 raise AirflowError(error=f"{AIRFLOW_NOT_REACHABLE_MSG}")
 
             # try airflow and see if dag_name exists
-            af_client.get_orch_info(dag_name)
+            af_client.get_workflow_info(workflow_name=dag_name)
 
             current_app.logger.info("User gets example data from {}".format(dag_name))
 
@@ -96,7 +97,7 @@ class ExampleDataDetailEndpoint(BaseMetaResource):
                 raise AirflowError(error=f"{AIRFLOW_NOT_REACHABLE_MSG}")
 
             # try airflow and see if dag_name exists
-            af_client.get_orch_info(dag_name)
+            af_client.get_workflow_info(workflow_name=dag_name)
 
             current_app.logger.info("User gets example data from {}".format(dag_name))
 
