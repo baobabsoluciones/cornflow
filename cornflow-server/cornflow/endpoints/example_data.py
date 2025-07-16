@@ -25,6 +25,7 @@ class ExampleDataListEndpoint(BaseMetaResource):
     """
     Endpoint used to obtain schemas for one app
     """
+
     # TODO: DATABRICKS NOT IMPLEMENTED YET
 
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]

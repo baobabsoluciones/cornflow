@@ -39,6 +39,9 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     AIRFLOW_BACKEND,
     SIGNUP_WITH_AUTH,
+    OID_PROVIDER_AWS,
+    OID_PROVIDER_AZURE,
+    OID_OTHER,
 )
 from cornflow.shared import db
 from cryptography.fernet import Fernet
@@ -181,6 +184,10 @@ def _setup_environment_variables():
 
     # Platform auth config and service users
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    if auth == AUTH_OID:
+        oid_provider = int(os.getenv("OID_PROVIDER", OID_PROVIDER_AWS))
+        os.environ["OID_PROVIDER"] = str(oid_provider)
+
     cornflow_admin_user = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
@@ -217,51 +224,42 @@ def _setup_environment_variables():
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     external_app_module = os.getenv("EXTERNAL_APP_MODULE")
+    base_dict = {
+            "environment": environment,
+            "auth": auth,
+            "cornflow_db_conn": cornflow_db_conn,
+            "cornflow_admin_user": cornflow_admin_user,
+            "cornflow_admin_email": cornflow_admin_email,
+            "cornflow_admin_pwd": cornflow_admin_pwd,
+            "cornflow_service_user": cornflow_service_user,
+            "cornflow_service_email": cornflow_service_email,
+            "cornflow_service_pwd": cornflow_service_pwd,
+            "cornflow_logging": cornflow_logging,
+            "open_deployment": open_deployment,
+            "external_application": external_application,
+            "external_app_module": external_app_module,
+            "cornflow_backend": cornflow_backend,
+        }
     if cornflow_backend == AIRFLOW_BACKEND:
-        return {
-            "environment": environment,
-            "auth": auth,
-            "airflow_user": airflow_user,
-            "airflow_pwd": airflow_pwd,
-            "airflow_url": airflow_url,
-            "cornflow_db_conn": cornflow_db_conn,
-            "cornflow_admin_user": cornflow_admin_user,
-            "cornflow_admin_email": cornflow_admin_email,
-            "cornflow_admin_pwd": cornflow_admin_pwd,
-            "cornflow_service_user": cornflow_service_user,
-            "cornflow_service_email": cornflow_service_email,
-            "cornflow_service_pwd": cornflow_service_pwd,
-            "cornflow_logging": cornflow_logging,
-            "open_deployment": open_deployment,
-            "external_application": external_application,
-            "external_app_module": external_app_module,
-            "cornflow_backend": cornflow_backend,
-        }
+        base_dict["airflow_user"] = airflow_user
+        base_dict["airflow_pwd"] = airflow_pwd
+        base_dict["airflow_url"] = airflow_url
+    
     elif cornflow_backend == DATABRICKS_BACKEND:
-        return {
-            "environment": environment,
-            "auth": auth,
-            "databricks_url": databricks_url,
-            "databricks_auth_secret": databricks_auth_secret,
-            "databricks_token_endpoint": databricks_token_endpoint,
-            "databricks_ep_clusters": databricks_ep_clusters,
-            "databricks_client_id": databricks_client_id,
-            "databricks_health_path": databricks_health_path,
-            "cornflow_db_conn": cornflow_db_conn,
-            "cornflow_admin_user": cornflow_admin_user,
-            "cornflow_admin_email": cornflow_admin_email,
-            "cornflow_admin_pwd": cornflow_admin_pwd,
-            "cornflow_service_user": cornflow_service_user,
-            "cornflow_service_email": cornflow_service_email,
-            "cornflow_service_pwd": cornflow_service_pwd,
-            "cornflow_logging": cornflow_logging,
-            "open_deployment": open_deployment,
-            "external_application": external_application,
-            "external_app_module": external_app_module,
-            "cornflow_backend": cornflow_backend,
-        }
+        base_dict["databricks_url"] = databricks_url
+        base_dict["databricks_auth_secret"] = databricks_auth_secret
+        base_dict["databricks_token_endpoint"] = databricks_token_endpoint
+        base_dict["databricks_ep_clusters"] = databricks_ep_clusters
+        base_dict["databricks_client_id"] = databricks_client_id
+        base_dict["databricks_health_path"] = databricks_health_path
+        
     else:
         raise Exception("Selected backend not among valid options")
+
+    if auth == AUTH_OID:
+        base_dict["oid_provider"] = oid_provider
+
+    return base_dict
 
 
 def _configure_logging(cornflow_logging):
