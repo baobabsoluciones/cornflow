@@ -62,7 +62,7 @@ global:
 # Cornflow image configuration
 image:
   repository: baobabsoluciones/cornflow
-  tag: "release-v1.2.3"
+  tag: "release-v1.2.4"
   pullPolicy: IfNotPresent  # Use Always for production
 
 # =============================================================================
