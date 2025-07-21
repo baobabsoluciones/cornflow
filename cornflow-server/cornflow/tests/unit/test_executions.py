@@ -60,6 +60,8 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             "name",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at"
         ]
 
@@ -470,6 +472,8 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
             "config",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at"
         ]
 
