@@ -25,6 +25,7 @@ from cornflow.shared.const import (
     AUTH_OID,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
+    OID_PROVIDER_AZURE,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -300,7 +301,18 @@ class Auth:
         :rtype: dict
         """
         # Fetch keys from provider
-        jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
+        # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
+        oid_provider = current_app.config["OID_PROVIDER"]
+        if oid_provider == OID_PROVIDER_AZURE:
+            tenant_id = provider_url.split("/")[
+                3
+            ]  # Extract tenant ID from provider URL
+            jwks_url = (
+                f"https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys"
+            )
+        else:
+            # For other providers, use the standard well-known endpoint
+            jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
         try:
             response = requests.get(jwks_url)
             response.raise_for_status()
