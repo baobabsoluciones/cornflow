@@ -25,7 +25,6 @@ from cornflow.shared.const import (
     AUTH_OID,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
-    OID_PROVIDER_AZURE,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -302,8 +301,7 @@ class Auth:
         """
         # Fetch keys from provider
         # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
-        oid_provider = current_app.config["OID_PROVIDER"]
-        if oid_provider == OID_PROVIDER_AZURE:
+        if "microsoftonline.com" in provider_url:
             tenant_id = provider_url.split("/")[
                 3
             ]  # Extract tenant ID from provider URL
