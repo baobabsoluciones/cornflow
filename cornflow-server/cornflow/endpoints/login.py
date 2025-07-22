@@ -188,8 +188,15 @@ class LoginBaseEndpoint(BaseMetaResource):
                 )
 
                 email = decoded_token.get("email", f"{username}@cornflow.org")
-                first_name = decoded_token.get("given_name", "")
-                last_name = decoded_token.get("family_name", "")
+
+                email_names = email.split("@")[0]
+                if "." in email_names:
+                    default_first_name, default_last_name = email_names.split(".")[0:2]
+                else:
+                    default_first_name, default_last_name = email_names, ""
+
+                first_name = decoded_token.get("given_name", default_first_name)
+                last_name = decoded_token.get("family_name", default_last_name)
 
                 data = {
                     "username": username,
