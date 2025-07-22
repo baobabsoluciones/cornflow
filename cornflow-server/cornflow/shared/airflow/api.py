@@ -1,8 +1,18 @@
-""" """
+""" 
+This module contains the Airflow class, which is used to interact with the Airflow API.
+
+The Airflow class is used to:
+- Check if the Airflow server is alive
+- Request headers with authentication
+- Consume a DAG run
+- Set the state of a DAG run
+- Run a workflow
+"""
 
 # Full imports
 import json
 import requests
+import warnings
 
 # Partial imports
 from requests.auth import HTTPBasicAuth
@@ -70,11 +80,29 @@ class Airflow(object):
         checks_only=False,
         case_id=None,
     ):
+        """
+        Run a workflow
+        """
+        
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
         return self.consume_dag_run(workflow_name, payload=payload, method="POST")
+    
+    def run_dag(
+        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+    ):
+        """
+        Run workflow
+        """
+        warnings.warn("This method will be deprecated on later versions, please use newer run_workflow method")
+        return self.run_workflow(
+            execution_id,
+            workflow_name=dag_name,
+            checks_only=checks_only,
+            case_id=case_id,
+        )
 
     def update_schemas(self, dag_name="update_all_schemas"):
         # TODO: DATABRICKS NOT IMPLEMENTED YET
