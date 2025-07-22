@@ -279,6 +279,8 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "user_id",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at"
         }
         # we only check the following because this endpoint does not return data
@@ -323,6 +325,8 @@ class TestExecutionsDetailEndpoint(
             "created_at",
             "state",
             "username",
+            "first_name",
+            "last_name",
             "updated_at"
         ]
         execution = self.get_one_row(
