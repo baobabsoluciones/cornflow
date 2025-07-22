@@ -39,7 +39,7 @@ from cornflow.models import (
     ViewModel,
 )
 from cornflow.models import (
-    DeployedOrch,
+    DeployedWorkflow,
     PermissionsDAG,
     UserModel,
 )
@@ -357,7 +357,7 @@ class TestCommands(TestCase):
         - Presence of required DAGs
         """
         register_deployed_dags_command_test(verbose=True)
-        dags = DeployedOrch.get_all_objects()
+        dags = DeployedWorkflow.get_all_objects()
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])
 

@@ -1,10 +1,11 @@
 """
 Initialization file for the models module
 """
+
 from .action import ActionModel
 from .alarms import AlarmsModel
 from .case import CaseModel
-from .dag import DeployedOrch
+from .dag import DeployedWorkflow
 from .dag_permissions import PermissionsDAG
 from .execution import ExecutionModel
 from .instance import InstanceModel

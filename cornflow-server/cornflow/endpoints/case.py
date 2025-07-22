@@ -3,11 +3,9 @@ External endpoints to manage the cases: create new cases from raw data, from an 
 or from an existing case, update the case info, patch its data, get all of them or one, move them and delete them.
 These endpoints have different access url, but manage the same data entities
 """
+
 # Import from libraries
-from cornflow_client.constants import (
-    INSTANCE_SCHEMA,
-    SOLUTION_SCHEMA
-)
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
@@ -16,7 +14,7 @@ import jsonpatch
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import CaseModel, ExecutionModel, DeployedOrch, InstanceModel
+from cornflow.models import CaseModel, ExecutionModel, DeployedWorkflow, InstanceModel
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
@@ -40,6 +38,7 @@ class CaseEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case or get all the cases and their related information
     """
+
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -79,15 +78,21 @@ class CaseEndpoint(BaseMetaResource):
 
         # We validate the instance data if it exists
         if kwargs.get("data") is not None:
-            data_schema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
+            data_schema = DeployedWorkflow.get_one_schema(
+                config, schema, INSTANCE_SCHEMA
+            )
             data_errors = json_schema_validate_as_string(data_schema, kwargs["data"])
             if data_errors:
                 raise InvalidData(payload=dict(jsonschema_errors=data_errors))
 
         # And the solution data if it exists
         if kwargs.get("solution") is not None:
-            solution_schema = DeployedOrch.get_one_schema(config, schema, SOLUTION_SCHEMA)
-            solution_errors = json_schema_validate_as_string(solution_schema, kwargs["solution"])
+            solution_schema = DeployedWorkflow.get_one_schema(
+                config, schema, SOLUTION_SCHEMA
+            )
+            solution_errors = json_schema_validate_as_string(
+                solution_schema, kwargs["solution"]
+            )
             if solution_errors:
                 raise InvalidData(payload=dict(jsonschema_errors=solution_errors))
 
@@ -102,6 +107,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to create a new case from an already existing instance and execution
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -129,7 +135,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
                 error="You must provide a valid instance_id OR an execution_id",
                 status_code=400,
                 log_txt=f"Error while user {self.get_user()} tries to create case from instance and execution. "
-                        f"The instance id or execution id is not valid."
+                f"The instance id or execution id is not valid.",
             )
         user = self.get_user()
 
@@ -140,7 +146,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
                 raise ObjectDoesNotExist(
                     err,
                     log_txt=f"Error while user {self.get_user()} tries to create case "
-                            f"from instance and execution. " + err
+                    f"from instance and execution. " + err,
                 )
             return dict(
                 data=instance.data, schema=instance.schema, checks=instance.checks
@@ -153,7 +159,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
                 raise ObjectDoesNotExist(
                     err,
                     log_txt=f"Error while user {self.get_user()} tries to create "
-                            f"case from instance and execution. " + err
+                    f"case from instance and execution. " + err,
                 )
             data = get_instance_data(execution.instance_id)
             data["solution"] = execution.data
@@ -179,6 +185,7 @@ class CaseCopyEndpoint(BaseMetaResource):
     """
     Copies the case to a new case. Original case id goes in the url
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -214,7 +221,9 @@ class CaseCopyEndpoint(BaseMetaResource):
                 payload[key] = "Copy_" + data[key]
 
         response = self.post_list(payload)
-        current_app.logger.info(f"User {self.get_user()} copied case {idx} into {response[0].id}")
+        current_app.logger.info(
+            f"User {self.get_user()} copied case {idx} into {response[0].id}"
+        )
         return response
 
 
@@ -222,6 +231,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
     """
     Endpoint used to get the information of a single case, edit it or delete it
     """
+
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -264,7 +274,8 @@ class CaseDetailsEndpoint(BaseMetaResource):
                 err = "The data entity does not exist on the database."
                 raise ObjectDoesNotExist(
                     err,
-                    log_txt=f"Error while user {self.get_user()} tries to edit case {idx}. " + err
+                    log_txt=f"Error while user {self.get_user()} tries to edit case {idx}. "
+                    + err,
                 )
             if parent_id is not None:
                 parent_case = self.data_model.get_one_object(
@@ -275,7 +286,7 @@ class CaseDetailsEndpoint(BaseMetaResource):
                     raise ObjectDoesNotExist(
                         err,
                         log_txt=f"Error while user {self.get_user()} tries to move "
-                                f"case {idx} to directory {idx}. " + err
+                        f"case {idx} to directory {idx}. " + err,
                     )
 
             case.move_to(parent_case)
@@ -302,6 +313,7 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
     """
     Endpoint used to get the data of a given case
     """
+
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     @doc(description="Get data of a case", tags=["Cases"], inherit=False)
@@ -338,6 +350,7 @@ class CaseToInstance(BaseMetaResource):
     """
     Endpoint used to create a new instance or instance and execution from a stored case
     """
+
     ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -383,13 +396,13 @@ class CaseToInstance(BaseMetaResource):
         config = current_app.config
 
         # Data validation
-        jsonschema = DeployedOrch.get_one_schema(config, schema, INSTANCE_SCHEMA)
+        jsonschema = DeployedWorkflow.get_one_schema(config, schema, INSTANCE_SCHEMA)
         data_errors = json_schema_validate_as_string(jsonschema, payload["data"])
         if data_errors:
             raise InvalidData(
                 payload=dict(jsonschema_errors=data_errors),
                 log_txt=f"Error while user {self.get_user()} tries to create instance from case {idx}. "
-                        f"Data do not match the jsonschema.",
+                f"Data do not match the jsonschema.",
             )
 
         response = self.post_list(payload)
@@ -403,6 +416,7 @@ class CaseCompare(BaseMetaResource):
     """
     Endpoint used to generate the json patch of two given cases
     """
+
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
 
     def __init__(self):
@@ -435,7 +449,7 @@ class CaseCompare(BaseMetaResource):
                 "The case identifiers should be different.",
                 400,
                 log_txt=f"Error while user {self.get_user()} tries to compare cases. "
-                        f"The cases to compare have the same identifier."
+                f"The cases to compare have the same identifier.",
             )
         case_1 = self.model.get_one_object(user=self.get_user(), idx=idx1)
         case_2 = self.model.get_one_object(user=self.get_user(), idx=idx2)
@@ -444,19 +458,19 @@ class CaseCompare(BaseMetaResource):
             raise ObjectDoesNotExist(
                 "You don't have access to the first case or it doesn't exist",
                 log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
-                        f"The user doesn't have access to case {idx1} or it does not exist."
+                f"The user doesn't have access to case {idx1} or it does not exist.",
             )
         elif case_2 is None:
             raise ObjectDoesNotExist(
                 "You don't have access to the second case or it doesn't exist",
                 log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
-                        f"The user doesn't have access to case {idx2} or it does not exist."
+                f"The user doesn't have access to case {idx2} or it does not exist.",
             )
         elif case_1.schema != case_2.schema:
             raise InvalidData(
                 "The cases asked to compare do not share the same schema",
                 log_txt=f"Error while user {self.get_user()} tries to compare cases {idx1} and {idx2}. "
-                        f"The cases don't have the same schemas."
+                f"The cases don't have the same schemas.",
             )
 
         data = kwargs.get("data", True)
@@ -471,5 +485,7 @@ class CaseCompare(BaseMetaResource):
             ).patch
 
         payload["schema"] = case_1.schema
-        current_app.logger.info(f"User {self.get_user()} compared cases {idx1} and {idx2}")
+        current_app.logger.info(
+            f"User {self.get_user()} compared cases {idx1} and {idx2}"
+        )
         return payload, 200

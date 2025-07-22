@@ -16,12 +16,12 @@ from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
 
-class DeployedOrch(TraceAttributesModel):
+class DeployedWorkflow(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """
 
-    __tablename__ = "deployed_dags"
+    __tablename__ = "deployed_workflows"
     id = db.Column(db.String(128), primary_key=True)
     description = db.Column(TEXT, nullable=True)
     instance_schema = db.Column(JSON, nullable=True)
@@ -34,7 +34,7 @@ class DeployedOrch(TraceAttributesModel):
         "PermissionsDAG",
         cascade="all,delete",
         backref="deployed_dags",
-        primaryjoin="and_(DeployedOrch.id==PermissionsDAG.dag_id)",
+        primaryjoin="and_(DeployedWorkflow.id==PermissionsDAG.dag_id)",
     )
 
     def __init__(self, data):
@@ -52,7 +52,7 @@ class DeployedOrch(TraceAttributesModel):
 
     @staticmethod
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
-        item = DeployedOrch.get_one_object(dag_name)
+        item = DeployedWorkflow.get_one_object(dag_name)
 
         if item is None:
             err = f"The DAG {dag_name} does not exist in the database."

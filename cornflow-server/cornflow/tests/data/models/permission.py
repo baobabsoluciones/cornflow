@@ -1,7 +1,7 @@
 from cornflow.models import PermissionViewRoleModel
 from cornflow.models.meta_models import TraceAttributesModel
 
-from cornflow.models.dag import DeployedOrch
+from cornflow.models.dag import DeployedWorkflow
 from cornflow.shared import db
 
 
@@ -68,7 +68,7 @@ class PermissionsDAG(TraceAttributesModel):
 
     @staticmethod
     def add_all_permissions_to_user(user_id):
-        dags = DeployedOrch.get_all_objects()
+        dags = DeployedWorkflow.get_all_objects()
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
         ]

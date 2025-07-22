@@ -8,7 +8,7 @@ from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import PermissionsDAG, DeployedOrch
+from cornflow.models import PermissionsDAG, DeployedWorkflow
 from cornflow.schemas.schemas import SchemaOneApp, SchemaListApp
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ALL_DEFAULT_ROLES
@@ -63,7 +63,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
         )
 
         if permission:
-            deployed_dag = DeployedOrch.get_one_object(dag_name)
+            deployed_dag = DeployedWorkflow.get_one_object(dag_name)
             current_app.logger.info("User gets schema {}".format(dag_name))
             return {
                 "instance": deployed_dag.instance_schema,
@@ -71,7 +71,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
                 "instance_checks": deployed_dag.instance_checks_schema,
                 "solution_checks": deployed_dag.solution_checks_schema,
                 "config": deployed_dag.config_schema,
-                "name": dag_name
+                "name": dag_name,
             }, 200
         else:
             err = "User does not have permission to access this dag"

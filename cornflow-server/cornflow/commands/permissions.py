@@ -238,7 +238,7 @@ def register_dag_permissions_command(
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedOrch, PermissionsDAG, UserModel
+    from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel
     from cornflow.shared import db
 
     if open_deployment is None:
@@ -256,7 +256,7 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users().all()
-    all_dags = DeployedOrch.get_all_objects().all()
+    all_dags = DeployedWorkflow.get_all_objects().all()
 
     if open_deployment == 1:
 
@@ -303,7 +303,9 @@ def register_dag_permissions_command(
     if verbose:
         click.echo(f"Workflow permissions registered")
         if len(permissions) > 1:
-            current_app.logger.info(f"Workflow permissions registered: {len(permissions)}")
+            current_app.logger.info(
+                f"Workflow permissions registered: {len(permissions)}"
+            )
         else:
             current_app.logger.info("No new Workflow permissions")
 

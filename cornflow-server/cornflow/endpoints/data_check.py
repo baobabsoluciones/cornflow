@@ -10,7 +10,7 @@ from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedOrch
+from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedWorkflow
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -310,7 +310,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             if schema == "pulp":
                 validation_schema = "solve_model_dag"
 
-            data_jsonschema = DeployedOrch.get_one_schema(
+            data_jsonschema = DeployedWorkflow.get_one_schema(
                 config, validation_schema, INSTANCE_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(
@@ -339,7 +339,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
 
             payload["data"] = case.solution
 
-            data_jsonschema = DeployedOrch.get_one_schema(
+            data_jsonschema = DeployedWorkflow.get_one_schema(
                 config, validation_schema, SOLUTION_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(
