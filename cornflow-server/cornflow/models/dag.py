@@ -33,7 +33,7 @@ class DeployedWorkflow(TraceAttributesModel):
     dag_permissions = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",
-        backref="deployed_dags",
+        backref="deployed_workflows",
         primaryjoin="and_(DeployedWorkflow.id==PermissionsDAG.dag_id)",
     )
 

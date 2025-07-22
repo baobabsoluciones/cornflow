@@ -10,7 +10,7 @@ class PermissionsDAG(TraceAttributesModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     dag_id = db.Column(
-        db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
+        db.String(128), db.ForeignKey("deployed_workflows.id"), nullable=False
     )
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     user = db.relationship("UserModel", viewonly=True)
