@@ -4,7 +4,6 @@ cachetools==5.3.3
 click<=8.1.7
 cornflow-client==2.0.0a22
 cryptography<=44.0.1
-databricks-sdk==0.29.0
 disposable-email-domains>=0.0.86
 Flask==2.3.2
 flask-apispec<=0.11.4
