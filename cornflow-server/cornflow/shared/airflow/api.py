@@ -1,4 +1,4 @@
-"""
+""" 
 This module contains the Airflow class, which is used to interact with the Airflow API.
 
 The Airflow class is used to:
@@ -19,8 +19,8 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
-from cornflow_client.constants import AirflowError
-from cornflow_client.constants import config_orchestrator
+from cornflow.shared.constants_cli import AirflowError
+from cornflow.shared.constants_cli import config_orchestrator
 
 
 class Airflow(object):
@@ -80,21 +80,23 @@ class Airflow(object):
         checks_only=False,
         case_id=None,
     ):
+        """
+        Run a workflow
+        """
+        
         conf = dict(exec_id=execution_id, checks_only=checks_only)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
         return self.consume_dag_run(workflow_name, payload=payload, method="POST")
-
+    
     def run_dag(
         self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
     ):
         """
         Run workflow
         """
-        warnings.warn(
-            "This method will be deprecated on later versions, please use newer run_workflow method"
-        )
+        warnings.warn("This method will be deprecated on later versions, please use newer run_workflow method")
         return self.run_workflow(
             execution_id,
             workflow_name=dag_name,
@@ -103,9 +105,11 @@ class Airflow(object):
         )
 
     def update_schemas(self, dag_name="update_all_schemas"):
+        # TODO: DATABRICKS NOT IMPLEMENTED YET
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
     def update_dag_registry(self, dag_name="update_dag_registry"):
+        # TODO: DATABRICKS NOT IMPLEMENTED YET
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
     def get_run_status(self, schema, run_id):
@@ -114,6 +118,7 @@ class Airflow(object):
         )
 
     def set_dag_run_to_fail(self, dag_name, run_id, new_status="failed"):
+        # TODO: DATABRICKS NOT IMPLEMENTED YET
         # here, two calls have to be done:
         # first we get information on the dag_run
         dag_run = self.consume_dag_run(
@@ -135,9 +140,16 @@ class Airflow(object):
         return self.set_dag_run_state(dag_name, payload=payload)
 
     def get_all_dag_runs(self, dag_name):
+        """
+        Get all dag runs for a given dag name
+        """
+        # TODO: this function is not used anywhere, should we remove it?
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
     def get_workflow_info(self, workflow_name, method="GET"):
+        """
+        Get information about a workflow
+        """
         url = f"{self.url}/dags/{workflow_name}"
         schema_info = self.request_headers_auth(method=method, url=url)
         if schema_info.status_code != 200:
