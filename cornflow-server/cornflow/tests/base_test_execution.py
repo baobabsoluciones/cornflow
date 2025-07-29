@@ -24,6 +24,41 @@ from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 from abc import ABC, abstractmethod
 
 
+class TestExecutionsDetailEndpointMock(CustomTestCase):
+
+    def setUp(self):
+        super().setUp()
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.instance_payload = payload
+        self.model = ExecutionModel
+        self.response_items = {
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "instance_id",
+            "data_hash",
+            "message",
+            "state",
+            "config",
+            "schema",
+            "user_id",
+            "indicators",
+            "username",
+            "first_name",
+            "last_name",
+            "updated_at",
+        }
+        # we only check the following because this endpoint does not return data
+        self.items_to_check = ["name", "description"]
+        self.url = EXECUTION_URL
+        with open(EXECUTION_PATH) as f:
+            self.payload = json.load(f)
+        self.payload["instance_id"] = fk_id
+
+
 class BaseExecutionList(BaseTestCases.ListFilters, ABC):
 
     @property
@@ -557,7 +592,7 @@ class BaseExecutionDetail(BaseTestCases.DetailEndpoint, ABC):
             )
 
 
-class BaseExecutionData(BaseExecutionDetail, ABC):
+class BaseExecutionData(TestExecutionsDetailEndpointMock, ABC):
     # e.g. "cornflow.endpoints.execution.Airflow"
     orchestrator_patch_target = None
     # e.g. patch_af_client
@@ -580,8 +615,6 @@ class BaseExecutionData(BaseExecutionDetail, ABC):
             "indicators",
             "updated_at",
             "username",
-            "first_name",
-            "last_name",
         }
         self.items_to_check = ["name"]
         self.keys_to_check = [
@@ -598,10 +631,13 @@ class BaseExecutionData(BaseExecutionDetail, ABC):
             "description",
             "state",
             "name",
-            "first_name",
-            "last_name",
             "id",
         ]
+
+    def patch_orchestrator(self, client_class):
+        """Patch the orchestrator client for testing"""
+        if self.orchestrator_patch_fn:
+            self.orchestrator_patch_fn(client_class)
 
     def test_get_one_execution(self):
         with patch(self.orchestrator_patch_target) as client:
@@ -763,36 +799,3 @@ class BaseExecutionStatus(BaseExecutionDetail, ABC):
             self.assertEqual(
                 f"execution {idx} updated correctly", response.json["message"]
             )
-
-class TestExecutionsDetailEndpointMock(CustomTestCase):
-    def setUp(self):
-        super().setUp()
-        with open(INSTANCE_PATH) as f:
-            payload = json.load(f)
-        fk_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
-        self.instance_payload = payload
-        self.model = ExecutionModel
-        self.response_items = {
-            "id",
-            "name",
-            "description",
-            "created_at",
-            "instance_id",
-            "data_hash",
-            "message",
-            "state",
-            "config",
-            "schema",
-            "user_id",
-            "indicators",
-            "username",
-            "first_name",
-            "last_name",
-            "updated_at"
-        }
-        # we only check the following because this endpoint does not return data
-        self.items_to_check = ["name", "description"]
-        self.url = EXECUTION_URL
-        with open(EXECUTION_PATH) as f:
-            self.payload = json.load(f)
-        self.payload["instance_id"] = fk_id
