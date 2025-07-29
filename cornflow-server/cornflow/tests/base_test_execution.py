@@ -73,6 +73,8 @@ class BaseExecutionList(BaseTestCases.ListFilters, ABC):
             "name",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at",
         ]
 
@@ -344,6 +346,8 @@ class BaseExecutionDetail(BaseTestCases.DetailEndpoint, ABC):
             "user_id",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at",
         }
         # we only check the following because this endpoint does not return data
@@ -384,6 +388,8 @@ class BaseExecutionDetail(BaseTestCases.DetailEndpoint, ABC):
             "created_at",
             "state",
             "username",
+            "first_name",
+            "last_name",
             "updated_at",
         ]
         execution = self.get_one_row(
@@ -641,6 +647,8 @@ class BaseExecutionLog(BaseExecutionDetail, ABC):
             "indicators",
             "updated_at",
             "username",
+            "first_name",
+            "last_name",
             "log",
             "log_text",
         }
@@ -661,6 +669,8 @@ class BaseExecutionLog(BaseExecutionDetail, ABC):
             "config",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at",
         ]
 
@@ -772,6 +782,8 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "user_id",
             "indicators",
             "username",
+            "first_name",
+            "last_name",
             "updated_at"
         }
         # we only check the following because this endpoint does not return data
