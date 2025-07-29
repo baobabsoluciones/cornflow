@@ -120,7 +120,19 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
             return obj.user.username
         return None
 
+    def get_first_name(self, obj):
+        if hasattr(obj, "user") and obj.user is not None:
+            return obj.user.first_name
+        return None
+
+    def get_last_name(self, obj):
+        if hasattr(obj, "user") and obj.user is not None:
+            return obj.user.last_name
+        return None
+
     username = fields.Method("get_username")
+    first_name = fields.Method("get_first_name")
+    last_name = fields.Method("get_last_name")
 
 
 class ExecutionDetailsWithIndicatorsAndLogResponse(
