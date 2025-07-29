@@ -580,6 +580,8 @@ class BaseExecutionData(BaseExecutionDetail, ABC):
             "indicators",
             "updated_at",
             "username",
+            "first_name",
+            "last_name",
         }
         self.items_to_check = ["name"]
         self.keys_to_check = [
@@ -596,6 +598,8 @@ class BaseExecutionData(BaseExecutionDetail, ABC):
             "description",
             "state",
             "name",
+            "first_name",
+            "last_name",
             "id",
         ]
 
