@@ -8,8 +8,6 @@ from cornflow.commands.auxiliar import (
 from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
-import sys
-from importlib import import_module
 import click
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
@@ -309,4 +307,3 @@ def register_dag_permissions_command(
         else:
             current_app.logger.info("No new Workflow permissions")
 
-    pass

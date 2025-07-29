@@ -2,9 +2,7 @@ def update_schemas_command(url, user, pwd, verbose: bool = False):
     import time
     from flask import current_app
 
-    # TODO: change when update client
-    # from cornflow_client.airflow.api import Airflow
-    from cornflow.shared.airflow.api import Airflow
+    from cornflow_client.airflow.api import Airflow
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
@@ -36,9 +34,7 @@ def update_dag_registry_command(url, user, pwd, verbose: bool = False):
     import time
     from flask import current_app
 
-    # TODO: change when update client
-    # from cornflow_client.airflow.api import Airflow
-    from cornflow.shared.airflow.api import Airflow
+    from cornflow_client.airflow.api import Airflow
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
