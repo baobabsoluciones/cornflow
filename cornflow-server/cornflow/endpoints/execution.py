@@ -64,15 +64,14 @@ from cornflow.shared.validators import (
 )
 
 
-class ExecutionEndpoint(BaseMetaResource):
+class OrchestratorMixin(BaseMetaResource):
     """
-    Endpoint used to create a new execution or get all the executions and their information back
+    Base class that provides orchestrator-related functionality for execution endpoints.
+    This mixin handles the initialization and properties for orchestrator clients (Airflow/Databricks).
     """
 
     def __init__(self):
         super().__init__()
-        self.data_model = ExecutionModel
-        self.foreign_data = {"instance_id": InstanceModel}
         self._orch_type = None
         self._orch_client = None
         self._orch_error = None
@@ -117,6 +116,17 @@ class ExecutionEndpoint(BaseMetaResource):
     def orch_const(self):
         self._init_orch()
         return self._orch_const
+
+
+class ExecutionEndpoint(OrchestratorMixin):
+    """
+    Endpoint used to create a new execution or get all the executions and their information back
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = ExecutionModel
+        self.foreign_data = {"instance_id": InstanceModel}
 
     @doc(description="Get all executions", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -342,56 +352,12 @@ class ExecutionEndpoint(BaseMetaResource):
         return execution, 201
 
 
-class ExecutionRelaunchEndpoint(BaseMetaResource):
+class ExecutionRelaunchEndpoint(OrchestratorMixin):
     def __init__(self):
         super().__init__()
         self.model = ExecutionModel
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
-
-    def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
-
-    @property
-    def orch_type(self):
-        self._init_orch()
-        return self._orch_type
-
-    @property
-    def orch_client(self):
-        self._init_orch()
-        return self._orch_client
-
-    @property
-    def orch_error(self):
-        self._init_orch()
-        return self._orch_error
-
-    @property
-    def orch_to_state_map(self):
-        self._init_orch()
-        return self._orch_to_state_map
-
-    @property
-    def orch_const(self):
-        self._init_orch()
-        return self._orch_const
 
     @doc(description="Re-launch an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
@@ -509,7 +475,7 @@ class ExecutionRelaunchEndpoint(BaseMetaResource):
         return {"message": "The execution was relaunched correctly"}, 201
 
 
-class ExecutionDetailsEndpointBase(BaseMetaResource):
+class ExecutionDetailsEndpointBase(OrchestratorMixin):
     """
     Endpoint used to get the information of a certain execution. But not the data!
     """
@@ -518,50 +484,6 @@ class ExecutionDetailsEndpointBase(BaseMetaResource):
         super().__init__()
         self.data_model = ExecutionModel
         self.foreign_data = {"instance_id": InstanceModel}
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
-
-    def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
-
-    @property
-    def orch_type(self):
-        self._init_orch()
-        return self._orch_type
-
-    @property
-    def orch_client(self):
-        self._init_orch()
-        return self._orch_client
-
-    @property
-    def orch_error(self):
-        self._init_orch()
-        return self._orch_error
-
-    @property
-    def orch_to_state_map(self):
-        self._init_orch()
-        return self._orch_to_state_map
-
-    @property
-    def orch_const(self):
-        self._init_orch()
-        return self._orch_const
 
 
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
@@ -642,7 +564,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         if self.orch_type != AIRFLOW_BACKEND:
             return {
                 "message": f"This feature is not available for {self.orch_const['name']}"
-            }, 200
+            }, 501
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -665,7 +587,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         return {"message": "The execution has been stopped"}, 200
 
 
-class ExecutionStatusEndpoint(BaseMetaResource):
+class ExecutionStatusEndpoint(OrchestratorMixin):
     """
     Endpoint used to get the status of a certain execution that is running in the airflow webserver
     """
@@ -673,50 +595,6 @@ class ExecutionStatusEndpoint(BaseMetaResource):
     def __init__(self):
         super().__init__()
         self.data_model = ExecutionModel
-        self._orch_type = None
-        self._orch_client = None
-        self._orch_error = None
-        self._orch_to_state_map = None
-        self._orch_const = None
-
-    def _init_orch(self):
-        if self._orch_type is None:
-            self._orch_type = current_app.config["CORNFLOW_BACKEND"]
-            if self._orch_type == AIRFLOW_BACKEND:
-                self._orch_client = Airflow.from_config(current_app.config)
-                self._orch_error = AirflowError
-                self._orch_to_state_map = AIRFLOW_TO_STATE_MAP
-                self._orch_const = config_orchestrator["airflow"]
-            elif self._orch_type == DATABRICKS_BACKEND:
-                self._orch_client = Databricks.from_config(current_app.config)
-                self._orch_error = DatabricksError
-                self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
-                self._orch_const = config_orchestrator["databricks"]
-
-    @property
-    def orch_type(self):
-        self._init_orch()
-        return self._orch_type
-
-    @property
-    def orch_client(self):
-        self._init_orch()
-        return self._orch_client
-
-    @property
-    def orch_error(self):
-        self._init_orch()
-        return self._orch_error
-
-    @property
-    def orch_to_state_map(self):
-        self._init_orch()
-        return self._orch_to_state_map
-
-    @property
-    def orch_const(self):
-        self._init_orch()
-        return self._orch_const
 
     @doc(description="Get status of an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())
