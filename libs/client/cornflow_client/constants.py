@@ -219,11 +219,38 @@ SOLVER_CONVERTER = {
     "HiGHS_CMD": "highs",
     "HiGHS": "highs",
 }
+# Execution states
+EXEC_STATE_CORRECT = 1
+EXEC_STATE_MANUAL = 2
+EXEC_STATE_RUNNING = 0
+EXEC_STATE_ERROR = -1
+EXEC_STATE_STOPPED = -2
+EXEC_STATE_ERROR_START = -3
+EXEC_STATE_NOT_RUN = -4
+EXEC_STATE_UNKNOWN = -5
+EXEC_STATE_SAVING = -6
+EXEC_STATE_QUEUED = -7
+
+# Databricks constants
+DATABRICKS_TERMINATE_STATE = "TERMINATED"
+DATABRICKS_FINISH_TO_STATE_MAP = dict(
+    SUCCESS=EXEC_STATE_CORRECT,
+    USER_CANCELED=EXEC_STATE_STOPPED,
+)
+DATABRICKS_TO_STATE_MAP = dict(
+    BLOCKED=EXEC_STATE_QUEUED,
+    PENDING=EXEC_STATE_QUEUED,
+    QUEUED=EXEC_STATE_QUEUED,
+    RUNNING=EXEC_STATE_RUNNING,
+    TERMINATING=EXEC_STATE_RUNNING,
+    SUCCESS=EXEC_STATE_CORRECT,
+    USER_CANCELED=EXEC_STATE_STOPPED,
+    OTHER_FINISH_ERROR=EXEC_STATE_ERROR,
+)
 
 
-class AirflowError(Exception):
+class OrchError(Exception):
     status_code = 400
-    log_txt = "Airflow error"
 
     def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
         Exception.__init__(self, error)
@@ -241,6 +268,14 @@ class AirflowError(Exception):
         rv = dict(self.payload or ())
         rv["error"] = self.error
         return rv
+
+
+class AirflowError(OrchError):
+    log_txt = "Airflow error"
+
+
+class DatabricksError(OrchError):
+    log_txt = "Databricks error"
 
 
 class NoSolverException(Exception):
@@ -265,3 +300,17 @@ class BadInstanceChecks(Exception):
 
 class BadSolutionChecks(Exception):
     pass
+
+
+config_orchestrator = {
+    "airflow": {
+        "name": "Airflow",
+        "def_schema": "solve_model_dag",
+        "run_id": "dag_run_id",
+    },
+    "databricks": {
+        "name": "Databricks",
+        "def_schema": "979073949072767",
+        "run_id": "run_id",
+    },
+}

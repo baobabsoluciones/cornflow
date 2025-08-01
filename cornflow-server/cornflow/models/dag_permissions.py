@@ -1,4 +1,4 @@
-from cornflow.models.dag import DeployedDAG
+from cornflow.models.dag import DeployedWorkflow
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
 
@@ -10,7 +10,7 @@ class PermissionsDAG(TraceAttributesModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     dag_id = db.Column(
-        db.String(128), db.ForeignKey("deployed_dags.id"), nullable=False
+        db.String(128), db.ForeignKey("deployed_workflows.id"), nullable=False
     )
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     user = db.relationship("UserModel", viewonly=True)
@@ -29,7 +29,7 @@ class PermissionsDAG(TraceAttributesModel):
 
     @staticmethod
     def add_all_permissions_to_user(user_id):
-        dags = DeployedDAG.get_all_objects()
+        dags = DeployedWorkflow.get_all_objects()
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user_id}) for dag in dags
         ]

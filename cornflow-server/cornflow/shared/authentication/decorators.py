@@ -6,7 +6,6 @@ from functools import wraps
 from .auth import Auth
 from cornflow.shared.exceptions import InvalidCredentials
 from flask import current_app
-import os
 
 
 def authenticate(

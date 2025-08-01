@@ -5,7 +5,7 @@
 import json
 
 # Imports from internal modules
-from cornflow.models import MainAlarmsModel, AlarmsModel
+from cornflow.models import MainAlarmsModel
 from cornflow.tests.const import MAIN_ALARMS_URL, ALARMS_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
