@@ -142,7 +142,7 @@ jobs:
           CORNFLOW_SERVICE_USER: cornflow
       - name: Run postgres unit tests
         run: |
-          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
+          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit
           coverage report -m
         env:
           FLASK_ENV: testing
@@ -158,7 +158,7 @@ jobs:
         env:
           FLASK_ENV: testing
           OPEN_DEPLOYMENT: 1
-          DATABASE_URL: sqlite:///cornflow_test.db
+          DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
           LOG_LEVEL: 30
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3

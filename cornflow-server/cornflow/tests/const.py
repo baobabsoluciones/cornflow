@@ -40,6 +40,9 @@ JSON_PATCH_GOOD_PATH = _get_file("./data/json_patch_good.json")
 JSON_PATCH_BAD_PATH = _get_file("./data/json_patch_bad.json")
 FULL_CASE_JSON_PATCH_1 = _get_file("./data/full_case_patch.json")
 
+SPECIAL_CHARACTERS_PATH = _get_file("./data/validators_is_special_character_tests.json")
+PASSWORD_PATTERN_PATH = _get_file("./data/validators_check_password_pattern_tests.json")
+
 LOGIN_URL = PREFIX + "/login/"
 SIGNUP_URL = PREFIX + "/signup/"
 TOKEN_URL = PREFIX + "/token/"
