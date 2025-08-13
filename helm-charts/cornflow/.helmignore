@@ -50,3 +50,6 @@ Sessionx.vim
 /tests
 /tests/*.yaml
 /tests/*.yml
+
+# Examples
+/examples

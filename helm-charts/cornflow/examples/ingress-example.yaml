@@ -1,0 +1,94 @@
+# =============================================================================
+# INGRESS EXAMPLE FOR CORNFLOW
+# =============================================================================
+# 
+# This is an example Ingress configuration for Cornflow.
+# Copy this file and modify it according to your needs.
+# 
+# Usage:
+# 1. Modify the host, annotations, and TLS configuration as needed
+# 2. Apply with: kubectl apply -f ingress-example.yaml
+# 
+# Note: Make sure you have an Ingress controller installed in your cluster
+# (e.g., nginx-ingress, traefik, etc.)
+# =============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cornflow-ingress
+  namespace: default  # Change to your namespace
+  annotations:
+    # Ingress class annotation (for older Kubernetes versions)
+    kubernetes.io/ingress.class: nginx
+    
+    # SSL/TLS configuration (uncomment and modify as needed)
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Rate limiting (optional)
+    # nginx.ingress.kubernetes.io/rate-limit: "100"
+    # nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+    # CORS configuration (optional)
+    # nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    # nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    # nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    
+    # Proxy configuration (optional)
+    # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  # Ingress class (for Kubernetes 1.19+)
+  ingressClassName: nginx  # Change to your ingress controller class
+  
+  # TLS configuration (uncomment and modify for HTTPS)
+  # tls:
+  # - hosts:
+  #   - cornflow.local  # Change to your domain
+  #   secretName: cornflow-tls
+  
+  rules:
+  - host: cornflow.local  # Change to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-cornflow-cornflow-server  # Change to your release name
+            port:
+              number: 5000
+
+# =============================================================================
+# AIRFLOW WEBSERVER INGRESS EXAMPLE
+# =============================================================================
+# 
+# If you want to expose the Airflow webserver as well, uncomment and modify
+# the following configuration:
+#
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airflow-webserver-ingress
+  namespace: default  # Change to your namespace
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # Add other annotations as needed
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: airflow.local  # Change to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-cornflow-webserver  # Change to your release name
+            port:
+              number: 8080

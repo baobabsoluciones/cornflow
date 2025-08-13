@@ -75,30 +75,7 @@ service:
   port: 5000
   annotations: {}
 
-# =============================================================================
-# INGRESS CONFIGURATION
-# =============================================================================
 
-# Ingress configuration for external access
-ingress:
-  enabled: false  # Set to true for production with external access
-  className: "nginx"  # Specify your ingress controller
-  annotations:
-    # Example annotations for production:
-    # kubernetes.io/ingress.class: nginx
-    # cert-manager.io/cluster-issuer: letsencrypt-prod
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-  hosts:
-    - host: cornflow.local  # Change to your domain
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
-    # Example TLS configuration for production:
-    # - secretName: cornflow-tls
-    #   hosts:
-    #     - cornflow.yourdomain.com
 
 # =============================================================================
 # CORNFLOW APPLICATION CONFIGURATION
