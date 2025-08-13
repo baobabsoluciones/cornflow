@@ -438,7 +438,8 @@ airflow:
       # IMPORTANT: Change RELEASE_NAME to your release name (e.g., decision-ops-cornflow, my-project-cornflow, local-cornflow-cornflow, production-porject--cornflow, etc.)
       # Example: value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
       # Note: If EXTERNAL_APP=1, the URL should include /cornflow (e.g., :5000/cornflow/)
-      value: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
+      #value: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
+      value: "http://service_user:Service_user1234@my-cornflow-cornflow-server:5000/"  # This is the default value for the cornflow-server service
 
 # =============================================================================
 # PRODUCTION RECOMMENDATIONS
