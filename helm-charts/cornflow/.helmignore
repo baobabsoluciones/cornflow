@@ -45,3 +45,8 @@ Sessionx.vim
 /ci
 /docs
 /examples
+
+# Tests
+/tests
+/tests/*.yaml
+/tests/*.yml

@@ -173,5 +173,9 @@ cornssh.pub
 
 # airflow logs
 cornflow-server/airflow_config/logs
-helm-charts/cornflow/charts/airflow-1.16.0.tgz
+helm-charts/cornflow/charts/*.tgz
 helm-charts/cornflow/packages
+
+# Helm test manifests (generated automatically)
+helm-charts/cornflow/tests/test-manifests*.yaml
+helm-charts/cornflow/tests/test-manifests*.yml
