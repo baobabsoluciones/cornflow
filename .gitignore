@@ -174,3 +174,4 @@ cornssh.pub
 # airflow logs
 cornflow-server/airflow_config/logs
 helm-charts/cornflow/charts/airflow-1.16.0.tgz
+helm-charts/cornflow/packages

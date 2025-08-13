@@ -1,0 +1,439 @@
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-release-cornflow
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: cornflow/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-release-cornflow-cornflow-config
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+data:
+  # You can add custom Cornflow configuration here
+  # config.py: |
+  #   # Custom Cornflow configuration
+  #   LOG_LEVEL = 'INFO'
+  #   DEBUG = False
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: test-release-cornflow-role
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "persistentvolumeclaims", "events", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: test-release-cornflow-rolebinding
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: test-release-cornflow-role
+subjects:
+  - kind: ServiceAccount
+    name: test-release-cornflow
+    namespace: default
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: postgresql
+      protocol: TCP
+      name: postgresql
+  selector:
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/component: postgresql
+---
+# Source: cornflow/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-cornflow-server
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cornflow-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/component: cornflow-server
+---
+# Source: cornflow/templates/cornflow-deployment.yaml
+################################
+## Cornflow Deployment
+#################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-cornflow-server
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cornflow-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cornflow
+      app.kubernetes.io/instance: test-release
+      app.kubernetes.io/component: cornflow-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cornflow
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/component: cornflow-server
+    spec:
+      serviceAccountName: test-release-cornflow
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+
+      containers:
+        - name: cornflow-server
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          image: "baobabsoluciones/cornflow:release-v1.2.4"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          env:
+            - name: CORNFLOW_DB_HOST
+              value: test-release-cornflow-postgresql
+            - name: AIRFLOW_URL
+              value: "http://test-release-webserver:8080"
+            - name: AIRFLOW_PWD
+              value: "admin"
+            - name: AIRFLOW_USER
+              value: "admin"
+            - name: APPLICATION_ROOT
+              value: "/"
+            - name: AUTH_TYPE
+              value: "1"
+            - name: CF_ALARMS_ENDPOINT
+              value: "0"
+            - name: CORNFLOW_ADMIN_PWD
+              value: "Cornflow_admin1234"
+            - name: CORNFLOW_ADMIN_USER
+              value: "cornflow_admin"
+            - name: CORNFLOW_DB
+              value: "cornflow"
+            - name: CORNFLOW_DB_PASSWORD
+              value: "cornflow"
+            - name: CORNFLOW_DB_PORT
+              value: "5432"
+            - name: CORNFLOW_DB_USER
+              value: "cornflow"
+            - name: CORNFLOW_SERVICE_PWD
+              value: "Service_user1234"
+            - name: CORNFLOW_SERVICE_USER
+              value: "service_user"
+            - name: CORS_ORIGINS
+              value: "*"
+            - name: DEFAULT_POSTGRES
+              value: "1"
+            - name: DEFAULT_ROLE
+              value: "2"
+            - name: EXTERNAL_APP
+              value: "0"
+            - name: FLASK_ENV
+              value: "development"
+            - name: LDAP_BIND_DN
+              value: "cn=admin,dc=example,dc=org"
+            - name: LDAP_BIND_PASSWORD
+              value: "admin"
+            - name: LDAP_EMAIL_ATTRIBUTE
+              value: "mail"
+            - name: LDAP_GROUP_ATTRIBUTE
+              value: "cn"
+            - name: LDAP_GROUP_BASE
+              value: "dc=example,dc=org"
+            - name: LDAP_GROUP_OBJECT_CLASS
+              value: "groupOfNames"
+            - name: LDAP_GROUP_TO_ROLE_ADMIN
+              value: "administrators"
+            - name: LDAP_GROUP_TO_ROLE_PLANNER
+              value: "planners"
+            - name: LDAP_GROUP_TO_ROLE_SERVICE
+              value: "service"
+            - name: LDAP_GROUP_TO_ROLE_VIEWER
+              value: "viewers"
+            - name: LDAP_HOST
+              value: "ldap://openldap:389"
+            - name: LDAP_PROTOCOL_VERSION
+              value: "3"
+            - name: LDAP_SERVICE_BASE
+              value: "ou=users,dc=example,dc=org"
+            - name: LDAP_USERNAME_ATTRIBUTE
+              value: "cn"
+            - name: LDAP_USER_BASE
+              value: "ou=users,dc=example,dc=org"
+            - name: LDAP_USER_OBJECT_CLASS
+              value: "inetOrgPerson"
+            - name: LDAP_USE_TLS
+              value: "False"
+            - name: LOG_LEVEL
+              value: "20"
+            - name: OID_EXPECTED_AUDIENCE
+              value: ""
+            - name: OID_PROVIDER
+              value: ""
+            - name: OPEN_DEPLOYMENT
+              value: "1"
+            - name: PWD_ROTATION_TIME
+              value: "120"
+            - name: SECRET_BI_KEY
+              value: "test-bi-secret-key-for-testing-only"
+            - name: SECRET_KEY
+              value: "test-secret-key-for-testing-only"
+            - name: SERVICE_EMAIL_ADDRESS
+              value: ""
+            - name: SERVICE_EMAIL_PASSWORD
+              value: ""
+            - name: SERVICE_EMAIL_PORT
+              value: ""
+            - name: SERVICE_EMAIL_SERVER
+              value: ""
+            - name: SERVICE_NAME
+              value: "Cornflow"
+            - name: SERVICE_USER_ALLOW_PASSWORD_LOGIN
+              value: "1"
+            - name: SIGNUP_ACTIVATED
+              value: "1"
+            - name: TOKEN_DURATION
+              value: "24"
+            - name: USER_ACCESS_ALL_OBJECTS
+              value: "0"
+
+          volumeMounts:
+            - name: logs
+              mountPath: /usr/src/app/log
+            - name: ssh-keys
+              mountPath: /usr/src/app/.ssh
+              readOnly: true
+            - name: app-dir
+              mountPath: /usr/src/app
+      volumes:
+        - name: logs
+          emptyDir: {}
+        - name: ssh-keys
+          secret:
+            secretName: test-release-ssh-keys
+            optional: true
+        - name: app-dir
+          emptyDir: {}
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cornflow
+      app.kubernetes.io/instance: test-release
+      app.kubernetes.io/component: postgresql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cornflow
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/component: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: "postgres:15.4"
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: cornflow
+            - name: POSTGRES_PASSWORD
+              value: cornflow
+            - name: POSTGRES_DB
+              value: cornflow
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cornflow
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cornflow
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: test-release-cornflow-postgresql
+---
+# Source: cornflow/templates/airflow-dags-pvc.yaml
+################################
+## Airflow DAGs PVC
+#################################
+---
+# Source: cornflow/templates/airflow-rbac.yaml
+################################
+## Airflow RBAC
+#################################
+---
+# Source: cornflow/templates/configmaps.yaml
+################################
+## Cornflow ConfigMap
+#################################
+---
+# Source: cornflow/templates/ingress.yaml
+################################
+## Cornflow Ingress
+#################################
+---
+# Source: cornflow/templates/postgresql.yaml
+################################
+## Cornflow PostgreSQL
+#################################
+---
+# Source: cornflow/templates/rbac.yaml
+################################
+## Cornflow RBAC
+#################################
+---
+# Source: cornflow/templates/services.yaml
+################################
+## Cornflow Services
+#################################

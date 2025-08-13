@@ -27,13 +27,22 @@ keywords:
   - optimization
   - operations-research
   - decision-ops
+  - workflow
+  - kubernetes
+  - helm
 home: https://github.com/baobabsoluciones/cornflow
 sources:
   - https://github.com/baobabsoluciones/cornflow
 maintainers:
   - name: Baobab Soluciones
     email: cornflow@baobabsoluciones.es
-icon: https://raw.githubusercontent.com/baobabsoluciones/cornflow/main/docs/source/_static/logo.png
+    url: https://baobabsoluciones.es
+icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+annotations:
+  category: "Application"
+  licenses: "Apache-2.0"
+  support: "https://github.com/baobabsoluciones/cornflow/issues"
+  repository: "https://storage.googleapis.com/cornflow-public-artifacts/"
 
 dependencies:
   - name: airflow

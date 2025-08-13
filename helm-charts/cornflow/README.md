@@ -23,8 +23,9 @@ Cornflow is a platform that allows you to create, execute, and manage optimizati
 ### Basic Installation
 
 ```bash
-# Add the repository (if available)
-helm repo add cornflow https://baobabsoluciones.github.io/cornflow-helm
+# Add the repository
+helm repo add cornflow https://storage.googleapis.com/cornflow-public-artifacts/
+helm repo update
 
 # Install the chart
 helm install my-project cornflow/cornflow
@@ -509,6 +510,69 @@ kubectl exec -it <pod-name> -- /bin/bash
 kubectl get events --sort-by='.lastTimestamp'
 ```
 
+## Testing
+
+The chart includes a comprehensive test suite located in the `tests/` directory.
+
+### Quick Test (Validation Only)
+
+For a quick validation without a Kubernetes cluster:
+
+```bash
+cd tests && ./quick-test.sh
+```
+
+This command:
+- Validates chart syntax
+- Generates templates with and without Airflow
+- Shows the number of generated resources
+
+### Complete Test (With Cluster)
+
+If you have a Kubernetes cluster available (minikube, kind, etc.):
+
+```bash
+cd tests && ./test.sh
+```
+
+This command additionally:
+- Installs the chart in a test namespace
+- Verifies that pods are running
+- Uninstalls the chart automatically
+
+### Manual Testing
+
+If you prefer to test step by step:
+
+```bash
+# 1. Validate syntax
+helm lint ..
+
+# 2. Generate templates with test values
+helm template test-release .. -f test-values.yaml
+
+# 3. Install in cluster (optional)
+helm install test-release .. -f test-values.yaml -n cornflow-test
+
+# 4. Verify installation
+kubectl get pods -n cornflow-test
+
+# 5. Uninstall
+helm uninstall test-release -n cornflow-test
+```
+
+### Test Configuration
+
+The `tests/` directory contains:
+
+- **`test-values.yaml`**: Minimal values for testing without Airflow
+- **`test-values-with-airflow.yaml`**: Values for testing with Airflow included
+- **`test.sh`**: Complete automated test script
+- **`quick-test.sh`**: Quick validation script
+- **`TEST_README.md`**: Detailed testing documentation
+
+For detailed testing information, see `tests/TEST_README.md`.
+
 ## Uninstallation
 
 ```bash
@@ -518,6 +582,46 @@ helm uninstall my-cornflow
 # Delete PVCs (optional)
 kubectl delete pvc -l app.kubernetes.io/instance=my-cornflow
 ```
+
+## Release Process
+
+The chart is automatically released to Google Cloud Storage when a tag is pushed.
+
+### Automatic Release (Recommended)
+
+1. **Create and push a tag:**
+   ```bash
+   git tag helm-chart-v1.2.5
+   git push origin helm-chart-v1.2.5
+   ```
+
+2. **The GitHub Action will automatically:**
+   - Validate the chart
+   - Package it
+   - Upload to `gs://cornflow-public-artifacts/`
+   - Create a GitHub release
+   - Update the Helm repository index
+
+### Manual Release
+
+Use the release script for manual releases:
+
+```bash
+# Package chart locally
+./scripts/release.sh -v 1.2.5 -p
+
+# Upload to Google Cloud Storage (requires gcloud auth)
+./scripts/release.sh -v 1.2.5 -u
+
+# Complete release process
+./scripts/release.sh -v 1.2.5 -a
+```
+
+### Repository Information
+
+- **Repository URL**: `https://storage.googleapis.com/cornflow-public-artifacts/`
+- **Bucket**: `gs://cornflow-public-artifacts/`
+- **Installation**: `helm repo add cornflow https://storage.googleapis.com/cornflow-public-artifacts/`
 
 ## Contributing
 

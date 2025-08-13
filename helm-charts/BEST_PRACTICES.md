@@ -432,4 +432,4 @@ Use tools like:
 
 - [Official Helm Documentation](https://helm.sh/docs/)
 - [Kubernetes Best Practices](https://kubernetes.io/docs/concepts/configuration/)
-- [Cornflow Documentation](https://cornflow.readthedocs.io/) 
+- [Cornflow Documentation](https://baobabsoluciones.github.io/cornflow/) 

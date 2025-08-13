@@ -1,0 +1,3198 @@
+---
+# Source: cornflow/charts/airflow/templates/jobs/create-user-job-serviceaccount.yaml
+###########################################
+## Airflow Create User Job ServiceAccount
+###########################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-create-user-job"
+  labels:
+    tier: airflow
+    component: create-user-job
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/jobs/migrate-database-job-serviceaccount.yaml
+#############################################
+## Airflow Migrate Database Job ServiceAccount
+##############################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-migrate-database-job"
+  labels:
+    tier: airflow
+    component: run-airflow-migrations
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-serviceaccount.yaml
+######################################
+## Airflow Pgbouncer ServiceAccount
+######################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-pgbouncer"
+  labels:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/scheduler/scheduler-serviceaccount.yaml
+################################
+## Airflow Scheduler ServiceAccount
+#################################
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "airflow-scheduler"
+  labels:
+    tier: airflow
+    component: scheduler
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/statsd/statsd-serviceaccount.yaml
+######################################
+## Airflow StatsD ServiceAccount
+######################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-statsd"
+  labels:
+    tier: airflow
+    component: statsd
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/triggerer/triggerer-serviceaccount.yaml
+################################
+## Airflow Triggerer ServiceAccount
+#################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-triggerer"
+  labels:
+    tier: airflow
+    component: triggerer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-serviceaccount.yaml
+######################################
+## Airflow Webserver ServiceAccount
+######################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-webserver"
+  labels:
+    tier: airflow
+    component: webserver
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-serviceaccount.yaml
+################################
+## Airflow Worker ServiceAccount
+#################################
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: "test-release-airflow-worker"
+  labels:
+    tier: airflow
+    component: worker
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-release-cornflow
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: cornflow/charts/airflow/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.24
+type: Opaque
+data:
+  postgres-password: "cG9zdGdyZXM="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
+---
+# Source: cornflow/charts/airflow/templates/secrets/metadata-connection-secret.yaml
+################################
+## Airflow Metadata Secret
+#################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-metadata
+  labels:
+    tier: airflow
+    release: test-release
+    chart: airflow
+    heritage: Helm
+type: Opaque
+data:
+  connection: "cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHRlc3QtcmVsZWFzZS1wZ2JvdW5jZXIuZGVmYXVsdDo2NTQzL3Rlc3QtcmVsZWFzZS1tZXRhZGF0YT9zc2xtb2RlPWRpc2FibGU="
+---
+# Source: cornflow/charts/airflow/templates/secrets/pgbouncer-config-secret.yaml
+################################
+## Pgbouncer Config Secret
+#################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-pgbouncer-config
+  labels:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+    chart: airflow
+    heritage: Helm
+type: Opaque
+data:
+  pgbouncer.ini: CgoKW2RhdGFiYXNlc10KdGVzdC1yZWxlYXNlLW1ldGFkYXRhID0gaG9zdD10ZXN0LXJlbGVhc2UtcG9zdGdyZXNxbC5kZWZhdWx0IGRibmFtZT1wb3N0Z3JlcyBwb3J0PTU0MzIgcG9vbF9zaXplPTEwIAp0ZXN0LXJlbGVhc2UtcmVzdWx0LWJhY2tlbmQgPSBob3N0PXRlc3QtcmVsZWFzZS1wb3N0Z3Jlc3FsLmRlZmF1bHQgZGJuYW1lPXBvc3RncmVzIHBvcnQ9NTQzMiBwb29sX3NpemU9NSAKCltwZ2JvdW5jZXJdCnBvb2xfbW9kZSA9IHRyYW5zYWN0aW9uCmxpc3Rlbl9wb3J0ID0gNjU0MwpsaXN0ZW5fYWRkciA9ICoKYXV0aF90eXBlID0gc2NyYW0tc2hhLTI1NgphdXRoX2ZpbGUgPSAvZXRjL3BnYm91bmNlci91c2Vycy50eHQKc3RhdHNfdXNlcnMgPSBwb3N0Z3JlcwppZ25vcmVfc3RhcnR1cF9wYXJhbWV0ZXJzID0gZXh0cmFfZmxvYXRfZGlnaXRzCm1heF9jbGllbnRfY29ubiA9IDEwMAp2ZXJib3NlID0gMApsb2dfZGlzY29ubmVjdGlvbnMgPSAwCmxvZ19jb25uZWN0aW9ucyA9IDAKCnNlcnZlcl90bHNfc3NsbW9kZSA9IHByZWZlcgpzZXJ2ZXJfdGxzX2NpcGhlcnMgPSBub3JtYWw=
+  users.txt: CiJwb3N0Z3JlcyIgInBvc3RncmVzIgoicG9zdGdyZXMiICJwb3N0Z3JlcyI=
+---
+# Source: cornflow/charts/airflow/templates/secrets/pgbouncer-stats-secret.yaml
+################################
+## Pgbouncer Stats Secret
+#################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-pgbouncer-stats
+  labels:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+    chart: airflow
+    heritage: Helm
+type: Opaque
+data:
+  connection: "cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQDEyNy4wLjAuMTo2NTQzL3BnYm91bmNlcj9zc2xtb2RlPWRpc2FibGU="
+---
+# Source: cornflow/charts/airflow/templates/secrets/webserver-secret-key-secret.yaml
+############################################
+## Airflow Webserver Flask Secret Key Secret
+############################################
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-webserver-secret-key
+  labels:
+    tier: airflow
+    component: webserver
+    release: test-release
+    chart: airflow
+    heritage: Helm
+type: Opaque
+data:
+  webserver-secret-key: "ZVZwTWJ6QjRVbUpaU3pVM2RtSndRalYwY2tNemJtOW5lWHBKUjIweVNVOD0="
+---
+# Source: cornflow/charts/airflow/templates/configmaps/configmap.yaml
+################################
+## Airflow ConfigMap
+#################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-release-config
+  labels:
+    tier: airflow
+    component: config
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+data:
+  # These are system-specified config overrides.
+  airflow.cfg: |-
+    [celery]
+    flower_url_prefix = 
+    worker_concurrency = 16
+    
+    [celery_kubernetes_executor]
+    kubernetes_queue = kubernetes
+    
+    [core]
+    auth_manager = airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    colored_console_log = False
+    dags_folder = /opt/airflow/dags
+    executor = KubernetesExecutor
+    load_examples = False
+    remote_logging = False
+    
+    [elasticsearch]
+    json_format = True
+    log_id_template = {dag_id}_{task_id}_{execution_date}_{try_number}
+    
+    [elasticsearch_configs]
+    max_retries = 3
+    retry_timeout = True
+    timeout = 30
+    
+    [kerberos]
+    ccache = /var/kerberos-ccache/cache
+    keytab = /etc/airflow.keytab
+    principal = airflow@FOO.COM
+    reinit_frequency = 3600
+    
+    [kubernetes]
+    airflow_configmap = test-release-config
+    airflow_local_settings_configmap = test-release-config
+    multi_namespace_mode = False
+    namespace = default
+    pod_template_file = /opt/airflow/pod_templates/pod_template_file.yaml
+    worker_container_repository = apache/airflow
+    worker_container_tag = 2.10.5
+    
+    [kubernetes_executor]
+    multi_namespace_mode = False
+    namespace = default
+    pod_template_file = /opt/airflow/pod_templates/pod_template_file.yaml
+    worker_container_repository = apache/airflow
+    worker_container_tag = 2.10.5
+    
+    [logging]
+    colored_console_log = False
+    remote_logging = False
+    
+    [metrics]
+    statsd_host = test-release-statsd
+    statsd_on = True
+    statsd_port = 9125
+    statsd_prefix = airflow
+    
+    [scheduler]
+    run_duration = 41460
+    standalone_dag_processor = False
+    statsd_host = test-release-statsd
+    statsd_on = True
+    statsd_port = 9125
+    statsd_prefix = airflow
+    
+    [webserver]
+    enable_proxy_fix = True
+    rbac = True
+    
+  airflow_local_settings.py: |-
+    
+    from airflow.www.utils import UIAlert
+    
+    DASHBOARD_UIALERTS = [
+      UIAlert(
+        'Usage of a dynamic webserver secret key detected. We recommend a static webserver secret key instead.'
+        ' See the <a href='
+        '"https://airflow.apache.org/docs/helm-chart/stable/production-guide.html#webserver-secret-key" '
+        'target="_blank" rel="noopener noreferrer">'
+        'Helm Chart Production Guide</a> for more details.',
+        category="warning",
+        roles=["Admin"],
+        html=True,
+      )
+    ]
+  pod_template_file.yaml: |-
+    
+    ---
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: placeholder-name
+      labels:
+        tier: airflow
+        component: worker
+        release: test-release
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    spec:
+      initContainers:
+      containers:
+        - envFrom:      
+            []
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor      
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key      
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env      
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          name: base
+          resources:
+            {}
+          volumeMounts:
+            - mountPath: "/opt/airflow/logs"
+              name: logs
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+            - name: dags
+              mountPath: /opt/airflow/dags
+              readOnly: False
+      restartPolicy: Never
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      terminationGracePeriodSeconds: 600
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      serviceAccountName: "test-release-airflow-worker"
+      volumes:
+      - name: dags
+        persistentVolumeClaim:
+          claimName: test-release-dags
+      - name: logs
+        persistentVolumeClaim:
+          claimName: test-release-logs
+      - configMap:
+          name: test-release-config
+        name: config
+---
+# Source: cornflow/charts/airflow/templates/configmaps/statsd-configmap.yaml
+################################
+## Airflow StatsD ConfigMap
+#################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-release-statsd
+  labels:
+    tier: airflow
+    component: config
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+data:
+  mappings.yml: |-
+    # Licensed to the Apache Software Foundation (ASF) under one
+    # or more contributor license agreements.  See the NOTICE file
+    # distributed with this work for additional information
+    # regarding copyright ownership.  The ASF licenses this file
+    # to you under the Apache License, Version 2.0 (the
+    # "License"); you may not use this file except in compliance
+    # with the License.  You may obtain a copy of the License at
+    #
+    #   http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing,
+    # software distributed under the License is distributed on an
+    # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    # KIND, either express or implied.  See the License for the
+    # specific language governing permissions and limitations
+    # under the License.
+    ---
+    # 
+    mappings:
+      # Map dot separated stats to labels
+      - match: airflow.dagrun.dependency-check.*.*
+        name: "airflow_dagrun_dependency_check"
+        labels:
+          dag_id: "$1"
+    
+      - match: airflow.operator_successes_(.*)
+        match_type: regex
+        name: "airflow_operator_successes"
+        labels:
+          operator: "$1"
+    
+      - match: airflow.operator_failures_(.*)
+        match_type: regex
+        name: "airflow_operator_failures"
+        labels:
+          operator: "$1"
+    
+      - match: airflow.scheduler_heartbeat
+        match_type: regex
+        name: "airflow_scheduler_heartbeat"
+        labels:
+          type: counter
+    
+      - match: airflow.dag_processor_heartbeat
+        match_type: regex
+        name: "airflow_dag_processor_heartbeat"
+        labels:
+          type: counter
+    
+      - match: airflow.dag.*.*.duration
+        name: "airflow_task_duration"
+        labels:
+          dag_id: "$1"
+          task_id: "$2"
+    
+      - match: airflow.dagrun.duration.success.*
+        name: "airflow_dagrun_duration"
+        labels:
+          dag_id: "$1"
+    
+      - match: airflow.dagrun.duration.failed.*
+        name: "airflow_dagrun_failed"
+        labels:
+          dag_id: "$1"
+    
+      - match: airflow.dagrun.schedule_delay.*
+        name: "airflow_dagrun_schedule_delay"
+        labels:
+          dag_id: "$1"
+    
+      - match: airflow.dag_processing.last_runtime.*
+        name: "airflow_dag_processing_last_runtime"
+        labels:
+          dag_file: "$1"
+    
+      - match: airflow.dag_processing.last_run.seconds_ago.*
+        name: "airflow_dag_processing_last_run_seconds_ago"
+        labels:
+          dag_file: "$1"
+    
+      - match: airflow.pool.open_slots.*
+        name: "airflow_pool_open_slots"
+        labels:
+          pool: "$1"
+    
+      - match: airflow.pool.used_slots.*
+        name: "airflow_pool_used_slots"
+        labels:
+          pool: "$1"
+    
+      - match: airflow.pool.starving_tasks.*
+        name: "airflow_pool_starving_tasks"
+        labels:
+          pool: "$1"
+    
+      - match: airflow.executor.open_slots.*
+        name: "airflow_executor_open_slots"
+        labels:
+          executor: "$1"
+    
+      - match: airflow.executor.queued_tasks.*
+        name: "airflow_executor_queued_tasks"
+        labels:
+          executor: "$1"
+    
+      - match: airflow.executor.running_tasks.*
+        name: "airflow_executor_running_tasks"
+        labels:
+          executor: "$1"
+    
+      - match: airflow.ti.running.*.*.*
+        name: "airflow_ti_running"
+        labels:
+          queue: "$1"
+          dag_id: "$2"
+          task_id: "$3"
+---
+# Source: cornflow/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-release-cornflow-cornflow-config
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+data:
+  # You can add custom Cornflow configuration here
+  # config.py: |
+  #   # Custom Cornflow configuration
+  #   LOG_LEVEL = 'INFO'
+  #   DEBUG = False
+---
+# Source: cornflow/charts/airflow/templates/dags-persistent-volume-claim.yaml
+######################################
+## Airflow DAGs PersistentVolumeClaim
+######################################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-release-dags
+  labels:
+    tier: airflow
+    component: dags-pvc
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: "1Gi"
+---
+# Source: cornflow/charts/airflow/templates/logs-persistent-volume-claim.yaml
+######################################
+## Airflow LOGs PersistentVolumeClaim
+######################################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-release-logs
+  labels:
+    tier: airflow
+    component: logs-pvc
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: "100Gi"
+---
+# Source: cornflow/templates/airflow-dags-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-release-airflow-dags
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: airflow-dags
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: cornflow/templates/airflow-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-release-airflow-worker
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: airflow-rbac
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/exec"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+# Source: cornflow/templates/airflow-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-release-airflow-worker
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: airflow-rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-release-airflow-worker
+subjects:
+- kind: ServiceAccount
+  name: test-release-airflow-scheduler
+  namespace: default
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-launcher-role.yaml
+################################
+## Airflow Pod Launcher Role
+#################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: test-release-pod-launcher-role
+  namespace: "default"
+  labels:
+    tier: airflow
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - "pods"
+    verbs:
+      - "create"
+      - "list"
+      - "get"
+      - "patch"
+      - "watch"
+      - "delete"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/exec"
+    verbs:
+      - "create"
+      - "get"
+  - apiGroups:
+      - ""
+    resources:
+      - "events"
+    verbs:
+      - "list"
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-log-reader-role.yaml
+################################
+## Airflow Pod Reader Role
+#################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: test-release-pod-log-reader-role
+  namespace: "default"
+  labels:
+    tier: airflow
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - "pods"
+    verbs:
+      - "list"
+      - "get"
+      - "watch"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
+      - "list"
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: test-release-cornflow-role
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "persistentvolumeclaims", "events", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-launcher-rolebinding.yaml
+################################
+## Airflow Pod Launcher Role Binding
+#################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: "default"
+  name: test-release-pod-launcher-rolebinding
+  labels:
+    tier: airflow
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: test-release-pod-launcher-role
+subjects:
+  - kind: ServiceAccount
+    name: "airflow-scheduler"
+    namespace: "default"
+  - kind: ServiceAccount
+    name: "test-release-airflow-worker"
+    namespace: "default"
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-log-reader-rolebinding.yaml
+################################
+## Airflow Pod Reader Role Binding
+#################################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: "default"
+  name: test-release-pod-log-reader-rolebinding
+  labels:
+    tier: airflow
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: test-release-pod-log-reader-role
+subjects:
+  - kind: ServiceAccount
+    name: "test-release-airflow-webserver"
+    namespace: "default"
+  - kind: ServiceAccount
+    name: "test-release-airflow-triggerer"
+    namespace: "default"
+---
+# Source: cornflow/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: test-release-cornflow-rolebinding
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: test-release-cornflow-role
+subjects:
+  - kind: ServiceAccount
+    name: test-release-cornflow
+    namespace: default
+---
+# Source: cornflow/charts/airflow/charts/postgresql/templates/primary/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-postgresql-hl
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.24
+    app.kubernetes.io/component: primary
+  annotations:
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: primary
+---
+# Source: cornflow/charts/airflow/charts/postgresql/templates/primary/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.24
+    app.kubernetes.io/component: primary
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+      nodePort: null
+  selector:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: primary
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-service.yaml
+################################
+## Airflow Pgbouncer Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-pgbouncer
+  labels:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9127"
+spec:
+  type: ClusterIP
+  selector:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+  ports:
+    - name: pgbouncer
+      protocol: TCP
+      port: 6543
+    - name: pgb-metrics
+      protocol: TCP
+      port: 9127
+---
+# Source: cornflow/charts/airflow/templates/statsd/statsd-service.yaml
+################################
+## Airflow StatsD Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-statsd
+  labels:
+    tier: airflow
+    component: statsd
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9102"
+spec:
+  type: ClusterIP
+  selector:
+    tier: airflow
+    component: statsd
+    release: test-release
+  ports:
+    - name: statsd-ingest
+      protocol: UDP
+      port: 9125
+      targetPort: 9125
+    - name: statsd-scrape
+      protocol: TCP
+      port: 9102
+      targetPort: 9102
+---
+# Source: cornflow/charts/airflow/templates/triggerer/triggerer-service.yaml
+################################
+## Airflow triggerer Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-triggerer
+  labels:
+    tier: airflow
+    component: triggerer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  clusterIP: None
+  selector:
+    tier: airflow
+    component: triggerer
+    release: test-release
+  ports:
+    - name: triggerer-logs
+      protocol: TCP
+      port: 8794
+      targetPort: 8794
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-service.yaml
+################################
+## Airflow Webserver Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-webserver
+  labels:
+    tier: airflow
+    component: webserver
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  type: ClusterIP
+  selector:
+    tier: airflow
+    component: webserver
+    release: test-release
+  ports:
+  
+    -
+      name: airflow-ui
+      port: 8080
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: postgresql
+      protocol: TCP
+      name: postgresql
+  selector:
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/component: postgresql
+---
+# Source: cornflow/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-release-cornflow-server
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cornflow-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/component: cornflow-server
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-deployment.yaml
+################################
+## Airflow Pgbouncer Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-pgbouncer
+  labels:
+    tier: airflow
+    component: pgbouncer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      tier: airflow
+      component: pgbouncer
+      release: test-release
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: pgbouncer
+        release: test-release
+      annotations:
+        checksum/pgbouncer-config-secret: 9e6d57d23e31edb4b2764a08c7772b85cbf60db4f76f2c963ea98d397d3039b7
+        checksum/pgbouncer-certificates-secret: 3224c82d398347122016433d054bcba1c2bab5837338418e638897a3462d4759
+    spec:
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      serviceAccountName: "test-release-airflow-pgbouncer"
+      securityContext: 
+        runAsUser: 65534
+      restartPolicy: Always
+      containers:
+        - name: pgbouncer
+          image: apache/airflow:airflow-pgbouncer-2025.03.05-1.23.1
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          command: 
+            - pgbouncer
+            - -u
+            - nobody
+            - /etc/pgbouncer/pgbouncer.ini
+          resources:
+            {}
+          ports:
+            - name: pgbouncer
+              containerPort: 6543
+          livenessProbe:
+            tcpSocket:
+              port: 6543
+          readinessProbe:
+            tcpSocket:
+              port: 6543
+          volumeMounts:
+            - name: pgbouncer-config
+              subPath: pgbouncer.ini
+              mountPath: /etc/pgbouncer/pgbouncer.ini
+              readOnly: true
+            - name: pgbouncer-config
+              subPath: users.txt
+              mountPath: /etc/pgbouncer/users.txt
+              readOnly: true
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - killall -INT pgbouncer && sleep 120
+        - name: metrics-exporter
+          resources:
+            {}
+          image: apache/airflow:airflow-pgbouncer-exporter-2025.03.05-0.18.0
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-pgbouncer-stats
+                  key: "connection"
+          ports:
+            - name: metrics
+              containerPort: 9127
+          livenessProbe:
+            exec:
+              command:
+                - pgbouncer_exporter
+                - health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - pgbouncer_exporter
+                - health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+      volumes:
+        - name: pgbouncer-config
+          secret:
+            secretName: test-release-pgbouncer-config
+---
+# Source: cornflow/charts/airflow/templates/scheduler/scheduler-deployment.yaml
+################################
+## Airflow Scheduler Deployment/StatefulSet
+#################################
+# Are we using a local executor?
+# Is persistence enabled on the _workers_?
+# This is important because in $local mode, the scheduler assumes the role of the worker
+# If we're using a StatefulSet
+# We can skip DAGs mounts on scheduler if dagProcessor is enabled, except with $local mode
+  
+# If we're using elasticsearch or opensearch logging
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-scheduler
+  labels:
+    tier: airflow
+    component: scheduler
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+    executor: "KubernetesExecutor"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: airflow
+      component: scheduler
+      release: test-release
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: scheduler
+        release: test-release
+      annotations:
+        checksum/metadata-secret: c56d509e66845b19a529c8cb298729c4ffb6245e240a5b28e8c5b61aeabdb479
+        checksum/result-backend-secret: 98a68f230007cfa8f5d3792e1aff843a76b0686409e4a46ab2f092f6865a1b71
+        checksum/pgbouncer-config-secret: 9e6d57d23e31edb4b2764a08c7772b85cbf60db4f76f2c963ea98d397d3039b7
+        checksum/airflow-config: 901dabd647cb6e05b2b886d8241b8a58b0389beab4e09e535f7825f299ea6327
+        checksum/extra-configmaps: e862ea47e13e634cf17d476323784fa27dac20015550c230953b526182f5cac8
+        checksum/extra-secrets: e9582fdd622296c976cbc10a5ba7d6702c28a24fe80795ea5b84ba443a56c827
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      nodeSelector:
+        {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  component: scheduler
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: "airflow-scheduler"
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      initContainers:
+        - name: wait-for-airflow-migrations
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+          args:          
+            - airflow
+            - db
+            - check-migrations
+            - --migration-wait-timeout=60
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key
+        - command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Test: Simulando copia de DAGs..."
+            mkdir -p /opt/airflow/dags
+            echo "# Test DAG" > /opt/airflow/dags/test_dag.py
+          image: alpine/git
+          imagePullPolicy: IfNotPresent
+          name: cornflow-dags-init
+          volumeMounts:
+          - mountPath: /opt/airflow/dags
+            name: dags
+      containers:
+        # Always run the main scheduler container.
+        - name: scheduler
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args: 
+            - bash
+            - -c
+            - exec airflow scheduler
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key          
+          livenessProbe:
+            initialDelaySeconds: 10
+            timeoutSeconds: 20
+            failureThreshold: 5
+            periodSeconds: 60
+            exec:
+              command:              
+                - sh
+                - -c
+                - |
+                  CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec /entrypoint \
+                  airflow jobs check --job-type SchedulerJob --local
+          startupProbe:
+            initialDelaySeconds: 0
+            timeoutSeconds: 20
+            failureThreshold: 6
+            periodSeconds: 10
+            exec:
+              command:              
+                - sh
+                - -c
+                - |
+                  CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec /entrypoint \
+                  airflow jobs check --job-type SchedulerJob --local
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /opt/airflow/pod_templates/pod_template_file.yaml
+              subPath: pod_template_file.yaml
+              readOnly: true
+            - name: logs
+              mountPath: "/opt/airflow/logs"
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+            - name: dags
+              mountPath: /opt/airflow/dags
+              readOnly: False
+        - name: scheduler-log-groomer
+          resources:
+            {}
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - bash
+            - /clean-logs
+          env:
+            - name: AIRFLOW__LOG_RETENTION_DAYS
+              value: "15"
+            - name: AIRFLOW__LOG_CLEANUP_FREQUENCY_MINUTES
+              value: "15"
+            - name: AIRFLOW_HOME
+              value: "/opt/airflow"
+          volumeMounts:
+            - name: logs
+              mountPath: "/opt/airflow/logs"
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-config
+        - name: dags
+          persistentVolumeClaim:
+            claimName: test-release-dags
+        - name: logs
+          persistentVolumeClaim:
+            claimName: test-release-logs
+---
+# Source: cornflow/charts/airflow/templates/statsd/statsd-deployment.yaml
+################################
+## Airflow StatsD Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-statsd
+  labels:
+    tier: airflow
+    component: statsd
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: airflow
+      component: statsd
+      release: test-release
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: statsd
+        release: test-release
+    spec:
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: "test-release-airflow-statsd"
+      securityContext: 
+        runAsUser: 65534
+      restartPolicy: Always
+      containers:
+        - name: statsd
+          image: quay.io/prometheus/statsd-exporter:v0.28.0
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args: 
+            - --statsd.mapping-config=/etc/statsd-exporter/mappings.yml
+          resources:
+            {}
+          ports:
+            - name: statsd-ingest
+              protocol: UDP
+              containerPort: 9125
+            - name: statsd-scrape
+              containerPort: 9102
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9102
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9102
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /etc/statsd-exporter/mappings.yml
+              subPath: mappings.yml
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-statsd
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-deployment.yaml
+################################
+## Airflow Webserver Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-webserver
+  labels:
+    tier: airflow
+    component: webserver
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  replicas: 1
+  strategy:
+    # Here we define the rolling update strategy
+    # - maxSurge define how many pod we can add at a time
+    # - maxUnavailable define how many pod can be unavailable
+    #   during the rolling update
+    # Setting maxUnavailable to 0 would make sure we have the appropriate
+    # capacity during the rolling update.
+    # You can also use percentage based value instead of integer.
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      tier: airflow
+      component: webserver
+      release: test-release
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: webserver
+        release: test-release
+      annotations:
+        checksum/metadata-secret: c56d509e66845b19a529c8cb298729c4ffb6245e240a5b28e8c5b61aeabdb479
+        checksum/pgbouncer-config-secret: 9e6d57d23e31edb4b2764a08c7772b85cbf60db4f76f2c963ea98d397d3039b7
+        checksum/webserver-secret-key: 791971550049776dd323a3f2f53475163882fed10f83e5b8da0fd597eddf22da
+        checksum/airflow-config: 901dabd647cb6e05b2b886d8241b8a58b0389beab4e09e535f7825f299ea6327
+        checksum/webserver-config: 2f3fdfd294a37094d2abee43b2b09888a5c195ee03414996bf99a4681658af94
+        checksum/extra-configmaps: e862ea47e13e634cf17d476323784fa27dac20015550c230953b526182f5cac8
+        checksum/extra-secrets: e9582fdd622296c976cbc10a5ba7d6702c28a24fe80795ea5b84ba443a56c827
+    spec:
+      serviceAccountName: "test-release-airflow-webserver"
+      nodeSelector:
+        {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  component: webserver
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      initContainers:
+        - name: wait-for-airflow-migrations
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+          args:          
+            - airflow
+            - db
+            - check-migrations
+            - --migration-wait-timeout=60
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key
+      containers:
+        - name: webserver
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - bash
+            - -c
+            - exec airflow webserver
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /opt/airflow/pod_templates/pod_template_file.yaml
+              subPath: pod_template_file.yaml
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+            - name: logs
+              mountPath: "/opt/airflow/logs"
+          ports:
+            - name: airflow-ui
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            timeoutSeconds: 20
+            failureThreshold: 6
+            periodSeconds: 10
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key          
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-config
+        - name: logs
+          persistentVolumeClaim:
+            claimName: test-release-logs
+---
+# Source: cornflow/templates/cornflow-deployment.yaml
+################################
+## Cornflow Deployment
+#################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-cornflow-server
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cornflow-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cornflow
+      app.kubernetes.io/instance: test-release
+      app.kubernetes.io/component: cornflow-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cornflow
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/component: cornflow-server
+    spec:
+      serviceAccountName: test-release-cornflow
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+
+      containers:
+        - name: cornflow-server
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          image: "baobabsoluciones/cornflow:release-v1.2.4"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          env:
+            - name: CORNFLOW_DB_HOST
+              value: test-release-cornflow-postgresql
+            - name: AIRFLOW_URL
+              value: "http://test-release-webserver:8080"
+            - name: AIRFLOW_PWD
+              value: "admin"
+            - name: AIRFLOW_USER
+              value: "admin"
+            - name: APPLICATION_ROOT
+              value: "/"
+            - name: AUTH_TYPE
+              value: "1"
+            - name: CF_ALARMS_ENDPOINT
+              value: "0"
+            - name: CORNFLOW_ADMIN_PWD
+              value: "Cornflow_admin1234"
+            - name: CORNFLOW_ADMIN_USER
+              value: "cornflow_admin"
+            - name: CORNFLOW_DB
+              value: "cornflow"
+            - name: CORNFLOW_DB_PASSWORD
+              value: "cornflow"
+            - name: CORNFLOW_DB_PORT
+              value: "5432"
+            - name: CORNFLOW_DB_USER
+              value: "cornflow"
+            - name: CORNFLOW_SERVICE_PWD
+              value: "Service_user1234"
+            - name: CORNFLOW_SERVICE_USER
+              value: "service_user"
+            - name: CORS_ORIGINS
+              value: "*"
+            - name: DEFAULT_POSTGRES
+              value: "1"
+            - name: DEFAULT_ROLE
+              value: "2"
+            - name: EXTERNAL_APP
+              value: "0"
+            - name: FLASK_ENV
+              value: "development"
+            - name: LDAP_BIND_DN
+              value: "cn=admin,dc=example,dc=org"
+            - name: LDAP_BIND_PASSWORD
+              value: "admin"
+            - name: LDAP_EMAIL_ATTRIBUTE
+              value: "mail"
+            - name: LDAP_GROUP_ATTRIBUTE
+              value: "cn"
+            - name: LDAP_GROUP_BASE
+              value: "dc=example,dc=org"
+            - name: LDAP_GROUP_OBJECT_CLASS
+              value: "groupOfNames"
+            - name: LDAP_GROUP_TO_ROLE_ADMIN
+              value: "administrators"
+            - name: LDAP_GROUP_TO_ROLE_PLANNER
+              value: "planners"
+            - name: LDAP_GROUP_TO_ROLE_SERVICE
+              value: "service"
+            - name: LDAP_GROUP_TO_ROLE_VIEWER
+              value: "viewers"
+            - name: LDAP_HOST
+              value: "ldap://openldap:389"
+            - name: LDAP_PROTOCOL_VERSION
+              value: "3"
+            - name: LDAP_SERVICE_BASE
+              value: "ou=users,dc=example,dc=org"
+            - name: LDAP_USERNAME_ATTRIBUTE
+              value: "cn"
+            - name: LDAP_USER_BASE
+              value: "ou=users,dc=example,dc=org"
+            - name: LDAP_USER_OBJECT_CLASS
+              value: "inetOrgPerson"
+            - name: LDAP_USE_TLS
+              value: "False"
+            - name: LOG_LEVEL
+              value: "20"
+            - name: OID_EXPECTED_AUDIENCE
+              value: ""
+            - name: OID_PROVIDER
+              value: ""
+            - name: OPEN_DEPLOYMENT
+              value: "1"
+            - name: PWD_ROTATION_TIME
+              value: "120"
+            - name: SECRET_BI_KEY
+              value: "test-bi-secret-key-for-testing-only"
+            - name: SECRET_KEY
+              value: "test-secret-key-for-testing-only"
+            - name: SERVICE_EMAIL_ADDRESS
+              value: ""
+            - name: SERVICE_EMAIL_PASSWORD
+              value: ""
+            - name: SERVICE_EMAIL_PORT
+              value: ""
+            - name: SERVICE_EMAIL_SERVER
+              value: ""
+            - name: SERVICE_NAME
+              value: "Cornflow"
+            - name: SERVICE_USER_ALLOW_PASSWORD_LOGIN
+              value: "1"
+            - name: SIGNUP_ACTIVATED
+              value: "1"
+            - name: TOKEN_DURATION
+              value: "24"
+            - name: USER_ACCESS_ALL_OBJECTS
+              value: "0"
+
+          volumeMounts:
+            - name: logs
+              mountPath: /usr/src/app/log
+            - name: ssh-keys
+              mountPath: /usr/src/app/.ssh
+              readOnly: true
+            - name: app-dir
+              mountPath: /usr/src/app
+      volumes:
+        - name: logs
+          emptyDir: {}
+        - name: ssh-keys
+          secret:
+            secretName: test-release-ssh-keys
+            optional: true
+        - name: app-dir
+          emptyDir: {}
+---
+# Source: cornflow/templates/postgresql.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-release-cornflow-postgresql
+  labels:
+    helm.sh/chart: cornflow-1.2.4
+    app.kubernetes.io/name: cornflow
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/version: "1.2.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cornflow
+      app.kubernetes.io/instance: test-release
+      app.kubernetes.io/component: postgresql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cornflow
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/component: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: "postgres:15.4"
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              value: cornflow
+            - name: POSTGRES_PASSWORD
+              value: cornflow
+            - name: POSTGRES_DB
+              value: cornflow
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cornflow
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cornflow
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: test-release-cornflow-postgresql
+---
+# Source: cornflow/charts/airflow/charts/postgresql/templates/primary/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-release-postgresql
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: test-release
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.24
+    app.kubernetes.io/component: primary
+spec:
+  replicas: 1
+  serviceName: test-release-postgresql-hl
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: test-release
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/component: primary
+  template:
+    metadata:
+      name: test-release-postgresql
+      labels:
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: postgresql
+        app.kubernetes.io/version: 16.1.0
+        helm.sh/chart: postgresql-13.2.24
+        app.kubernetes.io/component: primary
+    spec:
+      serviceAccountName: default
+      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: test-release
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/component: primary
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      hostNetwork: false
+      hostIPC: false
+      containers:
+        - name: postgresql
+          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r15
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            # Authentication
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-postgresql
+                  key: postgres-password
+            # Replication
+            # Initdb
+            # Standby
+            # LDAP
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            # TLS
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            # Audit
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            # Others
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+          resources:
+            limits: {}
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: cornflow/charts/airflow/templates/triggerer/triggerer-deployment.yaml
+################################
+## Airflow Triggerer Deployment
+#################################
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-release-triggerer
+  labels:
+    tier: airflow
+    component: triggerer
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+spec:
+  serviceName: test-release-triggerer
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: airflow
+      component: triggerer
+      release: test-release
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: triggerer
+        release: test-release
+      annotations:
+        checksum/metadata-secret: c56d509e66845b19a529c8cb298729c4ffb6245e240a5b28e8c5b61aeabdb479
+        checksum/pgbouncer-config-secret: 9e6d57d23e31edb4b2764a08c7772b85cbf60db4f76f2c963ea98d397d3039b7
+        checksum/airflow-config: 901dabd647cb6e05b2b886d8241b8a58b0389beab4e09e535f7825f299ea6327
+        checksum/extra-configmaps: e862ea47e13e634cf17d476323784fa27dac20015550c230953b526182f5cac8
+        checksum/extra-secrets: e9582fdd622296c976cbc10a5ba7d6702c28a24fe80795ea5b84ba443a56c827
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      nodeSelector:
+        {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  component: triggerer
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always
+      serviceAccountName: "test-release-airflow-triggerer"
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      initContainers:
+        - name: wait-for-airflow-migrations
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 125m
+              memory: 128Mi
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+          args:          
+            - airflow
+            - db
+            - check-migrations
+            - --migration-wait-timeout=60
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key
+      containers:
+        - name: triggerer
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args: 
+            - bash
+            - -c
+            - exec airflow triggerer
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 125m
+              memory: 128Mi
+          volumeMounts:
+            - name: logs
+              mountPath: "/opt/airflow/logs"
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+            - name: dags
+              mountPath: /opt/airflow/dags
+              readOnly: False
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key
+          
+          livenessProbe:
+            initialDelaySeconds: 10
+            timeoutSeconds: 20
+            failureThreshold: 5
+            periodSeconds: 60
+            exec:
+              command:              
+                - sh
+                - -c
+                - |
+                  CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec /entrypoint \
+                  airflow jobs check --job-type TriggererJob --local
+          ports:
+            - name: triggerer-logs
+              containerPort: 8794
+        - name: triggerer-log-groomer
+          resources:
+            {}
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - bash
+            - /clean-logs
+          env:
+            - name: AIRFLOW__LOG_RETENTION_DAYS
+              value: "15"
+            - name: AIRFLOW__LOG_CLEANUP_FREQUENCY_MINUTES
+              value: "15"
+            - name: AIRFLOW_HOME
+              value: "/opt/airflow"
+          volumeMounts:
+            - name: logs
+              mountPath: "/opt/airflow/logs"
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-config
+        - name: dags
+          persistentVolumeClaim:
+            claimName: test-release-dags
+        - name: logs
+          persistentVolumeClaim:
+            claimName: test-release-logs
+---
+# Source: cornflow/charts/airflow/templates/api-server/api-server-deployment.yaml
+################################
+## Airflow API Server Deployment
+#################################
+---
+# Source: cornflow/charts/airflow/templates/api-server/api-server-networkpolicy.yaml
+################################
+## Airflow API server NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/api-server/api-server-poddisruptionbudget.yaml
+################################
+## Airflow api-server PodDisruptionBudget
+#################################
+---
+# Source: cornflow/charts/airflow/templates/api-server/api-server-service.yaml
+################################
+## Airflow api-server Service
+#################################
+---
+# Source: cornflow/charts/airflow/templates/api-server/api-server-serviceaccount.yaml
+######################################
+## Airflow api-server ServiceAccount
+######################################
+---
+# Source: cornflow/charts/airflow/templates/cleanup/cleanup-cronjob.yaml
+################################
+## Airflow Cleanup Pods CronJob
+#################################
+---
+# Source: cornflow/charts/airflow/templates/cleanup/cleanup-serviceaccount.yaml
+################################
+## Airflow Cleanup ServiceAccount
+#################################
+---
+# Source: cornflow/charts/airflow/templates/configmaps/extra-configmaps.yaml
+####################################################
+## Extra ConfigMaps provisioned via the chart values
+####################################################
+---
+# Source: cornflow/charts/airflow/templates/configmaps/webserver-configmap.yaml
+################################
+## Airflow ConfigMap
+#################################
+---
+# Source: cornflow/charts/airflow/templates/dag-processor/dag-processor-deployment.yaml
+################################
+## Airflow Dag Processor Deployment
+#################################
+---
+# Source: cornflow/charts/airflow/templates/dag-processor/dag-processor-serviceaccount.yaml
+################################
+## Airflow Dag Processor ServiceAccount
+#################################
+---
+# Source: cornflow/charts/airflow/templates/flower/flower-deployment.yaml
+################################
+## Airflow Flower Deployment
+#################################
+---
+# Source: cornflow/charts/airflow/templates/flower/flower-ingress.yaml
+################################
+## Airflow Flower Ingress
+#################################
+---
+# Source: cornflow/charts/airflow/templates/flower/flower-networkpolicy.yaml
+################################
+## Airflow Flower NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/flower/flower-service.yaml
+################################
+## Airflow Flower Service Component
+#################################
+---
+# Source: cornflow/charts/airflow/templates/flower/flower-serviceaccount.yaml
+######################################
+## Airflow Flower ServiceAccount
+######################################
+---
+# Source: cornflow/charts/airflow/templates/limitrange.yaml
+################################
+## Airflow Namespace LimitRange
+#################################
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-ingress.yaml
+################################
+## Airflow Pgbouncer Ingress
+#################################
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-networkpolicy.yaml
+################################
+## Pgbouncer NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/pgbouncer/pgbouncer-poddisruptionbudget.yaml
+################################
+## Pgbouncer PodDisruptionBudget
+#################################
+---
+# Source: cornflow/charts/airflow/templates/priorityclasses/priority-classes.yaml
+#################################################
+## Priority classes provisioned via the chart values
+#################################################
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-cleanup-role.yaml
+################################
+## Airflow Cleanup Role
+#################################
+---
+# Source: cornflow/charts/airflow/templates/rbac/pod-cleanup-rolebinding.yaml
+################################
+## Airflow Cleanup Role Binding
+#################################
+---
+# Source: cornflow/charts/airflow/templates/rbac/security-context-constraint-rolebinding.yaml
+################################
+## Airflow SCC Role Binding
+#################################
+---
+# Source: cornflow/charts/airflow/templates/redis/redis-networkpolicy.yaml
+################################
+## Airflow Redis NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/redis/redis-service.yaml
+################################
+## Airflow Redis Service
+#################################
+---
+# Source: cornflow/charts/airflow/templates/redis/redis-serviceaccount.yaml
+######################################
+## Airflow Redis ServiceAccount
+######################################
+---
+# Source: cornflow/charts/airflow/templates/redis/redis-statefulset.yaml
+################################
+## Airflow Redis StatefulSet
+#################################
+---
+# Source: cornflow/charts/airflow/templates/resourcequota.yaml
+################################
+## Airflow Namespace ResourceQuota
+#################################
+---
+# Source: cornflow/charts/airflow/templates/scheduler/scheduler-networkpolicy.yaml
+################################
+## Airflow Scheduler NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/scheduler/scheduler-poddisruptionbudget.yaml
+################################
+## Airflow Scheduler PodDisruptionBudget
+#################################
+---
+# Source: cornflow/charts/airflow/templates/scheduler/scheduler-service.yaml
+################################
+## Airflow Scheduler Service
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/elasticsearch-secret.yaml
+################################
+## Elasticsearch Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/extra-secrets.yaml
+#################################################
+## Extra Secrets provisioned via the chart values
+#################################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/flower-secret.yaml
+################################
+## Flower Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/kerberos-keytab-secret.yaml
+################################
+## Kerberos Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/opensearch-secret.yaml
+################################
+## OpenSearch Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/pgbouncer-certificates-secret.yaml
+################################
+## Pgbouncer Certificate Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/registry-secret.yaml
+################################
+## Registry Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/result-backend-connection-secret.yaml
+################################
+## Airflow Result Backend Secret
+#################################
+---
+# Source: cornflow/charts/airflow/templates/statsd/statsd-ingress.yaml
+################################
+## Airflow Statsd Ingress
+#################################
+---
+# Source: cornflow/charts/airflow/templates/statsd/statsd-networkpolicy.yaml
+################################
+## Airflow StatsD NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/triggerer/triggerer-kedaautoscaler.yaml
+################################
+## Airflow Triggerer KEDA Scaler
+#################################
+---
+# Source: cornflow/charts/airflow/templates/triggerer/triggerer-networkpolicy.yaml
+##################################
+## Airflow triggerer NetworkPolicy
+##################################
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-hpa.yaml
+################################
+## Airflow Webserver HPA
+#################################
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-ingress.yaml
+################################
+## Airflow Webserver Ingress
+#################################
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-networkpolicy.yaml
+################################
+## Airflow Webserver NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/webserver/webserver-poddisruptionbudget.yaml
+################################
+## Airflow Webserver PodDisruptionBudget
+#################################
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-deployment.yaml
+################################
+## Airflow Worker Deployment
+#################################
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-hpa.yaml
+################################
+## Airflow Worker HPA
+#################################
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-kedaautoscaler.yaml
+################################
+## Airflow Worker KEDA Scaler
+#################################
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-networkpolicy.yaml
+################################
+## Airflow Worker NetworkPolicy
+#################################
+---
+# Source: cornflow/charts/airflow/templates/workers/worker-service.yaml
+################################
+## Airflow Worker Service
+#################################
+---
+# Source: cornflow/templates/airflow-dags-pvc.yaml
+################################
+## Airflow DAGs PVC
+#################################
+---
+# Source: cornflow/templates/airflow-rbac.yaml
+################################
+## Airflow RBAC
+#################################
+---
+# Source: cornflow/templates/configmaps.yaml
+################################
+## Cornflow ConfigMap
+#################################
+---
+# Source: cornflow/templates/ingress.yaml
+################################
+## Cornflow Ingress
+#################################
+---
+# Source: cornflow/templates/postgresql.yaml
+################################
+## Cornflow PostgreSQL
+#################################
+---
+# Source: cornflow/templates/rbac.yaml
+################################
+## Cornflow RBAC
+#################################
+---
+# Source: cornflow/templates/services.yaml
+################################
+## Cornflow Services
+#################################
+---
+# Source: cornflow/charts/airflow/templates/secrets/fernetkey-secret.yaml
+################################
+## Airflow Fernet Key Secret
+#################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-fernet-key
+  labels:
+    tier: airflow
+    release: test-release
+    chart: airflow
+    heritage: Helm
+  annotations:
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "0"
+type: Opaque
+data:
+  fernet-key: "VlVaaFYxSTJNSE5aUTJSaFJFRllTV1J2VlZsMmVUWlNjbEZWY3pWV2NtTT0="
+---
+# Source: cornflow/charts/airflow/templates/secrets/redis-secrets.yaml
+# We will create these secrets (if necessary) _even if_ we aren't
+# currently using CeleryExecutor or CeleryKubernetesExecutor. As we are
+# relying on the "pre-install" hack to prevent changing randomly generated passwords,
+# updating the executor later doesn't give us the opportunity to deploy them
+# when we need them. We will always deploy them defensively to make the executor
+# update path actually work.
+
+################################
+## Airflow Redis Password Secret
+#################################
+##################################
+## Airflow Redis Connection Secret
+##################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-release-broker-url
+  labels:
+    tier: airflow
+    component: redis
+    release: test-release
+    chart: airflow
+    heritage: Helm
+  annotations:
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "0"
+type: Opaque
+data:
+  connection: "JSFzKDxuaWw+KQ=="
+---
+# Source: cornflow/charts/airflow/templates/jobs/create-user-job.yaml
+################################
+## Airflow Create User Job
+#################################
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-release-create-user
+  labels:
+    tier: airflow
+    component: create-user-job
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "2"
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: create-user-job
+        release: test-release
+    spec:
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      restartPolicy: OnFailure
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      serviceAccountName: "test-release-airflow-create-user-job"
+      containers:
+        - name: create-user
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args: 
+            - bash
+            - -c
+            - |-
+              exec \
+              airflow users create "$@"
+            - --
+            - -r
+            - 'Admin'
+            - -u
+            - 'admin'
+            - -e
+            - 'admin@example.com'
+            - -f
+            - 'admin'
+            - -l
+            - 'user'
+            - -p
+            - 'admin'
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key          
+          resources:
+            {}
+          volumeMounts:
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-config
+---
+# Source: cornflow/charts/airflow/templates/jobs/migrate-database-job.yaml
+################################
+## Airflow Run Migrations
+#################################
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-release-run-airflow-migrations
+  labels:
+    tier: airflow
+    component: run-airflow-migrations
+    release: test-release
+    chart: "airflow-1.16.0"
+    heritage: Helm
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "1"
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: run-airflow-migrations
+        release: test-release
+    spec:
+      securityContext: 
+        runAsUser: 50000
+        fsGroup: 0
+      restartPolicy: OnFailure
+      nodeSelector:
+        {}
+      affinity:
+        {}
+      tolerations:
+        []
+      topologySpreadConstraints:
+        []
+      serviceAccountName: "test-release-airflow-migrate-database-job"
+      containers:
+        - name: run-airflow-migrations
+          image: apache/airflow:2.10.5
+          imagePullPolicy: IfNotPresent
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - bash
+            - -c
+            - |-
+              exec \
+              airflow db migrate
+          envFrom:          
+            []
+          env:          
+            # Dynamically created environment variables
+            - name: AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__API__AUTH_BACKEND
+              value: "airflow.api.auth.backend.basic_auth"
+            - name: PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__PYTHONPATH
+              value: "/opt/airflow/dags/deps"
+            - name: AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW_CONN_CF_URI
+              value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+            # Dynamically created secret envs
+            
+            # Extra env
+            - name: PYTHONUNBUFFERED
+              value: "1"          
+            # Hard Coded Airflow Envs
+            - name: AIRFLOW__CORE__FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-fernet-key
+                  key: fernet-key
+            - name: AIRFLOW_HOME
+              value: /opt/airflow
+            # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW_CONN_AIRFLOW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-metadata
+                  key: connection
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: test-release-webserver-secret-key
+                  key: webserver-secret-key
+          resources:
+            {}
+          volumeMounts:
+            - name: config
+              mountPath: "/opt/airflow/airflow.cfg"
+              subPath: airflow.cfg
+              readOnly: true
+            - name: config
+              mountPath: "/opt/airflow/config/airflow_local_settings.py"
+              subPath: airflow_local_settings.py
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: test-release-config
