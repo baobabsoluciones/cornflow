@@ -159,7 +159,3 @@ postgresql:
 service:
   type: ClusterIP
   port: 5000
-
-# Disable ingress for local testing
-ingress:
-  enabled: false

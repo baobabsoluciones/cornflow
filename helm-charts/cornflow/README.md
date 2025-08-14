@@ -9,14 +9,14 @@ Cornflow is a platform that allows you to create, execute, and manage optimizati
 - **Cornflow API**: Main application service
 - **PostgreSQL**: Database for Cornflow
 - **Airflow** (optional): Apache Airflow for workflow orchestration
-- **Ingress**: Optional configuration for external access
+- **External Access**: Use separate Ingress files from `examples/` directory
 
 ## Prerequisites
 
 - Kubernetes 1.19+
 - Helm 3.0+
 - A configured Kubernetes cluster
-- An Ingress controller (optional, for external access)
+- An Ingress controller (optional, for external access using separate Ingress files)
 
 ## Installation
 
@@ -115,13 +115,8 @@ cornflow:
     CORNFLOW_ADMIN_PWD: "my-admin-password"
     CORNFLOW_SERVICE_PWD: "my-service-password"
 
-ingress:
-  enabled: true
-  hosts:
-    - host: cornflow.mydomain.com
-      paths:
-        - path: /
-          pathType: Prefix
+# Note: Ingress is not included in the chart
+# Use separate Ingress files from examples/ directory for external access
 
 # Enable Airflow
 airflow:
@@ -171,7 +166,7 @@ helm install my-project ./helm-charts/cornflow \
 | `cornflow.replicaCount` | Number of Cornflow replicas | `1` |
 | `postgresql.enabled` | Enable PostgreSQL for Cornflow | `true` |
 | `airflow.enabled` | Enable Airflow deployment | `false` |
-| `ingress.enabled` | Enable Ingress for Cornflow | `false` |
+| `service.type` | Service type for Cornflow | `ClusterIP` |
 
 ### Database Configuration
 
@@ -275,25 +270,19 @@ airflow:
 
 **Important:** When Airflow is enabled, Cornflow will automatically be configured to connect to it. Make sure the `AIRFLOW_USER` and `AIRFLOW_PWD` in the Cornflow configuration match the Airflow `users[0].username` and `users[0].password`.
 
-### Ingress Configuration
+### External Access Configuration
 
-```yaml
-ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-  hosts:
-    - host: cornflow.mydomain.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: cornflow-tls
-      hosts:
-        - cornflow.mydomain.com
+The chart does not include Ingress resources by default. To expose Cornflow externally, use separate Ingress files from the `examples/` directory:
+
+```bash
+# Copy and modify the example Ingress for your environment
+cp examples/ingress-example.yaml my-ingress.yaml
+
+# Apply the Ingress
+kubectl apply -f my-ingress.yaml
 ```
+
+See `examples/ingress-example.yaml` and `examples/ingress-minikube.yaml` for reference configurations.
 
 ### Resource Configuration
 
@@ -403,9 +392,17 @@ persistence:
 kubectl port-forward svc/my-cornflow-cornflow 5000:5000
 ```
 
-### With Ingress
+### With External Ingress
 
-If you have enabled Ingress, you can access directly through the configured URLs.
+If you have applied a separate Ingress configuration, you can access through the configured URLs:
+
+```bash
+# Apply an Ingress configuration
+kubectl apply -f examples/ingress-example.yaml
+
+# Access via the configured host
+curl http://cornflow.mydomain.com
+```
 
 
 
@@ -489,9 +486,9 @@ kubectl exec -i deployment/my-cornflow-airflow-postgresql -- psql -U airflow air
      - Cornflow → `my-project-cornflow-postgresql`
            - Airflow → `my-project-postgresql`
 
-3. **Ingress issues**
+3. **External access issues**
    - Verify that Ingress controller is installed
-   - Check Ingress annotations
+   - Check Ingress configuration in separate files
    - Verify DNS configuration
 
 ### Useful Commands

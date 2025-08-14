@@ -112,14 +112,8 @@ jobs:
                   cpu: 250m
                   memory: 256Mi
           
-          ingress:
-            enabled: true
-            className: "nginx"
-            hosts:
-              - host: cornflow-test.local
-                paths:
-                  - path: /
-                    pathType: Prefix
+          # Note: Ingress is not included in the chart
+          # External access should be configured separately
           EOF
 
           # Install with production values

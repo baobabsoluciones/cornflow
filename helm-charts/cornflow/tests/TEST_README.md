@@ -82,8 +82,8 @@ helm uninstall test-release -n cornflow-test
 - **Airflow disabled**: To simplify testing
 - **Minimal resources**: Reduced CPU and memory
 - **Local PostgreSQL**: Included database
-- **No ingress**: For local testing
 - **Basic configuration**: Only essential variables
+- **Note**: Ingress is not included in the chart - use separate Ingress files from `examples/` directory
 
 ### test-values-with-airflow.yaml (With Airflow)
 - **Airflow enabled**: For complete testing

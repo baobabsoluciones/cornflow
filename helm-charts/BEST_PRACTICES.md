@@ -159,40 +159,79 @@ kubectl exec deployment/my-cornflow-postgresql -- \
   pg_dump -U cornflow cornflow | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 ```
 
-## 🌐 Ingress and TLS
+## 🌐 External Access and TLS
 
 ### Ingress Configuration
 
+**Note:** The chart does not include Ingress resources by default. Use separate Ingress files for external access.
+
 **Production with TLS:**
 ```yaml
-ingress:
-  enabled: true
-  className: "nginx"
+# Create a separate ingress.yaml file
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cornflow-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-  hosts:
-    - host: cornflow.mydomain.com
-      paths:
-        - path: /
-          pathType: Prefix
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  ingressClassName: nginx
   tls:
     - secretName: cornflow-tls
       hosts:
         - cornflow.mydomain.com
+  rules:
+    - host: cornflow.mydomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-cornflow-cornflow-server
+                port:
+                  number: 5000
 ```
 
-### Rate Limiting
-
-Configure rate limiting:
-```yaml
-ingress:
-  annotations:
-    nginx.ingress.kubernetes.io/rate-limit: "100"
-    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+**Apply the Ingress:**
+```bash
+kubectl apply -f ingress.yaml
 ```
+
+### Best Practices for External Ingress
+
+1. **Use separate Ingress files** for different environments:
+   ```bash
+   # Development
+   kubectl apply -f ingress-dev.yaml
+   
+   # Staging
+   kubectl apply -f ingress-staging.yaml
+   
+   # Production
+   kubectl apply -f ingress-prod.yaml
+   ```
+
+2. **Version control your Ingress configurations** alongside your application code
+
+3. **Use Helm hooks** if you need to manage Ingress with Helm:
+   ```yaml
+   # In a separate chart or using Helm hooks
+   apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: cornflow-ingress
+     annotations:
+       helm.sh/hook: post-install,post-upgrade
+       helm.sh/hook-weight: "1"
+   ```
+
+4. **Separate concerns** - keep Ingress configuration separate from application configuration
 
 ## 🔧 Application Configuration
 
@@ -354,9 +393,9 @@ kubectl exec deployment/my-cornflow-postgresql -- pg_isready -U cornflow
    - Check network configuration
    - Verify PostgreSQL is ready
 
-3. **Ingress issues**
+3. **External access issues**
    - Verify Ingress controller is installed
-   - Check Ingress annotations
+   - Check Ingress configuration in separate files
    - Verify DNS configuration
 
 ## 📈 Optimization
@@ -415,7 +454,7 @@ Use tools like:
 - [ ] Secrets configured correctly
 - [ ] RBAC enabled
 - [ ] Network Policies configured
-- [ ] Ingress with TLS enabled
+- [ ] External Ingress with TLS configured
 - [ ] Monitoring configured
 - [ ] Backup strategy implemented
 - [ ] HPA configured

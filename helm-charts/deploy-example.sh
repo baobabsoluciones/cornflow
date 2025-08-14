@@ -47,14 +47,6 @@ cornflow:
       cpu: 250m
       memory: 256Mi
 
-# Enable Ingress for external access (optional)
-# ingress:
-#   enabled: true
-#   hosts:
-#     - host: cornflow.local
-#       paths:
-#         - path: /
-#           pathType: Prefix
 EOF
 
 # Install the chart
