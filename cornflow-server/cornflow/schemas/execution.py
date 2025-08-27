@@ -99,19 +99,6 @@ class ExecutionDetailsEndpointResponse(BaseDataEndpointResponse):
     instance_id = fields.Str()
     state = fields.Int()
     message = fields.Str(attribute="state_message")
-
-
-class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointResponse):
-    def get_indicators(self, obj):
-        indicators_string = ""
-        if obj.data is not None and isinstance(obj.data, dict):
-            if "indicators" in obj.data.keys():
-                temp = obj.data["indicators"]
-                for key, val in sorted(temp.items()):
-                    indicators_string = f"{indicators_string} {key}: {val};"
-        return indicators_string[1:-1]
-
-    indicators = fields.Method("get_indicators")
     updated_at = fields.DateTime(dump_only=True)
 
     def get_username(self, obj):
@@ -132,6 +119,19 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
     username = fields.Method("get_username")
     first_name = fields.Method("get_first_name")
     last_name = fields.Method("get_last_name")
+
+
+class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointResponse):
+    def get_indicators(self, obj):
+        indicators_string = ""
+        if obj.data is not None and isinstance(obj.data, dict):
+            if "indicators" in obj.data.keys():
+                temp = obj.data["indicators"]
+                for key, val in sorted(temp.items()):
+                    indicators_string = f"{indicators_string} {key}: {val};"
+        return indicators_string[1:-1]
+
+    indicators = fields.Method("get_indicators")
 
 
 class ExecutionDetailsWithIndicatorsAndLogResponse(

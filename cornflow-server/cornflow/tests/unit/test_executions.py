@@ -433,6 +433,10 @@ class TestExecutionsDataEndpoint(TestExecutionsDetailEndpointMock):
             "state",
             "name",
             "id",
+            "updated_at",
+            "username",
+            "first_name",
+            "last_name",
         ]
 
     def test_get_one_execution(self):
