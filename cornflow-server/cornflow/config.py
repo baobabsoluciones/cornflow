@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH, OID_PROVIDER_AWS, OID_PROVIDER_AZURE
+from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH, OID_OTHER
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from cornflow.shared.const import AIRFLOW_BACKEND, DATABRICKS_BACKEND
@@ -75,7 +75,7 @@ class DefaultConfig(object):
 
     # OpenID Connect configuration
     OID_PROVIDER = os.getenv("OID_PROVIDER")
-    OID_PROVIDER_TYPE = int(os.getenv("OID_PROVIDER_TYPE", OID_PROVIDER_AWS))
+    OID_PROVIDER_TYPE = int(os.getenv("OID_PROVIDER_TYPE", OID_OTHER))
     OID_EXPECTED_AUDIENCE = os.getenv("OID_EXPECTED_AUDIENCE")
 
     # APISPEC:

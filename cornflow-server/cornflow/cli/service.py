@@ -39,7 +39,6 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     AIRFLOW_BACKEND,
     SIGNUP_WITH_AUTH,
-    OID_PROVIDER_AWS,
     OID_PROVIDER_AZURE,
     OID_OTHER,
 )
