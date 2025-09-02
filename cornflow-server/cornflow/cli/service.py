@@ -185,7 +185,7 @@ def _setup_environment_variables():
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
     if auth == AUTH_OID:
         oid_provider_url = os.getenv("OID_PROVIDER")
-        if "microsoft" in oid_provider_url:
+        if oid_provider_url.__contains__("microsoft"):
             oid_provider_type = OID_PROVIDER_AZURE
         else:
             oid_provider_type = OID_OTHER
