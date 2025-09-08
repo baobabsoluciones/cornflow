@@ -10,8 +10,8 @@ from flask_apispec import use_kwargs, doc
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow.schemas.user import SignupRequest
-from cornflow.shared.authentication import Auth
-from cornflow.shared.const import AUTH_LDAP, AUTH_OID
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE, SIGNUP_WITH_NO_AUTH
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -24,6 +24,8 @@ class SignUpEndpoint(BaseMetaResource):
     Endpoint used to sign up to the cornflow web server.
     """
 
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.data_model = UserModel
@@ -31,6 +33,11 @@ class SignUpEndpoint(BaseMetaResource):
         self.user_role_association = UserRoleModel
 
     @doc(description="Sign up", tags=["Users"])
+    @authenticate(
+        auth_class=Auth(),
+        optional_auth="SIGNUP_ACTIVATED",
+        no_auth_list=[SIGNUP_WITH_NO_AUTH],
+    )
     @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
         """

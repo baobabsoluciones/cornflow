@@ -1,5 +1,5 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID
+from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -25,7 +25,7 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
-    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
+    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
     # If service user is allowed to log with username and password
@@ -119,7 +119,7 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
-
+    SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
 
 class TestingOpenAuth(Testing):
     """
