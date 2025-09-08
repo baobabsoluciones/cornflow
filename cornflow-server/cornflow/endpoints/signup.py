@@ -1,6 +1,7 @@
 """
 External endpoint for the user to signup
 """
+
 # Import from libraries
 from flask import current_app
 from flask_apispec import use_kwargs, doc
@@ -9,8 +10,8 @@ from flask_apispec import use_kwargs, doc
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow.schemas.user import SignupRequest
-from cornflow.shared.authentication import Auth
-from cornflow.shared.const import AUTH_LDAP, AUTH_OID
+from cornflow.shared.authentication import Auth, authenticate
+from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE, SIGNUP_WITH_NO_AUTH
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -23,6 +24,8 @@ class SignUpEndpoint(BaseMetaResource):
     Endpoint used to sign up to the cornflow web server.
     """
 
+    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+
     def __init__(self):
         super().__init__()
         self.data_model = UserModel
@@ -30,6 +33,11 @@ class SignUpEndpoint(BaseMetaResource):
         self.user_role_association = UserRoleModel
 
     @doc(description="Sign up", tags=["Users"])
+    @authenticate(
+        auth_class=Auth(),
+        optional_auth="SIGNUP_ACTIVATED",
+        no_auth_list=[SIGNUP_WITH_NO_AUTH],
+    )
     @use_kwargs(SignupRequest, location="json")
     def post(self, **kwargs):
         """
@@ -57,14 +65,12 @@ class SignUpEndpoint(BaseMetaResource):
         if auth_type == AUTH_LDAP:
             err = "The user has to sign up on the active directory"
             raise EndpointNotImplemented(
-                err,
-                log_txt="Error while user tries to sign up. " + err
+                err, log_txt="Error while user tries to sign up. " + err
             )
         elif auth_type == AUTH_OID:
             err = "The user has to sign up with the OpenID protocol"
             raise EndpointNotImplemented(
-                err,
-                log_txt="Error while user tries to sign up. " + err
+                err, log_txt="Error while user tries to sign up. " + err
             )
 
         user = self.data_model(kwargs)
@@ -72,14 +78,13 @@ class SignUpEndpoint(BaseMetaResource):
         if user.check_username_in_use():
             raise InvalidCredentials(
                 error="Username already in use, please supply another username",
-                log_txt="Error while user tries to sign up. Username already in use."
-
+                log_txt="Error while user tries to sign up. Username already in use.",
             )
 
         if user.check_email_in_use():
             raise InvalidCredentials(
                 error="Email already in use, please supply another email address",
-                log_txt="Error while user tries to sign up. Email already in use."
+                log_txt="Error while user tries to sign up. Email already in use.",
             )
 
         user.save()
@@ -94,8 +99,9 @@ class SignUpEndpoint(BaseMetaResource):
             token = self.auth_class.generate_token(user.id)
         except Exception as e:
             raise InvalidUsage(
-                error="Error in generating user token: " + str(e), status_code=400,
-                log_txt="Error while user tries to sign up. Unable to generate token."
+                error="Error in generating user token: " + str(e),
+                status_code=400,
+                log_txt="Error while user tries to sign up. Unable to generate token.",
             )
         current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201

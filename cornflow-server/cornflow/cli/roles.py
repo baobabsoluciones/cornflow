@@ -18,4 +18,4 @@ def roles():
 def init(verbose):
     app = get_app()
     with app.app_context():
-        register_roles_command(verbose)
+        register_roles_command(verbose=verbose)

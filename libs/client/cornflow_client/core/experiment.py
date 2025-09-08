@@ -217,29 +217,26 @@ class ExperimentCore(ABC):
 
         solver = ExperimentCore.get_solver_name(config, default_solver)
 
+        # Map the parameters in config to the solver and library. Parameters in solver_config are not mapped.
         if remove_unknown:
+            # If remove_unknown is True, remove the unknown parameters from the config. Parameters in solver_config are not removed.
             conf = {
                 mapping[k, lib, solver]: v
                 for k, v in config.items()
                 if (k, lib, solver) in mapping
             }
-            if config.get("solver_config"):
-                conf.update(
-                    {
-                        mapping.get((k, lib, solver), k): v
-                        for k, v in config["solver_config"].items()
-                    }
-                )
         else:
             conf = {mapping.get((k, lib, solver), k): v for k, v in config.items()}
             conf.pop("solver", None)
             conf.pop("solver_config", None)
-            if config.get("solver_config"):
-                conf.update(
-                    {
-                        mapping.get((k, lib, solver), k): v
-                        for k, v in config["solver_config"].items()
-                    }
-                )
+
+        # Map the parameters in solver_config to the solver and library
+        if config.get("solver_config"):
+            conf.update(
+                {
+                    mapping.get((k, lib, solver), k): v
+                    for k, v in config["solver_config"].items()
+                }
+            )
 
         return conf

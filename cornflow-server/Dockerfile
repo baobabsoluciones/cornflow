@@ -1,15 +1,15 @@
-# VERSION 1.2.1
+# VERSION 1.2.4
 # AUTHOR: sistemas@baobabsoluciones.es
 
 FROM python:3.12-slim
 LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM linux
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.2.1
+ARG CORNFLOW_VERSION=1.2.4
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \
@@ -25,8 +25,8 @@ RUN apt update -y && apt-get install -y --no-install-recommends \
 WORKDIR /usr/src/app
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV DEFAULT_POSTGRES=1
 
 # install dependencies
