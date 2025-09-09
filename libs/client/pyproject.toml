@@ -5,10 +5,10 @@ description = "Client to connect to a cornflow server [forked from baobabsolucio
 requires-python = ">=3.10"
 dependencies = [
     "requests",
-"genson",
-"jsonschema",
-"marshmallow",
-"pytups",
+    "genson",
+    "jsonschema",
+    "marshmallow",
+    "pytups",
 ]
 authors= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
 maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
