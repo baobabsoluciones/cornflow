@@ -40,13 +40,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          uv sync --dev --all-extras
       - name: Test
         run: |
-          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
-          coverage report -m          
+          uv run --group dev --all-extras coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
+          uv run --group dev --all-extras coverage report -m          
 
   integration:
     name: Run all test suites on cornflow-client
@@ -77,9 +74,6 @@ jobs:
           cd ..
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
-      - name: Install dependencies
-        run: |
-          uv sync --dev --all-extras
       - name: Install airflow
         run: |
           cd ..
@@ -143,13 +137,13 @@ jobs:
           SIGNUP_ACTIVATED: 1
       - name: Run unit tests
         run: |
-          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
-          coverage report -m
+          uv run --group dev --all-extras coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
+          uv run --group dev --all-extras coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
-          coverage report -m
-          coverage xml
+          uv run --group dev --all-extras coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
+          uv run --group dev --all-extras coverage report -m
+          uv run --group dev --all-extras coverage xml
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
