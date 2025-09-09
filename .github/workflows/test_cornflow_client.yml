@@ -36,15 +36,17 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+          uv sync --dev --all-extras
       - name: Test
         run: |
           coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
-          coverage report -m
+          coverage report -m          
 
   integration:
     name: Run all test suites on cornflow-client
@@ -65,6 +67,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Copy DAG files
         run: |
           cd ..
@@ -73,9 +79,7 @@ jobs:
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+          uv sync --dev --all-extras
       - name: Install airflow
         run: |
           cd ..
