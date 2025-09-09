@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -27,73 +26,67 @@
 # Feel free to modify this file to suit your needs.
 version: '3.8'
 
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/airflow:release-v1.2.2
-    platform: linux/amd64
-    #build: 
-      #context: ./cornflow-server/airflow_config
-    environment:
-      &airflow-common-env
-      AIRFLOW_DB_HOST: airflow_db
-      AIRFLOW_DB_PORT: 5432
-      AIRFLOW_DB_USER: airflow
-      AIRFLOW_DB_PASSWORD: airflow
-      AIRFLOW_DB: airflow
-      AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
-      AIRFLOW__WEBSERVER__NAVBAR_COLOR: '#0693e3' 
-      AIRFLOW_LDAP_ENABLE: 'True'
-      AIRFLOW_LDAP_URI: ldap://openldap:389
-      AIRFLOW_LDAP_SEARCH: ou=users,dc=example,dc=org
-      AIRFLOW_LDAP_BIND_USER: cn=admin,dc=example,dc=org
-      AIRFLOW_LDAP_BIND_PASSWORD: admin
-      AIRFLOW_LDAP_UID_FIELD: cn
-      # cornflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
-      CORNFLOW_SERVICE_USER: cornflow
-      CORNFLOW_SERVICE_PWD: cornflow1234
-    volumes:
-      - ./cornflow-dags/DAG:/usr/local/airflow/dags
-      - ./cornflow-dags/requirements.txt:/requirements.txt
-      - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
-      - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
-      - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
-    depends_on:
-      &airflow-common-depends-on
-      airflow_db:
-        condition: service_healthy
+  image: baobabsoluciones/airflow:release-v1.2.4
+  platform: linux/amd64
+  #build:
+  #context: ./cornflow-server/airflow_config
+  environment: &airflow-common-env
+    AIRFLOW_DB_HOST: airflow_db
+    AIRFLOW_DB_PORT: 5432
+    AIRFLOW_DB_USER: airflow
+    AIRFLOW_DB_PASSWORD: airflow
+    AIRFLOW_DB: airflow
+    AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
+    AIRFLOW__WEBSERVER__NAVBAR_COLOR: '#0693e3'
+    AIRFLOW_LDAP_ENABLE: 'True'
+    AIRFLOW_LDAP_URI: ldap://openldap:389
+    AIRFLOW_LDAP_SEARCH: ou=users,dc=example,dc=org
+    AIRFLOW_LDAP_BIND_USER: cn=admin,dc=example,dc=org
+    AIRFLOW_LDAP_BIND_PASSWORD: admin
+    AIRFLOW_LDAP_UID_FIELD: cn
+    # cornflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
+    CORNFLOW_SERVICE_USER: cornflow
+    CORNFLOW_SERVICE_PWD: cornflow1234
+  volumes:
+    - ./cornflow-dags/DAG:/usr/local/airflow/dags
+    - ./cornflow-dags/requirements.txt:/requirements.txt
+    - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
+    - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
+    - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
+  depends_on: &airflow-common-depends-on
+    airflow_db:
+      condition: service_healthy
 
-x-cornflow-common:
-  &cornflow-common
+x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/cornflow:release-v1.2.2
-    platform: linux/amd64
-    #build: 
-    #context: ./cornflow-server
-    environment:
-      &cornflow-common-env
-      CORNFLOW_DB_HOST: cornflow_db
-      CORNFLOW_DB_PORT: 5432
-      CORNFLOW_DB_USER: cornflow
-      CORNFLOW_DB_PASSWORD: cornflow
-      CORNFLOW_DB: cornflow
-      AUTH_TYPE: 2
-      LDAP_HOST: ldap://openldap:389
-      LDAP_BIND_DN: cn=admin,dc=example,dc=org
-      LDAP_BIND_PASSWORD: admin
-      LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
-      CORNFLOW_SERVICE_USER: cornflow
-      # airflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
-      AIRFLOW_USER: administrator 
-      AIRFLOW_PWD: administrator1234
-    depends_on:
-      &cornflow-common-depends-on
-      cornflow_db:
-        condition: service_healthy
-      webserver:
-        condition: service_healthy
+  image: baobabsoluciones/cornflow:release-v1.2.4
+  platform: linux/amd64
+  #build:
+  #context: ./cornflow-server
+  environment: &cornflow-common-env
+    CORNFLOW_DB_HOST: cornflow_db
+    CORNFLOW_DB_PORT: 5432
+    CORNFLOW_DB_USER: cornflow
+    CORNFLOW_DB_PASSWORD: cornflow
+    CORNFLOW_DB: cornflow
+    AUTH_TYPE: 2
+    LDAP_HOST: ldap://openldap:389
+    LDAP_BIND_DN: cn=admin,dc=example,dc=org
+    LDAP_BIND_PASSWORD: admin
+    LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
+    CORNFLOW_SERVICE_USER: cornflow
+    # airflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
+    AIRFLOW_USER: administrator
+    AIRFLOW_PWD: administrator1234
+  depends_on: &cornflow-common-depends-on
+    cornflow_db:
+      condition: service_healthy
+    webserver:
+      condition: service_healthy
 
 services:
   cornflow:
@@ -102,7 +95,7 @@ services:
     ports:
       - 5000:5000
     healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/src/app/gunicorn.pid ]"]
+      test: ['CMD-SHELL', '[ -f /usr/src/app/gunicorn.pid ]']
       interval: 30s
       timeout: 30s
       retries: 5
@@ -118,14 +111,14 @@ services:
       - POSTGRES_PASSWORD=cornflow
       - POSTGRES_DB=cornflow
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "cornflow"]
+      test: ['CMD', 'pg_isready', '-U', 'cornflow']
       interval: 10s
       retries: 5
       start_period: 5s
     restart: always
     volumes:
       - postgres_cf_data:/var/lib/postgresql/data/
-  
+
   airflow_db:
     image: postgres:15.4
     environment:
@@ -133,7 +126,7 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ['CMD', 'pg_isready', '-U', 'airflow']
       interval: 10s
       retries: 5
       start_period: 5s
@@ -146,7 +139,7 @@ services:
     ports:
       - 8080:8080
     healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      test: ['CMD-SHELL', '[ -f /usr/local/airflow/airflow-webserver.pid ]']
       interval: 30s
       timeout: 30s
       retries: 5
@@ -166,7 +159,7 @@ services:
       - 636:636
     volumes:
       - ./cornflow-server/airflow_config/ldapbootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro
-    environment: 
+    environment:
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
 
   phpldapadmin:
@@ -178,7 +171,7 @@ services:
     environment:
       - PHPLDAPADMIN_LDAP_HOSTS=openldap
       - PHPLDAPADMIN_HTTPS=false
-    depends_on: 
+    depends_on:
       - openldap
 
 volumes:

@@ -8,6 +8,7 @@ Contents:
 
     Deploy a new solution method <deploy_solver_new>
     Solution method coding style <coding_style>
+    Custom role and extra permissions configuration <custom_role_extra_permission>
     Write a json-schema <jsonschema>
     Test your solution method <testing_app>
     Use your solution method <use_solver>

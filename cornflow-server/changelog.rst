@@ -1,3 +1,23 @@
+version 1.2.4
+--------------
+
+- released: 2025-07-08
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - added new authenticated option for signup endpoint.
+    - signup endpoint requires authentication of admin to create new users.
+    - changed requests version to 2.32.4 due to security issues.
+
+version 1.2.3
+--------------
+
+- released: 2025-06-10
+- description: Bug fixes for permissions management and view handling
+- changelog:
+    - Fixed view modification functionality that was not properly updating URL rules and endpoint configurations.
+    - Resolved permission deletion issues where orphaned permissions were not being correctly removed from the database.
+    - Enhanced custom roles functionality to work properly with external applications. For detailed configuration information, please refer to the Cornflow documentation.
+
 version 1.2.2
 --------------
 
