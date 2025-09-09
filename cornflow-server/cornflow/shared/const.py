@@ -1,7 +1,8 @@
 """
 In this file we import the values for different constants on cornflow server
 """
-CORNFLOW_VERSION = "1.2.1"
+
+CORNFLOW_VERSION = "1.2.4"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -44,6 +45,13 @@ AIRFLOW_TO_STATE_MAP = dict(
     failed=EXEC_STATE_ERROR,
     queued=EXEC_STATE_QUEUED,
 )
+# SIGNUP OPTIONS
+# NO_SIGNUP: no signup endpoint
+# SIGNUP_WITH_NO_AUTH: signup endpoint with no auth
+# SIGNUP_WITH_AUTH: signup endpoint with auth
+NO_SIGNUP = 0
+SIGNUP_WITH_NO_AUTH = 1
+SIGNUP_WITH_AUTH = 2
 
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
@@ -121,3 +129,9 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
+
+# Conditional endpoints
+CONDITIONAL_ENDPOINTS = {
+    "signup": "/signup/",
+    "login": "/login/",
+}
