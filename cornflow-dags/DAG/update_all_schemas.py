@@ -37,14 +37,7 @@ def _load_ignore_patterns():
     """
     Load ignore patterns from .dagignore if it exists, else use defaults. Always include default patterns.
     """
-    default_patterns = [
-        "scripts",
-        "documentation",
-        "tests",
-        "activate_dags",
-        ".",
-        "__"
-    ]
+    default_patterns = ["scripts", "documentation", "tests", "activate_dags", ".", "__"]
 
     _dir = os.path.dirname(__file__)
     dagignore_path = os.path.join(_dir, ".dagignore")
@@ -53,14 +46,14 @@ def _load_ignore_patterns():
 
     if os.path.exists(dagignore_path):
         try:
-            with open(dagignore_path, 'r') as f:
+            with open(dagignore_path, "r") as f:
                 for line in f:
                     line = line.strip()
-                    if line and not line.startswith('#'):
+                    if line and not line.startswith("#"):
                         ignore_patterns.add(line)
             print(f"Loaded ignore patterns from {dagignore_path}")
-        except Exception as e:
-            print(f"Warning: Could not read .dagignore file: {e}")
+        except FileNotFoundError:
+            print(f"Warning: Could not read .dagignore file: {FileNotFoundError}")
             print("Using default ignore patterns")
     else:
         print("No .dagignore file found, using default ignore patterns")
