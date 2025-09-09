@@ -13,6 +13,8 @@ class MyInstance(InstanceCore):
         "properties": {},
         "required": [],
     }
+    def check(self):
+        return {}
 
 
 class MySolution(SolutionCore):
