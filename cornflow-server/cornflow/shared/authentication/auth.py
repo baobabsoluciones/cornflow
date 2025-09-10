@@ -302,15 +302,16 @@ class Auth:
         """
         # Fetch keys from provider
         # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
-        oid_provider = current_app.config["OID_PROVIDER"]
-        if oid_provider == OID_PROVIDER_AZURE:
-            tenant_id = provider_url.split("/")[
-                3
-            ]  # Extract tenant ID from provider URL
+        oid_provider_type = current_app.config["OID_PROVIDER_TYPE"]
+        if oid_provider_type == OID_PROVIDER_AZURE:
+            # Azure AD uses a different endpoint for JWKS
+            # Extract tenant ID from provider URL
+            tenant_id = provider_url.split("/")[3]
             jwks_url = (
                 f"https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys"
             )
         else:
+            # AWS Cognito uses the standard well-known endpoint
             # For other providers, use the standard well-known endpoint
             jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
 

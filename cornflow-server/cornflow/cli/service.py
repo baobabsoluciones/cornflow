@@ -39,7 +39,6 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     AIRFLOW_BACKEND,
     SIGNUP_WITH_AUTH,
-    OID_PROVIDER_AWS,
     OID_PROVIDER_AZURE,
     OID_OTHER,
 )
@@ -185,8 +184,13 @@ def _setup_environment_variables():
     # Platform auth config and service users
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
     if auth == AUTH_OID:
-        oid_provider = int(os.getenv("OID_PROVIDER", OID_PROVIDER_AWS))
-        os.environ["OID_PROVIDER"] = str(oid_provider)
+        oid_provider_url = os.getenv("OID_PROVIDER")
+        if "microsoft" in oid_provider_url:
+            oid_provider_type = OID_PROVIDER_AZURE
+        else:
+            oid_provider_type = OID_OTHER
+        os.environ["OID_PROVIDER_TYPE"] = int(oid_provider_type)
+        os.environ["OID_PROVIDER"] = oid_provider_url
 
     cornflow_admin_user = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
     cornflow_admin_email = os.getenv(
@@ -257,7 +261,7 @@ def _setup_environment_variables():
         raise Exception("Selected backend not among valid options")
 
     if auth == AUTH_OID:
-        base_dict["oid_provider"] = oid_provider
+        base_dict["oid_provider"] = oid_provider_url
 
     return base_dict
 

@@ -84,7 +84,6 @@ AUTH_OAUTH = 4
 AUTH_OID = 0
 
 # OID possible providers
-OID_PROVIDER_AWS = 0
 OID_PROVIDER_AZURE = 1
 OID_OTHER = 2
 
