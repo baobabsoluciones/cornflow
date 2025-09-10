@@ -84,11 +84,8 @@ jobs:
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          uv pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          uv pip install -U orloge pulp
-          uv pip install -U -r airflow_config/requirements.txt
-          uv pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          UV_CONSTRAINT="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+          uv pip install -U "apache-airflow==${AIRFLOW_VERSION}" orloge pulp -r airflow_config/requirements.txt "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           airflow db init
           airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           airflow webserver -p 8080 &
