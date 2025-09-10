@@ -79,17 +79,17 @@ jobs:
           uv venv afvenv
           source afvenv/bin/activate
           UV_CONSTRAINT="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          uv pip install -U "apache-airflow==${AIRFLOW_VERSION}" orloge pulp -r airflow_config/requirements.txt "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          uv run --active airflow db init
-          uv run --active airflow users create \
+          uv pip install -U orloge pulp -r airflow_config/requirements.txt "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client" "apache-airflow==${AIRFLOW_VERSION}" 
+          airflow db init
+          airflow users create \
                 --username admin \
                 --firstname admin \
                 --lastname admin \
                 --role Admin \
                 --password admin \
                 --email admin@example.org
-          uv run --active airflow webserver -p 8080 &
-          uv run --active airflow scheduler &
+          airflow webserver -p 8080 &
+          airflow scheduler &
           deactivate
           sleep 5s
         env:
