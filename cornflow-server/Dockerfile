@@ -31,7 +31,7 @@ ENV DEFAULT_POSTGRES=1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install git+https://github.com/baobabsoluciones/cornflow.git@bugfix/migrations_command#subdirectory=cornflow-server
+RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
 
 # create folder for logs
