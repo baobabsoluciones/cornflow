@@ -30,8 +30,6 @@ ENV PYTHONUNBUFFERED=1
 ENV DEFAULT_POSTGRES=1
 
 # install dependencies
-COPY ./.ssh/* /root/.ssh/
-RUN chmod 400 /root/.ssh/id_rsa
 RUN pip install --upgrade pip
 RUN pip install git+ssh://git@github.com/baobabsoluciones/cornflow.git@bugfix/migrations_command#subdirectory=cornflow-server
 
