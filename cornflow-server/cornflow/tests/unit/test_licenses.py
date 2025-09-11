@@ -2,13 +2,19 @@ from cornflow.endpoints import LicensesEndpoint
 from cornflow.tests.const import LICENSES_URL, _get_file
 from cornflow.tests.custom_test_case import CustomTestCase
 
+try:
+    import tomllib
+except ModuleNotFoundError:
+    # Python < 3.11
+    import tomli as tomllib
+
 
 class TestLicensesListEndpoint(CustomTestCase):
     @staticmethod
     def read_requirements():
-        with open(_get_file("../../requirements.txt")) as req:
-            content = req.read()
-            requirements = content.split("\n")
+        with open(_get_file("../../pyproject.toml"), "rb") as req:
+            result = tomllib.load(req)
+            requirements = result["project"]["dependencies"]
 
         requirements = [
             r.split("=")[0].split(">")[0].split("<")[0].split("@")[0].lower()
@@ -39,7 +45,7 @@ class TestLicensesListEndpoint(CustomTestCase):
 
             self.assertEqual(200, response.status_code)
             self.assertIsInstance(response.json, list)
-            libraries = [k["library"].lower() for k in response.json]
+            libraries = {k["library"].lower() for k in response.json}
 
             for lib in self.libraries:
                 self.assertIn(lib, libraries)
