@@ -79,5 +79,8 @@ dev = ["alabaster",
     "sphinxcontrib-serializinghtml",
     "sphinxcontrib-redoc",
     "sphinx_design",
-    "shibuya"
+    "shibuya",
+    # tom-lib is the official package, but it's not available before 3.11
+    "tom-lib;python_version>='3.11'",
+    "tomli;python_version<'3.11'",
 ]
