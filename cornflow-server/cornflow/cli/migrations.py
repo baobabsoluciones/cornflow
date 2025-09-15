@@ -2,8 +2,8 @@ import os.path
 
 
 import click
+import cornflow
 from cornflow.shared import db
-from cornflow.shared.const import MIGRATIONS_DEFAULT_PATH
 from flask_migrate import Migrate, migrate, upgrade, downgrade, init
 
 from .utils import get_app
@@ -22,10 +22,7 @@ def migrations():
 def migrate_migrations():
     app = get_app()
     external = int(os.getenv("EXTERNAL_APP", 0))
-    if external == 0:
-        path = MIGRATIONS_DEFAULT_PATH
-    else:
-        path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
+    path = _get_migrations_path()
 
     with app.app_context():
         Migrate(app=app, db=db, directory=path)
@@ -38,11 +35,7 @@ def migrate_migrations():
 )
 def upgrade_migrations(revision="head"):
     app = get_app()
-    external = int(os.getenv("EXTERNAL_APP", 0))
-    if external == 0:
-        path = MIGRATIONS_DEFAULT_PATH
-    else:
-        path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
+    path = _get_migrations_path()
 
     with app.app_context():
         Migrate(app=app, db=db, directory=path)
@@ -55,11 +48,7 @@ def upgrade_migrations(revision="head"):
 )
 def downgrade_migrations(revision="-1"):
     app = get_app()
-    external = int(os.getenv("EXTERNAL_APP", 0))
-    if external == 0:
-        path = MIGRATIONS_DEFAULT_PATH
-    else:
-        path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
+    path = _get_migrations_path()
 
     with app.app_context():
         Migrate(app=app, db=db, directory=path)
@@ -72,12 +61,16 @@ def downgrade_migrations(revision="-1"):
 )
 def init_migrations():
     app = get_app()
-    external = int(os.getenv("EXTERNAL_APP", 0))
-    if external == 0:
-        path = MIGRATIONS_DEFAULT_PATH
-    else:
-        path = f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
+    path = _get_migrations_path()
 
     with app.app_context():
         Migrate(app=app, db=db, directory=path)
         init()
+
+
+def _get_migrations_path():
+    external = int(os.getenv("EXTERNAL_APP", 0))
+    if external == 0:
+        return os.path.join(os.path.dirname(cornflow.__file__), "migrations")
+    else:
+        return f"./{os.getenv('EXTERNAL_APP_MODULE', 'external_app')}/migrations"
