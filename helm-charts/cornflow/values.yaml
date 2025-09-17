@@ -396,6 +396,11 @@ airflow:
     persistence:
       enabled: true
       size: 1Gi
+      # IMPORTANT: for production, set to existing pvc with existingClaim
+      # example:
+      # enabled: true
+      # size: 1Gi
+      # existingClaim: airflow-dags
       
   # Airflow configuration
   env:
