@@ -30,8 +30,6 @@
 # The following variables need to be changed MANUALLY according to your release name:
 #
 # 1. In the cornflow.env section:
-#    - CORNFLOW_DB_HOST: Automatically configured (no manual change needed)
-#    - AIRFLOW_URL: Automatically configured (no manual change needed)
 #    - EXTERNAL_APP: Set to "1" if running as external app (affects URLs)
 #
 # 2. In the airflow.extraVolumes section:
@@ -133,6 +131,10 @@ cornflow:
     # =============================================================================
     # APPLICATION CONFIGURATION
     # =============================================================================
+    # IMPORTANT: change to your release name (e.g., my-project, cornflow, etc.)
+    # AIRFLOW_URL: "http://RELEASE_NAME-webserver:8080" must be set to your release name
+    # Example: value: "my-cornflow-webserver:8080" for helm install my-cornflow ./helm-charts/cornflow
+    AIRFLOW_URL: "http://my-cornflow-webserver:8080"
     APPLICATION_ROOT: "/"  # Application root path
     EXTERNAL_APP: "0"  # Set to "1" if running as external app
     # IMPORTANT: If you are running as external app, you must set the EXTERNAL_APP_MODULE to the name of the folder where the external app is located
