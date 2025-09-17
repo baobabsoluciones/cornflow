@@ -121,7 +121,10 @@ cornflow:
     # DATABASE CONFIGURATION
     # =============================================================================
     DEFAULT_POSTGRES: "1"  # Use Cornflow's specific DB variables
-    # IMPORTANT: DB_HOST is fixes by default to your release name (e.g., my-project, cornflow, etc.)
+    # IMPORTANT: change to your release name (e.g., my-project, cornflow, etc.)
+    # CORNFLOW_DB_HOST: "RELEASE_NAME-cornflow-postgresql" must be set to your release name
+    # Example: value: "my-project-cornflow-postgresql" for helm install my-project ./helm-charts/cornflow
+    CORNFLOW_DB_HOST: "my-cornflow-cornflow-postgresql"
     CORNFLOW_DB_PORT: "5432"
     CORNFLOW_DB_USER: "cornflow"
     CORNFLOW_DB_PASSWORD: "cornflow"

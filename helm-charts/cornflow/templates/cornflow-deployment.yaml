@@ -86,8 +86,6 @@ spec:
           resources:
             {{- toYaml .Values.cornflow.resources | nindent 12 }}
           env:
-            - name: CORNFLOW_DB_HOST
-              value: {{ .Release.Name }}-cornflow-postgresql
             - name: AIRFLOW_URL
               value: "http://{{ .Release.Name }}-webserver:8080"
             {{- range $key, $value := .Values.cornflow.env }}
