@@ -397,18 +397,6 @@ airflow:
       enabled: true
       size: 1Gi
       
-  # Extra volumes for init containers
-  extraVolumes:
-    - name: dags
-      persistentVolumeClaim:
-        # IMPORTANT: Change RELEASE_NAME to your release name (e.g., cornflow, cornflow-staging, etc.)
-        claimName: RELEASE_NAME-airflow-dags  # Change RELEASE_NAME to your release name
-      
-  # Extra volume mounts for init containers
-  extraVolumeMounts:
-    - name: dags
-      mountPath: /opt/airflow/dags
-
   # Airflow configuration
   env:
     - name: AIRFLOW__API__AUTH_BACKEND
