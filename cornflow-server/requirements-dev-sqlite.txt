@@ -1,0 +1,25 @@
+-r requirements-sqlite.txt
+alabaster
+Babel
+colorama
+coverage
+docutils
+Flask-Testing
+imagesize
+orloge
+packaging
+pipreqs
+Pygments
+pyparsing
+snowballstemmer
+Sphinx
+sphinxcontrib-applehelp
+sphinxcontrib-devhelp
+sphinxcontrib-htmlhelp
+sphinxcontrib-httpdomain
+sphinxcontrib-jsmath
+sphinxcontrib-qthelp
+sphinxcontrib-serializinghtml
+sphinxcontrib-redoc
+sphinx_design
+shibuya
