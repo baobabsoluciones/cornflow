@@ -5,9 +5,12 @@ from importlib import import_module
 from flask import current_app
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
-from cornflow.endpoints import resources, alarms_resources
-
-from cornflow.endpoints import alarms_resources, get_resources
+from cornflow.endpoints import (
+    resources,
+    alarms_resources,
+    table_resources,
+    get_resources,
+)
 
 # Imports from internal libraries
 from cornflow.models import ViewModel
@@ -191,7 +194,7 @@ def get_resources_to_register(external_app):
             resources_to_register += alarms_resources
             current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
         if current_app.config["TABLES_ENDPOINTS"]:
-            resources_to_register += tables_resources
+            resources_to_register += table_resources
             current_app.logger.info(" TABLES ENDPOINTS ENABLED ")
     else:
         current_app.logger.info(f" USING EXTERNAL APP: {external_app} ")
@@ -202,7 +205,7 @@ def get_resources_to_register(external_app):
             resources_to_register += alarms_resources
             current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
         if current_app.config["TABLES_ENDPOINTS"]:
-            resources_to_register += tables_resources
+            resources_to_register += table_resources
             current_app.logger.info(" TABLES ENDPOINTS ENABLED ")
 
     return resources_to_register
