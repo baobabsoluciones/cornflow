@@ -149,6 +149,14 @@ class TestingApplicationRoot(Testing):
     APPLICATION_ROOT = "/test"
 
 
+class TestingTableEndpoints(Testing):
+    """
+    Configuration class for testing with table endpoints
+    """
+
+    TABLES_ENDPOINTS = 1
+
+
 class Production(DefaultConfig):
     """
     Configuration class for production
@@ -169,4 +177,5 @@ app_config = {
     "production": Production,
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
+    "testing-table-endpoints": TestingTableEndpoints,
 }
