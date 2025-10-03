@@ -3,7 +3,7 @@ from importlib import import_module
 
 from flask import current_app
 
-from cornflow.endpoints import alarms_resources, get_resources
+from cornflow.endpoints import alarms_resources, get_resources, tables_resources
 from cornflow.models import RoleModel
 from cornflow.shared.const import (
     EXTRA_PERMISSION_ASSIGNATION,
@@ -25,7 +25,9 @@ def get_all_external(external_app):
         extra_permissions = EXTRA_PERMISSION_ASSIGNATION
         custom_roles_actions = {}
         if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = resources + alarms_resources
+            resources_to_register += alarms_resources
+        if current_app.config["TABLES_ENDPOINTS"]:
+            resources_to_register += tables_resources
     else:
         sys.path.append("./")
         external_module = import_module(external_app)
@@ -42,12 +44,11 @@ def get_all_external(external_app):
         except AttributeError:
             custom_roles_actions = {}
 
+        resources_to_register = external_module.endpoints.resources + resources
         if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = (
-                external_module.endpoints.resources + resources + alarms_resources
-            )
-        else:
-            resources_to_register = external_module.endpoints.resources + resources
+            resources_to_register += alarms_resources
+        if current_app.config["TABLES_ENDPOINTS"]:
+            resources_to_register += tables_resources
     return resources_to_register, extra_permissions, custom_roles_actions
 
 
