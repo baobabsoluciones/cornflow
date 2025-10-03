@@ -32,7 +32,7 @@ from cornflow.commands import (
     register_dag_permissions_command,
 )
 from cornflow.config import app_config
-from cornflow.endpoints import resources, alarms_resources, table_resources
+from cornflow.endpoints import resources, alarms_resources, tables_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
@@ -91,7 +91,7 @@ def create_app(env_name="development", dataconn=None):
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
     if app.config["TABLES_ENDPOINTS"]:
-        for res in table_resources:
+        for res in tables_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
     docs = FlaskApiSpec(app)
@@ -101,7 +101,7 @@ def create_app(env_name="development", dataconn=None):
         for res in alarms_resources:
             docs.register(target=res["resource"], endpoint=res["endpoint"])
     if app.config["TABLES_ENDPOINTS"]:
-        for res in table_resources:
+        for res in tables_resources:
             docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in

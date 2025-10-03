@@ -232,7 +232,7 @@ alarms_resources = [
     ),
 ]
 
-table_resources = [
+tables_resources = [
     dict(
         resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
     ),
