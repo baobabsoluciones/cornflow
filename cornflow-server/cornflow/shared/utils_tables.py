@@ -91,9 +91,13 @@ def get_all_tables():
                 for col in model.__dict__["__table__"]._columns
             }
             for typeclass, convert_to_int in type_converter.items():
-                if isinstance(props["id"].type, typeclass):
-                    tables[model.__tablename__]["convert_id"] = convert_to_int
-                    break
+                if "id" in props:
+                    if isinstance(props["id"].type, typeclass):
+                        tables[model.__tablename__]["convert_id"] = convert_to_int
+                        break
+                else:
+                    tables[model.__tablename__]["convert_id"] = False
+
         except AttributeError:
             pass
     return tables

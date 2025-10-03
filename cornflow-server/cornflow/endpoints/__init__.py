@@ -211,14 +211,6 @@ resources = [
         urls="/licences/",
         endpoint="licences",
     ),
-    dict(
-        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
-    ),
-    dict(
-        resource=TablesDetailsEndpoint,
-        urls="/table/<string:table_name>/<string:idx>/",
-        endpoint="tables-detail",
-    ),
 ]
 
 
@@ -237,6 +229,17 @@ alarms_resources = [
         resource=MainAlarmsEndpoint,
         urls="/main-alarms/",
         endpoint="main-alarms",
+    ),
+]
+
+table_resources = [
+    dict(
+        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail",
     ),
 ]
 

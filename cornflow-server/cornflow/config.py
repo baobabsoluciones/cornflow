@@ -1,5 +1,11 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH
+from .shared.const import (
+    AUTH_DB,
+    PLANNER_ROLE,
+    AUTH_OID,
+    SIGNUP_WITH_AUTH,
+    SIGNUP_WITH_NO_AUTH,
+)
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
@@ -83,7 +89,10 @@ class DefaultConfig(object):
     SERVICE_EMAIL_PORT = os.getenv("SERVICE_EMAIL_PORT", None)
 
     # Alarms endpoints
-    ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
+    ALARMS_ENDPOINTS = int(os.getenv("CF_ALARMS_ENDPOINT", 0))
+
+    # Tables endpoints
+    TABLES_ENDPOINTS = int(os.getenv("CF_TABLES_ENDPOINT", 0))
 
     # Token duration in hours
     TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
@@ -121,10 +130,12 @@ class Testing(DefaultConfig):
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
     SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
 
+
 class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
     """
+
     AUTH_TYPE = AUTH_OID
     OID_PROVIDER = "https://test-provider.example.com"
     OID_EXPECTED_AUDIENCE = "test-audience-id"
