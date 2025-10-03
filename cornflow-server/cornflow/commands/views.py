@@ -188,16 +188,21 @@ def get_resources_to_register(external_app):
     if external_app is None:
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = resources + alarms_resources
+            resources_to_register += alarms_resources
             current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
+        if current_app.config["TABLES_ENDPOINTS"]:
+            resources_to_register += tables_resources
+            current_app.logger.info(" TABLES ENDPOINTS ENABLED ")
     else:
         current_app.logger.info(f" USING EXTERNAL APP: {external_app} ")
         sys.path.append("./")
         external_module = import_module(external_app)
+        resources_to_register = external_module.endpoints.resources + resources
         if current_app.config["ALARMS_ENDPOINTS"]:
-            resources_to_register = (
-                external_module.endpoints.resources + resources + alarms_resources
-            )
-        else:
-            resources_to_register = external_module.endpoints.resources + resources
+            resources_to_register += alarms_resources
+            current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
+        if current_app.config["TABLES_ENDPOINTS"]:
+            resources_to_register += tables_resources
+            current_app.logger.info(" TABLES ENDPOINTS ENABLED ")
+
     return resources_to_register
