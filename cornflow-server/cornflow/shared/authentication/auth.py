@@ -301,7 +301,7 @@ class Auth:
         """
         # Fetch keys from provider
         # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
-        if provider_url.startswith("https://login.microsoftonline.com"):
+        if provider_url.startswith("https://login.microsoftonline.com/"):
             tenant_id = provider_url.split("/")[
                 3
             ]  
