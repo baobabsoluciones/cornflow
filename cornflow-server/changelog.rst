@@ -1,3 +1,13 @@
+version 1.2.5
+--------------
+
+- released: 2025-10-09
+- description:
+- changelog:
+    - updated cornflow-client to version 1.2.5
+    - fixed OpenID authentication error with Microsoft.
+    - added new fields to return on execution endpoint GET call.
+
 version 1.2.4
 --------------
 
