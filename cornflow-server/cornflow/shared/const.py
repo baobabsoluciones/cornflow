@@ -2,7 +2,7 @@
 In this file we import the values for different constants on cornflow server
 """
 
-CORNFLOW_VERSION = "1.2.4"
+CORNFLOW_VERSION = "1.2.5"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -120,9 +120,6 @@ BASE_PERMISSION_ASSIGNATION = [
 EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
 ]
-
-# migrations constants
-MIGRATIONS_DEFAULT_PATH = "./cornflow/migrations"
 
 # Costants for messages that are given back on exceptions
 AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"

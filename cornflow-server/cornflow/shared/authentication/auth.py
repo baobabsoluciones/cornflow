@@ -300,7 +300,18 @@ class Auth:
         :rtype: dict
         """
         # Fetch keys from provider
-        jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
+        # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
+        if provider_url.startswith("https://login.microsoftonline.com/"):
+            tenant_id = provider_url.split("/")[
+                3
+            ]  
+            # Extract tenant ID from provider URL
+            jwks_url = (
+                f"https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys"
+            )
+        else:
+            # For other providers, use the standard well-known endpoint
+            jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
         try:
             response = requests.get(jwks_url)
             response.raise_for_status()
