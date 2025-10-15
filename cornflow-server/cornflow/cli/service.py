@@ -189,7 +189,7 @@ def _setup_environment_variables():
             oid_provider_type = OID_PROVIDER_AZURE
         else:
             oid_provider_type = OID_OTHER
-        os.environ["OID_PROVIDER_TYPE"] = int(oid_provider_type)
+        os.environ["OID_PROVIDER_TYPE"] = str(oid_provider_type)
         os.environ["OID_PROVIDER"] = oid_provider_url
 
     cornflow_admin_user = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
