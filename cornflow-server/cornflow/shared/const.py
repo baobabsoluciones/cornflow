@@ -2,6 +2,9 @@
 In this file we import the values for different constants on cornflow server
 """
 
+from cornflow.endpoints.signup import SignUpEndpoint
+from cornflow.endpoints.login import LoginEndpoint
+
 CORNFLOW_VERSION = "1.2.4"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
@@ -128,7 +131,12 @@ AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
 
 # Conditional endpoints
-CONDITIONAL_ENDPOINTS = {
+CONDITIONAL_ENDPOINTS_BASE_CLASS = {
+    "signup": SignUpEndpoint,
+    "login": LoginEndpoint,
+}
+
+CONDITIONAL_ENDPOINTS_URLS = {
     "signup": "/signup/",
     "login": "/login/",
 }

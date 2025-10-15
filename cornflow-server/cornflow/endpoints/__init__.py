@@ -5,7 +5,10 @@ The login resource gets created on app startup as it depends on configuration
 """
 
 from flask import current_app
-from cornflow.shared.const import CONDITIONAL_ENDPOINTS
+from cornflow.shared.const import (
+    CONDITIONAL_ENDPOINTS_BASE_CLASS,
+    CONDITIONAL_ENDPOINTS_URLS,
+)
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
@@ -254,14 +257,14 @@ def get_resources():
     """
     base_resources = resources.copy()
 
-    for resource in CONDITIONAL_ENDPOINTS.keys():
+    for resource in CONDITIONAL_ENDPOINTS_URLS.keys():
         if resource not in [
             present_resource["endpoint"] for present_resource in base_resources
         ]:
             base_resources.append(
                 dict(
-                    resource=current_app.view_functions[resource].view_class,
-                    urls=CONDITIONAL_ENDPOINTS[resource],
+                    resource=CONDITIONAL_ENDPOINTS_BASE_CLASS[resource],
+                    urls=CONDITIONAL_ENDPOINTS_URLS[resource],
                     endpoint=resource,
                 )
             )
