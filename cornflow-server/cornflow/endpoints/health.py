@@ -19,7 +19,7 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
-    CORNFLOW_VERSION
+    CORNFLOW_VERSION,
 )
 from cornflow_client.databricks.api import Databricks
 from cornflow.shared.exceptions import EndpointNotImplemented
@@ -49,16 +49,19 @@ class HealthEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"Health check: cornflow {cornflow_status}, backend {backend_status}"
         )
-        return {"cornflow_status": cornflow_status, "backend_status": backend_status,
-                "cornflow_version": cornflow_version}
+        return {
+            "cornflow_status": cornflow_status,
+            "backend_status": backend_status,
+            "cornflow_version": cornflow_version,
+        }
 
-    def check_backend_status(self):  
-        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:  
-            client = Airflow.from_config(current_app.config)  
-        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:  
-            client = Databricks.from_config(current_app.config)  
-        else:  
-            raise EndpointNotImplemented()  
-        if client.is_alive():  
-            return STATUS_HEALTHY  
-        return STATUS_UNHEALTHY  
+    def check_backend_status(self):
+        if current_app.config["CORNFLOW_BACKEND"] == AIRFLOW_BACKEND:
+            client = Airflow.from_config(current_app.config)
+        elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:
+            client = Databricks.from_config(current_app.config)
+        else:
+            raise EndpointNotImplemented()
+        if client.is_alive(current_app.config):
+            return STATUS_HEALTHY
+        return STATUS_UNHEALTHY
