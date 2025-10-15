@@ -122,7 +122,7 @@ def create_app(env_name="development", dataconn=None):
         )
     elif auth_type == AUTH_OID:
         api.add_resource(
-            LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+            LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS_URLS["login"], endpoint="login"
         )
     else:
         raise ConfigurationError(
