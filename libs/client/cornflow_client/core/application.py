@@ -266,14 +266,15 @@ class ApplicationCore(ABC):
         if final_sol_dict:  # Checks for non-None and non-empty dict
             try:
                 solution_checks = algo.data_checks()
-            except AttributeError:
-                # Solver doesn't implement data_checks, which is acceptable.
-                solution_checks = None
             except Exception:
                 # Report unexpected errors during solution checks execution
                 solution_checks = {
-                    "error": "Error in solution checks",
-                    "description": "An error has been found in the solution checks; the solution could not be verified.",
+                    "solution_check_error": [
+                        {
+                            "error_type": "Error in solution checks",
+                            "error_message": "An error has been found in the solution checks; the solution could not be verified.",
+                        }
+                    ]
                 }
 
         return final_sol_dict, solution_checks
