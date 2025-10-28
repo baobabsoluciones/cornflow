@@ -269,6 +269,12 @@ class ApplicationCore(ABC):
             except AttributeError:
                 # Solver doesn't implement data_checks, which is acceptable.
                 solution_checks = None
+            except Exception:
+                # Report unexpected errors during solution checks execution
+                solution_checks = {
+                    "error": "Error in solution checks",
+                    "description": "An error has been found in the solution checks; the solution could not be verified.",
+                }
 
         return final_sol_dict, solution_checks
 
