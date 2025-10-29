@@ -7,10 +7,10 @@ from typing import List, Dict, Union
 from jsonschema import Draft7Validator
 
 from cornflow_client.constants import BadInstanceChecks
-from .instance_solution import InstanceSolutionCore, LaunchChecksMixin
+from .instance_solution import InstanceSolutionCore, CheckCore
 
 
-class InstanceCore(InstanceSolutionCore, LaunchChecksMixin, ABC):
+class InstanceCore(InstanceSolutionCore, CheckCore, ABC):
     """
     The instance template.
     """

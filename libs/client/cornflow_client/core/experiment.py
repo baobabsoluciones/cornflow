@@ -14,11 +14,11 @@ from cornflow_client.constants import (
     BadSolutionChecks,
 )
 from .instance import InstanceCore
-from .instance_solution import LaunchChecksMixin
+from .instance_solution import CheckCore
 from .solution import SolutionCore
 
 
-class ExperimentCore(LaunchChecksMixin, ABC):
+class ExperimentCore(CheckCore, ABC):
     """
     The solver template.
     """

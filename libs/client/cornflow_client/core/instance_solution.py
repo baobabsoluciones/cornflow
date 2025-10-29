@@ -434,7 +434,7 @@ class InstanceSolutionCore(ABC):
         return datetime_obj.hour
 
 
-class LaunchChecksMixin:
+class CheckCore:
     def get_check_methods(self) -> list:
         """
         Finds all class methods starting with check_ and returns them in a list.
