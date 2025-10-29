@@ -74,17 +74,8 @@ class ExperimentCore(ABC):
         """
         Method that executes the ExperimentCore.check() method and validates the result against the schema_checks
         """
-        try:
-            checks = self.check()
-            if checks is None:
-                checks = self.check_solution()
-        except NotImplementedError:
-            warnings.warn(
-                "The check_solution() method is deprecated. Please use check() instead. "
-                "Support for check_solution() will be removed on cornflow-client 2.0.0",
-                DeprecationWarning,
-            )
-            checks = self.check_solution()
+        # Check method always exists since it is implemented in the ExperimentCore class
+        checks = self.check()
         validator = Draft7Validator(self.schema_checks)
         if not validator.is_valid(checks):
             raise BadSolutionChecks(

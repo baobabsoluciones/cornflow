@@ -293,3 +293,52 @@ class TestCore(TestCase):
                 "b_equal_c": [{"b": 2, "c": 1}],
             },
         )
+
+    def test_unexpected_error_in_solution_checks(self):
+        """Test that unexpected errors in solution checks are raised correctly for the 5 most common error types."""
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        # Test cases for the 5 most common error types
+        error_test_cases = [
+            (RuntimeError, "Runtime error occurred"),
+            (AttributeError, "Attribute not found"),
+            (ValueError, "Invalid value provided"),
+            (TypeError, "Type mismatch error"),
+            (KeyError, "Missing key in dictionary"),
+        ]
+
+        for error_class, error_message in error_test_cases:
+            with self.subTest(error_type=error_class.__name__):
+
+                class ErrorSolver(ExperimentCore):
+                    schema_checks = get_empty_schema(properties=dict())
+
+                    def solve(self, options):
+                        self.solution = DummySolution({"sleep": 1})
+                        return dict(
+                            status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE
+                        )
+
+                    def data_checks(self):
+                        # Simulate different types of unexpected errors
+                        raise error_class(error_message)
+
+                    def get_objective(self):
+                        return 0
+
+                class ErrorApp(self.app.__class__):
+                    solvers = dict(default=ErrorSolver)
+                    solution = DummySolution
+
+                error_app = ErrorApp()
+
+                # Should raise the specific error type
+                with self.assertRaises(error_class) as context:
+                    error_app._validate_and_check_solution(
+                        ErrorSolver(), {}, "test_solver", 0.1
+                    )
+
+                # Verify the error message is correct
+                self.assertEqual(str(context.exception), error_message)

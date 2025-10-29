@@ -8,6 +8,7 @@ from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
 
 from jsonschema import Draft7Validator
+from cornflow_client.constants import BadSolutionChecks
 from pytups import SuperDict
 
 from cornflow_client.constants import (
@@ -263,19 +264,9 @@ class ApplicationCore(ABC):
 
         # Perform data checks only if a valid solution dict was obtained
         # and the solver implements data_checks
-        if final_sol_dict:  # Checks for non-None and non-empty dict
-            try:
-                solution_checks = algo.data_checks()
-            except Exception:
-                # Report unexpected errors during solution checks execution
-                solution_checks = {
-                    "solution_check_error": [
-                        {
-                            "error_type": "Error in solution checks",
-                            "error_message": "An error has been found in the solution checks; the solution could not be verified.",
-                        }
-                    ]
-                }
+        # Checks for non-None and non-empty dict
+        if final_sol_dict:
+            solution_checks = algo.data_checks()
 
         return final_sol_dict, solution_checks
 
