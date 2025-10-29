@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
@@ -76,8 +74,25 @@ class InstanceCore(InstanceSolutionCore, ABC):
         and the list/dict of errors / warnings as value.
 
         It will only return those checks that return a non-empty list/dict.
+        If a check method raises an exception, it will be caught and a generic error
+        message will be added to the checks dictionary.
         """
-        check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
+        check_method_names = self.get_check_methods()
+        check_methods = {}
+
+        # Execute each check method and catch any exceptions
+        for method_name in check_method_names:
+            try:
+                check_methods[method_name] = getattr(self, method_name)()
+            except Exception:
+                # If a check fails, add a generic error message
+                check_methods[method_name] = [
+                    {
+                        "error_type": "Check execution error",
+                        "error_message": "The execution of the check has failed, please contact support",
+                    }
+                ]
+
         failed_checks = {}
         for k, v in check_methods.items():
             if v is None:

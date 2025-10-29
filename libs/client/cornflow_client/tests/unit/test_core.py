@@ -294,8 +294,8 @@ class TestCore(TestCase):
             },
         )
 
-    def test_unexpected_error_in_solution_checks(self):
-        """Test that unexpected errors in solution checks are raised correctly for the 5 most common error types."""
+    def test_check_method_exception_handling(self):
+        """Test that when a check_* method raises an exception, a generic error message is added."""
 
         class DummySolution(SolutionCore):
             schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
@@ -312,8 +312,25 @@ class TestCore(TestCase):
         for error_class, error_message in error_test_cases:
             with self.subTest(error_type=error_class.__name__):
 
-                class ErrorSolver(ExperimentCore):
-                    schema_checks = get_empty_schema(properties=dict())
+                class ErrorCheckSolver(ExperimentCore):
+                    schema_checks = get_empty_schema(
+                        properties=dict(
+                            test_check=dict(
+                                type="array",
+                                objects=dict(
+                                    type="object",
+                                    properties=dict(
+                                        error_type=dict(type="string"),
+                                        error_message=dict(type="string"),
+                                    ),
+                                ),
+                            ),
+                            working_check=dict(
+                                type="array",
+                                objects=dict(type="object"),
+                            ),
+                        )
+                    )
 
                     def solve(self, options):
                         self.solution = DummySolution({"sleep": 1})
@@ -321,24 +338,42 @@ class TestCore(TestCase):
                             status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE
                         )
 
-                    def data_checks(self):
-                        # Simulate different types of unexpected errors
+                    def check_test_check(self):
+                        # Simulate different types of unexpected errors in a check method
                         raise error_class(error_message)
+
+                    def check_working_check(self):
+                        # This check should work correctly and return empty list (no errors)
+                        return []
 
                     def get_objective(self):
                         return 0
 
                 class ErrorApp(self.app.__class__):
-                    solvers = dict(default=ErrorSolver)
+                    solvers = dict(default=ErrorCheckSolver)
                     solution = DummySolution
 
                 error_app = ErrorApp()
 
-                # Should raise the specific error type
-                with self.assertRaises(error_class) as context:
-                    error_app._validate_and_check_solution(
-                        ErrorSolver(), {}, "test_solver", 0.1
-                    )
+                # Create instance and solution for the solver
+                instance = error_app.instance.from_dict({"seconds": 1})
+                solution = error_app.solution.from_dict({"sleep": 1})
+                error_solver = ErrorCheckSolver(instance, solution)
 
-                # Verify the error message is correct
-                self.assertEqual(str(context.exception), error_message)
+                # Should NOT raise an exception, but return the checks with generic error
+                checks = error_solver.launch_all_checks()
+
+                # Verify the generic error message is in the checks for the failing check
+                self.assertIn("test_check", checks)
+                self.assertEqual(
+                    checks["test_check"],
+                    [
+                        {
+                            "error_type": "Check execution error",
+                            "error_message": "The execution of the check has failed, please contact support",
+                        }
+                    ],
+                )
+
+                # Verify that the working check is NOT in the failed checks (empty list means no errors)
+                self.assertNotIn("working_check", checks)
