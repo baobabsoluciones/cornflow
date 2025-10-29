@@ -14,10 +14,11 @@ from cornflow_client.constants import (
     BadSolutionChecks,
 )
 from .instance import InstanceCore
+from .instance_solution import LaunchChecksMixin
 from .solution import SolutionCore
 
 
-class ExperimentCore(ABC):
+class ExperimentCore(LaunchChecksMixin, ABC):
     """
     The solver template.
     """
@@ -108,61 +109,6 @@ class ExperimentCore(ABC):
           type.
         """
         return self.launch_all_checks()
-
-    def get_check_methods(self) -> list:
-        """
-        Finds all class methods starting with check_ and returns them in a list.
-
-        :return: A list of check methods.
-        """
-        check_methods = [
-            m
-            for m in dir(self)
-            if m.startswith("check_")
-            and callable(getattr(self, m))
-            and m != "check_schema"
-            and m != "check_solution"
-        ]
-        return check_methods
-
-    def launch_all_checks(self) -> Dict[str, Union[List, Dict]]:
-        """
-        Launch every check method and return a dict with the check method name as key
-        and the list/dict of errors / warnings as value.
-
-        It will only return those checks that return a non-empty list/dict.
-        If a check method raises an exception, it will be caught and a generic error
-        message will be added to the checks dictionary.
-        """
-        check_method_names = self.get_check_methods()
-        check_methods = {}
-
-        # Execute each check method and catch any exceptions
-        for method_name in check_method_names:
-            try:
-                check_methods[method_name] = getattr(self, method_name)()
-            except Exception:
-                # If a check fails, add a generic error message
-                check_methods[method_name] = [
-                    {
-                        "error_type": "Check execution error",
-                        "error_message": "The execution of the check has failed, please contact support",
-                    }
-                ]
-                log.warning(f"The execution of the check {method_name} has failed, please contact support")
-
-        failed_checks = {}
-        for k, v in check_methods.items():
-            if v is None:
-                continue
-
-            try:
-                if len(v) > 0:
-                    failed_checks[k.split("check_")[1]] = v
-            except TypeError:
-                failed_checks[k.split("check_")[1]] = v
-
-        return dict(failed_checks)
 
     @property
     @abstractmethod
