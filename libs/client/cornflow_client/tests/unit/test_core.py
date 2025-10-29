@@ -294,7 +294,7 @@ class TestCore(TestCase):
             },
         )
 
-    def test_check_method_exception_handling(self):
+    def test_solution_check_method_exception_handling(self):
         """Test that when a check_* method raises an exception, a generic error message is added."""
 
         class DummySolution(SolutionCore):
@@ -362,6 +362,73 @@ class TestCore(TestCase):
 
                 # Should NOT raise an exception, but return the checks with generic error
                 checks = error_solver.launch_all_checks()
+
+                # Verify the generic error message is in the checks for the failing check
+                self.assertIn("test_check", checks)
+                self.assertEqual(
+                    checks["test_check"],
+                    [
+                        {
+                            "error_type": "Check execution error",
+                            "error_message": "The execution of the check has failed, please contact support",
+                        }
+                    ],
+                )
+
+                # Verify that the working check is NOT in the failed checks (empty list means no errors)
+                self.assertNotIn("working_check", checks)
+
+    def test_instance_check_method_exception_handling(self):
+        """Test that when a check_* method of an instance raises an exception, a generic error message is added."""
+
+        # Test cases for the 5 most common error types
+        error_test_cases = [
+            (RuntimeError, "Runtime error occurred"),
+            (AttributeError, "Attribute not found"),
+            (ValueError, "Invalid value provided"),
+            (TypeError, "Type mismatch error"),
+            (KeyError, "Missing key in dictionary"),
+        ]
+
+        for error_class, error_message in error_test_cases:
+            with self.subTest(error_type=error_class.__name__):
+
+                class ErrorCheckInstance(InstanceCore):
+                    schema = get_empty_schema(
+                        properties=dict(seconds=dict(type="number"))
+                    )
+                    schema_checks = get_empty_schema(
+                        properties=dict(
+                            test_check=dict(
+                                type="array",
+                                objects=dict(
+                                    type="object",
+                                    properties=dict(
+                                        error_type=dict(type="string"),
+                                        error_message=dict(type="string"),
+                                    ),
+                                ),
+                            ),
+                            working_check=dict(
+                                type="array",
+                                objects=dict(type="object"),
+                            ),
+                        )
+                    )
+
+                    def check_test_check(self):
+                        # Simulate different types of unexpected errors in a check method
+                        raise error_class(error_message)
+
+                    def check_working_check(self):
+                        # This check should work correctly and return empty list (no errors)
+                        return []
+
+                # Create instance
+                error_instance = ErrorCheckInstance({"seconds": 1})
+
+                # Should NOT raise an exception, but return the checks with generic error
+                checks = error_instance.launch_all_checks()
 
                 # Verify the generic error message is in the checks for the failing check
                 self.assertIn("test_check", checks)
