@@ -1,5 +1,6 @@
 """ """
 
+import logging as log
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
@@ -92,6 +93,9 @@ class InstanceCore(InstanceSolutionCore, ABC):
                         "error_message": "The execution of the check has failed, please contact support",
                     }
                 ]
+                log.warning(
+                    f"The execution of the check {method_name} has failed, please contact support"
+                )
 
         failed_checks = {}
         for k, v in check_methods.items():
