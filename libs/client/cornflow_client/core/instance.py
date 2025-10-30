@@ -1,17 +1,16 @@
-"""
+""" """
 
-"""
-
+import logging as log
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
 from jsonschema import Draft7Validator
 
 from cornflow_client.constants import BadInstanceChecks
-from .instance_solution import InstanceSolutionCore
+from .instance_solution import InstanceSolutionCore, CheckCore
 
 
-class InstanceCore(InstanceSolutionCore, ABC):
+class InstanceCore(InstanceSolutionCore, CheckCore, ABC):
     """
     The instance template.
     """
@@ -54,39 +53,3 @@ class InstanceCore(InstanceSolutionCore, ABC):
         the method Instance.check()
         """
         raise NotImplementedError()
-
-    def get_check_methods(self) -> list:
-        """
-        Finds all class methods starting with check_ and returns them in a list.
-
-        :return: A list of check methods.
-        """
-        check_methods = [
-            m
-            for m in dir(self)
-            if m.startswith("check_")
-            and callable(getattr(self, m))
-            and m != "check_schema"
-        ]
-        return check_methods
-
-    def launch_all_checks(self) -> Dict[str, Union[List, Dict]]:
-        """
-        Launch every check method and return a dict with the check method name as key
-        and the list/dict of errors / warnings as value.
-
-        It will only return those checks that return a non-empty list/dict.
-        """
-        check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
-        failed_checks = {}
-        for k, v in check_methods.items():
-            if v is None:
-                continue
-
-            try:
-                if len(v) > 0:
-                    failed_checks[k.split("check_")[1]] = v
-            except TypeError:
-                failed_checks[k.split("check_")[1]] = v
-
-        return dict(failed_checks)
