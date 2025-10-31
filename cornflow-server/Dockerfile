@@ -1,4 +1,4 @@
-# VERSION 1.2.5
+# VERSION 1.2.6
 # AUTHOR: sistemas@baobabsoluciones.es
 
 FROM python:3.12-slim
@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=linux
 
 # CORNFLOW vars
-ARG CORNFLOW_VERSION=1.2.5
+ARG CORNFLOW_VERSION=1.2.6
 
 # install linux pkg
 RUN apt update -y && apt-get install -y --no-install-recommends \

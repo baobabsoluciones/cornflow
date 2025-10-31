@@ -1,3 +1,11 @@
+version 1.2.6
+--------------
+
+- released: 2025-10-31
+- description: New check control
+- changelog:
+    - When a check has a coding error, it is now displayed in the instance/solution checks with the message: "The execution of the check has failed. Please contact support."
+
 version 1.2.5
 --------------
 
