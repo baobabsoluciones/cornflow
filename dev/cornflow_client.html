@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.2.5 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.2.6 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
-  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8a0dd7af" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=bb284d7b" />
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=d140fbf8" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -150,8 +150,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.get_check_methods"><code class="docutils literal notranslate">get_check_methods()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore.launch_all_checks"><code class="docutils literal notranslate">launch_all_checks()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -217,8 +215,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate">check_solution()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_check_methods"><code class="docutils literal notranslate">get_check_methods()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.launch_all_checks"><code class="docutils literal notranslate">launch_all_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate">get_solver_config()</span></code></a></li>
 </ul>
@@ -560,7 +556,7 @@ if each element in the list is:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CheckCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The instance template.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.data_checks">
@@ -602,25 +598,6 @@ if the problem is feasible</p>
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.schema_checks" title="Link to this definition">¶</a></dt>
 <dd><p>A dictionary representation of the json-schema for the dictionary returned by
 the method Instance.check()</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.get_check_methods">
-<span class="sig-name descname"><span class="pre">get_check_methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.get_check_methods" title="Link to this definition">¶</a></dt>
-<dd><p>Finds all class methods starting with <a href="#id2"><span class="problematic" id="id3">check_</span></a> and returns them in a list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A list of check methods.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.launch_all_checks">
-<span class="sig-name descname"><span class="pre">launch_all_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.launch_all_checks" title="Link to this definition">¶</a></dt>
-<dd><p>Launch every check method and return a dict with the check method name as key
-and the list/dict of errors / warnings as value.</p>
-<p>It will only return those checks that return a non-empty list/dict.</p>
 </dd></dl>
 
 </dd></dl>
@@ -963,7 +940,7 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CheckCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The solver template.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.instance">
@@ -1045,25 +1022,6 @@ error. Each of the elements inside represents one error of that particular
 type.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_check_methods">
-<span class="sig-name descname"><span class="pre">get_check_methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_check_methods" title="Link to this definition">¶</a></dt>
-<dd><p>Finds all class methods starting with <a href="#id4"><span class="problematic" id="id5">check_</span></a> and returns them in a list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A list of check methods.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.launch_all_checks">
-<span class="sig-name descname"><span class="pre">launch_all_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.launch_all_checks" title="Link to this definition">¶</a></dt>
-<dd><p>Launch every check method and return a dict with the check method name as key
-and the list/dict of errors / warnings as value.</p>
-<p>It will only return those checks that return a non-empty list/dict.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1838,9 +1796,9 @@ table3: {config1: a, config2: b},
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=36f53d34"></script>
+      <script src="../_static/documentation_options.js?v=010db75e"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=e730760c"></script></body>
+      <script src="../_static/shibuya.js?v=9b0e4dde"></script></body>
 </html>
