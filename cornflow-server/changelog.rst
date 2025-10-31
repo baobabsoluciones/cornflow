@@ -1,3 +1,11 @@
+version 1.2.6
+--------------
+
+- released: 2025-10-31
+- description: bump version code to stay up to date with cornflow-client.
+- changelog:
+    - updated cornflow-client to version 1.2.6
+
 version 1.2.5
 --------------
 
