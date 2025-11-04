@@ -17,8 +17,8 @@ from cornflow.tests.const import (
     INSTANCES_LIST,
     INSTANCE_PATH,
     EMPTY_INSTANCE_PATH,
-    USER_ACCESS_ALL_OBJECTS_YES,
 )
+from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_YES
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from flask import current_app
 
