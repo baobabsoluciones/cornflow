@@ -1,9 +1,17 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH, OID_OTHER
+from cornflow.shared.const import (
+    AUTH_DB,
+    PLANNER_ROLE,
+    AUTH_OID,
+    SIGNUP_WITH_AUTH,
+    SIGNUP_WITH_NO_AUTH,
+    OID_OTHER,
+    AIRFLOW_BACKEND,
+    DATABRICKS_BACKEND,
+    USER_ACCESS_ALL_OBJECTS_NO,
+)
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
-from cornflow.shared.const import AIRFLOW_BACKEND, DATABRICKS_BACKEND
-
 
 class DefaultConfig(object):
     """
@@ -51,7 +59,9 @@ class DefaultConfig(object):
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 
     # Planner users can access objects of other users (1) or not(0).
-    USER_ACCESS_ALL_OBJECTS = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+    USER_ACCESS_ALL_OBJECTS = os.getenv(
+        "USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO
+    )
 
     # LDAP configuration
     LDAP_HOST = os.getenv("LDAP_HOST", "ldap://openldap:389")
@@ -135,6 +145,7 @@ class Testing(DefaultConfig):
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
     SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
+
 
 class TestingDatabricks(Testing):
     CORNFLOW_BACKEND = DATABRICKS_BACKEND

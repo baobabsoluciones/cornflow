@@ -215,10 +215,7 @@ class ExecutionEndpoint(OrchestratorMixin):
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
-        instance = InstanceModel.get_one_object(
-            user=self.get_user(), idx=execution.instance_id
-        )
-
+        instance = InstanceModel.get_one_object(idx=execution.instance_id)
         if execution.schema != instance.schema:
             execution.delete()
             raise InvalidData(error="Instance and execution schema mismatch")

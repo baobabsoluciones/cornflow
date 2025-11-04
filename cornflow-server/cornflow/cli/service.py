@@ -41,6 +41,7 @@ from cornflow.shared.const import (
     SIGNUP_WITH_AUTH,
     OID_PROVIDER_AZURE,
     OID_OTHER,
+    USER_ACCESS_ALL_OBJECTS_NO,
 )
 from cornflow.shared import db
 from cryptography.fernet import Fernet
@@ -210,7 +211,7 @@ def _setup_environment_variables():
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
     signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
-    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
     default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     os.environ["DEFAULT_ROLE"] = str(default_role)
