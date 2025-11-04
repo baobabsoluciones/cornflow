@@ -378,6 +378,11 @@ def _setup_external_app():
     result = subprocess.run(pip_install_cmd, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
         error(f"Error installing requirements: {result.stderr}")
+        sys.exit(
+            f"FATAL: Failed to install requirements from requirements.txt. "
+            f"Please check the dependencies and ensure they are compatible. "
+            f"Error: {result.stderr}"
+        )
     else:
         logger.info(result.stdout)
     time.sleep(5)  # Consider if this sleep is truly necessary

@@ -78,15 +78,15 @@ class BaseMetaResource(Resource, MethodResource):
                 )
 
                 if (
-                    current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
                     == USER_ACCESS_ALL_OBJECTS_NO
                 ):
                     if self.user.id != owner.user_id:
                         raise NoPermission()
                 elif (
-                    current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
                     != USER_ACCESS_ALL_OBJECTS_YES
-                    and current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    and int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
                     != USER_ACCESS_ALL_OBJECTS_NO
                 ):
                     raise InvalidUsage("Invalid USER_ACCESS_ALL_OBJECTS value")
