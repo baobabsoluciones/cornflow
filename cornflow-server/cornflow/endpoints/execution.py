@@ -65,6 +65,8 @@ from cornflow.shared.validators import (
     json_schema_extend_and_validate_as_string,
 )
 
+import logging
+logger = logging.getLogger(__name__)
 
 class OrchestratorMixin(BaseMetaResource):
     """
@@ -217,15 +219,20 @@ class ExecutionEndpoint(OrchestratorMixin):
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
+        logger.info(f"USER_ACCESS_ALL_OBJECTS: {current_app.config['USER_ACCESS_ALL_OBJECTS']}")
+        logger.info(f"execution.instance_id: {execution.instance_id}")
+        logger.info(f"self.get_user(): {self.get_user()}")
         if current_app.config["USER_ACCESS_ALL_OBJECTS"] == USER_ACCESS_ALL_OBJECTS_YES:
             # Users can access all objects 
             instance = InstanceModel.get_one_object(
                  idx=execution.instance_id
             )
+            logger.info("All users can access objects")
         elif current_app.config["USER_ACCESS_ALL_OBJECTS"] == USER_ACCESS_ALL_OBJECTS_NO:
             instance = InstanceModel.get_one_object(
                 user=self.get_user(), idx=execution.instance_id
             )
+            logger.info("Only the user can access objects")
         else:
             raise InvalidData(error="Invalid USER_ACCESS_ALL_OBJECTS value")
 
