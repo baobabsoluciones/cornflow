@@ -212,23 +212,10 @@ class ExecutionEndpoint(OrchestratorMixin):
 
         if "schema" not in kwargs:
             kwargs["schema"] = self.orch_const["def_schema"]
-        print("Start post execution endpoint")
-        current_app.logger.info("Start post execution endpoint")
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
-        # Users can access all objects
-        print(f"execution: {execution}")
-        current_app.logger.info(f"execution: {execution}")
-        print(f"execution.instance_id: {execution.instance_id}")
-        current_app.logger.info(f"execution.instance_id: {execution.instance_id}")
         instance = InstanceModel.get_one_object(idx=execution.instance_id)
-        print(f"instance: {instance}")
-        current_app.logger.info(f"instance: {instance}")
-        print(f"instance.id: {instance.id}")
-        current_app.logger.info(f"instance.id: {instance.id}")
-        current_app.logger.info(f"Instance {instance} to be executed is {instance.id}")
-
         if execution.schema != instance.schema:
             execution.delete()
             raise InvalidData(error="Instance and execution schema mismatch")
