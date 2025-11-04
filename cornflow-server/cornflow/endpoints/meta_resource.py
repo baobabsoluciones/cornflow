@@ -4,13 +4,17 @@ This file has all the logic shared for all the resources
 
 # Import from external libraries
 from flask_restful import Resource
-from flask import g, request
+from flask import g, request, current_app
 from flask_apispec.views import MethodResource
 from functools import wraps
 from pytups import SuperDict
 
 # Import from internal modules
-from cornflow.shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.const import (
+    ALL_DEFAULT_ROLES,
+    USER_ACCESS_ALL_OBJECTS_NO,
+    USER_ACCESS_ALL_OBJECTS_YES,
+)
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
@@ -69,8 +73,24 @@ class BaseMetaResource(Resource, MethodResource):
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
                     raise ObjectDoesNotExist()
-                if self.user.id != owner.user_id:
-                    raise NoPermission()
+                print(
+                    f"current_app.config['USER_ACCESS_ALL_OBJECTS']: {current_app.config['USER_ACCESS_ALL_OBJECTS']}"
+                )
+
+                if (
+                    current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    == USER_ACCESS_ALL_OBJECTS_NO
+                ):
+                    if self.user.id != owner.user_id:
+                        raise NoPermission()
+                elif (
+                    current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    != USER_ACCESS_ALL_OBJECTS_YES
+                    and current_app.config["USER_ACCESS_ALL_OBJECTS"]
+                    != USER_ACCESS_ALL_OBJECTS_NO
+                ):
+                    raise InvalidUsage("Invalid USER_ACCESS_ALL_OBJECTS value")
+
         item.save()
         return item, 201
 
