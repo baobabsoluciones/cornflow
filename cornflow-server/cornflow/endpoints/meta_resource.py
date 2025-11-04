@@ -73,10 +73,11 @@ class BaseMetaResource(Resource, MethodResource):
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
                     raise ObjectDoesNotExist()
-                print(
-                    f"current_app.config['USER_ACCESS_ALL_OBJECTS']: {current_app.config['USER_ACCESS_ALL_OBJECTS']}"
-                )
-
+                # If we have the USER_ACCESS_ALL_OBJECTS_NO value, 
+                # we need to check if the user is the owner of the object. 
+                # If we have the USER_ACCESS_ALL_OBJECTS_YES value, 
+                # we do not need to check if the user is the owner of the object.
+                # If we have any other value, we raise an exception.
                 if (
                     int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
                     == USER_ACCESS_ALL_OBJECTS_NO
