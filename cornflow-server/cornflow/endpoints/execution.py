@@ -215,9 +215,17 @@ class ExecutionEndpoint(OrchestratorMixin):
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
-        instance = InstanceModel.get_one_object(
-            user=self.get_user(), idx=execution.instance_id
-        )
+        if current_app.config["USER_ACCESS_ALL_OBJECTS"] == 0:
+            # Users can access all objects 
+            instance = InstanceModel.get_one_object(
+                 idx=execution.instance_id
+            )
+        elif current_app.config["USER_ACCESS_ALL_OBJECTS"] == 1:
+            instance = InstanceModel.get_one_object(
+                user=self.get_user(), idx=execution.instance_id
+            )
+        else:
+            raise InvalidData(error="Invalid USER_ACCESS_ALL_OBJECTS value")
 
         if execution.schema != instance.schema:
             execution.delete()
