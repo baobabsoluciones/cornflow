@@ -113,18 +113,28 @@ class BaseDataModel(TraceAttributesModel):
         """
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         print(f"user_access: {user_access}")
+        current_app.logger.info(f"user_access: {user_access}")
         if user is None:
             return super().get_one_object(idx=idx)
         query = cls.query.filter_by(id=idx, deleted_at=None)
         print(f"query: {query}")
+        current_app.logger.info(f"query: {query}")
         if not user.is_admin() and not user.is_service_user() and user_access == 0:
             current_app.logger.info(
                 f"User {user.id} is not admin or service user and USER_ACCESS_ALL_OBJECTS is 0, so we filter by user_id {user.id}"
             )
             query = query.filter_by(user_id=user.id)
+            current_app.logger.info(
+                f"User {user.id} is not admin or service user and USER_ACCESS_ALL_OBJECTS is 0, so we filter by user_id {user.id}"
+            )
         else:
-            print(f"User {user.id} is admin or service user or USER_ACCESS_ALL_OBJECTS is 1, so we do not filter by user_id")
+            print(
+                f"User {user.id} is admin or service user or USER_ACCESS_ALL_OBJECTS is 1, so we do not filter by user_id"
+            )
             print(f"user_access: {user_access}")
+            current_app.logger.info(
+                f"User {user.id} is admin or service user or USER_ACCESS_ALL_OBJECTS is 1, so we do not filter by user_id"
+            )
         print(f"query: {query}")
         print(f"query.first(): {query.first()}")
         return query.first()
