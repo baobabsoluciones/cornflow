@@ -49,6 +49,8 @@ from cornflow.shared.const import (
     DATABRICKS_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
+    USER_ACCESS_ALL_OBJECTS_YES,
+    USER_ACCESS_ALL_OBJECTS_NO,
 )
 
 from cornflow.shared.exceptions import (
@@ -215,12 +217,12 @@ class ExecutionEndpoint(OrchestratorMixin):
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
-        if current_app.config["USER_ACCESS_ALL_OBJECTS"] == 0:
+        if current_app.config["USER_ACCESS_ALL_OBJECTS"] == USER_ACCESS_ALL_OBJECTS_YES:
             # Users can access all objects 
             instance = InstanceModel.get_one_object(
                  idx=execution.instance_id
             )
-        elif current_app.config["USER_ACCESS_ALL_OBJECTS"] == 1:
+        elif current_app.config["USER_ACCESS_ALL_OBJECTS"] == USER_ACCESS_ALL_OBJECTS_NO:
             instance = InstanceModel.get_one_object(
                 user=self.get_user(), idx=execution.instance_id
             )
