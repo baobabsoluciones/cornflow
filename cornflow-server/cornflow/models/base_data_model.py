@@ -112,21 +112,19 @@ class BaseDataModel(TraceAttributesModel):
         :rtype: :class:`BaseDataModel`
         """
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-        current_app.logger.debug(f"USER_ACCESS_ALL_OBJECTS: {user_access}")
+        print(f"user_access: {user_access}")
         if user is None:
             return super().get_one_object(idx=idx)
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        current_app.logger.debug(f"Query: {query}")
+        print(f"query: {query}")
         if not user.is_admin() and not user.is_service_user() and user_access == 0:
             current_app.logger.info(
                 f"User {user.id} is not admin or service user and USER_ACCESS_ALL_OBJECTS is 0, so we filter by user_id {user.id}"
             )
             query = query.filter_by(user_id=user.id)
         else:
-            current_app.logger.info(
-                f"User {user.id} is admin or service user or USER_ACCESS_ALL_OBJECTS is 1, so we do not filter by user_id"
-            )
-            current_app.logger.debug(f"user_access: {user_access}")
-        current_app.logger.debug(f"Query: {query}")
-        current_app.logger.debug(f"Query.first(): {query.first()}")
+            print(f"User {user.id} is admin or service user or USER_ACCESS_ALL_OBJECTS is 1, so we do not filter by user_id")
+            print(f"user_access: {user_access}")
+        print(f"query: {query}")
+        print(f"query.first(): {query.first()}")
         return query.first()
