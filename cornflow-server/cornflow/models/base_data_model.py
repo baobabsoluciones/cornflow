@@ -118,5 +118,8 @@ class BaseDataModel(TraceAttributesModel):
             return super().get_one_object(idx=idx)
         query = cls.query.filter_by(id=idx, deleted_at=None)
         if not user.is_admin() and not user.is_service_user() and user_access == 0:
+            current_app.logger.info(
+                f"User {user.id} is not admin or service user and USER_ACCESS_ALL_OBJECTS is 0, so we filter by user_id {user.id}"
+            )
             query = query.filter_by(user_id=user.id)
         return query.first()
