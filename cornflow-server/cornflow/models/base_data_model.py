@@ -8,6 +8,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
+from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 from cornflow.shared.utils import hash_json_256
 
 
@@ -115,6 +116,6 @@ class BaseDataModel(TraceAttributesModel):
         if user is None:
             return super().get_one_object(idx=idx)
         query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user() and user_access == 0:
+        if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
             query = query.filter_by(user_id=user.id)
         return query.first()

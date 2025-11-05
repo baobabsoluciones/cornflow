@@ -518,7 +518,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         """
         config = current_app.config
 
-        schema = ExecutionModel.get_one_object(user=self.get_user(), idx=idx).schema
+        schema = ExecutionModel.get_one_object(idx=idx).schema
 
         if data.get("data") is not None and schema is not None:
             data_jsonschema = DeployedWorkflow.get_one_schema(
