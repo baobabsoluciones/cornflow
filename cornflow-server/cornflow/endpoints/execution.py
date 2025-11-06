@@ -429,6 +429,39 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
           the data of the execution) and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        # Update execution state from Airflow before returning details
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
+        if execution is not None:
+            # Only update state if execution is in a state that might change
+            if execution.state in [
+                EXEC_STATE_RUNNING,
+                EXEC_STATE_QUEUED,
+                EXEC_STATE_UNKNOWN,
+            ]:
+                dag_run_id = execution.dag_run_id
+                if dag_run_id:
+                    schema = execution.schema
+                    # Check if Airflow is alive before querying
+                    af_client = Airflow.from_config(current_app.config)
+                    if af_client.is_alive():
+                        try:
+                            state_response = af_client.get_dag_run_status(
+                                dag_name=schema, dag_run_id=dag_run_id
+                            )
+                            data = state_response.json()
+                            mapped_state = AIRFLOW_TO_STATE_MAP.get(
+                                data["state"], EXEC_STATE_UNKNOWN
+                            )
+                            execution.update_state(mapped_state)
+                            current_app.logger.debug(
+                                f"Updated state for execution {idx} from Airflow to {mapped_state}"
+                            )
+                        except AirflowError as err:
+                            # Log error but don't fail the request
+                            current_app.logger.warning(
+                                f"Could not update state for execution {idx} from Airflow: {err}"
+                            )
+
         current_app.logger.info(
             f"User {self.get_user()} gets details of execution {idx}"
         )
@@ -496,7 +529,6 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
         af_client = Airflow.from_config(current_app.config)
         if not af_client.is_alive():
-
             raise AirflowError(
                 error=AIRFLOW_NOT_REACHABLE_MSG,
                 log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
