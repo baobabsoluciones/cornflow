@@ -482,12 +482,17 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} deleted execution {idx}")
+        self.set_execution_dag_run_to_fail(idx)
         return self.delete_detail(user=self.get_user(), idx=idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     def post(self, idx):
+        self.set_execution_dag_run_to_fail(idx)
+        return {"message": "The execution has been stopped"}, 200
+
+    def set_execution_dag_run_to_fail(self, idx):
         execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -507,7 +512,6 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         )
         execution.update_state(EXEC_STATE_STOPPED)
         current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
-        return {"message": "The execution has been stopped"}, 200
 
 
 class ExecutionStatusEndpoint(BaseMetaResource):
