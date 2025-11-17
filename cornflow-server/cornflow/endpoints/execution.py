@@ -483,7 +483,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         """
         current_app.logger.info(f"User {self.get_user()} deleted execution {idx}")
         self.set_execution_dag_run_to_fail(idx)
-        return self.delete_detail(user=self.get_user(), idx=idx)
+        return self.disable_detail(idx=idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
