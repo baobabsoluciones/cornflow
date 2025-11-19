@@ -37,6 +37,7 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
     PLANNER_ROLE,
     DATABRICKS_BACKEND,
+    PULSE_BACKEND,
     AIRFLOW_BACKEND,
     SIGNUP_WITH_AUTH,
     OID_PROVIDER_AZURE,
@@ -169,6 +170,9 @@ def _setup_environment_variables():
         os.environ["DATABRICKS_TOKEN_ENDPOINT"] = databricks_token_endpoint
         os.environ["DATABRICKS_EP_CLUSTERS"] = databricks_ep_clusters
         os.environ["DATABRICKS_CLIENT_ID"] = databricks_client_id
+    elif cornflow_backend == PULSE_BACKEND:
+        pulse_url = os.getenv("PULSE_URL")
+        os.environ["PULSE_URL"] = pulse_url
     else:
         raise Exception("Selected backend not among valid options")
     # Cornflow app config
@@ -256,6 +260,9 @@ def _setup_environment_variables():
         base_dict["databricks_ep_clusters"] = databricks_ep_clusters
         base_dict["databricks_client_id"] = databricks_client_id
         base_dict["databricks_health_path"] = databricks_health_path
+        
+    elif cornflow_backend == PULSE_BACKEND:
+        base_dict["pulse_url"] = pulse_url
         
     else:
         raise Exception("Selected backend not among valid options")

@@ -277,6 +277,8 @@ class AirflowError(OrchError):
 class DatabricksError(OrchError):
     log_txt = "Databricks error"
 
+class PulseError(OrchError):
+    log_txt= "Pulse error"
 
 class NoSolverException(Exception):
     pass

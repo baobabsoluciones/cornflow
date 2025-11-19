@@ -42,6 +42,11 @@ class DefaultConfig(object):
     DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
     DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
     DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
+
+    # PULSE config
+    PULSE_URL = os.getenv("PULSE_URL")
+
+    
     # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)

@@ -5,6 +5,7 @@ In this file we import the values for different constants on cornflow server
 # CORNFLOW BACKEND
 AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
+PULSE_BACKEND = 3
 
 
 CORNFLOW_VERSION = "1.3.0rc4"
@@ -68,6 +69,12 @@ DATABRICKS_TO_STATE_MAP = dict(
     USER_CANCELED=EXEC_STATE_STOPPED,
     OTHER_FINISH_ERROR=EXEC_STATE_ERROR,
     RUN_EXECUTION_ERROR=EXEC_STATE_ERROR,
+)
+
+PULSE_TO_STATE_MAP = dict(
+    processing=EXEC_STATE_RUNNING,
+    completed=EXEC_STATE_CORRECT,
+    failed=EXEC_STATE_ERROR, # Este estado todavia no existe en pulse
 )
 
 DATABRICKS_FINISH_TO_STATE_MAP = dict(
@@ -172,5 +179,10 @@ config_orchestrator = {
         "name": "Databricks",
         "def_schema": "979073949072767",
         "run_id": "run_id",
+    },
+    "pulse": {
+        "name": "Pulse",
+        "def_schema": "facility_location",  # default schema in Pulse
+        "run_id": "id",  # The key for the instance ID in Pulse's response
     },
 }

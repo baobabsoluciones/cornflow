@@ -8,6 +8,7 @@ These endpoints hve different access url, but manage the same data entities
 from cornflow_client.airflow.api import Airflow
 
 from cornflow_client.databricks.api import Databricks
+from cornflow_client.pulse.api import Pulse
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -34,6 +35,7 @@ from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
+    PULSE_BACKEND,
 )
 from cornflow.shared.const import (
     AIRFLOW_ERROR_MSG,
@@ -47,6 +49,7 @@ from cornflow.shared.const import (
     EXECUTION_STATE_MESSAGE_DICT,
     AIRFLOW_TO_STATE_MAP,
     DATABRICKS_TO_STATE_MAP,
+    PULSE_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
 )
@@ -54,6 +57,7 @@ from cornflow.shared.const import (
 from cornflow.shared.exceptions import (
     AirflowError,
     DatabricksError,
+    PulseError,
     ObjectDoesNotExist,
     InvalidData,
     EndpointNotImplemented,
@@ -91,6 +95,11 @@ class OrchestratorMixin(BaseMetaResource):
                 self._orch_error = DatabricksError
                 self._orch_to_state_map = DATABRICKS_TO_STATE_MAP
                 self._orch_const = config_orchestrator["databricks"]
+            elif self._orch_type == PULSE_BACKEND:
+                self._orch_client = Pulse.from_config(current_app.config)
+                self._orch_error = PulseError
+                self._orch_to_state_map = PULSE_TO_STATE_MAP
+                self._orch_const = config_orchestrator["pulse"]
 
     @property
     def orch_type(self):
@@ -185,7 +194,7 @@ class ExecutionEndpoint(OrchestratorMixin):
                     f"{AIRFLOW_ERROR_MSG} {err}"
                 )
                 continue
-            if self.orch_type == DATABRICKS_BACKEND:
+            if self.orch_type == DATABRICKS_BACKEND or self.orch_type == PULSE_BACKEND:
                 state = self.orch_to_state_map.get(response, EXEC_STATE_UNKNOWN)
             else:
                 data = response.json()
@@ -765,3 +774,5 @@ def map_run_state(state, orch_TYPE):
     elif orch_TYPE == DATABRICKS_BACKEND:
         preliminar_state = DATABRICKS_TO_STATE_MAP.get(state, EXEC_STATE_UNKNOWN)
         return preliminar_state
+    elif orch_TYPE == PULSE_BACKEND:
+        return PULSE_TO_STATE_MAP.get(state,EXEC_STATE_UNKNOWN)
