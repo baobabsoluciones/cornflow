@@ -62,7 +62,7 @@ class TestExecutionsListEndpoint(BaseTestCases.ListFilters):
             "username",
             "first_name",
             "last_name",
-            "updated_at"
+            "updated_at",
         ]
 
     def test_new_execution(self):
@@ -281,7 +281,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "username",
             "first_name",
             "last_name",
-            "updated_at"
+            "updated_at",
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -309,7 +309,9 @@ class TestExecutionsDetailEndpoint(
             check_payload=False,
         )
 
-    def test_create_delete_instance_load(self):
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_create_delete_instance_load(self, af_client_class):
+        patch_af_client(af_client_class)
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         keys_to_check = [
             "message",
@@ -327,7 +329,7 @@ class TestExecutionsDetailEndpoint(
             "username",
             "first_name",
             "last_name",
-            "updated_at"
+            "updated_at",
         ]
         execution = self.get_one_row(
             self.url + idx,
@@ -370,6 +372,17 @@ class TestExecutionsDetailEndpoint(
         self.get_one_row(
             self.url + idx, payload={}, expected_status=404, check_payload=False
         )
+
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_delete_one_row(self, af_client_class):
+        """
+        Tests deleting a single row.
+        """
+        patch_af_client(af_client_class)
+        idx = self.create_new_row(
+            self.url_with_query_arguments(), self.model, self.payload
+        )
+        self.delete_row(self.url + str(idx) + "/")
 
     def test_update_one_row_data(self):
         idx = self.create_new_row(
@@ -478,7 +491,7 @@ class TestExecutionsLogEndpoint(TestExecutionsDetailEndpointMock):
             "username",
             "first_name",
             "last_name",
-            "updated_at"
+            "updated_at",
         ]
 
     def test_get_one_execution(self):
