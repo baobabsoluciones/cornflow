@@ -24,12 +24,12 @@
 # The following variables are supported:
 #
 # Feel free to modify this file to suit your needs.
-version: '3.8'
+version: "3.8"
 
 x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow:release-v1.2.4
+  image: baobabsoluciones/airflow:release-v1.2.6
   platform: linux/amd64
   #build:
   #context: ./cornflow-server/airflow_config
@@ -42,7 +42,7 @@ x-airflow-common: &airflow-common
     AIRFLOW_DB_PASSWORD: airflow
     AIRFLOW_DB: airflow
     AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
-    AIRFLOW__WEBSERVER__NAVBAR_COLOR: '#0693e3'
+    AIRFLOW__WEBSERVER__NAVBAR_COLOR: "#0693e3"
   volumes:
     - ./cornflow-dags/DAG:/usr/local/airflow/dags
     - ./cornflow-dags/requirements.txt:/requirements.txt
@@ -56,7 +56,7 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v1.2.4
+  image: baobabsoluciones/cornflow:release-v1.2.6
   platform: linux/amd64
   #build:
   #context: ./cornflow-server
@@ -83,7 +83,7 @@ services:
     ports:
       - 5000:5000
     healthcheck:
-      test: ['CMD-SHELL', '[ -f /usr/src/app/gunicorn.pid ]']
+      test: ["CMD-SHELL", "[ -f /usr/src/app/gunicorn.pid ]"]
       interval: 30s
       timeout: 30s
       retries: 5
@@ -99,7 +99,7 @@ services:
       - POSTGRES_PASSWORD=cornflow
       - POSTGRES_DB=cornflow
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'cornflow']
+      test: ["CMD", "pg_isready", "-U", "cornflow"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -114,7 +114,7 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'airflow']
+      test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -127,7 +127,7 @@ services:
     ports:
       - 8080:8080
     healthcheck:
-      test: ['CMD-SHELL', '[ -f /usr/local/airflow/airflow-webserver.pid ]']
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
       interval: 30s
       timeout: 30s
       retries: 5

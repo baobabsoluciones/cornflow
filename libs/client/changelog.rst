@@ -1,3 +1,20 @@
+version 1.2.6
+--------------
+
+- released: 2025-10-31
+- description: New check control
+- changelog:
+    - When a check has a coding error, it is now displayed in the instance/solution checks with the message: "The execution of the check has failed. Please contact support."
+
+version 1.2.5
+--------------
+
+- released: 2025-10-09
+- description: bump version code to stay up to date with cornflow-server.
+- changelog:
+    - updated cornflow-client to version 1.2.5
+
+
 version 1.2.4
 --------------
 
