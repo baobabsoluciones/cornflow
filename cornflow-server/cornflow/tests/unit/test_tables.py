@@ -17,7 +17,7 @@ from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, TABLES_URL
 
 class TestTablesListEndpoint(TestCase):
     def create_app(self):
-        app = create_app("testing")
+        app = create_app("testing-table-endpoints")
         return app
 
     def setUp(self):
@@ -121,7 +121,7 @@ class TestTablesListEndpoint(TestCase):
 
 class TestTablesDetailEndpoint(TestCase):
     def create_app(self):
-        app = create_app("testing")
+        app = create_app("testing-table-endpoints")
         return app
 
     def setUp(self):
@@ -225,7 +225,7 @@ class TestTablesDetailEndpoint(TestCase):
 
 class TestTablesEndpointAdmin(TestCase):
     def create_app(self):
-        app = create_app("testing")
+        app = create_app("testing-table-endpoints")
         return app
 
     def setUp(self):

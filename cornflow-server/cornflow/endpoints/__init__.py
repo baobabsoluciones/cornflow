@@ -5,7 +5,9 @@ The login resource gets created on app startup as it depends on configuration
 """
 
 from flask import current_app
-from cornflow.shared.const import CONDITIONAL_ENDPOINTS
+from cornflow.shared.const import (
+    CONDITIONAL_ENDPOINTS_URLS,
+)
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .apiview import ApiViewListEndpoint
@@ -56,6 +58,9 @@ from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+
+from .signup import SignUpEndpoint
+from .login import LoginEndpoint
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -211,14 +216,6 @@ resources = [
         urls="/licences/",
         endpoint="licences",
     ),
-    dict(
-        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
-    ),
-    dict(
-        resource=TablesDetailsEndpoint,
-        urls="/table/<string:table_name>/<string:idx>/",
-        endpoint="tables-detail",
-    ),
 ]
 
 
@@ -240,27 +237,42 @@ alarms_resources = [
     ),
 ]
 
+tables_resources = [
+    dict(
+        resource=TablesEndpoint, urls="/table/<string:table_name>/", endpoint="tables"
+    ),
+    dict(
+        resource=TablesDetailsEndpoint,
+        urls="/table/<string:table_name>/<string:idx>/",
+        endpoint="tables-detail",
+    ),
+]
+
 
 def get_resources():
     """
-    Get the resources based on the configuration
+    Get the base resources in cornflow plñus the login and signup resources to generate
+    the permissions associated with them
 
     :return: The resources based on the configuration
     :rtype: list
     """
     base_resources = resources.copy()
-    registered_resources = current_app.view_functions.keys()
-    for resource in registered_resources:
-        if resource in CONDITIONAL_ENDPOINTS.keys():
-            # Check if the resource already exists
-            if resource not in [
-                present_resource["endpoint"] for present_resource in base_resources
-            ]:
-                base_resources.append(
-                    dict(
-                        resource=current_app.view_functions[resource].view_class,
-                        urls=CONDITIONAL_ENDPOINTS[resource],
-                        endpoint=resource,
-                    )
+
+    CONDITIONAL_ENDPOINTS_BASE_CLASS = {
+        "signup": SignUpEndpoint,
+        "login": LoginEndpoint,
+    }
+
+    for resource in CONDITIONAL_ENDPOINTS_URLS.keys():
+        if resource not in [
+            present_resource["endpoint"] for present_resource in base_resources
+        ]:
+            base_resources.append(
+                dict(
+                    resource=CONDITIONAL_ENDPOINTS_BASE_CLASS[resource],
+                    urls=CONDITIONAL_ENDPOINTS_URLS[resource],
+                    endpoint=resource,
                 )
+            )
     return base_resources

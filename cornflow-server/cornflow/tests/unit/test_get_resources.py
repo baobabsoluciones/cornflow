@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask
 from cornflow.endpoints import get_resources, resources
-from cornflow.shared.const import CONDITIONAL_ENDPOINTS
+from cornflow.shared.const import CONDITIONAL_ENDPOINTS_URLS
 
 
 class TestGetResources(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestGetResources(unittest.TestCase):
                 )
                 self.assertIsNotNone(signup_resource)
                 self.assertEqual(
-                    signup_resource["urls"], CONDITIONAL_ENDPOINTS["signup"]
+                    signup_resource["urls"], CONDITIONAL_ENDPOINTS_URLS["signup"]
                 )
                 self.assertEqual(
                     signup_resource["resource"], self.mock_signup_view.view_class
@@ -74,9 +74,11 @@ class TestGetResources(unittest.TestCase):
                 self.assertIsNotNone(signup_resource)
                 self.assertIsNotNone(login_resource)
                 self.assertEqual(
-                    signup_resource["urls"], CONDITIONAL_ENDPOINTS["signup"]
+                    signup_resource["urls"], CONDITIONAL_ENDPOINTS_URLS["signup"]
                 )
-                self.assertEqual(login_resource["urls"], CONDITIONAL_ENDPOINTS["login"])
+                self.assertEqual(
+                    login_resource["urls"], CONDITIONAL_ENDPOINTS_URLS["login"]
+                )
 
     def test_does_not_add_duplicate_endpoints(self):
         """Test that get_resources does not add endpoints that already exist in base resources"""

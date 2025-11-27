@@ -128,7 +128,7 @@ AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
 
 # Conditional endpoints
-CONDITIONAL_ENDPOINTS = {
+CONDITIONAL_ENDPOINTS_URLS = {
     "signup": "/signup/",
     "login": "/login/",
 }

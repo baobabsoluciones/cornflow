@@ -32,7 +32,7 @@ from cornflow.commands import (
     register_dag_permissions_command,
 )
 from cornflow.config import app_config
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.endpoints import resources, alarms_resources, tables_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
@@ -41,7 +41,7 @@ from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
-    CONDITIONAL_ENDPOINTS,
+    CONDITIONAL_ENDPOINTS_URLS,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
@@ -90,12 +90,18 @@ def create_app(env_name="development", dataconn=None):
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
+    if app.config["TABLES_ENDPOINTS"]:
+        for res in tables_resources:
+            api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
     docs = FlaskApiSpec(app)
     for res in resources:
         docs.register(target=res["resource"], endpoint=res["endpoint"])
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"])
+    if app.config["TABLES_ENDPOINTS"]:
+        for res in tables_resources:
             docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
@@ -105,18 +111,18 @@ def create_app(env_name="development", dataconn=None):
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
         if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
             api.add_resource(
-                SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
+                SignUpEndpoint, CONDITIONAL_ENDPOINTS_URLS["signup"], endpoint="signup"
             )
         api.add_resource(
-            LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+            LoginEndpoint, CONDITIONAL_ENDPOINTS_URLS["login"], endpoint="login"
         )
     elif auth_type == AUTH_LDAP:
         api.add_resource(
-            LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+            LoginEndpoint, CONDITIONAL_ENDPOINTS_URLS["login"], endpoint="login"
         )
     elif auth_type == AUTH_OID:
         api.add_resource(
-            LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login"
+            LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS_URLS["login"], endpoint="login"
         )
     else:
         raise ConfigurationError(
