@@ -28,5 +28,5 @@ pytups>=0.86.2
 requests<=2.32.4
 SQLAlchemy==1.3.21
 webargs<=8.3.0
-Werkzeug==3.0.6
+Werkzeug==3.1.4
 setuptools>=75.8.2
