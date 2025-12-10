@@ -15,6 +15,7 @@ from flask import current_app
 from flask_apispec import marshal_with, doc
 
 
+
 class HealthEndpoint(BaseMetaResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
