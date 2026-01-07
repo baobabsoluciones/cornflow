@@ -83,6 +83,22 @@ service:
 cornflow:
   replicaCount: 1  # Increase for production (2-3 recommended)
   
+  # If true, the container root filesystem is mounted read-only (more secure).
+  # Set to false if your image needs to write inside the image filesystem.
+  # set to false writing into the image filesystem (needed by gunicorn pidfile/tempfiles under /usr/src/app)
+  readOnlyRootFilesystem: true
+
+  # Probes configuration
+  # Default health endpoint for Cornflow server.
+  # If EXTERNAL_APP=1, you typically want "/cornflow/health".
+  probes:
+    path: /health/
+
+  # If true (default), mount an emptyDir on /usr/src/app.
+  # Set to false to avoid masking the image content at /usr/src/app.
+  # change to false in case of a personal cornflow image
+  mountAppEmptyDir: true
+
   # Resource configuration
   resources:
     # Development settings
