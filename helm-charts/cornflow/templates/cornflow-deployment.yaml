@@ -58,7 +58,11 @@ spec:
         - name: cornflow-server
           securityContext:
             allowPrivilegeEscalation: false
+            {{- if hasKey .Values.cornflow "readOnlyRootFilesystem" }}
+            readOnlyRootFilesystem: {{ .Values.cornflow.readOnlyRootFilesystem }}
+            {{- else }}
             readOnlyRootFilesystem: true
+            {{- end }}
             runAsNonRoot: true
             runAsUser: {{ .Values.security.runAsUser }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -69,7 +73,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /health/
+              path: {{ .Values.cornflow.probes.path | default "/health/" | quote }}
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -77,7 +81,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health/
+              path: {{ .Values.cornflow.probes.path | default "/health/" | quote }}
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -97,8 +101,10 @@ spec:
             - name: ssh-keys
               mountPath: /usr/src/app/.ssh
               readOnly: true
+            {{- if or (not (hasKey .Values.cornflow "mountAppEmptyDir")) .Values.cornflow.mountAppEmptyDir }}
             - name: app-dir
               mountPath: /usr/src/app
+            {{- end }}
       {{- with .Values.cornflow.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -118,5 +124,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-ssh-keys
             optional: true
+        {{- if or (not (hasKey .Values.cornflow "mountAppEmptyDir")) .Values.cornflow.mountAppEmptyDir }}
         - name: app-dir
-          emptyDir: {} 
+          emptyDir: {}
+        {{- end }}
