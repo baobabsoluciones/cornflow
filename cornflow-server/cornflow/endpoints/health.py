@@ -37,6 +37,10 @@ class HealthEndpoint(BaseMetaResource):
         :rtype: dict
         :doc-author: baobab soluciones
         """
+
+        current_app.logger.info(
+            f"Performing health check with backend: {current_app.config['CORNFLOW_BACKEND']}"
+        )
         backend_status = self.check_backend_status()
         cornflow_status = STATUS_UNHEALTHY
         cornflow_version = CORNFLOW_VERSION
@@ -50,6 +54,7 @@ class HealthEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"Health check: cornflow {cornflow_status}, backend {backend_status}"
         )
+        
         return {
             "cornflow_status": cornflow_status,
             "backend_status": backend_status,

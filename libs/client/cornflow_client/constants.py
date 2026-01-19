@@ -315,4 +315,9 @@ config_orchestrator = {
         "def_schema": "979073949072767",
         "run_id": "run_id",
     },
+    "pulse": {
+        "name": "Pulse",
+        "def_schema": "facility_location",  
+        "run_id": "id",  
+    },
 }

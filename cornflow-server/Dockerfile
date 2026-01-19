@@ -1,7 +1,7 @@
 # VERSION 1.3.0rc4
 # AUTHOR: sistemas@baobabsoluciones.es
 
-FROM python:3.12-slim
+FROM python:3.11-slim
 LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
@@ -31,8 +31,19 @@ ENV DEFAULT_POSTGRES=1
 
 # install dependencies
 RUN pip install --upgrade pip
-RUN pip install "cornflow==${CORNFLOW_VERSION}"
+# RUN pip install setuptools>=75.8.2
+# RUN pip install "cornflow==${CORNFLOW_VERSION}"
 
+# Install local cornflow-client library
+COPY ./libs/client /usr/src/libs/client
+RUN pip install -e /usr/src/libs/client
+
+# Copy local source code to the container
+COPY ./cornflow-server .
+
+# Install python dependencies from the local code
+RUN pip install -r requirements.txt
+RUN pip install -e .
 
 # create folder for logs
 RUN mkdir -p /usr/src/app/log

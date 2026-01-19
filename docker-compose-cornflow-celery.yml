@@ -60,10 +60,11 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  # image: baobabsoluciones/cornflow:release-v1.2.4
+  # image: cornflow-server-image2
   platform: linux/amd64
   build:
-    context: ./cornflow-server
+    context: .
+    dockerfile: ./cornflow-server/Dockerfile
   environment: &cornflow-common-env
     CORNFLOW_ADMIN_USER: cornflow_admin
     CORNFLOW_ADMIN_PWD: Cornflow_admin1234

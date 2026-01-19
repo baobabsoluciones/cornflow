@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Python virtual environment
+.env
+.venv
+**/env/
+**/venv/
+ENV/
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Logs and runtime artifacts
+cornflow-server/airflow_config/logs/
+**/*.log
+
+# Build artifacts
+**/dist/
+**/build/
+**/*.egg-info

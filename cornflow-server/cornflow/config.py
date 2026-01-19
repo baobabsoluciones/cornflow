@@ -2,7 +2,7 @@ import os
 from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID, SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH, OID_OTHER
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
-from cornflow.shared.const import AIRFLOW_BACKEND, DATABRICKS_BACKEND
+from cornflow.shared.const import AIRFLOW_BACKEND, DATABRICKS_BACKEND, PULSE_BACKEND
 
 
 class DefaultConfig(object):
@@ -28,8 +28,8 @@ class DefaultConfig(object):
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
     # To change the tasks backend used by cornflow to solve the optimization models
-    CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
-
+    #CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
+    CORNFLOW_BACKEND = PULSE_BACKEND
     # AIRFLOW config
     AIRFLOW_URL = os.getenv("AIRFLOW_URL")
     AIRFLOW_USER = os.getenv("AIRFLOW_USER")
@@ -44,7 +44,7 @@ class DefaultConfig(object):
     DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
 
     # PULSE config
-    PULSE_URL = os.getenv("PULSE_URL")
+    PULSE_URL = os.getenv("PULSE_URL","http://host.docker.internal:8001")
 
     
     # If service user is allowed to log with username and password

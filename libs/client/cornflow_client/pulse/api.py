@@ -1,7 +1,3 @@
-"""
-Python class to implement the Pulse client wrapper
-"""
-
 import requests
 from flask import current_app
 from cornflow_client.constants import config_orchestrator, PulseError
@@ -38,6 +34,7 @@ class Pulse:
         """
         Checks if the Pulse API is alive.
         """
+        
         health_endpoint = "/health"
         try:
             url = f"{self.url}{health_endpoint}"
@@ -60,27 +57,6 @@ class Pulse:
         except PulseError:
             raise PulseError("Schema (workflow) not available in Pulse")
 
-    def create_schema(self, schema_data: dict):
-        """
-        Creates a new schema in Pulse.
-        Corresponds to POST /schemas
-
-        :param schema_data: A dictionary containing the schema definition.
-        :return: The created schema object from the API.
-        """
-        url = f"{self.url}/schemas"
-        current_app.logger.info(f"Creating Pulse schema with data: {schema_data}")
-        try:
-            # First, check if schema already exists to make this idempotent
-            self.get_workflow_info(schema_data["id"])
-            current_app.logger.info(f"Schema '{schema_data['id']}' already exists. Skipping creation.")
-            return {"message": "Schema already exists"}
-        except PulseError:
-            # If it doesn't exist, we create it
-            response = self.request_headers_auth(method="POST", url=url, json=schema_data, status=201)
-            current_app.logger.info(f"Pulse schema '{schema_data['id']}' created successfully.")
-            return response.json()
-
     def run_workflow(
             self, 
             execution_id, 
@@ -98,21 +74,14 @@ class Pulse:
             current_app.logger.info(f"Pulse client received case_id {case_id}, but it is not currently used.")
 
         url = f"{self.url}/instances"
-
-        # Get the instance data from cornflow and pass it to pulse
-        execution_data = current_app.cornflow_client.get_data(execution_id)
-        instance_data = execution_data["data"]
         
-
         payload = dict( 
             schema_id=workflow_name,
-            data=instance_data,
             cornflow_execution_id = execution_id,
         )
+        current_app.logger.info(f"Pulse payload: {payload}")
         response = self.request_headers_auth(method="POST", url=url, json=payload, status=201)
-        # Return the ID of the created instance, which Cornflow will use as the run_id
-        run_id_key = self.constants["run_id"]
-        return response.json()[run_id_key]
+        return response
 
     def get_run_status(self, schema, run_id):
         """
@@ -123,11 +92,11 @@ class Pulse:
             url = f"{self.url}/instances/{run_id}"
             response = self.request_headers_auth(method="GET", url=url, status=200)
             info = response.json()
-            # The Pulse API returns the status in the 'status' field.
+          
             return info.get("status", "UNKNOWN")
         except PulseError as e:
             if e.status_code == 404:
-                return "processing"  # Or another status that indicates it's running
+                return "processing" 
             raise e
 
     def request_headers_auth(self, status=200, **kwargs):
