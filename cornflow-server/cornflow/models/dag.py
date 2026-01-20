@@ -1,13 +1,12 @@
-"""
+""" """
 
-"""
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
-    SOLUTION_CHECKS_SCHEMA
+    SOLUTION_CHECKS_SCHEMA,
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 
@@ -60,7 +59,7 @@ class DeployedDAG(TraceAttributesModel):
             raise ObjectDoesNotExist(
                 err,
                 log_txt=f"Error while user tries to register data for DAG {dag_name} "
-                            f"from instance and execution. " + err
+                f"from instance and execution. " + err,
             )
 
         if schema == INSTANCE_SCHEMA:

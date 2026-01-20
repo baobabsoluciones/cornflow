@@ -269,7 +269,7 @@ class modelMIP(Experiment):
             timeLimit=options.get("timeLimit", 360),
             abs_gap=options.get("abs_gap", 1),
             rel_gap=options.get("rel_gap", 0.01),
-            solver="cbc"
+            solver="cbc",
         )
         SOLVER_PARAMETERS = self.get_solver_config(SOLVER_PARAMETERS)
         mip_vrp = self.get_mip_model()
@@ -284,20 +284,21 @@ class modelMIP(Experiment):
             result = opt.solve(mip_vrp_instance)
 
             status = result.solver.status
-            termination_condition = PYOMO_STOP_MAPPING[result.solver.termination_condition]
+            termination_condition = PYOMO_STOP_MAPPING[
+                result.solver.termination_condition
+            ]
             # Check status
             if status in ["error", "unknown", "warning"]:
                 self.log += "Infeasible, check data \n"
                 return dict(
-                    status=termination_condition,
-                    status_sol=SOLUTION_STATUS_INFEASIBLE
+                    status=termination_condition, status_sol=SOLUTION_STATUS_INFEASIBLE
                 )
             elif status == "aborted":
                 if termination_condition != STATUS_TIME_LIMIT:
                     self.log += "Infeasible, check data \n"
                     return dict(
                         status=termination_condition,
-                        status_sol=SOLUTION_STATUS_INFEASIBLE
+                        status_sol=SOLUTION_STATUS_INFEASIBLE,
                     )
 
             solution_list = self.get_solution_data(mip_vrp_instance)
@@ -310,10 +311,7 @@ class modelMIP(Experiment):
 
         self.log += "Solving complete\n"
 
-        return dict(
-            status=termination_condition,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=termination_condition, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def get_solution_data(self, model_instance):
         """
@@ -347,7 +345,7 @@ class modelMIP(Experiment):
             i_tours for i_tours in tours if len(i_tours) > 1
         ]  # Eliminate routes that don't exit depots
         routes = dict.fromkeys(range(len(active_tours)))
-        for (vehicle_index, i_tours) in enumerate(
+        for vehicle_index, i_tours in enumerate(
             active_tours
         ):  # get the depot in the subtour and append it as origin and continue
             origin = [iDepot for iDepot in i_tours if iDepot in depots][0]

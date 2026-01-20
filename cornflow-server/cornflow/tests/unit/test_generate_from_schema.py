@@ -26,8 +26,7 @@ class GenerationTests(unittest.TestCase):
     def setUp(self):
         super().setUp()
 
-        self.full_inst_path = self._get_path(
-            "../data/instance_gfs.json")
+        self.full_inst_path = self._get_path("../data/instance_gfs.json")
         self.inst_path2 = self._get_path("../data/instance2_gfs.json")
         self.full_inst = SuperDict.from_dict(self.import_schema(self.full_inst_path))
         # Removing parameter tables
@@ -85,7 +84,7 @@ class GenerationTests(unittest.TestCase):
                 self.app_name,
                 "-o",
                 self.other_output_path,
-            ]
+            ],
         )
 
         self.assertEqual(result.exit_code, 0)
@@ -165,7 +164,8 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
         include_methods = self.all_methods.vfilter(
-            lambda v: v not in ["delete_detail", "put_detail", "get_detail", "patch_detail"]
+            lambda v: v
+            not in ["delete_detail", "put_detail", "get_detail", "patch_detail"]
         )
         self.last_path = self.other_output_path
         self.check(
@@ -255,7 +255,7 @@ class GenerationTests(unittest.TestCase):
                     " cornflow.schemas ",
                     " cornflow.shared.authentication ",
                     " ..models ",
-                    " ..schemas "
+                    " ..schemas ",
                 ]
                 for package in packages_to_mock:
                     txt = txt.replace(package, " mockedpackage ")
@@ -341,7 +341,10 @@ class GenerationTests(unittest.TestCase):
             bulk = self.snake_to_camel(app_name + "_" + table + "_bulk_endpoint")
             if any(m in include_methods for m in ["get_list", "post_list"]):
                 class_names += [base]
-            if any(m in include_methods for m in ["get_detail", "delete_detail", "put_detail", "patch_detail"]):
+            if any(
+                m in include_methods
+                for m in ["get_detail", "delete_detail", "put_detail", "patch_detail"]
+            ):
                 class_names += [details]
             if any(m in include_methods for m in ["put_bulk", "post_bulk"]):
                 class_names += [bulk]
@@ -402,7 +405,6 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(api_gen.get_id_type("employees"), "<string:idx>")
         self.assertEqual(api_gen.get_id_type("shifts"), "<int:idx>")
         self.assertEqual(api_gen.get_id_type("demand"), "<int:idx>")
-
 
     @staticmethod
     def snake_to_camel(name):

@@ -19,7 +19,13 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel, UserRoleModel, ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth
-from cornflow.shared.const import PLANNER_ROLE, ADMIN_ROLE, POST_ACTION, NO_SIGNUP, SIGNUP_WITH_AUTH
+from cornflow.shared.const import (
+    PLANNER_ROLE,
+    ADMIN_ROLE,
+    POST_ACTION,
+    NO_SIGNUP,
+    SIGNUP_WITH_AUTH,
+)
 from cornflow.tests.const import SIGNUP_URL
 
 

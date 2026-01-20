@@ -73,17 +73,17 @@ class Solution(SolutionCore):
         return self.data["shifts"]
 
     def get_all_shifts(self) -> TupList:
-        """ Returns a list with all the shifts """
+        """Returns a list with all the shifts"""
         return self.data["shifts"].values_tl()
 
     def get_id_and_shifts(self) -> TupList:
-        """ Returns a tuplist whose items are pairs composed by the id of the shift and the shift itself """
+        """Returns a tuplist whose items are pairs composed by the id of the shift and the shift itself"""
         return self.data["shifts"].items_tl()
 
     def get_shift_property(self, id_shift, prop):
-        """ Returns property prop of the shift of given index """
+        """Returns property prop of the shift of given index"""
         return self.data["shifts"][id_shift][prop]
 
     def nb_shifts(self):
-        """ Returns the total number of shifts in the solution"""
+        """Returns the total number of shifts in the solution"""
         return len(self.data["shifts"])

@@ -23,7 +23,9 @@ def get_licenses_summary():
     :return: a list of dicts with library, license, version, author, description, home page and license text.
     """
     license_list = []
-    for pkg in sorted(metadata.distributions(), key=lambda x: x.metadata['Name'].lower()):
+    for pkg in sorted(
+        metadata.distributions(), key=lambda x: x.metadata["Name"].lower()
+    ):
         pkg_metadata = dict(pkg.metadata.items())
         license_list += [
             {

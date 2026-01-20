@@ -1,10 +1,7 @@
 from ..core import Experiment, Solution
 from random import randint
 from math import floor, inf
-from cornflow_client.constants import (
-    STATUS_FEASIBLE,
-    SOLUTION_STATUS_FEASIBLE
-)
+from cornflow_client.constants import STATUS_FEASIBLE, SOLUTION_STATUS_FEASIBLE
 
 
 class Greedy(Experiment):
@@ -217,10 +214,7 @@ class Greedy(Experiment):
                 self.delayed = []
         self.all_trailers_back_to_base()
         self.solution = Solution(self.solution_data)
-        return dict(
-            status=STATUS_FEASIBLE,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=STATUS_FEASIBLE, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def initialize(self):
         self.last_refill_customers = {

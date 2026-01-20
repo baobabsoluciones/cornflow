@@ -1,6 +1,7 @@
 """
 This file contains the RoleModel
 """
+
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db

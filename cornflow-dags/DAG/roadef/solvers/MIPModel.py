@@ -8,10 +8,7 @@ import pickle
 import json
 from pytups import SuperDict, TupList
 import itertools
-from cornflow_client.constants import (
-    STATUS_FEASIBLE,
-    SOLUTION_STATUS_FEASIBLE
-)
+from cornflow_client.constants import STATUS_FEASIBLE, SOLUTION_STATUS_FEASIBLE
 
 
 class MIPModel(Experiment):
@@ -113,7 +110,9 @@ class MIPModel(Experiment):
             self.print_in_console(
                 f"=================== ROUND {current_round} ========================"
             )
-            solver = pl.getSolver(solver=solver_name, **config_iteration(self, current_round != 1))
+            solver = pl.getSolver(
+                solver=solver_name, **config_iteration(self, current_round != 1)
+            )
 
             used_routes, previous_value = self.solve_one_iteration(
                 solver, used_routes, previous_value, current_round
@@ -131,10 +130,7 @@ class MIPModel(Experiment):
             ) as fd:
                 json.dump(self.solution.to_dict(), fd)
 
-        return dict(
-            status=STATUS_FEASIBLE,
-            status_sol=SOLUTION_STATUS_FEASIBLE
-        )
+        return dict(status=STATUS_FEASIBLE, status_sol=SOLUTION_STATUS_FEASIBLE)
 
     def solve_one_iteration(self, solver, used_routes, previous_value, current_round):
         if 0 < current_round <= self.limit_artificial_round + 1:
@@ -316,12 +312,12 @@ class MIPModel(Experiment):
         self.print_in_console("Var 'inventory'")
 
         # Variables : quantity
-        for (r, i, tr, k) in self.get_var_quantity_s_domain(used_routes):
+        for r, i, tr, k in self.get_var_quantity_s_domain(used_routes):
             self.quantity_var[i, r, tr, k] = pl.LpVariable(
                 f"quantity{i, r, tr, k}", lowBound=0
             )
 
-        for (r, i, tr, k) in self.get_var_quantity_p_domain(used_routes):
+        for r, i, tr, k in self.get_var_quantity_p_domain(used_routes):
             self.quantity_var[i, r, tr, k] = pl.LpVariable(
                 f"quantity{i, r, tr, k}", upBound=0
             )
@@ -367,7 +363,7 @@ class MIPModel(Experiment):
         self.print_in_console("Added (3)")
 
         # Constraints : (7) - Conservation of the inventory
-        for (i, h) in ind_customers_hours:
+        for i, h in ind_customers_hours:
             artificial_var = 0
             if artificial_variables:
                 artificial_var = self.artificial_quantities_var[i, h]
@@ -390,7 +386,7 @@ class MIPModel(Experiment):
 
         # Constraints: (A2) - The quantity delivered in an artificial delivery respects quantities constraints
         if artificial_variables:
-            for (i, h) in ind_customers_hours:
+            for i, h in ind_customers_hours:
                 model += (
                     self.artificial_quantities_var[i, h]
                     + self.artificial_binary_var[i, h]
@@ -404,7 +400,7 @@ class MIPModel(Experiment):
 
         # Constraints : (9) - Conservation of the trailers' inventories
         _sum_c9_domain = self.get_sum_c9_domain(used_routes)
-        for (tr, h) in self.get_c4_c9_domain():
+        for tr, h in self.get_c4_c9_domain():
             model += (
                 pl.lpSum(
                     self.quantity_var[i, r, tr, k] * self.k_visit_hour[(i, h, r, k)]
@@ -435,7 +431,7 @@ class MIPModel(Experiment):
 
         # Constraints: (10) - Quantities delivered don't exceed trailer capacity
         _drivers = self.instance.get_id_drivers()
-        for (r, i, tr, k) in self.get_c10_domain(used_routes):
+        for r, i, tr, k in self.get_c10_domain(used_routes):
             _capacity = self.instance.get_customer_property(i, "Capacity")
             model += (
                 pl.lpSum(self.route_var[r, tr, dr] * _capacity for dr in _drivers)
@@ -445,7 +441,7 @@ class MIPModel(Experiment):
         self.print_in_console("Added (10)")
 
         # Constraints: (11), (12)
-        for (r, route, i, tr, k) in self.get_c11_c12_domain(used_routes):
+        for r, route, i, tr, k in self.get_c11_c12_domain(used_routes):
             # Constraint: (11) - Quantities delivered don't exceed the quantity in the trailer
             visited = lambda j: route.visited[j][0]
             q_tup = lambda j, kp: (visited(j), r, tr, kp)
@@ -491,7 +487,7 @@ class MIPModel(Experiment):
 
         # Constraints: (13) - Quantities loaded at a source don't exceed trailer capacity
         _drivers = self.instance.get_id_drivers()
-        for (r, i, tr, k) in self.get_c13_domain(used_routes):
+        for r, i, tr, k in self.get_c13_domain(used_routes):
             _capacity = self.instance.get_trailer_property(tr, "Capacity")
             model += (
                 self.quantity_var[i, r, tr, k]
@@ -500,7 +496,7 @@ class MIPModel(Experiment):
         self.print_in_console("Added (13)")
 
         # Constraints: (14) - Quantities loaded at a source don't exceed free space in the trailer
-        for (r, route, i, tr, k) in self.get_c14_domain(used_routes):
+        for r, route, i, tr, k in self.get_c14_domain(used_routes):
             visited = lambda j: route.visited[j][0]
             q_tup = lambda j, kp: (visited(j), r, tr, kp)
             hour_tup = lambda j, kp: (
@@ -529,7 +525,7 @@ class MIPModel(Experiment):
         #   and two shifts realized by the same driver must leave time for the driver to rest between both
         _sum_c4_domain = self.get_sum_c4_domain(used_routes)
         _sum_c5_domain = self.get_sum_c5_domain(used_routes)
-        for (tr, h) in self.get_c4_c9_domain():
+        for tr, h in self.get_c4_c9_domain():
             model += (
                 pl.lpSum(
                     self.route_var[r, tr, dr]
@@ -541,7 +537,7 @@ class MIPModel(Experiment):
             )
         self.print_in_console("Added (4)")
 
-        for (dr, h) in self.get_c5_domain():
+        for dr, h in self.get_c5_domain():
             model += (
                 pl.lpSum(
                     self.route_var[r, tr, dr]
@@ -752,7 +748,7 @@ class MIPModel(Experiment):
             lambda v: round(pl.value(v), 2) == 1
         ).keys_tl()
 
-        for (r, tr, dr) in selected_r_tr_dr:
+        for r, tr, dr in selected_r_tr_dr:
             label = used_routes[r]
             route = [
                 dict(
@@ -831,11 +827,11 @@ class MIPModel(Experiment):
         Removes steps from routes if the quantities delivered/loaded are 0
         """
         new_solution = dict()
-        for (id_shift, shift) in self.solution.get_id_and_shifts():
+        for id_shift, shift in self.solution.get_id_and_shifts():
             shift_copy = pickle.loads(pickle.dumps(shift, -1))
             removed = 0
 
-            for (id_step, step) in enumerate(shift["route"]):
+            for id_step, step in enumerate(shift["route"]):
                 new_id_step = id_step - removed
                 if step["quantity"] == 0 and step["location"] != 0:
                     del shift_copy["route"][new_id_step]
@@ -844,7 +840,7 @@ class MIPModel(Experiment):
                 new_solution[id_shift] = shift
                 continue
 
-            for (id_step, step) in enumerate(shift_copy["route"]):
+            for id_step, step in enumerate(shift_copy["route"]):
                 if step["location"] == 0:
                     continue
                 time_from_last = self.instance.get_time_between(
