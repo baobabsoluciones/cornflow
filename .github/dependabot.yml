@@ -4,7 +4,7 @@ updates:
     directory: "/cornflow-server"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0 # Esto evita que se creen PRs de versiones
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "pip"
     directory: "/libs/client"
