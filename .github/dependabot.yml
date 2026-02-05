@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/cornflow-server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: "pip"
+    directory: "/libs/client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    
+  - package-ecosystem: "pip"
+    directory: "/cornflow-dags"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    
