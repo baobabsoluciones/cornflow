@@ -66,6 +66,7 @@ class BaseDAGTests:
                         inst_check,
                         log,
                         log_dict,
+                        _,
                     ) = self.app.solve(instance_data, config, solution_data)
                 else:
                     # for compatibility with previous format
@@ -75,6 +76,7 @@ class BaseDAGTests:
                         inst_check,
                         log,
                         log_dict,
+                        _,
                     ) = self.app.solve(instance_data, config)
                 if solution_test is None:
                     raise ValueError("No solution found")

@@ -143,6 +143,8 @@ class DAGDetailEndpoint(BaseMetaResource):
             new_data["data"] = data
         if checks is not None:
             new_data["checks"] = checks
+        if kwargs.get("kpis") is not None:
+            new_data["kpis"] = kwargs["kpis"]
         kwargs.update(new_data)
         execution.update(kwargs)
 

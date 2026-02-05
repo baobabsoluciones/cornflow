@@ -184,7 +184,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        solution, sol_checks, inst_checks, log, log_json = fun(
+        solution, sol_checks, inst_checks, log, log_json, kpis = fun(
             data, config, solution_data
         )
 
@@ -200,6 +200,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             inst_checks=inst_checks,
             inst_id=inst_id,
         )
+        if kpis is not None:
+            payload["kpis"] = kpis
         if not solution:
             # No solution found: we just send everything to cornflow.
             if config.get("msg", True):
