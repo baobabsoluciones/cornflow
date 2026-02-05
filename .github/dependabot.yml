@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/cornflow_server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0 # Esto evita que se creen PRs de versiones
+
+  - package-ecosystem: "pip"
+    directory: "/libs/client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
