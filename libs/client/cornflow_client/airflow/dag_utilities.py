@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 import json
 import os
@@ -155,6 +153,120 @@ def get_schema(dag_name):
     return schema
 
 
+def _solution_checks_ok(sol_checks):
+    """True if solution checks are absent or all values are empty (no errors)."""
+    if not sol_checks:
+
+        return True
+    for v in sol_checks.values():
+        if v and (not isinstance(v, (list, dict)) or len(v) > 0):
+            return False
+    return True
+
+
+def cf_checks_and_kpis(fun_checks, fun_kpis, secrets, **kwargs):
+    """
+    DAG task: run instance checks only, or solution checks + KPIs.
+    - If execution has no solution_data: run instance checks and save to instance.checks.
+    - If execution has solution_data: run solution checks, save to execution.checks and instance.checks;
+      if no errors, run generate_kpis and save to execution.kpis.
+    """
+    ti = kwargs["ti"]
+    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    config = dict()
+    exec_id = kwargs["dag_run"].conf.get("exec_id")
+    dag_id = kwargs["dag_run"].dag_id
+    solution_schema = (
+        dag_id.replace("_checks", "") if dag_id.endswith("_checks") else dag_id
+    )
+    try:
+        if exec_id is None:
+            raise AirflowDagException("exec_id is required in dag_run.conf")
+        client = connect_to_cornflow(secrets)
+        execution_data = client.get_data(exec_id)
+
+        # Update state to set the "checks execution" to running
+        execution_status = client.update_status(exec_id, {"status": 0})
+        config = execution_data.get("config") or {}
+        instance_data = execution_data["data"]
+        inst_id = execution_data["id"]
+        solution_data = execution_data.get("solution_data")
+
+        # Comprobación: si la instancia (clase Instance) ya tiene checks
+        instance_response = client.get_one_instance(inst_id)
+        instance_has_checks = instance_response.get("checks") is not None
+
+        has_solution = (
+            solution_data is not None
+            and isinstance(solution_data, dict)
+            and len(solution_data) > 0
+        )
+
+        if not has_solution:
+            # 1b–2b: Instance checks only — reutilizar si la instancia ya tiene checks
+            if instance_has_checks:
+                inst_checks = instance_response["checks"]
+                log_json = dict(
+                    time=0,
+                    solver="checks",
+                    status="Instance checks (reused)",
+                    status_code=1,
+                )
+            else:
+                inst_checks, sol_checks, log_json = fun_checks(instance_data, None)
+            payload = dict(
+                state=1,
+                log_text="Instance checks completed.",
+                log_json=log_json,
+                solution_schema=solution_schema,
+                inst_checks=inst_checks,
+                inst_id=inst_id,
+            )
+            try_to_write_solution(client, exec_id, payload)
+            return "Instance checks saved"
+        else:
+            # 1b–5b: Solution checks + KPIs
+            inst_checks, sol_checks, log_json = fun_checks(instance_data, solution_data)
+            payload = dict(
+                state=1,
+                log_json=log_json,
+                log_text="Solution checks completed.",
+                solution_schema=solution_schema,
+                inst_checks=inst_checks,
+                inst_id=inst_id,
+            )
+            if sol_checks is not None:
+                payload["checks"] = sol_checks
+            if _solution_checks_ok(sol_checks):
+                kpis = fun_kpis(
+                    instance_data,
+                    config,
+                    solution_data,
+                    sol_checks,
+                    inst_checks,
+                    log_json,
+                )
+                if kpis is not None:
+                    payload["kpis"] = kpis
+            try_to_write_solution(client, exec_id, payload)
+            return "Checks and KPIs saved"
+
+    except Exception as e:
+        if config.get("msg", True):
+            print("Some unknown error happened")
+        try:
+            client = connect_to_cornflow(secrets)
+        except Exception:
+            client = None
+        if client is not None:
+            try_to_save_error(client, exec_id, -1)
+            client.update_status(exec_id, {"status": -1})
+            try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        raise AirflowDagException(
+            f"There was an error during the checks/KPIs execution: {e}"
+        )
+
+
 def cf_solve_app(app, secrets, **kwargs):
     if kwargs["dag_run"].conf.get("checks_only"):
         return cf_check(app.check, app.name, secrets, **kwargs)
@@ -184,7 +296,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        solution, sol_checks, inst_checks, log, log_json = fun(
+        solution, sol_checks, inst_checks, log, log_json, kpis = fun(
             data, config, solution_data
         )
 
@@ -200,6 +312,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             inst_checks=inst_checks,
             inst_id=inst_id,
         )
+        if kpis is not None:
+            payload["kpis"] = kpis
         if not solution:
             # No solution found: we just send everything to cornflow.
             if config.get("msg", True):

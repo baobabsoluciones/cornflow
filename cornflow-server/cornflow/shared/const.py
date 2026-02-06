@@ -158,6 +158,9 @@ DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
 
+# DAG name suffix for the checks/KPIs-only DAG (instance checks, solution checks, generate_kpis)
+CHECK_DAG_SUFFIX = "_checks"
+
 # Conditional endpoints
 CONDITIONAL_ENDPOINTS = {
     "signup": "/signup/",

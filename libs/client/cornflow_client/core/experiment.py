@@ -4,7 +4,7 @@ Base code for the experiment template.
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 from jsonschema import Draft7Validator
 
@@ -91,6 +91,16 @@ class ExperimentCore(ABC):
                 f"The solution checks do not match the schema: {[e for e in validator.iter_errors(checks)]}"
             )
         return checks
+# TODO: review
+    def generate_kpis(self) -> Optional[Dict]:
+        """
+        Optional method to generate KPIs from the current instance and solution.
+        Override in the solver to return a dict of KPI name -> value.
+        If not overridden, returns None.
+
+        :return: Dictionary of KPIs (key-value) or None.
+        """
+        return None
 
     def check(self) -> Dict[str, Union[List, Dict]]:
         """

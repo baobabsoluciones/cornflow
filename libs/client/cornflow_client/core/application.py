@@ -5,7 +5,7 @@ Base code for the application core.
 # Partial imports
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
-from typing import Type, Dict, List, Tuple, Union
+from typing import Type, Dict, List, Tuple, Union, Optional
 
 from jsonschema import Draft7Validator
 from pytups import SuperDict
@@ -130,6 +130,48 @@ class ApplicationCore(ABC):
           * **solution**: the solution data (optional)
         """
         raise NotImplementedError()
+
+    def generate_kpis(
+        self,
+        data: dict,
+        config: dict,
+        solution: Optional[Dict],
+        solution_checks: Optional[Dict],
+        instance_checks: Optional[Dict],
+        log_json: Optional[Dict],
+    ) -> Optional[Dict]:
+        """
+        Optional method to generate KPIs from the execution (instance, config, solution, checks, log).
+        Override this method in your application to return a dictionary of KPIs (same type as solution data).
+        If not overridden, tries the solver's generate_kpis() when instance and solution are available.
+
+        :param data: Instance data (input).
+        :param config: Execution configuration.
+        :param solution: Solution dictionary (or empty dict if no solution).
+        :param solution_checks: Solution checks if any.
+        :param instance_checks: Instance checks if any.
+        :param log_json: Execution log as dictionary.
+        :return: Dictionary of KPIs to store, or None.
+        """
+        # TODO: review
+        if not solution:
+            return None
+        try:
+            inst = self.instance.from_dict(data)
+            sol = self.solution.from_dict(solution)
+            solver_class = self.get_solver(
+                name=config.get("solver", self.get_default_solver_name())
+            )
+            if solver_class is None:
+                return None
+            algo = solver_class(inst, sol)
+            if hasattr(algo, "generate_kpis") and callable(
+                getattr(algo, "generate_kpis")
+            ):
+                return algo.generate_kpis()
+        except Exception:
+            pass
+        return None
 
     @property
     @abstractmethod
@@ -304,7 +346,8 @@ class ApplicationCore(ABC):
         :param data: Dictionary representing the problem instance.
         :param config: Dictionary containing execution configuration.
         :param solution_data: Optional dictionary with an initial solution.
-        :return: Tuple containing (solution, solution_checks, instance_checks, log_txt, log_json).
+        :return: Tuple containing (solution, solution_checks, instance_checks, log_txt, log_json, kpis).
+          kpis is the result of generate_kpis() (or None if not implemented).
         """
         if config.get("msg", True):
             print("Solving the model")
@@ -345,7 +388,12 @@ class ApplicationCore(ABC):
         if sol_final is None:
             sol_final = dict()
 
-        return sol_final, solution_checks, instance_checks, log_txt, log_json
+        # 6. Generate KPIs if the application implements it
+        kpis = self.generate_kpis(
+            data, config, sol_final, solution_checks, instance_checks, log_json
+        )
+
+        return sol_final, solution_checks, instance_checks, log_txt, log_json, kpis
 
     def check(
         self, instance_data: dict, solution_data: dict = None

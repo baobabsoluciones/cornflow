@@ -104,6 +104,7 @@ class TestCore(TestCase):
                     inst_check,
                     log,
                     log_dict,
+                    _,
                 ) = self.app.solve(data, self.config, data_out)
             else:
                 # for compatibility with previous format
@@ -113,6 +114,7 @@ class TestCore(TestCase):
                     inst_check,
                     log,
                     log_dict,
+                    _,
                 ) = self.app.solve(data, self.config)
 
             instance = self.app.instance.from_dict(data)

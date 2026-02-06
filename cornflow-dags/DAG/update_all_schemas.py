@@ -56,6 +56,7 @@ def import_dags():
                 "documentation",
                 "tests",
                 "activate_dags",
+                "activate_checks_dags",
             )
         ):
             continue
