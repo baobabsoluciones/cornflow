@@ -16,6 +16,7 @@ from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     AIRFLOW_ERROR_MSG,
     AIRFLOW_NOT_REACHABLE_MSG,
+    CHECK_DAG_SUFFIX,
     DAG_PAUSED_MSG,
     EXEC_STATE_QUEUED,
     EXEC_STATE_ERROR,
@@ -68,8 +69,11 @@ def _run_airflow_data_check(
             + AIRFLOW_NOT_REACHABLE_MSG,
         )
 
+    # Run the dedicated checks DAG (instance checks and/or solution checks + KPIs)
+    checks_workflow_name = schema + CHECK_DAG_SUFFIX
+
     # Check if DAG is paused
-    schema_info = af_client.get_workflow_info(workflow_name=schema)
+    schema_info = af_client.get_workflow_info(workflow_name=checks_workflow_name)
     info = schema_info.json()
     if info.get("is_paused", False):
         current_app.logger.error(DAG_PAUSED_MSG)
@@ -84,10 +88,10 @@ def _run_airflow_data_check(
             + DAG_PAUSED_MSG,
         )
 
-    # Run the DAG
+    # Run the checks DAG (no solver; many executions can run in parallel)
     try:
         response = af_client.run_workflow(
-            execution.id, workflow_name=schema, checks_only=True, **run_dag_kwargs
+            execution.id, workflow_name=checks_workflow_name, **run_dag_kwargs
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"

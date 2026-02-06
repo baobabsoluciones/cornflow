@@ -143,7 +143,7 @@ class ApplicationCore(ABC):
         """
         Optional method to generate KPIs from the execution (instance, config, solution, checks, log).
         Override this method in your application to return a dictionary of KPIs (same type as solution data).
-        If not overridden, returns None and no KPIs are stored.
+        If not overridden, tries the solver's generate_kpis() when instance and solution are available.
 
         :param data: Instance data (input).
         :param config: Execution configuration.
@@ -153,6 +153,24 @@ class ApplicationCore(ABC):
         :param log_json: Execution log as dictionary.
         :return: Dictionary of KPIs to store, or None.
         """
+        # TODO: review
+        if not solution:
+            return None
+        try:
+            inst = self.instance.from_dict(data)
+            sol = self.solution.from_dict(solution)
+            solver_class = self.get_solver(
+                name=config.get("solver", self.get_default_solver_name())
+            )
+            if solver_class is None:
+                return None
+            algo = solver_class(inst, sol)
+            if hasattr(algo, "generate_kpis") and callable(
+                getattr(algo, "generate_kpis")
+            ):
+                return algo.generate_kpis()
+        except Exception:
+            pass
         return None
 
     @property

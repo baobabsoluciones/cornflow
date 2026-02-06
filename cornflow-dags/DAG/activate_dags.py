@@ -34,6 +34,8 @@ def create_dag(app):
         else:
             PythonOperator(
                 task_id=app.name,
+                # TODO: revisar esta nueva propuesta para poder elegir el entorno de ejecución
+                # python="/opt/airflow/venv_{app.name}/bin/python",
                 python_callable=solve,
                 on_failure_callback=utils.callback_email,
             )
