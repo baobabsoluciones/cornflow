@@ -313,8 +313,8 @@ airflow:
   executor: KubernetesExecutor
   images:
     airflow:
-      repository: baobabsoluciones/airflow
-      tag: "release-v1.2.4"
+      repository: baobabsoluciones/airflow-k8s
+      tag: "latest"
       pullPolicy: IfNotPresent
   
   # Airflow webserver configuration
