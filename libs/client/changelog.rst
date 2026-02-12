@@ -8,10 +8,10 @@ version 1.3.0
     - added new exception classes for better error handling.
 
 Cornflow Client Updates (Python Library)
-=========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. New Method Names Available
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you use the Cornflow Python client (``cornflow-client``), we've added new method names that are clearer and more generic:
 
@@ -42,7 +42,7 @@ If you use the Cornflow Python client (``cornflow-client``), we've added new met
 - For now, both work - you'll just see deprecation warnings with the old names
 
 2. Changed Exception Classes
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Exception Classes:**
 

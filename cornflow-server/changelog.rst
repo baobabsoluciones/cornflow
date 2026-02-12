@@ -11,10 +11,10 @@ version 1.3.0
     - renamed ``DeployedDAG`` model to ``DeployedWorkflow``.
 
 What's New for Users
-====================
+~~~~~~~~~~~~~~~~~~~~
 
 Major New Feature: Databricks Support
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Cornflow now supports **Databricks** as an execution backend, giving you more flexibility in where your optimization models run.
 
@@ -32,10 +32,10 @@ Cornflow now supports **Databricks** as an execution backend, giving you more fl
 - All your existing workflows continue to work
 
 Changes You'll Notice
-=====================
+~~~~~~~~~~~~~~~~~~~~~
 
 1. Health Check Response
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 **What changed:**
 
@@ -61,7 +61,7 @@ Changes You'll Notice
 - If you're checking the health endpoint in your code, update ``airflow_status`` → ``backend_status``
 
 2. Execution Information
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 **What changed:**
 
@@ -88,7 +88,7 @@ Changes You'll Notice
 - If you're reading execution data in your code, update ``dag_run_id`` → ``run_id``
 
 3. Improved Azure AD Authentication
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **What changed:**
 
@@ -105,7 +105,7 @@ Changes You'll Notice
 - Nothing! If you use Azure AD, authentication will just work better
 
 4. Changed Model Class Names
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you're extending or integrating with the server, some model names have changed:
 
@@ -135,7 +135,7 @@ If you're extending or integrating with the server, some model names have change
 - This is a breaking change - the old name no longer exists
 
 Features Not Yet Available in Databricks
-=========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If your system is configured to use Databricks, these features are not yet supported:
 
@@ -151,7 +151,7 @@ If your system is configured to use Databricks, these features are not yet suppo
    - Coming in a future update
 
 What Still Works Exactly the Same
-==================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These features work identically regardless of your backend:
 
@@ -165,10 +165,10 @@ These features work identically regardless of your backend:
 - All optimization solvers
 
 For System Administrators
-==========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 New Configuration Options
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you're setting up or maintaining a Cornflow installation:
 
@@ -198,10 +198,10 @@ This updates:
 **See:** ``Migration_guide.md`` for detailed administrator instructions
 
 Need Help?
-==========
+~~~~~~~~~~
 
 Common Questions
------------------
+^^^^^^^^^^^^^^^^^
 
 **Q: Do I need to do anything to upgrade?**
 
